@@ -1,0 +1,8 @@
+{
+  "name": "Chekki AI",
+  "description": "엄마표 영어 숙제 채점 & 티칭 - 채점은 채키가, 칭찬은 엄마가. (Mom's Homework Helper)",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
