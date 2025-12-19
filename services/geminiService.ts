@@ -16,14 +16,11 @@ RULES:
 6. Do NOT return bounding_box (set to null) as this is a digital worksheet.
 `;
 
-// Helper for deterministic cloning (fallback mechanism)
-// This ensures the user NEVER sees a blank screen if the AI fails.
 const createFallbackItems = (originalItems: WorksheetItem[]): WorksheetItem[] => {
     return originalItems.map((item, index) => {
         let newQuestion = item.question_text;
         let newAnswer = item.correct_answer;
 
-        // Simple heuristics to vary the content slightly
         if (item.type === 'fill_in' || item.type === 'mcq') {
              newQuestion = `${item.question_text} (Review)`;
         } else {
@@ -32,26 +29,32 @@ const createFallbackItems = (originalItems: WorksheetItem[]): WorksheetItem[] =>
 
         return {
             ...item,
-            id: 2000 + index, // New ID range
+            id: 2000 + index, 
             question_text: newQuestion,
-            correct_answer: newAnswer, // Keep answer for practice key, or could blank it out
-            bounding_box: undefined // Clear box for print layout
+            correct_answer: newAnswer, 
+            bounding_box: undefined 
         };
     });
 };
 
+const getApiKey = () => {
+  try {
+    return process.env.API_KEY || (import.meta as any).env?.VITE_API_KEY;
+  } catch (e) {
+    return (import.meta as any).env?.VITE_API_KEY;
+  }
+};
+
 export const analyzeWorksheet = async (base64Image: string): Promise<WorksheetAnalysis> => {
   console.log("Starting analysis...");
-
-  // 1. FASTEST PATH: Direct Client-Side Key
-  const apiKey = process.env.API_KEY || (import.meta as any).env?.VITE_API_KEY;
+  const apiKey = getApiKey();
 
   if (apiKey) {
-    console.log("Client API Key found. Executing direct analysis...");
+    console.log("API Key found. Executing analysis...");
     try {
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3-flash-preview",
         contents: {
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: base64Image } },
@@ -61,95 +64,70 @@ export const analyzeWorksheet = async (base64Image: string): Promise<WorksheetAn
         config: {
           systemInstruction: SYSTEM_PROMPT,
           responseMimeType: "application/json",
-          temperature: 0.2, 
+          temperature: 0.1, 
         },
       });
       
       const text = response.text;
       if (!text) throw new Error("Empty response from Gemini");
       
-      console.log("Analysis successful.");
       return JSON.parse(text) as WorksheetAnalysis;
 
     } catch (error) {
       console.error("Direct API Error:", error);
-      // In production, we return an error state so the UI can prompt a retry
       return { 
-        ...MOCK_DATA, // Type safety filler
-        items: [], // Clear items to prevent showing mock data
+        items: [], 
         error: "API_ERROR", 
-        message_ko: "AI 분석에 실패했습니다. (API Key Error - Please check settings)" 
+        message_ko: "AI 분석에 실패했습니다. API 키를 확인해주세요." 
       };
     }
   }
 
-  // 2. PRODUCTION PATH: Backend Proxy (Vercel)
-  console.log("No local API Key. Attempting Backend Proxy...");
+  // Fallback to proxy
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Timeout for heavier images
-
     const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image: base64Image }),
-      signal: controller.signal
     });
     
-    clearTimeout(timeoutId);
-
     if (response.ok) {
-      const data = await response.json();
-      return data as WorksheetAnalysis;
+      return await response.json();
     } else {
        throw new Error(`Server responded with ${response.status}`);
     }
   } catch (err) {
-    console.warn("Backend proxy unavailable or timed out.", err);
     return {
-        ...MOCK_DATA,
         items: [],
         error: "CONNECTION_ERROR",
-        message_ko: "서버 연결에 실패했습니다. 인터넷 연결을 확인하거나 다시 시도해주세요."
+        message_ko: "서버 연결에 실패했습니다."
     };
   }
 };
 
 export const generateSimilarWorksheet = async (originalItems: WorksheetItem[]): Promise<WorksheetItem[]> => {
-    const apiKey = process.env.API_KEY || (import.meta as any).env?.VITE_API_KEY;
-    
-    // If no key, immediately fallback to algorithmic generation
-    if (!apiKey) {
-        return createFallbackItems(originalItems);
-    }
+    const apiKey = getApiKey();
+    if (!apiKey) return createFallbackItems(originalItems);
 
     try {
         const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-flash-preview",
             contents: {
                 parts: [{ text: `Original Items JSON: ${JSON.stringify(originalItems)}` }]
             },
             config: {
                 systemInstruction: CLONE_SYSTEM_PROMPT,
                 responseMimeType: "application/json",
-                temperature: 0.7, // Higher temp for creativity
+                temperature: 0.7,
             }
         });
 
         const text = response.text;
         if (!text) throw new Error("Empty response");
         const data = JSON.parse(text) as WorksheetAnalysis;
-        
-        // Validation: If AI returned empty items, use fallback
-        if (!data.items || data.items.length === 0) {
-            throw new Error("AI returned no items");
-        }
-        
-        return data.items;
+        return data.items || createFallbackItems(originalItems);
     } catch (e) {
-        console.error("Clone failed, using fallback strategy", e);
-        // Robust Fallback: Never show a blank screen
         return createFallbackItems(originalItems);
     }
 }
