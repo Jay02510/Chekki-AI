@@ -5,8 +5,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   define: {
-    // This polyfills the process.env object and injects the API_KEY at build time.
-    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
+    // Do NOT include API_KEY here anymore. 
+    // It will be accessed only by the Vercel serverless function.
     'process.env': {}
   },
   server: {

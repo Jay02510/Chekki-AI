@@ -1,15 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
 
 export const LoadingScreen: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [textIndex, setTextIndex] = useState(0);
   const [videoError, setVideoError] = useState(false);
 
+  // Added a security-focused step for production
   const loadingTexts = [
+    language === 'ko' ? "보안 연결을 생성하고 있어요..." : "Securing connection...",
     t('loading_step1'),
     t('loading_step2'),
     t('loading_step3'),
@@ -19,23 +20,15 @@ export const LoadingScreen: React.FC = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % loadingTexts.length);
-    }, 1500);
+    }, 1800);
     return () => clearInterval(interval);
   }, [loadingTexts.length]);
 
   return (
     <div className="fixed inset-0 bg-zinc-950/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6">
-      {/* 
-          UPDATED: 
-          1. Significantly increased size (w-96 mobile, 500px desktop)
-          2. Removed white rings/borders
-          3. Cleaner rounded rectangle shape
-      */}
       <div className="relative w-96 h-96 md:w-[500px] md:h-[500px] mb-12">
-        {/* Subtle Background Glow */}
         <div className="absolute inset-4 bg-orange-500/20 rounded-[2.5rem] blur-3xl animate-pulse"></div>
         
-        {/* Video Container - No borders/rings */}
         <div className="relative w-full h-full bg-zinc-900 rounded-[2.5rem] shadow-2xl z-10 overflow-hidden transform-gpu">
              {!videoError ? (
                 <video 
