@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { SYSTEM_PROMPT } from "../constants";
 import { WorksheetAnalysis, WorksheetItem } from "../types";
@@ -39,8 +40,11 @@ const createFallbackItems = (originalItems: WorksheetItem[]): WorksheetItem[] =>
 export const analyzeWorksheet = async (base64Image: string): Promise<WorksheetAnalysis> => {
   console.log("Starting analysis...");
   
-  if (!process.env.API_KEY) {
-    console.error("API Key is missing from process.env.API_KEY");
+  // process.env.API_KEY is handled by Vite's 'define' config
+  const apiKey = process.env.API_KEY;
+
+  if (!apiKey) {
+    console.error("API Key is missing from environment");
     return { 
       items: [], 
       error: "MISSING_KEY", 
@@ -49,7 +53,7 @@ export const analyzeWorksheet = async (base64Image: string): Promise<WorksheetAn
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: {
@@ -81,10 +85,11 @@ export const analyzeWorksheet = async (base64Image: string): Promise<WorksheetAn
 };
 
 export const generateSimilarWorksheet = async (originalItems: WorksheetItem[]): Promise<WorksheetItem[]> => {
-    if (!process.env.API_KEY) return createFallbackItems(originalItems);
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) return createFallbackItems(originalItems);
 
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
             contents: {
