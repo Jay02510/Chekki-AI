@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMistakes } from '../contexts/MistakeContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -18,7 +17,7 @@ export const OdapNoteModal: React.FC = () => {
      const centerY = rect.top + rect.height / 2;
      
      const colors = ['#F97316', '#EC4899', '#8B5CF6', '#10B981', '#F59E0B'];
-     const newParticles = [];
+     const newParticles: {id: number, x: number, y: number, color: string}[] = [];
      
      for(let i=0; i<30; i++) {
          newParticles.push({
@@ -215,7 +214,7 @@ export const OdapNoteModal: React.FC = () => {
                 className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all font-korean shadow-lg shadow-orange-500/20"
             >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
                 {t('review_print_btn')}
             </button>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -119,7 +118,7 @@ function AppContent() {
           status: 'complete',
           data: result,
           originalImage: displayUrl,
-          errorMessage: result.error ? result.message_ko : null,
+          errorMessage: result.error ? (result.message_ko || "API Error") : null,
         });
         setViewMode('overlay');
       }
@@ -277,7 +276,6 @@ function AppContent() {
                 />
               )}
             </div>
-            {/* Removed Fixed Bottom Button - Confirmed removal */}
           </div>
         )}
       </main>
