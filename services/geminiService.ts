@@ -1,6 +1,5 @@
-
 import { GoogleGenAI } from "@google/genai";
-import { SYSTEM_PROMPT, MOCK_DATA } from "../constants";
+import { SYSTEM_PROMPT } from "../constants";
 import { WorksheetAnalysis, WorksheetItem } from "../types";
 
 const CLONE_SYSTEM_PROMPT = `
@@ -37,80 +36,55 @@ const createFallbackItems = (originalItems: WorksheetItem[]): WorksheetItem[] =>
     });
 };
 
-const getApiKey = () => {
-  try {
-    return process.env.API_KEY || (import.meta as any).env?.VITE_API_KEY;
-  } catch (e) {
-    return (import.meta as any).env?.VITE_API_KEY;
-  }
-};
-
 export const analyzeWorksheet = async (base64Image: string): Promise<WorksheetAnalysis> => {
   console.log("Starting analysis...");
-  const apiKey = getApiKey();
-
-  if (apiKey) {
-    console.log("API Key found. Executing analysis...");
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: {
-          parts: [
-            { inlineData: { mimeType: "image/jpeg", data: base64Image } },
-            { text: "Analyze the entire image from top to bottom. Identify every single blank space, question, and writing line. Provide a correct example answer for every single item found. Return JSON with bounding boxes." },
-          ],
-        },
-        config: {
-          systemInstruction: SYSTEM_PROMPT,
-          responseMimeType: "application/json",
-          temperature: 0.1, 
-        },
-      });
-      
-      const text = response.text;
-      if (!text) throw new Error("Empty response from Gemini");
-      
-      return JSON.parse(text) as WorksheetAnalysis;
-
-    } catch (error) {
-      console.error("Direct API Error:", error);
-      return { 
-        items: [], 
-        error: "API_ERROR", 
-        message_ko: "AI 분석에 실패했습니다. API 키를 확인해주세요." 
-      };
-    }
+  
+  if (!process.env.API_KEY) {
+    console.error("API Key is missing from process.env.API_KEY");
+    return { 
+      items: [], 
+      error: "MISSING_KEY", 
+      message_ko: "API 키가 설정되지 않았습니다." 
+    };
   }
 
-  // Fallback to proxy
   try {
-    const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64Image }),
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: {
+        parts: [
+          { inlineData: { mimeType: "image/jpeg", data: base64Image } },
+          { text: "Analyze the entire image from top to bottom. Identify every single blank space, question, and writing line. Provide a correct example answer for every single item found. Return JSON with bounding boxes." },
+        ],
+      },
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        responseMimeType: "application/json",
+        temperature: 0.1, 
+      },
     });
     
-    if (response.ok) {
-      return await response.json();
-    } else {
-       throw new Error(`Server responded with ${response.status}`);
-    }
-  } catch (err) {
-    return {
-        items: [],
-        error: "CONNECTION_ERROR",
-        message_ko: "서버 연결에 실패했습니다."
+    const text = response.text;
+    if (!text) throw new Error("Empty response from Gemini");
+    
+    return JSON.parse(text) as WorksheetAnalysis;
+
+  } catch (error: any) {
+    console.error("Direct API Error:", error);
+    return { 
+      items: [], 
+      error: "API_ERROR", 
+      message_ko: "AI 분석에 실패했습니다. 이미지와 설정을 확인해주세요." 
     };
   }
 };
 
 export const generateSimilarWorksheet = async (originalItems: WorksheetItem[]): Promise<WorksheetItem[]> => {
-    const apiKey = getApiKey();
-    if (!apiKey) return createFallbackItems(originalItems);
+    if (!process.env.API_KEY) return createFallbackItems(originalItems);
 
     try {
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
             contents: {
@@ -128,6 +102,7 @@ export const generateSimilarWorksheet = async (originalItems: WorksheetItem[]): 
         const data = JSON.parse(text) as WorksheetAnalysis;
         return data.items || createFallbackItems(originalItems);
     } catch (e) {
+        console.error("Generation error:", e);
         return createFallbackItems(originalItems);
     }
 }
