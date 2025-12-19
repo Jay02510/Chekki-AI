@@ -111,14 +111,14 @@ function AppContent() {
             status: 'error',
             data: null,
             originalImage: null,
-            errorMessage: result.message_ko || "Unknown error."
+            errorMessage: result.message_ko ?? "Unknown error."
          });
       } else {
         setAnalysisState({
           status: 'complete',
           data: result,
           originalImage: displayUrl,
-          errorMessage: result.error ? (result.message_ko || "API Error") : null,
+          errorMessage: result.error ? (result.message_ko ?? "API Error") : null,
         });
         setViewMode('overlay');
       }

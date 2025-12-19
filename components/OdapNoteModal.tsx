@@ -2,12 +2,19 @@ import React, { useState } from 'react';
 import { useMistakes } from '../contexts/MistakeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  color: string;
+}
+
 export const OdapNoteModal: React.FC = () => {
   const { mistakes, showMistakeModal, setShowMistakeModal, removeMistake } = useMistakes();
   const { t, language } = useLanguage();
   
   // Confetti State
-  const [particles, setParticles] = useState<{id: number, x: number, y: number, color: string}[]>([]);
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   if (!showMistakeModal) return null;
 
@@ -17,7 +24,7 @@ export const OdapNoteModal: React.FC = () => {
      const centerY = rect.top + rect.height / 2;
      
      const colors = ['#F97316', '#EC4899', '#8B5CF6', '#10B981', '#F59E0B'];
-     const newParticles: {id: number, x: number, y: number, color: string}[] = [];
+     const newParticles: Particle[] = [];
      
      for(let i=0; i<30; i++) {
          newParticles.push({
