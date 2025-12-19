@@ -1,5 +1,5 @@
 
-import { initializeApp } from 'firebase/app';
+import { initializeApp } from "firebase/app";
 import { 
   getFirestore, 
   doc, 
@@ -17,6 +17,7 @@ import {
 import { UserProfile, WorksheetItem } from '../types';
 
 // --- FIREBASE CONFIGURATION ---
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k",
   authDomain: "homework-assistant-c00b9.firebaseapp.com",
@@ -27,18 +28,12 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app;
+const app = initializeApp(firebaseConfig);
 let dbInstance: Firestore | null = null;
 
 try {
-    app = initializeApp(firebaseConfig);
-    // Attempt to initialize Firestore
-    try {
-        dbInstance = getFirestore(app);
-        console.log("Firebase initialized successfully");
-    } catch (fsError) {
-        console.warn("Firestore service not available (Offline Mode Active). This is expected if 'firebase/firestore' failed to load or module resolution mismatched.");
-    }
+    dbInstance = getFirestore(app);
+    console.log("Firebase initialized successfully");
 } catch (e) {
     console.warn("Firebase initialization failed completely (Offline Mode Active):", e);
 }

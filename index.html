@@ -23,7 +23,7 @@
               zinc: {
                 850: '#1f2937', 
                 900: '#18181b',
-                950: '#09090b', // Deep black
+                950: '#09090b',
               },
               brand: {
                 dark: '#050505',
@@ -33,40 +33,15 @@
                 pink: '#EC4899',
               }
             },
-            backgroundImage: {
-              'hero-glow': 'conic-gradient(from 180deg at 50% 50%, #1a1a1a 0deg, #0a0a0a 180deg, #1a1a1a 360deg)',
-              'neon-gradient': 'linear-gradient(to right, #F97316, #EC4899)',
-              'glass-gradient': 'linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)',
-            },
             animation: {
               'fade-in': 'fadeIn 0.5s ease-out',
               'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'pulse-glow': 'pulseGlow 3s infinite',
-              'bounce-subtle': 'bounceSubtle 3s infinite',
-              'glasses-wiggle': 'glassesWiggle 2s ease-in-out infinite',
               'float': 'float 6s ease-in-out infinite',
             },
             keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(40px)' },
-                '100%': { opacity: '1' },
-              },
-              pulseGlow: {
-                '0%, 100%': { boxShadow: '0 0 15px rgba(249, 115, 22, 0.2)' },
-                '50%': { boxShadow: '0 0 30px rgba(249, 115, 22, 0.5)' },
-              },
-              bounceSubtle: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-10px)' },
-              },
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-20px)' },
-              }
+              fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+              fadeInUp: { '0%': { opacity: '0', transform: 'translateY(40px)' }, '100%': { opacity: '1' } },
+              float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } }
             }
           }
         }
@@ -75,18 +50,19 @@
   <script type="importmap">
 {
   "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "firebase/app": "https://esm.sh/firebase@10.13.0/app",
-    "firebase/firestore": "https://esm.sh/firebase@10.13.0/firestore",
-    "firebase/": "https://esm.sh/firebase@^12.7.0/"
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "firebase/": "https://esm.sh/firebase@^12.7.0/",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
 </head>
   <body class="bg-[#050505] text-zinc-100 antialiased selection:bg-brand-orange selection:text-white">
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

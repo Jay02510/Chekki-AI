@@ -19,13 +19,31 @@ const translations = {
     pro_plan: "Pro Plan 🚀",
     
     // Hero / Camera
-    hero_greeting: "👋 Hi! I'm Chekki.",
-    hero_desc: "Your supportive partner for home learning. Chekki checks the work so you can focus on the praise!",
+    hero_title: "English Homework?\nJust Snap a Photo.", // NEW: Sharper
+    hero_desc: "Chekki analyzes handwriting instantly. We explain it in Korean for you, and simple English for your child.", // NEW: Concrete benefit
     hero_badge: "AI Smart Assistant",
     hero_cta_title: "Ready to get started?",
     hero_cta_desc: "Join thousands of parents using Chekki to make homework time happier and more encouraging.",
     hero_cta_btn: "Start for Free",
     
+    // How It Works (NEW)
+    how_title: "How It Works",
+    how_step1: "Snap",
+    how_step1_desc: "Take a photo of the worksheet.",
+    how_step2: "Analyze",
+    how_step2_desc: "AI checks answers in 3 seconds.",
+    how_step3: "Coach",
+    how_step3_desc: "Guide your child with confidence.",
+
+    // Testimonials (NEW)
+    test_title: "Mom's Voices",
+    test_1_name: "Min-jun's Mom (Age 7)",
+    test_1_text: "I used to dread checking English homework because my pronunciation isn't perfect. Chekki solved that instantly!",
+    test_2_name: "Ji-woo's Dad (Age 5)",
+    test_2_text: "The 'Teaching Tips' are a lifesaver. Instead of just saying 'wrong', I can now explain WHY it's wrong.",
+    test_3_name: "Seo-yeon's Mom (Age 6)",
+    test_3_text: "My daughter loves collecting the O-dap stickers. Homework is finally fun.",
+
     drop_title: "Drop homework here",
     drop_subtitle: "or tap to select from album",
     processing: "Chekki is looking...",
@@ -131,12 +149,30 @@ const translations = {
     pro_plan: "프로 플랜 🚀",
 
     // Hero / Camera
-    hero_greeting: "👋 안녕하세요! 든든한 숙제 친구 채키예요.",
-    hero_desc: "엄마표 영어 교육의 따뜻한 파트너. 채키가 채점을 도와드릴 테니, 엄마는 칭찬만 해주세요!",
+    hero_title: "영어 숙제,\n사진 한 장이면 끝!", // NEW: Sharper
+    hero_desc: "사진만 찍으면 채키가 분석합니다. 부모님께는 한국어 가이드를, 아이에게는 쉬운 영어 설명을 제공해요.", // NEW
     hero_badge: "AI 스마트 어시스턴트",
     hero_cta_title: "함께 시작해볼까요?",
     hero_cta_desc: "숙제 시간이 즐거워지는 마법! 수천 명의 부모님과 함께해요.",
     hero_cta_btn: "무료로 시작하기",
+    
+    // How It Works (NEW)
+    how_title: "이렇게 사용하세요",
+    how_step1: "찍어요",
+    how_step1_desc: "영어 숙제를 사진으로 찰칵!",
+    how_step2: "확인해요",
+    how_step2_desc: "AI가 3초 만에 내용을 분석해요.",
+    how_step3: "코칭해요",
+    how_step3_desc: "한국어 설명으로 자신있게!",
+
+    // Testimonials (NEW)
+    test_title: "선배맘들의 생생 후기",
+    test_1_name: "민준맘 (7세)",
+    test_1_text: "영어 발음 때문에 숙제 봐주기가 겁났는데, 채키 덕분에 이제 자신 있게 가르쳐줘요!",
+    test_2_name: "지우아빠 (5세)",
+    test_2_text: "단순히 틀렸다고 하는 게 아니라, '왜' 그런지 한국어로 설명을 해주니 아이 지도하기가 너무 편합니다.",
+    test_3_name: "서연맘 (6세)",
+    test_3_text: "아이가 오답노트 스티커 모으는 재미에 숙제 시간을 기다려요. 정말 감사합니다.",
 
     drop_title: "숙제를 여기에 놓아주세요",
     drop_subtitle: "또는 터치해서 앨범에서 선택하기",

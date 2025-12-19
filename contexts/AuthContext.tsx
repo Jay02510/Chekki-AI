@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { db } from '../services/database';
@@ -37,10 +36,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const cached = localStorage.getItem('hw_user');
       if (cached) {
         const parsed = JSON.parse(cached);
+        
         // Re-verify with DB (silently)
         try {
             const dbUser = await db.getUser(parsed.email);
-            if (dbUser) setUser(dbUser);
+            if (dbUser) {
+                 setUser(dbUser);
+            }
             else setUser(parsed); // Keep cached if DB fails or returns null temporarily
         } catch (e) {
             setUser(parsed);
@@ -75,7 +77,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
         console.error("Login unexpected error", e);
         // Fallback for absolute safety
-        const fallbackUser: UserProfile = { name, email, plan: 'free', scansUsed: 0, maxScans: 3 };
+        const fallbackUser: UserProfile = { 
+            name, 
+            email, 
+            plan: 'free', 
+            scansUsed: 0, 
+            maxScans: 3
+        };
         setUser(fallbackUser);
         setShowLoginModal(false);
     } finally {
@@ -145,8 +153,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login, 
       logout, 
       deleteAccount,
-      incrementScan, 
-      upgradeToPro, 
+      incrementScan,
+      upgradeToPro,
       updateProfile,
       isAuthenticated: !!user,
       isLoading,
