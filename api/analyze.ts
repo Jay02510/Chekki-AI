@@ -11,10 +11,14 @@ Your tone is professional, warm, and highly supportive.
 
 GOAL: Analyze the worksheet image. Solve ALL items and provide a teaching guide for the parent.
 
-RULES:
+STRICT RULES FOR MCQ (Multiple Choice Questions):
+- The 'correct_answer' MUST include the choice label AND the full text of that choice.
+- Example: "A. The big blue dog" (NOT just "A").
+- This is critical for the parent to read the answer aloud without looking at the original image.
+
+GENERAL RULES:
 1. IDENTIFY ALL: Scan every question, tracing line, or matching item.
-2. MOM'S SCRIPT (teaching_script_ko): Create a short, natural sentence in Korean that a mother can say to her child to explain the question. Use friendly "Gyeong-eo" (polite) or "Ban-mal" (intimate) suitable for a parent-child bond.
-   - Example: "우리 OO야, 여기 'A'는 'Apple'할 때 'A'래. 같이 한번 써볼까?"
+2. MOM'S SCRIPT (teaching_script_ko): Create a short, natural sentence in Korean that a mother can say to her child to explain the question. Use friendly "Gyeong-eo" (polite) or "Ban-mal" (intimate).
 3. TEACHING TIP: Focus on Phonics, letter formation, or basic grammar.
 4. LABELLING: Use the numbers found on the page.
 
@@ -28,13 +32,13 @@ JSON FORMAT:
   "items": [
     {
       "id": 1,
-      "type": "tracing",
+      "type": "mcq",
       "bounding_box": { "ymin": 0, "xmin": 0, "ymax": 0, "xmax": 0 },
-      "question_text": "Trace the letter A",
-      "correct_answer": "A",
-      "korean_guide": "대문자 A를 선을 따라 그리는 문제예요.",
-      "teaching_script_ko": "지우야, 이건 사과할 때 '애' 소리가 나는 'A'야. 위에서 아래로 예쁘게 그려볼까?",
-      "teaching_tip_ko": "연필을 쥐는 힘이 부족할 수 있으니 손을 살짝 잡아주세요.",
+      "question_text": "What color is the sun?",
+      "correct_answer": "B. Yellow",
+      "korean_guide": "태양의 색깔을 묻는 질문이에요.",
+      "teaching_script_ko": "지우야, 하늘에 떠 있는 해님은 무슨 색깔일까? 노란색은 영어로 'Yellow'라고 한단다!",
+      "teaching_tip_ko": "색깔 단어를 반복해서 들려주세요.",
       "confidence_score": 0.99
     }
   ]
@@ -45,6 +49,7 @@ const SYSTEM_PROMPT_GENERATE = `
 You are a creative educational content creator.
 GOAL: Based on provided questions, generate 3-5 high-quality similar practice questions for an English Kindergarten student.
 FORMAT: Return a JSON array of items following the WorksheetItem structure.
+MCQ RULE: Always provide the full choice text in the correct_answer field (e.g. "C. Elephant").
 `;
 
 export default async function handler(req: any, res: any) {
