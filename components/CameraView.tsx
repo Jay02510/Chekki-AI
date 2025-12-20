@@ -69,7 +69,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 ) : (
                   <div className="w-full h-full animate-float flex items-center justify-center">
                     {!imgError ? (
-                       <img src={ASSETS.MASCOT_HAPPY} alt="Chekki Happy" className="w-full h-full object-contain drop-shadow-2xl filter brightness-110" onError={() => setImgError(true)}/>
+                       <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} alt="Chekki Mascot" className="w-full h-full object-contain drop-shadow-2xl filter brightness-110" onError={() => setImgError(true)}/>
                     ) : (
                        <ChekkiMascot className="w-full h-full drop-shadow-2xl filter brightness-110" mood={isNight ? "sleeping" : "happy"} />
                     )}
@@ -101,14 +101,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       onClick={() => setShowFeedbackModal(true)}
       className="group cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-8 py-4 rounded-[2rem] flex items-center gap-4 transition-all animate-fade-in-up shadow-2xl backdrop-blur-md mb-12 ring-1 ring-white/5 hover:ring-orange-500/50"
     >
-       <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center text-xl animate-pulse shadow-inner">✨</div>
+       <div className={`w-10 h-10 rounded-xl ${isNight ? 'bg-indigo-500/20' : 'bg-orange-500/20'} flex items-center justify-center text-xl animate-pulse shadow-inner`}>✨</div>
        <div className="flex-1">
-          <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-orange-500 mb-0.5">Beta Community</p>
+          <p className={`text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] ${isNight ? 'text-indigo-400' : 'text-orange-500'} mb-0.5`}>Beta Community</p>
           <p className="text-sm md:text-base font-bold text-zinc-200 font-korean group-hover:text-white transition-colors leading-tight">
             {t('beta_banner')}
           </p>
        </div>
-       <span className="ml-auto text-orange-500 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 font-black">→</span>
+       <span className={`${isNight ? 'text-indigo-400' : 'text-orange-500'} ml-auto opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 font-black`}>→</span>
     </div>
   );
 
@@ -181,14 +181,19 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <img 
                   src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                   alt="Chekki Hero" 
-                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform ${isNight ? 'scale-[1.5] lg:scale-[1.75]' : 'scale-100 lg:scale-110'}`}
+                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.3] lg:scale-[1.5]`}
                 />
             </div>
         </div>
       </div>
 
-      {/* Trust Stats */}
+      {/* Trust Stats with Night Mode Banner */}
       <div className="max-w-7xl mx-auto px-6 mb-32">
+          {isNight && (
+            <div className="max-w-2xl mb-12">
+               <BetaBanner />
+            </div>
+          )}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
               {[
                 { label: t('stat_accuracy'), value: '99.9%' },
@@ -318,7 +323,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                    <img 
                     src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                     alt="Chekki Mascot" 
-                    className={`w-[110%] h-[110%] object-contain filter brightness-110 drop-shadow-[0_15px_40px_rgba(0,0,0,0.3)] animate-float ${isNight ? 'scale-[1.5] lg:scale-[1.75]' : ''}`} 
+                    className={`w-[110%] h-[110%] object-contain filter brightness-110 drop-shadow-[0_15px_40px_rgba(0,0,0,0.3)] animate-float scale-[1.3] lg:scale-[1.5]`} 
                    />
                 </div>
               </div>
