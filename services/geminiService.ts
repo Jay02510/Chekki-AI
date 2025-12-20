@@ -11,14 +11,17 @@ import { SYSTEM_PROMPT } from "../constants";
 export const analyzeWorksheet = async (base64Image: string, isRetry = false): Promise<WorksheetAnalysis> => {
   console.log(`[Chekki] Starting direct analysis (isRetry: ${isRetry})...`);
   
-  const apiKey = process.env.API_KEY;
+  // Robust API key retrieval for various environments
+  const apiKey = process.env.API_KEY || (window as any).API_KEY;
+  
   if (!apiKey) {
+    console.error("[Chekki] API Key check failed. Environment:", process.env);
     throw new Error("API Key is missing. Please check your environment variables.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
   // Fallback Logic: Lite first, then upgrade to the more powerful 3 Flash on retry
-  const modelName = isRetry ? 'gemini-3-flash-preview' : 'gemini-flash-lite-latest';
+  const modelName = isRetry ? 'gemini-3-pro-preview' : 'gemini-3-flash-preview';
   
   try {
     const response = await ai.models.generateContent({
@@ -48,18 +51,22 @@ export const analyzeWorksheet = async (base64Image: string, isRetry = false): Pr
 
   } catch (error: any) {
     console.error(`[Chekki] Error with ${modelName}:`, error);
+    // If it fails with "Entity not found", it might be an invalid API key or model availability issue
+    if (error.message?.includes("not found")) {
+        throw new Error("Model or API configuration error. Please try again later.");
+    }
     throw error;
   }
 };
 
 export const generateSimilarWorksheet = async (originalItems: WorksheetItem[]): Promise<WorksheetItem[]> => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.API_KEY || (window as any).API_KEY;
   if (!apiKey) return originalItems;
   const ai = new GoogleGenAI({ apiKey });
   
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-flash-lite-latest",
+      model: "gemini-3-flash-preview",
       contents: [
         {
           role: "user",

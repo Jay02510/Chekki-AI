@@ -14,12 +14,12 @@ const translations = {
     app_name: "Chekki AI",
     tagline: "Mom's Friendly Homework Partner",
     login: "Start Here",
-    logout: "Bye for now!",
+    logout: "Log Out",
     scans: "Magic Helps",
     pro_plan: "Pro Magic 🚀",
     
     // Hero / Camera
-    hero_title: "English Homework?\nLeave it to Chekki!",
+    hero_title: "English Homework?\nJust Snap a Photo.",
     hero_desc: "Don't stress over tricky English questions anymore. Get warm, easy-to-understand explanations and clear answers instantly. Help your child grow with confidence!",
     hero_badge: "Mom's Secret Helper",
     hero_cta_title: "Happy Homework,",
@@ -128,18 +128,25 @@ const translations = {
     scans_left: "Homework Magic Left",
     footer_text: "Gemini 3 Pro Powered • Your Friendly Homework Buddy",
     fb_title: "Feedback",
-    fb_success: "Thank you for the feedback!"
+    fb_success: "Thank you for the feedback!",
+    fb_desc: "How was your experience with Chekki today?",
+    fb_error_desc: "Was something wrong with this specific answer?",
+    fb_submit: "Send Feedback",
+    fb_rating: "How helpful was I?",
+    fb_comment: "Any details for me?",
+    pw_title: "Unlock Full Magic",
+    pw_desc: "Get unlimited scans and AI practice sheets."
   },
   ko: {
     app_name: "채키 AI",
     tagline: "엄마를 위한 다정한 영어 숙제 파트너",
     login: "함께 시작해요",
-    logout: "다음에 만나요!",
+    logout: "로그아웃",
     scans: "번의 마법 남음",
     pro_plan: "마법 프로 플랜 🚀",
 
     // Hero / Camera
-    hero_title: "영어 숙제 정답,\n채키가 다정하게 알려드려요!",
+    hero_title: "우리 아이 영어 실력,\n한 단계 더 높이기",
     hero_desc: "어려운 영어 문제로 고민하지 마세요. 따뜻하고 이해하기 쉬운 설명과 정답을 즉시 확인하고, 우리 아이에게 자신 있게 가르쳐주세요.",
     hero_badge: "엄마만의 비밀 도우미",
     hero_cta_title: "행복한 숙제 시간,",
@@ -248,7 +255,14 @@ const translations = {
     scans_left: "남은 마법 횟수",
     footer_text: "Gemini 3 Pro 기반 • 엄마를 위한 다정한 영어 숙제 파트너",
     fb_title: "피드백",
-    fb_success: "소중한 의견 감사합니다!"
+    fb_success: "소중한 의견 감사합니다!",
+    fb_desc: "오늘 채키와 함께한 시간은 어떠셨나요?",
+    fb_error_desc: "정답이나 설명에 문제가 있었나요? 알려주시면 더 똑똑해질게요.",
+    fb_submit: "의견 보내기",
+    fb_rating: "채키가 얼마나 도움이 되었나요?",
+    fb_comment: "더 자세한 의견이 있으신가요?",
+    pw_title: "모든 마법 잠금해제",
+    pw_desc: "무제한 스캔과 복습 문제지 생성 기능을 만나보세요."
   }
 };
 
