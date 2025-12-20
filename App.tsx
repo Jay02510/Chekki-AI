@@ -34,7 +34,6 @@ function AppContent() {
   const [viewMode, setViewMode] = useState<WorkspaceMode>('overlay');
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Load session on mount (replacing showSplash dependency)
   useEffect(() => {
     if (analysisState.status === 'idle') {
       const saved = localStorage.getItem(SESSION_KEY);
@@ -76,7 +75,6 @@ function AppContent() {
             showReward: false
          });
       } else {
-        // Robust Extraction Logic: Handle both {items: []} and direct []
         const formattedData: WorksheetAnalysis = {
             worksheet_summary: result.worksheet_summary || { title_en: "Worksheet", title_ko: "워크시트" },
             items: Array.isArray(result) ? result : (result.items || [])
@@ -93,7 +91,6 @@ function AppContent() {
         setAnalysisState(newState);
         setViewMode('overlay');
 
-        // Save session
         localStorage.setItem(SESSION_KEY, JSON.stringify({
           state: newState,
           timestamp: Date.now()
@@ -113,7 +110,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans overflow-x-hidden">
       <Header onReset={handleReset} />
       <PaywallModal />
       <OdapNoteModal />
@@ -128,9 +125,9 @@ function AppContent() {
       
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
 
-      <main className="max-w-6xl mx-auto p-4 md:p-6 pb-0">
+      <main className="max-w-7xl mx-auto p-4 md:p-6 pb-0 h-screen flex flex-col">
         {analysisState.status === 'idle' && (
-          <div className="animate-fade-in pb-32">
+          <div className="animate-fade-in flex-1">
             <CameraView onImageSelected={handleImageSelected} />
           </div>
         )}
@@ -138,7 +135,7 @@ function AppContent() {
         {analysisState.status === 'analyzing' && <LoadingScreen />}
 
         {analysisState.status === 'error' && (
-           <div className="flex flex-col items-center justify-center min-h-[50vh] text-center p-6 animate-fade-in pt-24">
+           <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
              <div className="w-32 h-32 md:w-40 md:h-40 bg-red-950/20 rounded-full flex items-center justify-center mb-10 border border-red-500/30 relative">
                <ChekkiMascot className="w-20 h-20 md:w-28 md:h-28" mood="thinking" />
                <div className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-lg animate-bounce">!</div>
@@ -154,52 +151,39 @@ function AppContent() {
         )}
 
         {analysisState.status === 'complete' && analysisState.data && (
-          <div className="animate-fade-in-up pt-24 md:pt-28">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-              <div className="flex-1">
-                 <h2 className="text-2xl font-bold text-white font-korean tracking-tight">
+          <div className="animate-fade-in-up flex flex-col h-full pt-20 md:pt-24 pb-4">
+            <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
+              <div className="flex items-center gap-3">
+                 <h2 className="text-xl md:text-2xl font-bold text-white font-korean tracking-tight truncate max-w-[200px] md:max-w-none">
                     {language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
                  </h2>
-                 {analysisState.data.worksheet_summary?.total_score && (
-                     <div className="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-lg text-xs font-bold mt-2">
-                        <span>⭐</span> Score: {analysisState.data.worksheet_summary.total_score}
-                     </div>
-                 )}
+                 <div className="bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-lg text-xs font-bold">
+                    Score: {analysisState.data.worksheet_summary?.total_score || 100}
+                 </div>
               </div>
               
-              <div className="flex items-center gap-3">
-                  <button onClick={handleReset} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl font-bold border border-zinc-700 transition-all flex items-center gap-2 shadow-sm hover:border-orange-500/50 group">
-                    <span className="group-hover:rotate-12 transition-transform text-lg">📸</span> 
-                    <span className="hidden md:inline text-sm font-korean">{t('ws_scan_again')}</span>
+              <div className="flex items-center gap-2">
+                  <button onClick={handleReset} className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-xl border border-zinc-700 transition-all shadow-sm group">
+                    <span className="text-lg">📸</span> 
                   </button>
 
-                  <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 shrink-0 shadow-inner">
-                    <button onClick={() => setViewMode('overlay')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${viewMode === 'overlay' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
-                      <span className="text-lg">🔍</span>{t('ws_overlay')}
+                  <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 shadow-inner">
+                    <button onClick={() => setViewMode('overlay')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'overlay' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                      {t('ws_overlay')}
                     </button>
-                    <button onClick={() => setViewMode('split')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${viewMode === 'split' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
-                      <span className="text-lg">📄</span>{t('ws_list')}
+                    <button onClick={() => setViewMode('split')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'split' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                      {t('ws_list')}
                     </button>
                   </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-zinc-900 to-zinc-900 border border-zinc-800 rounded-xl p-5 mb-8 flex items-start gap-4 shadow-sm relative overflow-hidden group">
-              <div className="bg-orange-500/20 p-3 rounded-full"><span className="text-3xl">📝</span></div>
-              <div>
-                <h4 className="text-orange-500 font-bold text-xs uppercase mb-1 tracking-wider font-korean">{t('ws_summary_title')}</h4>
-                <p className="text-zinc-200 leading-relaxed font-korean text-lg font-medium">
-                  "{language === 'ko' ? analysisState.data.worksheet_summary?.overview_ko : analysisState.data.worksheet_summary?.overview_en}"
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-24">
+            <div className="flex-1 min-h-0">
               {viewMode === 'overlay' ? (
                 <WorksheetOverlay 
                   imageUrl={analysisState.originalImage!} 
                   items={analysisState.data.items || []} 
-                  className="h-[calc(100vh-250px)]"
+                  className="h-full"
                 />
               ) : (
                 <SplitView imageUrl={analysisState.originalImage!} items={analysisState.data.items || []} />
