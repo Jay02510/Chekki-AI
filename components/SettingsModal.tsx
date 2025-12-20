@@ -9,16 +9,17 @@ interface Props {
 }
 
 export const SettingsModal: React.FC<Props> = ({ onClose }) => {
-  const { user, updateProfile, deleteAccount } = useAuth();
+  const { user, updateProfile, deleteAccount, upgradeToPro } = useAuth();
   const { language, setLanguage } = useLanguage();
   
   const [name, setName] = useState('');
   const [notifications, setNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
   const [successMsg, setSuccessMsg] = useState('');
+  const [betaCode, setBetaCode] = useState('');
+  const [betaError, setBetaError] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
-  // Legal Modal State
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
 
   useEffect(() => {
@@ -29,6 +30,19 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
     updateProfile(name);
     setSuccessMsg('Settings saved successfully!');
     setTimeout(() => setSuccessMsg(''), 3000);
+  };
+
+  const handleRedeem = async () => {
+    setBetaError(false);
+    const success = await upgradeToPro(betaCode);
+    if (success) {
+        setSuccessMsg('Upgraded to Pro! 🚀');
+        setBetaCode('');
+        setTimeout(() => setSuccessMsg(''), 5000);
+    } else {
+        setBetaError(true);
+        setTimeout(() => setBetaError(false), 3000);
+    }
   };
 
   const handleDelete = () => {
@@ -47,7 +61,6 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
         
         <div className="relative bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl border border-zinc-800 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
           
-          {/* Header */}
           <div className="bg-zinc-950 px-6 py-4 border-b border-zinc-800 flex justify-between items-center shrink-0">
             <h2 className="text-xl font-bold text-white font-display">Settings</h2>
             <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">✕</button>
@@ -55,7 +68,6 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
 
           <div className="p-6 space-y-8 overflow-y-auto custom-scrollbar">
               
-              {/* Section 1: Profile */}
               <div>
                   <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Account Profile</h3>
                   <div className="space-y-4">
@@ -80,55 +92,65 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                   </div>
               </div>
 
+              {user?.plan !== 'pro' && (
+                  <>
+                    <div className="h-px bg-zinc-800"></div>
+                    <div>
+                        <h3 className="text-xs font-bold text-orange-500 uppercase tracking-wider mb-4">Redeem Access Code</h3>
+                        <div className="flex gap-2">
+                            <input 
+                                type="text" 
+                                value={betaCode}
+                                onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
+                                placeholder="Enter Beta Code"
+                                className={`flex-1 bg-zinc-950 border ${betaError ? 'border-red-500' : 'border-zinc-700'} rounded-lg px-4 py-2 text-white focus:border-orange-500 outline-none transition-colors text-sm font-mono tracking-widest`}
+                            />
+                            <button 
+                                onClick={handleRedeem}
+                                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+                            >
+                                Redeem
+                            </button>
+                        </div>
+                        {betaError && <p className="text-[10px] text-red-500 mt-1 font-bold">Invalid or expired code.</p>}
+                        <p className="text-[10px] text-zinc-600 mt-2">Testing code: CHEKKIBETA</p>
+                    </div>
+                  </>
+              )}
+
               <div className="h-px bg-zinc-800"></div>
 
-              {/* Section 2: Preferences */}
               <div>
                   <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Preferences</h3>
                   
                   <div className="space-y-4">
-                      {/* Language */}
                       <div className="flex items-center justify-between">
                           <div>
                               <div className="text-sm font-medium text-white">App Language</div>
-                              <div className="text-xs text-zinc-500">Select your preferred interface language</div>
+                              <div className="text-xs text-zinc-500">Select interface language</div>
                           </div>
                           <div className="flex bg-zinc-950 rounded-lg p-1 border border-zinc-800">
-                              <button 
-                                  onClick={() => setLanguage('en')}
-                                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${language === 'en' ? 'bg-zinc-700 text-white shadow' : 'text-zinc-500 hover:text-zinc-300'}`}
-                              >English</button>
-                              <button 
-                                  onClick={() => setLanguage('ko')}
-                                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${language === 'ko' ? 'bg-zinc-700 text-white shadow' : 'text-zinc-500 hover:text-zinc-300'}`}
-                              >한국어</button>
+                              <button onClick={() => setLanguage('en')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${language === 'en' ? 'bg-zinc-700 text-white shadow' : 'text-zinc-500 hover:text-zinc-300'}`}>English</button>
+                              <button onClick={() => setLanguage('ko')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${language === 'ko' ? 'bg-zinc-700 text-white shadow' : 'text-zinc-500 hover:text-zinc-300'}`}>한국어</button>
                           </div>
                       </div>
 
-                      {/* Notifications */}
                       <div className="flex items-center justify-between">
                           <div>
                               <div className="text-sm font-medium text-white">Notifications</div>
-                              <div className="text-xs text-zinc-500">Receive weekly homework reports</div>
+                              <div className="text-xs text-zinc-500">Weekly homework reports</div>
                           </div>
-                          <button 
-                              onClick={() => setNotifications(!notifications)}
-                              className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${notifications ? 'bg-orange-500' : 'bg-zinc-700'}`}
-                          >
+                          <button onClick={() => setNotifications(!notifications)} className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${notifications ? 'bg-orange-500' : 'bg-zinc-700'}`}>
                               <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${notifications ? 'translate-x-6' : 'translate-x-0'}`}></div>
                           </button>
                       </div>
 
-                      {/* Sound */}
                       <div className="flex items-center justify-between">
                           <div>
                               <div className="text-sm font-medium text-white">Sound Effects</div>
-                              <div className="text-xs text-zinc-500">Play sounds when completing tasks</div>
+                              <div className="text-xs text-zinc-500">Audio feedback on tasks</div>
                           </div>
-                          <button 
-                              onClick={() => setSoundEffects(!soundEffects)}
-                              className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${soundEffects ? 'bg-orange-500' : 'bg-zinc-700'}`}
-                          >
+                          <button onClick={() => setSoundEffects(!soundEffects)} className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${soundEffects ? 'bg-orange-500' : 'bg-zinc-700'}`}>
                               <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${soundEffects ? 'translate-x-6' : 'translate-x-0'}`}></div>
                           </button>
                       </div>
@@ -137,7 +159,6 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
 
               <div className="h-px bg-zinc-800"></div>
 
-              {/* Section 3: Danger Zone (Required for App Store) */}
               <div>
                   <h3 className="text-xs font-bold text-red-500 uppercase tracking-wider mb-4">Danger Zone</h3>
                   {!showDeleteConfirm ? (
@@ -151,31 +172,19 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                       <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 animate-fade-in">
                           <p className="text-sm text-red-200 mb-3 font-bold">Are you sure? This cannot be undone.</p>
                           <div className="flex gap-3">
-                              <button 
-                                  onClick={handleDelete}
-                                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-md"
-                              >
-                                  Yes, Delete
-                              </button>
-                              <button 
-                                  onClick={() => setShowDeleteConfirm(false)}
-                                  className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold rounded-md"
-                              >
-                                  Cancel
-                              </button>
+                              <button onClick={handleDelete} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-md">Yes, Delete</button>
+                              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold rounded-md">Cancel</button>
                           </div>
                       </div>
                   )}
               </div>
 
-              {/* Legal Links (Required for App Store) */}
               <div className="flex justify-center gap-6 text-[10px] text-zinc-600 pt-4">
                   <button onClick={() => setShowLegal('privacy')} className="hover:text-zinc-400">Privacy Policy</button>
                   <button onClick={() => setShowLegal('terms')} className="hover:text-zinc-400">Terms of Use (EULA)</button>
                   <a href="mailto:chekkihelp@gmail.com" className="hover:text-zinc-400">Support</a>
               </div>
 
-              {/* Actions */}
               <div className="pt-2 flex items-center justify-between">
                   <span className="text-green-500 text-sm font-bold animate-fade-in">{successMsg}</span>
                   <button 
