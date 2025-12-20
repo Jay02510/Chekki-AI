@@ -27,7 +27,7 @@ const firebaseConfig = {
 // Safe initialization for hot-reloading and ESM environments
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// These exports should be initialized after app is ready
+// Exports must be initialized from the same 'app' instance
 export const auth = getAuth(app);
 export const dbInstance = getFirestore(app);
 
