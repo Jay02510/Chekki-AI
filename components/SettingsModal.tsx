@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LegalModal } from './LegalModal';
+import { FeedbackModal } from './FeedbackModal';
 
 interface Props {
   onClose: () => void;
@@ -10,7 +11,7 @@ interface Props {
 
 export const SettingsModal: React.FC<Props> = ({ onClose }) => {
   const { user, updateProfile, deleteAccount, upgradeToPro } = useAuth();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   
   const [name, setName] = useState('');
   const [notifications, setNotifications] = useState(true);
@@ -21,6 +22,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   useEffect(() => {
     if (user) setName(user.name);
@@ -54,6 +56,9 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
     <>
       {showLegal && (
         <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />
+      )}
+      {showFeedback && (
+        <FeedbackModal onClose={() => setShowFeedback(false)} />
       )}
       
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -117,6 +122,27 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                     </div>
                   </>
               )}
+
+              <div className="h-px bg-zinc-800"></div>
+
+              <div>
+                  <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Support & Feedback</h3>
+                  <div className="space-y-3">
+                      <button 
+                        onClick={() => setShowFeedback(true)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 flex items-center justify-between group hover:border-orange-500 transition-colors"
+                      >
+                         <div className="flex items-center gap-3">
+                            <span className="text-xl">💬</span>
+                            <div className="text-left">
+                               <div className="text-sm font-bold text-white">{t('fb_title')}</div>
+                               <div className="text-[10px] text-zinc-500">Tell me how to improve!</div>
+                            </div>
+                         </div>
+                         <span className="text-zinc-600 group-hover:text-orange-500 transition-colors">→</span>
+                      </button>
+                  </div>
+              </div>
 
               <div className="h-px bg-zinc-800"></div>
 

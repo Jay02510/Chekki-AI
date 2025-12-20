@@ -55,9 +55,6 @@ const translations = {
     scans_left: "Homework Magic Left",
     supported_formats: "JPG, PNG, WEBP, HEIC are all great! • Max: 10MB",
 
-    // Splash
-    splash_subtitle: "Your Warm Homework Buddy",
-
     // Onboarding
     onb_1_title: "I'll handle the tricky part!",
     onb_1_desc: "I'll find the answers so you can focus on giving big hugs and high-fives.",
@@ -120,6 +117,16 @@ const translations = {
     ws_repeated: "Again",
     ws_times: "times",
     ws_review_tip: "Tip: Tap the flag 🚩 to save questions for later practice!",
+    ws_report_error: "Report Error",
+
+    // Feedback
+    fb_title: "Help Chekki Learn",
+    fb_desc: "Your thoughts help me become a better helper for you and your child!",
+    fb_rating: "How was your experience today?",
+    fb_comment: "Anything else you'd like to tell me?",
+    fb_submit: "Send with Love",
+    fb_success: "Thank you! I'll read this carefully. ❤️",
+    fb_error_desc: "Tell me what's wrong with this answer...",
 
     // Paywall
     pw_title: "Help Your Child More",
@@ -193,9 +200,6 @@ const translations = {
     scans_left: "남은 마법 횟수",
     supported_formats: "JPG, PNG, WEBP, HEIC 모두 좋아요! • 최대 10MB",
 
-    // Splash
-    splash_subtitle: "우리 아이 영어 숙제 짝꿍",
-
     // Onboarding
     onb_1_title: "어려운 건 제가 할게요!",
     onb_1_desc: "정답은 제가 찾을게요. 엄마는 아이에게 따뜻한 칭찬과 응원만 듬뿍 해주세요.",
@@ -258,6 +262,16 @@ const translations = {
     ws_repeated: "반복",
     ws_times: "회",
     ws_review_tip: "팁: 깃발 🚩을 누르면 어려운 문제를 나중에 복습할 수 있어요!",
+    ws_report_error: "오류 제보",
+
+    // Feedback
+    fb_title: "채키에게 들려주세요",
+    fb_desc: "어머님의 소중한 의견은 채키가 더 똑똑한 도우미가 되는 데 큰 힘이 돼요!",
+    fb_rating: "오늘 채키와의 시간은 어떠셨나요?",
+    fb_comment: "더 하고 싶은 이야기가 있으신가요?",
+    fb_submit: "사랑을 담아 보내기",
+    fb_success: "감사합니다! 어머님의 의견을 소중히 읽어볼게요. ❤️",
+    fb_error_desc: "이 정답의 어떤 점이 잘못되었나요?",
 
     // Paywall
     pw_title: "더 많은 도움을 드리고 싶어요",

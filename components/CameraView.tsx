@@ -21,7 +21,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
   const processFile = async (file: File) => {
     setIsProcessing(true);
     try {
-      const base64Url = await compressImage(file, 1024, 0.85);
+      // Optimized for speed: 800px width and 0.7 quality reduces size by ~50% vs 1024px/0.85
+      const base64Url = await compressImage(file, 800, 0.7);
       const base64Data = base64Url.split(',')[1];
       onImageSelected(base64Data);
     } catch (e) {

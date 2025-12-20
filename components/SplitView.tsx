@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useMistakes } from '../contexts/MistakeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { CloneWorksheetModal } from './CloneWorksheetModal';
+import { FeedbackModal } from './FeedbackModal';
 import { ASSETS } from '../constants';
 import { ChekkiMascot } from './Icons';
 
@@ -20,16 +21,11 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
   const { user, setShowPaywall } = useAuth();
   
   const [activeItemId, setActiveItemId] = useState<number | null>(null);
-  const [listeningId, setListeningId] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState<{id: number, type: 'success' | 'error' | 'info', msg: string} | null>(null);
-  const [userAudio, setUserAudio] = useState<string | null>(null);
-  const [showTip, setShowTip] = useState(true);
   const [showCloneModal, setShowCloneModal] = useState(false);
+  const [reportContext, setReportContext] = useState<WorksheetItem | null>(null);
   const [mascotError, setMascotError] = useState(false);
 
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     if (activeItemId !== null && itemRefs.current[activeItemId]) {
@@ -38,11 +34,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
         block: 'center',
       });
     }
-  }, [activeItemId]);
-
-  useEffect(() => {
-    setUserAudio(null);
-    setFeedback(null);
   }, [activeItemId]);
 
   const normalizeText = (text: string) => {
@@ -86,55 +77,11 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
     }
   };
 
-  const handlePronunciation = async (id: number, targetText: string) => {
-    if (user?.plan !== 'pro') {
-      setShowPaywall(true);
-      return;
-    }
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    setUserAudio(null);
-    setListeningId(id);
-    setFeedback({ id, type: 'info', msg: "Listening..." });
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        audioChunksRef.current = [];
-        mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
-        mediaRecorder.onstop = () => {
-            const url = URL.createObjectURL(new Blob(audioChunksRef.current, { type: 'audio/webm' }));
-            setUserAudio(url);
-            stream.getTracks().forEach(track => track.stop());
-        };
-        mediaRecorder.start();
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.onresult = (event: any) => {
-            const speechResult = event.results[0][0].transcript;
-            if (mediaRecorderRef.current?.state !== 'inactive') mediaRecorderRef.current?.stop();
-            if (speechResult.toLowerCase().includes(targetText.toLowerCase())) {
-                setFeedback({ id, type: 'success', msg: "Perfect! 🎉" });
-            } else {
-                setFeedback({ id, type: 'error', msg: `Heard: "${speechResult}"` });
-            }
-            setListeningId(null);
-        };
-        recognition.onerror = () => {
-            mediaRecorderRef.current?.stop();
-            setFeedback({ id, type: 'error', msg: "Try Again" });
-            setListeningId(null); 
-        };
-        recognition.start();
-    } catch (e) {
-        setListeningId(null);
-        setFeedback({ id, type: 'error', msg: "Mic Error" });
-    }
-  };
-
   return (
     <>
       {showCloneModal && <CloneWorksheetModal originalItems={items} onClose={() => setShowCloneModal(false)} />}
+      {reportContext && <FeedbackModal context={reportContext} onClose={() => setReportContext(null)} />}
+
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-250px)] min-h-[500px]">
         <div className="w-full lg:w-1/2 h-1/2 lg:h-full flex flex-col">
           <WorksheetOverlay imageUrl={imageUrl} items={items} focusedId={activeItemId} className="h-full" />
@@ -172,11 +119,18 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                       <div className="flex items-center gap-2"><span className="font-hand text-xl text-emerald-400 font-bold">{item.correct_answer}</span></div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={(e) => { e.stopPropagation(); playAudio(item.correct_answer); }} className="p-2.5 rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-colors">
+                      <button onClick={(e) => { e.stopPropagation(); playAudio(item.correct_answer); }} className="p-2 rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-colors">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); toggleMistake(item); }} className={`p-2.5 rounded-full transition-colors ${flagged ? 'text-red-500 bg-red-500/10' : 'text-zinc-600 hover:text-zinc-400'}`}>
+                      <button onClick={(e) => { e.stopPropagation(); toggleMistake(item); }} className={`p-2 rounded-full transition-colors ${flagged ? 'text-red-500 bg-red-500/10' : 'text-zinc-600 hover:text-zinc-400'}`}>
                         <svg className="w-5 h-5" fill={flagged ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21V5a2 2 0 012-2h10a2 2 0 012 2v8l-7-3.5L5 13v8" /></svg>
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setReportContext(item); }} 
+                        className="p-2 rounded-full text-zinc-600 hover:text-yellow-500 transition-colors"
+                        title={t('ws_report_error')}
+                      >
+                         <span className="text-sm">⚠️</span>
                       </button>
                     </div>
                   </div>

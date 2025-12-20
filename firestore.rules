@@ -12,11 +12,15 @@ service cloud.firestore {
     // Mistakes: Users can only see and edit their own mistake records
     match /mistakes/{mistakeId} {
       allow read, write: if request.auth != null && (
-        // For existing documents
         (resource != null && resource.data.userId == request.auth.uid) ||
-        // For new documents
         (request.resource.data.userId == request.auth.uid)
       );
+    }
+
+    // Feedback: Authenticated users can create feedback entries
+    match /feedback/{feedbackId} {
+      allow create: if request.auth != null;
+      allow read: if false; // Only admins can read feedback from Firebase Console
     }
   }
 }

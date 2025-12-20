@@ -14,13 +14,16 @@ export const LoadingScreen: React.FC = () => {
     t('loading_step1'),
     t('loading_step2'),
     t('loading_step3'),
-    t('loading_step4')
+    t('loading_step4'),
+    "💡 Tip: Good things take a moment!",
+    "🚀 Almost done with your guide..."
   ];
 
   useEffect(() => {
+    // Increased update frequency from 1800ms to 1400ms to keep user engaged
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % loadingTexts.length);
-    }, 1800);
+    }, 1400);
     return () => clearInterval(interval);
   }, [loadingTexts.length]);
 
