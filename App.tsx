@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -9,13 +8,12 @@ import { PaywallModal } from './components/PaywallModal';
 import { OnboardingTour } from './components/OnboardingTour';
 import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
-import { RewardOverlay } from './components/RewardOverlay';
-import { ChekkiMascot } from './components/Icons';
 import { analyzeWorksheet } from './services/geminiService';
 import { AnalysisState, WorksheetAnalysis, WorkspaceMode } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { MistakeProvider } from './contexts/MistakeContext';
+import { ChekkiMascot } from './components/Icons';
 
 const SESSION_KEY = 'hw_last_session';
 
@@ -63,27 +61,27 @@ function AppContent() {
       if (!canScan) return; 
     }
 
-    setLastImageData(base64Data);
     const displayUrl = `data:image/jpeg;base64,${base64Data}`;
-    setAnalysisState({ status: 'analyzing', data: null, originalImage: displayUrl, errorMessage: null, showReward: false });
+    setLastImageData(base64Data);
+    setAnalysisState({ 
+        status: 'analyzing', 
+        data: null, 
+        originalImage: displayUrl, 
+        errorMessage: null, 
+        showReward: false 
+    });
 
     try {
       const result: any = await analyzeWorksheet(base64Data, isRetryAttempt);
       
-      // Ensure we have a valid object and it's not a server-reported error
       if (!result || result.error === "ANALYSIS_FAILED") {
-         throw new Error("API_REPORTED_FAILURE");
+         throw new Error("API_ERROR");
       }
 
       const formattedData: WorksheetAnalysis = {
           worksheet_summary: result.worksheet_summary || { title_en: "Worksheet", title_ko: "워크시트" },
           items: Array.isArray(result) ? result : (result.items || [])
       };
-
-      // Safeguard: Ensure items is an array
-      if (!Array.isArray(formattedData.items)) {
-          formattedData.items = [];
-      }
 
       const newState: AnalysisState = {
         status: 'complete',
@@ -102,8 +100,7 @@ function AppContent() {
       }));
       
     } catch (error: any) {
-      console.error("[App] Analysis process failed:", error);
-      
+      console.error("[App] Analysis failed:", error);
       setAnalysisState({ 
         status: 'error', 
         data: null, 
@@ -140,7 +137,7 @@ function AppContent() {
       
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
 
-      <main className="max-w-7xl mx-auto p-4 md:p-6 pb-0 h-screen flex flex-col">
+      <main className="max-w-7xl mx-auto p-4 md:p-6 pb-0 min-h-screen flex flex-col">
         {analysisState.status === 'idle' && (
           <div className="animate-fade-in flex-1">
             <CameraView onImageSelected={(data) => handleImageSelected(data, false)} />
@@ -171,7 +168,7 @@ function AppContent() {
         )}
 
         {analysisState.status === 'complete' && analysisState.data && (
-          <div className="animate-fade-in-up flex flex-col h-full pt-20 md:pt-24 pb-4">
+          <div className="animate-fade-in-up flex flex-col flex-1 pt-20 md:pt-24 pb-4">
             <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                  <h2 className="text-xl md:text-2xl font-black text-white font-korean tracking-tight truncate">
@@ -196,7 +193,7 @@ function AppContent() {
               </div>
             </div>
 
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-[400px]">
               {viewMode === 'overlay' ? (
                 <WorksheetOverlay 
                   imageUrl={analysisState.originalImage!} 

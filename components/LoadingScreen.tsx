@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [textIndex, setTextIndex] = useState(0);
   const [videoError, setVideoError] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
@@ -29,7 +29,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
       setTextIndex((prev) => (prev + 1) % loadingTexts.length);
     }, 2000);
 
-    const cancelTimer = setTimeout(() => setShowCancel(true), 12000);
+    const cancelTimer = setTimeout(() => setShowCancel(true), 15000);
 
     return () => {
       clearInterval(interval);
@@ -39,14 +39,12 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
 
   return (
     <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col items-center justify-center p-8 overflow-hidden">
-      {/* Dynamic Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-zinc-950 to-purple-500/10 animate-pulse"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/5 blur-[120px] rounded-full animate-float"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-purple-500/5 opacity-50"></div>
       
       <div className="relative w-64 h-64 md:w-[400px] md:h-[400px] mb-12 shrink-0">
         <div className="absolute inset-4 bg-orange-500/20 rounded-[3rem] blur-[80px] animate-pulse"></div>
         
-        <div className="relative w-full h-full bg-zinc-900/50 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-2xl z-10 overflow-hidden flex items-center justify-center">
+        <div className="relative w-full h-full bg-zinc-900/50 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 shadow-2xl z-10 overflow-hidden">
              {!videoError ? (
                 <video 
                   autoPlay 
@@ -59,16 +57,16 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
                     <source src={ASSETS.VIDEO_ANALYZING} type="video/mp4" />
                 </video>
              ) : (
-                <div className="w-full h-full p-12 flex items-center justify-center animate-float">
-                   <ChekkiMascot className="w-full h-full drop-shadow-2xl" mood="thinking" />
+                <div className="w-full h-full p-12 flex items-center justify-center">
+                   <ChekkiMascot className="w-full h-full" mood="thinking" />
                 </div>
              )}
         </div>
       </div>
       
-      <div className="flex flex-col items-center justify-center z-20 max-w-lg w-full text-center">
+      <div className="flex flex-col items-center justify-center z-20 max-w-lg w-full">
         <div className="h-16 flex items-center justify-center mb-4">
-          <h2 className="text-xl md:text-2xl font-black text-white font-korean animate-fade-in break-keep" key={textIndex}>
+          <h2 className="text-xl md:text-2xl font-black text-white text-center font-korean animate-fade-in break-keep" key={textIndex}>
             {loadingTexts[textIndex]}
           </h2>
         </div>
@@ -77,22 +75,19 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
           {[0, 1, 2].map(i => (
             <div 
               key={i} 
-              className="w-2.5 h-2.5 bg-orange-500 rounded-full animate-bounce" 
+              className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" 
               style={{ animationDelay: `${i * 0.15}s` }}
             ></div>
           ))}
         </div>
 
         {showCancel && onCancel && (
-          <div className="flex flex-col items-center gap-4 animate-fade-in">
-            <p className="text-zinc-500 text-xs text-center max-w-xs font-medium">{t('loading_tip')}</p>
-            <button 
-              onClick={onCancel}
-              className="px-8 py-2.5 rounded-full border border-white/10 text-white hover:bg-white/10 text-xs font-black uppercase tracking-widest transition-all active:scale-95"
-            >
-              {t('btn_cancel_retry')}
-            </button>
-          </div>
+          <button 
+            onClick={onCancel}
+            className="px-6 py-2 rounded-full border border-white/10 text-zinc-500 hover:text-white hover:border-white/30 text-xs font-black uppercase tracking-widest transition-all animate-fade-in"
+          >
+            {t('btn_cancel_retry')}
+          </button>
         )}
       </div>
     </div>

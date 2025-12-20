@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { WorksheetItem } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -12,17 +11,25 @@ interface Props {
   className?: string;
 }
 
-export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteractive = true, focusedId, className }) => {
+export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, className }) => {
   const { user, setShowPaywall } = useAuth();
   const { t } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Immediate check for completed image loads (prevents hanging on cached/base64 data)
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setImageLoaded(true);
+    }
+  }, [imageUrl]);
 
   const getStyle = (item: WorksheetItem) => {
     const box = item.bounding_box;
     if (!box) return { display: 'none' };
     
-    // Scale percentages from 0-1000 range to 0-100%
+    // Scale percentages from 0-1000 range (Gemini coordinate system) to 0-100%
     const top = (box.ymin / 1000) * 100;
     const left = (box.xmin / 1000) * 100;
 
@@ -49,17 +56,22 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
 
   return (
     <div className={`w-full flex flex-col bg-zinc-950 rounded-2xl border border-zinc-800 overflow-hidden relative shadow-2xl ${className || 'h-full'}`}>
-      <div className="flex-1 relative overflow-y-auto custom-scrollbar">
-        <div ref={containerRef} className="relative w-full">
+      <div className="flex-1 relative overflow-y-auto custom-scrollbar bg-black/40">
+        <div ref={containerRef} className="relative w-full min-h-[200px]">
           <img 
+            ref={imgRef}
             src={imageUrl} 
             alt="Worksheet" 
             className={`w-full h-auto block transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
+            onError={() => {
+                console.error("Image load failed in overlay");
+                setImageLoaded(true); // Allow items to show as fallback
+            }}
             draggable={false}
           />
           
-          {imageLoaded && items.map((item) => {
+          {imageLoaded && items && items.map((item) => {
             const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
             const text = item.correct_answer || "";
             const displayText = text.startsWith(item.id.toString()) ? text : `${item.id}. ${text}`;

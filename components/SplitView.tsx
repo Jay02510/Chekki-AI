@@ -103,7 +103,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
           </div>
 
           <div className="overflow-y-auto p-4 space-y-3 custom-scrollbar flex-1 relative z-10">
-            {/* Localized Tip */}
             <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl flex items-start gap-3 mb-2">
                <span className="text-lg">💡</span>
                <p className="text-xs text-orange-200/80 leading-relaxed font-korean">{t('ws_review_tip')}</p>
@@ -114,6 +113,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
               const isActive = activeItemId === item.id;
               const flagged = isMistake(item.question_text);
               const guideText = language === 'ko' ? item.korean_guide : (item.english_guide || item.teaching_tip_en || item.korean_guide);
+              const scriptText = item.teaching_script_ko;
 
               return (
                 <div key={item.id} ref={(el) => { itemRefs.current[item.id] = el; }} onClick={(e) => { e.stopPropagation(); setActiveItemId(item.id); }}
@@ -136,10 +136,22 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                     </div>
                   </div>
                   {isActive && (
-                    <div className="border-t border-white/5 bg-black/20 p-4 animate-fade-in">
-                        <div className="flex gap-2 items-start text-xs text-zinc-300 font-korean">
+                    <div className="border-t border-white/5 bg-black/20 p-4 animate-fade-in space-y-3">
+                        {scriptText && (
+                          <div className="bg-brand-purple/10 border border-brand-purple/20 p-3 rounded-lg flex gap-3">
+                             <span className="text-base shrink-0">👩‍🏫</span>
+                             <div className="space-y-1">
+                                <p className="text-[10px] font-black uppercase text-brand-purple tracking-widest">Mom's Script (엄마의 한마디)</p>
+                                <p className="text-xs text-white leading-relaxed font-korean">{scriptText}</p>
+                             </div>
+                          </div>
+                        )}
+                        <div className="flex gap-2 items-start text-xs text-zinc-300 font-korean pl-1">
                            <span className="text-base shrink-0">🧐</span>
-                           <p className="leading-relaxed">{guideText}</p>
+                           <div className="space-y-1">
+                              <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Analysis (학습 가이드)</p>
+                              <p className="leading-relaxed">{guideText}</p>
+                           </div>
                         </div>
                     </div>
                   )}

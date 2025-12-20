@@ -1,6 +1,4 @@
-
-// initializeApp is the primary entry point for Firebase v9+
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
   getFirestore, 
   doc, 
@@ -12,13 +10,9 @@ import {
   where, 
   getDocs,
   deleteDoc,
-  addDoc,
-  type Firestore
+  addDoc
 } from 'firebase/firestore';
-import { 
-  getAuth, 
-  type Auth
-} from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { UserProfile } from '../types';
 
 const firebaseConfig = {
@@ -30,11 +24,13 @@ const firebaseConfig = {
   appId: "1:123535525914:web:decc3f5b3e3ffee4a0a9a3"
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth: Auth = getAuth(app);
-export const dbInstance: Firestore = getFirestore(app);
+// Safe initialization for hot-reloading and ESM environments
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Helper for local storage keys
+// These exports should be initialized after app is ready
+export const auth = getAuth(app);
+export const dbInstance = getFirestore(app);
+
 const getLocalKey = (uid: string) => `chekki_mistakes_${uid}`;
 
 export const db = {

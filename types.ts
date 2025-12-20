@@ -25,8 +25,9 @@ export interface WorksheetItem {
   korean_guide: string;
   english_guide?: string;
   teaching_tip_ko: string;
+  teaching_script_ko?: string; // NEW: Direct script for parents to read
   teaching_tip_en?: string;
-  handwriting_tip_ko?: string; // NEW: Tip for letter formation
+  handwriting_tip_ko?: string;
   confidence_score: number;
   group_id?: string;
 }
@@ -36,7 +37,7 @@ export interface WorksheetSummary {
   title_ko: string;
   overview_ko: string;
   overview_en?: string;
-  total_score?: number; // NEW: Auto-scoring
+  total_score?: number;
 }
 
 export interface WorksheetAnalysis {
@@ -54,7 +55,7 @@ export interface UserProfile {
   plan: 'free' | 'pro';
   scansUsed: number;
   maxScans: number;
-  totalStamps?: number; // NEW: Gamification
+  totalStamps?: number;
 }
 
 export type AppView = 'onboarding' | 'camera' | 'analyzing' | 'workspace';
@@ -65,7 +66,7 @@ export interface AnalysisState {
   data: WorksheetAnalysis | null;
   originalImage: string | null; 
   errorMessage: string | null;
-  showReward?: boolean; // NEW: Trigger for the stamp animation
+  showReward?: boolean;
 }
 
 export interface CommunityPost {
