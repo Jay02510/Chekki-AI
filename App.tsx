@@ -85,7 +85,7 @@ function AppContent() {
           data: formattedData,
           originalImage: displayUrl,
           errorMessage: null,
-          showReward: true, 
+          showReward: false, // Explicitly disabled for main Answer Key flow
         };
 
         setAnalysisState(newState);
@@ -115,13 +115,6 @@ function AppContent() {
       <PaywallModal />
       <OdapNoteModal />
       <LoginModal />
-      
-      {analysisState.showReward && (
-          <RewardOverlay 
-            onClose={() => setAnalysisState(prev => ({ ...prev, showReward: false }))} 
-            score={analysisState.data?.worksheet_summary?.total_score || 100}
-          />
-      )}
       
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
 
@@ -157,9 +150,6 @@ function AppContent() {
                  <h2 className="text-xl md:text-2xl font-black text-white font-korean tracking-tight truncate">
                     {language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
                  </h2>
-                 <div className="bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-lg text-xs font-black shadow-lg shadow-orange-500/5">
-                    Score: {analysisState.data.worksheet_summary?.total_score || 100}
-                 </div>
               </div>
               
               <div className="flex items-center gap-2 shrink-0">
