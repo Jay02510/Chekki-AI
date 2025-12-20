@@ -21,7 +21,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
   const processFile = async (file: File) => {
     setIsProcessing(true);
     try {
-      const base64Url = await compressImage(file, 1024, 0.75);
+      // 800px is the "sweet spot" for Gemini to read text while staying under payload limits
+      const base64Url = await compressImage(file, 800, 0.7);
       const base64Data = base64Url.split(',')[1];
       onImageSelected(base64Data);
     } catch (e) {

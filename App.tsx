@@ -70,33 +70,40 @@ function AppContent() {
     try {
       const result: any = await analyzeWorksheet(base64Data, isRetryAttempt);
       
-      if (result.error === "ANALYSIS_FAILED") {
-         throw new Error("API_ERROR");
-      } else {
-        const formattedData: WorksheetAnalysis = {
-            worksheet_summary: result.worksheet_summary || { title_en: "Worksheet", title_ko: "워크시트" },
-            items: Array.isArray(result) ? result : (result.items || [])
-        };
-
-        const newState: AnalysisState = {
-          status: 'complete',
-          data: formattedData,
-          originalImage: displayUrl,
-          errorMessage: null,
-          showReward: false, 
-        };
-
-        setAnalysisState(newState);
-        setViewMode('overlay');
-
-        localStorage.setItem(SESSION_KEY, JSON.stringify({
-          state: newState,
-          timestamp: Date.now()
-        }));
+      // Ensure we have a valid object and it's not a server-reported error
+      if (!result || result.error === "ANALYSIS_FAILED") {
+         throw new Error("API_REPORTED_FAILURE");
       }
+
+      const formattedData: WorksheetAnalysis = {
+          worksheet_summary: result.worksheet_summary || { title_en: "Worksheet", title_ko: "워크시트" },
+          items: Array.isArray(result) ? result : (result.items || [])
+      };
+
+      // Safeguard: Ensure items is an array
+      if (!Array.isArray(formattedData.items)) {
+          formattedData.items = [];
+      }
+
+      const newState: AnalysisState = {
+        status: 'complete',
+        data: formattedData,
+        originalImage: displayUrl,
+        errorMessage: null,
+        showReward: false, 
+      };
+
+      setAnalysisState(newState);
+      setViewMode('overlay');
+
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        state: newState,
+        timestamp: Date.now()
+      }));
+      
     } catch (error: any) {
-      console.error("[App] Analysis process failed. Check Vercel logs and API_KEY environment variable.");
-      // Ensure user NEVER sees technical setup errors like "Missing API Key"
+      console.error("[App] Analysis process failed:", error);
+      
       setAnalysisState({ 
         status: 'error', 
         data: null, 

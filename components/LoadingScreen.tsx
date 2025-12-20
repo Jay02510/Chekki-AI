@@ -29,6 +29,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
       setTextIndex((prev) => (prev + 1) % loadingTexts.length);
     }, 2000);
 
+    // Show cancel button if it takes more than 15s (indicating a potential hang)
     const cancelTimer = setTimeout(() => setShowCancel(true), 15000);
 
     return () => {
@@ -39,12 +40,14 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
 
   return (
     <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col items-center justify-center p-8 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-purple-500/5 opacity-50"></div>
+      {/* Background Pulse: Ensures the screen always feels "alive" */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-purple-500/10 animate-pulse"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/5 blur-[120px] rounded-full animate-float"></div>
       
       <div className="relative w-64 h-64 md:w-[400px] md:h-[400px] mb-12 shrink-0">
         <div className="absolute inset-4 bg-orange-500/20 rounded-[3rem] blur-[80px] animate-pulse"></div>
         
-        <div className="relative w-full h-full bg-zinc-900/50 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 shadow-2xl z-10 overflow-hidden">
+        <div className="relative w-full h-full bg-zinc-900/50 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-2xl z-10 overflow-hidden">
              {!videoError ? (
                 <video 
                   autoPlay 
@@ -57,8 +60,8 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
                     <source src={ASSETS.VIDEO_ANALYZING} type="video/mp4" />
                 </video>
              ) : (
-                <div className="w-full h-full p-12 flex items-center justify-center">
-                   <ChekkiMascot className="w-full h-full" mood="thinking" />
+                <div className="w-full h-full p-12 flex items-center justify-center animate-float">
+                   <ChekkiMascot className="w-full h-full opacity-80" mood="thinking" />
                 </div>
              )}
         </div>
@@ -82,12 +85,15 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
         </div>
 
         {showCancel && onCancel && (
-          <button 
-            onClick={onCancel}
-            className="px-6 py-2 rounded-full border border-white/10 text-zinc-500 hover:text-white hover:border-white/30 text-xs font-black uppercase tracking-widest transition-all animate-fade-in"
-          >
-            {t('btn_cancel_retry')}
-          </button>
+          <div className="flex flex-col items-center gap-4 animate-fade-in">
+            <p className="text-zinc-500 text-xs text-center max-w-xs">{t('loading_tip')}</p>
+            <button 
+              onClick={onCancel}
+              className="px-6 py-2 rounded-full border border-white/10 text-white hover:bg-white/10 text-xs font-black uppercase tracking-widest transition-all"
+            >
+              {t('btn_cancel_retry')}
+            </button>
+          </div>
         )}
       </div>
     </div>

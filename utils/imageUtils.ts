@@ -1,5 +1,5 @@
 
-export const compressImage = (file: File, maxWidth = 800, quality = 0.8): Promise<string> => {
+export const compressImage = (file: File, maxWidth = 800, quality = 0.7): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -13,9 +13,15 @@ export const compressImage = (file: File, maxWidth = 800, quality = 0.8): Promis
         let width = img.width;
         let height = img.height;
 
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
+        // Force a maximum dimension to keep payload small
+        if (width > maxWidth || height > maxWidth) {
+          if (width > height) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          } else {
+            width = (width * maxWidth) / height;
+            height = maxWidth;
+          }
         }
 
         canvas.width = width;
@@ -27,7 +33,13 @@ export const compressImage = (file: File, maxWidth = 800, quality = 0.8): Promis
           return;
         }
         
+        // Use a white background for JPEGs (removes transparency issues)
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, width, height);
+        
         ctx.drawImage(img, 0, 0, width, height);
+        
+        // JPEG compression is more efficient for photos than PNG
         const dataUrl = canvas.toDataURL('image/jpeg', quality);
         resolve(dataUrl);
       };
