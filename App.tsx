@@ -33,6 +33,8 @@ function AppContent() {
   
   const [viewMode, setViewMode] = useState<WorkspaceMode>('overlay');
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [lastImageData, setLastImageData] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (analysisState.status === 'idle') {
@@ -51,20 +53,26 @@ function AppContent() {
     }
   }, []);
 
-  const handleImageSelected = async (base64Data: string) => {
+  const handleImageSelected = async (base64Data: string, isRetryAttempt = false) => {
     if (!isAuthenticated) {
       openLoginModal();
       return;
     }
 
-    const canScan = await incrementScan();
-    if (!canScan) return; 
+    if (!isRetryAttempt) {
+      const canScan = await incrementScan();
+      if (!canScan) return; 
+      setRetryCount(0);
+    } else {
+      setRetryCount(prev => prev + 1);
+    }
 
+    setLastImageData(base64Data);
     const displayUrl = `data:image/jpeg;base64,${base64Data}`;
     setAnalysisState({ status: 'analyzing', data: null, originalImage: displayUrl, errorMessage: null, showReward: false });
 
     try {
-      const result: any = await analyzeWorksheet(base64Data);
+      const result: any = await analyzeWorksheet(base64Data, isRetryAttempt);
       
       if (result.error) {
          setAnalysisState({
@@ -85,7 +93,7 @@ function AppContent() {
           data: formattedData,
           originalImage: displayUrl,
           errorMessage: null,
-          showReward: false, // Explicitly disabled for main Answer Key flow
+          showReward: false, 
         };
 
         setAnalysisState(newState);
@@ -101,11 +109,19 @@ function AppContent() {
     }
   };
 
+  const handleRetry = () => {
+    if (lastImageData) {
+      handleImageSelected(lastImageData, true);
+    }
+  };
+
   const handleReset = () => {
     if (analysisState.status === 'complete') {
         if (!window.confirm(t('err_confirm'))) return;
     }
     setAnalysisState({ status: 'idle', data: null, originalImage: null, errorMessage: null, showReward: false });
+    setLastImageData(null);
+    setRetryCount(0);
     localStorage.removeItem(SESSION_KEY);
   };
 
@@ -121,11 +137,11 @@ function AppContent() {
       <main className="max-w-7xl mx-auto p-4 md:p-6 pb-0 h-screen flex flex-col">
         {analysisState.status === 'idle' && (
           <div className="animate-fade-in flex-1">
-            <CameraView onImageSelected={handleImageSelected} />
+            <CameraView onImageSelected={(data) => handleImageSelected(data, false)} />
           </div>
         )}
 
-        {analysisState.status === 'analyzing' && <LoadingScreen />}
+        {analysisState.status === 'analyzing' && <LoadingScreen onCancel={handleReset} />}
 
         {analysisState.status === 'error' && (
            <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
@@ -137,9 +153,14 @@ function AppContent() {
              <p className="text-zinc-400 mb-8 max-w-md mx-auto font-korean leading-relaxed">
                {analysisState.errorMessage}
              </p>
-             <button onClick={handleReset} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all transform active:scale-95 font-korean shadow-lg shadow-white/10">
-               {t('btn_retake')}
-             </button>
+             <div className="flex flex-col sm:flex-row gap-4">
+               <button onClick={handleRetry} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all transform active:scale-95 font-korean shadow-lg">
+                 {t('btn_retry')}
+               </button>
+               <button onClick={handleReset} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all transform active:scale-95 font-korean shadow-lg">
+                 {t('btn_retake')}
+               </button>
+             </div>
            </div>
         )}
 

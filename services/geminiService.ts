@@ -1,71 +1,80 @@
 
+import { GoogleGenAI } from "@google/genai";
 import { WorksheetAnalysis, WorksheetItem } from "../types";
+import { SYSTEM_PROMPT } from "../constants";
 
 /**
- * Securely calls the Vercel API proxy to analyze the worksheet.
+ * Direct client-side SDK call with Tiered Fallback Logic.
+ * 1st Attempt: 'gemini-flash-lite-latest' (Fastest)
+ * Retry Attempt: 'gemini-3-flash-preview' (Most Intelligent)
  */
-export const analyzeWorksheet = async (base64Image: string): Promise<WorksheetAnalysis> => {
-  console.log("[Chekki] Starting secure analysis via Vercel proxy...");
+export const analyzeWorksheet = async (base64Image: string, isRetry = false): Promise<WorksheetAnalysis> => {
+  console.log(`[Chekki] Starting direct analysis (isRetry: ${isRetry})...`);
+  
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("API Key is missing. Please check your environment variables.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+  // Fallback Logic: Lite first, then upgrade to the more powerful 3 Flash on retry
+  const modelName = isRetry ? 'gemini-3-flash-preview' : 'gemini-flash-lite-latest';
   
   try {
-    const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await ai.models.generateContent({
+      model: modelName,
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { inlineData: { mimeType: "image/jpeg", data: base64Image } },
+            { text: "Analyze this worksheet with 100% thoroughness. Solve every single question. Return ONLY JSON." },
+          ],
+        },
+      ],
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        responseMimeType: "application/json",
+        temperature: 0.1,
       },
-      body: JSON.stringify({ image: base64Image }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("[Chekki] Proxy response error:", response.status, errorData);
-      throw new Error(errorData.error || "SERVER_ERROR");
-    }
-    
-    const result = await response.json();
-    console.log("[Chekki] Analysis successful.");
+    const text = response.text;
+    if (!text) throw new Error("EMPTY_RESPONSE");
+
+    const result = JSON.parse(text);
+    console.log("[Chekki] Analysis successful with model:", modelName);
     return result as WorksheetAnalysis;
 
   } catch (error: any) {
-    console.error("[Chekki] Critical Analysis Error:", error);
-    return { 
-      items: [], 
-      error: error.message || "API_ERROR", 
-      message_ko: "err_network" // Using key for translation
-    };
+    console.error(`[Chekki] Error with ${modelName}:`, error);
+    throw error;
   }
 };
 
-/**
- * Generates similar practice questions based on original worksheet items.
- */
 export const generateSimilarWorksheet = async (originalItems: WorksheetItem[]): Promise<WorksheetItem[]> => {
-    console.log("[Chekki] Generating practice content...");
-    try {
-        const response = await fetch('/api/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                mode: 'generate_similar',
-                items: originalItems 
-            }),
-        });
-
-        if (!response.ok) throw new Error("Generation failed");
-        
-        const data = await response.json();
-        const newItems = Array.isArray(data) ? data : (data.items || []);
-        
-        return newItems.map((item: any, idx: number) => ({
-            ...item,
-            id: 10000 + idx 
-        }));
-    } catch (e) {
-        console.error("[Chekki] Generation error:", e);
-        return originalItems.map((item, idx) => ({
-            ...item,
-            id: 20000 + idx,
-            question_text: `${item.question_text} (Practice)`
-        }));
-    }
-}
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) return originalItems;
+  const ai = new GoogleGenAI({ apiKey });
+  
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-flash-lite-latest",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: `Based on these questions: ${JSON.stringify(originalItems)}, generate 3-5 similar practice questions for a child. Return as JSON array of items.` },
+          ],
+        },
+      ],
+      config: {
+        responseMimeType: "application/json",
+        temperature: 0.7,
+      },
+    });
+    return JSON.parse(response.text || "[]");
+  } catch (e) {
+    return originalItems;
+  }
+};

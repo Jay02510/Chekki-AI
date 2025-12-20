@@ -95,13 +95,21 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                </div>
                <div>
                   <h3 className="font-bold text-white font-display text-2xl leading-none mb-1">{t('ws_results_title')}</h3>
-                  <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider bg-zinc-800 px-2 py-1 rounded">{groupedItems.length} {t('ws_items_found')}</span>
+                  <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider bg-zinc-800 px-2 py-1 rounded">
+                    {groupedItems.length} {t('ws_items_found')}
+                  </span>
                </div>
             </div>
           </div>
 
           <div className="overflow-y-auto p-4 space-y-3 custom-scrollbar flex-1 relative z-10">
-            {groupedItems.map((group, index) => {
+            {/* Localized Tip */}
+            <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl flex items-start gap-3 mb-2">
+               <span className="text-lg">💡</span>
+               <p className="text-xs text-orange-200/80 leading-relaxed font-korean">{t('ws_review_tip')}</p>
+            </div>
+
+            {groupedItems.map((group) => {
               const item = group.main;
               const isActive = activeItemId === item.id;
               const flagged = isMistake(item.question_text);
@@ -125,13 +133,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                       <button onClick={(e) => { e.stopPropagation(); toggleMistake(item); }} className={`p-2 rounded-full transition-colors ${flagged ? 'text-red-500 bg-red-500/10' : 'text-zinc-600 hover:text-zinc-400'}`}>
                         <svg className="w-5 h-5" fill={flagged ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21V5a2 2 0 012-2h10a2 2 0 012 2v8l-7-3.5L5 13v8" /></svg>
                       </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setReportContext(item); }} 
-                        className="p-2 rounded-full text-zinc-600 hover:text-yellow-500 transition-colors"
-                        title={t('ws_report_error')}
-                      >
-                         <span className="text-sm">⚠️</span>
-                      </button>
                     </div>
                   </div>
                   {isActive && (
@@ -149,7 +150,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
 
           <div className="p-4 bg-zinc-900 border-t border-zinc-800 shrink-0" onClick={(e) => e.stopPropagation()}>
              <button onClick={() => { if(user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }} className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 transform transition-all hover:scale-[1.02] active:scale-95">
-                <span>🪄</span> Generate Practice Questions
+                <span>🪄</span> {t('ws_gen_practice')}
              </button>
           </div>
         </div>

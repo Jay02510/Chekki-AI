@@ -87,7 +87,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </div>
-                <span className="text-sm font-bold text-zinc-400 uppercase tracking-widest group-hover/btn:text-white transition-colors">Upload Image</span>
+                <span className="text-sm font-bold text-zinc-400 uppercase tracking-widest group-hover/btn:text-white transition-colors">{t('btn_upload')}</span>
             </div>
           </div>
           <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileChange} disabled={isProcessing} />
@@ -230,7 +230,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
                 <span className="text-4xl group-hover:animate-pulse">🔊</span>
              </div>
           </div>
-          <div className="md:col-span-5 bg-[#0F1014] border border-white/10 rounded-3xl p-8 relative overflow-hidden group hover:border-brand-orange/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(249,115,22,0.1)] flex flex-col justify-between">
+          <div className="md:col-span-5 bg-[#0F1014] border border-white/10 rounded-3xl p-8 relative overflow-hidden group hover:border-brand-orange/50 transition-all duration-500 hover:shadow-[0_0_30_px_rgba(249,115,22,0.1)] flex flex-col justify-between">
              <div className="absolute top-0 right-0 p-24 bg-brand-orange/10 rounded-full blur-[60px]"></div>
              <div className="text-left relative z-10">
                 <span className="text-5xl font-bold text-brand-orange/20 font-display block mb-4 transition-transform group-hover:translate-x-2 group-hover:text-brand-orange/80 duration-500">03</span>
@@ -272,7 +272,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
       <div className="max-w-7xl mx-auto px-6 py-20 border-t border-white/5">
          <h2 className="text-2xl font-bold text-center text-white mb-12 font-korean">"{t('test_title')}"</h2>
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Testimonial 1 */}
             <div className="flex flex-col h-full bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl relative hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -top-3 left-6 text-4xl text-zinc-700">❝</div>
                 <p className="text-zinc-300 font-korean text-lg mb-8 pt-4 leading-relaxed">"{t('test_1_text')}"</p>
@@ -284,7 +283,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
                     </div>
                 </div>
             </div>
-            {/* Testimonial 2 */}
             <div className="flex flex-col h-full bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl relative hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -top-3 left-6 text-4xl text-zinc-700">❝</div>
                 <p className="text-zinc-300 font-korean text-lg mb-8 pt-4 leading-relaxed">"{t('test_2_text')}"</p>
@@ -296,7 +294,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
                     </div>
                 </div>
             </div>
-            {/* Testimonial 3 */}
             <div className="flex flex-col h-full bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl relative hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -top-3 left-6 text-4xl text-zinc-700">❝</div>
                 <p className="text-zinc-300 font-korean text-lg mb-8 pt-4 leading-relaxed">"{t('test_3_text')}"</p>
@@ -311,7 +308,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
          </div>
       </div>
 
-      {/* --- REFINED CTA SECTION --- */}
       <div className="relative w-full py-32 bg-zinc-950 border-t border-white/5 overflow-hidden">
          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand-orange/5"></div>
          <div className="max-w-6xl mx-auto px-6 relative z-10 animate-fade-in-up" style={{animationDelay: '0.5s'}}>
@@ -329,7 +325,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
               </div>
               <div className="hidden md:flex justify-end items-center relative h-[600px]">
                  <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-[120px] animate-pulse"></div>
-                 {/* Mascot with enhanced scaling and depth for world-class hero section */}
                  <img 
                     src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png" 
                     alt="Chekki Mascot" 

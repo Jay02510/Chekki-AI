@@ -14,6 +14,7 @@ interface Props {
 
 export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteractive = true, focusedId, className }) => {
   const { user, setShowPaywall } = useAuth();
+  const { t } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -85,7 +86,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
       </div>
       
       <div className="bg-zinc-900/90 backdrop-blur-md px-6 py-4 border-t border-white/5 flex justify-center shrink-0">
-         <p className="text-zinc-300 text-sm font-black font-korean tracking-wide">💡 정답을 누르면 영어 발음을 들려드려요!</p>
+         <p className="text-zinc-300 text-sm font-black font-korean tracking-wide">{t('ws_voice_guide')}</p>
       </div>
     </div>
   );

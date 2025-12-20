@@ -39,14 +39,20 @@ export default async function handler(req: any, res: any) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const apiKey = process.env.GEMINI_API || process.env.API_KEY; 
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API; 
+    
+    if (!apiKey) {
+      return res.status(500).json({ error: "MISSING_API_KEY" });
+    }
+
     const ai = new GoogleGenAI({ apiKey });
 
     const { image } = body;
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
 
+    // Using gemini-3-flash-preview for the best speed/quality balance
     const response = await ai.models.generateContent({
-      model: "gemini-flash-lite-latest",
+      model: "gemini-3-flash-preview",
       contents: [
         {
           role: "user",
@@ -63,8 +69,16 @@ export default async function handler(req: any, res: any) {
       },
     });
 
-    return res.status(200).json(JSON.parse(response.text || '{}'));
+    if (!response.text) {
+        throw new Error("EMPTY_RESPONSE_FROM_MODEL");
+    }
+
+    return res.status(200).json(JSON.parse(response.text));
   } catch (error: any) {
-    return res.status(500).json({ error: "ANALYSIS_FAILED", message: error.message });
+    console.error("[API Error]:", error);
+    return res.status(500).json({ 
+      error: "ANALYSIS_FAILED", 
+      message: error.message || "Unknown error occurred" 
+    });
   }
 }
