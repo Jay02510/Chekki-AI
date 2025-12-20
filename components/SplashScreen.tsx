@@ -28,20 +28,20 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   ];
 
   useEffect(() => {
-    // Cycle features every 1200ms (slower for readability)
+    // Cycle features every 300ms for faster visual engagement
     const featureInterval = setInterval(() => {
       setFeatureIndex(prev => (prev + 1) % features.length);
-    }, 1200);
+    }, 300);
 
-    // Start exit sequence at 4.5s
+    // Start exit sequence much faster (1.0s)
     const timer = setTimeout(() => {
       setIsExiting(true);
-    }, 4500); 
+    }, 1000); 
 
-    // Finish at 5s
+    // Finish at 1.2s total for instant entry feel
     const cleanup = setTimeout(() => {
       onFinish();
-    }, 5000);
+    }, 1200);
 
     return () => {
       clearInterval(featureInterval);
@@ -51,16 +51,16 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   }, [onFinish, features.length]);
 
   return (
-    <div className={`fixed inset-0 z-[100] bg-zinc-950 flex flex-col items-center justify-center transition-opacity duration-500 ${isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+    <div className={`fixed inset-0 z-[100] bg-zinc-950 flex flex-col items-center justify-center transition-opacity duration-300 ${isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
       
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px] animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '0.5s' }}></div>
       </div>
 
       <div className="relative z-10 flex flex-col items-center">
         
-        <div className="relative mb-8 transform transition-transform animate-bounce-subtle">
+        <div className="relative mb-8 transform transition-transform">
            {/* Video Container */}
            <div className="w-64 h-64 bg-zinc-900 rounded-3xl flex items-center justify-center shadow-2xl border border-zinc-800 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent z-20 pointer-events-none"></div>
@@ -87,12 +87,10 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                 </div>
               )}
            </div>
-           <div className="absolute -top-4 -right-4 text-2xl animate-pulse">✨</div>
-           <div className="absolute -bottom-2 -left-4 text-xl animate-pulse" style={{animationDelay: '0.5s'}}>✨</div>
         </div>
 
         <div className="text-center space-y-2 h-24">
-          <h1 className="text-4xl font-black text-white tracking-tight animate-fade-in-up font-display">
+          <h1 className="text-4xl font-black text-white tracking-tight font-display">
             Chekki<span className="text-orange-500">AI</span>
           </h1>
           
@@ -101,7 +99,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
             {features.map((feat, index) => (
                 <p 
                     key={index}
-                    className={`absolute inset-0 w-full text-center text-zinc-400 font-bold tracking-wide font-korean transition-all duration-500 transform ${
+                    className={`absolute inset-0 w-full text-center text-zinc-400 font-bold tracking-wide font-korean transition-all duration-300 transform ${
                         index === featureIndex 
                             ? 'opacity-100 translate-y-0 scale-100' 
                             : 'opacity-0 translate-y-4 scale-95'
@@ -113,14 +111,10 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
           </div>
         </div>
 
-        {/* Progress bar matches duration (5s) */}
+        {/* Faster progress bar */}
         <div className="mt-8 w-48 h-1 bg-zinc-800 rounded-full overflow-hidden relative">
-          <div className="h-full bg-orange-500 animate-[width_5s_ease-in-out_forwards]" style={{ width: '0%' }}></div>
+          <div className="h-full bg-orange-500 animate-[width_1.2s_ease-in-out_forwards]" style={{ width: '0%' }}></div>
         </div>
-        
-        <p className="mt-2 text-[10px] text-zinc-600 font-mono uppercase tracking-widest animate-pulse">
-            Loading Resources...
-        </p>
       </div>
 
       <style>{`

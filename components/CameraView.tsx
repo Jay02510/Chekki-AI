@@ -302,7 +302,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
       <div className="relative w-full py-32 bg-zinc-950 border-t border-white/5 overflow-hidden">
          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand-orange/5"></div>
          <div className="max-w-6xl mx-auto px-6 relative z-10 animate-fade-in-up" style={{animationDelay: '0.5s'}}>
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Switched to weighted grid for mascot dominance */}
+            <div className="grid md:grid-cols-[1.2fr_1fr] gap-12 items-center">
               <div className="flex flex-col items-start w-full text-left">
                 <h2 className="text-5xl md:text-8xl font-black text-white font-korean mb-8 tracking-tighter leading-none">
                    {t('hero_cta_title')}
@@ -315,12 +316,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
                 </button>
               </div>
               <div className="hidden md:flex justify-end items-center relative h-[600px]">
-                 <div className="absolute inset-0 bg-orange-500/10 rounded-full blur-[100px] animate-pulse"></div>
-                 {/* Mascot size increased to scale-2.0 and centered better for a heroic exit feel */}
+                 <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-[120px] animate-pulse"></div>
+                 {/* Mascot size significantly increased to scale-4.5 for parity with text energy */}
                  <img 
                     src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png" 
                     alt="Chekki Mascot" 
-                    className="w-full max-w-[850px] h-full object-contain drop-shadow-[0_0_100px_rgba(249,115,22,0.5)] animate-float scale-[2.0] z-10 origin-center transition-transform"
+                    className="w-full max-w-[850px] h-full object-contain drop-shadow-[0_0_120px_rgba(249,115,22,0.6)] animate-float scale-[4.5] z-10 origin-center transition-transform"
                  />
               </div>
             </div>

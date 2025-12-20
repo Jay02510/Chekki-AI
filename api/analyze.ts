@@ -1,4 +1,5 @@
-import { GoogleGenAI, Type } from "@google/genai";
+
+import { GoogleGenAI } from "@google/genai";
 
 export const config = {
   maxDuration: 60, 
@@ -28,17 +29,17 @@ const CLONE_PROMPT = `
 You are an expert educational content generator. Take the provided list of questions and generate NEW ones with similar difficulty and vocabulary for practice. Return a JSON array of items.
 `;
 
-export default async function handler(request: Request) {
-  if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+export default async function handler(req: any, res: any) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const body = await request.json();
+    const body = req.body;
     const apiKey = process.env.API_KEY; 
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "API Key missing in environment" }), { status: 500 });
+      return res.status(500).json({ error: "API Key missing in environment" });
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -53,16 +54,13 @@ export default async function handler(request: Request) {
                 responseMimeType: "application/json",
             },
         });
-        return new Response(response.text, { 
-          status: 200, 
-          headers: { 'Content-Type': 'application/json' } 
-        });
+        return res.status(200).json(JSON.parse(response.text));
     }
 
     // Handle Main Worksheet Analysis
     const { image } = body;
     if (!image) {
-      return new Response(JSON.stringify({ error: "No image data provided" }), { status: 400 });
+      return res.status(400).json({ error: "No image data provided" });
     }
 
     const response = await ai.models.generateContent({
@@ -83,16 +81,13 @@ export default async function handler(request: Request) {
       },
     });
 
-    return new Response(response.text, {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return res.status(200).json(JSON.parse(response.text));
 
   } catch (error: any) {
     console.error("Vercel Function Error:", error);
-    return new Response(JSON.stringify({ 
+    return res.status(500).json({ 
       error: "ANALYSIS_FAILED", 
       message: error.message || "Unknown server error" 
-    }), { status: 500 });
+    });
   }
 }
