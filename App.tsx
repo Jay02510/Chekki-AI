@@ -18,10 +18,23 @@ import { ChekkiMascot } from './components/Icons';
 
 const SESSION_KEY = 'hw_last_session';
 
+const isNightModeKST = () => {
+  const now = new Date();
+  const kstTime = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Seoul',
+    hour: 'numeric',
+    hour12: false,
+  }).format(now);
+  const hour = parseInt(kstTime, 10);
+  // Night mode between 10 PM (22:00) and 6 AM (06:00)
+  return hour >= 22 || hour < 6;
+};
+
 function AppContent() {
   const { user, openLoginModal, isAuthenticated, incrementScan } = useAuth();
   const { t, language } = useLanguage();
   
+  const [isNight, setIsNight] = useState(isNightModeKST());
   const [analysisState, setAnalysisState] = useState<AnalysisState>({
     status: 'idle',
     data: null,
@@ -33,6 +46,14 @@ function AppContent() {
   const [viewMode, setViewMode] = useState<WorkspaceMode>('overlay');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [lastImageData, setLastImageData] = useState<string | null>(null);
+
+  // Sync night mode on mount and potentially interval
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIsNight(isNightModeKST());
+    }, 60000); // Check every minute
+    return () => clearInterval(timer);
+  }, []);
 
   // Sync analysis state with auth state: reset to landing if logged out
   useEffect(() => {
@@ -138,7 +159,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans overflow-x-hidden">
+    <div className={`min-h-screen ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} text-zinc-100 font-sans overflow-x-hidden transition-colors duration-1000`}>
       <Header onReset={() => handleReset(false)} />
       <PaywallModal />
       <OdapNoteModal />
@@ -149,16 +170,16 @@ function AppContent() {
       <main className="max-w-7xl mx-auto p-4 md:p-6 pb-0 min-h-screen flex flex-col">
         {analysisState.status === 'idle' && (
           <div className="animate-fade-in flex-1">
-            <CameraView onImageSelected={(data) => handleImageSelected(data, false)} />
+            <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data, false)} />
           </div>
         )}
 
-        {analysisState.status === 'analyzing' && <LoadingScreen onCancel={() => handleReset(false)} />}
+        {analysisState.status === 'analyzing' && <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />}
 
         {analysisState.status === 'error' && (
            <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
              <div className="w-32 h-32 md:w-40 md:h-40 bg-red-950/20 rounded-full flex items-center justify-center mb-10 border border-red-500/30 relative">
-               <ChekkiMascot className="w-20 h-20 md:w-28 md:h-28" mood="thinking" />
+               <ChekkiMascot className="w-20 h-20 md:w-28 md:h-28" mood={isNight ? "sleeping" : "thinking"} />
                <div className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-lg animate-bounce">!</div>
              </div>
              <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('error_title')}</h3>

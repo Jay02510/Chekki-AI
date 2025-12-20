@@ -6,9 +6,10 @@ import { ASSETS } from '../constants';
 
 interface Props {
   onCancel?: () => void;
+  isNight?: boolean;
 }
 
-export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
+export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) => {
   const { t, language } = useLanguage();
   const [textIndex, setTextIndex] = useState(0);
   const [videoError, setVideoError] = useState(false);
@@ -38,13 +39,13 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
   }, [loadingTexts.length]);
 
   return (
-    <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col items-center justify-center p-8 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-purple-500/5 opacity-50"></div>
+    <div className={`fixed inset-0 ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}>
+      <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-900/10 to-purple-900/10' : 'from-orange-500/5 to-purple-500/5'} opacity-50`}></div>
       
       <div className="relative w-64 h-64 md:w-[400px] md:h-[400px] mb-12 shrink-0">
-        <div className="absolute inset-4 bg-orange-500/20 rounded-[3rem] blur-[80px] animate-pulse"></div>
+        <div className={`absolute inset-4 ${isNight ? 'bg-indigo-500/10' : 'bg-orange-500/20'} rounded-[3rem] blur-[80px] animate-pulse`}></div>
         
-        <div className="relative w-full h-full bg-zinc-900/50 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 shadow-2xl z-10 overflow-hidden">
+        <div className={`relative w-full h-full ${isNight ? 'bg-indigo-950/30' : 'bg-zinc-900/50'} backdrop-blur-3xl rounded-[2.5rem] border border-white/5 shadow-2xl z-10 overflow-hidden`}>
              {!videoError ? (
                 <video 
                   autoPlay 
@@ -54,11 +55,11 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
                   className="absolute inset-0 w-full h-full object-contain p-4 scale-110" 
                   onError={() => setVideoError(true)}
                 >
-                    <source src={ASSETS.VIDEO_ANALYZING} type="video/mp4" />
+                    <source src={isNight ? ASSETS.VIDEO_SLEEPY : ASSETS.VIDEO_ANALYZING} type="video/mp4" />
                 </video>
              ) : (
                 <div className="w-full h-full p-12 flex items-center justify-center">
-                   <ChekkiMascot className="w-full h-full" mood="thinking" />
+                   <ChekkiMascot className="w-full h-full" mood={isNight ? "sleeping" : "thinking"} />
                 </div>
              )}
         </div>
@@ -75,7 +76,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel }) => {
           {[0, 1, 2].map(i => (
             <div 
               key={i} 
-              className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" 
+              className={`w-2 h-2 ${isNight ? 'bg-indigo-400' : 'bg-orange-500'} rounded-full animate-bounce`} 
               style={{ animationDelay: `${i * 0.15}s` }}
             ></div>
           ))}
