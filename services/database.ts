@@ -15,13 +15,9 @@ import {
 } from 'firebase/firestore';
 import { 
   getAuth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut,
-  onAuthStateChanged,
   Auth
 } from 'firebase/auth';
-import { UserProfile, WorksheetItem } from '../types';
+import { UserProfile } from '../types';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k",
@@ -36,40 +32,83 @@ const app = initializeApp(firebaseConfig);
 export const auth: Auth = getAuth(app);
 export const dbInstance: Firestore = getFirestore(app);
 
+// Helper for local storage keys
+const getLocalKey = (uid: string) => `chekki_mistakes_${uid}`;
+
 export const db = {
   async getUser(uid: string): Promise<UserProfile | null> {
     try {
         const docRef = doc(dbInstance, "users", uid);
         const docSnap = await getDoc(docRef);
         return docSnap.exists() ? (docSnap.data() as UserProfile) : null;
-    } catch (e) {
-        console.error("DB Get User Error:", e);
+    } catch (e: any) {
+        console.warn("[Chekki DB] getUser failed, check Firebase rules:", e.message);
         return null;
     }
   },
 
   async createUser(uid: string, profile: UserProfile): Promise<void> {
-    await setDoc(doc(dbInstance, "users", uid), { ...profile, uid });
+    try {
+      await setDoc(doc(dbInstance, "users", uid), { ...profile, uid });
+    } catch (e) {
+      console.error("[Chekki DB] createUser failed:", e);
+    }
   },
 
   async updateUser(uid: string, updates: Partial<UserProfile>): Promise<void> {
-    const userRef = doc(dbInstance, "users", uid);
-    await updateDoc(userRef, updates);
+    try {
+      const userRef = doc(dbInstance, "users", uid);
+      await updateDoc(userRef, updates);
+    } catch (e) {
+      console.error("[Chekki DB] updateUser failed:", e);
+    }
   },
 
   async getMistakes(uid: string): Promise<any[]> {
-    const items: any[] = [];
-    const q = query(collection(dbInstance, "mistakes"), where("userId", "==", uid));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => items.push(doc.data()));
-    return items.sort((a, b) => (b.dateAdded || "").localeCompare(a.dateAdded || ""));
+    try {
+        const items: any[] = [];
+        const q = query(collection(dbInstance, "mistakes"), where("userId", "==", uid));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => items.push(doc.data()));
+        
+        const sorted = items.sort((a, b) => (b.dateAdded || "").localeCompare(a.dateAdded || ""));
+        
+        // Sync to local storage for offline/fallback use
+        localStorage.setItem(getLocalKey(uid), JSON.stringify(sorted));
+        
+        return sorted;
+    } catch (e: any) {
+        console.warn("[Chekki DB] getMistakes failed (likely permissions). Falling back to local storage.");
+        const localData = localStorage.getItem(getLocalKey(uid));
+        return localData ? JSON.parse(localData) : [];
+    }
   },
 
   async addMistake(uid: string, mistake: any): Promise<void> {
-    await setDoc(doc(dbInstance, "mistakes", mistake.uniqueId), { ...mistake, userId: uid });
+    const localKey = getLocalKey(uid);
+    
+    // Always update local first for immediate UI response
+    const currentLocal = JSON.parse(localStorage.getItem(localKey) || '[]');
+    localStorage.setItem(localKey, JSON.stringify([mistake, ...currentLocal]));
+
+    try {
+      await setDoc(doc(dbInstance, "mistakes", mistake.uniqueId), { ...mistake, userId: uid });
+    } catch (e: any) {
+      console.warn("[Chekki DB] addMistake cloud sync failed:", e.message);
+    }
   },
 
-  async removeMistake(uniqueId: string): Promise<void> {
-    await deleteDoc(doc(dbInstance, "mistakes", uniqueId));
+  async removeMistake(uniqueId: string, uid?: string): Promise<void> {
+    if (uid) {
+      const localKey = getLocalKey(uid);
+      const currentLocal = JSON.parse(localStorage.getItem(localKey) || '[]');
+      localStorage.setItem(localKey, JSON.stringify(currentLocal.filter((m: any) => m.uniqueId !== uniqueId)));
+    }
+
+    try {
+      await deleteDoc(doc(dbInstance, "mistakes", uniqueId));
+    } catch (e: any) {
+      console.warn("[Chekki DB] removeMistake cloud sync failed:", e.message);
+    }
   }
 };

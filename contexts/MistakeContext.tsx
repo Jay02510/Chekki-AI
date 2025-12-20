@@ -22,7 +22,7 @@ interface MistakeContextType {
 const MistakeContext = createContext<MistakeContextType | undefined>(undefined);
 
 export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, firebaseUser } = useAuth();
+  const { firebaseUser } = useAuth();
   const [mistakes, setMistakes] = useState<MistakeItem[]>([]);
   const [showMistakeModal, setShowMistakeModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,17 +30,17 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Load mistakes when user changes
   useEffect(() => {
     const loadMistakes = async () => {
-        // Use Firebase UID for reliable security permissions
         if (!firebaseUser) {
             setMistakes([]);
             return;
         }
         setIsLoading(true);
         try {
+            // The database service now handles fallbacks internally
             const data = await db.getMistakes(firebaseUser.uid);
             setMistakes(data);
         } catch (e) {
-            console.error("Failed to load mistakes (Check Firestore Rules):", e);
+            console.error("Critical error loading mistakes:", e);
         } finally {
             setIsLoading(false);
         }
@@ -55,7 +55,7 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     if (exists) {
       setMistakes(prev => prev.filter(m => m.uniqueId !== exists.uniqueId));
-      await db.removeMistake(exists.uniqueId);
+      await db.removeMistake(exists.uniqueId, firebaseUser.uid);
     } else {
       const newItem: MistakeItem = {
         ...item,
@@ -68,8 +68,9 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const removeMistake = async (uniqueId: string) => {
+    if (!firebaseUser) return;
     setMistakes(prev => prev.filter(m => m.uniqueId !== uniqueId));
-    await db.removeMistake(uniqueId);
+    await db.removeMistake(uniqueId, firebaseUser.uid);
   };
 
   const isMistake = (questionText: string) => {
