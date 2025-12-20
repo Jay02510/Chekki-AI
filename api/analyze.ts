@@ -35,39 +35,33 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Safety check for body parsing
-    let body = req.body;
-    if (typeof body === 'string') {
-        try {
-            body = JSON.parse(body);
-        } catch (e) {
-            return res.status(400).json({ error: "INVALID_JSON", message: "Failed to parse request body" });
-        }
-    }
+    // Vercel usually parses JSON automatically, but we handle both cases for robustness
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-    const apiKey = process.env.API_KEY; 
-
+    // Use the variable name visible in user's screenshot
+    const apiKey = process.env.GEMINI_API || process.env.API_KEY; 
+    
     if (!apiKey) {
-      return res.status(500).json({ error: "API_KEY_MISSING", message: "Server API Key is not configured." });
+      console.error("[Chekki API] Missing API Key in environment variables.");
+      return res.status(500).json({ error: "API_KEY_MISSING", message: "Server API Key is not configured in Vercel." });
     }
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // Handle Similar Question Generation
+    // Similar Question Generation Mode
     if (body.mode === 'generate_similar') {
-        const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: [{ parts: [{ text: `Original Items: ${JSON.stringify(body.items)}. Generate 5 similar new questions.` }] }],
-            config: {
-                systemInstruction: CLONE_PROMPT,
-                responseMimeType: "application/json",
-            },
-        });
-        const text = response.text || '[]';
-        return res.status(200).json(JSON.parse(text));
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [{ parts: [{ text: `Original Items: ${JSON.stringify(body.items)}. Generate 5 similar new questions.` }] }],
+        config: {
+          systemInstruction: CLONE_PROMPT,
+          responseMimeType: "application/json",
+        },
+      });
+      return res.status(200).json(JSON.parse(response.text || '[]'));
     }
 
-    // Handle Main Worksheet Analysis
+    // Main Analysis Mode
     const { image } = body;
     if (!image) {
       return res.status(400).json({ error: "NO_IMAGE", message: "No image data provided" });
@@ -95,7 +89,7 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json(JSON.parse(outputText));
 
   } catch (error: any) {
-    console.error("Vercel Function Error:", error);
+    console.error("[Chekki API] Serverless Function Error:", error);
     return res.status(500).json({ 
       error: "ANALYSIS_FAILED", 
       message: error.message || "Unknown server error" 

@@ -271,28 +271,40 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
       <div className="max-w-7xl mx-auto px-6 py-20 border-t border-white/5">
          <h2 className="text-2xl font-bold text-center text-white mb-12 font-korean">"{t('test_title')}"</h2>
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl relative hover:-translate-y-1 transition-transform duration-300">
+            {/* Testimonial 1 */}
+            <div className="flex flex-col h-full bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl relative hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -top-3 left-6 text-4xl text-zinc-700">❝</div>
-                <p className="text-zinc-300 font-korean text-lg mb-6 pt-4 leading-relaxed">"{t('test_1_text')}"</p>
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center text-xl">👩</div>
-                    <div><div className="font-bold text-white text-sm font-korean">{t('test_1_name')}</div><div className="text-xs text-orange-500 font-bold">Verified User</div></div>
+                <p className="text-zinc-300 font-korean text-lg mb-8 pt-4 leading-relaxed">"{t('test_1_text')}"</p>
+                <div className="mt-auto flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-orange-200 flex items-center justify-center text-2xl shrink-0 overflow-hidden shadow-inner">👩</div>
+                    <div className="flex flex-col justify-center">
+                        <div className="font-bold text-white text-base font-korean leading-none mb-1">{t('test_1_name')}</div>
+                        <div className="text-[10px] text-orange-500 font-bold uppercase tracking-widest">Verified User</div>
+                    </div>
                 </div>
             </div>
-            <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl relative hover:-translate-y-1 transition-transform duration-300">
+            {/* Testimonial 2 */}
+            <div className="flex flex-col h-full bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl relative hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -top-3 left-6 text-4xl text-zinc-700">❝</div>
-                <p className="text-zinc-300 font-korean text-lg mb-6 pt-4 leading-relaxed">"{t('test_2_text')}"</p>
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-xl">👨</div>
-                    <div><div className="font-bold text-white text-sm font-korean">{t('test_2_name')}</div><div className="text-xs text-orange-500 font-bold">Verified User</div></div>
+                <p className="text-zinc-300 font-korean text-lg mb-8 pt-4 leading-relaxed">"{t('test_2_text')}"</p>
+                <div className="mt-auto flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center text-2xl shrink-0 overflow-hidden shadow-inner">👨</div>
+                    <div className="flex flex-col justify-center">
+                        <div className="font-bold text-white text-base font-korean leading-none mb-1">{t('test_2_name')}</div>
+                        <div className="text-[10px] text-orange-500 font-bold uppercase tracking-widest">Verified User</div>
+                    </div>
                 </div>
             </div>
-            <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl relative hover:-translate-y-1 transition-transform duration-300">
+            {/* Testimonial 3 */}
+            <div className="flex flex-col h-full bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl relative hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -top-3 left-6 text-4xl text-zinc-700">❝</div>
-                <p className="text-zinc-300 font-korean text-lg mb-6 pt-4 leading-relaxed">"{t('test_3_text')}"</p>
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-xl">👩</div>
-                    <div><div className="font-bold text-white text-sm font-korean">{t('test_3_name')}</div><div className="text-xs text-orange-500 font-bold">Verified User</div></div>
+                <p className="text-zinc-300 font-korean text-lg mb-8 pt-4 leading-relaxed">"{t('test_3_text')}"</p>
+                <div className="mt-auto flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-purple-200 flex items-center justify-center text-2xl shrink-0 overflow-hidden shadow-inner">👩</div>
+                    <div className="flex flex-col justify-center">
+                        <div className="font-bold text-white text-base font-korean leading-none mb-1">{t('test_3_name')}</div>
+                        <div className="text-[10px] text-orange-500 font-bold uppercase tracking-widest">Verified User</div>
+                    </div>
                 </div>
             </div>
          </div>
@@ -316,11 +328,11 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
               </div>
               <div className="hidden md:flex justify-end items-center relative h-[600px]">
                  <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-[120px] animate-pulse"></div>
-                 {/* Mascot size massively boosted and origin refined for professional 3D overflow */}
+                 {/* Mascot with enhanced scaling and depth for world-class hero section */}
                  <img 
                     src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png" 
                     alt="Chekki Mascot" 
-                    className="w-full max-w-[850px] h-full object-contain drop-shadow-[0_0_150px_rgba(249,115,22,0.6)] animate-float scale-[8.5] z-10 origin-bottom-right transition-transform translate-x-20"
+                    className="w-full max-w-[850px] h-full object-contain drop-shadow-[0_40px_100px_rgba(249,115,22,0.6)] animate-float scale-[8.5] z-10 origin-bottom-right transition-transform translate-x-12"
                  />
               </div>
             </div>

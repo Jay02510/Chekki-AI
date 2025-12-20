@@ -11,6 +11,7 @@ import { SplashScreen } from './components/SplashScreen';
 import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
 import { RewardOverlay } from './components/RewardOverlay';
+import { ChekkiMascot } from './components/Icons';
 import { analyzeWorksheet } from './services/geminiService';
 import { AnalysisState, WorksheetAnalysis, WorkspaceMode } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -132,15 +133,15 @@ function AppContent() {
 
         {analysisState.status === 'error' && (
            <div className="flex flex-col items-center justify-center min-h-[50vh] text-center p-6 animate-fade-in pt-24">
-             <div className="w-24 h-24 bg-red-900/20 rounded-full flex items-center justify-center mb-6 border border-red-500/30 relative">
-               <span className="text-5xl">👓</span>
-               <span className="absolute top-0 right-0 text-3xl">⚠️</span>
+             <div className="w-32 h-32 md:w-40 md:h-40 bg-red-950/20 rounded-full flex items-center justify-center mb-10 border border-red-500/30 relative">
+               <ChekkiMascot className="w-20 h-20 md:w-28 md:h-28" mood="thinking" />
+               <div className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-lg animate-bounce">!</div>
              </div>
              <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('error_title')}</h3>
              <p className="text-zinc-400 mb-8 max-w-md mx-auto font-korean leading-relaxed">
                {analysisState.errorMessage}
              </p>
-             <button onClick={handleReset} className="bg-zinc-800 text-white px-8 py-3 rounded-xl font-bold hover:bg-zinc-700 transition-colors border border-zinc-700 font-korean">
+             <button onClick={handleReset} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all transform active:scale-95 font-korean shadow-lg shadow-white/10">
                {t('btn_retake')}
              </button>
            </div>
