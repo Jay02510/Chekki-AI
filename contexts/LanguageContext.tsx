@@ -19,7 +19,7 @@ const translations = {
     pro_plan: "Pro Magic 🚀",
     
     hero_title: "English Homework?\nJust Snap a Photo.",
-    hero_title_night: "Up Late? You're Great.\nLet's Finish Homework.",
+    hero_title_night: "Up late?\nLet's finish this homework.",
     hero_desc: "Don't stress over tricky English questions anymore. Get warm, easy-to-understand explanations and clear answers instantly. Help your child grow with confidence!",
     hero_desc_night: "Late night study session? No problem. Chekki is here to help you wrap up the day so you can finally get some well-deserved rest.",
     hero_badge: "Mom's Secret Helper",
@@ -31,7 +31,7 @@ const translations = {
     drop_subtitle: "Tap here to pick a photo",
     supported_formats: "JPG, PNG, WEBP, HEIC are all great! • Max: 10MB",
     
-    beta_banner: "✨ Chekki is in Beta! Tap here to share your ideas and feedback.",
+    beta_banner: "✨ You’ve worked hard today. Chekki will take it from here.",
     
     how_title: "How Chekki Helps",
     how_step1: "Take a Photo",
@@ -138,7 +138,7 @@ const translations = {
     pro_plan: "마법 프로 플랜 🚀",
 
     hero_title: "우리 아이 영어 실력,\n한 단계 더 높이기",
-    hero_title_night: "늦은 밤 열공하는 엄마,\n정말 최고예요! 얼른 끝내요.",
+    hero_title_night: "늦은 밤 아이 숙제,\n얼른 끝내고 같이 쉬어요.",
     hero_desc: "어려운 영어 문제로 고민하지 마세요. 따뜻하고 이해하기 쉬운 설명과 정답을 즉시 확인하고, 우리 아이에게 자신 있게 가르쳐주세요.",
     hero_desc_night: "이 시간까지 우리 아이를 위해 애쓰시는 어머님, 정말 대단하세요! 채키와 함께 얼른 숙제 마무리하고 푹 쉬세요.",
     hero_badge: "엄마만의 비밀 도우미",
@@ -150,7 +150,7 @@ const translations = {
     drop_subtitle: "여기를 눌러 앨범에서 골라주세요",
     supported_formats: "JPG, PNG, WEBP, HEIC 모두 좋아요! • 최대 10MB",
     
-    beta_banner: "✨ 베타 버전 출시! 채키가 더 똑똑해질 수 있게 피드백을 들려주세요.",
+    beta_banner: "✨ 육아퇴근 5분 전! 야간 숙제는 채키에게 맡기세요.",
 
     how_title: "채키는 이렇게 도와드려요",
     how_step1: "사진 찍기",
@@ -166,7 +166,7 @@ const translations = {
     test_2_name: "지우 아버님",
     test_2_text: "설명이 정말 쉬워요. 단순히 답만 주는 게 아니라 아이 눈높이에서 설명해줄 수 있어 정말 좋습니다.",
     test_3_name: "서연 어머님",
-    test_3_text: "연습문제 만들어주는 기능이 최고예요. 아이가 어려워하는 것만 쏙쏙 골라 복습시킬 수 있거든요.",
+    test_3_text: "연습문제 만들어주는 기능이 최고예요. 아이가 어려워하는 것만 쏙쏙 골라 복습시킬 수 이거든요.",
 
     onb_1_title: "어려운 건 제가 할게요!",
     onb_1_desc: "정답은 제가 찾을게요. 엄마는 아이에게 따뜻한 칭찬과 응원만 듬뿍 해주세요.",

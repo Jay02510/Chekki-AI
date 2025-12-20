@@ -181,7 +181,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <img 
                   src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                   alt="Chekki Hero" 
-                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform ${isNight ? 'scale-[1.4] lg:scale-[1.7]' : 'scale-100 lg:scale-110'}`}
+                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform ${isNight ? 'scale-[1.5] lg:scale-[1.75]' : 'scale-100 lg:scale-110'}`}
                 />
             </div>
         </div>
@@ -318,7 +318,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                    <img 
                     src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                     alt="Chekki Mascot" 
-                    className={`w-[110%] h-[110%] object-contain filter brightness-110 drop-shadow-[0_15px_40px_rgba(0,0,0,0.3)] animate-float ${isNight ? 'scale-[1.4] lg:scale-[1.7]' : ''}`} 
+                    className={`w-[110%] h-[110%] object-contain filter brightness-110 drop-shadow-[0_15px_40px_rgba(0,0,0,0.3)] animate-float ${isNight ? 'scale-[1.5] lg:scale-[1.75]' : ''}`} 
                    />
                 </div>
               </div>
