@@ -117,6 +117,7 @@ const translations = {
     // Errors
     error_title: "Oops! Let's try again.",
     btn_retry: "Try with Smart AI",
+    btn_scan_again_simple: "Scan Again",
     btn_retake: "Take New Photo",
     err_confirm: "Are you sure? Current results will be lost.",
     err_network: "Connection is weak. Let's try again!",
@@ -236,6 +237,7 @@ const translations = {
     // Errors
     error_title: "앗! 조금만 더 잘 보여주세요.",
     btn_retry: "똑똑한 AI로 다시 시도",
+    btn_scan_again_simple: "다시 스캔하기",
     btn_retake: "새로 찍기",
     err_confirm: "정말 취소하시겠어요? 현재 결과가 사라집니다.",
     err_network: "연결이 잠시 끊겼나 봐요. 다시 시도해 볼까요?",

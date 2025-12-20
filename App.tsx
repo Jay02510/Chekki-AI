@@ -34,7 +34,6 @@ function AppContent() {
   const [viewMode, setViewMode] = useState<WorkspaceMode>('overlay');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [lastImageData, setLastImageData] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (analysisState.status === 'idle') {
@@ -62,9 +61,6 @@ function AppContent() {
     if (!isRetryAttempt) {
       const canScan = await incrementScan();
       if (!canScan) return; 
-      setRetryCount(0);
-    } else {
-      setRetryCount(prev => prev + 1);
     }
 
     setLastImageData(base64Data);
@@ -72,6 +68,8 @@ function AppContent() {
     setAnalysisState({ status: 'analyzing', data: null, originalImage: displayUrl, errorMessage: null, showReward: false });
 
     try {
+      // Logic from user: try Flash Lite first, then Flash 3 on retry. 
+      // The analyzeWorksheet service handles the model switching logic based on isRetryAttempt.
       const result: any = await analyzeWorksheet(base64Data, isRetryAttempt);
       
       if (result.error) {
@@ -104,14 +102,24 @@ function AppContent() {
           timestamp: Date.now()
         }));
       }
-    } catch (error) {
-      setAnalysisState({ status: 'error', data: null, originalImage: null, errorMessage: t('err_network'), showReward: false });
+    } catch (error: any) {
+      console.error("[App] Analysis failed:", error);
+      setAnalysisState({ 
+        status: 'error', 
+        data: null, 
+        originalImage: null, 
+        errorMessage: error.message === "API Key is missing. Please check your environment variables." ? error.message : t('err_network'), 
+        showReward: false 
+      });
     }
   };
 
-  const handleRetry = () => {
+  const handleScanAgain = () => {
     if (lastImageData) {
+      // Triggering the 'retry' which uses the smarter model as per user requirement.
       handleImageSelected(lastImageData, true);
+    } else {
+      handleReset();
     }
   };
 
@@ -121,7 +129,6 @@ function AppContent() {
     }
     setAnalysisState({ status: 'idle', data: null, originalImage: null, errorMessage: null, showReward: false });
     setLastImageData(null);
-    setRetryCount(0);
     localStorage.removeItem(SESSION_KEY);
   };
 
@@ -154,8 +161,8 @@ function AppContent() {
                {analysisState.errorMessage}
              </p>
              <div className="flex flex-col sm:flex-row gap-4">
-               <button onClick={handleRetry} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all transform active:scale-95 font-korean shadow-lg">
-                 {t('btn_retry')}
+               <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all transform active:scale-95 font-korean shadow-lg">
+                 {t('btn_scan_again_simple')}
                </button>
                <button onClick={handleReset} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all transform active:scale-95 font-korean shadow-lg">
                  {t('btn_retake')}
