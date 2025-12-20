@@ -316,10 +316,11 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
               </div>
               <div className="hidden md:flex justify-end items-center relative h-[600px]">
                  <div className="absolute inset-0 bg-orange-500/10 rounded-full blur-[100px] animate-pulse"></div>
+                 {/* Mascot size increased to scale-2.0 and centered better for a heroic exit feel */}
                  <img 
                     src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png" 
                     alt="Chekki Mascot" 
-                    className="w-full max-w-[850px] h-full object-contain drop-shadow-[0_0_80px_rgba(249,115,22,0.4)] animate-float scale-[1.6] z-10 origin-center"
+                    className="w-full max-w-[850px] h-full object-contain drop-shadow-[0_0_100px_rgba(249,115,22,0.5)] animate-float scale-[2.0] z-10 origin-center transition-transform"
                  />
               </div>
             </div>
