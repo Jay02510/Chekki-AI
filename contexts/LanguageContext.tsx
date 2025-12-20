@@ -19,9 +19,9 @@ const translations = {
     pro_plan: "Pro Magic 🚀",
     
     hero_title: "English Homework?\nJust Snap a Photo.",
-    hero_title_night: "Night Owl Mom? You're a Superhero.\nLet's finish this homework.",
+    hero_title_night: "Up Late? You're Great.\nLet's Finish Homework.",
     hero_desc: "Don't stress over tricky English questions anymore. Get warm, easy-to-understand explanations and clear answers instantly. Help your child grow with confidence!",
-    hero_desc_night: "It's late, but you're still going—that's amazing. Chekki is wide awake and ready to help you wrap up this page so you can finally get some rest.",
+    hero_desc_night: "Late night study session? No problem. Chekki is here to help you wrap up the day so you can finally get some well-deserved rest.",
     hero_badge: "Mom's Secret Helper",
     hero_cta_title: "Happy Homework,",
     hero_cta_desc: "Join thousands of moms who've turned homework time into a peaceful, happy bonding moment.",
@@ -31,7 +31,7 @@ const translations = {
     drop_subtitle: "Tap here to pick a photo",
     supported_formats: "JPG, PNG, WEBP, HEIC are all great! • Max: 10MB",
     
-    beta_banner: "🌿 We're in Beta! Share your thoughts to help Chekki grow.",
+    beta_banner: "✨ Chekki is in Beta! Tap here to share your ideas and feedback.",
     
     how_title: "How Chekki Helps",
     how_step1: "Take a Photo",
@@ -138,9 +138,9 @@ const translations = {
     pro_plan: "마법 프로 플랜 🚀",
 
     hero_title: "우리 아이 영어 실력,\n한 단계 더 높이기",
-    hero_title_night: "밤늦게까지 정말 고생 많으셨어요.\n우리 같이 얼른 숙제 끝내고 쉬어요!",
+    hero_title_night: "늦은 밤 열공하는 엄마,\n정말 최고예요! 얼른 끝내요.",
     hero_desc: "어려운 영어 문제로 고민하지 마세요. 따뜻하고 이해하기 쉬운 설명과 정답을 즉시 확인하고, 우리 아이에게 자신 있게 가르쳐주세요.",
-    hero_desc_night: "늦은 시간까지 정말 대단하세요! 모두가 잠든 이 시간에도 채키는 깨어있어요. 얼른 숙제 마치고 엄마도 푹 쉬실 수 있게 제가 도와드릴게요.",
+    hero_desc_night: "이 시간까지 우리 아이를 위해 애쓰시는 어머님, 정말 대단하세요! 채키와 함께 얼른 숙제 마무리하고 푹 쉬세요.",
     hero_badge: "엄마만의 비밀 도우미",
     hero_cta_title: "행복한 숙제 시간,",
     hero_cta_desc: "숙제 시간이 스트레스가 아닌, 아이와 함께 웃으며 성장하는 따뜻한 시간이 됩니다.",
@@ -150,7 +150,7 @@ const translations = {
     drop_subtitle: "여기를 눌러 앨범에서 골라주세요",
     supported_formats: "JPG, PNG, WEBP, HEIC 모두 좋아요! • 최대 10MB",
     
-    beta_banner: "🌿 베타 버전이에요! 채키가 더 똑똑해질 수 있게 소중한 의견을 들려주세요.",
+    beta_banner: "✨ 베타 버전 출시! 채키가 더 똑똑해질 수 있게 피드백을 들려주세요.",
 
     how_title: "채키는 이렇게 도와드려요",
     how_step1: "사진 찍기",
