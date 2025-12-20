@@ -19,7 +19,9 @@ const translations = {
     pro_plan: "Pro Magic 🚀",
     
     hero_title: "English Homework?\nJust Snap a Photo.",
+    hero_title_night: "Moonlight Magic for\nMidnight Moms.",
     hero_desc: "Don't stress over tricky English questions anymore. Get warm, easy-to-understand explanations and clear answers instantly. Help your child grow with confidence!",
+    hero_desc_night: "Late night study session? No problem. Chekki's owl-mode is activated and ready to help you grade those tricky pages while the world sleeps.",
     hero_badge: "Mom's Secret Helper",
     hero_cta_title: "Happy Homework,",
     hero_cta_desc: "Join thousands of moms who've turned homework time into a peaceful, happy bonding moment.",
@@ -134,7 +136,9 @@ const translations = {
     pro_plan: "마법 프로 플랜 🚀",
 
     hero_title: "우리 아이 영어 실력,\n한 단계 더 높이기",
+    hero_title_night: "모두가 잠든 밤,\n채키는 아직 열일 중!",
     hero_desc: "어려운 영어 문제로 고민하지 마세요. 따뜻하고 이해하기 쉬운 설명과 정답을 즉시 확인하고, 우리 아이에게 자신 있게 가르쳐주세요.",
+    hero_desc_night: "늦은 밤 아이 숙제를 챙기느라 고생 많으셨어요. 모두가 잠든 이 시간에도 채키는 깨어서 어머님의 든든한 파트너가 되어 드릴게요.",
     hero_badge: "엄마만의 비밀 도우미",
     hero_cta_title: "행복한 숙제 시간,",
     hero_cta_desc: "숙제 시간이 스트레스가 아닌, 아이와 함께 웃으며 성장하는 따뜻한 시간이 됩니다.",
