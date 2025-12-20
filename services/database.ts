@@ -24,10 +24,9 @@ const firebaseConfig = {
   appId: "1:123535525914:web:decc3f5b3e3ffee4a0a9a3"
 };
 
-// Safe initialization for hot-reloading and ESM environments
+// Unified initialization
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Exports must be initialized from the same 'app' instance
 export const auth = getAuth(app);
 export const dbInstance = getFirestore(app);
 
