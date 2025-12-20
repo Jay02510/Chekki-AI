@@ -28,44 +28,38 @@ export default async function handler(req: any, res: any) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const apiKey = process.env.API_KEY; 
     
-    if (!apiKey) {
-      console.error("[Backend Error]: API_KEY environment variable is missing.");
-      return res.status(500).json({ error: "ANALYSIS_FAILED" });
-    }
-
-    const ai = new GoogleGenAI({ apiKey });
+    // Create the GoogleGenAI instance with the API key from environment variables.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const { task, image, isRetry, originalItems } = body;
 
     if (task === 'generate') {
+      // Use gemini-3-flash-preview for standard text generation tasks.
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: [{ text: `Original items: ${JSON.stringify(originalItems)}. Create 3-5 similar ones.` }],
+        contents: `Original items: ${JSON.stringify(originalItems)}. Create 3-5 similar ones.`,
         config: {
           systemInstruction: SYSTEM_PROMPT_GENERATE,
           responseMimeType: "application/json",
           temperature: 0.7,
         },
       });
+      // response.text is a property, not a method.
       return res.status(200).json(JSON.parse(response.text || "[]"));
     }
 
-    // Default: Analyze task
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
     const model = isRetry ? "gemini-3-pro-preview" : "gemini-3-flash-preview";
 
+    // contents must be an object with parts for multi-part queries (image + text).
     const response = await ai.models.generateContent({
       model: model,
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { inlineData: { mimeType: "image/jpeg", data: image } },
-            { text: "Analyze this worksheet thoroughly. Solve everything." },
-          ],
-        },
-      ],
+      contents: {
+        parts: [
+          { inlineData: { mimeType: "image/jpeg", data: image } },
+          { text: "Analyze this worksheet thoroughly and solve every item." },
+        ],
+      },
       config: {
         systemInstruction: SYSTEM_PROMPT_ANALYZE,
         responseMimeType: "application/json",
@@ -73,8 +67,11 @@ export default async function handler(req: any, res: any) {
       },
     });
 
-    if (!response.text) throw new Error("EMPTY_RESPONSE");
-    return res.status(200).json(JSON.parse(response.text));
+    // response.text property directly returns the extracted string.
+    const outputText = response.text;
+    if (!outputText) throw new Error("EMPTY_RESPONSE");
+    
+    return res.status(200).json(JSON.parse(outputText));
 
   } catch (error: any) {
     console.error("[Backend Error]:", error.message);

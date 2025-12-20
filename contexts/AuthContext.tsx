@@ -2,13 +2,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { auth, db } from '../services/database';
+// Added 'type' for User and ensured correct named exports for Firebase v9
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut,
   deleteUser,
-  User
+  type User
 } from 'firebase/auth';
 
 interface AuthContextType {
@@ -41,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
+    // onAuthStateChanged is a named export from 'firebase/auth' in v9
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
@@ -55,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (name: string, email: string, pass: string) => {
+    // createUserWithEmailAndPassword is a named export from 'firebase/auth' in v9
     const res = await createUserWithEmailAndPassword(auth, email, pass);
     const newProfile: UserProfile = {
       name,
@@ -69,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, pass: string) => {
+    // signInWithEmailAndPassword is a named export from 'firebase/auth' in v9
     await signInWithEmailAndPassword(auth, email, pass);
     setShowLoginModal(false);
   };
@@ -85,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteAccount = async () => {
     if (!firebaseUser) return;
     await db.updateUser(firebaseUser.uid, { name: 'Deleted User' }); // Soft delete in DB for records
+    // deleteUser is a named export from 'firebase/auth' in v9
     await deleteUser(firebaseUser);
     setUserProfile(null);
     setFirebaseUser(null);

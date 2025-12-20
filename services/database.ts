@@ -1,5 +1,6 @@
 
-import { initializeApp } from "firebase/app";
+// initializeApp is the primary entry point for Firebase v9+
+import { initializeApp } from 'firebase/app';
 import { 
   getFirestore, 
   doc, 
@@ -12,11 +13,11 @@ import {
   getDocs,
   deleteDoc,
   addDoc,
-  Firestore
+  type Firestore
 } from 'firebase/firestore';
 import { 
   getAuth, 
-  Auth
+  type Auth
 } from 'firebase/auth';
 import { UserProfile } from '../types';
 
