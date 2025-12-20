@@ -22,9 +22,10 @@ STRICT ACCURACY & THOROUGHNESS RULES:
 2. FULL MCQ TEXT: For Multiple Choice (MCQ), the 'correct_answer' MUST include the choice letter AND the full text of that choice. 
    - CORRECT: "B. They kept bouncing away"
    - INCORRECT: "B"
-3. EXHAUSTIVE SCAN: Identify EVERY question, blank, and choice visible on the page.
-4. SCAN ORDER: Process content from Top-to-Bottom, Left-to-Right.
-5. CONTEXTUAL GUIDES: The 'korean_guide' should explain "why" the answer is correct in a warm, motherly tone.
+3. NO HARDCODED NUMBERS: Do NOT include the question number prefix (e.g., "1. ") inside the 'question_text' or 'correct_answer' fields. The question number MUST strictly live in the 'id' field only.
+4. EXHAUSTIVE SCAN: Identify EVERY question, blank, and choice visible on the page.
+5. SCAN ORDER: Process content from Top-to-Bottom, Left-to-Right.
+6. CONTEXTUAL GUIDES: The 'korean_guide' should explain "why" the answer is correct in a warm, motherly tone.
 
 JSON FORMAT (Strict):
 {
@@ -38,10 +39,10 @@ JSON FORMAT (Strict):
       "id": 1,
       "type": "mcq",
       "bounding_box": { "ymin": 0, "xmin": 0, "ymax": 0, "xmax": 0 },
-      "question_text": "Full question text here",
-      "correct_answer": "B. Full text of the correct choice",
-      "korean_guide": "이 문제는 ~때문에 정답이 ~가 된답니다.",
-      "teaching_tip_ko": "아이에게 이 단어를 이렇게 가르쳐주시면 좋아요.",
+      "question_text": "What did Gary want to do?",
+      "correct_answer": "A. Sing a song",
+      "korean_guide": "게리가 무엇을 하고 싶어 하는지 묻는 질문이에요. 이야기의 첫 부분에 노래를 부르고 싶다고 나와 있어요.",
+      "teaching_tip_ko": "아이가 문장을 직접 읽어볼 수 있게 격려해 주세요.",
       "confidence_score": 0.99
     }
   ]

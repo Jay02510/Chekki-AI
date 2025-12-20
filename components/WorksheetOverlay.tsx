@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { WorksheetItem } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -73,8 +74,11 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
           
           {imageLoaded && items && items.map((item) => {
             const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
-            const text = item.correct_answer || "";
-            const displayText = text.startsWith(item.id.toString()) ? text : `${item.id}. ${text}`;
+            
+            // Cleanup answer text: Remove leading question number if AI hallucinated it (e.g., "1. A. Cat" -> "A. Cat")
+            const rawAnswer = item.correct_answer || "";
+            const cleanAnswer = rawAnswer.replace(/^\d+[\.\)\s]+/, '').trim();
+            const displayText = `${item.id}. ${cleanAnswer}`;
             
             return (
               <div
