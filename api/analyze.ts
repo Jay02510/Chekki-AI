@@ -5,33 +5,22 @@ export const config = {
   maxDuration: 60, 
 };
 
-const SYSTEM_PROMPT = `
+const SYSTEM_PROMPT_ANALYZE = `
 You are Homework Helper AI, a supportive assistant for Korean parents.
-
-GOAL:
-Analyze the worksheet image. Solve ALL visible items (questions, fill-in-the-blanks).
-
+GOAL: Analyze the worksheet image. Solve ALL visible items.
 RULES:
 1. IDENTIFY ALL: Scan every question on the page.
 2. LABELLING: Use the labels/numbers from the page.
-3. OUTPUT: Provide the correct answer and a warm, simple Korean explanation ('korean_guide') for the parent.
-4. BOXES: Provide 'bounding_box' [ymin, xmin, ymax, xmax] for the answer area.
+3. OUTPUT: Provide correct answer and warm Korean 'korean_guide' for the parent.
+4. BOXES: Provide 'bounding_box' [ymin, xmin, ymax, xmax].
+FORMAT: JSON { "worksheet_summary": {...}, "items": [...] }
+`;
 
-FORMAT:
-{
-  "worksheet_summary": { "title_en": "Title", "title_ko": "제목", "overview_ko": "다정한 요약" },
-  "items": [
-    {
-      "id": 1,
-      "type": "fill_in",
-      "bounding_box": { "ymin": 0, "xmin": 0, "ymax": 0, "xmax": 0 },
-      "question_text": "text",
-      "correct_answer": "answer",
-      "korean_guide": "따뜻한 설명",
-      "teaching_tip_ko": "팁"
-    }
-  ]
-}
+const SYSTEM_PROMPT_GENERATE = `
+You are a creative educational content creator.
+GOAL: Based on provided questions, generate 3-5 high-quality similar practice questions for a child.
+RULES: Use simple language suitable for a kindergarten/elementary student. 
+FORMAT: Return a JSON array of items following the WorksheetItem structure.
 `;
 
 export default async function handler(req: any, res: any) {
@@ -39,46 +28,56 @@ export default async function handler(req: any, res: any) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const apiKey = process.env.API_KEY || process.env.GEMINI_API; 
+    const apiKey = process.env.API_KEY; 
     
     if (!apiKey) {
-      return res.status(500).json({ error: "MISSING_API_KEY" });
+      console.error("[Backend Error]: API_KEY environment variable is missing.");
+      return res.status(500).json({ error: "ANALYSIS_FAILED" });
     }
 
     const ai = new GoogleGenAI({ apiKey });
+    const { task, image, isRetry, originalItems } = body;
 
-    const { image } = body;
+    if (task === 'generate') {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [{ text: `Original items: ${JSON.stringify(originalItems)}. Create 3-5 similar ones.` }],
+        config: {
+          systemInstruction: SYSTEM_PROMPT_GENERATE,
+          responseMimeType: "application/json",
+          temperature: 0.7,
+        },
+      });
+      return res.status(200).json(JSON.parse(response.text || "[]"));
+    }
+
+    // Default: Analyze task
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
+    const model = isRetry ? "gemini-3-pro-preview" : "gemini-3-flash-preview";
 
-    // Using gemini-3-flash-preview for the best speed/quality balance
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: model,
       contents: [
         {
           role: "user",
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: image } },
-            { text: "Solve this worksheet quickly. Provide JSON output with warm Korean guides for a mom." },
+            { text: "Analyze this worksheet thoroughly. Solve everything." },
           ],
         },
       ],
       config: {
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: SYSTEM_PROMPT_ANALYZE,
         responseMimeType: "application/json",
         temperature: 0.1, 
       },
     });
 
-    if (!response.text) {
-        throw new Error("EMPTY_RESPONSE_FROM_MODEL");
-    }
-
+    if (!response.text) throw new Error("EMPTY_RESPONSE");
     return res.status(200).json(JSON.parse(response.text));
+
   } catch (error: any) {
-    console.error("[API Error]:", error);
-    return res.status(500).json({ 
-      error: "ANALYSIS_FAILED", 
-      message: error.message || "Unknown error occurred" 
-    });
+    console.error("[Backend Error]:", error.message);
+    return res.status(500).json({ error: "ANALYSIS_FAILED" });
   }
 }

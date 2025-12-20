@@ -68,18 +68,10 @@ function AppContent() {
     setAnalysisState({ status: 'analyzing', data: null, originalImage: displayUrl, errorMessage: null, showReward: false });
 
     try {
-      // Logic from user: try Flash Lite first, then Flash 3 on retry. 
-      // The analyzeWorksheet service handles the model switching logic based on isRetryAttempt.
       const result: any = await analyzeWorksheet(base64Data, isRetryAttempt);
       
-      if (result.error) {
-         setAnalysisState({
-            status: 'error',
-            data: null,
-            originalImage: null,
-            errorMessage: t(result.message_ko || 'err_network'),
-            showReward: false
-         });
+      if (result.error === "ANALYSIS_FAILED") {
+         throw new Error("API_ERROR");
       } else {
         const formattedData: WorksheetAnalysis = {
             worksheet_summary: result.worksheet_summary || { title_en: "Worksheet", title_ko: "워크시트" },
@@ -103,12 +95,13 @@ function AppContent() {
         }));
       }
     } catch (error: any) {
-      console.error("[App] Analysis failed:", error);
+      console.error("[App] Analysis process failed. Check Vercel logs and API_KEY environment variable.");
+      // Ensure user NEVER sees technical setup errors like "Missing API Key"
       setAnalysisState({ 
         status: 'error', 
         data: null, 
         originalImage: null, 
-        errorMessage: error.message === "API Key is missing. Please check your environment variables." ? error.message : t('err_network'), 
+        errorMessage: t('err_network'), 
         showReward: false 
       });
     }
@@ -116,7 +109,6 @@ function AppContent() {
 
   const handleScanAgain = () => {
     if (lastImageData) {
-      // Triggering the 'retry' which uses the smarter model as per user requirement.
       handleImageSelected(lastImageData, true);
     } else {
       handleReset();
