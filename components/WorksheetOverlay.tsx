@@ -34,7 +34,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
   const isMobile = useIsMobile();
 
   // Answer Scaling State
-  const [globalStickerScale, setGlobalStickerScale] = useState(1.0);
+  const [globalStickerScale, setGlobalStickerScale] = useState(1.1); // Default slightly larger for visibility
 
   // Viewport State
   const [scale, setScale] = useState(1);
@@ -76,15 +76,23 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
     const box = stickers[id] || originalBox;
     if (!box) return { display: 'none' };
     
-    // Apply global scale to the width/height of the box
-    const width = ((box.xmax - box.xmin) / 1000) * 100 * globalStickerScale;
-    const height = ((box.ymax - box.ymin) / 1000) * 100 * globalStickerScale;
+    // Width and Height are based on bounding box percentage 0-1000
+    const w = ((box.xmax - box.xmin) / 1000) * 100;
+    const h = ((box.ymax - box.ymin) / 1000) * 100;
+
+    // Center point of the original box
+    const centerX = ((box.xmin + box.xmax) / 2 / 1000) * 100;
+    const centerY = ((box.ymin + box.ymax) / 2 / 1000) * 100;
+
+    // Apply global scaling relative to center
+    const scaledWidth = w * globalStickerScale;
+    const scaledHeight = h * globalStickerScale;
 
     return {
-      top: `${(box.ymin / 1000) * 100}%`,
-      left: `${(box.xmin / 1000) * 100}%`,
-      width: `${width}%`,
-      height: `${height}%`,
+      top: `${centerY - scaledHeight/2}%`,
+      left: `${centerX - scaledWidth/2}%`,
+      width: `${scaledWidth}%`,
+      height: `${scaledHeight}%`,
     };
   };
 
@@ -96,10 +104,10 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
         if (/[il1\.,':;!|]/.test(c)) width += 5;
         else if (/[mwMW]/.test(c)) width += 13;
         else if (/[A-Z]/.test(c)) width += 10;
-        else if (/\s/.test(c)) width += 4;
-        else width += 8;
+        else if (/\s/.test(c)) width += 5;
+        else width += 9;
     }
-    return Math.max(width + 16, 24); 
+    return Math.max(width + 24, 40); 
   };
 
   const handleStart = (e: React.MouseEvent | React.TouchEvent, operationType: 'drag' | 'resize' | 'pan', id?: number) => {
@@ -189,7 +197,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
     if ('speechSynthesis' in window && !editingId) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      utterance.rate = 0.9;
+      utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -218,12 +226,12 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
 
             <div className="flex items-center gap-4">
                 {/* Answer Size Controls */}
-                <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-xl border border-white/5">
+                <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-xl border border-white/10">
                     <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hidden md:block">Answer Size</span>
                     <div className="flex items-center gap-1">
-                        <button onClick={() => setGlobalStickerScale(s => Math.max(0.5, s - 0.1))} className="w-7 h-7 flex items-center justify-center bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white transition-colors">-</button>
+                        <button onClick={() => setGlobalStickerScale(s => Math.max(0.5, s - 0.1))} className="w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white transition-colors text-lg font-bold">-</button>
                         <span className="text-xs font-mono w-10 text-center text-orange-400 font-bold">{Math.round(globalStickerScale * 100)}%</span>
-                        <button onClick={() => setGlobalStickerScale(s => Math.min(2.0, s + 0.1))} className="w-7 h-7 flex items-center justify-center bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white transition-colors">+</button>
+                        <button onClick={() => setGlobalStickerScale(s => Math.min(2.5, s + 0.1))} className="w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white transition-colors text-lg font-bold">+</button>
                     </div>
                 </div>
 
@@ -233,26 +241,18 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
                         onMouseUp={handlePeekEnd}
                         onTouchStart={handlePeekStart}
                         onTouchEnd={handlePeekEnd}
-                        className="w-9 h-9 flex items-center justify-center bg-indigo-600 rounded-xl hover:bg-indigo-500 text-white shadow-lg active:scale-90 transition-transform"
+                        className="w-10 h-10 flex items-center justify-center bg-indigo-600 rounded-xl hover:bg-indigo-500 text-white shadow-lg active:scale-90 transition-transform text-lg"
                         title="Hold to Peek"
                     >
                         👁️
                     </button>
-                    {isMobile && (
-                        <div className="flex items-center gap-1">
-                            <button onClick={() => setScale(s => Math.max(0.5, s - 0.1))} className="w-9 h-9 flex items-center justify-center bg-zinc-800 rounded-xl hover:bg-zinc-700 text-white font-bold">-</button>
-                            <button onClick={() => setScale(s => Math.min(3, s + 0.1))} className="w-9 h-9 flex items-center justify-center bg-zinc-800 rounded-xl hover:bg-zinc-700 text-white font-bold">+</button>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
 
-        <div className={`w-full flex justify-center bg-zinc-950 rounded-2xl border border-zinc-800 relative ${
-          !isMobile ? 'overflow-y-auto overflow-x-hidden h-full block' : `overflow-hidden ${className || 'h-[600px]'}`
-        }`}>
+        <div className={`w-full flex justify-center bg-zinc-950 rounded-2xl border border-zinc-800 relative overflow-hidden ${className || 'h-[600px]'}`}>
             <div 
-                className={!isMobile ? "relative w-full h-auto" : "relative w-full h-full"}
+                className="relative w-full h-full"
                 onMouseDown={(e) => handleStart(e, 'pan')}
                 onTouchStart={(e) => handleStart(e, 'pan')}
                 style={{ cursor: mode === 'view' ? 'grab' : 'default' }}
@@ -260,7 +260,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
                 <div 
                     ref={containerRef}
                     className="relative w-full transition-transform duration-75 ease-out origin-top-left"
-                    style={!isMobile ? { width: '100%', position: 'relative' } : { 
+                    style={{ 
                         transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
                         width: '100%' 
                     }}
@@ -274,18 +274,20 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
                     />
                     
                     {imageLoaded && items.map((item, index) => {
-                        const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId || (item.group_id && items.find(i => i.id === focusedId)?.group_id === item.group_id);
+                        const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
                         const opacityClass = isPeeking ? 'opacity-0' : (isFocused ? 'opacity-100' : 'opacity-30 grayscale');
                         
-                        const isMcq = item.type === 'mcq';
+                        const isMcq = item.type === 'mcq' || item.type === 'MCQ';
                         const stickerData = stickers[item.id];
                         const rawText = stickerData?.text || item.correct_answer;
-                        const displayText = `${index + 1}. ${rawText}`;
+                        
+                        // Use actual item ID from AI if it matches numbering, otherwise fallback to index
+                        const displayText = rawText.match(/^\d+/) ? rawText : `${item.id}. ${rawText}`;
                         const isEditing = editingId === item.id;
                         
                         const textWidth = estimateTextWidth(displayText);
-                        const viewBoxWidth = Math.max(textWidth, 24); 
-                        const viewBoxHeight = 20;
+                        const viewBoxWidth = Math.max(textWidth, 40); 
+                        const viewBoxHeight = 22;
 
                         return (
                             <div
@@ -299,13 +301,19 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
                                 <div 
                                     className={`w-full h-full relative box-border transition-transform ${
                                         activeOperation?.id === item.id ? 'z-50 ring-2 ring-orange-400' : ''
-                                    } ${isMcq ? '' : 'bg-white/75 shadow-lg rounded-md border border-orange-200/50'}`}
+                                    } ${isMcq ? '' : 'bg-white/90 shadow-2xl rounded-lg border border-orange-200/80'}`}
                                     style={isEditing ? { containerType: 'size' } as React.CSSProperties : {}} 
                                 >
                                     {isMcq ? (
                                         <>
-                                            <div className="w-full h-full border-[3.5px] border-orange-600 rounded-full bg-orange-500/15 box-border pointer-events-auto shadow-md" onClick={() => playAudio(displayText)}></div>
-                                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white border border-orange-200 px-2 py-1 rounded-lg shadow-xl text-[10px] font-bold text-orange-600 whitespace-nowrap pointer-events-none transform -translate-y-full" style={{transform: `scale(${1/scale})`}}>
+                                            <div 
+                                                className="w-full h-full border-[4px] border-orange-600 rounded-full bg-orange-500/25 box-border pointer-events-auto shadow-xl hover:bg-orange-500/40 transition-colors" 
+                                                onClick={() => playAudio(displayText)}
+                                            ></div>
+                                            <div 
+                                                className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white border border-orange-300 px-3 py-1.5 rounded-xl shadow-2xl text-[12px] font-black text-orange-600 whitespace-nowrap pointer-events-none transform -translate-y-full ring-2 ring-orange-100"
+                                                style={{transform: `scale(${1/scale})` }}
+                                            >
                                                 {displayText}
                                             </div>
                                         </>
@@ -315,7 +323,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
                                                 <input 
                                                     autoFocus
                                                     className="w-full h-full text-center text-orange-600 font-bold bg-transparent border-none outline-none p-0 m-0 font-hand"
-                                                    style={{ fontSize: '65cqh' }}
+                                                    style={{ fontSize: '70cqh' }}
                                                     value={editText}
                                                     onChange={(e) => setEditText(e.target.value)}
                                                     onBlur={() => saveEdit(item.id)}
@@ -349,12 +357,12 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, isInteracti
 
                                     {isInteractive && mode === 'edit' && !isEditing && (
                                         <div 
-                                            className="absolute -bottom-3 -right-3 w-7 h-7 bg-orange-500 rounded-xl cursor-nwse-resize opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-xl z-50 hover:bg-orange-600 transition-all pointer-events-auto border-2 border-white"
+                                            className="absolute -bottom-4 -right-4 w-9 h-9 bg-orange-500 rounded-2xl cursor-nwse-resize opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-xl z-50 hover:bg-orange-600 transition-all pointer-events-auto border-2 border-white"
                                             style={{ transform: `scale(${1/scale})` }}
                                             onMouseDown={(e) => handleStart(e, 'resize', item.id)}
                                             onTouchStart={(e) => handleStart(e, 'resize', item.id)}
                                         >
-                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </div>

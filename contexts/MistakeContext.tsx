@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { WorksheetItem } from '../types';
 import { useAuth } from './AuthContext';
@@ -21,7 +22,7 @@ interface MistakeContextType {
 const MistakeContext = createContext<MistakeContextType | undefined>(undefined);
 
 export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, firebaseUser } = useAuth();
   const [mistakes, setMistakes] = useState<MistakeItem[]>([]);
   const [showMistakeModal, setShowMistakeModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -29,41 +30,40 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Load mistakes when user changes
   useEffect(() => {
     const loadMistakes = async () => {
-        if (!user) {
+        // Use Firebase UID for reliable security permissions
+        if (!firebaseUser) {
             setMistakes([]);
             return;
         }
         setIsLoading(true);
         try {
-            const data = await db.getMistakes(user.email);
+            const data = await db.getMistakes(firebaseUser.uid);
             setMistakes(data);
         } catch (e) {
-            console.error("Failed to load mistakes", e);
+            console.error("Failed to load mistakes (Check Firestore Rules):", e);
         } finally {
             setIsLoading(false);
         }
     };
     loadMistakes();
-  }, [user]);
+  }, [firebaseUser]);
 
   const toggleMistake = async (item: WorksheetItem) => {
-    if (!user) return; // Should prompt login in real app
+    if (!firebaseUser) return;
 
     const exists = mistakes.find(m => m.question_text === item.question_text && m.correct_answer === item.correct_answer);
 
     if (exists) {
-      // Optimistic Remove
       setMistakes(prev => prev.filter(m => m.uniqueId !== exists.uniqueId));
       await db.removeMistake(exists.uniqueId);
     } else {
-      // Optimistic Add
       const newItem: MistakeItem = {
         ...item,
         uniqueId: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         dateAdded: new Date().toISOString()
       };
       setMistakes(prev => [newItem, ...prev]);
-      await db.addMistake(user.email, newItem);
+      await db.addMistake(firebaseUser.uid, newItem);
     }
   };
 
