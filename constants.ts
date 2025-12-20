@@ -8,7 +8,7 @@ export const ASSETS = {
   MASCOT_THINKING: `https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-analyzing_pzuksu.png`,
   MASCOT_SCAN: `https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png`,
   HERO_IMAGE: `https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_dropshadow:azimuth_220;elevation_60;spread_20/f_png,e_improve,e_sharpen/v1765770525/Chekki_Futuristic_Background_i8foqe.png`,
-  HERO_SLEEPY: `https://res.cloudinary.com/dginphpy4/image/upload/v1766230753/Chekki-Sleepy-Hero_g0mprn.svg`,
+  HERO_SLEEPY: `https://res.cloudinary.com/dginphpy4/image/upload/v1766246089/Sleepy-Chekki_xvg2n6.svg`,
   VIDEO_ANALYZING: `https://res.cloudinary.com/dginphpy4/video/upload/76_ci2vo2.mp4`,
   VIDEO_SLEEPY: `https://res.cloudinary.com/dginphpy4/video/upload/Sleepy_Chekki_Night_Float_fcqkyh.mp4`,
   STAMP_SOUND: `https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3`
