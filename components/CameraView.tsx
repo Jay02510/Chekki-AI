@@ -5,6 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
+import { FeedbackModal } from './FeedbackModal';
 
 interface Props {
   onImageSelected: (base64: string) => void;
@@ -17,6 +18,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { t, language } = useLanguage();
 
   const processFile = async (file: File) => {
@@ -94,9 +96,23 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     </div>
   );
 
+  const BetaBanner = () => (
+    <div 
+      onClick={() => setShowFeedbackModal(true)}
+      className="group cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-4 transition-all animate-fade-in-up shadow-xl backdrop-blur-md mb-8 ring-1 ring-white/5 hover:ring-orange-500/50"
+    >
+       <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-lg animate-pulse">🌿</div>
+       <p className="text-xs md:text-sm font-bold text-zinc-300 font-korean group-hover:text-white transition-colors">
+         {t('beta_banner')}
+       </p>
+       <span className="ml-auto text-orange-500 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">→</span>
+    </div>
+  );
+
   if (user) {
     return (
       <div className="min-h-screen pt-32 pb-12 px-6 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
+        {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         <div className="w-full max-w-3xl flex flex-col items-center text-center mb-10 gap-6">
            <div className="space-y-2">
               <h1 className="text-4xl md:text-6xl font-black text-white font-display break-keep leading-[1.15]">
@@ -104,13 +120,18 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               </h1>
               <p className="text-zinc-400 font-korean text-lg md:text-xl max-w-lg mx-auto leading-relaxed break-keep">{t('dash_subtitle')}</p>
            </div>
-           <div className="bg-[#0F1014] border border-white/10 rounded-full py-2 px-6 flex items-center gap-3 shadow-lg">
-               <div className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">{t('scans_left')}</div>
-               <div className="w-px h-4 bg-white/10"></div>
-               <div className="font-bold text-white text-xl font-display leading-none">{user.plan === 'pro' ? '∞' : (user.maxScans - user.scansUsed)}</div>
+           
+           <div className="flex flex-wrap justify-center gap-4">
+              <div className="bg-[#0F1014] border border-white/10 rounded-full py-2 px-6 flex items-center gap-3 shadow-lg">
+                  <div className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">{t('scans_left')}</div>
+                  <div className="w-px h-4 bg-white/10"></div>
+                  <div className="font-bold text-white text-xl font-display leading-none">{user.plan === 'pro' ? '∞' : (user.maxScans - user.scansUsed)}</div>
+              </div>
            </div>
         </div>
-        <div className="w-full max-w-2xl animate-fade-in-up mb-12">
+        
+        <div className="w-full max-w-2xl animate-fade-in-up">
+           <BetaBanner />
            <DropZone size="large" />
         </div>
         <p className="mt-8 text-zinc-600 text-xs font-bold uppercase tracking-widest text-center">{t('supported_formats')}</p>
@@ -120,6 +141,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
   return (
     <div className="min-h-screen flex flex-col pt-32 md:pt-40 pb-20 overflow-x-hidden scroll-smooth">
+      {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
+      
       {/* Hero Section */}
       <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-8 items-center mb-32">
         <div className={`absolute top-0 left-1/4 -translate-x-1/2 w-[800px] h-[500px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/20'} rounded-full blur-[120px] -z-10 pointer-events-none opacity-50 mix-blend-screen`}></div>
@@ -155,7 +178,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <img 
                   src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                   alt="Chekki Hero" 
-                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform ${isNight ? 'scale-110 lg:scale-125' : 'scale-100 lg:scale-110'}`}
+                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform ${isNight ? 'scale-[1.25] lg:scale-[1.5]' : 'scale-100 lg:scale-110'}`}
                 />
             </div>
         </div>
@@ -292,7 +315,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                    <img 
                     src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                     alt="Chekki Mascot" 
-                    className={`w-[110%] h-[110%] object-contain filter brightness-110 drop-shadow-[0_15px_40px_rgba(0,0,0,0.3)] animate-float ${isNight ? 'scale-125' : ''}`} 
+                    className={`w-[110%] h-[110%] object-contain filter brightness-110 drop-shadow-[0_15px_40px_rgba(0,0,0,0.3)] animate-float ${isNight ? 'scale-[1.25] lg:scale-[1.5]' : ''}`} 
                    />
                 </div>
               </div>
