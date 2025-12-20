@@ -7,7 +7,6 @@ import { WorksheetOverlay } from './components/WorksheetOverlay';
 import { SplitView } from './components/SplitView';
 import { PaywallModal } from './components/PaywallModal';
 import { OnboardingTour } from './components/OnboardingTour';
-import { SplashScreen } from './components/SplashScreen';
 import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
 import { RewardOverlay } from './components/RewardOverlay';
@@ -34,10 +33,10 @@ function AppContent() {
   
   const [viewMode, setViewMode] = useState<WorkspaceMode>('overlay');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
 
+  // Load session on mount (replacing showSplash dependency)
   useEffect(() => {
-    if (!showSplash && analysisState.status === 'idle') {
+    if (analysisState.status === 'idle') {
       const saved = localStorage.getItem(SESSION_KEY);
       if (saved) {
         try {
@@ -51,14 +50,7 @@ function AppContent() {
         }
       }
     }
-  }, [showSplash]);
-
-  useEffect(() => {
-    if (!showSplash && isAuthenticated) {
-       const visited = localStorage.getItem('hw_onboarding_done');
-       if (!visited) setShowOnboarding(true);
-    }
-  }, [showSplash, isAuthenticated]);
+  }, []);
 
   const handleImageSelected = async (base64Data: string) => {
     if (!isAuthenticated) {
@@ -73,7 +65,7 @@ function AppContent() {
     setAnalysisState({ status: 'analyzing', data: null, originalImage: displayUrl, errorMessage: null, showReward: false });
 
     try {
-      const result: WorksheetAnalysis = await analyzeWorksheet(base64Data);
+      const result: any = await analyzeWorksheet(base64Data);
       
       if (result.error) {
          setAnalysisState({
@@ -84,14 +76,28 @@ function AppContent() {
             showReward: false
          });
       } else {
-        setAnalysisState({
+        // Robust Extraction Logic: Handle both {items: []} and direct []
+        const formattedData: WorksheetAnalysis = {
+            worksheet_summary: result.worksheet_summary || { title_en: "Worksheet", title_ko: "워크시트" },
+            items: Array.isArray(result) ? result : (result.items || [])
+        };
+
+        const newState: AnalysisState = {
           status: 'complete',
-          data: result,
+          data: formattedData,
           originalImage: displayUrl,
           errorMessage: null,
           showReward: true, 
-        });
+        };
+
+        setAnalysisState(newState);
         setViewMode('overlay');
+
+        // Save session
+        localStorage.setItem(SESSION_KEY, JSON.stringify({
+          state: newState,
+          timestamp: Date.now()
+        }));
       }
     } catch (error) {
       setAnalysisState({ status: 'error', data: null, originalImage: null, errorMessage: t('err_network'), showReward: false });
@@ -106,20 +112,20 @@ function AppContent() {
     localStorage.removeItem(SESSION_KEY);
   };
 
-  if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
-
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans">
       <Header onReset={handleReset} />
       <PaywallModal />
       <OdapNoteModal />
       <LoginModal />
+      
       {analysisState.showReward && (
           <RewardOverlay 
             onClose={() => setAnalysisState(prev => ({ ...prev, showReward: false }))} 
             score={analysisState.data?.worksheet_summary?.total_score || 100}
           />
       )}
+      
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
 
       <main className="max-w-6xl mx-auto p-4 md:p-6 pb-0">

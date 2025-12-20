@@ -6,28 +6,37 @@ export const config = {
 };
 
 const SYSTEM_PROMPT = `
-You are Homework Helper AI, a specialized educational assistant for Korean parents whose children attend English Kindergarten (ages 4-7).
+You are Homework Helper AI, a specialized educational assistant for Korean parents.
 
-GOAL:
-Analyze the worksheet image. Provide correct answers AND professional coaching advice.
+TASK:
+Analyze the provided worksheet image. There are 4 questions visible (Numbered 5, 6, 7, and 8).
 
-CRITICAL INSTRUCTIONS FOR ACCURACY:
-1. QUESTION NUMBERS: Use the ACTUAL question numbers printed on the worksheet (e.g., 5, 6, 7, 8). Do NOT start from 1 if the page starts at 5.
-2. FULL ANSWERS (MANDATORY): For multiple choice (MCQ), NEVER return just the letter (e.g., 'B'). You MUST return the letter AND the full text of the choice (e.g., 'B. A squirrel stole one'). This is vital for the child's audio playback.
-3. QUESTION TEXT: Extract the full question text exactly as it appears.
-4. SCAN SEQUENCE: If the worksheet has columns, scan the LEFT column from top-to-bottom first, then move to the RIGHT column.
+OUTPUT REQUIREMENTS:
+1. QUESTION NUMBERS: Use the exact numbers on the page (5, 6, 7, 8).
+2. FULL ANSWER TEXT (CRITICAL): For the 'correct_answer' field, do NOT just put the letter. You MUST put the letter and the full sentence (e.g., "B. A squirrel stole one"). This is for a text-to-speech engine to read back to a child.
+3. BOUNDING BOXES: Provide accurate coordinates [ymin, xmin, ymax, xmax] as integers (0-1000) for where the answer sticker should appear on the worksheet.
+4. LANGUAGE: Provide 'korean_guide' and 'teaching_tip_ko' in warm, encouraging Korean.
 
-HANDWRITING COACHING:
-- For items involving writing (Tracing, Fill-in), look at the child's letter formation.
-- Provide a 'handwriting_tip_ko' (Korean) if letters are likely to be tricky for a child (e.g., "글자 'p'의 꼬리를 조금 더 길게 내려써볼까요?").
-
-SCORING:
-- Estimate a 'total_score' out of 100 based on the difficulty and completion of the worksheet.
-
-JSON OUTPUT RULES:
-- worksheet_summary: { title_en, title_ko, overview_ko, overview_en, total_score }
-- items: Array of { id, type, bounding_box: {ymin, xmin, ymax, xmax}, question_text, correct_answer, korean_guide, handwriting_tip_ko, teaching_tip_ko }
-- Bounding boxes must be integers 0-1000.
+JSON STRUCTURE:
+{
+  "worksheet_summary": {
+    "title_en": "Gary's Juggling Act",
+    "title_ko": "게리의 저글링 쇼",
+    "overview_ko": "게리의 저글링 이야기와 관련된 이해도 확인 문제입니다.",
+    "total_score": 100
+  },
+  "items": [
+    {
+      "id": 5,
+      "type": "mcq",
+      "bounding_box": { "ymin": 0, "xmin": 0, "ymax": 0, "xmax": 0 },
+      "question_text": "Why did Gary stop juggling the apples?",
+      "correct_answer": "B. A squirrel stole one",
+      "korean_guide": "다람쥐가 사과 하나를 훔쳐가서 저글링을 멈추게 되었어요.",
+      "teaching_tip_ko": "아이가 'stole'이라는 단어를 모른다면 '훔치다'의 과거형이라고 설명해주세요."
+    }
+  ]
+}
 `;
 
 export default async function handler(req: any, res: any) {
@@ -45,18 +54,6 @@ export default async function handler(req: any, res: any) {
 
     const ai = new GoogleGenAI({ apiKey });
 
-    if (body.mode === 'generate_similar') {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [{ parts: [{ text: `Original Items: ${JSON.stringify(body.items)}. Generate 5 similar new questions for practice.` }] }],
-        config: {
-          systemInstruction: "You are an expert educator. Generate new questions with the same difficulty level.",
-          responseMimeType: "application/json",
-        },
-      });
-      return res.status(200).json(JSON.parse(response.text || '[]'));
-    }
-
     const { image } = body;
     if (!image) {
       return res.status(400).json({ error: "NO_IMAGE", message: "No image data provided" });
@@ -69,7 +66,7 @@ export default async function handler(req: any, res: any) {
           role: "user",
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: image } },
-            { text: "Analyze this worksheet. IMPORTANT: Capture the WHOLE text of the correct answer for playback, not just the letter. Use the question numbers from the image." },
+            { text: "Identify questions 5, 6, 7, and 8. For each, give the full correct answer string (Letter + Text)." },
           ],
         },
       ],
@@ -80,14 +77,10 @@ export default async function handler(req: any, res: any) {
       },
     });
 
-    const outputText = response.text || '{}';
-    return res.status(200).json(JSON.parse(outputText));
+    return res.status(200).json(JSON.parse(response.text || '{}'));
 
   } catch (error: any) {
     console.error("[Chekki API] Error:", error);
-    return res.status(500).json({ 
-      error: "ANALYSIS_FAILED", 
-      message: error.message || "Unknown error" 
-    });
+    return res.status(500).json({ error: "ANALYSIS_FAILED", message: error.message });
   }
 }
