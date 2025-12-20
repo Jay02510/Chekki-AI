@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut,
+  deleteUser,
   User
 } from 'firebase/auth';
 
@@ -16,6 +17,8 @@ interface AuthContextType {
   signUp: (name: string, email: string, pass: string) => Promise<void>;
   signIn: (email: string, pass: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (name: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   incrementScan: () => Promise<boolean>;
   upgradeToPro: (code?: string) => Promise<boolean>;
   isAuthenticated: boolean;
@@ -72,6 +75,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => signOut(auth);
 
+  const updateProfile = async (name: string) => {
+    if (!firebaseUser || !userProfile) return;
+    const updates = { name };
+    setUserProfile({ ...userProfile, ...updates });
+    await db.updateUser(firebaseUser.uid, updates);
+  };
+
+  const deleteAccount = async () => {
+    if (!firebaseUser) return;
+    await db.updateUser(firebaseUser.uid, { name: 'Deleted User' }); // Soft delete in DB for records
+    await deleteUser(firebaseUser);
+    setUserProfile(null);
+    setFirebaseUser(null);
+  };
+
   const incrementScan = async (): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return true;
     if (userProfile.plan === 'free' && userProfile.scansUsed >= userProfile.maxScans) {
@@ -85,7 +103,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const upgradeToPro = async (code?: string): Promise<boolean> => {
-    // Basic Beta Code Logic
     const validCodes = ['CHEKKIBETA', 'CHEKKI2025', 'MOMPOWER'];
     if (code && !validCodes.includes(code.toUpperCase())) {
         return false;
@@ -99,7 +116,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
-  // Fix: Define modal control functions used in AuthContext value
   const openLoginModal = () => setShowLoginModal(true);
   const closeLoginModal = () => setShowLoginModal(false);
 
@@ -110,6 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signUp,
       signIn,
       logout,
+      updateProfile,
+      deleteAccount,
       incrementScan,
       upgradeToPro,
       isAuthenticated: !!firebaseUser,

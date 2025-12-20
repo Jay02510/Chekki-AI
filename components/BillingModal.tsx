@@ -62,7 +62,7 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
 
                 {!isPro ? (
                     <button 
-                        onClick={upgradeToPro}
+                        onClick={() => upgradeToPro()}
                         className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-orange-500/20"
                     >
                         Upgrade to Pro

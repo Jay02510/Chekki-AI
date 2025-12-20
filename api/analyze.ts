@@ -54,7 +54,7 @@ export default async function handler(req: any, res: any) {
                 responseMimeType: "application/json",
             },
         });
-        return res.status(200).json(JSON.parse(response.text));
+        return res.status(200).json(JSON.parse(response.text ?? '[]'));
     }
 
     // Handle Main Worksheet Analysis
@@ -81,7 +81,7 @@ export default async function handler(req: any, res: any) {
       },
     });
 
-    return res.status(200).json(JSON.parse(response.text));
+    return res.status(200).json(JSON.parse(response.text ?? '{}'));
 
   } catch (error: any) {
     console.error("Vercel Function Error:", error);
