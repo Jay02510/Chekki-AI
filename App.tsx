@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -32,6 +33,14 @@ function AppContent() {
   const [viewMode, setViewMode] = useState<WorkspaceMode>('overlay');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [lastImageData, setLastImageData] = useState<string | null>(null);
+
+  // Sync analysis state with auth state: reset to landing if logged out
+  useEffect(() => {
+    if (!isAuthenticated && analysisState.status !== 'idle') {
+      setAnalysisState({ status: 'idle', data: null, originalImage: null, errorMessage: null, showReward: false });
+      localStorage.removeItem(SESSION_KEY);
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (analysisState.status === 'idle') {
@@ -115,12 +124,12 @@ function AppContent() {
     if (lastImageData) {
       handleImageSelected(lastImageData, true);
     } else {
-      handleReset();
+      handleReset(false);
     }
   };
 
-  const handleReset = () => {
-    if (analysisState.status === 'complete') {
+  const handleReset = (confirm = true) => {
+    if (confirm && analysisState.status === 'complete') {
         if (!window.confirm(t('err_confirm'))) return;
     }
     setAnalysisState({ status: 'idle', data: null, originalImage: null, errorMessage: null, showReward: false });
@@ -130,7 +139,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans overflow-x-hidden">
-      <Header onReset={handleReset} />
+      <Header onReset={() => handleReset(false)} />
       <PaywallModal />
       <OdapNoteModal />
       <LoginModal />
@@ -144,7 +153,7 @@ function AppContent() {
           </div>
         )}
 
-        {analysisState.status === 'analyzing' && <LoadingScreen onCancel={handleReset} />}
+        {analysisState.status === 'analyzing' && <LoadingScreen onCancel={() => handleReset(false)} />}
 
         {analysisState.status === 'error' && (
            <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
@@ -160,7 +169,7 @@ function AppContent() {
                <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all transform active:scale-95 font-korean shadow-lg">
                  {t('btn_scan_again_simple')}
                </button>
-               <button onClick={handleReset} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all transform active:scale-95 font-korean shadow-lg">
+               <button onClick={() => handleReset(false)} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all transform active:scale-95 font-korean shadow-lg">
                  {t('btn_retake')}
                </button>
              </div>
@@ -177,7 +186,7 @@ function AppContent() {
               </div>
               
               <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={handleReset} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl border border-zinc-700 transition-all shadow-xl flex items-center gap-2 group active:scale-95">
+                  <button onClick={() => handleReset(true)} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl border border-zinc-700 transition-all shadow-xl flex items-center gap-2 group active:scale-95">
                     <span className="text-lg group-hover:rotate-12 transition-transform">📸</span> 
                     <span className="hidden sm:inline text-xs font-black uppercase tracking-widest">{t('ws_scan_again')}</span>
                   </button>
