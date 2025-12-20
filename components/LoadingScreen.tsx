@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ChekkiMascot } from './Icons';
@@ -8,9 +9,8 @@ export const LoadingScreen: React.FC = () => {
   const [textIndex, setTextIndex] = useState(0);
   const [videoError, setVideoError] = useState(false);
 
-  // Added a security-focused step for production
   const loadingTexts = [
-    language === 'ko' ? "보안 연결을 생성하고 있어요..." : "Securing connection...",
+    t('loading_step0'),
     t('loading_step1'),
     t('loading_step2'),
     t('loading_step3'),

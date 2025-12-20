@@ -35,11 +35,20 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const body = req.body;
+    // Safety check for body parsing
+    let body = req.body;
+    if (typeof body === 'string') {
+        try {
+            body = JSON.parse(body);
+        } catch (e) {
+            return res.status(400).json({ error: "INVALID_JSON", message: "Failed to parse request body" });
+        }
+    }
+
     const apiKey = process.env.API_KEY; 
 
     if (!apiKey) {
-      return res.status(500).json({ error: "API Key missing in environment" });
+      return res.status(500).json({ error: "API_KEY_MISSING", message: "Server API Key is not configured." });
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -54,13 +63,14 @@ export default async function handler(req: any, res: any) {
                 responseMimeType: "application/json",
             },
         });
-        return res.status(200).json(JSON.parse(response.text ?? '[]'));
+        const text = response.text || '[]';
+        return res.status(200).json(JSON.parse(text));
     }
 
     // Handle Main Worksheet Analysis
     const { image } = body;
     if (!image) {
-      return res.status(400).json({ error: "No image data provided" });
+      return res.status(400).json({ error: "NO_IMAGE", message: "No image data provided" });
     }
 
     const response = await ai.models.generateContent({
@@ -81,7 +91,8 @@ export default async function handler(req: any, res: any) {
       },
     });
 
-    return res.status(200).json(JSON.parse(response.text ?? '{}'));
+    const outputText = response.text || '{}';
+    return res.status(200).json(JSON.parse(outputText));
 
   } catch (error: any) {
     console.error("Vercel Function Error:", error);

@@ -19,14 +19,14 @@ const translations = {
     pro_plan: "Pro Plan 🚀",
     
     // Hero / Camera
-    hero_title: "English Homework?\nJust Snap a Photo.", // NEW: Sharper
-    hero_desc: "Chekki analyzes handwriting instantly. We explain it in Korean for you, and simple English for your child.", // NEW: Concrete benefit
+    hero_title: "English Homework?\nJust Snap a Photo.",
+    hero_desc: "Chekki analyzes handwriting instantly. We explain it in Korean for you, and simple English for your child.",
     hero_badge: "AI Smart Assistant",
-    hero_cta_title: "Ready to get started?",
+    hero_cta_title: "Together,",
     hero_cta_desc: "Join thousands of parents using Chekki to make homework time happier and more encouraging.",
     hero_cta_btn: "Start for Free",
     
-    // How It Works (NEW)
+    // How It Works
     how_title: "How It Works",
     how_step1: "Snap",
     how_step1_desc: "Take a photo of the worksheet.",
@@ -35,7 +35,7 @@ const translations = {
     how_step3: "Coach",
     how_step3_desc: "Guide your child with confidence.",
 
-    // Testimonials (NEW)
+    // Testimonials
     test_title: "Mom's Voices",
     test_1_name: "Min-jun's Mom (Age 7)",
     test_1_text: "I used to dread checking English homework because my pronunciation isn't perfect. Chekki solved that instantly!",
@@ -87,7 +87,8 @@ const translations = {
     stat_questions: "Questions Helped",
     stat_rating: "App Rating",
 
-    // Loading Steps (NEW)
+    // Loading Steps
+    loading_step0: "Securing connection...",
     loading_step1: "Looking at the wonderful handwriting...",
     loading_step2: "Reviewing the answers gently...",
     loading_step3: "Preparing praise tips for you...",
@@ -95,10 +96,17 @@ const translations = {
     scan_loading_text: "SCANNING...",
     growing_text: "Growing!",
 
+    // Reward
+    reward_job: "Awesome Job!",
+    reward_stamp: "Great Job!",
+    reward_tap: "Tap to stamp!",
+
     // Error
     error_title: "Let's try that again!",
     error_desc: "I'm having a little trouble seeing the photo clearly. Could you take it again for me?",
     btn_retake: "Retake Photo",
+    err_network: "Failed to connect to the server. Please check your internet and try again.",
+    err_confirm: "Warning: Current progress will be lost. Continue?",
 
     // Workspace
     ws_overlay: "Focus View",
@@ -149,14 +157,14 @@ const translations = {
     pro_plan: "프로 플랜 🚀",
 
     // Hero / Camera
-    hero_title: "영어 숙제,\n사진 한 장이면 끝!", // NEW: Sharper
-    hero_desc: "사진만 찍으면 채키가 분석합니다. 부모님께는 한국어 가이드를, 아이에게는 쉬운 영어 설명을 제공해요.", // NEW
+    hero_title: "영어 숙제,\n사진 한 장이면 끝!",
+    hero_desc: "사진만 찍으면 채키가 분석합니다. 부모님께는 한국어 가이드를, 아이에게는 쉬운 영어 설명을 제공해요.",
     hero_badge: "AI 스마트 어시스턴트",
     hero_cta_title: "함께 시작해볼까요?",
     hero_cta_desc: "숙제 시간이 즐거워지는 마법! 수천 명의 부모님과 함께해요.",
     hero_cta_btn: "무료로 시작하기",
     
-    // How It Works (NEW)
+    // How It Works
     how_title: "이렇게 사용하세요",
     how_step1: "찍어요",
     how_step1_desc: "영어 숙제를 사진으로 찰칵!",
@@ -165,7 +173,7 @@ const translations = {
     how_step3: "코칭해요",
     how_step3_desc: "한국어 설명으로 자신있게!",
 
-    // Testimonials (NEW)
+    // Testimonials
     test_title: "선배맘들의 생생 후기",
     test_1_name: "민준맘 (7세)",
     test_1_text: "영어 발음 때문에 숙제 봐주기가 겁났는데, 채키 덕분에 이제 자신 있게 가르쳐줘요!",
@@ -217,18 +225,26 @@ const translations = {
     stat_questions: "검토한 문제",
     stat_rating: "앱 평점",
 
-    // Loading Steps (NEW)
+    // Loading Steps
+    loading_step0: "보안 연결을 생성하고 있어요...",
     loading_step1: "글씨를 꼼꼼히 살펴보고 있어요...",
     loading_step2: "정답을 확인하는 중이에요...",
     loading_step3: "아이에게 해줄 칭찬을 찾고 있어요...",
     loading_step4: "거의 다 됐어요!",
     scan_loading_text: "스캔 중...",
     growing_text: "성장 중!",
+
+    // Reward
+    reward_job: "너무 잘했어요!",
+    reward_stamp: "참 잘했어요!",
+    reward_tap: "도장을 꾹! 눌러주세요",
     
     // Error
     error_title: "조금만 더 잘 보여주세요!",
     error_desc: "사진이 약간 흐릿해서 잘 안 보여요. 다시 한 번 예쁘게 찍어주실 수 있나요?",
     btn_retake: "다시 찍기",
+    err_network: "서버 연결에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해주세요.",
+    err_confirm: "⚠️ 경고: 이미지가 사라집니다. 계속하시겠습니까?",
 
     // Workspace
     ws_overlay: "포커스 뷰",
@@ -276,17 +292,15 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>(() => {
-    // Initialize lazily to prevent flicker/revert on reload
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('hw_language');
       if (stored === 'en' || stored === 'ko') {
         return stored;
       }
     }
-    return 'ko'; // Default
+    return 'ko'; 
   });
 
-  // Persist to storage
   useEffect(() => {
     localStorage.setItem('hw_language', language);
   }, [language]);

@@ -53,17 +53,6 @@ function AppContent() {
   }, [showSplash]);
 
   useEffect(() => {
-     if (analysisState.status === 'complete' && analysisState.data) {
-        try {
-           localStorage.setItem(SESSION_KEY, JSON.stringify({
-              state: analysisState,
-              timestamp: Date.now()
-           }));
-        } catch (e) {}
-     }
-  }, [analysisState]);
-
-  useEffect(() => {
     if (!showSplash && isAuthenticated) {
        const visited = localStorage.getItem('hw_onboarding_done');
        if (!visited) setShowOnboarding(true);
@@ -76,7 +65,8 @@ function AppContent() {
       return;
     }
 
-    if (!incrementScan()) return; 
+    const canScan = await incrementScan();
+    if (!canScan) return; 
 
     const displayUrl = `data:image/jpeg;base64,${base64Data}`;
     setAnalysisState({ status: 'analyzing', data: null, originalImage: displayUrl, errorMessage: null, showReward: false });
@@ -84,12 +74,12 @@ function AppContent() {
     try {
       const result: WorksheetAnalysis = await analyzeWorksheet(base64Data);
       
-      if (result.error && result.error !== "API_ERROR_FALLBACK") {
+      if (result.error) {
          setAnalysisState({
             status: 'error',
             data: null,
             originalImage: null,
-            errorMessage: result.message_ko ?? "Unknown error.",
+            errorMessage: t(result.message_ko || 'err_network'),
             showReward: false
          });
       } else {
@@ -97,22 +87,19 @@ function AppContent() {
           status: 'complete',
           data: result,
           originalImage: displayUrl,
-          errorMessage: result.error ? (result.message_ko ?? "API Error") : null,
-          showReward: true, // Trigger Reward
+          errorMessage: null,
+          showReward: true, 
         });
         setViewMode('overlay');
       }
     } catch (error) {
-      setAnalysisState({ status: 'error', data: null, originalImage: null, errorMessage: "Network error.", showReward: false });
+      setAnalysisState({ status: 'error', data: null, originalImage: null, errorMessage: t('err_network'), showReward: false });
     }
   };
 
   const handleReset = () => {
     if (analysisState.status === 'complete') {
-        const msg = language === 'ko' 
-            ? "⚠️ 경고: 이미지가 사라집니다. 계속하시겠습니까?"
-            : "⚠️ Warning: Image will be lost. Continue?";
-        if (!window.confirm(msg)) return;
+        if (!window.confirm(t('err_confirm'))) return;
     }
     setAnalysisState({ status: 'idle', data: null, originalImage: null, errorMessage: null, showReward: false });
     localStorage.removeItem(SESSION_KEY);
