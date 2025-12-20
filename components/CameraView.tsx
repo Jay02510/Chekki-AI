@@ -314,12 +314,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected }) => {
                   {t('hero_cta_btn')}
                 </button>
               </div>
-              <div className="hidden md:flex justify-end items-center relative h-[500px]">
+              <div className="hidden md:flex justify-end items-center relative h-[600px]">
                  <div className="absolute inset-0 bg-orange-500/10 rounded-full blur-[100px] animate-pulse"></div>
                  <img 
                     src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png" 
                     alt="Chekki Mascot" 
-                    className="w-full max-w-[650px] h-full object-contain drop-shadow-[0_0_80px_rgba(249,115,22,0.4)] animate-float scale-125 z-10"
+                    className="w-full max-w-[850px] h-full object-contain drop-shadow-[0_0_80px_rgba(249,115,22,0.4)] animate-float scale-[1.6] z-10 origin-center"
                  />
               </div>
             </div>
