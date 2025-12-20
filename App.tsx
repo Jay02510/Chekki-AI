@@ -153,25 +153,26 @@ function AppContent() {
         {analysisState.status === 'complete' && analysisState.data && (
           <div className="animate-fade-in-up flex flex-col h-full pt-20 md:pt-24 pb-4">
             <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
-              <div className="flex items-center gap-3">
-                 <h2 className="text-xl md:text-2xl font-bold text-white font-korean tracking-tight truncate max-w-[200px] md:max-w-none">
+              <div className="flex items-center gap-3 min-w-0">
+                 <h2 className="text-xl md:text-2xl font-black text-white font-korean tracking-tight truncate">
                     {language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
                  </h2>
-                 <div className="bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-lg text-xs font-bold">
+                 <div className="bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-lg text-xs font-black shadow-lg shadow-orange-500/5">
                     Score: {analysisState.data.worksheet_summary?.total_score || 100}
                  </div>
               </div>
               
-              <div className="flex items-center gap-2">
-                  <button onClick={handleReset} className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-xl border border-zinc-700 transition-all shadow-sm group">
-                    <span className="text-lg">📸</span> 
+              <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={handleReset} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl border border-zinc-700 transition-all shadow-xl flex items-center gap-2 group active:scale-95">
+                    <span className="text-lg group-hover:rotate-12 transition-transform">📸</span> 
+                    <span className="hidden sm:inline text-xs font-black uppercase tracking-widest">{t('ws_scan_again')}</span>
                   </button>
 
                   <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 shadow-inner">
-                    <button onClick={() => setViewMode('overlay')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'overlay' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                    <button onClick={() => setViewMode('overlay')} className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${viewMode === 'overlay' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
                       {t('ws_overlay')}
                     </button>
-                    <button onClick={() => setViewMode('split')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'split' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                    <button onClick={() => setViewMode('split')} className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${viewMode === 'split' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
                       {t('ws_list')}
                     </button>
                   </div>
