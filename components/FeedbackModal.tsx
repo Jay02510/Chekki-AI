@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const FeedbackModal: React.FC<Props> = ({ onClose, context }) => {
-  const { firebaseUser } = useAuth();
+  const { firebaseUser, user } = useAuth();
   const { t } = useLanguage();
   
   const [rating, setRating] = useState(5);
@@ -27,7 +27,9 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context }) => {
       await db.sendFeedback(firebaseUser.uid, {
         rating: context ? undefined : rating,
         comment,
-        context
+        context,
+        userEmail: user?.email, // Added for easier admin identification in DB
+        userName: user?.name
       });
       setIsSuccess(true);
       setTimeout(onClose, 2500);
@@ -91,17 +93,29 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context }) => {
                       />
                   </div>
 
-                  <button 
-                    onClick={handleSubmit}
-                    disabled={isSubmitting || (!comment && context)}
-                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    {isSubmitting ? (
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    ) : (
-                        <span>{t('fb_submit')} ❤️</span>
-                    )}
-                  </button>
+                  <div className="space-y-4">
+                    <button 
+                      onClick={handleSubmit}
+                      disabled={isSubmitting || (!comment && context)}
+                      className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      {isSubmitting ? (
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      ) : (
+                          <span>{t('fb_submit')} ❤️</span>
+                      )}
+                    </button>
+                    
+                    <div className="pt-2">
+                      <p className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-2">Or email us directly</p>
+                      <a 
+                        href="mailto:chekkihelp@gmail.com" 
+                        className="text-xs font-bold text-zinc-400 hover:text-white transition-colors underline underline-offset-4"
+                      >
+                        chekkihelp@gmail.com
+                      </a>
+                    </div>
+                  </div>
                 </>
             )}
         </div>

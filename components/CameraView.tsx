@@ -54,6 +54,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     <div className={`relative w-full ${size === 'large' ? 'min-h-[400px] h-auto' : 'h-[500px]'} perspective-1000 transition-all duration-700 ease-out py-8`}>
       <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] border ${isNight ? 'border-indigo-500/10' : 'border-white/5'} rounded-full animate-[spin_20s_linear_infinite] pointer-events-none`}></div>
       <div 
+        role="button"
+        aria-label="Upload Worksheet"
         className={`relative w-full h-full max-w-2xl mx-auto ${isNight ? 'bg-indigo-950/20' : 'bg-zinc-900/60'} backdrop-blur-2xl rounded-[2.5rem] border transition-all duration-500 flex flex-col items-center justify-center p-10 group cursor-pointer overflow-hidden
           ${dragActive ? 'border-brand-orange shadow-[0_0_50px_rgba(249,115,22,0.3)] scale-[1.02]' : 'border-white/10 shadow-2xl hover:border-white/30 hover:shadow-brand-orange/10'}`}
         onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
@@ -98,6 +100,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
   const BetaBanner = () => (
     <div 
+      role="button"
+      aria-label="Submit Feedback"
       onClick={() => setShowFeedbackModal(true)}
       className="group cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-8 py-4 rounded-[2rem] flex items-center gap-4 transition-all animate-fade-in-up shadow-2xl backdrop-blur-md mb-12 ring-1 ring-white/5 hover:ring-orange-500/50"
     >
@@ -337,8 +341,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               <div className="text-[10px] text-zinc-600 uppercase font-black tracking-widest">{t('footer_text')}</div>
           </div>
           <div className="flex gap-8 text-[10px] text-zinc-500 font-black uppercase tracking-widest">
-              <span className="hover:text-white cursor-pointer">Privacy</span>
-              <span className="hover:text-white cursor-pointer">Terms</span>
+              <span className="hover:text-white cursor-pointer" onClick={() => (window as any).openLegal?.('privacy')}>Privacy</span>
+              <span className="hover:text-white cursor-pointer" onClick={() => (window as any).openLegal?.('terms')}>Terms</span>
               <span className="hover:text-white cursor-pointer">Support</span>
           </div>
       </footer>

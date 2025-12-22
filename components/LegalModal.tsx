@@ -25,7 +25,13 @@ export const LegalModal: React.FC<Props> = ({ type, onClose }) => {
             <h2 className="text-xl font-bold text-white font-display">{title}</h2>
             <p className="text-xs text-zinc-500">{date}</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors bg-zinc-900 w-8 h-8 rounded-full flex items-center justify-center border border-zinc-800">✕</button>
+          <button 
+            onClick={onClose} 
+            aria-label="Close"
+            className="text-zinc-500 hover:text-white transition-colors bg-zinc-900 w-8 h-8 rounded-full flex items-center justify-center border border-zinc-800"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Content */}
@@ -34,86 +40,67 @@ export const LegalModal: React.FC<Props> = ({ type, onClose }) => {
             {isPrivacy ? (
                 <>
                     <section>
-                        <h3 className="text-white font-bold mb-2">1. Introduction</h3>
-                        <p>Chekki AI ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application and services.</p>
+                        <h3 className="text-white font-bold mb-2">1. Commitment to Privacy</h3>
+                        <p>Chekki AI is designed for parents. We understand the sensitivity of children's educational data and implement industry-standard protections to keep your family's information secure.</p>
                     </section>
                     
                     <section>
-                        <h3 className="text-white font-bold mb-2">2. Information We Collect & Storage</h3>
-                        <ul className="list-disc pl-5 space-y-1 text-zinc-400">
-                            <li><strong>User Provided Information:</strong> Account information (email address, name) when you register.</li>
-                            <li><strong>Temporary Worksheet Images (For ALL Users):</strong> Whether you are a Free or Pro user, images of worksheets you scan are processed instantly in real-time. <u>We do not permanently store full worksheet images on our cloud servers.</u> They are temporarily held in your device's local memory for the duration of your session to protect your child's privacy.</li>
-                            <li><strong>Stored Data for Pro Users:</strong> Pro Plan subscribers may have unlimited storage of <em>metadata</em> (analysis results, scores, dates, and mistake text). However, the original image files associated with these records are not retained.</li>
-                            <li><strong>Stored Review Data:</strong> Specific text data you choose to save (e.g., "Mistake Notes" or flagged questions) is securely stored in our cloud database.</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h3 className="text-white font-bold mb-2">3. How We Use Your Information</h3>
-                        <p>We use the information we collect to:</p>
+                        <h3 className="text-white font-bold mb-2">2. Data Processing & AI Disclosure</h3>
+                        <p>Our service utilizes the <strong>Google Gemini API</strong> for worksheet analysis. When you upload an image:</p>
                         <ul className="list-disc pl-5 space-y-1 text-zinc-400 mt-2">
-                            <li>Provide AI-powered worksheet analysis and feedback.</li>
-                            <li>Improve the accuracy of our AI models.</li>
-                            <li>Manage your account and subscription.</li>
-                            <li>Respond to customer support requests.</li>
+                            <li>The image is transmitted via encrypted channels to Google's servers for processing.</li>
+                            <li><strong>Transient Processing:</strong> We do not permanently store the raw image files of your children's worksheets on our cloud servers. They are processed and then discarded.</li>
+                            <li>Only the resulting text analysis (scores, question text, and guides) is stored to power your "Review Note" and account history.</li>
                         </ul>
                     </section>
 
                     <section>
-                        <h3 className="text-white font-bold mb-2">4. Data Sharing and AI Processing</h3>
-                        <p>We utilize third-party AI services (Google Gemini API) to analyze your worksheets. Images are transmitted securely (encrypted) to these providers solely for the purpose of immediate analysis. <strong>We do not retain the original image files on our servers</strong> after the analysis session is complete.</p>
+                        <h3 className="text-white font-bold mb-2">3. Information We Collect</h3>
+                        <ul className="list-disc pl-5 space-y-1 text-zinc-400">
+                            <li><strong>Account Data:</strong> Name and email address used for registration.</li>
+                            <li><strong>Activity Logs:</strong> Number of scans used and general app usage patterns to improve the service.</li>
+                            <li><strong>Saved Review Items:</strong> Specifically flagged questions you choose to save for practice sheets.</li>
+                        </ul>
                     </section>
 
                     <section>
-                        <h3 className="text-white font-bold mb-2">5. Children's Privacy</h3>
-                        <p>Our Service is intended for use by parents and guardians. We do not knowingly collect personally identifiable information directly from children under 13. If you become aware that a child has provided us with Personal Data without parental consent, please contact us.</p>
+                        <h3 className="text-white font-bold mb-2">4. Children's Privacy (COPPA)</h3>
+                        <p>Chekki AI is a tool for <strong>adults</strong> (parents and teachers). We do not knowingly collect personal information directly from children under the age of 13. All accounts must be created and managed by an adult.</p>
                     </section>
 
                     <section>
-                        <h3 className="text-white font-bold mb-2">6. Your Rights (Account Deletion)</h3>
-                        <p>You have the right to delete your account and all associated data at any time. You can do this directly within the app via <strong>Settings &gt; Danger Zone &gt; Delete Account</strong>.</p>
-                    </section>
-
-                    <section>
-                        <h3 className="text-white font-bold mb-2">7. Contact Us</h3>
-                        <p>If you have any questions about this Privacy Policy, please contact us at: <a href="mailto:chekkihelp@gmail.com" className="text-orange-500 hover:underline">chekkihelp@gmail.com</a></p>
+                        <h3 className="text-white font-bold mb-2">5. Contact & Data Deletion</h3>
+                        <p>You may request full deletion of your account via the Settings menu or by contacting us at <strong>chekkihelp@gmail.com</strong>. Deletion is instantaneous and permanent.</p>
                     </section>
                 </>
             ) : (
                 <>
                     <section>
-                        <h3 className="text-white font-bold mb-2">1. Acceptance of Terms</h3>
-                        <p>By accessing or using Chekki AI, you agree to be bound by these Terms of Use ("Terms"). If you disagree with any part of the terms, you may not access the Service.</p>
+                        <h3 className="text-white font-bold mb-2">1. Agreement to Terms</h3>
+                        <p>By using Chekki AI, you agree to these terms. This is a beta service provided for educational support purposes.</p>
                     </section>
 
                     <section>
-                        <h3 className="text-white font-bold mb-2">2. Description of Service</h3>
-                        <p>Chekki AI provides an educational tool that uses Artificial Intelligence to analyze homework and worksheets. The Service is provided "as is" and is intended to assist parents, not replace professional educational instruction.</p>
+                        <h3 className="text-white font-bold mb-2">2. AI Disclaimer & Accuracy</h3>
+                        <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-xl text-orange-200 mb-4">
+                            <p className="font-bold mb-1">Important Education Notice:</p>
+                            <p>Chekki AI uses advanced artificial intelligence to analyze handwriting and text. While highly accurate, AI can occasionally "hallucinate" or provide incorrect answers. <strong>Always verify the results</strong> before sharing them with your child. Chekki AI is an assistant, not a replacement for parental or professional supervision.</p>
+                        </div>
                     </section>
 
                     <section>
-                        <h3 className="text-white font-bold mb-2">3. User Conduct</h3>
-                        <p>You agree not to use the App to upload content that is illegal, offensive, harmful, or violates the rights of others. We reserve the right to suspend accounts that violate these guidelines.</p>
+                        <h3 className="text-white font-bold mb-2">3. Subscription & Beta Access</h3>
+                        <p>During the beta period, access codes (e.g., CHEKKIBETA) may be used to unlock Pro features. We reserve the right to modify or terminate these promotional periods at our discretion.</p>
                     </section>
 
                     <section>
-                        <h3 className="text-white font-bold mb-2">4. AI Disclaimer</h3>
-                        <p>The feedback, grading, and suggestions provided by Chekki AI are generated by artificial intelligence. While we strive for accuracy, AI models can make mistakes ("hallucinations"). You should always verify the results before relying on them for educational purposes.</p>
+                        <h3 className="text-white font-bold mb-2">4. User Content Responsibilities</h3>
+                        <p>You are solely responsible for the images you upload. You agree not to upload any content that is protected by third-party copyright without permission, or content that contains personally identifiable information of others.</p>
                     </section>
 
                     <section>
-                        <h3 className="text-white font-bold mb-2">5. Subscriptions and Billing</h3>
-                        <p>Certain features of the Service may require a paid subscription ("Pro Plan"). Payment will be charged to your iTunes Account at confirmation of purchase. Subscriptions automatically renew unless auto-renew is turned off at least 24-hours before the end of the current period.</p>
-                    </section>
-
-                    <section>
-                        <h3 className="text-white font-bold mb-2">6. Intellectual Property</h3>
-                        <p>The Service and its original content (excluding Content provided by you), features, and functionality are and will remain the exclusive property of Chekki AI and its licensors.</p>
-                    </section>
-
-                    <section>
-                        <h3 className="text-white font-bold mb-2">7. Limitation of Liability</h3>
-                        <p>In no event shall Chekki AI be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.</p>
+                        <h3 className="text-white font-bold mb-2">5. Limitation of Liability</h3>
+                        <p>Chekki AI shall not be liable for any educational outcomes or errors resulting from the use of the application. Contact support at <strong>chekkihelp@gmail.com</strong> for inquiries.</p>
                     </section>
                 </>
             )}
@@ -124,7 +111,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose }) => {
         <div className="bg-zinc-950 p-4 border-t border-zinc-800 flex justify-end">
             <button 
                 onClick={onClose}
-                className="bg-white text-black hover:bg-zinc-200 px-6 py-2 rounded-lg font-bold transition-colors text-sm"
+                className="bg-white text-black hover:bg-zinc-200 px-6 py-2 rounded-lg font-bold transition-colors text-sm active:scale-95"
             >
                 I Understand
             </button>

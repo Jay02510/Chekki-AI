@@ -1,3 +1,4 @@
+
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
   getFirestore, 
@@ -12,6 +13,7 @@ import {
   deleteDoc,
   addDoc
 } from 'firebase/firestore';
+// Fix: Use single quotes for consistency and ensure named import for modular SDK
 import { getAuth } from 'firebase/auth';
 import { UserProfile } from '../types';
 
@@ -100,7 +102,14 @@ export const db = {
     }
   },
 
-  async sendFeedback(uid: string, feedback: { rating?: number, comment: string, context?: any }): Promise<void> {
+  // Updated signature to include userEmail and userName as allowed properties
+  async sendFeedback(uid: string, feedback: { 
+    rating?: number; 
+    comment: string; 
+    context?: any;
+    userEmail?: string;
+    userName?: string;
+  }): Promise<void> {
     try {
       await addDoc(collection(dbInstance, "feedback"), {
         ...feedback,
