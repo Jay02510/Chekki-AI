@@ -10,6 +10,30 @@ import { FeedbackModal } from './FeedbackModal';
 import { ASSETS } from '../constants';
 import { ChekkiMascot } from './Icons';
 
+interface TooltipProps {
+  text: string;
+  children: React.ReactNode;
+}
+
+const Tooltip: React.FC<TooltipProps> = ({ text, children }) => {
+  const [show, setShow] = useState(false);
+  return (
+    <div 
+      className="relative flex items-center"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      {children}
+      {show && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-800 text-white text-[10px] rounded shadow-xl border border-white/10 whitespace-nowrap z-50 pointer-events-none animate-fade-in">
+          {text}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-800"></div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface Props {
   imageUrl: string;
   items: WorksheetItem[];
@@ -167,9 +191,9 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
           </div>
 
           <div className="overflow-y-auto p-4 space-y-3 custom-scrollbar flex-1 relative z-10 overscroll-contain">
-            <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl flex items-start gap-3 mb-2">
-               <span className="text-base md:text-lg">💡</span>
-               <p className="text-[10px] md:text-xs text-orange-200/80 leading-relaxed font-korean">{t('ws_review_tip')}</p>
+            <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl flex items-start gap-3 mb-2 animate-fade-in shadow-lg">
+               <span className="text-base md:text-lg animate-bounce">💡</span>
+               <p className="text-[10px] md:text-xs text-orange-200/80 leading-relaxed font-bold font-korean">{t('ws_review_tip')}</p>
             </div>
 
             {groupedItems.map((group) => {
@@ -196,21 +220,27 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setReportContext(item); }} 
-                        className="p-1.5 md:p-2 rounded-full text-zinc-700 hover:text-amber-400 transition-colors"
-                      >
-                         <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                         </svg>
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); playAudio(cleanAnswer); }} className="p-1.5 md:p-2 rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-colors">
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); toggleMistake(item); }} className={`p-1.5 md:p-2 rounded-full transition-colors ${flagged ? 'text-red-500 bg-red-500/10' : 'text-zinc-600 hover:text-zinc-400'}`}>
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill={flagged ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21V5a2 2 0 012-2h10a2 2 0 012 2v8l-7-3.5L5 13v8" /></svg>
-                      </button>
+                    <div className="flex items-center gap-0.5 md:gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <Tooltip text={t('tt_report')}>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setReportContext(item); }} 
+                          className="p-1.5 md:p-2 rounded-full text-zinc-700 hover:text-amber-400 hover:bg-white/5 transition-all"
+                        >
+                           <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                           </svg>
+                        </button>
+                      </Tooltip>
+                      <Tooltip text={t('tt_audio')}>
+                        <button onClick={(e) => { e.stopPropagation(); playAudio(cleanAnswer); }} className="p-1.5 md:p-2 rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-all">
+                          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                        </button>
+                      </Tooltip>
+                      <Tooltip text={t('tt_save')}>
+                        <button onClick={(e) => { e.stopPropagation(); toggleMistake(item); }} className={`p-1.5 md:p-2 rounded-full transition-all ${flagged ? 'text-red-500 bg-red-500/10' : 'text-zinc-600 hover:text-zinc-400 hover:bg-white/5'}`}>
+                          <svg className="w-4 h-4 md:w-5 md:h-5" fill={flagged ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21V5a2 2 0 012-2h10a2 2 0 012 2v8l-7-3.5L5 13v8" /></svg>
+                        </button>
+                      </Tooltip>
                     </div>
                   </div>
                   {isActive && (
