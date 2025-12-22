@@ -30,11 +30,24 @@ const isNightModeKST = () => {
   return hour >= 22 || hour < 6;
 };
 
+// Hook for detecting restricted in-app browsers common in Korea
+const useInAppBrowser = () => {
+    const [isInApp, setIsInApp] = useState(false);
+    useEffect(() => {
+        const ua = navigator.userAgent.toLowerCase();
+        const restricted = /kakaotalk|naver|line|fbav|fban|instagram/i.test(ua);
+        setIsInApp(restricted);
+    }, []);
+    return isInApp;
+};
+
 function AppContent() {
   const { user, openLoginModal, isAuthenticated, incrementScan } = useAuth();
   const { t, language } = useLanguage();
+  const isInApp = useInAppBrowser();
   
   const [isNight, setIsNight] = useState(isNightModeKST());
+  const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [analysisState, setAnalysisState] = useState<AnalysisState>({
     status: 'idle',
     data: null,
@@ -167,7 +180,23 @@ function AppContent() {
       
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
 
-      <main className="max-w-7xl mx-auto p-4 md:p-6 pb-0 min-h-screen flex flex-col">
+      <main className={`max-w-7xl mx-auto p-4 md:p-6 pb-0 min-h-screen flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : ''}`}>
+        
+        {/* In-App Browser Warning Banner for Korean Users */}
+        {analysisState.status === 'idle' && isInApp && showInAppNotice && (
+            <div className="fixed top-20 left-4 right-4 z-[60] bg-brand-orange text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20">
+                <div className="flex items-center gap-3">
+                    <span className="text-xl">⚠️</span>
+                    <p className="text-[11px] md:text-xs font-bold font-korean leading-tight">
+                        {language === 'ko' 
+                           ? "현재 인앱 브라우저를 사용 중입니다. 더 원활한 스캔을 위해 'Safari' 또는 'Chrome'으로 열어주세요." 
+                           : "Restricted browser detected. Please open in Safari or Chrome for full AI functionality."}
+                    </p>
+                </div>
+                <button onClick={() => setShowInAppNotice(false)} className="text-white/60 p-1">✕</button>
+            </div>
+        )}
+
         {analysisState.status === 'idle' && (
           <div className="animate-fade-in flex-1">
             <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data, false)} />
@@ -198,25 +227,25 @@ function AppContent() {
         )}
 
         {analysisState.status === 'complete' && analysisState.data && (
-          <div className="animate-fade-in-up flex flex-col flex-1 pt-20 md:pt-24 pb-4">
+          <div className="animate-fade-in-up flex flex-col flex-1 pt-14 md:pt-24 pb-4">
             <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
-                 <h2 className="text-xl md:text-2xl font-black text-white font-korean tracking-tight truncate">
+                 <h2 className="text-lg md:text-2xl font-black text-white font-korean tracking-tight truncate">
                     {language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
                  </h2>
               </div>
               
               <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => handleReset(true)} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl border border-zinc-700 transition-all shadow-xl flex items-center gap-2 group active:scale-95">
-                    <span className="text-lg group-hover:rotate-12 transition-transform">📸</span> 
+                  <button onClick={() => handleReset(true)} className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl border border-zinc-700 transition-all shadow-xl flex items-center gap-2 group active:scale-95">
+                    <span className="text-base md:text-lg group-hover:rotate-12 transition-transform">📸</span> 
                     <span className="hidden sm:inline text-xs font-black uppercase tracking-widest">{t('ws_scan_again')}</span>
                   </button>
 
                   <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 shadow-inner">
-                    <button onClick={() => setViewMode('overlay')} className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${viewMode === 'overlay' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                    <button onClick={() => setViewMode('overlay')} className={`px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-black transition-all ${viewMode === 'overlay' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
                       {t('ws_overlay')}
                     </button>
-                    <button onClick={() => setViewMode('split')} className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${viewMode === 'split' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                    <button onClick={() => setViewMode('split')} className={`px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-black transition-all ${viewMode === 'split' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
                       {t('ws_list')}
                     </button>
                   </div>
