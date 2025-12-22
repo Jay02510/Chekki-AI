@@ -31,7 +31,7 @@ const translations = {
     drop_subtitle: "Tap here to pick a photo",
     supported_formats: "JPG, PNG, WEBP, HEIC are all great! • Max: 10MB",
     
-    beta_banner: "✨ You’ve worked hard today. Chekki will take it from here.",
+    beta_banner: "✨ Chekki is growing! Tap here to share your feedback.",
     
     how_title: "How Chekki Helps",
     how_step1: "Take a Photo",
@@ -150,7 +150,7 @@ const translations = {
     drop_subtitle: "여기를 눌러 앨범에서 골라주세요",
     supported_formats: "JPG, PNG, WEBP, HEIC 모두 좋아요! • 최대 10MB",
     
-    beta_banner: "✨ 육아퇴근 5분 전! 야간 숙제는 채키에게 맡기세요.",
+    beta_banner: "✨ 채키는 성장 중! 더 좋은 서비스가 될 수 있게 의견을 들려주세요.",
 
     how_title: "채키는 이렇게 도와드려요",
     how_step1: "사진 찍기",
