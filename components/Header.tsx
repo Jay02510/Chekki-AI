@@ -43,14 +43,14 @@ export const Header: React.FC<Props> = ({ onReset }) => {
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top)]">
         <div className="absolute inset-0 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5"></div>
         
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-24 flex items-center justify-between">
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-24 flex items-center justify-between gap-2">
           
           <div 
-            className="flex items-center cursor-pointer group h-full flex-shrink" 
+            className="flex items-center cursor-pointer group h-full flex-shrink min-w-0" 
             onClick={onReset}
           >
             {!logoError ? (
-              <div className="relative w-16 h-16 md:w-32 md:h-32 flex-shrink-0">
+              <div className="relative w-12 h-12 md:w-32 md:h-32 flex-shrink-0">
                   <img 
                     src={ASSETS.LOGO} 
                     alt="Chekki AI" 
@@ -59,27 +59,27 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                   />
               </div>
             ) : (
-              <div className="w-10 h-10 md:w-14 md:h-14 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300">
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
                  <ChekkiMascot className="w-6 h-6 text-white drop-shadow-md" mood="happy" />
               </div>
             )}
             
-            <div className="flex flex-col justify-center -ml-3 md:-ml-10 relative z-10 pt-1">
-              <h1 className="text-lg md:text-3xl font-black text-white leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-300">
+            <div className="flex flex-col justify-center -ml-1 md:-ml-10 relative z-10 pt-1 min-w-0">
+              <h1 className="text-lg md:text-3xl font-black text-white leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-300 truncate">
                 Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
               </h1>
-              <span className="text-[8px] md:text-[11px] text-zinc-500 font-bold tracking-wider md:tracking-[0.15em] uppercase mt-0.5 opacity-80 leading-tight truncate max-w-[100px] md:max-w-none">
-                {language === 'ko' ? "숙제 파트너" : t('tagline')}
+              <span className="text-[7px] md:text-[11px] text-zinc-500 font-bold tracking-wider md:tracking-[0.15em] uppercase mt-0.5 opacity-80 leading-tight truncate">
+                {language === 'ko' ? "엄마표 영어 숙제 파트너" : t('tagline')}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-4 h-full flex-shrink-0">
+          <div className="flex items-center gap-1.5 md:gap-4 h-full flex-shrink-0">
             {user && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 md:gap-2">
                  <button 
                   onClick={() => setShowCommunity(true)}
-                  className="hidden sm:flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+                  className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
                   title="Mom's Lounge"
                  >
                    <span>☕</span>
@@ -87,12 +87,12 @@ export const Header: React.FC<Props> = ({ onReset }) => {
 
                  <button 
                    onClick={() => setShowMistakeModal(true)}
-                   className="relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+                   className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
                    title="Review Note"
                  >
                    <span>📝</span>
                    {mistakes.length > 0 && (
-                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold shadow-lg shadow-red-500/50">
+                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] md:text-[9px] w-3.5 h-3.5 md:w-4 md:h-4 flex items-center justify-center rounded-full font-bold shadow-lg shadow-red-500/50">
                        {mistakes.length}
                      </span>
                    )}
@@ -102,17 +102,17 @@ export const Header: React.FC<Props> = ({ onReset }) => {
 
             <button 
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group flex-shrink-0"
+              className="flex items-center gap-1 px-2 py-1.5 md:px-2.5 md:py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group flex-shrink-0"
             >
-              <span className={`text-[10px] md:text-xs font-bold font-display transition-colors ${language === 'en' ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>EN</span>
+              <span className={`text-[9px] md:text-xs font-bold font-display transition-colors ${language === 'en' ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>EN</span>
               <div className="w-px h-2.5 bg-white/20"></div>
-              <span className={`text-[10px] md:text-xs font-bold font-display transition-colors ${language === 'ko' ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>KO</span>
+              <span className={`text-[9px] md:text-xs font-bold font-display transition-colors ${language === 'ko' ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>KO</span>
             </button>
 
             {user ? (
               <div className="flex items-center gap-4 pl-1 relative flex-shrink-0">
                 <div 
-                  className="h-9 w-9 md:h-10 md:w-10 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer hover:ring-2 hover:ring-orange-500/50 transition-all uppercase select-none" 
+                  className="h-8 w-8 md:h-10 md:w-10 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer hover:ring-2 hover:ring-orange-500/50 transition-all uppercase select-none text-xs md:text-base" 
                   onClick={() => setShowUserMenu(!showUserMenu)} 
                 >
                   {user.name.charAt(0)}
@@ -121,7 +121,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                 {showUserMenu && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
-                    <div className="absolute right-0 top-14 w-60 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in-up origin-top-right ring-1 ring-white/10">
+                    <div className="absolute right-0 top-12 md:top-14 w-60 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in-up origin-top-right ring-1 ring-white/10">
                        <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 text-left">
                           <p className="text-white font-bold truncate font-display leading-tight">{user.name}</p>
                           <p className="text-[10px] text-zinc-500 truncate mb-2 leading-tight">{user.email}</p>
@@ -162,7 +162,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
             ) : (
               <button 
                 onClick={openLoginModal}
-                className="flex-shrink-0 bg-white text-black px-3.5 py-2 md:px-6 md:py-2.5 rounded-full text-[11px] md:text-sm font-black font-display hover:bg-zinc-200 transition-all transform active:scale-95 shadow-lg shadow-white/5 whitespace-nowrap min-w-fit"
+                className="flex-shrink-0 bg-white text-black px-3.5 py-2 md:px-6 md:py-2.5 rounded-full text-[10px] md:text-sm font-black font-display hover:bg-zinc-200 transition-all transform active:scale-95 shadow-lg shadow-white/5 whitespace-nowrap min-w-fit"
               >
                 {t('login')}
               </button>

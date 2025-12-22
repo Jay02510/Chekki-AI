@@ -145,12 +145,12 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
       {reportContext && <FeedbackModal context={reportContext} onClose={() => setReportContext(null)} />}
 
       <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-[calc(100dvh-180px)] lg:h-[calc(100vh-250px)] min-h-[450px]">
-        {/* Mobile: 40% height for image, LG: 1/2 height */}
+        {/* Image Display */}
         <div className="w-full lg:w-1/2 h-[40%] lg:h-full flex flex-col">
           <WorksheetOverlay imageUrl={imageUrl} items={items} focusedId={activeItemId} className="h-full" />
         </div>
 
-        {/* Mobile: 60% height for list, LG: 1/2 height */}
+        {/* Results List */}
         <div className="w-full lg:w-1/2 h-[60%] lg:h-full flex flex-col bg-zinc-900/50 rounded-2xl border border-zinc-800/50 overflow-hidden relative" onClick={() => setActiveItemId(null)}>
           <div className="p-4 md:p-6 border-b border-zinc-800 bg-zinc-900 flex justify-between items-center shrink-0" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 md:gap-4 relative z-10">
@@ -192,7 +192,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                       <div className="flex items-center gap-2">
                         <span className="font-hand text-lg md:text-xl text-emerald-400 font-bold">{cleanAnswer}</span>
                         {speechResult?.id === item.id && speechResult.success && (
-                            <span className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-bounce">Great Job! 🌟</span>
+                            <span className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-bounce">Good! 🌟</span>
                         )}
                       </div>
                     </div>
@@ -220,7 +220,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                         <div className="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-xl flex flex-col gap-3">
                             <div className="flex items-center justify-between">
                                 <p className="text-[9px] md:text-[10px] font-black uppercase text-indigo-400 tracking-widest">
-                                    {language === 'ko' ? "Pronunciation Coach (발음 연습)" : "Pronunciation Coach (Practice Speaking)"}
+                                    {language === 'ko' ? "발음 연습 (Pronunciation Coach)" : "Pronunciation Coach (Practice Speaking)"}
                                 </p>
                                 {isListening && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
                             </div>
@@ -234,8 +234,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                                 </button>
                                 <div className="flex-1">
-                                    <p className="text-xs text-zinc-300 font-medium">
-                                        {isListening ? "I'm listening... Say the answer aloud!" : "Tap the mic and speak the answer to get a stamp!"}
+                                    <p className="text-xs text-zinc-300 font-medium leading-tight">
+                                        {isListening ? "I'm listening... Say it now!" : "Tap the mic and say the answer aloud for a stamp!"}
                                     </p>
                                     {speechResult?.id === item.id && !speechResult.success && (
                                         <p className="text-[10px] text-red-400 mt-1 font-bold">Try again! Listen to Chekki first. 🔊</p>
@@ -244,17 +244,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                             </div>
                         </div>
 
-                        {scriptText && (
-                          <div className="bg-brand-purple/10 border border-brand-purple/20 p-2.5 md:p-3 rounded-lg flex gap-3">
-                             <span className="text-base shrink-0">👩‍🏫</span>
-                             <div className="space-y-1">
-                                <p className="text-[9px] md:text-[10px] font-black uppercase text-brand-purple tracking-widest">Mom's Script (엄마의 한마디)</p>
-                                <p className="text-xs text-white leading-relaxed font-korean">{scriptText}</p>
-                             </div>
-                          </div>
-                        )}
-
-                        {/* Language-Specific Explanation */}
+                        {/* Monolingual Guide Based on Current Language */}
                         <div className="space-y-3 pl-1">
                             {language === 'en' ? (
                                 <div className="flex gap-2 items-start text-[11px] md:text-xs text-zinc-300">
@@ -265,13 +255,22 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                                    </div>
                                 </div>
                             ) : (
-                                <div className="flex gap-2 items-start text-[11px] md:text-xs text-zinc-300 font-korean">
-                                   <span className="text-base shrink-0">🇰🇷</span>
-                                   <div className="space-y-1">
-                                      <p className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest">Korean Guide (학습 가이드)</p>
-                                      <p className="leading-relaxed">{item.korean_guide}</p>
-                                   </div>
-                                </div>
+                                <>
+                                  <div className="bg-brand-purple/10 border border-brand-purple/20 p-2.5 md:p-3 rounded-lg flex gap-3">
+                                    <span className="text-base shrink-0">👩‍🏫</span>
+                                    <div className="space-y-1">
+                                        <p className="text-[9px] md:text-[10px] font-black uppercase text-brand-purple tracking-widest">Mom's Script (엄마의 한마디)</p>
+                                        <p className="text-xs text-white leading-relaxed font-korean">{scriptText}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2 items-start text-[11px] md:text-xs text-zinc-300 font-korean">
+                                    <span className="text-base shrink-0">🇰🇷</span>
+                                    <div className="space-y-1">
+                                        <p className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest">Korean Guide (학습 가이드)</p>
+                                        <p className="leading-relaxed">{item.korean_guide}</p>
+                                    </div>
+                                  </div>
+                                </>
                             )}
                         </div>
                     </div>

@@ -6,44 +6,39 @@ export const config = {
 };
 
 const SYSTEM_PROMPT_ANALYZE = `
-You are Homework Helper AI, a specialized educational assistant for Korean parents whose children attend English Kindergarten. 
+You are Homework Helper AI, a specialized educational assistant for Korean parents.
 Your tone is professional, warm, and highly supportive.
 
-GOAL: Analyze the worksheet image. Solve ALL items and provide a comprehensive bilingual teaching guide for the parent.
+GOAL: Analyze the worksheet image. Solve ALL items and provide a comprehensive bilingual teaching guide.
+
+STRICT PEDAGOGICAL RULES:
+- The 'korean_guide' and 'english_guide' MUST NOT just restate the question.
+- They MUST explain the logic, phonics rule, or context needed to find the answer.
+- Example: Instead of "This asks for the color," say "Explain that the sun is often depicted as yellow in stories, and point out the word 'Yellow' in the text."
 
 STRICT RULES FOR NUMBERING:
 - Use the EXACT question number found on the page for the 'id' field (e.g., 1, 2, 3).
 - DO NOT include the question number or dots (e.g., "1. ") inside the 'question_text' or 'correct_answer' strings. 
 
-STRICT RULES FOR MCQ (Multiple Choice Questions):
-- The 'correct_answer' MUST include the choice label AND the full text of that choice.
-- Example: "A. The big blue dog".
-
-GENERAL RULES:
-1. IDENTIFY ALL: Scan every question, tracing line, or matching item.
-2. MOM'S SCRIPT (teaching_script_ko): Create a short, natural sentence in Korean that a mother can say to her child to explain the question.
-3. BILINGUAL GUIDES: Provide both 'korean_guide' and 'english_guide'. The English guide should be simple enough for a child to hear, while the Korean guide explains the pedagogical 'why' to the parent.
-4. TEACHING TIPS: Provide both 'teaching_tip_ko' and 'teaching_tip_en'.
-
 JSON FORMAT:
 {
   "worksheet_summary": {
-    "title_en": "Phonics Fun",
-    "title_ko": "즐거운 파닉스",
-    "overview_ko": "알파벳의 소리와 모양을 익히는 활동이에요."
+    "title_en": "Reading Comprehension",
+    "title_ko": "독해 연습",
+    "overview_ko": "이야기를 읽고 내용을 파악하는 활동이에요."
   },
   "items": [
     {
       "id": 1,
       "type": "mcq",
       "bounding_box": { "ymin": 0, "xmin": 0, "ymax": 0, "xmax": 0 },
-      "question_text": "What color is the sun?",
-      "correct_answer": "B. Yellow",
-      "korean_guide": "태양의 색깔을 묻는 질문이에요. 자연물에 대한 명칭과 색깔을 연결하는 법을 배웁니다.",
-      "english_guide": "This question asks about the color of the sun. It's a great way to practice common objects and colors.",
-      "teaching_script_ko": "지우야, 하늘에 떠 있는 해님은 무슨 색깔일까? 노란색은 영어로 'Yellow'라고 한단다!",
-      "teaching_tip_ko": "색깔 단어를 반복해서 들려주세요.",
-      "teaching_tip_en": "Encourage the child to point at the sun and say 'Yellow'.",
+      "question_text": "Why did Gary stop juggling?",
+      "correct_answer": "B. A squirrel stole an apple",
+      "korean_guide": "게리가 왜 저글링을 멈췄는지 묻는 질문이에요. 본문 두 번째 문장에서 'A squirrel grabbed it and ran away'라는 표현을 찾아 squirrel(다람쥐)이 사과를 가져갔기 때문임을 설명해주세요.",
+      "english_guide": "This question tests reading comprehension. Guide the child to find the sentence about the squirrel grabbing the apple to understand why Gary had to stop.",
+      "teaching_script_ko": "지우야, 게리가 왜 사과 던지기를 멈췄을까? 여기 다람쥐가 사과를 가져갔다는 문장을 같이 읽어볼까?",
+      "teaching_tip_ko": "본문에서 핵심 단어(squirrel, grabbed)를 함께 찾아보세요.",
+      "teaching_tip_en": "Ask the child to point to the squirrel in the picture and say the word 'Stole'.",
       "confidence_score": 0.99
     }
   ]
@@ -54,8 +49,6 @@ const SYSTEM_PROMPT_GENERATE = `
 You are a creative educational content creator.
 GOAL: Based on provided questions, generate 3-5 high-quality similar practice questions for an English Kindergarten student.
 FORMAT: Return a JSON array of items following the WorksheetItem structure.
-NUMBERING RULE: Use sequential integers for 'id'. Do not put numbers in question_text.
-MCQ RULE: Always provide the full choice text in the correct_answer field.
 `;
 
 export default async function handler(req: any, res: any) {
@@ -93,7 +86,7 @@ export default async function handler(req: any, res: any) {
       contents: {
         parts: [
           { inlineData: { mimeType: "image/jpeg", data: image } },
-          { text: "Analyze this worksheet thoroughly. Solve everything and provide teaching scripts for a Korean mom." },
+          { text: "Analyze this worksheet thoroughly. Solve everything and provide deep pedagogical guides." },
         ],
       },
       config: {
