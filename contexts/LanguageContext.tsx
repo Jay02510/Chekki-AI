@@ -19,9 +19,9 @@ const translations = {
     pro_plan: "Pro Magic 🚀",
     
     hero_title: "English Homework?\nJust Snap a Photo.",
-    hero_title_night: "Up late?\nLet's finish this homework.",
+    hero_title_night: "You’ve worked hard today.\nChekki will take it from here.",
     hero_desc: "Don't stress over tricky English questions anymore. Get warm, easy-to-understand explanations and clear answers instantly. Help your child grow with confidence!",
-    hero_desc_night: "You’ve worked hard today. Chekki is here to help you wrap up the day so you can finally get some well-deserved rest.",
+    hero_desc_night: "Don't stress over tricky English questions anymore. Get warm, easy-to-understand explanations and clear answers instantly. Help your child grow with confidence!",
     hero_badge: "Mom's Secret Helper",
     hero_cta_title: "Happy Homework,",
     hero_cta_desc: "Join thousands of moms who've turned homework time into a peaceful, happy bonding moment.",
@@ -138,9 +138,9 @@ const translations = {
     pro_plan: "마법 프로 플랜 🚀",
 
     hero_title: "우리 아이 영어 실력,\n한 단계 더 높이기",
-    hero_title_night: "Up late?\nLet's finish this homework.",
+    hero_title_night: "육아퇴근 5분 전!\n야간 숙제는 채키에게 맡기세요.",
     hero_desc: "어려운 영어 문제로 고민하지 마세요. 따뜻하고 이해하기 쉬운 설명과 정답을 즉시 확인하고, 우리 아이에게 자신 있게 가르쳐주세요.",
-    hero_desc_night: "육아퇴근 5분 전! 야간 숙제는 채키에게 맡기세요. 어머님, 오늘도 정말 고생 많으셨어요.",
+    hero_desc_night: "어려운 영어 문제로 고민하지 마세요. 따뜻하고 이해하기 쉬운 설명과 정답을 즉시 확인하고, 우리 아이에게 자신 있게 가르쳐주세요.",
     hero_badge: "엄마만의 비밀 도우미",
     hero_cta_title: "행복한 숙제 시간,",
     hero_cta_desc: "숙제 시간이 스트레스가 아닌, 아이와 함께 웃으며 성장하는 따뜻한 시간이 됩니다.",

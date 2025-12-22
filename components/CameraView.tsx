@@ -69,7 +69,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 ) : (
                   <div className="w-full h-full animate-float flex items-center justify-center">
                     {!imgError ? (
-                       <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} alt="Chekki Mascot" className="w-full h-full object-contain drop-shadow-2xl filter brightness-110" onError={() => setImgError(true)}/>
+                       <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} alt="Chekki Mascot" className={`w-full h-full object-contain drop-shadow-2xl filter brightness-110 ${isNight ? 'scale-[1.8]' : ''}`} onError={() => setImgError(true)}/>
                     ) : (
                        <ChekkiMascot className="w-full h-full drop-shadow-2xl filter brightness-110" mood={isNight ? "sleeping" : "happy"} />
                     )}
@@ -181,7 +181,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <img 
                   src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                   alt="Chekki Hero" 
-                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.3] lg:scale-[1.5]`}
+                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.8] lg:scale-[2.2]`}
                 />
             </div>
         </div>
@@ -323,7 +323,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                    <img 
                     src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                     alt="Chekki Mascot" 
-                    className={`w-[110%] h-[110%] object-contain filter brightness-110 drop-shadow-[0_15px_40px_rgba(0,0,0,0.3)] animate-float scale-[1.3] lg:scale-[1.5]`} 
+                    className={`w-[110%] h-[110%] object-contain filter brightness-110 drop-shadow-[0_15px_40px_rgba(0,0,0,0.3)] animate-float scale-[1.8] lg:scale-[2.2]`} 
                    />
                 </div>
               </div>
