@@ -205,7 +205,7 @@ const translations = {
     ws_gen_practice: "맞춤 연습문제 만들기",
     ws_scan_again: "다시 찍기",
     ws_overlay: "포커스 뷰",
-    ws_list: "다정한 리스트",
+    ws_list: "Easy List",
     
     stat_accuracy: "정확도",
     stat_users: "행복한 가족",

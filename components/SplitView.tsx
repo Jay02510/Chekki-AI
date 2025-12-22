@@ -25,6 +25,11 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
   const [reportContext, setReportContext] = useState<WorksheetItem | null>(null);
   const [mascotError, setMascotError] = useState(false);
 
+  // Pronunciation States
+  const [isListening, setIsListening] = useState(false);
+  const [speechResult, setSpeechResult] = useState<{ id: number; success: boolean } | null>(null);
+  const recognitionRef = useRef<any>(null);
+
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   useEffect(() => {
@@ -35,6 +40,43 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
       });
     }
   }, [activeItemId]);
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        const activeItem = items.find(i => i.id === activeItemId);
+        if (activeItem) {
+          const cleanAnswer = activeItem.correct_answer.toLowerCase().replace(/^\d+[\.\)\s]+/, '').replace(/[^\w\s]/g, '').trim();
+          const cleanSpeech = transcript.replace(/[^\w\s]/g, '').trim();
+          
+          if (cleanSpeech.includes(cleanAnswer) || cleanAnswer.includes(cleanSpeech)) {
+            setSpeechResult({ id: activeItem.id, success: true });
+            const audio = new Audio(ASSETS.STAMP_SOUND);
+            audio.play().catch(() => {});
+          } else {
+            setSpeechResult({ id: activeItem.id, success: false });
+          }
+        }
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, [activeItemId, items]);
 
   const normalizeText = (text: string) => {
     if (!text) return "";
@@ -82,6 +124,21 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
     }
   };
 
+  const startPronunciationCheck = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (user?.plan !== 'pro') {
+      setShowPaywall(true);
+      return;
+    }
+    if (!recognitionRef.current) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+    setSpeechResult(null);
+    setIsListening(true);
+    recognitionRef.current.start();
+  };
+
   return (
     <>
       {showCloneModal && <CloneWorksheetModal originalItems={items} onClose={() => setShowCloneModal(false)} />}
@@ -119,7 +176,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
               const item = group.main;
               const isActive = activeItemId === item.id;
               const flagged = isMistake(item.question_text);
-              const guideText = language === 'ko' ? item.korean_guide : (item.english_guide || item.teaching_tip_en || item.korean_guide);
               const scriptText = item.teaching_script_ko;
               
               const cleanAnswer = item.correct_answer.replace(/^\d+[\.\)\s]+/, '').trim();
@@ -133,7 +189,12 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className={`text-xs md:text-sm font-bold leading-snug mb-1 md:mb-2 ${isActive ? 'text-white' : 'text-zinc-400'}`}>{getDisplayQuestion(item.question_text)}</h4>
-                      <div className="flex items-center gap-2"><span className="font-hand text-lg md:text-xl text-emerald-400 font-bold">{cleanAnswer}</span></div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-hand text-lg md:text-xl text-emerald-400 font-bold">{cleanAnswer}</span>
+                        {speechResult?.id === item.id && speechResult.success && (
+                            <span className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-bounce">Great Job! 🌟</span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
                       <button 
@@ -153,7 +214,36 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                     </div>
                   </div>
                   {isActive && (
-                    <div className="border-t border-white/5 bg-black/20 p-3 md:p-4 animate-fade-in space-y-3">
+                    <div className="border-t border-white/5 bg-black/20 p-3 md:p-4 animate-fade-in space-y-4">
+                        
+                        {/* Pronunciation Coach */}
+                        <div className="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-xl flex flex-col gap-3">
+                            <div className="flex items-center justify-between">
+                                <p className="text-[9px] md:text-[10px] font-black uppercase text-indigo-400 tracking-widest">
+                                    {language === 'ko' ? "Pronunciation Coach (발음 연습)" : "Pronunciation Coach (Practice Speaking)"}
+                                </p>
+                                {isListening && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button 
+                                  onClick={startPronunciationCheck}
+                                  disabled={isListening}
+                                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600 hover:bg-indigo-500'} shadow-lg text-white ring-4 ring-indigo-500/20 active:scale-95`}
+                                  title="Speak Answer"
+                                >
+                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                                </button>
+                                <div className="flex-1">
+                                    <p className="text-xs text-zinc-300 font-medium">
+                                        {isListening ? "I'm listening... Say the answer aloud!" : "Tap the mic and speak the answer to get a stamp!"}
+                                    </p>
+                                    {speechResult?.id === item.id && !speechResult.success && (
+                                        <p className="text-[10px] text-red-400 mt-1 font-bold">Try again! Listen to Chekki first. 🔊</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
                         {scriptText && (
                           <div className="bg-brand-purple/10 border border-brand-purple/20 p-2.5 md:p-3 rounded-lg flex gap-3">
                              <span className="text-base shrink-0">👩‍🏫</span>
@@ -163,12 +253,26 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                              </div>
                           </div>
                         )}
-                        <div className="flex gap-2 items-start text-[11px] md:text-xs text-zinc-300 font-korean pl-1">
-                           <span className="text-base shrink-0">🧐</span>
-                           <div className="space-y-1">
-                              <p className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest">Analysis (학습 가이드)</p>
-                              <p className="leading-relaxed">{guideText}</p>
-                           </div>
+
+                        {/* Language-Specific Explanation */}
+                        <div className="space-y-3 pl-1">
+                            {language === 'en' ? (
+                                <div className="flex gap-2 items-start text-[11px] md:text-xs text-zinc-300">
+                                   <span className="text-base shrink-0">🇬🇧</span>
+                                   <div className="space-y-1">
+                                      <p className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest">English Guide</p>
+                                      <p className="leading-relaxed">{item.english_guide || item.teaching_tip_en || "Learn how to solve this step by step."}</p>
+                                   </div>
+                                </div>
+                            ) : (
+                                <div className="flex gap-2 items-start text-[11px] md:text-xs text-zinc-300 font-korean">
+                                   <span className="text-base shrink-0">🇰🇷</span>
+                                   <div className="space-y-1">
+                                      <p className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest">Korean Guide (학습 가이드)</p>
+                                      <p className="leading-relaxed">{item.korean_guide}</p>
+                                   </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                   )}
