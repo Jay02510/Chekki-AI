@@ -29,18 +29,18 @@ interface Props {
 
 export const CommunityModal: React.FC<Props> = ({ onClose }) => {
     const { user } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [postContent, setPostContent] = useState('');
     const [copySuccess, setCopySuccess] = useState<string | null>(null);
     const [reportedPosts, setReportedPosts] = useState<string[]>([]);
 
     const generateTemplate = (platform: 'cafe' | 'insta') => {
-        const base = postContent || "Today we practiced English homework with Chekki! 🚀";
+        const base = postContent || (language === 'ko' ? "오늘도 채키랑 영어 숙제 끝냈어요! 🚀" : "Today we practiced English homework with Chekki! 🚀");
         
         if (platform === 'cafe') {
-            return `[Chekki Study Record]\n\n📝 Title: Today's Homework\n✨ Mood: Proud!\n\n${base}\n\nThe AI pronunciation check was really helpful today. It's amazing to see the progress day by day!\n\n#ChekkiAI #MomsEnglish #HomeworkHelper #EnglishKindergarten`;
+            return `[영유 숙제 기록] 채키 AI로 오늘도 열공 완료! ✨\n\n아이랑 영유 숙제하다 보면 저도 가끔 헷갈릴 때가 있는데,\n채키(Chekki) 덕분에 발음도 확인하고 설명도 다정하게 해줄 수 있어서 너무 좋네요.\n\n특히 어려워했던 문제는 오답노트로 따로 모아볼 수 있어서 주말 복습도 든든합니다.\n공유해주신 학습 팁들 항상 잘 보고 있어요! 다들 화이팅입니다. ❤️\n\n💬 기록 한마디: ${base}\n\n#채키AI #영유맘 #숙제도우미 #엄마표영어 #7세영어 #자기주도학습`;
         } else {
-            return `${base}\n\nStudy streak: Day 3 🔥\n.\n.\n#Chekki #KidsEnglish #StudyGram #MomLife`;
+            return `${base}\n\n오늘도 우리 아이 성장을 위해 찰칵! 📸\n영어 숙제 시간이 이제 스트레스가 아니라\n도란도란 이야기 나누는 즐거운 시간이 되었어요.\n\n채키(@Chekki_AI)가 알려주는 엄마표 티칭 가이드 최고! 👍\n\n#공부기록 #홈스쿨링 #영유맘소통 #육아소통 #엄마표영어 #ChekkiAI #ChekkiMoment #StudyGram`;
         }
     };
 
@@ -91,8 +91,8 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
                         <textarea 
                             value={postContent}
                             onChange={(e) => setPostContent(e.target.value)}
-                            placeholder="How did the homework go today? (e.g., Min-jun got 100% on the phonics quiz!)" 
-                            className="w-full bg-black/20 border border-zinc-700 rounded-xl p-3 text-zinc-200 placeholder-zinc-500 text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 outline-none resize-none h-24 mb-4 transition-all" 
+                            placeholder={language === 'ko' ? "오늘 숙제는 어땠나요? (예: 민준이가 파닉스 퀴즈를 다 맞았어요!)" : "How did the homework go today?"} 
+                            className="w-full bg-black/20 border border-zinc-700 rounded-xl p-3 text-zinc-200 placeholder-zinc-500 text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 outline-none resize-none h-24 mb-4 transition-all font-korean" 
                         />
 
                         <div className="grid grid-cols-2 gap-3">
@@ -104,7 +104,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
                                     <span className="animate-fade-in">Copied! ✓</span>
                                 ) : (
                                     <>
-                                        <span>📋 Copy for Naver Cafe</span>
+                                        <span>📋 Copy for Cafe</span>
                                     </>
                                 )}
                             </button>
@@ -116,13 +116,13 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
                                     <span className="animate-fade-in">Copied! ✓</span>
                                 ) : (
                                     <>
-                                        <span>📸 Copy for Instagram</span>
+                                        <span>📸 Copy for Insta</span>
                                     </>
                                 )}
                             </button>
                         </div>
-                        <p className="text-[10px] text-zinc-500 text-center mt-3">
-                            * Tip: Copy this text and paste it into your favorite app with a photo!
+                        <p className="text-[10px] text-zinc-500 text-center mt-3 font-korean opacity-70">
+                            * 팁: 문구를 복사한 뒤 사진과 함께 업로드해 보세요!
                         </p>
                     </div>
 

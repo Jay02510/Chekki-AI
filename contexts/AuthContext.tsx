@@ -1,15 +1,14 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { auth, db } from '../services/database';
-// Fix: Use single quotes and correct named imports for modular SDK. Removed 'type' prefix inside curly braces for broader compatibility.
+// Fix: Use 'type' for User to resolve export member errors in certain TypeScript configurations
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut,
   deleteUser,
-  User
+  type User
 } from 'firebase/auth';
 
 interface AuthContextType {

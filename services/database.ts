@@ -1,4 +1,3 @@
-
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
   getFirestore, 
@@ -13,7 +12,7 @@ import {
   deleteDoc,
   addDoc
 } from 'firebase/firestore';
-// Fix: Use single quotes for consistency and ensure named import for modular SDK
+// Fix: Use correct named import for modular SDK and single quotes for consistency
 import { getAuth } from 'firebase/auth';
 import { UserProfile } from '../types';
 

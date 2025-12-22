@@ -1,5 +1,4 @@
-
-import { GoogleGenAI } from "@google/genai";
+import {GoogleGenAI} from "@google/genai";
 
 export const config = {
   maxDuration: 60, 
@@ -62,43 +61,44 @@ export default async function handler(req: any, res: any) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const apiKey = process.env.API_KEY; 
     
-    if (!apiKey) {
+    // Fix: Always use process.env.API_KEY directly when initializing the GoogleGenAI client
+    if (!process.env.API_KEY) {
       console.error("[Backend Error]: API_KEY environment variable is missing.");
       return res.status(500).json({ error: "ANALYSIS_FAILED" });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const { task, image, isRetry, originalItems } = body;
 
     if (task === 'generate') {
+      // Fix: Use ai.models.generateContent directly and provide simple text as a string
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: [{ text: `Original items: ${JSON.stringify(originalItems)}. Create 3-5 similar ones for a Kindergarten child.` }],
+        contents: `Original items: ${JSON.stringify(originalItems)}. Create 3-5 similar ones for a Kindergarten child.`,
         config: {
           systemInstruction: SYSTEM_PROMPT_GENERATE,
           responseMimeType: "application/json",
           temperature: 0.7,
         },
       });
+      // Fix: Access response.text as a property, not a method
       return res.status(200).json(JSON.parse(response.text || "[]"));
     }
 
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
-    const model = isRetry ? "gemini-3-pro-preview" : "gemini-3-flash-preview";
+    // Fix: Models must be chosen based on task complexity or specific user choice
+    const modelName = isRetry ? "gemini-3-pro-preview" : "gemini-3-flash-preview";
 
+    // Fix: Use ai.models.generateContent and provide contents as an object with parts
     const response = await ai.models.generateContent({
-      model: model,
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { inlineData: { mimeType: "image/jpeg", data: image } },
-            { text: "Analyze this worksheet thoroughly. Solve everything and provide teaching scripts for a Korean mom." },
-          ],
-        },
-      ],
+      model: modelName,
+      contents: {
+        parts: [
+          { inlineData: { mimeType: "image/jpeg", data: image } },
+          { text: "Analyze this worksheet thoroughly. Solve everything and provide teaching scripts for a Korean mom." },
+        ],
+      },
       config: {
         systemInstruction: SYSTEM_PROMPT_ANALYZE,
         responseMimeType: "application/json",
@@ -106,6 +106,7 @@ export default async function handler(req: any, res: any) {
       },
     });
 
+    // Fix: Access response.text as a property
     if (!response.text) throw new Error("EMPTY_RESPONSE");
     return res.status(200).json(JSON.parse(response.text));
 
