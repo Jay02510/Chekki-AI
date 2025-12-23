@@ -204,7 +204,7 @@ const translations = {
 
     ws_results_title: "채키의 채점 결과",
     ws_items_found: "개의 문제 해결됨",
-    ws_review_tip: "팁: 질문을 클릭하면 엄마를 위한 티칭 스크립트와 발음 연습 도구를 볼 수 있어요!",
+    ws_review_tip: "팁: 질문을 클릭하면 엄마를 위한 티칭 가이드와 발음 연습 도구를 볼 수 있어요!",
     ws_voice_guide: "💡 정답을 누르면 영어 발음을 들려드려요!",
     ws_gen_practice: "맞춤 연습문제 만들기",
     ws_scan_again: "다시 찍기",

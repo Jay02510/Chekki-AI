@@ -58,7 +58,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
   return (
     <div className={`w-full flex flex-col bg-zinc-950 rounded-2xl border border-zinc-800 overflow-hidden relative shadow-2xl ${className || 'h-full'}`}>
       <div className="flex-1 relative overflow-y-auto custom-scrollbar bg-black/40">
-        <div ref={containerRef} className="relative w-full min-h-[200px]">
+        <div ref={containerRef} className="relative w-full min-h-[200px] transform-gpu">
           <img 
             ref={imgRef}
             src={imageUrl} 
@@ -70,6 +70,8 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
                 setImageLoaded(true); // Allow items to show as fallback
             }}
             draggable={false}
+            // @ts-ignore - fetchpriority is a valid attribute but TS might not recognize it yet
+            fetchpriority="high"
           />
           
           {imageLoaded && items && items.map((item) => {

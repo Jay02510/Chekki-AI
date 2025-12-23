@@ -193,7 +193,9 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
           <div className="overflow-y-auto p-4 space-y-3 custom-scrollbar flex-1 relative z-10 overscroll-contain">
             <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl flex items-start gap-3 mb-2 animate-fade-in shadow-lg">
                <span className="text-base md:text-lg animate-bounce">💡</span>
-               <p className="text-[10px] md:text-xs text-orange-200/80 leading-relaxed font-bold font-korean">{t('ws_review_tip')}</p>
+               <p className="text-[10px] md:text-xs text-orange-200/80 leading-relaxed font-bold font-korean">
+                 {language === 'ko' ? "팁: 질문을 클릭하여 다정한 티칭 가이드와 발음 코칭을 확인해보세요!" : "Tip: Click any question to reveal Mom's Script, teaching guides, and the Pronunciation Coach!"}
+               </p>
             </div>
 
             {groupedItems.map((group) => {
