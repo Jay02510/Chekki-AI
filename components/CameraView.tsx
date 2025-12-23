@@ -24,7 +24,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const processFile = async (file: File) => {
     setIsProcessing(true);
     try {
-      const base64Url = await compressImage(file, 1024, 0.75);
+      const base64Url = await compressImage(file);
       const base64Data = base64Url.split(',')[1];
       onImageSelected(base64Data);
     } catch (e) {
@@ -50,6 +50,21 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     if (e.dataTransfer.files && e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
   };
 
+  const ClarityGuide = () => (
+    <div className="flex gap-2 mt-4 mb-2 overflow-x-auto pb-2 no-scrollbar px-2">
+      {[
+        { icon: '☀️', text: language === 'ko' ? '밝은 곳에서' : 'Good Lighting' },
+        { icon: '📏', text: language === 'ko' ? '수평 맞춰서' : 'Hold Flat' },
+        { icon: '🔍', text: language === 'ko' ? '초점 선명하게' : 'Stay Sharp' }
+      ].map((tip, i) => (
+        <div key={i} className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full shrink-0">
+          <span className="text-xs">{tip.icon}</span>
+          <span className="text-[10px] font-bold text-zinc-400 whitespace-nowrap">{tip.text}</span>
+        </div>
+      ))}
+    </div>
+  );
+
   const DropZone = ({ size = "large" }: { size?: "large" | "compact" }) => (
     <div className={`relative w-full ${size === 'large' ? 'min-h-[300px] h-auto md:min-h-[400px]' : 'h-[500px]'} perspective-1000 transition-all duration-700 ease-out py-4 md:py-8`}>
       <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] border ${isNight ? 'border-indigo-500/10' : 'border-white/5'} rounded-full animate-[spin_20s_linear_infinite] pointer-events-none`}></div>
@@ -63,7 +78,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       >
           <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-500/10 to-purple-500/10' : 'from-brand-orange/5 to-brand-purple/5'} opacity-50 group-hover:opacity-100 transition-opacity duration-500`}></div>
           <div className="relative z-10 flex flex-col items-center text-center">
-            <div className={`${size === 'large' ? 'w-32 h-32 md:w-56 md:h-56' : 'w-40 h-40'} mb-6 md:mb-8 relative transition-transform duration-500 group-hover:scale-105`}>
+            <div className={`${size === 'large' ? 'w-32 h-32 md:w-56 md:h-56' : 'w-40 h-40'} mb-4 md:mb-6 relative transition-transform duration-500 group-hover:scale-105`}>
                 {isProcessing ? (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className={`w-12 h-12 md:w-16 md:h-16 border-4 ${isNight ? 'border-indigo-500' : 'border-brand-orange'} border-t-transparent rounded-full animate-spin`}></div>
@@ -77,12 +92,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     )}
                   </div>
                 )}
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 md:w-32 h-4 md:h-6 bg-black/50 blur-lg rounded-full opacity-50 group-hover:opacity-80 transition-opacity"></div>
             </div>
             <h3 className="text-xl md:text-3xl font-bold text-white mb-2 font-display break-keep">
               {isProcessing ? t('processing') : t('drop_title')}
             </h3>
-            <p className="text-zinc-500 font-medium font-korean text-base md:text-lg break-keep leading-snug">{t('drop_subtitle')}</p>
+            <p className="text-zinc-500 font-medium font-korean text-base md:text-lg break-keep leading-tight">{t('drop_subtitle')}</p>
+            
+            <ClarityGuide />
+
             <div className="mt-6 md:mt-8 flex flex-col items-center gap-3 group/btn">
                 <div className={`w-12 h-12 md:w-14 md:h-14 rounded-full bg-zinc-800 border-2 border-white/10 flex items-center justify-center shadow-lg group-hover/btn:${isNight ? 'bg-indigo-600' : 'bg-brand-orange'} group-hover/btn:border-white group-hover/btn:scale-110 transition-all duration-300`}>
                     <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -191,7 +208,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
       </div>
 
-      {/* Trust Stats with Night Mode Banner */}
+      {/* Trust Stats */}
       <div className="max-w-7xl mx-auto px-6 mb-24 md:mb-32">
           {isNight && (
             <div className="max-w-2xl mb-12">
@@ -212,139 +229,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               ))}
           </div>
       </div>
-
-      {/* How It Works */}
-      <div className="bg-white/[0.02] border-y border-white/5 backdrop-blur-sm py-16 md:py-20 mb-24 md:mb-32 relative overflow-hidden">
-         <div className="max-w-7xl mx-auto px-6 text-center">
-            <h2 className={`text-[10px] md:text-xs font-black ${isNight ? 'text-indigo-400' : 'text-orange-500'} uppercase tracking-[0.2em] mb-3 leading-tight`}>{t('how_title')}</h2>
-            <p className="text-2xl md:text-4xl font-black text-white font-korean mb-12 md:mb-16 break-keep leading-[1.25]">{language === 'ko' ? "3단계로 끝내는 홈스쿨링" : "Done in 3 Simple Steps"}</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 relative">
-                <div className="flex flex-col items-center group">
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shadow-2xl mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:border-orange-500/50 text-2xl md:text-3xl">📸</div>
-                    <h3 className="text-lg md:text-xl font-bold text-white mb-2 font-korean break-keep leading-tight">{t('how_step1')}</h3>
-                    <p className="text-zinc-400 font-korean text-xs md:text-sm leading-relaxed max-w-[200px] break-keep">{t('how_step1_desc')}</p>
-                </div>
-                <div className="flex flex-col items-center group">
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shadow-2xl mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:border-purple-500/50 text-2xl md:text-3xl">✨</div>
-                    <h3 className="text-lg md:text-xl font-bold text-white mb-2 font-korean break-keep leading-tight">{t('how_step2')}</h3>
-                    <p className="text-zinc-400 font-korean text-xs md:text-sm leading-relaxed max-w-[200px] break-keep">{t('how_step2_desc')}</p>
-                </div>
-                <div className="flex flex-col items-center group">
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shadow-2xl mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:border-emerald-500/50 text-2xl md:text-3xl">🗣️</div>
-                    <h3 className="text-lg md:text-xl font-bold text-white mb-2 font-korean break-keep leading-tight">{t('how_step3')}</h3>
-                    <p className="text-zinc-400 font-korean text-xs md:text-sm leading-relaxed max-w-[200px] break-keep">{t('how_step3_desc')}</p>
-                </div>
-            </div>
-         </div>
-      </div>
-
-      {/* Feature Section */}
-      <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-40">
-          <div className="grid md:grid-cols-2 gap-8">
-              {/* Vision AI Card with Video Loop Background */}
-              <div className={`bg-gradient-to-br from-zinc-900 to-zinc-950 p-8 md:p-10 rounded-[2rem] md:rounded-[3rem] border border-white/5 shadow-2xl flex flex-col justify-center relative overflow-hidden group min-h-[350px] md:min-h-[400px]`}>
-                  <div className="absolute inset-0 opacity-40 pointer-events-none group-hover:opacity-60 transition-opacity duration-700">
-                     <video autoPlay muted loop playsInline className="w-full h-full object-cover">
-                        <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
-                     </video>
-                  </div>
-                  <div className="relative z-10 drop-shadow-md">
-                    <span className={`${isNight ? 'text-indigo-400' : 'text-orange-500'} font-black text-[10px] md:text-xs uppercase tracking-widest mb-4 block`}>Vision AI</span>
-                    <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-korean break-keep leading-tight">{t('feat_vision_title')}</h3>
-                    <p className="text-zinc-100 font-korean text-sm md:text-base leading-relaxed mb-8 break-keep drop-shadow-lg font-bold">{t('feat_vision_desc')}</p>
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-black/40 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border border-white/10">
-                            <span className="text-xl">🔍</span>
-                        </div>
-                        <span className="text-[10px] md:text-xs text-white font-black uppercase tracking-widest drop-shadow-md">{language === 'ko' ? "실시간 정답 스캔" : "Real-time AI Grading"}</span>
-                    </div>
-                  </div>
-              </div>
-              
-              <div className="grid gap-6 md:gap-8">
-                  <div className="bg-zinc-900/50 p-6 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm flex items-start gap-4 md:gap-6">
-                      <div className={`w-12 h-12 md:w-14 md:h-14 ${isNight ? 'bg-indigo-500/10' : 'bg-emerald-500/10'} rounded-2xl flex items-center justify-center text-xl md:text-2xl shrink-0`}>🔊</div>
-                      <div>
-                          <h4 className="text-lg md:text-xl font-bold text-white mb-2 font-korean leading-tight">{t('feat_audio')}</h4>
-                          <p className="text-zinc-500 text-xs md:text-sm font-korean break-keep leading-relaxed">{t('feat_audio_desc')}</p>
-                      </div>
-                  </div>
-                  <div className="bg-zinc-900/50 p-6 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm flex items-start gap-4 md:gap-6">
-                      <div className={`w-12 h-12 md:w-14 md:h-14 ${isNight ? 'bg-indigo-500/10' : 'bg-purple-500/10'} rounded-2xl flex items-center justify-center text-xl md:text-2xl shrink-0`}>📝</div>
-                      <div>
-                          <h4 className="text-lg md:text-xl font-bold text-white mb-2 font-korean leading-tight">{language === 'ko' ? "복습 노트 생성" : "Smart Review Note"}</h4>
-                          <p className="text-zinc-500 text-xs md:text-sm font-korean break-keep leading-relaxed">{t('feat_review_desc')}</p>
-                      </div>
-                  </div>
-                  <div className="bg-zinc-900/50 p-6 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm flex items-start gap-4 md:gap-6">
-                      <div className={`w-12 h-12 md:w-14 md:h-14 ${isNight ? 'bg-indigo-500/10' : 'bg-pink-500/10'} rounded-2xl flex items-center justify-center text-xl md:text-2xl shrink-0`}>🛡️</div>
-                      <div>
-                          <h4 className="text-lg md:text-xl font-bold text-white mb-2 font-korean leading-tight">{t('feat_privacy')}</h4>
-                          <p className="text-zinc-500 text-xs md:text-sm font-korean break-keep leading-relaxed">{t('feat_privacy_desc')}</p>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
-
-      {/* Testimonials */}
-      <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-40 text-center">
-          <h2 className={`text-[10px] md:text-xs font-black ${isNight ? 'text-indigo-400' : 'text-orange-500'} uppercase tracking-[0.2em] mb-8 md:mb-3 leading-tight`}>{t('test_title')}</h2>
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-              {[
-                { name: t('test_1_name'), text: t('test_1_text'), avatar: '👩🏻' },
-                { name: t('test_2_name'), text: t('test_2_text'), avatar: '👨🏻' },
-                { name: t('test_3_name'), text: t('test_3_text'), avatar: '👩🏼' }
-              ].map((test, i) => (
-                <div key={i} className="bg-zinc-900/40 border border-white/5 p-6 md:p-8 rounded-3xl text-left backdrop-blur-md hover:-translate-y-2 transition-transform">
-                    <div className={`${isNight ? 'text-indigo-400' : 'text-orange-500'} mb-4 text-lg md:text-xl`}>★★★★★</div>
-                    <p className="text-zinc-300 font-korean text-xs md:text-sm italic mb-6 leading-relaxed break-keep">"{test.text}"</p>
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-800 rounded-full flex items-center justify-center text-lg">{test.avatar}</div>
-                        <div className="text-[10px] md:text-xs font-bold text-white leading-tight">{test.name}</div>
-                    </div>
-                </div>
-              ))}
-          </div>
-      </div>
-
-      {/* Final CTA */}
-      <div className="max-w-5xl mx-auto px-4 md:px-6 mb-20">
-          <div className={`bg-gradient-to-r ${isNight ? 'from-indigo-600 to-indigo-950' : 'from-orange-500 to-pink-500'} rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden shadow-2xl ${isNight ? 'shadow-indigo-500/10' : 'shadow-orange-500/20'} group min-h-[300px] md:min-h-[350px] flex items-center`}>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-white/5 blur-[100px] rounded-full pointer-events-none"></div>
-              
-              <div className="relative z-10 grid lg:grid-cols-[1.3fr_0.7fr] gap-8 items-center w-full">
-                <div className="text-left animate-fade-in-up">
-                  <h2 className="text-2xl md:text-5xl font-black text-white mb-3 font-display break-keep leading-tight drop-shadow-xl">{t('hero_cta_title')}</h2>
-                  <p className="text-white text-sm md:text-xl font-korean mb-8 font-bold break-keep leading-relaxed drop-shadow-lg opacity-95 max-w-lg">{t('hero_cta_desc')}</p>
-                  <button onClick={openLoginModal} className={`bg-white ${isNight ? 'text-indigo-800' : 'text-orange-600'} px-8 py-3.5 md:px-10 md:py-4 rounded-xl font-black text-base md:text-lg hover:bg-zinc-100 transition-all transform active:scale-95 shadow-2xl leading-tight`}>
-                      {t('hero_cta_btn')}
-                  </button>
-                </div>
-                
-                <div className="hidden lg:flex justify-end items-center relative h-full">
-                   <img 
-                    src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
-                    alt="Chekki Mascot" 
-                    className={`w-[110%] h-[110%] object-contain filter brightness-110 drop-shadow-[0_15px_40px_rgba(0,0,0,0.3)] animate-float scale-[1.8] lg:scale-[2.2]`} 
-                   />
-                </div>
-              </div>
-          </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="max-w-7xl mx-auto px-6 pt-10 pb-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col items-center md:items-start gap-1">
-              <div className="text-sm font-black text-white font-display leading-tight">Chekki<span className={isNight ? 'text-indigo-500' : 'text-orange-500'}>AI</span></div>
-              <div className="text-[9px] text-zinc-600 uppercase font-black tracking-widest">{t('footer_text')}</div>
-          </div>
-          <div className="flex gap-8 text-[10px] text-zinc-500 font-black uppercase tracking-widest">
-              <span className="hover:text-white cursor-pointer" onClick={() => (window as any).openLegal?.('privacy')}>Privacy</span>
-              <span className="hover:text-white cursor-pointer" onClick={() => (window as any).openLegal?.('terms')}>Terms</span>
-              <span className="hover:text-white cursor-pointer">Support</span>
-          </div>
-      </footer>
     </div>
   );
 };

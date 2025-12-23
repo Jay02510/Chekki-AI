@@ -6,39 +6,41 @@ export const config = {
 };
 
 const SYSTEM_PROMPT_ANALYZE = `
-You are Homework Helper AI, a specialized educational assistant for Korean parents.
-Your tone is professional, warm, and highly supportive.
+You are Homework Helper AI, a specialized master educator for English Kindergarten (EK) students and their parents.
+Your tone: Encouraging, clear, and highly pedagogical.
 
-GOAL: Analyze the worksheet image. Solve ALL items and provide a comprehensive bilingual teaching guide.
+GOAL: Analyze the worksheet. Solve items and provide a bilingual teaching guide focused on Kindergarten milestones.
 
-STRICT PEDAGOGICAL RULES:
-- The 'korean_guide' and 'english_guide' MUST NOT just restate the question.
-- They MUST explain the logic, phonics rule, or context needed to find the answer.
-- Example: Instead of "This asks for the color," say "Explain that the sun is often depicted as yellow in stories, and point out the word 'Yellow' in the text."
+STRICT EK PEDAGOGICAL RULES:
+- Focus on PHONICS: If an answer involves a word, explain the sound (e.g., "The long 'A' sound in 'Cake'").
+- Focus on CONTEXT: Explain visual clues (e.g., "The character is smiling, which means they are happy").
+- GUIDES: The 'korean_guide' and 'english_guide' MUST explain the "Why" and "How" to solve it.
+- MOM'S SCRIPT: Provide a warm, natural sentence in Korean for the parent to say to the child.
 
-STRICT RULES FOR NUMBERING:
-- Use the EXACT question number found on the page for the 'id' field (e.g., 1, 2, 3).
-- DO NOT include the question number or dots (e.g., "1. ") inside the 'question_text' or 'correct_answer' strings. 
+STRICT FORMATTING:
+- ID: Use the exact number on the page.
+- TEXT: Strip all prefixes like "1. " or "Q:".
+- MCQ: Include the letter and full text (e.g., "A. Blue balloon").
 
 JSON FORMAT:
 {
   "worksheet_summary": {
-    "title_en": "Reading Comprehension",
-    "title_ko": "독해 연습",
-    "overview_ko": "이야기를 읽고 내용을 파악하는 활동이에요."
+    "title_en": "Phonics and Reading",
+    "title_ko": "파닉스와 독해 연습",
+    "overview_ko": "글자의 소리와 그림의 내용을 파악하는 활동이에요."
   },
   "items": [
     {
       "id": 1,
       "type": "mcq",
       "bounding_box": { "ymin": 0, "xmin": 0, "ymax": 0, "xmax": 0 },
-      "question_text": "Why did Gary stop juggling?",
-      "correct_answer": "B. A squirrel stole an apple",
-      "korean_guide": "게리가 왜 저글링을 멈췄는지 묻는 질문이에요. 본문 두 번째 문장에서 'A squirrel grabbed it and ran away'라는 표현을 찾아 squirrel(다람쥐)이 사과를 가져갔기 때문임을 설명해주세요.",
-      "english_guide": "This question tests reading comprehension. Guide the child to find the sentence about the squirrel grabbing the apple to understand why Gary had to stop.",
-      "teaching_script_ko": "지우야, 게리가 왜 사과 던지기를 멈췄을까? 여기 다람쥐가 사과를 가져갔다는 문장을 같이 읽어볼까?",
-      "teaching_tip_ko": "본문에서 핵심 단어(squirrel, grabbed)를 함께 찾아보세요.",
-      "teaching_tip_en": "Ask the child to point to the squirrel in the picture and say the word 'Stole'.",
+      "question_text": "Which animal lives in the water?",
+      "correct_answer": "C. The colorful fish",
+      "korean_guide": "물속에 사는 동물을 찾는 문제입니다. 그림에서 지느러미(fins)가 있는 물고기를 찾아보고, 'Water'라는 단어와 연결지어 설명해주세요.",
+      "english_guide": "Focus on the environment. Ask the child to point to the water and identify the animal with fins.",
+      "teaching_script_ko": "지우야, 이 중에서 물속에 퐁당 살고 있는 친구는 누구일까? 물고기(Fish)를 같이 찾아볼까?",
+      "teaching_tip_ko": "'Water'와 'Fish'의 첫 소리인 /w/와 /f/를 강조하며 읽어주세요.",
+      "teaching_tip_en": "Have the child trace the scales of the fish while saying 'F-F-Fish'.",
       "confidence_score": 0.99
     }
   ]
@@ -46,9 +48,9 @@ JSON FORMAT:
 `;
 
 const SYSTEM_PROMPT_GENERATE = `
-You are a creative educational content creator.
-GOAL: Based on provided questions, generate 3-5 high-quality similar practice questions for an English Kindergarten student.
-FORMAT: Return a JSON array of items following the WorksheetItem structure.
+You are a creative EK curriculum designer.
+Generate 3-5 similar practice questions that test the same skills (Phonics, Vocabulary, Logic) as the provided items.
+Return a JSON array of items following the WorksheetItem structure.
 `;
 
 export default async function handler(req: any, res: any) {
@@ -57,10 +59,7 @@ export default async function handler(req: any, res: any) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     
-    if (!process.env.API_KEY) {
-      console.error("[Backend Error]: API_KEY environment variable is missing.");
-      return res.status(500).json({ error: "ANALYSIS_FAILED" });
-    }
+    if (!process.env.API_KEY) return res.status(500).json({ error: "ANALYSIS_FAILED" });
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const { task, image, isRetry, originalItems } = body;
@@ -68,7 +67,7 @@ export default async function handler(req: any, res: any) {
     if (task === 'generate') {
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Original items: ${JSON.stringify(originalItems)}. Create 3-5 similar ones for a Kindergarten child.`,
+        contents: `Original items: ${JSON.stringify(originalItems)}. Create 3-5 similar practice items.`,
         config: {
           systemInstruction: SYSTEM_PROMPT_GENERATE,
           responseMimeType: "application/json",
@@ -86,13 +85,15 @@ export default async function handler(req: any, res: any) {
       contents: {
         parts: [
           { inlineData: { mimeType: "image/jpeg", data: image } },
-          { text: "Analyze this worksheet thoroughly. Solve everything and provide deep pedagogical guides." },
+          { text: "Analyze this EK worksheet. Focus on phonics and comprehension logic." },
         ],
       },
       config: {
         systemInstruction: SYSTEM_PROMPT_ANALYZE,
         responseMimeType: "application/json",
         temperature: 0.1, 
+        // For Pro model, we use a thinking budget for deeper analysis of handwriting
+        ...(isRetry ? { thinkingConfig: { thinkingBudget: 4000 } } : {})
       },
     });
 
