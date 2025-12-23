@@ -29,7 +29,6 @@ const isNightModeKST = () => {
   return hour >= 22 || hour < 6;
 };
 
-// Hook for detecting restricted in-app browsers
 const useInAppBrowser = () => {
     const [isInApp, setIsInApp] = useState(false);
     useEffect(() => {
@@ -66,6 +65,15 @@ function AppContent() {
     return () => clearInterval(timer);
   }, []);
 
+  // Cleanup: revoke any existing data URLs when changing analysis state to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (analysisState.originalImage?.startsWith('blob:')) {
+        URL.revokeObjectURL(analysisState.originalImage);
+      }
+    };
+  }, [analysisState.originalImage]);
+
   useEffect(() => {
     if (!isAuthenticated && analysisState.status !== 'idle') {
       setAnalysisState({ status: 'idle', data: null, originalImage: null, errorMessage: null, showReward: false });
@@ -101,8 +109,10 @@ function AppContent() {
       if (!canScan) return; 
     }
 
+    // Optimization: Store local image immediately for instant viewing transition
     const displayUrl = `data:image/jpeg;base64,${base64Data}`;
     setLastImageData(base64Data);
+    
     setAnalysisState({ 
         status: 'analyzing', 
         data: null, 
@@ -132,6 +142,7 @@ function AppContent() {
       };
 
       setAnalysisState(newState);
+      // Ensure we switch to a helpful view mode for results
       setViewMode('overlay');
 
       localStorage.setItem(SESSION_KEY, JSON.stringify({
@@ -179,7 +190,6 @@ function AppContent() {
 
       <main className={`max-w-7xl mx-auto p-4 md:p-6 pb-0 min-h-screen flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : ''}`}>
         
-        {/* In-App Browser Warning Banner */}
         {analysisState.status === 'idle' && isInApp && showInAppNotice && (
             <div className="fixed top-20 left-4 right-4 z-[60] bg-orange-600 text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
                 <div className="flex items-center gap-3">
