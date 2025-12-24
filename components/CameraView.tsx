@@ -252,20 +252,20 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* How it Works Section - Restored to original design */}
+      {/* Three Step Process Section - EXACT MATCH TO SCREENSHOT TOP */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-40">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20">
               {[
-                  { title: language === 'ko' ? "사진 찍기" : t('how_step1'), desc: language === 'ko' ? "숙제 페이지를 찰칵 찍어주세요." : t('how_step1_desc'), icon: '📸' },
-                  { title: language === 'ko' ? "정답 확인" : t('how_step2'), desc: language === 'ko' ? "제가 모든 정답을 꼼꼼히 찾아낼게요." : t('how_step2_desc'), icon: '✨' },
-                  { title: language === 'ko' ? "다정하게 지도" : t('how_step3'), desc: language === 'ko' ? "제 설명을 보고 아이에게 친절히 알려주세요." : t('how_step3_desc'), icon: '🗣️' }
+                  { title: language === 'ko' ? "사진 찍기" : "Snap a Photo", desc: language === 'ko' ? "숙제 페이지를 찰칵 찍어주세요." : "Take a quick picture of the page.", icon: '📸' },
+                  { title: language === 'ko' ? "정답 확인" : "Get Answers", desc: language === 'ko' ? "제가 모든 정답을 꼼꼼히 찾아낼게요." : "I'll find all the right answers for you.", icon: '✨' },
+                  { title: language === 'ko' ? "다정하게 지도" : "Teach with Love", desc: language === 'ko' ? "제 설명을 보고 아이에게 친절히 알려주세요." : "Explain it kindly using my easy guide.", icon: '🗣️' }
               ].map((item, i) => (
                   <div key={i} className="flex flex-col items-center text-center group">
-                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl md:text-4xl mb-6 shadow-2xl backdrop-blur-md group-hover:scale-110 transition-transform">
+                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl md:text-5xl mb-8 shadow-2xl backdrop-blur-md group-hover:scale-110 transition-transform">
                         {item.icon}
                       </div>
-                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">{item.title}</h3>
-                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep max-w-[200px]">
+                      <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-korean">{item.title}</h3>
+                      <p className="text-zinc-500 font-korean text-base md:text-lg leading-relaxed break-keep max-w-[280px]">
                         {item.desc}
                       </p>
                   </div>
@@ -273,101 +273,155 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Feature Highlights Section - Restored to original design */}
+      {/* Vision AI Grid Section - EXACT MATCH TO SCREENSHOT (Image 1) */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48 relative">
-          <div className="grid lg:grid-cols-[1.2fr_1fr] gap-6 md:gap-8 items-stretch">
-              {/* Vision AI Main Card */}
-              <div className="group relative rounded-[3rem] p-10 md:p-14 overflow-hidden bg-zinc-900/40 border border-white/10 flex flex-col justify-end min-h-[400px] md:min-h-[500px] shadow-2xl backdrop-blur-sm">
-                  <div className="absolute top-0 right-0 w-full h-full -z-10 overflow-hidden pointer-events-none">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-brand-orange/20 to-brand-purple/20 blur-[120px] opacity-60"></div>
+          <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 md:gap-8 items-stretch">
+              {/* Vision AI Large Card */}
+              <div className="group relative rounded-[3.5rem] p-10 md:p-16 overflow-hidden bg-[#121318] border border-white/5 flex flex-col justify-end min-h-[450px] md:min-h-[600px] shadow-2xl">
+                  {/* Masked Hero/Character Image */}
+                  <div className="absolute inset-0 z-0 overflow-hidden rounded-[3.5rem]">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#121318] via-transparent to-transparent z-10"></div>
+                      {!heroError ? (
+                          <img 
+                           src={ASSETS.HERO_IMAGE} 
+                           alt="Easy Answer Key" 
+                           className="w-full h-full object-cover object-center filter brightness-90 group-hover:scale-105 transition-transform duration-1000"
+                          />
+                      ) : (
+                          <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                             <ChekkiMascot className="w-64 h-64 opacity-20" mood="happy" />
+                          </div>
+                      )}
                   </div>
-                  <div className="absolute top-10 right-10 w-64 h-64 md:w-[400px] md:h-[400px] opacity-80 group-hover:opacity-100 transition-opacity animate-float pointer-events-none">
-                       {!heroError ? (
-                           <img 
-                            src={ASSETS.HERO_IMAGE} 
-                            alt="Chekki Mascot" 
-                            className="w-full h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-                           />
-                       ) : (
-                           <ChekkiMascot className="w-full h-full" mood="happy" />
-                       )}
-                  </div>
-                  <div className="relative z-10 text-left">
-                    <span className="inline-block text-[10px] md:text-xs font-black text-brand-orange uppercase tracking-[0.2em] mb-4 drop-shadow-sm">Vision AI</span>
-                    <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display leading-tight drop-shadow-md">
-                      {language === 'ko' ? "다정한 정답지" : t('feat_vision_title')}
+                  
+                  <div className="relative z-20 text-left">
+                    <span className="inline-block text-xs md:text-sm font-black text-brand-orange uppercase tracking-[0.3em] mb-4">Vision AI</span>
+                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 font-display leading-[1.1] tracking-tight">
+                        {language === 'ko' ? "다정한 정답지" : "Easy Answer Key"}
                     </h2>
-                    <p className="text-zinc-400 font-korean text-base md:text-lg max-w-md leading-relaxed break-keep font-medium">
-                      {language === 'ko' ? "복잡한 문제도 채키가 알기 쉽게 풀어드려요. 정확한 정답과 텍스트를 한눈에 확인하세요." : t('feat_vision_desc')}
+                    <p className="text-zinc-300 font-korean text-lg md:text-xl max-w-md leading-relaxed break-keep font-medium mb-10">
+                        {language === 'ko' ? "복잡한 문제도 채키가 알기 쉽게 풀어드려요. 정확한 정답과 텍스트를 한눈에 확인하세요." : "I'll solve those tricky reading and grammar pages for you, giving you the exact letters and words you need."}
                     </p>
+                    
+                    <div className="flex items-center gap-4 bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-3 rounded-2xl w-fit">
+                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center shadow-lg">🔍</div>
+                        <span className="text-xs md:text-sm font-black text-zinc-300 uppercase tracking-widest">{language === 'ko' ? "실시간 AI 채점" : "Real-time AI Grading"}</span>
+                    </div>
                   </div>
               </div>
 
-              {/* Side Feature Stack */}
+              {/* Feature Cards Column */}
               <div className="flex flex-col gap-6 md:gap-8">
-                  <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
-                      <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform shadow-inner">🔊</div>
-                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">
-                        {language === 'ko' ? "원어민 발음 듣기" : t('feat_audio')}
+                  {/* Native Voice Card */}
+                  <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
+                      <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">🔊</div>
+                      <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
+                        {language === 'ko' ? "원어민 발음 듣기" : "Native Voice"}
                       </h3>
-                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep font-medium">
-                        {language === 'ko' ? "정확한 발음을 함께 듣고 아이에게 자신 있게 들려주세요." : t('feat_audio_desc')}
+                      <p className="text-zinc-500 font-korean text-base md:text-lg leading-relaxed break-keep font-medium">
+                        {language === 'ko' ? "정확한 발음을 함께 듣고 아이에게 자신 있게 들려주세요." : "Listen to the right way to say it, then model it perfectly for your little one."}
                       </p>
                   </div>
-                  <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
-                      <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform shadow-inner">📝</div>
-                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">
-                        {language === 'ko' ? "복습 노트 생성" : t('review_title')}
+                  {/* Smart Review Card */}
+                  <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
+                      <div className="w-16 h-16 rounded-2xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">📝</div>
+                      <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
+                        {language === 'ko' ? "복습 노트 생성" : "Smart Review Note"}
                       </h3>
-                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep font-medium">
-                        {language === 'ko' ? "어려웠던 문제는 깃발로 콕! 저장했다가 나중에 맞춤 연습문제로 복습해요." : t('feat_review_desc')}
+                      <p className="text-zinc-500 font-korean text-base md:text-lg leading-relaxed break-keep font-medium">
+                        {language === 'ko' ? "어려웠던 문제는 깃발로 콕! 저장했다가 나중에 맞춤 연습문제로 복습해요." : "Save the 'tricky' questions in your review note to make custom practice sheets later."}
+                      </p>
+                  </div>
+                  {/* Privacy Card */}
+                  <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
+                      <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">🛡️</div>
+                      <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
+                        {language === 'ko' ? "안전한 프라이버시" : "Safe & Private"}
+                      </h3>
+                      <p className="text-zinc-500 font-korean text-base md:text-lg leading-relaxed break-keep font-medium">
+                        {language === 'ko' ? "우리 아이 사진은 분석 후 바로 삭제되니 안심하세요." : "Your child's safety is everything. I look at photos and then they're gone—no storage."}
                       </p>
                   </div>
               </div>
           </div>
       </div>
 
-      {/* Testimonials Section */}
+      {/* Testimonials Section - EXACT MATCH TO SCREENSHOT (Image 2) */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48">
           <div className="text-center mb-16 md:mb-24">
-              <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display tracking-tight">{t('test_title')}</h2>
-              <p className="text-zinc-500 font-korean text-lg font-medium">{language === 'ko' ? "채키와 함께 행복해진 가족들의 이야기" : "Happy families growing together"}</p>
+              <span className="text-xs md:text-sm font-black text-brand-orange uppercase tracking-[0.4em] mb-4 block">REAL STORIES FROM MOMS</span>
+              <h2 className="text-4xl md:text-6xl font-black text-white font-display tracking-tight leading-tight">
+                  {language === 'ko' ? "채키와 함께 행복해진\n가족들의 이야기" : "Mom's love Chekki"}
+              </h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8 text-left">
               {[
-                  { name: t('test_1_name'), text: t('test_1_text'), color: 'from-orange-500/20' },
-                  { name: t('test_2_name'), text: t('test_2_text'), color: 'from-purple-500/20' },
-                  { name: t('test_3_name'), text: t('test_3_text'), color: 'from-pink-500/20' }
+                  { name: language === 'ko' ? "민준 어머님" : "Min-jun's Mom", text: language === 'ko' ? "아이가 물어볼 때마다 당황했는데, 이제 채키 덕분에 저도 자신 있게 가르쳐줄 수 있어요!" : "I used to be so nervous when Min-jun asked for help. Now I have Chekki, and homework time is actually fun!", avatar: '👩🏻', color: 'from-orange-500/10' },
+                  { name: language === 'ko' ? "지우 아버님" : "Ji-woo's Dad", text: language === 'ko' ? "설명이 정말 쉬워요. 단순히 답만 주는 게 아니라 아이 눈높이에서 설명해줄 수 있어 정말 좋습니다." : "The explanations are so easy to understand. I can explain the 'why' to my daughter without any stress.", avatar: '👨🏻', color: 'from-purple-500/10' },
+                  { name: language === 'ko' ? "서연 어머님" : "Seo-yeon's Mom", text: language === 'ko' ? "연습문제 만들어주는 기능이 최고예요. 아이가 어려워하는 것만 쏙쏙 골라 복습시킬 수 있거든요." : "The practice sheets are like magic for review. It feels like having a kind tutor right in my pocket.", avatar: '👩🏼', color: 'from-pink-500/10' }
               ].map((item, i) => (
-                  <div key={i} className={`p-8 rounded-3xl bg-zinc-900/60 border border-white/5 bg-gradient-to-br ${item.color} to-transparent backdrop-blur-md relative overflow-hidden shadow-2xl`}>
-                      <div className="absolute top-4 right-6 text-4xl opacity-20 text-white font-display">❝</div>
-                      <p className="text-zinc-300 font-korean text-base md:text-lg mb-8 leading-relaxed italic break-keep relative z-10">{item.text}</p>
-                      <div className="flex items-center gap-3 relative z-10">
-                          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-zinc-400 border border-white/5">{item.name[0]}</div>
-                          <span className="text-sm font-bold text-white font-korean">{item.name}</span>
+                  <div key={i} className={`p-10 md:p-12 rounded-[2.5rem] bg-[#121318] border border-white/5 bg-gradient-to-br ${item.color} to-transparent backdrop-blur-md relative overflow-hidden shadow-2xl`}>
+                      <div className="flex gap-1 mb-8">
+                          {[...Array(5)].map((_, star) => (
+                              <span key={star} className="text-brand-orange text-xl md:text-2xl">★</span>
+                          ))}
+                      </div>
+                      <p className="text-zinc-200 font-korean text-lg md:text-xl mb-12 leading-relaxed italic font-medium break-keep">
+                          "{item.text}"
+                      </p>
+                      <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-2xl shadow-lg">{item.avatar}</div>
+                          <span className="text-base md:text-lg font-black text-white font-korean">{item.name}</span>
                       </div>
                   </div>
               ))}
           </div>
       </div>
 
-      {/* Final CTA Section */}
+      {/* Final CTA Section - EXACT MATCH TO SCREENSHOT (Image 3) */}
       <div className="max-w-7xl mx-auto px-6 pb-20">
-          <div className={`relative w-full rounded-[3.5rem] p-12 md:p-24 overflow-hidden text-center bg-zinc-900/60 border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]`}>
-              <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-600/20 to-purple-600/20' : 'from-orange-500/20 to-pink-500/20'} opacity-60`}></div>
-              <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
-                  <h2 className="text-4xl md:text-6xl font-black text-white mb-8 font-display tracking-tight leading-tight whitespace-pre-line drop-shadow-2xl">
-                      {language === 'ko' ? "오늘부터 우리 아이 숙제 시간,\n채키가 다정하게 도와드릴게요." : "Make homework time\nhappy again."}
-                  </h2>
-                  <p className="text-zinc-400 font-korean text-lg md:text-xl mb-12 max-w-lg leading-relaxed break-keep font-medium">
-                      {t('hero_cta_desc')}
-                  </p>
-                  <button onClick={openLoginModal} className="group relative bg-white text-black px-12 py-5 md:px-14 md:py-6 rounded-2xl font-black text-xl md:text-2xl transition-all transform active:scale-95 shadow-[0_20px_60px_rgba(255,255,255,0.2)] font-display flex items-center gap-4 hover:shadow-white/30">
-                      <span className="font-korean">{t('hero_cta_btn')}</span>
-                      <span className="text-2xl md:text-3xl transition-transform group-hover:translate-x-2">🚀</span>
-                  </button>
+          <div className="relative w-full rounded-[3.5rem] p-12 md:p-24 overflow-hidden text-left bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_120px_rgba(249,115,22,0.3)]">
+              {/* Background Glows */}
+              <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 blur-[100px] pointer-events-none"></div>
+              
+              <div className="relative z-10 grid lg:grid-cols-[1.2fr_0.8fr] items-center gap-12">
+                  <div className="max-w-2xl">
+                      <h2 className="text-4xl md:text-7xl font-black text-white mb-8 font-display tracking-tight leading-[1.05] drop-shadow-2xl">
+                          {language === 'ko' ? "행복한 숙제 시간," : "Happy Homework,"}
+                      </h2>
+                      <p className="text-white font-korean text-xl md:text-2xl mb-12 leading-relaxed break-keep font-bold opacity-90">
+                          {language === 'ko' ? "숙제 시간이 스트레스가 아닌, 아이와 함께 웃으며 성장하는 따뜻한 시간이 됩니다." : "Join thousands of moms who've turned homework time into a peaceful, happy bonding moment."}
+                      </p>
+                      <button 
+                        onClick={openLoginModal} 
+                        className="group relative bg-white text-brand-orange px-12 py-5 md:px-14 md:py-6 rounded-[1.5rem] font-black text-xl md:text-2xl transition-all transform active:scale-95 shadow-2xl font-display flex items-center gap-4 hover:shadow-white/30"
+                      >
+                          <span className="font-korean">{language === 'ko' ? "무료로 체험해보기" : "Try it for Free"}</span>
+                          <span className="text-2xl md:text-3xl transition-transform group-hover:translate-x-2">🚀</span>
+                      </button>
+                  </div>
+                  
+                  {/* Large CTA Mascot */}
+                  <div className="hidden lg:flex justify-center items-center">
+                       <div className="relative w-full max-w-[450px] aspect-square animate-float">
+                            <div className="absolute inset-0 bg-white/20 blur-[100px] rounded-full scale-125 opacity-40"></div>
+                            {!heroError ? (
+                                <img 
+                                    src={ASSETS.HERO_IMAGE} 
+                                    alt="Chekki AI" 
+                                    className="w-full h-full object-contain filter drop-shadow-[0_40px_80px_rgba(0,0,0,0.6)]"
+                                />
+                            ) : (
+                                <ChekkiMascot className="w-full h-full" mood="happy" />
+                            )}
+                       </div>
+                  </div>
               </div>
+          </div>
+          
+          <div className="mt-16 text-center">
+              <p className="text-zinc-600 text-[10px] md:text-xs font-black uppercase tracking-[0.5em]">{language === 'ko' ? "엄마표 영어 숙제 파트너 • 채키 AI" : "MOM'S FRIENDLY HOMEWORK PARTNER • CHEKKI AI"}</p>
           </div>
       </div>
     </div>
