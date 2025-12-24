@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { compressImage } from '../utils/imageUtils';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -265,9 +264,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Final CTA Section - Tightened container with truly massive mascot fitting perfectly */}
+      {/* Final CTA Section - Massive Mascot properly fitted into the container */}
       <div className="max-w-7xl mx-auto px-6 pb-12">
-          <div className="relative w-full min-h-[400px] md:min-h-[450px] rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_100px_rgba(249,115,22,0.3)]">
+          <div className="relative w-full rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_100px_rgba(249,115,22,0.3)]">
               {/* Decorative background glow */}
               <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 blur-[80px] pointer-events-none"></div>
               
@@ -290,17 +289,17 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                   </div>
                   
                   {/* 
-                    Truly massive mascot fit into the container. 
-                    Absolute positioning allows it to ignore the parent's padding 
-                    and fill the right side completely.
+                    Truly massive mascot fit into the box. 
+                    Uses a flex container with scale transform to ensure it looks huge
+                    without excess empty space around it.
                   */}
-                  <div className="hidden lg:block absolute top-0 right-[-5%] w-[55%] h-full pointer-events-none">
-                       <div className="relative w-full h-full animate-float">
-                            <div className="absolute inset-0 bg-white/20 blur-[150px] rounded-full scale-75 translate-x-20 opacity-40"></div>
+                  <div className="hidden lg:flex flex-1 justify-end items-center h-full relative pointer-events-none">
+                       <div className="relative w-full max-w-[600px] aspect-square animate-float">
+                            <div className="absolute inset-0 bg-white/20 blur-[120px] rounded-full scale-125 opacity-40"></div>
                             <img 
                               src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png" 
                               alt="Chekki Happy Mascot" 
-                              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[140%] w-auto object-contain filter drop-shadow-[0_40px_100px_rgba(0,0,0,0.5)] transform translate-x-10" 
+                              className="w-full h-full object-contain filter drop-shadow-2xl transform scale-[1.8] translate-x-12 translate-y-4" 
                             />
                        </div>
                   </div>
