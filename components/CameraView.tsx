@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
 import { FeedbackModal } from './FeedbackModal';
+import { LegalModal } from './LegalModal';
 
 interface Props {
   onImageSelected: (base64: string) => void;
@@ -20,10 +21,11 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   
   const [imgError, setImgError] = useState(false);
   const [heroError, setHeroError] = useState(false);
-  const [heroLoaded, setHeroLoaded] = useState(false);
   const [mascotLoaded, setMascotLoaded] = useState(false);
   
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+  
   const { t, language } = useLanguage();
 
   const processFile = async (file: File) => {
@@ -179,6 +181,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   return (
     <div className="min-h-full flex flex-col pt-24 md:pt-40 pb-20 overflow-x-hidden scroll-smooth">
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
+      {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
       
       {/* Hero Section */}
       <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-8 items-center mb-24 md:mb-32">
@@ -213,29 +216,22 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             <div className="relative w-full max-w-[300px] md:max-w-[500px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] animate-pulse`}></div>
                 
-                {!heroError ? (
-                  <img 
-                    src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
-                    alt="Chekki Hero" 
-                    className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.5] md:scale-[2.2] ${heroLoaded ? 'opacity-100' : 'opacity-0'}`}
-                    onLoad={() => setHeroLoaded(true)}
-                    onError={() => setHeroError(true)}
-                    loading="eager"
-                  />
-                ) : (
-                   <ChekkiMascot className="w-full h-full drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.5] md:scale-[2.2]" mood={isNight ? "sleeping" : "happy"} />
-                )}
-
-                {!heroLoaded && !heroError && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                     <ChekkiMascot className="w-32 h-32 md:w-48 md:h-48 opacity-20" mood="happy" />
-                  </div>
-                )}
+                <div className="w-full h-full relative z-10 transition-transform scale-[1.5] md:scale-[2.2]">
+                   <video 
+                     autoPlay 
+                     muted 
+                     loop 
+                     playsInline 
+                     className="w-full h-full object-contain drop-shadow-2xl animate-float"
+                   >
+                     <source src={isNight ? ASSETS.VIDEO_SLEEPY : ASSETS.VIDEO_INTRO} type="video/mp4" />
+                   </video>
+                </div>
             </div>
         </div>
       </div>
 
-      {/* Trust Stats Row */}
+      {/* Stats Row */}
       <div className="max-w-7xl mx-auto px-6 mb-32">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
               {[
@@ -252,7 +248,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Three Step Process Section - EXACT MATCH TO SCREENSHOT TOP */}
+      {/* Three Steps */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-40">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20">
               {[
@@ -273,12 +269,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Vision AI Grid Section - EXACT MATCH TO SCREENSHOT (Image 1) */}
+      {/* Vision AI Grid Section */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48 relative">
           <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 md:gap-8 items-stretch">
-              {/* Vision AI Large Card */}
               <div className="group relative rounded-[3.5rem] p-10 md:p-16 overflow-hidden bg-[#121318] border border-white/5 flex flex-col justify-end min-h-[450px] md:min-h-[600px] shadow-2xl">
-                  {/* Masked Hero/Character Image */}
                   <div className="absolute inset-0 z-0 overflow-hidden rounded-[3.5rem]">
                       <div className="absolute inset-0 bg-gradient-to-t from-[#121318] via-transparent to-transparent z-10"></div>
                       {!heroError ? (
@@ -286,6 +280,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                            src={ASSETS.HERO_IMAGE} 
                            alt="Easy Answer Key" 
                            className="w-full h-full object-cover object-center filter brightness-90 group-hover:scale-105 transition-transform duration-1000"
+                           onError={() => setHeroError(true)}
                           />
                       ) : (
                           <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
@@ -305,14 +300,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     
                     <div className="flex items-center gap-4 bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-3 rounded-2xl w-fit">
                         <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center shadow-lg">🔍</div>
-                        <span className="text-xs md:text-sm font-black text-zinc-300 uppercase tracking-widest">{language === 'ko' ? "실시간 AI 채점" : "Real-time AI Grading"}</span>
+                        <span className="text-xs md:text-sm font-black text-zinc-300 uppercase tracking-widest">{language === 'ko' ? "실시간 정답 스캔" : "Real-time AI Grading"}</span>
                     </div>
                   </div>
               </div>
 
-              {/* Feature Cards Column */}
               <div className="flex flex-col gap-6 md:gap-8">
-                  {/* Native Voice Card */}
                   <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
                       <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">🔊</div>
                       <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
@@ -322,7 +315,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                         {language === 'ko' ? "정확한 발음을 함께 듣고 아이에게 자신 있게 들려주세요." : "Listen to the right way to say it, then model it perfectly for your little one."}
                       </p>
                   </div>
-                  {/* Smart Review Card */}
                   <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
                       <div className="w-16 h-16 rounded-2xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">📝</div>
                       <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
@@ -332,7 +324,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                         {language === 'ko' ? "어려웠던 문제는 깃발로 콕! 저장했다가 나중에 맞춤 연습문제로 복습해요." : "Save the 'tricky' questions in your review note to make custom practice sheets later."}
                       </p>
                   </div>
-                  {/* Privacy Card */}
                   <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
                       <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">🛡️</div>
                       <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
@@ -346,7 +337,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Testimonials Section - EXACT MATCH TO SCREENSHOT (Image 2) */}
+      {/* Testimonials */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48">
           <div className="text-center mb-16 md:mb-24">
               <span className="text-xs md:text-sm font-black text-brand-orange uppercase tracking-[0.4em] mb-4 block">REAL STORIES FROM MOMS</span>
@@ -379,10 +370,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Final CTA Section - EXACT MATCH TO SCREENSHOT (Image 3) */}
+      {/* Footer CTA */}
       <div className="max-w-7xl mx-auto px-6 pb-20">
           <div className="relative w-full rounded-[3.5rem] p-12 md:p-24 overflow-hidden text-left bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_120px_rgba(249,115,22,0.3)]">
-              {/* Background Glows */}
               <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 blur-[100px] pointer-events-none"></div>
               
               <div className="relative z-10 grid lg:grid-cols-[1.2fr_0.8fr] items-center gap-12">
@@ -402,26 +392,39 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       </button>
                   </div>
                   
-                  {/* Large CTA Mascot */}
                   <div className="hidden lg:flex justify-center items-center">
                        <div className="relative w-full max-w-[450px] aspect-square animate-float">
                             <div className="absolute inset-0 bg-white/20 blur-[100px] rounded-full scale-125 opacity-40"></div>
-                            {!heroError ? (
-                                <img 
-                                    src={ASSETS.HERO_IMAGE} 
-                                    alt="Chekki AI" 
-                                    className="w-full h-full object-contain filter drop-shadow-[0_40px_80px_rgba(0,0,0,0.6)]"
-                                />
-                            ) : (
-                                <ChekkiMascot className="w-full h-full" mood="happy" />
-                            )}
+                            <video 
+                              autoPlay 
+                              muted 
+                              loop 
+                              playsInline 
+                              className="w-full h-full object-contain filter drop-shadow-[0_40px_80px_rgba(0,0,0,0.6)]"
+                            >
+                                <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
+                            </video>
                        </div>
                   </div>
               </div>
           </div>
           
-          <div className="mt-16 text-center">
-              <p className="text-zinc-600 text-[10px] md:text-xs font-black uppercase tracking-[0.5em]">{language === 'ko' ? "엄마표 영어 숙제 파트너 • 채키 AI" : "MOM'S FRIENDLY HOMEWORK PARTNER • CHEKKI AI"}</p>
+          {/* Main Footer Matching Screenshot */}
+          <div className="mt-16 pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-0 pb-12">
+              <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                  <h4 className="text-2xl font-black text-white font-display mb-1">
+                    Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
+                  </h4>
+                  <p className="text-zinc-500 text-[10px] md:text-xs font-bold font-korean tracking-tight uppercase">
+                    {language === 'ko' ? "Gemini 3 Pro 기반 • 엄마를 위한 다정한 영어 숙제 파트너" : "GEMINI 3 PRO POWERED • MOM'S FRIENDLY HOMEWORK PARTNER"}
+                  </p>
+              </div>
+              
+              <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-[11px] md:text-xs text-zinc-400 font-black uppercase tracking-[0.2em]">
+                  <button onClick={() => setShowLegal('privacy')} className="hover:text-white transition-colors">Privacy</button>
+                  <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors">Terms</button>
+                  <a href="mailto:chekkihelp@gmail.com" className="hover:text-white transition-colors">Support</a>
+              </div>
           </div>
       </div>
     </div>
