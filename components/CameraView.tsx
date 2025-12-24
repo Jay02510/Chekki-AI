@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { compressImage } from '../utils/imageUtils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,6 +18,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [heroLoaded, setHeroLoaded] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { t, language } = useLanguage();
 
@@ -86,10 +87,18 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 ) : (
                   <div className="w-full h-full animate-float flex items-center justify-center">
                     {!imgError ? (
-                       <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} alt="Chekki Mascot" className={`w-full h-full object-contain drop-shadow-2xl filter brightness-110 ${isNight ? 'scale-[1.5] md:scale-[1.8]' : ''}`} onError={() => setImgError(true)}/>
+                       <img 
+                        src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} 
+                        alt="Chekki Mascot" 
+                        className={`w-full h-full object-contain drop-shadow-2xl filter brightness-110 ${isNight ? 'scale-[1.5] md:scale-[1.8]' : ''} transition-opacity duration-500 ${heroLoaded ? 'opacity-100' : 'opacity-0'}`} 
+                        onLoad={() => setHeroLoaded(true)}
+                        onError={() => setImgError(true)}
+                       />
                     ) : (
                        <ChekkiMascot className="w-full h-full drop-shadow-2xl filter brightness-110" mood={isNight ? "sleeping" : "happy"} />
                     )}
+                    {/* Skeleton for Mascot */}
+                    {!heroLoaded && !imgError && <div className="absolute inset-0 bg-white/5 rounded-full animate-pulse"></div>}
                   </div>
                 )}
             </div>
@@ -135,7 +144,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
   if (user) {
     return (
-      <div className="min-h-screen pt-12 md:pt-32 pb-12 px-4 md:px-6 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
+      <div className="min-h-full pt-12 md:pt-32 pb-12 px-4 md:px-6 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         <div className="w-full max-w-3xl flex flex-col items-center text-center mb-8 md:mb-10 gap-4 md:gap-6">
            <div className="space-y-1 md:space-y-2">
@@ -164,7 +173,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   }
 
   return (
-    <div className="min-h-screen flex flex-col pt-24 md:pt-40 pb-20 overflow-x-hidden scroll-smooth">
+    <div className="min-h-full flex flex-col pt-24 md:pt-40 pb-20 overflow-x-hidden scroll-smooth">
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
       
       {/* Hero Section */}
@@ -202,8 +211,18 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <img 
                   src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                   alt="Chekki Hero" 
-                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.5] md:scale-[2.2]`}
+                  className={`w-full h-full object-contain drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.5] md:scale-[2.2] ${heroLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  onLoad={() => setHeroLoaded(true)}
+                  onError={() => setImgError(true)}
                 />
+                {!heroLoaded && !imgError && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                     <ChekkiMascot className="w-32 h-32 md:w-48 md:h-48 opacity-20" mood="happy" />
+                  </div>
+                )}
+                {imgError && (
+                   <ChekkiMascot className="w-full h-full drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.5] md:scale-[2.2]" mood={isNight ? "sleeping" : "happy"} />
+                )}
             </div>
         </div>
       </div>

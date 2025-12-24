@@ -9,6 +9,7 @@ import { PaywallModal } from './components/PaywallModal';
 import { OnboardingTour } from './components/OnboardingTour';
 import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
+import { SplashScreen } from './components/SplashScreen';
 import { analyzeWorksheet } from './services/geminiService';
 import { AnalysisState, WorksheetAnalysis, WorkspaceMode } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -45,6 +46,7 @@ function AppContent() {
   const isInApp = useInAppBrowser();
   
   const [isNight, setIsNight] = useState(isNightModeKST());
+  const [showSplash, setShowSplash] = useState(true);
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [analysisState, setAnalysisState] = useState<AnalysisState>({
     status: 'idle',
@@ -65,7 +67,6 @@ function AppContent() {
     return () => clearInterval(timer);
   }, []);
 
-  // Cleanup: revoke any existing data URLs when changing analysis state to prevent memory leaks
   useEffect(() => {
     return () => {
       if (analysisState.originalImage?.startsWith('blob:')) {
@@ -109,7 +110,6 @@ function AppContent() {
       if (!canScan) return; 
     }
 
-    // Optimization: Store local image immediately for instant viewing transition
     const displayUrl = `data:image/jpeg;base64,${base64Data}`;
     setLastImageData(base64Data);
     
@@ -142,7 +142,6 @@ function AppContent() {
       };
 
       setAnalysisState(newState);
-      // Ensure we switch to a helpful view mode for results
       setViewMode('overlay');
 
       localStorage.setItem(SESSION_KEY, JSON.stringify({
@@ -179,8 +178,12 @@ function AppContent() {
     localStorage.removeItem(SESSION_KEY);
   };
 
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
+
   return (
-    <div className={`min-h-screen ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} text-zinc-100 font-sans overflow-x-hidden transition-colors duration-1000`}>
+    <div className={`min-h-[100dvh] ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} text-zinc-100 font-sans overflow-x-hidden transition-colors duration-1000 flex flex-col`}>
       <Header onReset={() => handleReset(false)} />
       <PaywallModal />
       <OdapNoteModal />
@@ -188,7 +191,7 @@ function AppContent() {
       
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
 
-      <main className={`max-w-7xl mx-auto p-4 md:p-6 pb-0 min-h-screen flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : ''}`}>
+      <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-0 flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : ''}`}>
         
         {analysisState.status === 'idle' && isInApp && showInAppNotice && (
             <div className="fixed top-20 left-4 right-4 z-[60] bg-orange-600 text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
@@ -233,7 +236,7 @@ function AppContent() {
         )}
 
         {analysisState.status === 'complete' && analysisState.data && (
-          <div className="animate-fade-in-up flex flex-col flex-1 pt-14 md:pt-24 pb-4">
+          <div className="animate-fade-in-up flex flex-col flex-1 pt-14 md:pt-24 pb-4 overflow-hidden">
             <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                  <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
@@ -258,7 +261,7 @@ function AppContent() {
               </div>
             </div>
 
-            <div className="flex-1 min-h-[400px]">
+            <div className="flex-1 min-h-0">
               {viewMode === 'overlay' ? (
                 <WorksheetOverlay 
                   imageUrl={analysisState.originalImage!} 

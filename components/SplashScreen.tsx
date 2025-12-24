@@ -27,17 +27,19 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   ];
 
   useEffect(() => {
+    // Feature rotation timer
     const featureInterval = setInterval(() => {
       setFeatureIndex(prev => (prev + 1) % features.length);
-    }, 200); // Super fast rotation for high-energy feel
+    }, 400); 
 
+    // Safety timeout: If assets take too long, allow app entry
     const timer = setTimeout(() => {
       setIsExiting(true);
-    }, 600); 
+    }, 2200); 
 
     const cleanup = setTimeout(() => {
       onFinish();
-    }, 800);
+    }, 2400);
 
     return () => {
       clearInterval(featureInterval);
@@ -47,44 +49,56 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   }, [onFinish, features.length]);
 
   return (
-    <div className={`fixed inset-0 z-[100] bg-zinc-950 flex flex-col items-center justify-center transition-opacity duration-200 ${isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+    <div className={`fixed inset-0 z-[100] bg-[#050505] flex flex-col items-center justify-center transition-opacity duration-300 ${isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
       
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px] animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] animate-pulse"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-orange-500/10 rounded-full blur-[100px] animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-[100px] animate-pulse"></div>
       </div>
 
       <div className="relative z-10 flex flex-col items-center">
-        <div className="relative mb-6">
-           <div className="w-48 h-48 bg-zinc-900 rounded-3xl flex items-center justify-center shadow-2xl border border-zinc-800 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent z-20"></div>
+        <div className="relative mb-8">
+           <div className="w-40 h-40 md:w-56 md:h-56 bg-zinc-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl border border-white/5 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent z-20 pointer-events-none"></div>
               {!videoError ? (
-                <video autoPlay muted loop playsInline preload="auto" className="w-full h-full object-contain z-10" onError={() => setVideoError(true)}>
+                <video 
+                  autoPlay 
+                  muted 
+                  loop 
+                  playsInline 
+                  preload="auto" 
+                  className="w-full h-full object-contain z-10 scale-110" 
+                  onError={() => setVideoError(true)}
+                  onAbort={() => setVideoError(true)}
+                >
                   <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
                 </video>
               ) : (
-                <div className="w-full h-full p-4 animate-float">
-                   <ChekkiMascot className="w-full h-full" mood="happy" />
+                <div className="w-full h-full p-8 animate-float">
+                   <ChekkiMascot className="w-full h-full drop-shadow-2xl" mood="happy" />
                 </div>
               )}
            </div>
+           
+           {/* Glow behind the logo */}
+           <div className="absolute -inset-4 bg-orange-500/20 blur-2xl rounded-full -z-10 animate-pulse"></div>
         </div>
 
-        <div className="text-center space-y-1 h-20">
-          <h1 className="text-3xl font-black text-white tracking-tight font-display">
-            Chekki<span className="text-orange-500">AI</span>
+        <div className="text-center space-y-2 h-24">
+          <h1 className="text-4xl font-black text-white tracking-tighter font-display leading-none">
+            Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
           </h1>
-          <div className="relative h-5 overflow-hidden">
+          <div className="relative h-6 overflow-hidden mt-1">
             {features.map((feat, index) => (
-                <p key={index} className={`absolute inset-0 w-full text-center text-zinc-400 font-bold text-xs uppercase tracking-widest transition-all duration-200 transform ${index === featureIndex ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+                <p key={index} className={`absolute inset-0 w-full text-center text-zinc-500 font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all duration-300 transform ${index === featureIndex ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                     {feat}
                 </p>
             ))}
           </div>
         </div>
 
-        <div className="mt-6 w-32 h-0.5 bg-zinc-800 rounded-full overflow-hidden relative">
-          <div className="h-full bg-orange-500 animate-[width_0.8s_linear_forwards]" style={{ width: '0%' }}></div>
+        <div className="mt-8 w-40 h-1 bg-zinc-800 rounded-full overflow-hidden relative">
+          <div className="h-full bg-gradient-to-r from-orange-500 to-pink-500 animate-[width_2s_linear_forwards]" style={{ width: '0%' }}></div>
         </div>
       </div>
 
