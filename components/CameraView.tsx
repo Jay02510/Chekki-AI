@@ -20,7 +20,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [isProcessing, setIsProcessing] = useState(false);
   
   const [imgError, setImgError] = useState(false);
-  const [heroError, setHeroError] = useState(false);
   const [mascotLoaded, setMascotLoaded] = useState(false);
   
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -207,17 +206,17 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </p>
           <div className="flex flex-wrap gap-4 justify-start">
             <button onClick={openLoginModal} className="group relative bg-white text-black px-8 py-4 md:px-10 md:py-5 rounded-2xl font-black text-base md:text-xl transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)] font-display flex items-center gap-3 overflow-hidden">
-              <span className="relative font-korean">{t('onb_1_btn')}</span> 
+              <span className="relative font-korean">Let's Go!</span> 
               <span className="text-xl md:text-2xl relative transition-transform group-hover:translate-x-1">→</span>
             </button>
           </div>
         </div>
         
-        {/* RESTORED: Mascot image in the Hero section instead of video loop */}
+        {/* Adjusted: Mascot image scale reduced to fit container better */}
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2">
             <div className="relative w-full max-w-[300px] md:max-w-[500px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] animate-pulse`}></div>
-                <div className="w-full h-full relative z-10 transition-transform scale-[1.5] md:scale-[2.2]">
+                <div className="w-full h-full relative z-10 transition-transform scale-[1.1] md:scale-[1.4]">
                    <img 
                     src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                     alt="Chekki Hero" 
@@ -266,11 +265,11 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Vision AI Grid Section - VIDEO LOOP ONLY HERE */}
+      {/* Vision AI Grid Section - VIDEO LOOP ONLY HERE - Height reduced as requested */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48 relative">
           <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 md:gap-8 items-stretch">
-              {/* Vision AI Large Card - VIDEO LOOP RESTORED HERE */}
-              <div className="group relative rounded-[3.5rem] p-10 md:p-16 overflow-hidden bg-[#121318] border border-white/5 flex flex-col justify-end min-h-[450px] md:min-h-[600px] shadow-2xl">
+              {/* Vision AI Large Card - VIDEO LOOP HEIGHT REDUCED */}
+              <div className="group relative rounded-[3.5rem] p-10 md:p-16 overflow-hidden bg-[#121318] border border-white/5 flex flex-col justify-end min-h-[350px] md:min-h-[480px] shadow-2xl">
                   <div className="absolute inset-0 z-0 overflow-hidden rounded-[3.5rem]">
                       <div className="absolute inset-0 bg-gradient-to-t from-[#121318] via-transparent to-transparent z-10"></div>
                       <video 
@@ -286,10 +285,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                   
                   <div className="relative z-20 text-left">
                     <span className="inline-block text-xs md:text-sm font-black text-brand-orange uppercase tracking-[0.3em] mb-4">Vision AI</span>
-                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 font-display leading-[1.1] tracking-tight">
+                    <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display leading-[1.1] tracking-tight">
                         {language === 'ko' ? "다정한 정답지" : "Easy Answer Key"}
                     </h2>
-                    <p className="text-zinc-300 font-korean text-lg md:text-xl max-w-md leading-relaxed break-keep font-medium mb-10">
+                    <p className="text-zinc-300 font-korean text-base md:text-lg max-w-md leading-relaxed break-keep font-medium mb-10">
                         {language === 'ko' ? "복잡한 문제도 채키가 알기 쉽게 풀어드려요. 정확한 정답과 텍스트를 한눈에 확인하세요." : "I'll solve those tricky reading and grammar pages for you, giving you the exact letters and words you need."}
                     </p>
                     
@@ -320,16 +319,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       </h3>
                       <p className="text-zinc-500 font-korean text-base md:text-lg leading-relaxed break-keep font-medium">
                         {language === 'ko' ? "어려웠던 문제는 깃발로 콕! 저장했다가 나중에 맞춤 연습문제로 복습해요." : "Save the 'tricky' questions in your review note to make custom practice sheets later."}
-                      </p>
-                  </div>
-                  {/* Privacy Card */}
-                  <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
-                      <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">🛡️</div>
-                      <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
-                        {language === 'ko' ? "안전한 프라이버시" : "Safe & Private"}
-                      </h3>
-                      <p className="text-zinc-500 font-korean text-base md:text-lg leading-relaxed break-keep font-medium">
-                        {language === 'ko' ? "우리 아이 사진은 분석 후 바로 삭제되니 안심하세요. 소중한 정보는 안전하게 지켜집니다." : "Your child's safety is everything. I look at photos and then they're gone—no storage."}
                       </p>
                   </div>
               </div>
@@ -369,7 +358,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Final CTA Section */}
+      {/* Final CTA Section - Mascot enlarged and Icon updated */}
       <div className="max-w-7xl mx-auto px-6 pb-20">
           <div className="relative w-full rounded-[3.5rem] p-12 md:p-24 overflow-hidden text-left bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_120px_rgba(249,115,22,0.3)]">
               <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 blur-[100px] pointer-events-none"></div>
@@ -386,13 +375,13 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                         className="group relative bg-white text-brand-orange px-12 py-5 md:px-14 md:py-6 rounded-[1.5rem] font-black text-xl md:text-2xl transition-all transform active:scale-95 shadow-2xl font-display flex items-center gap-4 hover:shadow-white/30"
                       >
                           <span className="font-korean">{language === 'ko' ? "무료로 체험해보기" : "Try it for Free"}</span>
-                          <span className="text-2xl md:text-3xl transition-transform group-hover:translate-x-2">🚀</span>
+                          <span className="text-2xl md:text-3xl transition-transform group-hover:translate-x-2">✨</span>
                       </button>
                   </div>
                   
-                  {/* RESTORED: Mascot static image for Final CTA instead of video loop */}
+                  {/* Enlarged: Mascot static image for Final CTA - max-w increased and scale added */}
                   <div className="hidden lg:flex justify-center items-center">
-                       <div className="relative w-full max-w-[450px] aspect-square animate-float">
+                       <div className="relative w-full max-w-[550px] aspect-square animate-float scale-110">
                             <div className="absolute inset-0 bg-white/20 blur-[100px] rounded-full scale-125 opacity-40"></div>
                             <img 
                               src={ASSETS.MASCOT_HAPPY} 
@@ -404,7 +393,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               </div>
           </div>
           
-          {/* FOOTER SECTION: Active Links matching screenshot exactly */}
+          {/* Footer Section */}
           <div className="mt-24 pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-0 pb-12">
               <div className="flex flex-col items-center md:items-start text-center md:text-left">
                   <h4 className="text-2xl font-black text-white font-display mb-1">
