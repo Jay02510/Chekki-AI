@@ -356,7 +356,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Final CTA Section - Mascot 50% bigger */}
+      {/* Final CTA Section - Mascot 50% bigger and fitting tightly */}
       <div className="max-w-7xl mx-auto px-6 pb-12">
           <div className="relative w-full rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-10 overflow-hidden text-left bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_100px_rgba(249,115,22,0.25)]">
               <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 blur-[80px] pointer-events-none"></div>
@@ -365,7 +365,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 font-display tracking-tight leading-[1.05] drop-shadow-2xl">
                           {language === 'ko' ? "행복한 숙제 시간," : "Happy Homework,"}
                       </h2>
-                      <p className="text-white font-korean text-base md:text-xl mb-8 leading-relaxed break-keep font-bold opacity-90">
+                      <p className="text-white font-korean text-base md:text-lg mb-8 leading-relaxed break-keep font-bold opacity-90">
                           {language === 'ko' ? "숙제 시간이 스트레스가 아닌, 아이와 함께 웃으며 성장하는 따뜻한 시간이 됩니다." : "Join thousands of moms who've turned homework time into a peaceful, happy bonding moment."}
                       </p>
                       <button 
@@ -377,14 +377,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       </button>
                   </div>
                   
-                  {/* Significantly enlarged happy mascot */}
+                  {/* Significantly enlarged happy mascot (LOGO image as requested) */}
                   <div className="hidden lg:flex justify-center items-center h-full">
-                       <div className="relative w-full max-w-[650px] aspect-square animate-float transform scale-[1.8] md:scale-[2.2] translate-x-12 translate-y-4">
-                            <div className="absolute inset-0 bg-white/20 blur-[120px] rounded-full scale-125 opacity-40"></div>
+                       <div className="relative w-full max-w-[800px] aspect-square animate-float transform scale-[2.8] md:scale-[3.5] translate-x-20 translate-y-8">
+                            <div className="absolute inset-0 bg-white/20 blur-[150px] rounded-full scale-125 opacity-50"></div>
                             <img 
-                              src={ASSETS.MASCOT_HAPPY} 
+                              src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png" 
                               alt="Chekki Happy Mascot" 
-                              className="w-full h-full object-contain filter drop-shadow-[0_40px_80px_rgba(0,0,0,0.5)]" 
+                              className="w-full h-full object-contain filter drop-shadow-[0_40px_80px_rgba(0,0,0,0.6)]" 
                             />
                        </div>
                   </div>
