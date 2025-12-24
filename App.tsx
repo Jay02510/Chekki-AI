@@ -9,7 +9,6 @@ import { PaywallModal } from './components/PaywallModal';
 import { OnboardingTour } from './components/OnboardingTour';
 import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
-import { SplashScreen } from './components/SplashScreen';
 import { analyzeWorksheet } from './services/geminiService';
 import { AnalysisState, WorksheetAnalysis, WorkspaceMode } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -46,7 +45,6 @@ function AppContent() {
   const isInApp = useInAppBrowser();
   
   const [isNight, setIsNight] = useState(isNightModeKST());
-  const [showSplash, setShowSplash] = useState(true);
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [analysisState, setAnalysisState] = useState<AnalysisState>({
     status: 'idle',
@@ -178,10 +176,6 @@ function AppContent() {
     setLastImageData(null);
     localStorage.removeItem(SESSION_KEY);
   };
-
-  if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
-  }
 
   return (
     <div className={`min-h-[100dvh] ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} text-zinc-100 font-sans overflow-x-hidden transition-colors duration-1000 flex flex-col`}>

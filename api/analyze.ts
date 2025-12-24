@@ -64,6 +64,7 @@ export default async function handler(req: any, res: any) {
           systemInstruction: SYSTEM_PROMPT_GENERATE,
           responseMimeType: "application/json",
           temperature: 0.3,
+          thinkingConfig: { thinkingBudget: 0 } // Speed-oriented generation
         },
       });
       return res.status(200).json(JSON.parse(response.text || "[]"));
@@ -71,7 +72,7 @@ export default async function handler(req: any, res: any) {
 
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
     
-    // Performance Optimization: Use Flash by default for speed. Use Pro for retries.
+    // Model strategy: Flash for instant results, Pro for complex retry reasoning
     const modelName = isRetry ? "gemini-3-pro-preview" : "gemini-3-flash-preview";
 
     const response = await ai.models.generateContent({
@@ -84,7 +85,8 @@ export default async function handler(req: any, res: any) {
         systemInstruction: SYSTEM_PROMPT_ANALYZE,
         responseMimeType: "application/json",
         temperature: 0, 
-        ...(isRetry ? { thinkingConfig: { thinkingBudget: 4000 } } : {})
+        // Optimization: Disable thinking on first attempt for speed, let model decide on retry
+        ...(isRetry ? {} : { thinkingConfig: { thinkingBudget: 0 } })
       },
     });
 
