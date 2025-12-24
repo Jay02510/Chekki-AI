@@ -103,7 +103,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     ) : (
                        <ChekkiMascot className="w-full h-full drop-shadow-2xl filter brightness-110" mood={isNight ? "sleeping" : "happy"} />
                     )}
-                    {/* Skeleton for Mascot: Only show if neither error nor loaded */}
                     {!mascotLoaded && !imgError && <div className="absolute inset-0 bg-white/5 rounded-full animate-pulse"></div>}
                   </div>
                 )}
@@ -214,8 +213,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2">
             <div className="relative w-full max-w-[300px] md:max-w-[500px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] animate-pulse`}></div>
-                
-                {/* Hero Asset with resilient fallback */}
                 {!heroError ? (
                   <img 
                     src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
@@ -228,8 +225,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 ) : (
                    <ChekkiMascot className="w-full h-full drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.5] md:scale-[2.2]" mood={isNight ? "sleeping" : "happy"} />
                 )}
-
-                {/* Initial mascot as skeleton until high-quality remote asset is ready */}
                 {!heroLoaded && !heroError && (
                   <div className="absolute inset-0 flex items-center justify-center">
                      <ChekkiMascot className="w-32 h-32 md:w-48 md:h-48 opacity-20" mood="happy" />
@@ -240,12 +235,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       </div>
 
       {/* Trust Stats */}
-      <div className="max-w-7xl mx-auto px-6 mb-24 md:mb-32">
-          {isNight && (
-            <div className="max-w-2xl mb-12">
-               <BetaBanner />
-            </div>
-          )}
+      <div className="max-w-7xl mx-auto px-6 mb-24 md:mb-40">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
               {[
                 { label: t('stat_accuracy'), value: '99.9%' },
@@ -258,6 +248,74 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     <div className="text-[9px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest">{stat.label}</div>
                 </div>
               ))}
+          </div>
+      </div>
+
+      {/* How it Works Section */}
+      <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48 relative">
+          <div className={`absolute -top-40 right-0 w-96 h-96 ${isNight ? 'bg-indigo-500/10' : 'bg-orange-500/10'} rounded-full blur-[120px] -z-10`}></div>
+          <div className="text-center mb-16 md:mb-24">
+              <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display tracking-tight">{t('how_title')}</h2>
+              <div className={`w-20 h-1.5 mx-auto rounded-full bg-gradient-to-r ${isNight ? 'from-indigo-500 to-purple-600' : 'from-orange-500 to-pink-500'}`}></div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+              {[
+                  { step: '01', title: t('how_step1'), desc: t('how_step1_desc'), icon: '📸' },
+                  { step: '02', title: t('how_step2'), desc: t('how_step2_desc'), icon: '🤖' },
+                  { step: '03', title: t('how_step3'), desc: t('how_step3_desc'), icon: '❤️' }
+              ].map((item, i) => (
+                  <div key={i} className="group relative bg-zinc-900/40 border border-white/5 rounded-[2.5rem] p-8 md:p-10 backdrop-blur-md hover:border-white/20 transition-all hover:translate-y-[-8px]">
+                      <div className="absolute top-6 right-8 text-4xl md:text-5xl font-black text-white/5 font-display select-none">{item.step}</div>
+                      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">{item.icon}</div>
+                      <h3 className="text-xl md:text-2xl font-bold text-white mb-4 font-korean">{item.title}</h3>
+                      <p className="text-zinc-500 font-korean text-base leading-relaxed break-keep">{item.desc}</p>
+                  </div>
+              ))}
+          </div>
+      </div>
+
+      {/* Testimonials Section */}
+      <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48">
+          <div className="text-center mb-16 md:mb-24">
+              <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display tracking-tight">{t('test_title')}</h2>
+              <p className="text-zinc-500 font-korean text-lg">{language === 'ko' ? "채키와 함께 행복해진 가족들의 이야기" : "Happy families growing together"}</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+              {[
+                  { name: t('test_1_name'), text: t('test_1_text'), color: 'from-orange-500/20' },
+                  { name: t('test_2_name'), text: t('test_2_text'), color: 'from-purple-500/20' },
+                  { name: t('test_3_name'), text: t('test_3_text'), color: 'from-pink-500/20' }
+              ].map((item, i) => (
+                  <div key={i} className={`p-8 rounded-3xl bg-zinc-900/60 border border-white/5 bg-gradient-to-br ${item.color} to-transparent backdrop-blur-md relative overflow-hidden`}>
+                      <div className="absolute top-4 right-6 text-4xl opacity-20">❝</div>
+                      <p className="text-zinc-300 font-korean text-base md:text-lg mb-8 leading-relaxed italic break-keep">{item.text}</p>
+                      <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-zinc-400">{item.name[0]}</div>
+                          <span className="text-sm font-bold text-white font-korean">{item.name}</span>
+                      </div>
+                  </div>
+              ))}
+          </div>
+      </div>
+
+      {/* Final CTA Section */}
+      <div className="max-w-7xl mx-auto px-6 pb-20">
+          <div className={`relative w-full rounded-[3rem] p-12 md:p-20 overflow-hidden text-center bg-zinc-900/60 border border-white/10`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-600/10 to-purple-600/10' : 'from-orange-500/10 to-pink-500/10'} opacity-50`}></div>
+              <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+                  <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display tracking-tight leading-tight">
+                      {language === 'ko' ? "오늘부터 우리 아이 숙제 시간,\n채키가 다정하게 도와드릴게요." : "Make homework time happy again."}
+                  </h2>
+                  <p className="text-zinc-400 font-korean text-lg mb-10 max-w-lg leading-relaxed break-keep">
+                      {t('hero_cta_desc')}
+                  </p>
+                  <button onClick={openLoginModal} className="group relative bg-white text-black px-10 py-5 rounded-2xl font-black text-xl transition-all transform active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)] font-display flex items-center gap-4">
+                      <span className="font-korean">{t('hero_cta_btn')}</span>
+                      <span className="text-2xl transition-transform group-hover:translate-x-1">🚀</span>
+                  </button>
+              </div>
           </div>
       </div>
     </div>
