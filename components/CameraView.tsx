@@ -212,11 +212,11 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
         </div>
         
-        {/* Mascot Resized */}
+        {/* Mascot Resized 50% bigger */}
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2">
-            <div className="relative w-full max-w-[260px] md:max-w-[400px] aspect-square flex items-center justify-center">
-                <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] animate-pulse`}></div>
-                <div className="w-full h-full relative z-10 transition-transform scale-100 md:scale-105">
+            <div className="relative w-full max-w-[390px] md:max-w-[600px] aspect-square flex items-center justify-center">
+                <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[100px] animate-pulse`}></div>
+                <div className="w-full h-full relative z-10 transition-transform scale-100 md:scale-110">
                    <img 
                     src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
                     alt="Chekki Hero" 
@@ -356,7 +356,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Final CTA Section - Reduced padding, reverted mascot, and fixed button text wrapping */}
+      {/* Final CTA Section - Mascot 50% bigger */}
       <div className="max-w-7xl mx-auto px-6 pb-12">
           <div className="relative w-full rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-10 overflow-hidden text-left bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_100px_rgba(249,115,22,0.25)]">
               <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 blur-[80px] pointer-events-none"></div>
@@ -365,7 +365,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 font-display tracking-tight leading-[1.05] drop-shadow-2xl">
                           {language === 'ko' ? "행복한 숙제 시간," : "Happy Homework,"}
                       </h2>
-                      <p className="text-white font-korean text-base md:text-lg mb-8 leading-relaxed break-keep font-bold opacity-90">
+                      <p className="text-white font-korean text-base md:text-xl mb-8 leading-relaxed break-keep font-bold opacity-90">
                           {language === 'ko' ? "숙제 시간이 스트레스가 아닌, 아이와 함께 웃으며 성장하는 따뜻한 시간이 됩니다." : "Join thousands of moms who've turned homework time into a peaceful, happy bonding moment."}
                       </p>
                       <button 
@@ -377,10 +377,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       </button>
                   </div>
                   
-                  {/* Reverted to the happy mascot for high impact */}
+                  {/* Significantly enlarged happy mascot */}
                   <div className="hidden lg:flex justify-center items-center h-full">
-                       <div className="relative w-full max-w-[450px] aspect-square animate-float transform scale-[1.2] md:scale-[1.4] translate-x-4">
-                            <div className="absolute inset-0 bg-white/20 blur-[100px] rounded-full scale-125 opacity-30"></div>
+                       <div className="relative w-full max-w-[650px] aspect-square animate-float transform scale-[1.8] md:scale-[2.2] translate-x-12 translate-y-4">
+                            <div className="absolute inset-0 bg-white/20 blur-[120px] rounded-full scale-125 opacity-40"></div>
                             <img 
                               src={ASSETS.MASCOT_HAPPY} 
                               alt="Chekki Happy Mascot" 
