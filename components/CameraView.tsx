@@ -356,34 +356,34 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Final CTA Section - Matched to Screenshot & Fixed Text Wrapping */}
+      {/* Final CTA Section - Reduced padding, reverted mascot, and fixed button text wrapping */}
       <div className="max-w-7xl mx-auto px-6 pb-12">
-          <div className="relative w-full rounded-[2.5rem] md:rounded-[3.5rem] p-8 md:p-14 overflow-hidden text-left bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_100px_rgba(249,115,22,0.25)]">
+          <div className="relative w-full rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-10 overflow-hidden text-left bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_100px_rgba(249,115,22,0.25)]">
               <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 blur-[80px] pointer-events-none"></div>
-              <div className="relative z-10 grid lg:grid-cols-[1.2fr_0.8fr] items-center gap-8 md:gap-10">
+              <div className="relative z-10 grid lg:grid-cols-[1.2fr_0.8fr] items-center gap-6 md:gap-8">
                   <div className="max-w-xl">
-                      <h2 className="text-3xl md:text-6xl font-black text-white mb-5 font-display tracking-tight leading-[1.05] drop-shadow-2xl">
+                      <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 font-display tracking-tight leading-[1.05] drop-shadow-2xl">
                           {language === 'ko' ? "행복한 숙제 시간," : "Happy Homework,"}
                       </h2>
-                      <p className="text-white font-korean text-base md:text-xl mb-8 leading-relaxed break-keep font-bold opacity-90">
+                      <p className="text-white font-korean text-base md:text-lg mb-8 leading-relaxed break-keep font-bold opacity-90">
                           {language === 'ko' ? "숙제 시간이 스트레스가 아닌, 아이와 함께 웃으며 성장하는 따뜻한 시간이 됩니다." : "Join thousands of moms who've turned homework time into a peaceful, happy bonding moment."}
                       </p>
                       <button 
                         onClick={openLoginModal} 
-                        className="group relative bg-white text-brand-orange px-6 py-3.5 md:px-10 md:py-4.5 rounded-[1.2rem] font-black text-base md:text-xl transition-all transform active:scale-95 shadow-2xl font-display flex items-center justify-center gap-2 md:gap-3 hover:shadow-white/30 whitespace-nowrap min-w-[200px] sm:min-w-fit"
+                        className="group relative bg-white text-brand-orange px-6 py-3.5 md:px-10 md:py-4 rounded-[1.2rem] font-black text-sm md:text-xl transition-all transform active:scale-95 shadow-2xl font-display flex items-center justify-center gap-2 md:gap-3 hover:shadow-white/30 whitespace-nowrap w-fit"
                       >
                           <span className="font-korean">{language === 'ko' ? "무료로 체험해보기" : "Try it for Free"}</span>
-                          <span className="text-xl md:text-2xl transition-transform group-hover:translate-x-2">→</span>
+                          <span className="text-lg md:text-2xl transition-transform group-hover:translate-x-2">→</span>
                       </button>
                   </div>
                   
-                  {/* Enlarged Mascot for Desktop */}
+                  {/* Reverted to the happy mascot for high impact */}
                   <div className="hidden lg:flex justify-center items-center h-full">
-                       <div className="relative w-full max-w-[500px] aspect-square animate-float transform scale-[1.3] md:scale-[1.6] translate-x-8">
+                       <div className="relative w-full max-w-[450px] aspect-square animate-float transform scale-[1.2] md:scale-[1.4] translate-x-4">
                             <div className="absolute inset-0 bg-white/20 blur-[100px] rounded-full scale-125 opacity-30"></div>
                             <img 
-                              src={ASSETS.MASCOT_SCAN} 
-                              alt="Chekki Mascot with Book" 
+                              src={ASSETS.MASCOT_HAPPY} 
+                              alt="Chekki Happy Mascot" 
                               className="w-full h-full object-contain filter drop-shadow-[0_40px_80px_rgba(0,0,0,0.5)]" 
                             />
                        </div>
