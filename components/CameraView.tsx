@@ -18,7 +18,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Robust image state management
   const [imgError, setImgError] = useState(false);
   const [heroError, setHeroError] = useState(false);
   const [heroLoaded, setHeroLoaded] = useState(false);
@@ -213,6 +212,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2">
             <div className="relative w-full max-w-[300px] md:max-w-[500px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] animate-pulse`}></div>
+                
                 {!heroError ? (
                   <img 
                     src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
@@ -225,6 +225,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 ) : (
                    <ChekkiMascot className="w-full h-full drop-shadow-2xl animate-float relative z-10 transition-transform scale-[1.5] md:scale-[2.2]" mood={isNight ? "sleeping" : "happy"} />
                 )}
+
                 {!heroLoaded && !heroError && (
                   <div className="absolute inset-0 flex items-center justify-center">
                      <ChekkiMascot className="w-32 h-32 md:w-48 md:h-48 opacity-20" mood="happy" />
@@ -235,7 +236,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       </div>
 
       {/* Trust Stats */}
-      <div className="max-w-7xl mx-auto px-6 mb-24 md:mb-40">
+      <div className="max-w-7xl mx-auto px-6 mb-32">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
               {[
                 { label: t('stat_accuracy'), value: '99.9%' },
@@ -251,27 +252,61 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* How it Works Section */}
-      <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48 relative">
-          <div className={`absolute -top-40 right-0 w-96 h-96 ${isNight ? 'bg-indigo-500/10' : 'bg-orange-500/10'} rounded-full blur-[120px] -z-10`}></div>
-          <div className="text-center mb-16 md:mb-24">
-              <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display tracking-tight">{t('how_title')}</h2>
-              <div className={`w-20 h-1.5 mx-auto rounded-full bg-gradient-to-r ${isNight ? 'from-indigo-500 to-purple-600' : 'from-orange-500 to-pink-500'}`}></div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+      {/* How it Works Section - EXACT MATCH TO SCREENSHOT TOP */}
+      <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-40">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20">
               {[
                   { step: '01', title: t('how_step1'), desc: t('how_step1_desc'), icon: '📸' },
-                  { step: '02', title: t('how_step2'), desc: t('how_step2_desc'), icon: '🤖' },
-                  { step: '03', title: t('how_step3'), desc: t('how_step3_desc'), icon: '❤️' }
+                  { step: '02', title: t('how_step2'), desc: t('how_step2_desc'), icon: '✨' },
+                  { step: '03', title: t('how_step3'), desc: t('how_step3_desc'), icon: '🗣️' }
               ].map((item, i) => (
-                  <div key={i} className="group relative bg-zinc-900/40 border border-white/5 rounded-[2.5rem] p-8 md:p-10 backdrop-blur-md hover:border-white/20 transition-all hover:translate-y-[-8px]">
-                      <div className="absolute top-6 right-8 text-4xl md:text-5xl font-black text-white/5 font-display select-none">{item.step}</div>
-                      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">{item.icon}</div>
-                      <h3 className="text-xl md:text-2xl font-bold text-white mb-4 font-korean">{item.title}</h3>
-                      <p className="text-zinc-500 font-korean text-base leading-relaxed break-keep">{item.desc}</p>
+                  <div key={i} className="flex flex-col items-center text-center group">
+                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl md:text-4xl mb-6 shadow-2xl backdrop-blur-md group-hover:scale-110 transition-transform">
+                        {item.icon}
+                      </div>
+                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">{item.title}</h3>
+                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep max-w-[200px]">
+                        {item.desc}
+                      </p>
                   </div>
               ))}
+          </div>
+      </div>
+
+      {/* Feature Highlights Section - EXACT MATCH TO SCREENSHOT BOTTOM */}
+      <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48">
+          <div className="grid lg:grid-cols-[1.2fr_1fr] gap-6 md:gap-8 items-stretch">
+              {/* Vision AI Main Card */}
+              <div className="group relative rounded-[3rem] p-10 md:p-14 overflow-hidden bg-zinc-900/40 border border-white/10 flex flex-col justify-end min-h-[400px] md:min-h-[500px]">
+                  <div className="absolute top-0 right-0 w-full h-full -z-10 opacity-40">
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-brand-orange/20 to-brand-purple/20 blur-[100px]"></div>
+                  </div>
+                  {/* Background Image / Mascot Placeholder */}
+                  <div className="absolute top-10 right-10 w-48 h-48 md:w-80 md:h-80 opacity-60 group-hover:opacity-100 transition-opacity animate-float">
+                      <ChekkiMascot className="w-full h-full" mood="happy" />
+                  </div>
+                  <div className="relative z-10">
+                    <span className="inline-block text-[10px] md:text-xs font-black text-brand-orange uppercase tracking-[0.2em] mb-4">Vision AI</span>
+                    <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display leading-tight">{t('feat_vision_title')}</h2>
+                    <p className="text-zinc-400 font-korean text-base md:text-lg max-w-md leading-relaxed break-keep">{t('feat_vision_desc')}</p>
+                  </div>
+              </div>
+
+              {/* Side Feature Stack */}
+              <div className="flex flex-col gap-6 md:gap-8">
+                  {/* Pronunciation Card */}
+                  <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group">
+                      <div className="w-14 h-14 rounded-2xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">🔊</div>
+                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">{t('feat_audio')}</h3>
+                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep">{t('feat_audio_desc')}</p>
+                  </div>
+                  {/* Review Note Card */}
+                  <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group">
+                      <div className="w-14 h-14 rounded-2xl bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">📝</div>
+                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">{t('review_title')}</h3>
+                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep">{t('feat_review_desc')}</p>
+                  </div>
+              </div>
           </div>
       </div>
 
