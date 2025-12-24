@@ -212,26 +212,23 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             </button>
           </div>
         </div>
+        
+        {/* RESTORED: Mascot image in the Hero section instead of video loop */}
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2">
             <div className="relative w-full max-w-[300px] md:max-w-[500px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] animate-pulse`}></div>
-                
                 <div className="w-full h-full relative z-10 transition-transform scale-[1.5] md:scale-[2.2]">
-                   <video 
-                     autoPlay 
-                     muted 
-                     loop 
-                     playsInline 
-                     className="w-full h-full object-contain drop-shadow-2xl animate-float"
-                   >
-                     <source src={isNight ? ASSETS.VIDEO_SLEEPY : ASSETS.VIDEO_INTRO} type="video/mp4" />
-                   </video>
+                   <img 
+                    src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} 
+                    alt="Chekki Hero" 
+                    className="w-full h-full object-contain drop-shadow-2xl animate-float filter brightness-110" 
+                   />
                 </div>
             </div>
         </div>
       </div>
 
-      {/* Stats Row */}
+      {/* Trust Stats Row */}
       <div className="max-w-7xl mx-auto px-6 mb-32">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
               {[
@@ -248,7 +245,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Three Steps */}
+      {/* Three Step Process Section */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-40">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20">
               {[
@@ -269,24 +266,22 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Vision AI Grid Section */}
+      {/* Vision AI Grid Section - VIDEO LOOP ONLY HERE */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48 relative">
           <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 md:gap-8 items-stretch">
+              {/* Vision AI Large Card - VIDEO LOOP RESTORED HERE */}
               <div className="group relative rounded-[3.5rem] p-10 md:p-16 overflow-hidden bg-[#121318] border border-white/5 flex flex-col justify-end min-h-[450px] md:min-h-[600px] shadow-2xl">
                   <div className="absolute inset-0 z-0 overflow-hidden rounded-[3.5rem]">
                       <div className="absolute inset-0 bg-gradient-to-t from-[#121318] via-transparent to-transparent z-10"></div>
-                      {!heroError ? (
-                          <img 
-                           src={ASSETS.HERO_IMAGE} 
-                           alt="Easy Answer Key" 
-                           className="w-full h-full object-cover object-center filter brightness-90 group-hover:scale-105 transition-transform duration-1000"
-                           onError={() => setHeroError(true)}
-                          />
-                      ) : (
-                          <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
-                             <ChekkiMascot className="w-64 h-64 opacity-20" mood="happy" />
-                          </div>
-                      )}
+                      <video 
+                        autoPlay 
+                        muted 
+                        loop 
+                        playsInline 
+                        className="w-full h-full object-cover object-center filter brightness-90 group-hover:scale-105 transition-transform duration-1000"
+                      >
+                         <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
+                      </video>
                   </div>
                   
                   <div className="relative z-20 text-left">
@@ -298,14 +293,16 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                         {language === 'ko' ? "복잡한 문제도 채키가 알기 쉽게 풀어드려요. 정확한 정답과 텍스트를 한눈에 확인하세요." : "I'll solve those tricky reading and grammar pages for you, giving you the exact letters and words you need."}
                     </p>
                     
-                    <div className="flex items-center gap-4 bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-3 rounded-2xl w-fit">
+                    <div className="flex items-center gap-4 bg-black/40 border border-white/10 backdrop-blur-xl px-5 py-3 rounded-2xl w-fit">
                         <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center shadow-lg">🔍</div>
                         <span className="text-xs md:text-sm font-black text-zinc-300 uppercase tracking-widest">{language === 'ko' ? "실시간 정답 스캔" : "Real-time AI Grading"}</span>
                     </div>
                   </div>
               </div>
 
+              {/* Feature Cards Column */}
               <div className="flex flex-col gap-6 md:gap-8">
+                  {/* Native Voice Card */}
                   <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
                       <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">🔊</div>
                       <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
@@ -315,6 +312,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                         {language === 'ko' ? "정확한 발음을 함께 듣고 아이에게 자신 있게 들려주세요." : "Listen to the right way to say it, then model it perfectly for your little one."}
                       </p>
                   </div>
+                  {/* Smart Review Card */}
                   <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
                       <div className="w-16 h-16 rounded-2xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">📝</div>
                       <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
@@ -324,20 +322,21 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                         {language === 'ko' ? "어려웠던 문제는 깃발로 콕! 저장했다가 나중에 맞춤 연습문제로 복습해요." : "Save the 'tricky' questions in your review note to make custom practice sheets later."}
                       </p>
                   </div>
+                  {/* Privacy Card */}
                   <div className="flex-1 rounded-[2.5rem] p-10 bg-[#121318] border border-white/5 hover:border-white/10 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
                       <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">🛡️</div>
                       <h3 className="text-2xl md:text-3xl font-black text-white mb-4 font-display">
                         {language === 'ko' ? "안전한 프라이버시" : "Safe & Private"}
                       </h3>
                       <p className="text-zinc-500 font-korean text-base md:text-lg leading-relaxed break-keep font-medium">
-                        {language === 'ko' ? "우리 아이 사진은 분석 후 바로 삭제되니 안심하세요." : "Your child's safety is everything. I look at photos and then they're gone—no storage."}
+                        {language === 'ko' ? "우리 아이 사진은 분석 후 바로 삭제되니 안심하세요. 소중한 정보는 안전하게 지켜집니다." : "Your child's safety is everything. I look at photos and then they're gone—no storage."}
                       </p>
                   </div>
               </div>
           </div>
       </div>
 
-      {/* Testimonials */}
+      {/* Testimonials Section */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48">
           <div className="text-center mb-16 md:mb-24">
               <span className="text-xs md:text-sm font-black text-brand-orange uppercase tracking-[0.4em] mb-4 block">REAL STORIES FROM MOMS</span>
@@ -370,11 +369,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Footer CTA */}
+      {/* Final CTA Section */}
       <div className="max-w-7xl mx-auto px-6 pb-20">
           <div className="relative w-full rounded-[3.5rem] p-12 md:p-24 overflow-hidden text-left bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_120px_rgba(249,115,22,0.3)]">
               <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 blur-[100px] pointer-events-none"></div>
-              
               <div className="relative z-10 grid lg:grid-cols-[1.2fr_0.8fr] items-center gap-12">
                   <div className="max-w-2xl">
                       <h2 className="text-4xl md:text-7xl font-black text-white mb-8 font-display tracking-tight leading-[1.05] drop-shadow-2xl">
@@ -392,25 +390,22 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       </button>
                   </div>
                   
+                  {/* RESTORED: Mascot static image for Final CTA instead of video loop */}
                   <div className="hidden lg:flex justify-center items-center">
                        <div className="relative w-full max-w-[450px] aspect-square animate-float">
                             <div className="absolute inset-0 bg-white/20 blur-[100px] rounded-full scale-125 opacity-40"></div>
-                            <video 
-                              autoPlay 
-                              muted 
-                              loop 
-                              playsInline 
-                              className="w-full h-full object-contain filter drop-shadow-[0_40px_80px_rgba(0,0,0,0.6)]"
-                            >
-                                <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
-                            </video>
+                            <img 
+                              src={ASSETS.MASCOT_HAPPY} 
+                              alt="Chekki Success" 
+                              className="w-full h-full object-contain filter drop-shadow-[0_40px_80px_rgba(0,0,0,0.6)]" 
+                            />
                        </div>
                   </div>
               </div>
           </div>
           
-          {/* Main Footer Matching Screenshot */}
-          <div className="mt-16 pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-0 pb-12">
+          {/* FOOTER SECTION: Active Links matching screenshot exactly */}
+          <div className="mt-24 pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-0 pb-12">
               <div className="flex flex-col items-center md:items-start text-center md:text-left">
                   <h4 className="text-2xl font-black text-white font-display mb-1">
                     Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
@@ -421,9 +416,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               </div>
               
               <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-[11px] md:text-xs text-zinc-400 font-black uppercase tracking-[0.2em]">
-                  <button onClick={() => setShowLegal('privacy')} className="hover:text-white transition-colors">Privacy</button>
-                  <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors">Terms</button>
-                  <a href="mailto:chekkihelp@gmail.com" className="hover:text-white transition-colors">Support</a>
+                  <button onClick={() => setShowLegal('privacy')} className="hover:text-white transition-colors cursor-pointer">PRIVACY</button>
+                  <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors cursor-pointer">TERMS</button>
+                  <a href="mailto:chekkihelp@gmail.com" className="hover:text-white transition-colors cursor-pointer">SUPPORT</a>
               </div>
           </div>
       </div>
