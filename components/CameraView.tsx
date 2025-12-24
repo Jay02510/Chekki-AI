@@ -235,7 +235,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
       </div>
 
-      {/* Trust Stats */}
+      {/* Trust Stats Row */}
       <div className="max-w-7xl mx-auto px-6 mb-32">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
               {[
@@ -252,13 +252,13 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* How it Works Section - EXACT MATCH TO SCREENSHOT TOP */}
+      {/* How it Works Section - EXACT MATCH TO SCREENSHOT (Top Part) */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-40">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20">
               {[
-                  { step: '01', title: t('how_step1'), desc: t('how_step1_desc'), icon: '📸' },
-                  { step: '02', title: t('how_step2'), desc: t('how_step2_desc'), icon: '✨' },
-                  { step: '03', title: t('how_step3'), desc: t('how_step3_desc'), icon: '🗣️' }
+                  { title: language === 'ko' ? "사진 찍기" : t('how_step1'), desc: language === 'ko' ? "숙제 페이지를 찰칵 찍어주세요." : t('how_step1_desc'), icon: '📸' },
+                  { title: language === 'ko' ? "정답 확인" : t('how_step2'), desc: language === 'ko' ? "제가 모든 정답을 꼼꼼히 찾아낼게요." : t('how_step2_desc'), icon: '✨' },
+                  { title: language === 'ko' ? "다정하게 지도" : t('how_step3'), desc: language === 'ko' ? "제 설명을 보고 아이에게 친절히 알려주세요." : t('how_step3_desc'), icon: '🗣️' }
               ].map((item, i) => (
                   <div key={i} className="flex flex-col items-center text-center group">
                       <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl md:text-4xl mb-6 shadow-2xl backdrop-blur-md group-hover:scale-110 transition-transform">
@@ -273,38 +273,58 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Feature Highlights Section - EXACT MATCH TO SCREENSHOT BOTTOM */}
-      <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48">
+      {/* Feature Highlights Section - EXACT MATCH TO SCREENSHOT (Bottom Part) */}
+      <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48 relative">
           <div className="grid lg:grid-cols-[1.2fr_1fr] gap-6 md:gap-8 items-stretch">
-              {/* Vision AI Main Card */}
-              <div className="group relative rounded-[3rem] p-10 md:p-14 overflow-hidden bg-zinc-900/40 border border-white/10 flex flex-col justify-end min-h-[400px] md:min-h-[500px]">
-                  <div className="absolute top-0 right-0 w-full h-full -z-10 opacity-40">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-brand-orange/20 to-brand-purple/20 blur-[100px]"></div>
+              {/* Vision AI Main Card (Large, immersive) */}
+              <div className="group relative rounded-[3rem] p-10 md:p-14 overflow-hidden bg-zinc-900/40 border border-white/10 flex flex-col justify-end min-h-[400px] md:min-h-[500px] shadow-2xl backdrop-blur-sm">
+                  <div className="absolute top-0 right-0 w-full h-full -z-10 overflow-hidden pointer-events-none">
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-brand-orange/20 to-brand-purple/20 blur-[120px] opacity-60"></div>
                   </div>
-                  {/* Background Image / Mascot Placeholder */}
-                  <div className="absolute top-10 right-10 w-48 h-48 md:w-80 md:h-80 opacity-60 group-hover:opacity-100 transition-opacity animate-float">
-                      <ChekkiMascot className="w-full h-full" mood="happy" />
+                  {/* Immersive Mascot Image positioned as per Hi-Fi design */}
+                  <div className="absolute top-10 right-10 w-64 h-64 md:w-[400px] md:h-[400px] opacity-80 group-hover:opacity-100 transition-opacity animate-float pointer-events-none">
+                       {!heroError ? (
+                           <img 
+                            src={ASSETS.HERO_IMAGE} 
+                            alt="Chekki Mascot" 
+                            className="w-full h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                           />
+                       ) : (
+                           <ChekkiMascot className="w-full h-full" mood="happy" />
+                       )}
                   </div>
                   <div className="relative z-10">
-                    <span className="inline-block text-[10px] md:text-xs font-black text-brand-orange uppercase tracking-[0.2em] mb-4">Vision AI</span>
-                    <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display leading-tight">{t('feat_vision_title')}</h2>
-                    <p className="text-zinc-400 font-korean text-base md:text-lg max-w-md leading-relaxed break-keep">{t('feat_vision_desc')}</p>
+                    <span className="inline-block text-[10px] md:text-xs font-black text-brand-orange uppercase tracking-[0.2em] mb-4 drop-shadow-sm">Vision AI</span>
+                    <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display leading-tight drop-shadow-md">
+                      {language === 'ko' ? "다정한 정답지" : t('feat_vision_title')}
+                    </h2>
+                    <p className="text-zinc-400 font-korean text-base md:text-lg max-w-md leading-relaxed break-keep font-medium">
+                      {language === 'ko' ? "복잡한 문제도 채키가 알기 쉽게 풀어드려요. 정확한 정답과 텍스트를 한눈에 확인하세요." : t('feat_vision_desc')}
+                    </p>
                   </div>
               </div>
 
-              {/* Side Feature Stack */}
+              {/* Side Feature Stack (Two focused cards) */}
               <div className="flex flex-col gap-6 md:gap-8">
                   {/* Pronunciation Card */}
-                  <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group">
-                      <div className="w-14 h-14 rounded-2xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">🔊</div>
-                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">{t('feat_audio')}</h3>
-                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep">{t('feat_audio_desc')}</p>
+                  <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
+                      <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform shadow-inner">🔊</div>
+                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">
+                        {language === 'ko' ? "원어민 발음 듣기" : t('feat_audio')}
+                      </h3>
+                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep font-medium">
+                        {language === 'ko' ? "정확한 발음을 함께 듣고 아이에게 자신 있게 들려주세요." : t('feat_audio_desc')}
+                      </p>
                   </div>
                   {/* Review Note Card */}
-                  <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group">
-                      <div className="w-14 h-14 rounded-2xl bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">📝</div>
-                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">{t('review_title')}</h3>
-                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep">{t('feat_review_desc')}</p>
+                  <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
+                      <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform shadow-inner">📝</div>
+                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">
+                        {language === 'ko' ? "복습 노트 생성" : t('review_title')}
+                      </h3>
+                      <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep font-medium">
+                        {language === 'ko' ? "어려웠던 문제는 깃발로 콕! 저장했다가 나중에 맞춤 연습문제로 복습해요." : t('feat_review_desc')}
+                      </p>
                   </div>
               </div>
           </div>
@@ -314,7 +334,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48">
           <div className="text-center mb-16 md:mb-24">
               <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display tracking-tight">{t('test_title')}</h2>
-              <p className="text-zinc-500 font-korean text-lg">{language === 'ko' ? "채키와 함께 행복해진 가족들의 이야기" : "Happy families growing together"}</p>
+              <p className="text-zinc-500 font-korean text-lg font-medium">{language === 'ko' ? "채키와 함께 행복해진 가족들의 이야기" : "Happy families growing together"}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
@@ -323,11 +343,11 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                   { name: t('test_2_name'), text: t('test_2_text'), color: 'from-purple-500/20' },
                   { name: t('test_3_name'), text: t('test_3_text'), color: 'from-pink-500/20' }
               ].map((item, i) => (
-                  <div key={i} className={`p-8 rounded-3xl bg-zinc-900/60 border border-white/5 bg-gradient-to-br ${item.color} to-transparent backdrop-blur-md relative overflow-hidden`}>
-                      <div className="absolute top-4 right-6 text-4xl opacity-20">❝</div>
-                      <p className="text-zinc-300 font-korean text-base md:text-lg mb-8 leading-relaxed italic break-keep">{item.text}</p>
-                      <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-zinc-400">{item.name[0]}</div>
+                  <div key={i} className={`p-8 rounded-3xl bg-zinc-900/60 border border-white/5 bg-gradient-to-br ${item.color} to-transparent backdrop-blur-md relative overflow-hidden shadow-2xl`}>
+                      <div className="absolute top-4 right-6 text-4xl opacity-20 text-white font-display">❝</div>
+                      <p className="text-zinc-300 font-korean text-base md:text-lg mb-8 leading-relaxed italic break-keep relative z-10">{item.text}</p>
+                      <div className="flex items-center gap-3 relative z-10">
+                          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-zinc-400 border border-white/5">{item.name[0]}</div>
                           <span className="text-sm font-bold text-white font-korean">{item.name}</span>
                       </div>
                   </div>
@@ -337,18 +357,18 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
       {/* Final CTA Section */}
       <div className="max-w-7xl mx-auto px-6 pb-20">
-          <div className={`relative w-full rounded-[3rem] p-12 md:p-20 overflow-hidden text-center bg-zinc-900/60 border border-white/10`}>
-              <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-600/10 to-purple-600/10' : 'from-orange-500/10 to-pink-500/10'} opacity-50`}></div>
+          <div className={`relative w-full rounded-[3.5rem] p-12 md:p-24 overflow-hidden text-center bg-zinc-900/60 border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-600/20 to-purple-600/20' : 'from-orange-500/20 to-pink-500/20'} opacity-60`}></div>
               <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
-                  <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display tracking-tight leading-tight">
-                      {language === 'ko' ? "오늘부터 우리 아이 숙제 시간,\n채키가 다정하게 도와드릴게요." : "Make homework time happy again."}
+                  <h2 className="text-4xl md:text-6xl font-black text-white mb-8 font-display tracking-tight leading-tight whitespace-pre-line drop-shadow-2xl">
+                      {language === 'ko' ? "오늘부터 우리 아이 숙제 시간,\n채키가 다정하게 도와드릴게요." : "Make homework time\nhappy again."}
                   </h2>
-                  <p className="text-zinc-400 font-korean text-lg mb-10 max-w-lg leading-relaxed break-keep">
+                  <p className="text-zinc-400 font-korean text-lg md:text-xl mb-12 max-w-lg leading-relaxed break-keep font-medium">
                       {t('hero_cta_desc')}
                   </p>
-                  <button onClick={openLoginModal} className="group relative bg-white text-black px-10 py-5 rounded-2xl font-black text-xl transition-all transform active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)] font-display flex items-center gap-4">
+                  <button onClick={openLoginModal} className="group relative bg-white text-black px-12 py-5 md:px-14 md:py-6 rounded-2xl font-black text-xl md:text-2xl transition-all transform active:scale-95 shadow-[0_20px_60px_rgba(255,255,255,0.2)] font-display flex items-center gap-4 hover:shadow-white/30">
                       <span className="font-korean">{t('hero_cta_btn')}</span>
-                      <span className="text-2xl transition-transform group-hover:translate-x-1">🚀</span>
+                      <span className="text-2xl md:text-3xl transition-transform group-hover:translate-x-2">🚀</span>
                   </button>
               </div>
           </div>
