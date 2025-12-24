@@ -68,14 +68,6 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    return () => {
-      if (analysisState.originalImage?.startsWith('blob:')) {
-        URL.revokeObjectURL(analysisState.originalImage);
-      }
-    };
-  }, [analysisState.originalImage]);
-
-  useEffect(() => {
     if (!isAuthenticated && analysisState.status !== 'idle') {
       setAnalysisState({ status: 'idle', data: null, originalImage: null, errorMessage: null, showReward: false });
       localStorage.removeItem(SESSION_KEY);
@@ -98,6 +90,15 @@ function AppContent() {
       }
     }
   }, []);
+
+  // Prevent mobile scroll bounce on main content when analyzing
+  useEffect(() => {
+    if (analysisState.status === 'analyzing') {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [analysisState.status]);
 
   const handleImageSelected = async (base64Data: string, isRetryAttempt = false) => {
     if (!isAuthenticated) {

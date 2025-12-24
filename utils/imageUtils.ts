@@ -1,5 +1,5 @@
 
-export const compressImage = (file: File, maxWidth = 1200, quality = 0.7): Promise<string> => {
+export const compressImage = (file: File, maxWidth = 1024, quality = 0.6): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -13,7 +13,6 @@ export const compressImage = (file: File, maxWidth = 1200, quality = 0.7): Promi
         let width = img.width;
         let height = img.height;
 
-        // Maintain aspect ratio while scaling to optimized maxWidth
         if (width > maxWidth) {
           height = (height * maxWidth) / width;
           width = maxWidth;
@@ -22,26 +21,24 @@ export const compressImage = (file: File, maxWidth = 1200, quality = 0.7): Promi
         canvas.width = width;
         canvas.height = height;
         
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false });
         if (!ctx) {
-          reject(new Error('Could not get canvas context'));
+          reject(new Error('Canvas context failed'));
           return;
         }
         
-        // High-quality interpolation for text clarity
         ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        ctx.imageSmoothingQuality = 'medium'; // Faster than high while preserving text
         
         ctx.drawImage(img, 0, 0, width, height);
         
-        // JPEG offers best balance for Gemini's OCR vs Payload size
         const dataUrl = canvas.toDataURL('image/jpeg', quality);
         resolve(dataUrl);
       };
 
-      img.onerror = () => reject(new Error("Failed to load image for compression"));
+      img.onerror = () => reject(new Error("Image load failed"));
     };
 
-    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.onerror = () => reject(new Error("File read failed"));
   });
 };

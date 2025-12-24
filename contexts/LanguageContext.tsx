@@ -172,89 +172,89 @@ const translations = {
     test_3_name: "서연 어머님",
     test_3_text: "연습문제 만들어주는 기능이 최고예요. 아이가 어려워하는 것만 쏙쏙 골라 복습시킬 수 있거든요.",
 
-    onb_1_title: "어려운 건 제가 할게요!",
-    onb_1_desc: "정답은 제가 찾을게요. 엄마는 아이에게 따뜻한 칭찬과 응원만 듬뿍 해주세요.",
-    onb_1_btn: "시작할까요?",
-    onb_2_title: "준비 되셨나요?",
-    onb_2_desc: "숙제를 잘 볼 수 있게 카메라 권한을 허용해 주세요.",
+    onb_1_title: "어려운 부분은 제가 할게요!",
+    onb_1_desc: "정답은 제가 찾을 테니, 어머님은 아이에게 칭찬과 격려를 듬뿍 해주세요.",
+    onb_1_btn: "시작하기",
+    onb_2_title: "시작할 준비 되셨나요?",
+    onb_2_desc: "문제를 분석하기 위해 카메라 권한이 필요해요.",
     onb_2_btn: "카메라 켜기",
-    onb_3_title: "알림을 켜두세요!",
-    onb_3_desc: "도움이 되는 티칭 팁과 다정한 복습 알림을 보내드릴게요.",
+    onb_3_title: "소식을 받아보세요!",
+    onb_3_desc: "복습 시간 알림과 유익한 교육 팁을 보내드릴게요.",
     onb_3_btn: "좋아요!",
 
     feat_vision_title: "다정한 정답지",
-    feat_vision_desc: "복합한 문제도 채키가 알기 쉽게 풀어드려요. 정확한 정답과 텍스트를 한눈에 확인하세요.",
-    feat_audio: "원어민 발음 듣기",
+    feat_vision_desc: "복잡한 문제도 채키가 알기 쉽게 풀어드려요. 정확한 정답과 텍스트를 한눈에 확인하세요.",
+    feat_audio: "원어민 발음",
     feat_audio_desc: "정확한 발음을 함께 듣고 아이에게 자신 있게 들려주세요.",
     feat_review_desc: "어려웠던 문제는 깃발로 콕! 저장했다가 나중에 맞춤 연습문제로 복습해요.",
-    feat_privacy: "안전한 프라이버시",
-    feat_privacy_desc: "우리 아이 사진은 분석 후 바로 삭제되니 안심하세요. 소중한 정보는 안전하게 지켜집니다.",
-    scan_loading_text: "생각 중...",
+    feat_privacy: "안전한 보안",
+    feat_privacy_desc: "우리 아이 사진은 분석 후 바로 삭제되니 안심하세요.",
+    scan_loading_text: "분석 중...",
     growing_text: "성장 중!",
 
-    processing: "문제를 읽어보고 있어요...",
-    loading_step0: "머리를 맞대고 고민 중...",
-    loading_step1: "이야기를 꼼꼼히 읽고 있어요...",
-    loading_step2: "멋진 정답을 찾는 중이에요...",
-    loading_step3: "다정한 설명을 쓰고 있어요...",
-    loading_step4: "거의 다 됐어요! 조금만 기다려주세요.",
-    loading_tip: "💡 사진에 글자가 많으면 조금 더 걸릴 수 있어요.",
-    loading_almost: "🚀 거의 다 됐어요! 정답지를 준비 중입니다.",
-    btn_cancel_retry: "취소하고 다시 시도하기",
+    processing: "문제를 분석하고 있어요...",
+    loading_step0: "두뇌 가동 중...",
+    loading_step1: "지문을 꼼꼼히 읽고 있어요...",
+    loading_step2: "최선의 정답을 찾는 중...",
+    loading_step3: "다정한 가이드를 작성 중...",
+    loading_step4: "거의 다 됐어요! 잠시만요...",
+    loading_tip: "💡 문제가 많으면 시간이 조금 더 걸릴 수 있어요!",
+    loading_almost: "🚀 곧 완료됩니다! 가이드를 준비 중이에요...",
+    btn_cancel_retry: "취소하고 다시 시도",
 
-    ws_results_title: "채키의 채점 결과",
-    ws_items_found: "개의 문제 해결됨",
-    ws_review_tip: "팁: 질문을 클릭하면 엄마를 위한 티칭 가이드와 발음 연습 도구를 볼 수 있어요!",
+    ws_results_title: "채키의 분석 결과",
+    ws_items_found: "개의 문제를 풀었어요",
+    ws_review_tip: "팁: 문제를 클릭하여 티칭 가이드와 발음 연습을 확인하세요!",
     ws_voice_guide: "💡 정답을 누르면 영어 발음을 들려드려요!",
     ws_gen_practice: "맞춤 연습문제 만들기",
     ws_scan_again: "다시 찍기",
-    ws_overlay: "정답만 보기",
+    ws_overlay: "집중 보기",
     ws_list: "목록으로 보기",
 
-    tt_report: "정답 오류 신고하기",
+    tt_report: "정답 오류 신고",
     tt_audio: "원어민 발음 듣기",
-    tt_save: "복습 노트에 저장",
+    tt_save: "오답 노트에 저장",
     
     stat_accuracy: "정확도",
-    stat_users: "행복한 가족",
+    stat_users: "함께하는 가족",
     stat_questions: "해결한 문제",
-    stat_rating: "부모님 평점",
+    stat_rating: "학부모 평점",
 
-    review_title: "복습 노트",
+    review_title: "오답 노트",
     review_empty_title: "아직 저장된 문제가 없어요",
-    review_empty_desc: "아이가 어려워했던 문제를 저장해 보세요. 나중에 멋진 연습문제지로 만들어 드릴게요!",
-    review_print_btn: "연습 문제지 만들기 (PDF)",
-    lbl_question: "질문",
+    review_empty_desc: "아이가 어려워하는 문제를 저장해보세요. 나중에 연습문제로 만들어드릴게요!",
+    review_print_btn: "연습문제 만들기 (PDF)",
+    lbl_question: "문제",
     lbl_correct_answer: "정답",
-    lbl_write_answer: "연습 공간",
+    lbl_write_answer: "직접 써보기",
     lbl_mom_tip: "다정한 팁:",
-    print_footer: "채키 AI - 우리 아이의 성장을 엄마와 함께 응원합니다!",
-    lbl_mistakes_count: "개의 저장된 문제",
+    print_footer: "채키 AI - 우리 아이의 성장을 함께하는 파트너!",
+    lbl_mistakes_count: "개의 저장된 항목",
 
-    reward_job: "정말 잘하고 계세요!",
-    reward_stamp: "최고의 엄마!",
+    reward_job: "정말 잘했어요!",
+    reward_stamp: "참 잘했어요! ✨",
     reward_tap: "하이파이브 해주세요!",
 
-    error_title: "앗! 조금만 더 잘 보여주세요.",
-    btn_retry: "다시 시도하기",
-    btn_scan_again_simple: "다시 스캔하기",
+    error_title: "다시 한번 해볼까요?",
+    btn_retry: "다시 시도",
+    btn_scan_again_simple: "다시 찍기",
     btn_retake: "새로 찍기",
-    err_confirm: "정말 취소하시겠어요? 현재 결과가 사라집니다.",
-    err_network: "연결이 잠시 잠들었나 봐요. 사진을 한 번 더 찍어볼까요?",
+    err_confirm: "정말 취소하시겠어요? 현재 분석 결과가 사라집니다.",
+    err_network: "연결이 조금 느려졌어요. 다시 한번 스캔해볼까요?",
 
-    dash_welcome: "반가워요,",
-    dash_subtitle: "숙제 사진만 올려주세요! 제가 다정한 정답 가이드를 만들어 드릴게요.",
-    scans_left: "남은 마법 횟수",
-    footer_text: "Gemini 3 Pro 기반 • 엄마를 위한 다정한 영어 숙제 파트너",
-    fb_title: "피드백",
+    dash_welcome: "안녕하세요,",
+    dash_subtitle: "숙제 사진을 올려주시면 쉬운 티칭 가이드를 만들어드려요.",
+    scans_left: "남은 숙제 마법",
+    footer_text: "Gemini 3 Pro 기반 • 다정한 숙제 친구 채키",
+    fb_title: "의견 보내기",
     fb_success: "소중한 의견 감사합니다!",
-    fb_desc: "오늘 채키와 함께한 시간은 어떠셨나요?",
-    fb_error_desc: "정답이나 설명에 문제가 있었나요? 알려주시면 더 똑똑해질게요.",
-    fb_submit: "의견 보내기",
+    fb_desc: "오늘 채키와의 경험은 어떠셨나요?",
+    fb_error_desc: "이 정답에 문제가 있었나요?",
+    fb_submit: "의견 제출하기",
     fb_rating: "채키가 얼마나 도움이 되었나요?",
-    fb_comment: "더 자세한 의견이 있으신가요?",
-    pw_title: "모든 마법 잠금해제",
-    pw_desc: "무제한 스캔과 복습 문제지 생성 기능을 ₩9,900에 만나보세요."
+    fb_comment: "자세한 내용을 들려주세요.",
+    pw_title: "모든 마법 잠금 해제",
+    pw_desc: "무제한 스캔과 AI 연습문제 생성 기능을 만나보세요."
   }
 };
 
@@ -262,20 +262,18 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('hw_language');
-      if (stored === 'en' || stored === 'ko') return stored;
-    }
-    return 'ko'; 
+    const saved = localStorage.getItem('chekki_lang');
+    if (saved === 'ko' || saved === 'en') return saved;
+    return navigator.language.startsWith('ko') ? 'ko' : 'en';
   });
 
   useEffect(() => {
-    localStorage.setItem('hw_language', language);
+    localStorage.setItem('chekki_lang', language);
+    document.documentElement.lang = language;
   }, [language]);
 
-  const t = (key: string) => {
-    // @ts-ignore
-    return translations[language][key] || key;
+  const t = (key: string): string => {
+    return (translations[language] as any)[key] || (translations['en'] as any)[key] || key;
   };
 
   return (
@@ -287,6 +285,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
-  if (context === undefined) throw new Error('useLanguage must be used within a LanguageProvider');
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
   return context;
 };
