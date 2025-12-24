@@ -252,7 +252,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* How it Works Section - EXACT MATCH TO SCREENSHOT (Top Part) */}
+      {/* How it Works Section - Restored to original design */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-40">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20">
               {[
@@ -273,15 +273,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Feature Highlights Section - EXACT MATCH TO SCREENSHOT (Bottom Part) */}
+      {/* Feature Highlights Section - Restored to original design */}
       <div className="max-w-7xl mx-auto px-6 mb-32 md:mb-48 relative">
           <div className="grid lg:grid-cols-[1.2fr_1fr] gap-6 md:gap-8 items-stretch">
-              {/* Vision AI Main Card (Large, immersive) */}
+              {/* Vision AI Main Card */}
               <div className="group relative rounded-[3rem] p-10 md:p-14 overflow-hidden bg-zinc-900/40 border border-white/10 flex flex-col justify-end min-h-[400px] md:min-h-[500px] shadow-2xl backdrop-blur-sm">
                   <div className="absolute top-0 right-0 w-full h-full -z-10 overflow-hidden pointer-events-none">
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-brand-orange/20 to-brand-purple/20 blur-[120px] opacity-60"></div>
                   </div>
-                  {/* Immersive Mascot Image positioned as per Hi-Fi design */}
                   <div className="absolute top-10 right-10 w-64 h-64 md:w-[400px] md:h-[400px] opacity-80 group-hover:opacity-100 transition-opacity animate-float pointer-events-none">
                        {!heroError ? (
                            <img 
@@ -293,7 +292,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                            <ChekkiMascot className="w-full h-full" mood="happy" />
                        )}
                   </div>
-                  <div className="relative z-10">
+                  <div className="relative z-10 text-left">
                     <span className="inline-block text-[10px] md:text-xs font-black text-brand-orange uppercase tracking-[0.2em] mb-4 drop-shadow-sm">Vision AI</span>
                     <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display leading-tight drop-shadow-md">
                       {language === 'ko' ? "다정한 정답지" : t('feat_vision_title')}
@@ -304,9 +303,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                   </div>
               </div>
 
-              {/* Side Feature Stack (Two focused cards) */}
+              {/* Side Feature Stack */}
               <div className="flex flex-col gap-6 md:gap-8">
-                  {/* Pronunciation Card */}
                   <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
                       <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform shadow-inner">🔊</div>
                       <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">
@@ -316,7 +314,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                         {language === 'ko' ? "정확한 발음을 함께 듣고 아이에게 자신 있게 들려주세요." : t('feat_audio_desc')}
                       </p>
                   </div>
-                  {/* Review Note Card */}
                   <div className="flex-1 rounded-[2.5rem] p-8 md:p-10 bg-zinc-900/60 border border-white/5 hover:border-white/20 transition-all flex flex-col items-start text-left group shadow-xl backdrop-blur-md">
                       <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform shadow-inner">📝</div>
                       <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">
@@ -337,7 +334,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               <p className="text-zinc-500 font-korean text-lg font-medium">{language === 'ko' ? "채키와 함께 행복해진 가족들의 이야기" : "Happy families growing together"}</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8 text-left">
               {[
                   { name: t('test_1_name'), text: t('test_1_text'), color: 'from-orange-500/20' },
                   { name: t('test_2_name'), text: t('test_2_text'), color: 'from-purple-500/20' },
