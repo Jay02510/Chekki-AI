@@ -208,8 +208,8 @@ const translations = {
     ws_voice_guide: "💡 정답을 누르면 영어 발음을 들려드려요!",
     ws_gen_practice: "맞춤 연습문제 만들기",
     ws_scan_again: "다시 찍기",
-    ws_overlay: "포커스 뷰",
-    ws_list: "Easy List",
+    ws_overlay: "정답만 보기",
+    ws_list: "목록으로 보기",
 
     tt_report: "정답 오류 신고하기",
     tt_audio: "원어민 발음 듣기",

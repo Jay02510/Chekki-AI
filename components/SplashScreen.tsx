@@ -32,19 +32,19 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
       setFeatureIndex(prev => (prev + 1) % features.length);
     }, 400); 
 
-    // Safety timeout: If assets take too long, allow app entry
-    const timer = setTimeout(() => {
+    // Safety timeout: If assets take too long, allow app entry (2 seconds is plenty for mobile focus)
+    const exitTimer = setTimeout(() => {
       setIsExiting(true);
     }, 2200); 
 
-    const cleanup = setTimeout(() => {
+    const cleanupTimer = setTimeout(() => {
       onFinish();
-    }, 2400);
+    }, 2500);
 
     return () => {
       clearInterval(featureInterval);
-      clearTimeout(timer);
-      clearTimeout(cleanup);
+      clearTimeout(exitTimer);
+      clearTimeout(cleanupTimer);
     };
   }, [onFinish, features.length]);
 
@@ -70,6 +70,8 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                   className="w-full h-full object-contain z-10 scale-110" 
                   onError={() => setVideoError(true)}
                   onAbort={() => setVideoError(true)}
+                  onStalled={() => setVideoError(true)}
+                  onSuspend={() => setVideoError(true)}
                 >
                   <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
                 </video>
@@ -98,7 +100,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
         </div>
 
         <div className="mt-8 w-40 h-1 bg-zinc-800 rounded-full overflow-hidden relative">
-          <div className="h-full bg-gradient-to-r from-orange-500 to-pink-500 animate-[width_2s_linear_forwards]" style={{ width: '0%' }}></div>
+          <div className="h-full bg-gradient-to-r from-orange-500 to-pink-500 animate-[width_2.2s_linear_forwards]" style={{ width: '0%' }}></div>
         </div>
       </div>
 
