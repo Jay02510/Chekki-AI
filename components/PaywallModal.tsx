@@ -1,13 +1,32 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const PaywallModal: React.FC = () => {
   const { showPaywall, setShowPaywall, upgradeToPro, user } = useAuth();
   const { t, language } = useLanguage();
+  
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [betaCode, setBetaCode] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(false);
 
   if (!showPaywall) return null;
+
+  const handleRedeem = async () => {
+    if (!betaCode) return;
+    setIsProcessing(true);
+    setError(false);
+    
+    const success = await upgradeToPro(betaCode);
+    if (success) {
+      // Logic handled in AuthContext (closes modal)
+    } else {
+      setError(true);
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -54,7 +73,7 @@ export const PaywallModal: React.FC = () => {
             </div>
 
             {/* Pro Tier */}
-            <div className="relative bg-gradient-to-b from-zinc-800 to-zinc-900 border-2 border-orange-500 rounded-[2rem] p-8 flex flex-col shadow-2xl scale-[1.05] z-10">
+            <div className={`relative bg-gradient-to-b from-zinc-800 to-zinc-900 border-2 rounded-[2rem] p-8 flex flex-col shadow-2xl scale-[1.05] z-10 transition-all duration-300 ${error ? 'border-red-500' : 'border-orange-500'}`}>
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
                     Most Popular
                 </div>
@@ -82,13 +101,50 @@ export const PaywallModal: React.FC = () => {
                     </li>
                 </ul>
 
-                <button 
-                    onClick={() => upgradeToPro()}
-                    className="w-full py-5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xl shadow-xl shadow-orange-500/20 transform active:scale-95 transition-all"
-                >
-                    {language === 'ko' ? '지금 업그레이드 하기' : 'Upgrade Now'}
-                </button>
-                <p className="text-center text-[10px] text-zinc-500 mt-4 uppercase tracking-widest font-bold">
+                {!showCodeInput ? (
+                    <>
+                        <button 
+                            onClick={() => upgradeToPro()}
+                            className="w-full py-5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xl shadow-xl shadow-orange-500/20 transform active:scale-95 transition-all"
+                        >
+                            {language === 'ko' ? '지금 업그레이드 하기' : 'Upgrade Now'}
+                        </button>
+                        <button 
+                            onClick={() => setShowCodeInput(true)}
+                            className="text-center text-[10px] text-zinc-500 mt-4 uppercase tracking-widest font-bold hover:text-white transition-colors"
+                        >
+                            Have an access code?
+                        </button>
+                    </>
+                ) : (
+                    <div className="space-y-3 animate-fade-in">
+                        <input 
+                            type="text" 
+                            value={betaCode}
+                            onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
+                            placeholder="ENTER BETA CODE"
+                            className={`w-full bg-black/40 border ${error ? 'border-red-500' : 'border-zinc-700'} rounded-xl px-4 py-3 text-white text-center font-mono tracking-widest outline-none focus:border-orange-500`}
+                        />
+                        <div className="flex gap-2">
+                             <button 
+                                onClick={handleRedeem}
+                                disabled={isProcessing}
+                                className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg disabled:opacity-50"
+                            >
+                                {isProcessing ? 'Verifying...' : 'Redeem'}
+                            </button>
+                            <button 
+                                onClick={() => { setShowCodeInput(false); setError(false); }}
+                                className="px-4 py-3 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-sm"
+                            >
+                                Back
+                            </button>
+                        </div>
+                        {error && <p className="text-[10px] text-red-500 text-center font-bold">Invalid or expired code.</p>}
+                    </div>
+                )}
+                
+                <p className="text-center text-[9px] text-zinc-600 mt-4 uppercase tracking-[0.2em] font-bold">
                     No commitment. Cancel anytime.
                 </p>
             </div>

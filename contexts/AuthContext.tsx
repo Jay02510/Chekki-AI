@@ -33,6 +33,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const FREE_LIMIT = 3;
+const VALID_BETA_CODES = ['CHEKKIBETA', 'CHEKKI2025', 'MOMAI'];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
@@ -111,9 +112,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const upgradeToPro = async (code?: string): Promise<boolean> => {
-    // In production, this would trigger a Stripe Checkout session.
-    // Here we simulate the successful payment.
     if (!firebaseUser || !userProfile) return false;
+
+    // If a code is provided, it MUST be valid.
+    if (code && !VALID_BETA_CODES.includes(code.toUpperCase().trim())) {
+      return false;
+    }
     
     const nextMonth = new Date();
     nextMonth.setMonth(nextMonth.getMonth() + 1);
