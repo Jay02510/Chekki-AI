@@ -1,7 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { auth, db } from '../services/database';
-// Fix: Use 'type' for User to resolve export member errors in certain TypeScript configurations
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
@@ -21,6 +21,7 @@ interface AuthContextType {
   deleteAccount: () => Promise<void>;
   incrementScan: () => Promise<boolean>;
   upgradeToPro: (code?: string) => Promise<boolean>;
+  cancelSubscription: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
   showPaywall: boolean;
@@ -84,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteAccount = async () => {
     if (!firebaseUser) return;
-    await db.updateUser(firebaseUser.uid, { name: 'Deleted User' }); // Soft delete in DB for records
+    await db.updateUser(firebaseUser.uid, { name: 'Deleted User' });
     await deleteUser(firebaseUser);
     setUserProfile(null);
     setFirebaseUser(null);
@@ -102,14 +103,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
+  const cancelSubscription = async () => {
+    if (!firebaseUser || !userProfile) return;
+    const updates: Partial<UserProfile> = { isCanceled: true };
+    setUserProfile({ ...userProfile, ...updates });
+    await db.updateUser(firebaseUser.uid, updates);
+  };
+
   const upgradeToPro = async (code?: string): Promise<boolean> => {
-    const validCodes = ['CHEKKIBETA', 'CHEKKI2025', 'MOMPOWER'];
-    if (code && !validCodes.includes(code.toUpperCase())) {
-        return false;
-    }
-    
+    // In production, this would trigger a Stripe Checkout session.
+    // Here we simulate the successful payment.
     if (!firebaseUser || !userProfile) return false;
-    const updates: Partial<UserProfile> = { plan: 'pro', maxScans: 9999 };
+    
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+    const updates: Partial<UserProfile> = { 
+      plan: 'pro', 
+      maxScans: 9999,
+      subscriptionStartedAt: new Date().toISOString(),
+      nextBillingDate: nextMonth.toISOString(),
+      isCanceled: false
+    };
+    
     setUserProfile({ ...userProfile, ...updates });
     await db.updateUser(firebaseUser.uid, updates);
     setShowPaywall(false);
@@ -130,6 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       deleteAccount,
       incrementScan,
       upgradeToPro,
+      cancelSubscription,
       isAuthenticated: !!firebaseUser,
       isLoading,
       showPaywall,

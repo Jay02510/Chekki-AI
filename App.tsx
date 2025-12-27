@@ -89,7 +89,6 @@ function AppContent() {
     }
   }, []);
 
-  // Prevent mobile scroll bounce on main content when analyzing
   useEffect(() => {
     if (analysisState.status === 'analyzing') {
       document.body.style.overflow = 'hidden';
@@ -121,7 +120,20 @@ function AppContent() {
     });
 
     try {
-      const result: any = await analyzeWorksheet(base64Data, isRetryAttempt);
+      // Pass the user plan to the backend to enable Pro-tier features
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          task: 'analyze',
+          image: base64Data,
+          isRetry: isRetryAttempt,
+          userPlan: user?.plan 
+        })
+      });
+
+      if (!response.ok) throw new Error("API_ERROR");
+      const result = await response.json();
       
       if (!result || result.error === "ANALYSIS_FAILED") {
          throw new Error("API_ERROR");

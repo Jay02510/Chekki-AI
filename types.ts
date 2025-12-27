@@ -25,7 +25,7 @@ export interface WorksheetItem {
   korean_guide: string;
   english_guide?: string;
   teaching_tip_ko: string;
-  teaching_script_ko?: string; // NEW: Direct script for parents to read
+  teaching_script_ko?: string;
   teaching_tip_en?: string;
   handwriting_tip_ko?: string;
   confidence_score: number;
@@ -49,6 +49,7 @@ export interface WorksheetAnalysis {
 }
 
 export interface UserProfile {
+  uid?: string;
   name: string;
   email: string;
   photoUrl?: string;
@@ -56,6 +57,9 @@ export interface UserProfile {
   scansUsed: number;
   maxScans: number;
   totalStamps?: number;
+  subscriptionStartedAt?: string;
+  nextBillingDate?: string;
+  isCanceled?: boolean;
 }
 
 export type AppView = 'onboarding' | 'camera' | 'analyzing' | 'workspace';

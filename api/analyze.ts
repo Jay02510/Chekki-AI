@@ -54,7 +54,7 @@ export default async function handler(req: any, res: any) {
     if (!process.env.API_KEY) return res.status(500).json({ error: "ANALYSIS_FAILED" });
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const { task, image, isRetry, originalItems } = body;
+    const { task, image, isRetry, originalItems, userPlan } = body;
 
     if (task === 'generate') {
       const response = await ai.models.generateContent({
@@ -64,7 +64,7 @@ export default async function handler(req: any, res: any) {
           systemInstruction: SYSTEM_PROMPT_GENERATE,
           responseMimeType: "application/json",
           temperature: 0.3,
-          thinkingConfig: { thinkingBudget: 0 } // Speed-oriented generation
+          thinkingConfig: { thinkingBudget: 0 }
         },
       });
       return res.status(200).json(JSON.parse(response.text || "[]"));
@@ -72,8 +72,9 @@ export default async function handler(req: any, res: any) {
 
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
     
-    // Model strategy: Flash for instant results, Pro for complex retry reasoning
-    const modelName = isRetry ? "gemini-3-pro-preview" : "gemini-3-flash-preview";
+    // Pro users get the high-quality model by default (Deep Reasoning)
+    // Free users get Flash unless it's a retry.
+    const modelName = (userPlan === 'pro' || isRetry) ? "gemini-3-pro-preview" : "gemini-3-flash-preview";
 
     const response = await ai.models.generateContent({
       model: modelName,
@@ -85,8 +86,8 @@ export default async function handler(req: any, res: any) {
         systemInstruction: SYSTEM_PROMPT_ANALYZE,
         responseMimeType: "application/json",
         temperature: 0, 
-        // Optimization: Disable thinking on first attempt for speed, let model decide on retry
-        ...(isRetry ? {} : { thinkingConfig: { thinkingBudget: 0 } })
+        // Optimization: Disable thinking on first attempt for speed unless user is Pro
+        ...(userPlan === 'pro' || isRetry ? { thinkingConfig: { thinkingBudget: 16000 } } : { thinkingConfig: { thinkingBudget: 0 } })
       },
     });
 
