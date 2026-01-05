@@ -19,7 +19,6 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Check if image is already cached or complete
   useEffect(() => {
     if (imgRef.current && imgRef.current.complete) {
       setImageLoaded(true);
@@ -30,14 +29,15 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
     const box = item.bounding_box;
     if (!box) return { display: 'none' };
     
-    // Scale percentages from 0-1000 range to 0-100%
     const top = (box.ymin / 1000) * 100;
     const left = (box.xmin / 1000) * 100;
 
     return {
       top: `${top}%`,
       left: `${left}%`,
-      zIndex: 10
+      zIndex: 10,
+      transform: 'translate3d(0, 0, 0)', // Force GPU layer
+      willChange: 'transform, opacity'
     };
   };
 
@@ -57,14 +57,13 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
 
   return (
     <div className={`w-full flex flex-col bg-zinc-950 rounded-2xl border border-zinc-800 overflow-hidden relative shadow-2xl transition-all duration-500 ${className || 'h-full'}`}>
-      <div className="flex-1 relative overflow-y-auto custom-scrollbar bg-black/40">
-        {/* Use transform-gpu and will-change to boost mobile performance */}
-        <div ref={containerRef} className="relative w-full min-h-[300px] transform-gpu will-change-transform">
+      <div className="flex-1 relative overflow-y-auto custom-scrollbar bg-black/40 overscroll-contain">
+        <div ref={containerRef} className="relative w-full min-h-[300px] transform-gpu">
           <img 
             ref={imgRef}
             src={imageUrl} 
             alt="Worksheet" 
-            className={`w-full h-auto block transition-opacity duration-300 ease-out ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`w-full h-auto block transition-opacity duration-500 ease-in-out ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
             draggable={false}
             loading="eager"
@@ -72,14 +71,13 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
             fetchpriority="high"
           />
           
-          {/* Skeleton state for the image while loading */}
           {!imageLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 animate-pulse">
-               <div className="w-12 h-12 border-4 border-zinc-800 border-t-zinc-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm animate-pulse">
+               <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mb-4"></div>
+               <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Loading Canvas...</p>
             </div>
           )}
 
-          {/* Markers: Only render once image is confirmed to avoid coordinate jumping */}
           {imageLoaded && items && items.map((item) => {
             const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
             const rawAnswer = item.correct_answer || "";
@@ -90,7 +88,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
               <div
                 key={item.id}
                 style={getStyle(item)}
-                className={`absolute transition-all duration-500 pointer-events-auto ${isFocused ? 'opacity-100 scale-100' : 'opacity-10 scale-90'}`}
+                className={`absolute transition-all duration-500 pointer-events-auto ${isFocused ? 'opacity-100 scale-100' : 'opacity-5 scale-90'}`}
                 onClick={(e) => { e.stopPropagation(); playAudio(displayText); }}
               >
                  <div className="bg-orange-600 text-white px-2 py-1 md:px-4 md:py-2 rounded-xl shadow-[0_10px_40px_rgba(234,88,12,0.4)] border-2 border-white/20 flex items-center gap-2 transform transition-all hover:scale-105 active:scale-95 group cursor-pointer ring-4 ring-orange-500/10 min-w-fit max-w-[200px] md:max-w-[400px]">

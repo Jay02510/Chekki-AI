@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { compressImage } from '../utils/imageUtils';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -147,6 +148,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   );
 
   if (user) {
+    const remaining = user.plan === 'pro' ? '∞' : Math.max(0, user.maxScansPerDay - user.scansUsedToday);
     return (
       <div className="min-h-full pt-12 md:pt-28 pb-12 px-4 md:px-6 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
@@ -160,9 +162,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
            
            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
               <div className="bg-[#0F1014] border border-white/10 rounded-full py-1.5 px-5 md:py-2 md:px-6 flex items-center gap-2 md:gap-3 shadow-lg">
-                  <div className="text-[9px] md:text-[10px] text-zinc-500 uppercase font-black tracking-widest">{t('scans_left')}</div>
+                  <div className="text-[9px] md:text-[10px] text-zinc-500 uppercase font-black tracking-widest">{language === 'ko' ? "오늘 남은 마법" : "Magic Left Today"}</div>
                   <div className="w-px h-3 md:h-4 bg-white/10"></div>
-                  <div className="font-bold text-white text-base md:text-xl font-display leading-none">{user.plan === 'pro' ? '∞' : (user.maxScans - user.scansUsed)}</div>
+                  <div className="font-bold text-white text-base md:text-xl font-display leading-none">{remaining}</div>
               </div>
            </div>
         </div>
@@ -211,7 +213,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
         </div>
         
-        {/* Mascot Resized */}
+        {/* Mascot */}
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2">
             <div className="relative w-full max-w-[260px] md:max-w-[400px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] animate-pulse`}></div>
@@ -264,14 +266,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
       </div>
 
-      {/* Final CTA Section - Massive Mascot properly fitted into the container */}
+      {/* Final CTA Section */}
       <div className="max-w-7xl mx-auto px-6 pb-12">
           <div className="relative w-full rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-gradient-to-r from-brand-orange via-[#EC4899] to-brand-purple shadow-[0_40px_100px_rgba(249,115,22,0.3)]">
-              {/* Decorative background glow */}
               <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 blur-[80px] pointer-events-none"></div>
               
               <div className="relative z-10 w-full h-full flex flex-col lg:flex-row items-center p-8 md:p-12 lg:p-16">
-                  {/* Text Content */}
                   <div className="w-full lg:max-w-xl text-left">
                       <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 font-display tracking-tight leading-[1] drop-shadow-2xl">
                           {language === 'ko' ? "행복한 숙제 시간," : "Happy Homework,"}
@@ -288,11 +288,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       </button>
                   </div>
                   
-                  {/* 
-                    Truly massive mascot fit into the box. 
-                    Uses a flex container with scale transform to ensure it looks huge
-                    without excess empty space around it.
-                  */}
                   <div className="hidden lg:flex flex-1 justify-end items-center h-full relative pointer-events-none">
                        <div className="relative w-full max-w-[600px] aspect-square animate-float">
                             <div className="absolute inset-0 bg-white/20 blur-[120px] rounded-full scale-125 opacity-40"></div>
@@ -306,7 +301,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               </div>
           </div>
           
-          {/* Footer Section - Compact & Aligned */}
+          {/* Footer Section */}
           <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-0 pb-8">
               <div className="flex flex-col items-center md:items-start text-center md:text-left">
                   <h4 className="text-lg font-black text-white font-display mb-1">

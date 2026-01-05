@@ -32,7 +32,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const FREE_LIMIT = 3;
+const FREE_DAILY_LIMIT = 3;
 const VALID_BETA_CODES = ['CHEKKIBETA', 'CHEKKI2025', 'MOMAI'];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -62,8 +62,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       name,
       email,
       plan: 'free',
-      scansUsed: 0,
-      maxScans: FREE_LIMIT
+      scansUsedToday: 0,
+      lastScanDate: new Date().toISOString().split('T')[0],
+      maxScansPerDay: FREE_DAILY_LIMIT
     };
     await db.createUser(res.user.uid, newProfile);
     setUserProfile(newProfile);
@@ -94,11 +95,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const incrementScan = async (): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return true;
-    if (userProfile.plan === 'free' && userProfile.scansUsed >= userProfile.maxScans) {
+    
+    const today = new Date().toISOString().split('T')[0];
+    const isNewDay = userProfile.lastScanDate !== today;
+    
+    let currentScans = isNewDay ? 0 : userProfile.scansUsedToday;
+    
+    if (userProfile.plan === 'free' && currentScans >= userProfile.maxScansPerDay) {
       setShowPaywall(true);
       return false;
     }
-    const updates = { scansUsed: userProfile.scansUsed + 1 };
+
+    const updates = { 
+      scansUsedToday: currentScans + 1,
+      lastScanDate: today
+    };
+    
     setUserProfile({ ...userProfile, ...updates });
     await db.updateUser(firebaseUser.uid, updates);
     return true;
@@ -114,7 +126,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const upgradeToPro = async (code?: string): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return false;
 
-    // If a code is provided, it MUST be valid.
     if (code && !VALID_BETA_CODES.includes(code.toUpperCase().trim())) {
       return false;
     }
@@ -124,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const updates: Partial<UserProfile> = { 
       plan: 'pro', 
-      maxScans: 9999,
+      maxScansPerDay: 9999,
       subscriptionStartedAt: new Date().toISOString(),
       nextBillingDate: nextMonth.toISOString(),
       isCanceled: false

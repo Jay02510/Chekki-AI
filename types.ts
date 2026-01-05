@@ -54,12 +54,15 @@ export interface UserProfile {
   email: string;
   photoUrl?: string;
   plan: 'free' | 'pro';
-  scansUsed: number;
-  maxScans: number;
+  scansUsedToday: number; // Changed from scansUsed to scansUsedToday
+  lastScanDate: string;   // ISO date string (YYYY-MM-DD)
+  maxScansPerDay: number; // 3 for free, 9999 for pro
   totalStamps?: number;
   subscriptionStartedAt?: string;
   nextBillingDate?: string;
   isCanceled?: boolean;
+  referredBy?: string;
+  referralCount?: number;
 }
 
 export type AppView = 'onboarding' | 'camera' | 'analyzing' | 'workspace';
