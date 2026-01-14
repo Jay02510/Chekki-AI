@@ -79,7 +79,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         const transcript = event.results[0][0].transcript.toLowerCase();
         const activeItem = items.find(i => i.id === activeItemId);
         if (activeItem) {
-          // Normalize comparison for speech
           const cleanAnswer = activeItem.correct_answer.toLowerCase().replace(/[^\w\s]/g, '').trim();
           const cleanSpeech = transcript.replace(/[^\w\s]/g, '').trim();
           
@@ -198,6 +197,15 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 <div className="h-full flex flex-col items-center justify-center space-y-4 py-20 opacity-50">
                     <div className="w-12 h-12 border-4 border-white/5 border-t-orange-500 rounded-full animate-spin"></div>
                     <p className="text-sm font-bold font-korean">{t('ws_scanning_detail')}</p>
+                </div>
+            )}
+
+            {!isLoadingItems && items.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
+                  <span className="text-4xl opacity-50">🔍</span>
+                  <p className="text-sm font-bold text-zinc-500 font-korean">
+                    {language === 'ko' ? "문제를 찾지 못했어요. 사진을 다시 찍어주세요!" : "I couldn't find any questions. Please try taking a clearer photo!"}
+                  </p>
                 </div>
             )}
 
@@ -329,7 +337,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 disabled={isLoadingItems}
                 className="w-full py-3 md:py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-xs md:text-sm shadow-xl flex items-center justify-center gap-2 transform transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
              >
-                <span>🪄</span> {isLoadingItems ? "Designing..." : t('ws_gen_practice')}
+                <span>🪄</span> {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
              </button>
           </div>
         </div>

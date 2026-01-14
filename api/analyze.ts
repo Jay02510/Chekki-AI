@@ -6,8 +6,9 @@ export const config = {
 };
 
 const SYSTEM_PROMPT_SUMMARY = `
-You are "Chekki AI". Quickly summarize this English Kindergarten worksheet.
-Return ONLY JSON with this schema:
+You are "Chekki AI", a specialist in identifying English Kindergarten (EK) worksheets.
+Identify the worksheet's main title and its primary learning objective.
+Return ONLY JSON:
 {
   "worksheet_summary": { 
     "title_en": "string", 
@@ -18,24 +19,26 @@ Return ONLY JSON with this schema:
 `;
 
 const SYSTEM_PROMPT_ITEMS = `
-You are "Chekki AI". Rigorously extract every single question.
-CRITICAL EXTRACTION RULE: For "correct_answer", you MUST NOT return just a letter (A, B, C) or a number. 
-You MUST return the FULL STRING representing the answer. 
-Example: If the answer is choice B and choice B says "Apple", your correct_answer must be "B. Apple". 
-If the item is a fill-in-the-blank for "Cat", return "Cat".
+You are "Chekki AI". Your goal is to extract every question, vocabulary word, or exercise item from the worksheet.
 
-Follow the COMPREHENSIVENESS PROTOCOL: Scan top-to-bottom, left-to-right.
-Return ONLY JSON with this schema:
+CRITICAL RULES:
+1. FULL TEXT ANSWERS: For "correct_answer", you MUST NOT return just a letter (like "A") or a number. You MUST return the FULL text content of the answer. 
+   - Example: If Choice B is "Banana", return "B. Banana". 
+   - Example: If it's a vocabulary sheet for the word "Cringe", return "Cringe".
+2. ITEM IDENTIFICATION: If the page doesn't have numbered questions, treat each vocabulary word or section (e.g., "Read and write the words") as an item.
+3. BOUNDING BOXES: Provide coordinates (0-1000) for where the item's answer or focus area is.
+
+Return ONLY JSON:
 {
   "items": [{
     "id": number,
-    "type": "fill_in|matching|coloring|tracing|mcq|other",
+    "type": "vocabulary|fill_in|matching|coloring|mcq",
     "bounding_box": { "ymin": number, "xmin": number, "ymax": number, "xmax": number },
-    "question_text": "text",
+    "question_text": "The prompt or the word itself",
     "correct_answer": "THE FULL TEXT OF THE ANSWER",
-    "korean_guide": "explanation",
-    "teaching_script_ko": "script",
-    "teaching_tip_ko": "tip"
+    "korean_guide": "Explanation in Korean",
+    "teaching_script_ko": "A kind script for a mom to say to her child in Korean",
+    "teaching_tip_ko": "A helpful teaching tip in Korean"
   }]
 }
 `;
@@ -72,23 +75,20 @@ export default async function handler(req: any, res: any) {
     const isSummaryTask = task === 'summary';
     const systemPrompt = isSummaryTask ? SYSTEM_PROMPT_SUMMARY : SYSTEM_PROMPT_ITEMS;
     
-    // Use Flash for Summary to be near-instant.
-    // Use Pro for Items only if Pro user OR explicitly retrying for accuracy.
-    const modelName = isSummaryTask ? "gemini-3-flash-preview" : 
-                     ((userPlan === 'pro' || isRetry) ? "gemini-3-pro-preview" : "gemini-3-flash-preview");
+    // We use Gemini 3 Pro for the ITEMS task to ensure rigorous extraction of vocabulary and boxes.
+    const modelName = isSummaryTask ? "gemini-3-flash-preview" : "gemini-3-pro-preview";
 
     const response = await ai.models.generateContent({
       model: modelName,
       contents: [
         { inlineData: { mimeType: "image/jpeg", data: image } },
-        { text: isSummaryTask ? "Identify the title and goal." : "Extract all questions with full text answers." },
+        { text: isSummaryTask ? "Identify the title and goal." : "Rigorously extract all items/words/questions with coordinates and full-text answers." },
       ],
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
         temperature: 0, 
-        // Reduced thinking budget for standard items to speed up response.
-        thinkingConfig: { thinkingBudget: isSummaryTask ? 0 : (userPlan === 'pro' || isRetry ? 12000 : 0) }
+        thinkingConfig: { thinkingBudget: isSummaryTask ? 0 : 20000 }
       },
     });
 
