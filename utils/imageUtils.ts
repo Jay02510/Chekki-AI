@@ -1,5 +1,5 @@
 
-export const compressImage = (file: File, maxWidth = 1024, quality = 0.6): Promise<string> => {
+export const compressImage = (file: File, maxWidth = 900, quality = 0.4): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -13,6 +13,7 @@ export const compressImage = (file: File, maxWidth = 1024, quality = 0.6): Promi
         let width = img.width;
         let height = img.height;
 
+        // Smaller cap for faster transit
         if (width > maxWidth) {
           height = (height * maxWidth) / width;
           width = maxWidth;
@@ -28,10 +29,11 @@ export const compressImage = (file: File, maxWidth = 1024, quality = 0.6): Promi
         }
         
         ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'medium'; // Faster than high while preserving text
+        ctx.imageSmoothingQuality = 'low'; // Fast resize
         
         ctx.drawImage(img, 0, 0, width, height);
         
+        // JPEG at 0.4 is perfect balance for text OCR and tiny payload
         const dataUrl = canvas.toDataURL('image/jpeg', quality);
         resolve(dataUrl);
       };

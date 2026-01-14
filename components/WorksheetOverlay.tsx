@@ -88,9 +88,8 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
 
           {imageLoaded && items && items.map((item) => {
             const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
-            const rawAnswer = item.correct_answer || "";
-            const cleanAnswer = rawAnswer.replace(/^\d+[\.\)\s]+/, '').trim();
-            const displayText = `${item.id}. ${cleanAnswer}`;
+            // No longer stripping letters/numbers. We show the full text extracted.
+            const displayText = `${item.id}. ${item.correct_answer}`;
             
             return (
               <div

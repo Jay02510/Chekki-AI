@@ -19,6 +19,11 @@ Return ONLY JSON with this schema:
 
 const SYSTEM_PROMPT_ITEMS = `
 You are "Chekki AI". Rigorously extract every single question.
+CRITICAL EXTRACTION RULE: For "correct_answer", you MUST NOT return just a letter (A, B, C) or a number. 
+You MUST return the FULL STRING representing the answer. 
+Example: If the answer is choice B and choice B says "Apple", your correct_answer must be "B. Apple". 
+If the item is a fill-in-the-blank for "Cat", return "Cat".
+
 Follow the COMPREHENSIVENESS PROTOCOL: Scan top-to-bottom, left-to-right.
 Return ONLY JSON with this schema:
 {
@@ -27,7 +32,7 @@ Return ONLY JSON with this schema:
     "type": "fill_in|matching|coloring|tracing|mcq|other",
     "bounding_box": { "ymin": number, "xmin": number, "ymax": number, "xmax": number },
     "question_text": "text",
-    "correct_answer": "answer",
+    "correct_answer": "THE FULL TEXT OF THE ANSWER",
     "korean_guide": "explanation",
     "teaching_script_ko": "script",
     "teaching_tip_ko": "tip"
@@ -49,7 +54,6 @@ export default async function handler(req: any, res: any) {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const { task, image, isRetry, originalItems, userPlan } = body;
 
-    // Task: Parallel Question Generation
     if (task === 'generate') {
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
@@ -58,7 +62,6 @@ export default async function handler(req: any, res: any) {
           systemInstruction: SYSTEM_PROMPT_GENERATE,
           responseMimeType: "application/json",
           temperature: 0.7,
-          thinkingConfig: { thinkingBudget: 0 }
         },
       });
       return res.status(200).json(JSON.parse(response.text || "[]"));
@@ -66,11 +69,11 @@ export default async function handler(req: any, res: any) {
 
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
     
-    // Split into Summary vs Items
     const isSummaryTask = task === 'summary';
     const systemPrompt = isSummaryTask ? SYSTEM_PROMPT_SUMMARY : SYSTEM_PROMPT_ITEMS;
     
-    // Summary uses Flash for speed. Items use Pro for accuracy.
+    // Use Flash for Summary to be near-instant.
+    // Use Pro for Items only if Pro user OR explicitly retrying for accuracy.
     const modelName = isSummaryTask ? "gemini-3-flash-preview" : 
                      ((userPlan === 'pro' || isRetry) ? "gemini-3-pro-preview" : "gemini-3-flash-preview");
 
@@ -78,14 +81,14 @@ export default async function handler(req: any, res: any) {
       model: modelName,
       contents: [
         { inlineData: { mimeType: "image/jpeg", data: image } },
-        { text: isSummaryTask ? "Identify the title and goal." : "Extract all questions with bounding boxes." },
+        { text: isSummaryTask ? "Identify the title and goal." : "Extract all questions with full text answers." },
       ],
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
         temperature: 0, 
-        // Summary never needs thinking budget (instant). Items get 24k only if Pro/Retry.
-        thinkingConfig: { thinkingBudget: isSummaryTask ? 0 : (userPlan === 'pro' || isRetry ? 24000 : 0) }
+        // Reduced thinking budget for standard items to speed up response.
+        thinkingConfig: { thinkingBudget: isSummaryTask ? 0 : (userPlan === 'pro' || isRetry ? 12000 : 0) }
       },
     });
 

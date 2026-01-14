@@ -79,7 +79,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         const transcript = event.results[0][0].transcript.toLowerCase();
         const activeItem = items.find(i => i.id === activeItemId);
         if (activeItem) {
-          const cleanAnswer = activeItem.correct_answer.toLowerCase().replace(/^\d+[\.\)\s]+/, '').replace(/[^\w\s]/g, '').trim();
+          // Normalize comparison for speech
+          const cleanAnswer = activeItem.correct_answer.toLowerCase().replace(/[^\w\s]/g, '').trim();
           const cleanSpeech = transcript.replace(/[^\w\s]/g, '').trim();
           
           if (cleanSpeech.includes(cleanAnswer) || cleanAnswer.includes(cleanSpeech)) {
@@ -214,8 +215,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
               const isActive = activeItemId === item.id;
               const flagged = isMistake(item.question_text);
               const scriptText = item.teaching_script_ko;
-              
-              const cleanAnswer = item.correct_answer.replace(/^\d+[\.\)\s]+/, '').trim();
+              const answerText = item.correct_answer;
 
               return (
                 <div key={item.id} ref={(el) => { itemRefs.current[item.id] = el; }} onClick={(e) => { e.stopPropagation(); setActiveItemId(item.id); }}
@@ -227,7 +227,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                     <div className="flex-1 min-w-0">
                       <h4 className={`text-xs md:text-sm font-bold leading-snug mb-1 md:mb-2 ${isActive ? 'text-white' : 'text-zinc-400'}`}>{getDisplayQuestion(item.question_text)}</h4>
                       <div className="flex items-center gap-2">
-                        <span className="font-hand text-lg md:text-xl text-emerald-400 font-bold">{cleanAnswer}</span>
+                        <span className="font-hand text-lg md:text-xl text-emerald-400 font-bold">{answerText}</span>
                         {speechResult?.id === item.id && speechResult.success && (
                             <span className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-bounce">Good! 🌟</span>
                         )}
@@ -245,7 +245,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                         </button>
                       </Tooltip>
                       <Tooltip text={t('tt_audio')}>
-                        <button onClick={(e) => { e.stopPropagation(); playAudio(cleanAnswer); }} className="p-1.5 md:p-2 rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-all">
+                        <button onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} className="p-1.5 md:p-2 rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-all">
                           <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
                         </button>
                       </Tooltip>
