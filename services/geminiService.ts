@@ -25,31 +25,26 @@ export const analyzeWorksheet = async (base64Image: string, isRetry = false): Pr
 };
 
 /**
- * SPEED OPTIMIZATION: Fire 4 parallel threads for micro-generation.
- * This spreads the compute load and returns the full set much faster.
+ * REVERTED: Now uses a single robust generation request.
  */
 export const generateSimilarWorksheet = async (originalItems: WorksheetItem[]): Promise<WorksheetItem[]> => {
   try {
-    // Fire 4 concurrent promises for 1-2 items each
-    const promises = [1, 2, 3, 4].map(() => 
-      fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          task: 'generate',
-          originalItems: originalItems.slice(0, 5) 
-        })
-      }).then(res => res.ok ? res.json() : [])
-    );
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        task: 'generate',
+        originalItems: originalItems.slice(0, 5) 
+      })
+    });
 
-    const results = await Promise.all(promises);
+    if (!response.ok) throw new Error("GEN_FAILED");
+    const newItems = await response.json();
     
-    const allItems = results.flat().map((item, idx) => ({
+    return newItems.map((item: any, idx: number) => ({
       ...item,
       id: idx + 1
     }));
-
-    return allItems.length > 0 ? allItems : originalItems;
   } catch (e) {
     console.error("[Chekki Service] Generation failed:", e);
     return originalItems;

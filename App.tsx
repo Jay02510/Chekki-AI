@@ -115,7 +115,7 @@ function AppContent() {
     
     setAnalysisState({ 
         status: 'analyzing', 
-        data: { worksheet_summary: { title_en: "Analyzing...", title_ko: "분석 중...", overview_ko: "" }, items: [] }, 
+        data: null, 
         originalImage: displayUrl, 
         errorMessage: null, 
         showReward: false,
@@ -123,76 +123,51 @@ function AppContent() {
         isItemsLoaded: false
     });
 
-    const fetchPart = async (task: 'summary' | 'items') => {
-        try {
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                  task,
-                  image: base64Data,
-                  isRetry: isRetryAttempt,
-                  userPlan: user?.plan 
-                })
-            });
-            if (!response.ok) throw new Error("PART_FAILED");
-            return await response.json();
-        } catch (e) {
-            console.error(`Parallel fetch failed for ${task}:`, e);
-            return null;
-        }
-    };
+    try {
+        // Single optimized backend call (backend handles parallelization)
+        const response = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              task: 'analyze', 
+              image: base64Data,
+              userPlan: user?.plan 
+            })
+        });
 
-    const summaryPromise = fetchPart('summary');
-    const itemsPromise = fetchPart('items');
+        if (!response.ok) throw new Error("ANALYSIS_FAILED");
+        const result = await response.json();
 
-    // FAST PATH: Show UI immediately when summary is ready
-    summaryPromise.then(res => {
-        if (res?.worksheet_summary) {
-            setAnalysisState(prev => ({
-                ...prev,
-                isSummaryLoaded: true,
-                status: 'complete', // Enter workspace immediately
-                data: {
-                    ...prev.data!,
-                    worksheet_summary: res.worksheet_summary
-                }
-            }));
-        }
-    });
+        const newState: AnalysisState = {
+            status: 'complete',
+            data: result,
+            originalImage: displayUrl,
+            errorMessage: null,
+            showReward: false,
+            isSummaryLoaded: true,
+            isItemsLoaded: true
+        };
 
-    // RIGOROUS PATH: Populate markers when they arrive
-    itemsPromise.then(res => {
-        if (res?.items) {
-            setAnalysisState(prev => {
-                const newState: AnalysisState = {
-                    ...prev,
-                    isItemsLoaded: true,
-                    status: 'complete',
-                    data: {
-                        ...prev.data!,
-                        items: res.items
-                    }
-                };
-                
-                // Final save to session
-                localStorage.setItem(SESSION_KEY, JSON.stringify({
-                    state: newState,
-                    timestamp: Date.now()
-                }));
+        setAnalysisState(newState);
+        
+        localStorage.setItem(SESSION_KEY, JSON.stringify({
+            state: newState,
+            timestamp: Date.now()
+        }));
 
-                // Optional confetti when everything is ready
-                if (newState.isSummaryLoaded) {
-                  setShowConfetti(true);
-                  setTimeout(() => setShowConfetti(false), 3000);
-                }
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
 
-                return newState;
-            });
-        } else {
-            setAnalysisState(prev => prev.isSummaryLoaded ? { ...prev, isItemsLoaded: true } : { ...prev, status: 'error', errorMessage: t('err_network') });
-        }
-    });
+    } catch (e: any) {
+        setAnalysisState({ 
+            status: 'error', 
+            errorMessage: t('err_network'),
+            data: null,
+            originalImage: displayUrl,
+            isSummaryLoaded: false,
+            isItemsLoaded: false
+        });
+    }
   };
 
   const handleScanAgain = () => {
@@ -270,7 +245,7 @@ function AppContent() {
           </div>
         )}
 
-        {(analysisState.status === 'analyzing' && !analysisState.isSummaryLoaded) && <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />}
+        {analysisState.status === 'analyzing' && <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />}
 
         {analysisState.status === 'error' && (
            <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
@@ -297,7 +272,7 @@ function AppContent() {
             <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                  <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
-                    {language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "분석 중...") : (analysisState.data.worksheet_summary?.title_en || "Analyzing...")}
+                    {language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "제목 없음") : (analysisState.data.worksheet_summary?.title_en || "Untitled")}
                  </h2>
                  {user?.plan === 'pro' && (
                    <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest animate-pulse">PRO</span>
