@@ -186,7 +186,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                <div>
                   <h3 className="font-bold text-white font-display text-lg md:text-2xl leading-none mb-0.5 md:mb-1">{t('ws_results_title')}</h3>
                   <span className="text-[9px] md:text-xs text-zinc-500 font-bold uppercase tracking-wider bg-zinc-800 px-2 py-0.5 md:py-1 rounded">
-                    {isLoadingItems ? "Scanning for questions..." : `${groupedItems.length} ${t('ws_items_found')}`}
+                    {isLoadingItems ? t('ws_scanning_header') : `${groupedItems.length} ${t('ws_items_found')}`}
                   </span>
                </div>
             </div>
@@ -197,7 +197,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             {isLoadingItems && items.length === 0 && (
                 <div className="h-full flex flex-col items-center justify-center space-y-4 py-20 opacity-50">
                     <div className="w-12 h-12 border-4 border-white/5 border-t-orange-500 rounded-full animate-spin"></div>
-                    <p className="text-sm font-bold font-korean">문제를 꼼꼼하게 읽고 있어요...</p>
+                    <p className="text-sm font-bold font-korean">{t('ws_scanning_detail')}</p>
                 </div>
             )}
 
@@ -205,7 +205,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl flex items-start gap-3 mb-2 animate-fade-in shadow-lg">
                    <span className="text-base md:text-lg animate-bounce">💡</span>
                    <p className="text-[10px] md:text-xs text-orange-200/80 leading-relaxed font-bold font-korean">
-                     {language === 'ko' ? "팁: 질문을 클릭하여 다정한 티칭 가이드와 발음 코칭을 확인해보세요!" : "Tip: Click any question to reveal Mom's Script, teaching guides, and the Pronunciation Coach!"}
+                     {t('ws_review_tip')}
                    </p>
                 </div>
             )}

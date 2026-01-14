@@ -81,12 +81,15 @@ const translations = {
 
     ws_results_title: "Chekki's Results",
     ws_items_found: "questions solved",
-    ws_review_tip: "Tip: Click any question to see teaching scripts and practice pronunciation!",
+    ws_review_tip: "Tip: Click any question to reveal Mom's Script, teaching guides, and the Pronunciation Coach!",
     ws_voice_guide: "💡 Tap an answer to hear the English pronunciation!",
     ws_gen_practice: "Generate Practice Questions",
     ws_scan_again: "Scan Again",
     ws_overlay: "Focus View",
     ws_list: "Easy List",
+    ws_scanning_header: "Scanning for questions...",
+    ws_scanning_detail: "Reading questions carefully...",
+    ws_finding_questions: "Finding Questions...",
 
     tt_report: "Report issue with this answer",
     tt_audio: "Listen to native pronunciation",
@@ -204,12 +207,15 @@ const translations = {
 
     ws_results_title: "채키의 분석 결과",
     ws_items_found: "개의 문제를 풀었어요",
-    ws_review_tip: "팁: 문제를 클릭하여 티칭 가이드와 발음 연습을 확인하세요!",
+    ws_review_tip: "팁: 질문을 클릭하여 다정한 티칭 가이드와 발음 코칭을 확인해보세요!",
     ws_voice_guide: "💡 정답을 누르면 영어 발음을 들려드려요!",
     ws_gen_practice: "맞춤 연습문제 만들기",
     ws_scan_again: "다시 찍기",
     ws_overlay: "집중 보기",
     ws_list: "목록으로 보기",
+    ws_scanning_header: "문제를 분석하는 중...",
+    ws_scanning_detail: "문제를 꼼꼼하게 읽고 있어요...",
+    ws_finding_questions: "문제를 찾는 중...",
 
     tt_report: "정답 오류 신고",
     tt_audio: "원어민 발음 듣기",

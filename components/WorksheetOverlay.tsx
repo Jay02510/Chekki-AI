@@ -75,7 +75,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
           {isLoadingItems && imageLoaded && (
             <div className="absolute top-4 right-4 z-[60] bg-orange-600 text-white px-3 py-1.5 rounded-full flex items-center gap-2 shadow-2xl animate-bounce">
                 <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <span className="text-[10px] font-black uppercase tracking-widest">Finding Questions...</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">{t('ws_finding_questions')}</span>
             </div>
           )}
 
