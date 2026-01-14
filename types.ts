@@ -54,9 +54,9 @@ export interface UserProfile {
   email: string;
   photoUrl?: string;
   plan: 'free' | 'pro';
-  scansUsedToday: number; // Changed from scansUsed to scansUsedToday
-  lastScanDate: string;   // ISO date string (YYYY-MM-DD)
-  maxScansPerDay: number; // 3 for free, 9999 for pro
+  scansUsedToday: number;
+  lastScanDate: string;
+  maxScansPerDay: number;
   totalStamps?: number;
   subscriptionStartedAt?: string;
   nextBillingDate?: string;
@@ -74,6 +74,8 @@ export interface AnalysisState {
   originalImage: string | null; 
   errorMessage: string | null;
   showReward?: boolean;
+  isSummaryLoaded?: boolean; // New: track partial loading
+  isItemsLoaded?: boolean;    // New: track partial loading
 }
 
 export interface CommunityPost {

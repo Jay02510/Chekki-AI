@@ -37,9 +37,10 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children }) => {
 interface Props {
   imageUrl: string;
   items: WorksheetItem[];
+  isLoadingItems?: boolean;
 }
 
-export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
+export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = false }) => {
   const { t, language } = useLanguage(); 
   const { toggleMistake, isMistake } = useMistakes();
   const { user, setShowPaywall } = useAuth();
@@ -109,8 +110,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
 
   const getDisplayQuestion = (text: string) => {
     return text
-      .replace(/^\d+[\.\)\s]+/, '') // Remove leading "1. " or "1) "
-      .replace(/\(\d+\/\d+\)/g, '') // Remove existing (1/5) patterns
+      .replace(/^\d+[\.\)\s]+/, '') 
+      .replace(/\(\d+\/\d+\)/g, '') 
       .trim();
   };
 
@@ -171,7 +172,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
       <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-[calc(100dvh-180px)] lg:h-[calc(100vh-250px)] min-h-[450px]">
         {/* Image Display */}
         <div className="w-full lg:w-1/2 h-[40%] lg:h-full flex flex-col">
-          <WorksheetOverlay imageUrl={imageUrl} items={items} focusedId={activeItemId} className="h-full" />
+          <WorksheetOverlay imageUrl={imageUrl} items={items} focusedId={activeItemId} className="h-full" isLoadingItems={isLoadingItems} />
         </div>
 
         {/* Results List */}
@@ -184,19 +185,29 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
                <div>
                   <h3 className="font-bold text-white font-display text-lg md:text-2xl leading-none mb-0.5 md:mb-1">{t('ws_results_title')}</h3>
                   <span className="text-[9px] md:text-xs text-zinc-500 font-bold uppercase tracking-wider bg-zinc-800 px-2 py-0.5 md:py-1 rounded">
-                    {groupedItems.length} {t('ws_items_found')}
+                    {isLoadingItems ? "Scanning for questions..." : `${groupedItems.length} ${t('ws_items_found')}`}
                   </span>
                </div>
             </div>
           </div>
 
           <div className="overflow-y-auto p-4 space-y-3 custom-scrollbar flex-1 relative z-10 overscroll-contain">
-            <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl flex items-start gap-3 mb-2 animate-fade-in shadow-lg">
-               <span className="text-base md:text-lg animate-bounce">💡</span>
-               <p className="text-[10px] md:text-xs text-orange-200/80 leading-relaxed font-bold font-korean">
-                 {language === 'ko' ? "팁: 질문을 클릭하여 다정한 티칭 가이드와 발음 코칭을 확인해보세요!" : "Tip: Click any question to reveal Mom's Script, teaching guides, and the Pronunciation Coach!"}
-               </p>
-            </div>
+            
+            {isLoadingItems && items.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center space-y-4 py-20 opacity-50">
+                    <div className="w-12 h-12 border-4 border-white/5 border-t-orange-500 rounded-full animate-spin"></div>
+                    <p className="text-sm font-bold font-korean">문제를 꼼꼼하게 읽고 있어요...</p>
+                </div>
+            )}
+
+            {!isLoadingItems && items.length > 0 && (
+                <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl flex items-start gap-3 mb-2 animate-fade-in shadow-lg">
+                   <span className="text-base md:text-lg animate-bounce">💡</span>
+                   <p className="text-[10px] md:text-xs text-orange-200/80 leading-relaxed font-bold font-korean">
+                     {language === 'ko' ? "팁: 질문을 클릭하여 다정한 티칭 가이드와 발음 코칭을 확인해보세요!" : "Tip: Click any question to reveal Mom's Script, teaching guides, and the Pronunciation Coach!"}
+                   </p>
+                </div>
+            )}
 
             {groupedItems.map((group) => {
               const item = group.main;
@@ -208,7 +219,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
 
               return (
                 <div key={item.id} ref={(el) => { itemRefs.current[item.id] = el; }} onClick={(e) => { e.stopPropagation(); setActiveItemId(item.id); }}
-                  className={`relative rounded-xl border transition-all duration-200 cursor-pointer overflow-hidden ${isActive ? 'bg-zinc-800/90 border-orange-500 shadow-xl' : 'bg-zinc-900/60 border-zinc-800/50 hover:bg-zinc-800'}`}>
+                  className={`relative rounded-xl border transition-all duration-200 cursor-pointer overflow-hidden animate-fade-in ${isActive ? 'bg-zinc-800/90 border-orange-500 shadow-xl' : 'bg-zinc-900/60 border-zinc-800/50 hover:bg-zinc-800'}`}>
                   <div className="flex items-start p-3 md:p-4 gap-3 md:gap-4">
                     <div className={`w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-xs md:text-sm font-black shrink-0 transition-colors ${isActive ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-500'}`}>
                       {item.id}
@@ -313,8 +324,12 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items }) => {
           </div>
 
           <div className="p-3 md:p-4 bg-zinc-900 border-t border-zinc-800 shrink-0" onClick={(e) => e.stopPropagation()}>
-             <button onClick={() => { if(user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }} className="w-full py-3 md:py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-xs md:text-sm shadow-xl flex items-center justify-center gap-2 transform transition-all hover:scale-[1.02] active:scale-95">
-                <span>🪄</span> {t('ws_gen_practice')}
+             <button 
+                onClick={() => { if(user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }} 
+                disabled={isLoadingItems}
+                className="w-full py-3 md:py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-xs md:text-sm shadow-xl flex items-center justify-center gap-2 transform transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+             >
+                <span>🪄</span> {isLoadingItems ? "Designing..." : t('ws_gen_practice')}
              </button>
           </div>
         </div>

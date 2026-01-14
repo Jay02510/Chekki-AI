@@ -10,9 +10,10 @@ interface Props {
   isInteractive?: boolean;
   focusedId?: number | null; 
   className?: string;
+  isLoadingItems?: boolean;
 }
 
-export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, className }) => {
+export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, className, isLoadingItems = false }) => {
   const { user, setShowPaywall } = useAuth();
   const { t } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -35,7 +36,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
     return {
       top: `${top}%`,
       left: `${left}%`,
-      zIndex: 10 + (item.id || 0), // Ensure markers don't overlap completely
+      zIndex: 10 + (item.id || 0), 
       transform: 'translate3d(0, 0, 0)', 
       willChange: 'transform, opacity'
     };
@@ -71,6 +72,13 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
             fetchpriority="high"
           />
           
+          {isLoadingItems && imageLoaded && (
+            <div className="absolute top-4 right-4 z-[60] bg-orange-600 text-white px-3 py-1.5 rounded-full flex items-center gap-2 shadow-2xl animate-bounce">
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span className="text-[10px] font-black uppercase tracking-widest">Finding Questions...</span>
+            </div>
+          )}
+
           {!imageLoaded && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm">
                <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mb-4"></div>
@@ -88,7 +96,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
               <div
                 key={item.id}
                 style={getStyle(item)}
-                className={`absolute transition-all duration-500 pointer-events-auto ${isFocused ? 'opacity-100 scale-100' : 'opacity-10 scale-90'}`}
+                className={`absolute transition-all duration-500 pointer-events-auto animate-fade-in ${isFocused ? 'opacity-100 scale-100' : 'opacity-10 scale-90'}`}
                 onClick={(e) => { e.stopPropagation(); playAudio(displayText); }}
               >
                  <div className={`bg-orange-600 text-white px-2 py-1 md:px-4 md:py-2 rounded-xl shadow-[0_10px_40px_rgba(234,88,12,0.4)] border-2 border-white/20 flex items-center gap-2 transform transition-all hover:scale-110 active:scale-95 group cursor-pointer ring-4 ring-orange-500/10 min-w-fit max-w-[200px] md:max-w-[400px] animate-[markerPulse_2s_infinite]`}>

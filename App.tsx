@@ -9,8 +9,7 @@ import { PaywallModal } from './components/PaywallModal';
 import { OnboardingTour } from './components/OnboardingTour';
 import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
-import { analyzeWorksheet } from './services/geminiService';
-import { AnalysisState, WorksheetAnalysis, WorkspaceMode } from './types';
+import { AnalysisState, WorksheetAnalysis, WorkspaceMode, WorksheetItem } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { MistakeProvider } from './contexts/MistakeContext';
@@ -49,10 +48,12 @@ function AppContent() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [analysisState, setAnalysisState] = useState<AnalysisState>({
     status: 'idle',
-    data: null,
+    data: { worksheet_summary: { title_en: "", title_ko: "", overview_ko: "" }, items: [] },
     originalImage: null,
     errorMessage: null,
     showReward: false,
+    isSummaryLoaded: false,
+    isItemsLoaded: false
   });
   
   const [viewMode, setViewMode] = useState<WorkspaceMode>('overlay');
@@ -114,66 +115,84 @@ function AppContent() {
     
     setAnalysisState({ 
         status: 'analyzing', 
-        data: null, 
+        data: { worksheet_summary: { title_en: "Analyzing...", title_ko: "분석 중...", overview_ko: "" }, items: [] }, 
         originalImage: displayUrl, 
         errorMessage: null, 
-        showReward: false 
+        showReward: false,
+        isSummaryLoaded: false,
+        isItemsLoaded: false
     });
 
-    try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          task: 'analyze',
-          image: base64Data,
-          isRetry: isRetryAttempt,
-          userPlan: user?.plan 
-        })
-      });
+    const fetchPart = async (task: 'summary' | 'items') => {
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  task,
+                  image: base64Data,
+                  isRetry: isRetryAttempt,
+                  userPlan: user?.plan 
+                })
+            });
+            if (!response.ok) throw new Error("PART_FAILED");
+            return await response.json();
+        } catch (e) {
+            console.error(`Parallel fetch failed for ${task}:`, e);
+            return null;
+        }
+    };
 
-      if (!response.ok) throw new Error("API_ERROR");
-      const result = await response.json();
-      
-      if (!result || result.error === "ANALYSIS_FAILED") {
-         throw new Error("API_ERROR");
-      }
+    const summaryPromise = fetchPart('summary');
+    const itemsPromise = fetchPart('items');
 
-      const formattedData: WorksheetAnalysis = {
-          worksheet_summary: result.worksheet_summary || { title_en: "Worksheet", title_ko: "워크시트" },
-          items: Array.isArray(result) ? result : (result.items || [])
-      };
+    // FAST PATH: Show UI immediately when summary is ready
+    summaryPromise.then(res => {
+        if (res?.worksheet_summary) {
+            setAnalysisState(prev => ({
+                ...prev,
+                isSummaryLoaded: true,
+                status: 'complete', // Enter workspace immediately
+                data: {
+                    ...prev.data!,
+                    worksheet_summary: res.worksheet_summary
+                }
+            }));
+        }
+    });
 
-      const newState: AnalysisState = {
-        status: 'complete',
-        data: formattedData,
-        originalImage: displayUrl,
-        errorMessage: null,
-        showReward: false, 
-      };
+    // RIGOROUS PATH: Populate markers when they arrive
+    itemsPromise.then(res => {
+        if (res?.items) {
+            setAnalysisState(prev => {
+                const newState: AnalysisState = {
+                    ...prev,
+                    isItemsLoaded: true,
+                    status: 'complete',
+                    data: {
+                        ...prev.data!,
+                        items: res.items
+                    }
+                };
+                
+                // Final save to session
+                localStorage.setItem(SESSION_KEY, JSON.stringify({
+                    state: newState,
+                    timestamp: Date.now()
+                }));
 
-      setAnalysisState(newState);
-      setViewMode('overlay');
-      
-      // Trigger demo confetti
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
+                // Optional confetti when everything is ready
+                if (newState.isSummaryLoaded) {
+                  setShowConfetti(true);
+                  setTimeout(() => setShowConfetti(false), 3000);
+                }
 
-      localStorage.setItem(SESSION_KEY, JSON.stringify({
-        state: newState,
-        timestamp: Date.now()
-      }));
-      
-    } catch (error: any) {
-      console.error("[App] Analysis failed:", error);
-      setAnalysisState({ 
-        status: 'error', 
-        data: null, 
-        originalImage: null, 
-        errorMessage: t('err_network'), 
-        showReward: false 
-      });
-    }
+                return newState;
+            });
+        } else {
+            setAnalysisState(prev => prev.isSummaryLoaded ? { ...prev, isItemsLoaded: true } : { ...prev, status: 'error', errorMessage: t('err_network') });
+        }
+    });
   };
 
   const handleScanAgain = () => {
@@ -188,7 +207,15 @@ function AppContent() {
     if (confirm && analysisState.status === 'complete') {
         if (!window.confirm(t('err_confirm'))) return;
     }
-    setAnalysisState({ status: 'idle', data: null, originalImage: null, errorMessage: null, showReward: false });
+    setAnalysisState({ 
+        status: 'idle', 
+        data: null, 
+        originalImage: null, 
+        errorMessage: null, 
+        showReward: false,
+        isSummaryLoaded: false,
+        isItemsLoaded: false
+    });
     setLastImageData(null);
     localStorage.removeItem(SESSION_KEY);
   };
@@ -202,7 +229,6 @@ function AppContent() {
       
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
 
-      {/* Confetti celebration for demo */}
       {showConfetti && (
         <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center">
            {[...Array(40)].map((_, i) => (
@@ -244,7 +270,7 @@ function AppContent() {
           </div>
         )}
 
-        {analysisState.status === 'analyzing' && <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />}
+        {(analysisState.status === 'analyzing' && !analysisState.isSummaryLoaded) && <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />}
 
         {analysisState.status === 'error' && (
            <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
@@ -271,7 +297,7 @@ function AppContent() {
             <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                  <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
-                    {language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
+                    {language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "분석 중...") : (analysisState.data.worksheet_summary?.title_en || "Analyzing...")}
                  </h2>
                  {user?.plan === 'pro' && (
                    <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest animate-pulse">PRO</span>
@@ -301,9 +327,14 @@ function AppContent() {
                   imageUrl={analysisState.originalImage!} 
                   items={analysisState.data.items || []} 
                   className="h-full"
+                  isLoadingItems={!analysisState.isItemsLoaded}
                 />
               ) : (
-                <SplitView imageUrl={analysisState.originalImage!} items={analysisState.data.items || []} />
+                <SplitView 
+                    imageUrl={analysisState.originalImage!} 
+                    items={analysisState.data.items || []} 
+                    isLoadingItems={!analysisState.isItemsLoaded}
+                />
               )}
             </div>
           </div>
