@@ -35,8 +35,8 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
     return {
       top: `${top}%`,
       left: `${left}%`,
-      zIndex: 10,
-      transform: 'translate3d(0, 0, 0)', // Force GPU layer
+      zIndex: 10 + (item.id || 0), // Ensure markers don't overlap completely
+      transform: 'translate3d(0, 0, 0)', 
       willChange: 'transform, opacity'
     };
   };
@@ -63,7 +63,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
             ref={imgRef}
             src={imageUrl} 
             alt="Worksheet" 
-            className={`w-full h-auto block transition-opacity duration-500 ease-in-out ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`w-full h-auto block transition-opacity duration-1000 ease-in-out ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
             draggable={false}
             loading="eager"
@@ -72,9 +72,9 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
           />
           
           {!imageLoaded && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm animate-pulse">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm">
                <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mb-4"></div>
-               <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Loading Canvas...</p>
+               <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest animate-pulse">Developing Canvas...</p>
             </div>
           )}
 
@@ -88,10 +88,10 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
               <div
                 key={item.id}
                 style={getStyle(item)}
-                className={`absolute transition-all duration-500 pointer-events-auto ${isFocused ? 'opacity-100 scale-100' : 'opacity-5 scale-90'}`}
+                className={`absolute transition-all duration-500 pointer-events-auto ${isFocused ? 'opacity-100 scale-100' : 'opacity-10 scale-90'}`}
                 onClick={(e) => { e.stopPropagation(); playAudio(displayText); }}
               >
-                 <div className="bg-orange-600 text-white px-2 py-1 md:px-4 md:py-2 rounded-xl shadow-[0_10px_40px_rgba(234,88,12,0.4)] border-2 border-white/20 flex items-center gap-2 transform transition-all hover:scale-105 active:scale-95 group cursor-pointer ring-4 ring-orange-500/10 min-w-fit max-w-[200px] md:max-w-[400px]">
+                 <div className={`bg-orange-600 text-white px-2 py-1 md:px-4 md:py-2 rounded-xl shadow-[0_10px_40px_rgba(234,88,12,0.4)] border-2 border-white/20 flex items-center gap-2 transform transition-all hover:scale-110 active:scale-95 group cursor-pointer ring-4 ring-orange-500/10 min-w-fit max-w-[200px] md:max-w-[400px] animate-[markerPulse_2s_infinite]`}>
                     <span className="font-display font-black text-[10px] md:text-base leading-tight tracking-tight whitespace-normal break-words break-keep text-left">
                       {displayText}
                     </span>
@@ -106,6 +106,14 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
       <div className="bg-zinc-900/95 backdrop-blur-md px-6 py-2.5 border-t border-white/5 flex justify-center shrink-0">
          <p className="text-zinc-500 text-[9px] md:text-xs font-black font-korean tracking-widest uppercase">{t('ws_voice_guide')}</p>
       </div>
+
+      <style>{`
+        @keyframes markerPulse {
+          0% { box-shadow: 0 10px 40px rgba(234,88,12,0.4); }
+          50% { box-shadow: 0 10px 50px rgba(234,88,12,0.6); }
+          100% { box-shadow: 0 10px 40px rgba(234,88,12,0.4); }
+        }
+      `}</style>
     </div>
   );
 };

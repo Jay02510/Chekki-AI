@@ -46,6 +46,7 @@ function AppContent() {
   
   const [isNight, setIsNight] = useState(isNightModeKST());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [analysisState, setAnalysisState] = useState<AnalysisState>({
     status: 'idle',
     data: null,
@@ -120,7 +121,6 @@ function AppContent() {
     });
 
     try {
-      // Pass the user plan to the backend to enable Pro-tier features
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -154,6 +154,10 @@ function AppContent() {
 
       setAnalysisState(newState);
       setViewMode('overlay');
+      
+      // Trigger demo confetti
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
 
       localStorage.setItem(SESSION_KEY, JSON.stringify({
         state: newState,
@@ -198,10 +202,30 @@ function AppContent() {
       
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
 
+      {/* Confetti celebration for demo */}
+      {showConfetti && (
+        <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center">
+           {[...Array(40)].map((_, i) => (
+             <div 
+               key={i}
+               className="absolute w-2 h-2 rounded-full animate-[confetti_3s_ease-out_forwards]"
+               style={{
+                 backgroundColor: ['#F97316', '#EC4899', '#8B5CF6', '#FCD34D'][i % 4],
+                 left: '50%',
+                 top: '50%',
+                 '--tx': `${(Math.random() - 0.5) * 600}px`,
+                 '--ty': `${(Math.random() - 0.7) * 400}px`,
+                 animationDelay: `${Math.random() * 0.5}s`
+               } as any}
+             ></div>
+           ))}
+        </div>
+      )}
+
       <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-0 flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : ''}`}>
         
         {analysisState.status === 'idle' && isInApp && showInAppNotice && (
-            <div className="fixed top-20 left-4 right-4 z-[60] bg-orange-600 text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
+            <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
                 <div className="flex items-center gap-3">
                     <span className="text-xl">⚠️</span>
                     <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
@@ -249,6 +273,9 @@ function AppContent() {
                  <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
                     {language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
                  </h2>
+                 {user?.plan === 'pro' && (
+                   <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest animate-pulse">PRO</span>
+                 )}
               </div>
               
               <div className="flex items-center gap-2 shrink-0">
@@ -282,6 +309,13 @@ function AppContent() {
           </div>
         )}
       </main>
+      
+      <style>{`
+        @keyframes confetti {
+          0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+          100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.5) rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
