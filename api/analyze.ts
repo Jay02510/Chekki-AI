@@ -5,8 +5,20 @@ export const config = {
   maxDuration: 60, 
 };
 
-const SYSTEM_PROMPT_SUMMARY = `Identify EK worksheet title and goal. Return JSON: { "worksheet_summary": { "title_en": "string", "title_ko": "string", "overview_ko": "string" } }`;
-const SYSTEM_PROMPT_ITEMS = `Extract all exercises/words. RULES: 1. FULL TEXT answers. 2. Precise boxes (0-1000). 3. Identify vocab words as items if no numbers.`;
+const SYSTEM_PROMPT_SUMMARY = `Identify EK (English Kindergarten) worksheet title and primary learning goal. Return JSON: { "worksheet_summary": { "title_en": "string", "title_ko": "string", "overview_ko": "string" } }`;
+
+const SYSTEM_PROMPT_ITEMS = `
+You are "Chekki AI", a high-fidelity educational assistant.
+Rigorously extract all items/exercises from the image.
+
+For each item, you MUST provide:
+1. FULL TEXT answers (e.g., "B. Apple" not just "B").
+2. Precise coordinates (bounding_box 0-1000).
+3. A "Teaching Script" (엄마의 한마디): A warm, encouraging sentence for a parent to say to their child in Korean.
+4. A "Korean Guide": An explanation of the grammar/vocab rule in Korean.
+5. An "English Guide": A clear, step-by-step explanation of the solution in English.
+6. A "Teaching Tip": A pedagogical tip for parents in both languages.
+`;
 
 const ITEM_SCHEMA = {
   type: Type.OBJECT,
@@ -30,10 +42,21 @@ const ITEM_SCHEMA = {
           question_text: { type: Type.STRING },
           correct_answer: { type: Type.STRING },
           korean_guide: { type: Type.STRING },
+          english_guide: { type: Type.STRING },
           teaching_script_ko: { type: Type.STRING },
-          teaching_tip_ko: { type: Type.STRING }
+          teaching_tip_ko: { type: Type.STRING },
+          teaching_tip_en: { type: Type.STRING }
         },
-        required: ["id", "type", "bounding_box", "question_text", "correct_answer"]
+        required: [
+          "id", 
+          "type", 
+          "bounding_box", 
+          "question_text", 
+          "correct_answer", 
+          "korean_guide", 
+          "english_guide", 
+          "teaching_script_ko"
+        ]
       }
     }
   }
@@ -49,11 +72,10 @@ export default async function handler(req: any, res: any) {
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-    // Handle Practice Generation (Flash is enough)
     if (task === 'generate') {
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Context: ${JSON.stringify(originalItems)}. Task: 2-3 unique questions.`,
+        contents: `Context: ${JSON.stringify(originalItems)}. Task: 2-3 unique questions with guides.`,
         config: { responseMimeType: "application/json", temperature: 0.7 }
       });
       return res.status(200).json(JSON.parse(response.text || "[]"));
@@ -61,25 +83,21 @@ export default async function handler(req: any, res: any) {
 
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
 
-    // HYBRID PARALLEL EXECUTION (Server-Side)
-    // We run both tasks at once on the server to save client-side round trips.
     const [summaryResult, itemsResult] = await Promise.all([
-      // Task 1: Summary (Fast Flash Model)
       ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: [{ inlineData: { mimeType: "image/jpeg", data: image } }, { text: "Summary." }],
+        contents: [{ inlineData: { mimeType: "image/jpeg", data: image } }, { text: "Provide worksheet summary." }],
         config: { systemInstruction: SYSTEM_PROMPT_SUMMARY, responseMimeType: "application/json" }
       }).then(r => JSON.parse(r.text || "{}")),
 
-      // Task 2: Item Extraction (Pro Model with Optimized Thinking)
       ai.models.generateContent({
         model: "gemini-3-pro-preview",
-        contents: [{ inlineData: { mimeType: "image/jpeg", data: image } }, { text: "Extract items." }],
+        contents: [{ inlineData: { mimeType: "image/jpeg", data: image } }, { text: "Perform rigorous extraction of all questions including detailed teaching guides in both English and Korean." }],
         config: {
           systemInstruction: SYSTEM_PROMPT_ITEMS,
           responseMimeType: "application/json",
           responseSchema: ITEM_SCHEMA,
-          thinkingConfig: { thinkingBudget: 10000 } // Optimized budget for speed
+          thinkingConfig: { thinkingBudget: 12000 }
         }
       }).then(r => JSON.parse(r.text || "{}"))
     ]);
