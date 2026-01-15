@@ -57,14 +57,14 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
   };
 
   return (
-    <div className={`w-full flex flex-col bg-zinc-950 rounded-2xl border border-zinc-800 overflow-hidden relative shadow-2xl transition-all duration-500 ${className || 'h-full'}`}>
-      <div className="flex-1 relative overflow-y-auto custom-scrollbar bg-black/40 overscroll-contain">
+    <div className={`w-full flex flex-col bg-zinc-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.6)] transition-all duration-700 ${className || 'h-full'}`}>
+      <div className="flex-1 relative overflow-y-auto custom-scrollbar overscroll-contain">
         <div ref={containerRef} className="relative w-full min-h-[300px] transform-gpu">
           <img 
             ref={imgRef}
             src={imageUrl} 
             alt="Worksheet" 
-            className={`w-full h-auto block transition-opacity duration-1000 ease-in-out ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`w-full h-auto block transition-all duration-1000 ease-in-out ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'}`}
             onLoad={() => setImageLoaded(true)}
             draggable={false}
             loading="eager"
@@ -73,36 +73,42 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
           />
           
           {isLoadingItems && imageLoaded && (
-            <div className="absolute top-4 right-4 z-[60] bg-orange-600 text-white px-3 py-1.5 rounded-full flex items-center gap-2 shadow-2xl animate-bounce">
-                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <span className="text-[10px] font-black uppercase tracking-widest">{t('ws_finding_questions')}</span>
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[60] bg-orange-600 text-white px-6 py-2.5 rounded-full flex items-center gap-3 shadow-[0_20px_40px_rgba(234,88,12,0.4)] animate-bounce border border-white/20 backdrop-blur-xl">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span className="text-xs font-black uppercase tracking-[0.2em]">{t('ws_finding_questions')}</span>
             </div>
           )}
 
           {!imageLoaded && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm">
-               <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mb-4"></div>
-               <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest animate-pulse">Developing Canvas...</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/40 backdrop-blur-2xl">
+               <div className="w-16 h-16 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin mb-6"></div>
+               <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.2em] animate-pulse">Scanning Canvas...</p>
             </div>
           )}
 
           {imageLoaded && items && items.map((item) => {
             const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
-            // No longer stripping letters/numbers. We show the full text extracted.
             const displayText = `${item.id}. ${item.correct_answer}`;
             
             return (
               <div
                 key={item.id}
                 style={getStyle(item)}
-                className={`absolute transition-all duration-500 pointer-events-auto animate-fade-in ${isFocused ? 'opacity-100 scale-100' : 'opacity-10 scale-90'}`}
+                className={`absolute transition-all duration-500 pointer-events-auto animate-fade-in ${isFocused ? 'opacity-100 scale-100' : 'opacity-20 scale-90 blur-[1px]'}`}
                 onClick={(e) => { e.stopPropagation(); playAudio(displayText); }}
               >
-                 <div className={`bg-orange-600 text-white px-2 py-1 md:px-4 md:py-2 rounded-xl shadow-[0_10px_40px_rgba(234,88,12,0.4)] border-2 border-white/20 flex items-center gap-2 transform transition-all hover:scale-110 active:scale-95 group cursor-pointer ring-4 ring-orange-500/10 min-w-fit max-w-[200px] md:max-w-[400px] animate-[markerPulse_2s_infinite]`}>
-                    <span className="font-display font-black text-[10px] md:text-base leading-tight tracking-tight whitespace-normal break-words break-keep text-left">
-                      {displayText}
+                 <div className={`
+                    px-3 py-1.5 md:px-5 md:py-2.5 rounded-2xl shadow-2xl border-2 border-white/20 flex items-center gap-3 transform transition-all hover:scale-110 active:scale-95 group cursor-pointer min-w-fit max-w-[220px] md:max-w-[450px]
+                    ${isFocused ? 'bg-orange-600 ring-4 ring-orange-500/20' : 'bg-zinc-800 ring-1 ring-white/10'}
+                    animate-[markerPulse_3s_infinite]
+                 `}>
+                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                        <span className="font-black text-[10px] md:text-xs text-white">{item.id}</span>
+                    </div>
+                    <span className="font-hand font-bold text-sm md:text-xl leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md">
+                      {item.correct_answer}
                     </span>
-                    <span className="text-[10px] md:text-xs shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">🔊</span>
+                    <span className="text-xs md:text-lg shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">🔊</span>
                  </div>
               </div>
             );
@@ -110,15 +116,15 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
         </div>
       </div>
       
-      <div className="bg-zinc-900/95 backdrop-blur-md px-6 py-2.5 border-t border-white/5 flex justify-center shrink-0">
-         <p className="text-zinc-500 text-[9px] md:text-xs font-black font-korean tracking-widest uppercase">{t('ws_voice_guide')}</p>
+      <div className="bg-zinc-900/60 backdrop-blur-3xl px-6 py-4 border-t border-white/5 flex justify-center shrink-0">
+         <p className="text-zinc-500 text-[10px] font-black font-korean tracking-[0.2em] uppercase">{t('ws_voice_guide')}</p>
       </div>
 
       <style>{`
         @keyframes markerPulse {
-          0% { box-shadow: 0 10px 40px rgba(234,88,12,0.4); }
-          50% { box-shadow: 0 10px 50px rgba(234,88,12,0.6); }
-          100% { box-shadow: 0 10px 40px rgba(234,88,12,0.4); }
+          0% { transform: scale(1) translate3d(0, 0, 0); }
+          50% { transform: scale(1.03) translate3d(0, -2px, 0); }
+          100% { transform: scale(1) translate3d(0, 0, 0); }
         }
       `}</style>
     </div>

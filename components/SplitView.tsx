@@ -12,7 +12,7 @@ import { ChekkiMascot } from './Icons';
 
 interface TooltipProps {
   text: string;
-  children: React.ReactNode;
+  children: React.Node;
 }
 
 const Tooltip: React.FC<TooltipProps> = ({ text, children }) => {
@@ -66,7 +66,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     }
   }, [activeItemId]);
 
-  // Initialize Speech Recognition
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -84,35 +83,25 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
           
           if (cleanSpeech.includes(cleanAnswer) || cleanAnswer.includes(cleanSpeech)) {
             setSpeechResult({ id: activeItem.id, success: true });
+            if ('vibrate' in navigator) navigator.vibrate(50);
             const audio = new Audio(ASSETS.STAMP_SOUND);
             audio.play().catch(() => {});
           } else {
             setSpeechResult({ id: activeItem.id, success: false });
+            if ('vibrate' in navigator) navigator.vibrate([30, 30, 30]);
           }
         }
         setIsListening(false);
       };
 
-      recognitionRef.current.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
+      recognitionRef.current.onerror = () => setIsListening(false);
+      recognitionRef.current.onend = () => setIsListening(false);
     }
   }, [activeItemId, items]);
 
   const normalizeText = (text: string) => {
     if (!text) return "";
     return text.replace(/[0-9]+\./g, '').replace(/[.,/#!$%^&*;:{}=\-_`~]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
-  };
-
-  const getDisplayQuestion = (text: string) => {
-    return text
-      .replace(/^\d+[\.\)\s]+/, '') 
-      .replace(/\(\d+\/\d+\)/g, '') 
-      .trim();
   };
 
   const groupedItems = useMemo(() => {
@@ -143,8 +132,10 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       return;
     }
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
+      utterance.rate = 0.85;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -155,10 +146,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       setShowPaywall(true);
       return;
     }
-    if (!recognitionRef.current) {
-      alert("Speech recognition is not supported in this browser.");
-      return;
-    }
+    if (!recognitionRef.current) return;
     setSpeechResult(null);
     setIsListening(true);
     recognitionRef.current.start();
@@ -170,51 +158,34 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       {reportContext && <FeedbackModal context={reportContext} onClose={() => setReportContext(null)} />}
 
       <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-[calc(100dvh-180px)] lg:h-[calc(100vh-250px)] min-h-[450px]">
-        {/* Image Display */}
-        <div className="w-full lg:w-1/2 h-[40%] lg:h-full flex flex-col">
+        {/* Left Side: Original Image with Magnifier Potential */}
+        <div className="w-full lg:w-5/12 h-[35%] lg:h-full flex flex-col">
           <WorksheetOverlay imageUrl={imageUrl} items={items} focusedId={activeItemId} className="h-full" isLoadingItems={isLoadingItems} />
         </div>
 
-        {/* Results List */}
-        <div className="w-full lg:w-1/2 h-[60%] lg:h-full flex flex-col bg-zinc-900/50 rounded-2xl border border-zinc-800/50 overflow-hidden relative" onClick={() => setActiveItemId(null)}>
-          <div className="p-4 md:p-6 border-b border-zinc-800 bg-zinc-900 flex justify-between items-center shrink-0" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 md:gap-4 relative z-10">
-               <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-zinc-800 border border-zinc-700 flex items-center justify-center overflow-hidden shadow-lg flex-shrink-0">
-                    {!mascotError ? <img src={ASSETS.MASCOT_HAPPY} alt="Chekki" className="w-full h-full object-cover" onError={() => setMascotError(true)} /> : <span className="text-xl md:text-3xl">🎓</span>}
+        {/* Right Side: Enhanced Memo Cards */}
+        <div className="w-full lg:w-7/12 h-[65%] lg:h-full flex flex-col bg-zinc-950/40 rounded-3xl border border-white/5 overflow-hidden relative shadow-inner" onClick={() => setActiveItemId(null)}>
+          <div className="px-6 py-5 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl flex justify-between items-center shrink-0">
+            <div className="flex items-center gap-4">
+               <div className="w-12 h-12 rounded-2xl bg-zinc-800 border border-white/5 flex items-center justify-center overflow-hidden shadow-xl">
+                    {!mascotError ? <img src={ASSETS.MASCOT_HAPPY} alt="Chekki" className="w-full h-full object-cover scale-110" onError={() => setMascotError(true)} /> : <span className="text-2xl">🎓</span>}
                </div>
                <div>
-                  <h3 className="font-bold text-white font-display text-lg md:text-2xl leading-none mb-0.5 md:mb-1">{t('ws_results_title')}</h3>
-                  <span className="text-[9px] md:text-xs text-zinc-500 font-bold uppercase tracking-wider bg-zinc-800 px-2 py-0.5 md:py-1 rounded">
-                    {isLoadingItems ? t('ws_scanning_header') : `${groupedItems.length} ${t('ws_items_found')}`}
-                  </span>
+                  <h3 className="font-black text-white font-display text-xl leading-none mb-1">{t('ws_results_title')}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{isLoadingItems ? t('ws_scanning_header') : `${groupedItems.length} ${t('ws_items_found')}`}</span>
+                    <span className="w-1 h-1 bg-zinc-700 rounded-full"></span>
+                    <span className="text-[10px] text-orange-500 font-black animate-pulse uppercase">Live Guidance</span>
+                  </div>
                </div>
             </div>
           </div>
 
-          <div className="overflow-y-auto p-4 space-y-3 custom-scrollbar flex-1 relative z-10 overscroll-contain">
-            
+          <div className="overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar flex-1 overscroll-contain bg-gradient-to-b from-transparent to-zinc-950/20">
             {isLoadingItems && items.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center space-y-4 py-20 opacity-50">
-                    <div className="w-12 h-12 border-4 border-white/5 border-t-orange-500 rounded-full animate-spin"></div>
-                    <p className="text-sm font-bold font-korean">{t('ws_scanning_detail')}</p>
-                </div>
-            )}
-
-            {!isLoadingItems && items.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
-                  <span className="text-4xl opacity-50">🔍</span>
-                  <p className="text-sm font-bold text-zinc-500 font-korean">
-                    {language === 'ko' ? "문제를 찾지 못했어요. 사진을 다시 찍어주세요!" : "I couldn't find any questions. Please try taking a clearer photo!"}
-                  </p>
-                </div>
-            )}
-
-            {!isLoadingItems && items.length > 0 && (
-                <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl flex items-start gap-3 mb-2 animate-fade-in shadow-lg">
-                   <span className="text-base md:text-lg animate-bounce">💡</span>
-                   <p className="text-[10px] md:text-xs text-orange-200/80 leading-relaxed font-bold font-korean">
-                     {t('ws_review_tip')}
-                   </p>
+                <div className="h-full flex flex-col items-center justify-center space-y-4 py-20">
+                    <div className="w-12 h-12 border-2 border-white/5 border-t-orange-500 rounded-full animate-spin"></div>
+                    <p className="text-sm font-bold text-zinc-500 font-korean">{t('ws_scanning_detail')}</p>
                 </div>
             )}
 
@@ -227,102 +198,109 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
               return (
                 <div key={item.id} ref={(el) => { itemRefs.current[item.id] = el; }} onClick={(e) => { e.stopPropagation(); setActiveItemId(item.id); }}
-                  className={`relative rounded-xl border transition-all duration-200 cursor-pointer overflow-hidden animate-fade-in ${isActive ? 'bg-zinc-800/90 border-orange-500 shadow-xl' : 'bg-zinc-900/60 border-zinc-800/50 hover:bg-zinc-800'}`}>
-                  <div className="flex items-start p-3 md:p-4 gap-3 md:gap-4">
-                    <div className={`w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-xs md:text-sm font-black shrink-0 transition-colors ${isActive ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-500'}`}>
+                  className={`group relative rounded-[1.5rem] border transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in-up ${isActive ? 'bg-zinc-800/90 border-orange-500/50 shadow-[0_20px_40px_rgba(0,0,0,0.4)] ring-1 ring-orange-500/20' : 'bg-zinc-900/60 border-white/5 hover:border-white/20'}`}>
+                  
+                  <div className="flex items-start p-4 md:p-6 gap-4">
+                    <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-xs md:text-sm font-black shrink-0 transition-all duration-300 ${isActive ? 'bg-orange-500 text-white rotate-3 scale-110 shadow-lg shadow-orange-500/20' : 'bg-zinc-800 text-zinc-500 group-hover:bg-zinc-700 group-hover:text-zinc-300'}`}>
                       {item.id}
                     </div>
+                    
                     <div className="flex-1 min-w-0">
-                      <h4 className={`text-xs md:text-sm font-bold leading-snug mb-1 md:mb-2 ${isActive ? 'text-white' : 'text-zinc-400'}`}>{getDisplayQuestion(item.question_text)}</h4>
-                      <div className="flex items-center gap-2">
-                        <span className="font-hand text-lg md:text-xl text-emerald-400 font-bold">{answerText}</span>
+                      <h4 className={`text-sm md:text-base font-bold leading-relaxed mb-2 transition-colors ${isActive ? 'text-white' : 'text-zinc-400'}`}>
+                        {item.question_text.replace(/^\d+[\.\)\s]+/, '')}
+                      </h4>
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="bg-white/5 rounded-xl px-3 py-1 border border-white/5 group-hover:border-white/10 transition-colors">
+                            <span className="font-hand text-xl md:text-2xl text-emerald-400 font-bold tracking-tight drop-shadow-sm">{answerText}</span>
+                        </div>
                         {speechResult?.id === item.id && speechResult.success && (
-                            <span className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-bounce">Good! 🌟</span>
+                            <span className="bg-emerald-500/10 text-emerald-400 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-500/20 animate-bounce tracking-widest uppercase">Excellent! 🌟</span>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-0.5 md:gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                      <Tooltip text={t('tt_report')}>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setReportContext(item); }} 
-                          className="p-1.5 md:p-2 rounded-full text-zinc-700 hover:text-amber-400 hover:bg-white/5 transition-all"
-                        >
-                           <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                           </svg>
+
+                    <div className="flex flex-col gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-orange-500 hover:text-white transition-all shadow-lg active:scale-90">
+                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z"/></svg>
                         </button>
-                      </Tooltip>
-                      <Tooltip text={t('tt_audio')}>
-                        <button onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} className="p-1.5 md:p-2 rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-all">
-                          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                        <button onClick={(e) => { e.stopPropagation(); toggleMistake(item); }} className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all shadow-lg active:scale-90 ${flagged ? 'bg-red-500 text-white' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'}`}>
+                           <svg className="w-4 h-4" fill={flagged ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                         </button>
-                      </Tooltip>
-                      <Tooltip text={t('tt_save')}>
-                        <button onClick={(e) => { e.stopPropagation(); toggleMistake(item); }} className={`p-1.5 md:p-2 rounded-full transition-all ${flagged ? 'text-red-500 bg-red-500/10' : 'text-zinc-600 hover:text-zinc-400 hover:bg-white/5'}`}>
-                          <svg className="w-4 h-4 md:w-5 md:h-5" fill={flagged ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21V5a2 2 0 012-2h10a2 2 0 012 2v8l-7-3.5L5 13v8" /></svg>
-                        </button>
-                      </Tooltip>
                     </div>
                   </div>
+
                   {isActive && (
-                    <div className="border-t border-white/5 bg-black/20 p-3 md:p-4 animate-fade-in space-y-4">
-                        
-                        {/* Pronunciation Coach */}
-                        <div className="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-xl flex flex-col gap-3">
+                    <div className="px-4 pb-6 md:px-6 md:pb-8 animate-fade-in-up space-y-6">
+                        {/* Pronunciation Section */}
+                        <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 flex flex-col gap-4 shadow-inner">
                             <div className="flex items-center justify-between">
-                                <p className="text-[9px] md:text-[10px] font-black uppercase text-indigo-400 tracking-widest">
-                                    {language === 'ko' ? "발음 연습 (Pronunciation Coach)" : "Pronunciation Coach (Practice Speaking)"}
-                                </p>
-                                {isListening && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
+                                <div className="flex items-center gap-2">
+                                    <span className="flex h-2 w-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]"></span>
+                                    <p className="text-[10px] font-black uppercase text-indigo-400 tracking-[0.2em]">{language === 'ko' ? "원어민 발음 코칭" : "Native Speaking Coach"}</p>
+                                </div>
+                                {isListening && <span className="text-[9px] font-black text-red-500 animate-pulse uppercase tracking-widest">Recording...</span>}
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-4">
                                 <button 
                                   onClick={startPronunciationCheck}
                                   disabled={isListening}
-                                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600 hover:bg-indigo-500'} shadow-lg text-white ring-4 ring-indigo-500/20 active:scale-95`}
-                                  title="Speak Answer"
+                                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600 hover:bg-indigo-500'} shadow-xl text-white ring-4 ring-indigo-500/20 active:scale-95`}
                                 >
-                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                                    <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                                 </button>
                                 <div className="flex-1">
-                                    <p className="text-xs text-zinc-300 font-medium leading-tight">
-                                        {isListening ? "I'm listening... Say it now!" : "Tap the mic and say the answer aloud for a stamp!"}
+                                    <p className="text-xs text-indigo-200/80 font-bold leading-relaxed mb-1">
+                                        {isListening ? "말씀해 주세요! Chekki가 듣고 있어요." : "마이크를 누르고 정답을 소리 내어 읽어보세요!"}
                                     </p>
-                                    {speechResult?.id === item.id && !speechResult.success && (
-                                        <p className="text-[10px] text-red-400 mt-1 font-bold">Try again! Listen to Chekki first. 🔊</p>
-                                    )}
+                                    <p className="text-[10px] text-zinc-500 font-medium">Native pronunciation: "{answerText}"</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Monolingual Guide Based on Current Language */}
-                        <div className="space-y-3 pl-1">
-                            {language === 'en' ? (
-                                <div className="flex gap-2 items-start text-[11px] md:text-xs text-zinc-300">
-                                   <span className="text-base shrink-0">🇬🇧</span>
-                                   <div className="space-y-1">
-                                      <p className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest">English Guide</p>
-                                      <p className="leading-relaxed">{item.english_guide || item.teaching_tip_en || "Learn how to solve this step by step."}</p>
-                                   </div>
-                                </div>
-                            ) : (
+                        {/* Teaching Memos */}
+                        <div className="grid gap-4">
+                            {language === 'ko' ? (
                                 <>
-                                  <div className="bg-brand-purple/10 border border-brand-purple/20 p-2.5 md:p-3 rounded-lg flex gap-3">
-                                    <span className="text-base shrink-0">👩‍🏫</span>
-                                    <div className="space-y-1">
-                                        <p className="text-[9px] md:text-[10px] font-black uppercase text-brand-purple tracking-widest">Mom's Script (엄마의 한마디)</p>
-                                        <p className="text-xs text-white leading-relaxed font-korean">{scriptText}</p>
+                                    <div className="bg-orange-500/5 border border-orange-500/10 rounded-2xl p-5 relative overflow-hidden group/memo transition-all hover:bg-orange-500/10">
+                                        <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover/memo:bg-orange-500/10 transition-colors"></div>
+                                        <div className="relative flex gap-4">
+                                            <div className="text-2xl shrink-0">💌</div>
+                                            <div className="space-y-1.5">
+                                                <p className="text-[10px] font-black uppercase text-orange-500 tracking-[0.2em]">{t('lbl_mom_tip')}</p>
+                                                <p className="text-[13px] text-zinc-200 leading-relaxed font-korean font-medium tracking-tight">
+                                                    "{scriptText}"
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                  </div>
-                                  <div className="flex gap-2 items-start text-[11px] md:text-xs text-zinc-300 font-korean">
-                                    <span className="text-base shrink-0">🇰🇷</span>
-                                    <div className="space-y-1">
-                                        <p className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest">Korean Guide (학습 가이드)</p>
-                                        <p className="leading-relaxed">{item.korean_guide}</p>
+                                    <div className="bg-zinc-950/40 border border-white/5 rounded-2xl p-5">
+                                        <div className="flex gap-4">
+                                            <div className="text-2xl shrink-0">🇰🇷</div>
+                                            <div className="space-y-2">
+                                                <p className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em]">Learning Guide</p>
+                                                <p className="text-[12px] text-zinc-400 leading-relaxed font-korean font-medium">{item.korean_guide}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                  </div>
                                 </>
+                            ) : (
+                                <div className="bg-zinc-950/40 border border-white/5 rounded-2xl p-5">
+                                    <div className="flex gap-4">
+                                        <div className="text-2xl shrink-0">🇬🇧</div>
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em]">English Explanation</p>
+                                            <p className="text-[13px] text-zinc-300 leading-relaxed font-medium">{item.english_guide || "Review the vocabulary and grammar rules above."}</p>
+                                        </div>
+                                    </div>
+                                </div>
                             )}
+                        </div>
+                        
+                        <div className="flex justify-end pt-2">
+                            <button onClick={(e) => { e.stopPropagation(); setReportContext(item); }} className="text-[10px] font-bold text-zinc-600 hover:text-amber-500 uppercase tracking-widest flex items-center gap-1.5 transition-colors">
+                                <span className="text-xs">⚠️</span> {t('tt_report')}
+                            </button>
                         </div>
                     </div>
                   )}
@@ -331,13 +309,14 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             })}
           </div>
 
-          <div className="p-3 md:p-4 bg-zinc-900 border-t border-zinc-800 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <div className="p-4 md:p-6 bg-zinc-900 border-t border-white/5 backdrop-blur-3xl shrink-0" onClick={(e) => e.stopPropagation()}>
              <button 
                 onClick={() => { if(user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }} 
                 disabled={isLoadingItems}
-                className="w-full py-3 md:py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-xs md:text-sm shadow-xl flex items-center justify-center gap-2 transform transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                className="w-full py-4 md:py-5 rounded-2xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-sm md:text-base shadow-[0_10px_30px_rgba(249,115,22,0.3)] flex items-center justify-center gap-3 transform transition-all hover:scale-[1.02] hover:shadow-orange-500/50 active:scale-95 disabled:opacity-50 group"
              >
-                <span>🪄</span> {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
+                <span className="text-xl group-hover:rotate-12 transition-transform">🪄</span> 
+                {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
              </button>
           </div>
         </div>
