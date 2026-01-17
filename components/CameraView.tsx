@@ -207,7 +207,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </p>
           <div className="flex flex-wrap gap-4 justify-start">
             <button onClick={openLoginModal} className="group relative bg-white text-black px-8 py-4 md:px-10 md:py-5 rounded-2xl font-black text-base md:text-xl transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)] font-display flex items-center gap-3 overflow-hidden">
-              <span className="relative font-korean">{t('hero_cta_btn')}</span> 
+              <span className="relative font-korean whitespace-nowrap">{t('hero_cta_btn')}</span> 
               <span className="text-xl md:text-2xl relative transition-transform group-hover:translate-x-1">→</span>
             </button>
           </div>
@@ -230,17 +230,17 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
       {/* Why Chekki Section */}
       <div className="max-w-7xl mx-auto px-6 mb-24">
-          <h2 className="text-3xl md:text-5xl font-black text-white text-center mb-12 font-display">{t('diff_title')}</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-white text-center mb-12 font-display break-keep">{t('diff_title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-zinc-900/50 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-md">
+              <div className="bg-zinc-900/50 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-md min-h-[200px]">
                   <div className="text-3xl mb-4">✍️</div>
                   <h3 className="text-xl font-bold text-white mb-2 font-korean">{t('diff_ocr')}</h3>
-                  <p className="text-zinc-400 text-sm md:text-base leading-relaxed font-korean">{t('diff_ocr_desc')}</p>
+                  <p className="text-zinc-400 text-sm md:text-base leading-relaxed font-korean break-keep">{t('diff_ocr_desc')}</p>
               </div>
-              <div className="bg-zinc-900/50 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-md">
+              <div className="bg-zinc-900/50 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-md min-h-[200px]">
                   <div className="text-3xl mb-4">💌</div>
                   <h3 className="text-xl font-bold text-white mb-2 font-korean">{t('diff_script')}</h3>
-                  <p className="text-zinc-400 text-sm md:text-base leading-relaxed font-korean">{t('diff_script_desc')}</p>
+                  <p className="text-zinc-400 text-sm md:text-base leading-relaxed font-korean break-keep">{t('diff_script_desc')}</p>
               </div>
           </div>
       </div>
@@ -248,17 +248,17 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       {/* Trust & Privacy Section */}
       <div className="bg-white/5 border-y border-white/5 py-20 mb-24 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display">{t('trust_title')}</h2>
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display break-keep">{t('trust_title')}</h2>
             <div className="grid md:grid-cols-2 gap-12 mt-12">
                 <div className="space-y-4">
                     <div className="text-emerald-500 text-4xl">🔒</div>
                     <h3 className="text-xl font-bold text-white font-korean">{t('trust_privacy')}</h3>
-                    <p className="text-zinc-400 text-sm max-w-sm mx-auto font-korean">{t('trust_privacy_desc')}</p>
+                    <p className="text-zinc-400 text-sm max-w-sm mx-auto font-korean break-keep">{t('trust_privacy_desc')}</p>
                 </div>
                 <div className="space-y-4">
                     <div className="text-orange-500 text-4xl">👨‍👩‍👧</div>
                     <h3 className="text-xl font-bold text-white font-korean">{t('trust_safety')}</h3>
-                    <p className="text-zinc-400 text-sm max-w-sm mx-auto font-korean">{t('trust_safety_desc')}</p>
+                    <p className="text-zinc-400 text-sm max-w-sm mx-auto font-korean break-keep">{t('trust_safety_desc')}</p>
                 </div>
             </div>
         </div>
@@ -266,14 +266,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
       {/* Three Step Process */}
       <div className="max-w-7xl mx-auto px-6 mb-24">
-          <h2 className="text-2xl md:text-4xl font-black text-white text-center mb-16 font-display uppercase tracking-widest">{t('how_title')}</h2>
+          <h2 className="text-2xl md:text-4xl font-black text-white text-center mb-16 font-display uppercase tracking-widest break-keep">{t('how_title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
               {[
                   { title: t('how_step1'), desc: t('how_step1_desc'), icon: '📸' },
                   { title: t('how_step2'), desc: t('how_step2_desc'), icon: '✨' },
                   { title: t('how_step3'), desc: t('how_step3_desc'), icon: '🗣️' }
               ].map((item, i) => (
-                  <div key={i} className="flex flex-col items-center text-center group">
+                  <div key={i} className="flex flex-col items-center text-center group min-h-[220px]">
                       <div className="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center text-3xl md:text-4xl mb-6 shadow-2xl backdrop-blur-md group-hover:scale-110 transition-transform">
                         {item.icon}
                       </div>
@@ -293,7 +293,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               
               <div className="relative z-10 w-full h-full flex flex-col lg:flex-row items-center p-8 md:p-12 lg:p-16">
                   <div className="w-full lg:max-w-xl text-left">
-                      <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 font-display tracking-tight leading-[1] drop-shadow-2xl">
+                      <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 font-display tracking-tight leading-[1] drop-shadow-2xl break-keep">
                           {t('hero_cta_title')}
                       </h2>
                       <p className="text-white font-korean text-lg md:text-xl mb-8 leading-relaxed break-keep font-bold opacity-90 max-w-sm drop-shadow-lg">
@@ -327,7 +327,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                   <h4 className="text-lg font-black text-white font-display mb-1">
                     Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
                   </h4>
-                  <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold font-korean tracking-tight uppercase">
+                  <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold font-korean tracking-tight uppercase break-keep">
                     {t('footer_text')}
                   </p>
               </div>
