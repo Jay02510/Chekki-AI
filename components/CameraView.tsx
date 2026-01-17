@@ -188,7 +188,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         <div className={`absolute top-0 left-1/4 -translate-x-1/2 w-[800px] h-[500px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/20'} rounded-full blur-[120px] -z-10 pointer-events-none opacity-50 mix-blend-screen`}></div>
         <div className="w-full flex flex-col items-start text-left z-10 animate-fade-in-up order-2 lg:order-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-white/10 bg-white/5 mb-6 backdrop-blur-sm shadow-xl self-start ring-1 ring-white/10">
-            <span className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${isNight ? 'bg-indigo-500' : 'bg-emerald-500'} animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]`}></span>
+            <span className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${isNight ? 'bg-indigo-500' : 'bg-brand-orange'} animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.6)]`}></span>
             <span className="text-[9px] md:text-xs font-black text-zinc-200 tracking-widest uppercase">{t('hero_badge')}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white font-display mb-6 md:mb-8 tracking-tighter text-left drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
@@ -196,9 +196,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               <span className={`text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600`}>{t('hero_title_night')}</span>
             ) : (
               language === 'ko' ? (
-                  <>우리 아이 영어 실력 <br/> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>한 단계 더 높이기</span></>
+                  <>숙제 전쟁은 이제 끝, <br/> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>아이와 웃으며 공부하세요</span></>
               ) : (
-                  <>English Homework? <br/> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>Just Snap a Photo.</span></>
+                  <>Homework Stress? <br/> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>Just Snap a Photo.</span></>
               )
             )}
           </h1>
@@ -207,7 +207,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </p>
           <div className="flex flex-wrap gap-4 justify-start">
             <button onClick={openLoginModal} className="group relative bg-white text-black px-8 py-4 md:px-10 md:py-5 rounded-2xl font-black text-base md:text-xl transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)] font-display flex items-center gap-3 overflow-hidden">
-              <span className="relative font-korean">Let's Go!</span> 
+              <span className="relative font-korean">{t('hero_cta_btn')}</span> 
               <span className="text-xl md:text-2xl relative transition-transform group-hover:translate-x-1">→</span>
             </button>
           </div>
@@ -228,36 +228,56 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
       </div>
 
-      {/* Trust Stats Row */}
-      <div className="max-w-7xl mx-auto px-6 mb-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {[
-                { label: t('stat_accuracy'), value: '99.9%' },
-                { label: t('stat_users'), value: '10,000+' },
-                { label: t('stat_questions'), value: '1M+' },
-                { label: t('stat_rating'), value: '4.9/5' }
-              ].map((stat, i) => (
-                <div key={i} className="bg-zinc-900/40 border border-white/5 p-4 md:p-5 rounded-2xl md:rounded-3xl text-center backdrop-blur-md">
-                    <div className="text-xl md:text-3xl font-black text-white mb-1 font-display leading-tight">{stat.value}</div>
-                    <div className="text-[9px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest">{stat.label}</div>
-                </div>
-              ))}
+      {/* Why Chekki Section */}
+      <div className="max-w-7xl mx-auto px-6 mb-24">
+          <h2 className="text-3xl md:text-5xl font-black text-white text-center mb-12 font-display">{t('diff_title')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-zinc-900/50 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-md">
+                  <div className="text-3xl mb-4">✍️</div>
+                  <h3 className="text-xl font-bold text-white mb-2 font-korean">{t('diff_ocr')}</h3>
+                  <p className="text-zinc-400 text-sm md:text-base leading-relaxed font-korean">{t('diff_ocr_desc')}</p>
+              </div>
+              <div className="bg-zinc-900/50 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-md">
+                  <div className="text-3xl mb-4">💌</div>
+                  <h3 className="text-xl font-bold text-white mb-2 font-korean">{t('diff_script')}</h3>
+                  <p className="text-zinc-400 text-sm md:text-base leading-relaxed font-korean">{t('diff_script_desc')}</p>
+              </div>
           </div>
       </div>
 
+      {/* Trust & Privacy Section */}
+      <div className="bg-white/5 border-y border-white/5 py-20 mb-24 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-6 font-display">{t('trust_title')}</h2>
+            <div className="grid md:grid-cols-2 gap-12 mt-12">
+                <div className="space-y-4">
+                    <div className="text-emerald-500 text-4xl">🔒</div>
+                    <h3 className="text-xl font-bold text-white font-korean">{t('trust_privacy')}</h3>
+                    <p className="text-zinc-400 text-sm max-w-sm mx-auto font-korean">{t('trust_privacy_desc')}</p>
+                </div>
+                <div className="space-y-4">
+                    <div className="text-orange-500 text-4xl">👨‍👩‍👧</div>
+                    <h3 className="text-xl font-bold text-white font-korean">{t('trust_safety')}</h3>
+                    <p className="text-zinc-400 text-sm max-w-sm mx-auto font-korean">{t('trust_safety_desc')}</p>
+                </div>
+            </div>
+        </div>
+      </div>
+
       {/* Three Step Process */}
-      <div className="max-w-7xl mx-auto px-6 mb-16 md:mb-20">
+      <div className="max-w-7xl mx-auto px-6 mb-24">
+          <h2 className="text-2xl md:text-4xl font-black text-white text-center mb-16 font-display uppercase tracking-widest">{t('how_title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
               {[
-                  { title: language === 'ko' ? "사진 찍기" : "Snap a Photo", desc: language === 'ko' ? "숙제 페이지를 찰칵 찍어주세요." : "Take a quick picture of the page.", icon: '📸' },
-                  { title: language === 'ko' ? "정답 확인" : "Get Answers", desc: language === 'ko' ? "제가 모든 정답을 꼼꼼히 찾아낼게요." : "I'll find all the right answers for you.", icon: '✨' },
-                  { title: language === 'ko' ? "다정하게 지도" : "Teach with Love", desc: language === 'ko' ? "제 설명을 보고 아이에게 친절히 알려주세요." : "Explain it kindly using my easy guide.", icon: '🗣️' }
+                  { title: t('how_step1'), desc: t('how_step1_desc'), icon: '📸' },
+                  { title: t('how_step2'), desc: t('how_step2_desc'), icon: '✨' },
+                  { title: t('how_step3'), desc: t('how_step3_desc'), icon: '🗣️' }
               ].map((item, i) => (
                   <div key={i} className="flex flex-col items-center text-center group">
-                      <div className="w-14 h-14 md:w-16 md:h-16 rounded-[1.2rem] bg-white/5 border border-white/10 flex items-center justify-center text-2xl md:text-3xl mb-4 shadow-2xl backdrop-blur-md group-hover:scale-110 transition-transform">
+                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center text-3xl md:text-4xl mb-6 shadow-2xl backdrop-blur-md group-hover:scale-110 transition-transform">
                         {item.icon}
                       </div>
-                      <h3 className="text-xl md:text-2xl font-black text-white mb-2 font-korean">{item.title}</h3>
+                      <h3 className="text-xl md:text-2xl font-black text-white mb-3 font-korean">{item.title}</h3>
                       <p className="text-zinc-500 font-korean text-sm md:text-base leading-relaxed break-keep max-w-[240px]">
                         {item.desc}
                       </p>
@@ -274,16 +294,16 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               <div className="relative z-10 w-full h-full flex flex-col lg:flex-row items-center p-8 md:p-12 lg:p-16">
                   <div className="w-full lg:max-w-xl text-left">
                       <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 font-display tracking-tight leading-[1] drop-shadow-2xl">
-                          {language === 'ko' ? "행복한 숙제 시간," : "Happy Homework,"}
+                          {t('hero_cta_title')}
                       </h2>
                       <p className="text-white font-korean text-lg md:text-xl mb-8 leading-relaxed break-keep font-bold opacity-90 max-w-sm drop-shadow-lg">
-                          {language === 'ko' ? "숙제 시간이 스트레스가 아닌, 아이와 함께 웃으며 성장하는 따뜻한 시간이 됩니다." : "Join thousands of moms who've turned homework time into a peaceful, happy bonding moment."}
+                          {t('hero_cta_desc')}
                       </p>
                       <button 
                         onClick={openLoginModal} 
                         className="group relative bg-white text-brand-orange px-10 py-4 md:px-12 md:py-5 rounded-[1.5rem] font-black text-base md:text-2xl transition-all transform active:scale-95 shadow-2xl font-display flex items-center justify-center gap-3 md:gap-4 hover:shadow-white/40 whitespace-nowrap w-fit"
                       >
-                          <span className="font-korean">{language === 'ko' ? "무료로 체험해보기" : "Try it for Free"}</span>
+                          <span className="font-korean">{t('hero_cta_btn')}</span>
                           <span className="text-xl md:text-3xl transition-transform group-hover:translate-x-2">→</span>
                       </button>
                   </div>
@@ -308,7 +328,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
                   </h4>
                   <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold font-korean tracking-tight uppercase">
-                    {language === 'ko' ? "Gemini 3 Pro 기반 • 엄마를 위한 다정한 영어 숙제 파트너" : "GEMINI 3 PRO POWERED • MOM'S FRIENDLY HOMEWORK PARTNER"}
+                    {t('footer_text')}
                   </p>
               </div>
               

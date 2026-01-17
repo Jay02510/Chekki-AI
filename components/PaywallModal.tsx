@@ -38,10 +38,10 @@ export const PaywallModal: React.FC = () => {
         <div className="p-8 md:p-12 text-center relative overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none"></div>
             <h2 className="text-3xl md:text-5xl font-black text-white mb-4 font-display leading-tight">
-                {language === 'ko' ? '모든 학습 마법을 깨워보세요' : 'Unlock Full Learning Magic'}
+                {t('pw_title')}
             </h2>
             <p className="text-zinc-400 text-lg md:text-xl font-medium font-korean max-w-2xl mx-auto">
-                {language === 'ko' ? '하루 3번의 제한 없이, 채키의 모든 프리미엄 기능을 무제한으로 사용하세요.' : 'Remove daily limits and access Chekki’s premium AI tools forever.'}
+                {language === 'ko' ? '라떼와 스콘 한 세트 가격으로 매일 밤 평화를 구매하세요.' : 'Buy back 30 hours of monthly peace for the price of a latte and scone.'}
             </p>
             <button onClick={() => setShowPaywall(false)} className="absolute top-6 right-8 text-zinc-500 hover:text-white transition-colors text-2xl">✕</button>
         </div>
@@ -75,7 +75,7 @@ export const PaywallModal: React.FC = () => {
             {/* Pro Tier */}
             <div className={`relative bg-gradient-to-b from-zinc-800 to-zinc-900 border-2 rounded-[2rem] p-8 flex flex-col shadow-2xl scale-[1.05] z-10 transition-all duration-300 ${error ? 'border-red-500' : 'border-orange-500'}`}>
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
-                    Most Popular
+                    Recommended for EK Families
                 </div>
                 
                 <div className="mb-6">
@@ -94,10 +94,10 @@ export const PaywallModal: React.FC = () => {
                         <span className="text-orange-500 text-lg">🚀</span> <strong>Deep Reasoning Mode</strong> (Gemini 3 Pro)
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-200">
-                        <span className="text-orange-500 text-lg">🔊</span> Native Audio Pronunciation
+                        <span className="text-orange-500 text-lg">🔊</span> Native Audio & Speaking Coach
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-200">
-                        <span className="text-orange-500 text-lg">☕</span> Mom's Lounge Exclusive Badges
+                        <span className="text-orange-500 text-lg">☕</span> Mom's Lounge Exclusive Status
                     </li>
                 </ul>
 

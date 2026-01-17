@@ -12,7 +12,8 @@ import { ChekkiMascot } from './Icons';
 
 interface TooltipProps {
   text: string;
-  children: React.Node;
+  // Fix: Changed React.Node to React.ReactNode which is the correct type for children in React
+  children: React.ReactNode;
 }
 
 const Tooltip: React.FC<TooltipProps> = ({ text, children }) => {
