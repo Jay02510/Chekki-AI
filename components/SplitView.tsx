@@ -6,6 +6,7 @@ import { useMistakes } from '../contexts/MistakeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { CloneWorksheetModal } from './CloneWorksheetModal';
 import { FeedbackModal } from './FeedbackModal';
+import { WorksheetOverlay } from './WorksheetOverlay';
 import { ASSETS } from '../constants';
 
 interface Props {
@@ -23,7 +24,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const [showCloneModal, setShowCloneModal] = useState(false);
   const [reportContext, setReportContext] = useState<WorksheetItem | null>(null);
   const [mascotError, setMascotError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
@@ -106,28 +106,18 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       {reportContext && <FeedbackModal context={reportContext} onClose={() => setReportContext(null)} />}
 
       <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-[calc(100dvh-180px)] lg:h-[calc(100vh-250px)] min-h-[450px]">
-        {/* Left Side: Worksheet Preview */}
-        <div className="w-full lg:w-1/2 h-[35%] lg:h-full flex flex-col bg-zinc-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-2xl">
-          <div className="flex-1 relative overflow-y-auto custom-scrollbar overscroll-contain bg-zinc-900/40">
-              <img 
-                src={imageUrl} 
-                alt="Worksheet" 
-                className={`w-full h-auto block transition-all duration-1000 ease-in-out ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'}`}
-                onLoad={() => setImageLoaded(true)}
-              />
-              {!imageLoaded && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/40 backdrop-blur-2xl">
-                   <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin"></div>
-                </div>
-              )}
-          </div>
-          <div className="bg-zinc-900/80 backdrop-blur-xl px-4 py-3 border-t border-white/5 flex justify-center text-center">
-             <p className="text-zinc-500 text-[9px] font-black uppercase tracking-widest">{t('supported_formats')}</p>
-          </div>
+        {/* Left Side: Worksheet Overlay (The Magic Paper) */}
+        <div className="w-full lg:w-1/2 h-[40%] lg:h-full">
+            <WorksheetOverlay 
+                imageUrl={imageUrl} 
+                items={items} 
+                focusedId={activeItemId}
+                isLoadingItems={isLoadingItems}
+            />
         </div>
 
         {/* Right Side: Enhanced Teaching Cards */}
-        <div className="w-full lg:w-1/2 h-[65%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative" onClick={() => setActiveItemId(null)}>
+        <div className="w-full lg:w-1/2 h-[60%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative" onClick={() => setActiveItemId(null)}>
           <div className="px-6 py-5 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl flex justify-between items-center shrink-0">
             <div className="flex items-center gap-4">
                <div className="w-12 h-12 rounded-2xl bg-zinc-800 border border-white/5 flex items-center justify-center overflow-hidden shadow-xl">
@@ -151,7 +141,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             {items.map((item) => {
               const isActive = activeItemId === item.id;
               const flagged = isMistake(item.question_text);
-              const scriptText = item.teaching_script_ko;
+              const scriptText = language === 'ko' ? item.teaching_script_ko : item.teaching_script_en;
+              const guideText = language === 'ko' ? item.korean_guide : item.english_guide;
               const answerText = item.correct_answer;
 
               return (
@@ -188,7 +179,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                             <button onClick={startPronunciationCheck} disabled={isListening} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600'} text-white shadow-lg`}>
                                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                             </button>
-                            <p className="text-xs text-indigo-200/80 font-bold leading-relaxed">{isListening ? "Listening..." : "Tap to practice speaking!"}</p>
+                            <p className="text-xs text-indigo-200/80 font-bold leading-relaxed">{isListening ? (language === 'ko' ? "듣는 중..." : "Listening...") : (language === 'ko' ? "발음 연습을 해보세요!" : "Tap to practice speaking!")}</p>
                         </div>
                         <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4">
                             <p className="text-[10px] font-black uppercase text-orange-500 mb-1">{t('lbl_mom_tip')}</p>
@@ -196,7 +187,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                         </div>
                         <div className="bg-zinc-950/40 border border-white/5 rounded-2xl p-4">
                             <p className="text-[10px] font-black uppercase text-zinc-500 mb-1">Learning Guide</p>
-                            <p className="text-xs text-zinc-400 font-korean leading-relaxed">{item.korean_guide}</p>
+                            <p className="text-xs text-zinc-400 font-korean leading-relaxed">{guideText}</p>
                         </div>
                     </div>
                   )}

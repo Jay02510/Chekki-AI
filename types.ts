@@ -25,9 +25,12 @@ export interface WorksheetItem {
   english_guide?: string;
   teaching_tip_ko: string;
   teaching_script_ko?: string;
+  // Added teaching_script_en to support bilingual scripts and fix the TS error in SplitView
+  teaching_script_en?: string;
   teaching_tip_en?: string;
   handwriting_tip_ko?: string;
-  confidence_score: number;
+  // Made confidence_score optional as it's not explicitly required by the backend response schema
+  confidence_score?: number;
   group_id?: string;
   // Added bounding_box property to fix TS error in WorksheetOverlay.tsx
   bounding_box?: BoundingBox;

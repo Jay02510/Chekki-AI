@@ -11,12 +11,17 @@ const SYSTEM_PROMPT_ITEMS = `
 You are "Chekki AI", a high-fidelity educational assistant for English Kindergarten parents.
 Extract all questions and answers from the provided image.
 
-Focus strictly on content quality and pedagogical scripts. Do NOT provide coordinates or location hints.
+CRITICAL: For every item, you MUST provide precise "bounding_box" coordinates [ymin, xmin, ymax, xmax] normalized to 0-1000.
+Linguistic Rule: Provide ALL guides and scripts in BOTH Korean and English.
+
 For each item:
-1. FULL TEXT answers (e.g., "B. Apple" not just "B").
-2. A "Teaching Script" (엄마의 한마디): A warm, encouraging sentence for a parent to say to their child in Korean.
-3. A "Korean Guide": An explanation of the grammar/vocab rule in Korean.
-4. An "English Guide": A clear, simple explanation in English.
+1. "question_text": The question as it appears.
+2. "correct_answer": The full text answer.
+3. "teaching_script_ko": Encouraging words for the parent in Korean.
+4. "teaching_script_en": Encouraging words for the parent in English.
+5. "korean_guide": Rule explanation in Korean.
+6. "english_guide": Rule explanation in English.
+7. "bounding_box": Precise coordinates for overlay.
 `;
 
 const ITEM_SCHEMA = {
@@ -34,8 +39,19 @@ const ITEM_SCHEMA = {
           korean_guide: { type: Type.STRING },
           english_guide: { type: Type.STRING },
           teaching_script_ko: { type: Type.STRING },
+          teaching_script_en: { type: Type.STRING },
           teaching_tip_ko: { type: Type.STRING },
-          teaching_tip_en: { type: Type.STRING }
+          teaching_tip_en: { type: Type.STRING },
+          bounding_box: {
+            type: Type.OBJECT,
+            properties: {
+              ymin: { type: Type.NUMBER },
+              xmin: { type: Type.NUMBER },
+              ymax: { type: Type.NUMBER },
+              xmax: { type: Type.NUMBER }
+            },
+            required: ["ymin", "xmin", "ymax", "xmax"]
+          }
         },
         required: [
           "id", 
@@ -44,7 +60,9 @@ const ITEM_SCHEMA = {
           "correct_answer", 
           "korean_guide", 
           "english_guide", 
-          "teaching_script_ko"
+          "teaching_script_ko",
+          "teaching_script_en",
+          "bounding_box"
         ]
       }
     }
@@ -89,14 +107,14 @@ export default async function handler(req: any, res: any) {
         contents: {
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: image } }, 
-            { text: "Extract all items. Ignore coordinates. Focus on Mom's Scripts." }
+            { text: "Extract all items with coordinates and bilingual scripts." }
           ]
         },
         config: {
           systemInstruction: SYSTEM_PROMPT_ITEMS,
           responseMimeType: "application/json",
           responseSchema: ITEM_SCHEMA,
-          thinkingConfig: { thinkingBudget: 8000 } // Reduced from 12k for 30% faster response
+          thinkingConfig: { thinkingBudget: 10000 }
         }
       }).then(r => JSON.parse(r.text || "{}"))
     ]);
