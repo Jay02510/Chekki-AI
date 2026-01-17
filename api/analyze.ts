@@ -8,16 +8,15 @@ export const config = {
 const SYSTEM_PROMPT_SUMMARY = `Identify EK (English Kindergarten) worksheet title and primary learning goal. Return JSON: { "worksheet_summary": { "title_en": "string", "title_ko": "string", "overview_ko": "string" } }`;
 
 const SYSTEM_PROMPT_ITEMS = `
-You are "Chekki AI", a high-fidelity educational assistant.
-Rigorously extract all items/exercises from the image.
+You are "Chekki AI", a high-fidelity educational assistant for English Kindergarten parents.
+Extract all questions and answers from the provided image.
 
-For each item, you MUST provide:
+Focus strictly on content quality and pedagogical scripts. Do NOT provide coordinates or location hints.
+For each item:
 1. FULL TEXT answers (e.g., "B. Apple" not just "B").
-2. Precise coordinates (bounding_box 0-1000).
-3. A "Teaching Script" (엄마의 한마디): A warm, encouraging sentence for a parent to say to their child in Korean.
-4. A "Korean Guide": An explanation of the grammar/vocab rule in Korean.
-5. An "English Guide": A clear, step-by-step explanation of the solution in English.
-6. A "Teaching Tip": A pedagogical tip for parents in both languages.
+2. A "Teaching Script" (엄마의 한마디): A warm, encouraging sentence for a parent to say to their child in Korean.
+3. A "Korean Guide": An explanation of the grammar/vocab rule in Korean.
+4. An "English Guide": A clear, simple explanation in English.
 `;
 
 const ITEM_SCHEMA = {
@@ -30,15 +29,6 @@ const ITEM_SCHEMA = {
         properties: {
           id: { type: Type.INTEGER },
           type: { type: Type.STRING },
-          bounding_box: {
-            type: Type.OBJECT,
-            properties: {
-              ymin: { type: Type.NUMBER },
-              xmin: { type: Type.NUMBER },
-              ymax: { type: Type.NUMBER },
-              xmax: { type: Type.NUMBER }
-            }
-          },
           question_text: { type: Type.STRING },
           correct_answer: { type: Type.STRING },
           korean_guide: { type: Type.STRING },
@@ -50,7 +40,6 @@ const ITEM_SCHEMA = {
         required: [
           "id", 
           "type", 
-          "bounding_box", 
           "question_text", 
           "correct_answer", 
           "korean_guide", 
@@ -70,7 +59,6 @@ export default async function handler(req: any, res: any) {
     const { task, image, originalItems } = body;
     if (!process.env.API_KEY) return res.status(500).json({ error: "API_KEY_MISSING" });
 
-    // Correct initialization using named parameter as per @google/genai guidelines
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     if (task === 'generate') {
@@ -79,13 +67,11 @@ export default async function handler(req: any, res: any) {
         contents: `Context: ${JSON.stringify(originalItems)}. Task: 2-3 unique questions with guides.`,
         config: { responseMimeType: "application/json", temperature: 0.7 }
       });
-      // Extracting generated text using the .text property (not a method)
       return res.status(200).json(JSON.parse(response.text || "[]"));
     }
 
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
 
-    // Using the recommended Content structure { parts: [...] } for multimodal generation content
     const [summaryResult, itemsResult] = await Promise.all([
       ai.models.generateContent({
         model: "gemini-3-flash-preview",
@@ -103,14 +89,14 @@ export default async function handler(req: any, res: any) {
         contents: {
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: image } }, 
-            { text: "Perform rigorous extraction of all questions including detailed teaching guides in both English and Korean." }
+            { text: "Extract all items. Ignore coordinates. Focus on Mom's Scripts." }
           ]
         },
         config: {
           systemInstruction: SYSTEM_PROMPT_ITEMS,
           responseMimeType: "application/json",
           responseSchema: ITEM_SCHEMA,
-          thinkingConfig: { thinkingBudget: 12000 }
+          thinkingConfig: { thinkingBudget: 8000 } // Reduced from 12k for 30% faster response
         }
       }).then(r => JSON.parse(r.text || "{}"))
     ]);

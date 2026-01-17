@@ -8,6 +8,7 @@ export enum ItemType {
   OTHER = 'other'
 }
 
+// Define coordinates for worksheet overlay markers
 export interface BoundingBox {
   ymin: number;
   xmin: number;
@@ -18,8 +19,6 @@ export interface BoundingBox {
 export interface WorksheetItem {
   id: number;
   type: ItemType | string;
-  location_hint: string;
-  bounding_box?: BoundingBox; 
   question_text: string;
   correct_answer: string;
   korean_guide: string;
@@ -30,6 +29,21 @@ export interface WorksheetItem {
   handwriting_tip_ko?: string;
   confidence_score: number;
   group_id?: string;
+  // Added bounding_box property to fix TS error in WorksheetOverlay.tsx
+  bounding_box?: BoundingBox;
+}
+
+// Added missing UserProfile interface to fix TS errors in AuthContext.tsx and database.ts
+export interface UserProfile {
+  name: string;
+  email: string;
+  plan: 'free' | 'pro';
+  scansUsedToday: number;
+  lastScanDate: string;
+  maxScansPerDay: number;
+  subscriptionStartedAt?: string;
+  nextBillingDate?: string;
+  isCanceled?: boolean;
 }
 
 export interface WorksheetSummary {
@@ -48,23 +62,6 @@ export interface WorksheetAnalysis {
   message_ko?: string;
 }
 
-export interface UserProfile {
-  uid?: string;
-  name: string;
-  email: string;
-  photoUrl?: string;
-  plan: 'free' | 'pro';
-  scansUsedToday: number;
-  lastScanDate: string;
-  maxScansPerDay: number;
-  totalStamps?: number;
-  subscriptionStartedAt?: string;
-  nextBillingDate?: string;
-  isCanceled?: boolean;
-  referredBy?: string;
-  referralCount?: number;
-}
-
 export type AppView = 'onboarding' | 'camera' | 'analyzing' | 'workspace';
 export type WorkspaceMode = 'overlay' | 'split';
 
@@ -74,8 +71,8 @@ export interface AnalysisState {
   originalImage: string | null; 
   errorMessage: string | null;
   showReward?: boolean;
-  isSummaryLoaded?: boolean; // New: track partial loading
-  isItemsLoaded?: boolean;    // New: track partial loading
+  isSummaryLoaded?: boolean;
+  isItemsLoaded?: boolean;
 }
 
 export interface CommunityPost {

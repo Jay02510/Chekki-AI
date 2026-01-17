@@ -1,15 +1,14 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
-import { WorksheetOverlay } from './components/WorksheetOverlay';
 import { SplitView } from './components/SplitView';
 import { PaywallModal } from './components/PaywallModal';
 import { OnboardingTour } from './components/OnboardingTour';
 import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
-import { AnalysisState, WorksheetAnalysis, WorkspaceMode, WorksheetItem } from './types';
+import { AnalysisState } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { MistakeProvider } from './contexts/MistakeContext';
@@ -56,7 +55,6 @@ function AppContent() {
     isItemsLoaded: false
   });
   
-  const [viewMode, setViewMode] = useState<WorkspaceMode>('overlay');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [lastImageData, setLastImageData] = useState<string | null>(null);
 
@@ -124,7 +122,6 @@ function AppContent() {
     });
 
     try {
-        // Single optimized backend call (backend handles parallelization)
         const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -149,12 +146,7 @@ function AppContent() {
         };
 
         setAnalysisState(newState);
-        
-        localStorage.setItem(SESSION_KEY, JSON.stringify({
-            state: newState,
-            timestamp: Date.now()
-        }));
-
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ state: newState, timestamp: Date.now() }));
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 3000);
 
@@ -171,11 +163,8 @@ function AppContent() {
   };
 
   const handleScanAgain = () => {
-    if (lastImageData) {
-      handleImageSelected(lastImageData, true);
-    } else {
-      handleReset(false);
-    }
+    if (lastImageData) handleImageSelected(lastImageData, true);
+    else handleReset(false);
   };
 
   const handleReset = (confirm = true) => {
@@ -231,8 +220,8 @@ function AppContent() {
                     <span className="text-xl">⚠️</span>
                     <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
                         {language === 'ko' 
-                           ? "현재 인앱 브라우저를 사용 중입니다. 더 원활한 카메라 및 음성 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요." 
-                           : "In-app browser detected. Please open in Safari or Chrome for full AI features (Camera/Mic)."}
+                           ? "더 원활한 카메라 및 음성 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요." 
+                           : "Open in Safari or Chrome for full AI features (Camera/Mic)."}
                     </p>
                 </div>
                 <button onClick={() => setShowInAppNotice(false)} className="text-white/60 p-1 ml-2">✕</button>
@@ -284,33 +273,15 @@ function AppContent() {
                     <span className="text-sm md:text-lg">📸</span> 
                     <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">{t('ws_scan_again')}</span>
                   </button>
-
-                  <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 shadow-inner">
-                    <button onClick={() => setViewMode('overlay')} className={`px-2 py-1.5 md:px-4 md:py-2 rounded-lg text-[9px] md:text-xs font-black transition-all ${viewMode === 'overlay' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
-                      {t('ws_overlay')}
-                    </button>
-                    <button onClick={() => setViewMode('split')} className={`px-2 py-1.5 md:px-4 md:py-2 rounded-lg text-[9px] md:text-xs font-black transition-all ${viewMode === 'split' ? 'bg-zinc-700 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
-                      {t('ws_list')}
-                    </button>
-                  </div>
               </div>
             </div>
 
             <div className="flex-1 min-h-0">
-              {viewMode === 'overlay' ? (
-                <WorksheetOverlay 
-                  imageUrl={analysisState.originalImage!} 
-                  items={analysisState.data.items || []} 
-                  className="h-full"
-                  isLoadingItems={!analysisState.isItemsLoaded}
-                />
-              ) : (
                 <SplitView 
                     imageUrl={analysisState.originalImage!} 
                     items={analysisState.data.items || []} 
                     isLoadingItems={!analysisState.isItemsLoaded}
                 />
-              )}
             </div>
           </div>
         )}
