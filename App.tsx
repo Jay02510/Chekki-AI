@@ -8,6 +8,7 @@ import { PaywallModal } from './components/PaywallModal';
 import { OnboardingTour } from './components/OnboardingTour';
 import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
+import { SplashScreen } from './components/SplashScreen';
 import { AnalysisState } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -15,6 +16,7 @@ import { MistakeProvider } from './contexts/MistakeContext';
 import { ChekkiMascot } from './components/Icons';
 
 const SESSION_KEY = 'hw_last_session';
+const ONBOARDED_KEY = 'chekki_onboarded_v1';
 
 const isNightModeKST = () => {
   const now = new Date();
@@ -45,6 +47,7 @@ function AppContent() {
   const [isNight, setIsNight] = useState(isNightModeKST());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const [analysisState, setAnalysisState] = useState<AnalysisState>({
     status: 'idle',
     data: { worksheet_summary: { title_en: "", title_ko: "", overview_ko: "" }, items: [] },
@@ -64,6 +67,19 @@ function AppContent() {
     }, 60000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    // Check if onboarding is needed
+    const hasOnboarded = localStorage.getItem(ONBOARDED_KEY);
+    if (!hasOnboarded) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem(ONBOARDED_KEY, 'true');
+    setShowOnboarding(false);
+  };
 
   useEffect(() => {
     if (!isAuthenticated && analysisState.status !== 'idle') {
@@ -184,6 +200,8 @@ function AppContent() {
     localStorage.removeItem(SESSION_KEY);
   };
 
+  if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
+
   return (
     <div className={`min-h-[100dvh] ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} text-zinc-100 font-sans overflow-x-hidden transition-colors duration-1000 flex flex-col`}>
       <Header onReset={() => handleReset(false)} />
@@ -191,7 +209,7 @@ function AppContent() {
       <OdapNoteModal />
       <LoginModal />
       
-      {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
+      {showOnboarding && <OnboardingTour onComplete={handleOnboardingComplete} />}
 
       {showConfetti && (
         <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center">

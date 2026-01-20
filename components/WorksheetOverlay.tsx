@@ -30,8 +30,9 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
     const box = item.bounding_box;
     if (!box) return { display: 'none' };
     
-    const top = (box.ymin / 1000) * 100;
-    const left = (box.xmin / 1000) * 100;
+    // Add safety padding to prevent markers from clipping at the very edges
+    const top = Math.min(Math.max((box.ymin / 1000) * 100, 2), 95);
+    const left = Math.min(Math.max((box.xmin / 1000) * 100, 5), 85);
 
     return {
       top: `${top}%`,
@@ -100,7 +101,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
                  <div className={`
                     px-3 py-1.5 md:px-5 md:py-2.5 rounded-2xl shadow-2xl border-2 border-white/20 flex items-center gap-3 transform transition-all hover:scale-110 active:scale-95 group cursor-pointer min-w-fit max-w-[220px] md:max-w-[450px]
                     ${isFocused ? 'bg-orange-600 ring-4 ring-orange-500/20' : 'bg-zinc-800 ring-1 ring-white/10'}
-                    animate-[markerPulse_3s_infinite]
+                    ${isFocused && focusedId ? 'animate-[ping_1.5s_cubic-bezier(0,0,0.2,1)_1]' : ''}
                  `}>
                     <div className="w-5 h-5 md:w-6 md:h-6 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
                         <span className="font-black text-[10px] md:text-xs text-white">{item.id}</span>
