@@ -1,3 +1,4 @@
+
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
   getFirestore, 
@@ -12,7 +13,6 @@ import {
   deleteDoc,
   addDoc
 } from 'firebase/firestore';
-// Fix: Use correct named import for modular SDK and single quotes for consistency
 import { getAuth } from 'firebase/auth';
 import { UserProfile } from '../types';
 
@@ -25,9 +25,7 @@ const firebaseConfig = {
   appId: "1:123535525914:web:decc3f5b3e3ffee4a0a9a3"
 };
 
-// Unified initialization
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-
 export const auth = getAuth(app);
 export const dbInstance = getFirestore(app);
 
@@ -40,7 +38,6 @@ export const db = {
         const docSnap = await getDoc(docRef);
         return docSnap.exists() ? (docSnap.data() as UserProfile) : null;
     } catch (e: any) {
-        console.warn("[Chekki DB] getUser failed:", e.message);
         return null;
     }
   },
@@ -48,18 +45,14 @@ export const db = {
   async createUser(uid: string, profile: UserProfile): Promise<void> {
     try {
       await setDoc(doc(dbInstance, "users", uid), { ...profile, uid });
-    } catch (e) {
-      console.error("[Chekki DB] createUser failed:", e);
-    }
+    } catch (e) {}
   },
 
   async updateUser(uid: string, updates: Partial<UserProfile>): Promise<void> {
     try {
       const userRef = doc(dbInstance, "users", uid);
       await updateDoc(userRef, updates);
-    } catch (e) {
-      console.error("[Chekki DB] updateUser failed:", e);
-    }
+    } catch (e) {}
   },
 
   async getMistakes(uid: string): Promise<any[]> {
@@ -83,9 +76,7 @@ export const db = {
     localStorage.setItem(localKey, JSON.stringify([mistake, ...currentLocal]));
     try {
       await setDoc(doc(dbInstance, "mistakes", mistake.uniqueId), { ...mistake, userId: uid });
-    } catch (e: any) {
-      console.warn("[Chekki DB] addMistake cloud sync failed:", e.message);
-    }
+    } catch (e: any) {}
   },
 
   async removeMistake(uniqueId: string, uid?: string): Promise<void> {
@@ -96,12 +87,9 @@ export const db = {
     }
     try {
       await deleteDoc(doc(dbInstance, "mistakes", uniqueId));
-    } catch (e: any) {
-      console.warn("[Chekki DB] removeMistake cloud sync failed:", e.message);
-    }
+    } catch (e: any) {}
   },
 
-  // Updated signature to include userEmail and userName as allowed properties
   async sendFeedback(uid: string, feedback: { 
     rating?: number; 
     comment: string; 
@@ -110,14 +98,22 @@ export const db = {
     userName?: string;
   }): Promise<void> {
     try {
+      // 1. Store in Firestore
       await addDoc(collection(dbInstance, "feedback"), {
         ...feedback,
         userId: uid,
         timestamp: new Date().toISOString()
       });
+
+      // 2. Trigger Notification to Developer (jsn.benjamin@gmail.com)
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedback)
+      });
+      
     } catch (e: any) {
       console.error("[Chekki DB] sendFeedback failed:", e.message);
-      throw e;
     }
   }
 };

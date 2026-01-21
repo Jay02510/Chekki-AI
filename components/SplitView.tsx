@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { CloneWorksheetModal } from './CloneWorksheetModal';
 import { FeedbackModal } from './FeedbackModal';
 import { WorksheetOverlay } from './WorksheetOverlay';
+import { InlineFeedback } from './InlineFeedback';
 import { ASSETS } from '../constants';
 
 interface Props {
@@ -194,6 +195,13 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 </div>
               );
             })}
+
+            {/* Ideal Placement: Feedback Box at the end of results */}
+            {!isLoadingItems && items.length > 0 && (
+              <div className="pt-6 pb-2">
+                <InlineFeedback />
+              </div>
+            )}
           </div>
 
           <div className="p-4 md:p-6 bg-zinc-900 border-t border-white/5 shrink-0" onClick={(e) => e.stopPropagation()}>
