@@ -7,13 +7,13 @@ import { useLanguage } from '../contexts/LanguageContext';
 // Keep mock posts for social proof/atmosphere
 const MOCK_POSTS: CommunityPost[] = [
     {
-        id: '1', author: 'Ji-woo Mom', avatar: '👩🏻', timeAgo: '5m',
-        content: 'Check out this week\'s O-dap note! My son struggled with phonics but improved so much with Chekki.',
+        id: '1', author: 'Ji-woo Family', avatar: '👩🏻', timeAgo: '5m',
+        content: 'Check out this week\'s review note! My child struggled with phonics but improved so much with Chekki.',
         likes: 24, comments: 5, tag: 'Review'
     },
     {
-        id: '2', author: 'Min-jun Daddy', avatar: '👨🏻', timeAgo: '2h',
-        content: 'Finally hit a 10-day study streak! 🏆 My son is so motivated to see the "Growing!" bar fill up.',
+        id: '2', author: 'Min-jun Family', avatar: '👨🏻', timeAgo: '2h',
+        content: 'Finally hit a 10-day study streak! 🏆 My child is so motivated to see the "Growing!" bar fill up.',
         likes: 156, comments: 12, tag: 'Achievement'
     },
     {
@@ -38,9 +38,9 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
         const base = postContent || (language === 'ko' ? "오늘도 채키랑 영어 숙제 끝냈어요! 🚀" : "Today we practiced English homework with Chekki! 🚀");
         
         if (platform === 'cafe') {
-            return `[영유 숙제 기록] 채키 AI로 오늘도 열공 완료! ✨\n\n아이랑 영유 숙제하다 보면 저도 가끔 헷갈릴 때가 있는데,\n채키(Chekki) 덕분에 발음도 확인하고 설명도 다정하게 해줄 수 있어서 너무 좋네요.\n\n특히 어려워했던 문제는 오답노트로 따로 모아볼 수 있어서 주말 복습도 든든합니다.\n공유해주신 학습 팁들 항상 잘 보고 있어요! 다들 화이팅입니다. ❤️\n\n💬 기록 한마디: ${base}\n\n#채키AI #영유맘 #숙제도우미 #엄마표영어 #7세영어 #자기주도학습`;
+            return `[영유 숙제 기록] 채키 AI로 오늘도 열공 완료! ✨\n\n아이랑 영유 숙제하다 보면 저도 가끔 헷갈릴 때가 있는데,\n채키(Chekki) 덕분에 발음도 확인하고 설명도 다정하게 해줄 수 있어서 너무 좋네요.\n\n특히 어려워했던 문제는 오답노트로 따로 모아볼 수 있어서 주말 복습도 든든합니다.\n공유해주신 학습 팁들 항상 잘 보고 있어요! 다들 화이팅입니다. ❤️\n\n💬 기록 한마디: ${base}\n\n#채키AI #영유맘 #숙제도우미 #부모표영어 #7세영어 #자기주도학습`;
         } else {
-            return `${base}\n\n오늘도 우리 아이 성장을 위해 찰칵! 📸\n영어 숙제 시간이 이제 스트레스가 아니라\n도란도란 이야기 나누는 즐거운 시간이 되었어요.\n\n채키(@Chekki_AI)가 알려주는 엄마표 티칭 가이드 최고! 👍\n\n#공부기록 #홈스쿨링 #영유맘소통 #육아소통 #엄마표영어 #ChekkiAI #ChekkiMoment #StudyGram`;
+            return `${base}\n\n오늘도 우리 아이 성장을 위해 찰칵! 📸\n영어 숙제 시간이 이제 스트레스가 아니라\n도란도란 이야기 나누는 즐거운 시간이 되었어요.\n\n채키(@Chekki_AI)가 알려주는 부모표 티칭 가이드 최고! 👍\n\n#공부기록 #홈스쿨링 #영유맘소통 #육아소통 #부모표영어 #ChekkiAI #ChekkiMoment #StudyGram`;
         }
     };
 
@@ -69,7 +69,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
                 <div className="bg-zinc-950 p-4 border-b border-zinc-800 flex justify-between items-center shrink-0">
                    <div className="flex items-center gap-2">
                        <span className="text-xl">☕</span>
-                       <h2 className="text-lg font-bold text-white font-display">Mom's Lounge</h2>
+                       <h2 className="text-lg font-bold text-white font-display">Parent's Lounge</h2>
                    </div>
                    <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">✕</button>
                 </div>
