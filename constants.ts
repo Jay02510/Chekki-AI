@@ -9,8 +9,8 @@ import { WorksheetAnalysis, ItemType } from "./types";
 export const ASSETS = {
   VIDEO_INTRO: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/chekki-intro_y7hj7c.mp4`,      
   LOGO: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto,e_background_removal/v1765769939/chekki-logo_q5xeux.png`,              
-  MASCOT_HAPPY: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1765769939/chekki-analyzing_pzuksu.png`,     
-  MASCOT_THINKING: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1765769939/chekki-analyzing_pzuksu.png`,
+  MASCOT_HAPPY: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1765769939/chekki-logo_q5xeux.png`,     
+  MASCOT_THINKING: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1765769939/chekki-logo_q5xeux.png`,
   MASCOT_SCAN: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1765769939/chekki-scan_sqo9sz.png`,
   HERO_IMAGE: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto,e_background_removal/v1765770525/Chekki_Futuristic_Background_i8foqe.png`,
   HERO_SLEEPY: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1766246089/Sleepy-Chekki_xvg2n6.svg`,

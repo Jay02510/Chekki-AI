@@ -59,7 +59,11 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
                 </video>
              ) : (
                 <div className="w-full h-full p-12 flex items-center justify-center">
-                   <ChekkiMascot className="w-full h-full" mood={isNight ? "sleeping" : "thinking"} />
+                   <img 
+                    src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} 
+                    alt="Chekki Mascot" 
+                    className="w-full h-full object-contain" 
+                   />
                 </div>
              )}
         </div>

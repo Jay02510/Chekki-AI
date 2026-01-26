@@ -77,7 +77,11 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                 </video>
               ) : (
                 <div className="w-full h-full p-8 animate-float">
-                   <ChekkiMascot className="w-full h-full drop-shadow-2xl" mood="happy" />
+                   <img 
+                    src={ASSETS.MASCOT_HAPPY} 
+                    alt="Chekki Logo Mascot" 
+                    className="w-full h-full object-contain drop-shadow-2xl" 
+                   />
                 </div>
               )}
            </div>
