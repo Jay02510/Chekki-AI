@@ -4,13 +4,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LegalModal } from './LegalModal';
 import { FeedbackModal } from './FeedbackModal';
+import { db } from '../services/database';
 
 interface Props {
   onClose: () => void;
 }
 
 export const SettingsModal: React.FC<Props> = ({ onClose }) => {
-  const { user, updateProfile, deleteAccount, upgradeToPro } = useAuth();
+  const { user, updateProfile, deleteAccount, upgradeToPro, firebaseUser, joinSchool } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   
   const [name, setName] = useState('');
@@ -18,20 +19,55 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
   const [soundEffects, setSoundEffects] = useState(true);
   const [successMsg, setSuccessMsg] = useState('');
   const [betaCode, setBetaCode] = useState('');
+  const [schoolCode, setSchoolCode] = useState('');
   const [betaError, setBetaError] = useState(false);
+  const [schoolError, setSchoolError] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
 
+  // Admin Stats
+  const [adminStats, setAdminStats] = useState<{ totalUsers: number, betaUsage: any } | null>(null);
+  const [isAdminLoading, setIsAdminLoading] = useState(false);
+
+  // Developer Email Check
+  const isAdmin = firebaseUser?.email === 'jsn.benjamin@gmail.com';
+
   useEffect(() => {
     if (user) setName(user.name);
   }, [user]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAdminStats();
+    }
+  }, [isAdmin]);
+
+  const fetchAdminStats = async () => {
+    setIsAdminLoading(true);
+    const stats = await db.getSystemStats();
+    if (stats) setAdminStats(stats);
+    setIsAdminLoading(false);
+  };
 
   const handleSave = () => {
     updateProfile(name);
     setSuccessMsg('Settings saved successfully!');
     setTimeout(() => setSuccessMsg(''), 3000);
+  };
+
+  const handleSchoolRedeem = async () => {
+    setSchoolError(false);
+    const success = await joinSchool(schoolCode);
+    if (success) {
+        setSuccessMsg('Academy Linked! 🎓');
+        setSchoolCode('');
+        setTimeout(() => setSuccessMsg(''), 5000);
+    } else {
+        setSchoolError(true);
+        setTimeout(() => setSchoolError(false), 3000);
+    }
   };
 
   const handleRedeem = async () => {
@@ -73,6 +109,45 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
 
           <div className="p-6 space-y-8 overflow-y-auto custom-scrollbar">
               
+              {/* --- ADMIN DASHBOARD SECTION --- */}
+              {isAdmin && (
+                <div className="bg-indigo-600/10 border border-indigo-500/30 rounded-2xl p-5 mb-4 animate-fade-in">
+                   <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">📊</span>
+                        <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest">Admin Insights</h3>
+                      </div>
+                      <button 
+                        onClick={fetchAdminStats}
+                        disabled={isAdminLoading}
+                        className="text-[10px] font-black text-indigo-400 hover:text-white transition-colors uppercase flex items-center gap-1"
+                      >
+                         {isAdminLoading ? '...' : 'Refresh'}
+                      </button>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase mb-1">Total Parents</p>
+                        <div className="text-2xl font-black text-white">{adminStats?.totalUsers || 0}</div>
+                      </div>
+                      <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase mb-1">CHEKKI40 Used</p>
+                        <div className="text-2xl font-black text-orange-500">{adminStats?.betaUsage?.['CHEKKI40'] || 0} <span className="text-xs text-zinc-600">/ 40</span></div>
+                      </div>
+                   </div>
+                   
+                   {adminStats && (
+                      <div className="mt-4 w-full h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
+                        <div 
+                          className="h-full bg-indigo-500 transition-all duration-1000" 
+                          style={{ width: `${Math.min(100, (adminStats.betaUsage?.['CHEKKI40'] || 0) / 40 * 100)}%` }}
+                        ></div>
+                      </div>
+                   )}
+                </div>
+              )}
+
               <div>
                   <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Account Profile</h3>
                   <div className="space-y-4">
@@ -85,19 +160,45 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                               className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-orange-500 outline-none transition-colors"
                           />
                       </div>
-                      <div>
-                          <label className="block text-sm font-medium text-zinc-400 mb-1">Email Address</label>
-                          <input 
-                              type="email" 
-                              value={user?.email || ''}
-                              disabled
-                              className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2 text-zinc-500 cursor-not-allowed"
-                          />
-                      </div>
                   </div>
               </div>
 
-              {user?.plan !== 'pro' && (
+              {/* --- ACADEMY PARTNERSHIP SECTION --- */}
+              <div className="h-px bg-zinc-800"></div>
+              <div>
+                  <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-4">Academy Partnership</h3>
+                  {user?.schoolId ? (
+                      <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4 flex items-center gap-3">
+                          <div className="text-2xl">🏫</div>
+                          <div>
+                              <p className="text-sm font-bold text-white">{user.schoolName}</p>
+                              <p className="text-[10px] text-indigo-300 uppercase tracking-widest font-black">Authorized Student Account</p>
+                          </div>
+                      </div>
+                  ) : (
+                      <>
+                        <p className="text-[10px] text-zinc-500 mb-3">Does your Hagwon use Chekki? Enter your student code below.</p>
+                        <div className="flex gap-2">
+                            <input 
+                                type="text" 
+                                value={schoolCode}
+                                onChange={(e) => setSchoolCode(e.target.value.toUpperCase())}
+                                placeholder="Hagwon Code (e.g. POLY10)"
+                                className={`flex-1 bg-zinc-950 border ${schoolError ? 'border-red-500' : 'border-zinc-700'} rounded-lg px-4 py-2 text-white focus:border-indigo-500 outline-none transition-colors text-xs font-mono tracking-widest`}
+                            />
+                            <button 
+                                onClick={handleSchoolRedeem}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-lg active:scale-95 transition-all"
+                            >
+                                Link
+                            </button>
+                        </div>
+                        {schoolError && <p className="text-[10px] text-red-500 mt-1 font-bold">Invalid Hagwon code.</p>}
+                      </>
+                  )}
+              </div>
+
+              {user?.plan !== 'pro' && !user?.schoolId && (
                   <>
                     <div className="h-px bg-zinc-800"></div>
                     <div>

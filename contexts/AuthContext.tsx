@@ -21,6 +21,7 @@ interface AuthContextType {
   deleteAccount: () => Promise<void>;
   incrementScan: () => Promise<boolean>;
   upgradeToPro: (code?: string) => Promise<boolean>;
+  joinSchool: (schoolCode: string) => Promise<boolean>;
   cancelSubscription: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -124,17 +125,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await db.updateUser(firebaseUser.uid, updates);
   };
 
+  const joinSchool = async (schoolCode: string): Promise<boolean> => {
+    if (!firebaseUser || !userProfile) return false;
+    
+    const sanitized = schoolCode.toUpperCase().trim();
+    // Example schools - in production these would be in DB
+    const schools: Record<string, string> = {
+        'POLY10': 'Poly Academy Seocho',
+        'GATE05': 'GATE Academy Bundang',
+        'ECC99': 'YBM ECC Gangnam'
+    };
+
+    if (schools[sanitized]) {
+        const updates: Partial<UserProfile> = {
+            schoolId: sanitized,
+            schoolName: schools[sanitized],
+            plan: 'pro', // Auto-upgrade for partner students
+            maxScansPerDay: 9999
+        };
+        setUserProfile({ ...userProfile, ...updates });
+        await db.updateUser(firebaseUser.uid, updates);
+        return true;
+    }
+    return false;
+  };
+
   const upgradeToPro = async (code?: string): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return false;
 
-    // Check if providing a code. Older codes are implicitly removed by this check.
     if (code) {
       const sanitizedCode = code.toUpperCase().trim();
+      
+      // Check if it's a school code first
+      const isSchool = await joinSchool(sanitizedCode);
+      if (isSchool) return true;
+
       if (sanitizedCode !== BETA_CODE_MAIN) {
         return false;
       }
       
-      // Perform server-side check for usage limit
       const canRedeem = await db.redeemBetaCode(sanitizedCode, BETA_CODE_LIMIT);
       if (!canRedeem) {
         return false; 
@@ -172,6 +201,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       deleteAccount,
       incrementScan,
       upgradeToPro,
+      joinSchool,
       cancelSubscription,
       isAuthenticated: !!firebaseUser,
       isLoading,

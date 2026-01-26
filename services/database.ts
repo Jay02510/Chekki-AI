@@ -12,7 +12,8 @@ import {
   getDocs,
   deleteDoc,
   addDoc,
-  runTransaction
+  runTransaction,
+  getCountFromServer
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { UserProfile } from '../types';
@@ -116,10 +117,6 @@ export const db = {
     }
   },
 
-  /**
-   * Safe redemption of beta codes using Firestore Transactions.
-   * Limits usage to a specific number of unique redemptions.
-   */
   async redeemBetaCode(code: string, limit: number): Promise<boolean> {
     const usageRef = doc(dbInstance, "system", "beta_usage");
     
@@ -142,6 +139,27 @@ export const db = {
     } catch (e) {
       console.error("Redemption transaction failed", e);
       return false;
+    }
+  },
+
+  // NEW: Admin helper to track growth
+  async getSystemStats() {
+    try {
+      const userCol = collection(dbInstance, "users");
+      const userSnapshot = await getCountFromServer(userCol);
+      const totalUsers = userSnapshot.data().count;
+
+      const betaRef = doc(dbInstance, "system", "beta_usage");
+      const betaSnap = await getDoc(betaRef);
+      const betaData = betaSnap.exists() ? betaSnap.data() : {};
+
+      return {
+        totalUsers,
+        betaUsage: betaData
+      };
+    } catch (e) {
+      console.error("Failed to fetch system stats", e);
+      return null;
     }
   }
 };

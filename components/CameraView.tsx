@@ -154,6 +154,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         <div className="w-full max-w-3xl flex flex-col items-center text-center mb-8 md:mb-10 gap-4 md:gap-6">
            <div className="space-y-1 md:space-y-2">
+              {user.schoolName && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-2">
+                      <span className="text-xs">🏫</span>
+                      <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{user.schoolName}</span>
+                  </div>
+              )}
               <h1 className="text-3xl md:text-6xl font-black text-white font-display break-keep leading-[1.15]">
                 {t('dash_welcome')} <span className={`text-transparent bg-clip-text bg-gradient-to-r ${isNight ? 'from-indigo-400 to-purple-500' : 'from-orange-400 to-pink-500'}`}>{user.name}!</span>
               </h1>
