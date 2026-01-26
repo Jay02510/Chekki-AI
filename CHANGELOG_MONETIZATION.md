@@ -1,6 +1,7 @@
+
 # 💰 Chekki AI - Monetization & Paywall Roadmap
 
-This document summarizes the updates made to transition Chekki AI from a Beta-only tool to a production-ready application with tiered subscriptions. Use this as a guide for localizing the app into other languages (e.g., French).
+This document summarizes the updates made to transition Chekki AI from a Beta-only tool to a production-ready application with tiered subscriptions.
 
 ## 1. Subscription Tiers (Free vs. Pro)
 
@@ -27,8 +28,9 @@ This document summarizes the updates made to transition Chekki AI from a Beta-on
 - **Free Logic:** Free users use `gemini-3-flash-preview` for speed and cost-efficiency.
 
 ### C. Access Code System
-- **CHEKKIBETA:** A hardcoded validation list in `AuthContext.tsx` allows legacy users to bypass the paywall.
-- **Redemption UI:** Integrated directly into the `PaywallModal` to reduce friction for early testers.
+- **CHEKKI40:** A transactional redemption system in `database.ts` allows exactly 40 users to unlock Pro features.
+- **Cleanup:** Legacy code `CHEKKIBETA` has been removed to maintain strict usage limits.
+- **Redemption UI:** Integrated directly into the `PaywallModal` and `SettingsModal` for easy onboarding.
 
 ## 3. UI/UX Components
 
@@ -43,13 +45,3 @@ This document summarizes the updates made to transition Chekki AI from a Beta-on
 ### 3. `Header.tsx` Update
 - Added a visual distinction for Pro users (PRO badge in the user menu).
 - Persistent "Upgrade" buttons for free users.
-
-## 4. Translation Guide for French Version
-
-When updating the French version, ensure the following terms are localized consistently:
-- **Free Explorer** -> *Explorateur Gratuit*
-- **Chekki Pro** -> *Chekki Pro*
-- **Unlimited Scans** -> *Scans Illimités*
-- **Deep Reasoning Mode** -> *Mode Raisonnement Approfondi*
-- **Mom's Script** -> *Le Script de Maman*
-- **Practice Sheet** -> *Feuille d'Exercices*

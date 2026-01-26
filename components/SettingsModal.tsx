@@ -117,8 +117,8 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                                 Redeem
                             </button>
                         </div>
-                        {betaError && <p className="text-[10px] text-red-500 mt-1 font-bold">Invalid or expired code.</p>}
-                        <p className="text-[10px] text-zinc-600 mt-2">Testing code: CHEKKIBETA</p>
+                        {betaError && <p className="text-[10px] text-red-500 mt-1 font-bold">Invalid or limit reached.</p>}
+                        <p className="text-[10px] text-zinc-600 mt-2">New Beta Code: CHEKKI40 (Limit: 40 users)</p>
                     </div>
                   </>
               )}

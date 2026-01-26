@@ -90,7 +90,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose }) => {
 
                     <section>
                         <h3 className="text-white font-bold mb-2">3. Subscription & Beta Access</h3>
-                        <p>During the beta period, access codes (e.g., CHEKKIBETA) may be used to unlock Pro features. We reserve the right to modify or terminate these promotional periods at our discretion.</p>
+                        <p>During the beta period, access codes (e.g., CHEKKI40) may be used to unlock Pro features. We reserve the right to modify or terminate these promotional periods at our discretion based on usage limits.</p>
                     </section>
 
                     <section>

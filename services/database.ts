@@ -11,7 +11,8 @@ import {
   where, 
   getDocs,
   deleteDoc,
-  addDoc
+  addDoc,
+  runTransaction
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { UserProfile } from '../types';
@@ -98,14 +99,12 @@ export const db = {
     userName?: string;
   }): Promise<void> {
     try {
-      // 1. Store in Firestore
       await addDoc(collection(dbInstance, "feedback"), {
         ...feedback,
         userId: uid,
         timestamp: new Date().toISOString()
       });
 
-      // 2. Trigger Notification to Developer (jsn.benjamin@gmail.com)
       await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -114,6 +113,35 @@ export const db = {
       
     } catch (e: any) {
       console.error("[Chekki DB] sendFeedback failed:", e.message);
+    }
+  },
+
+  /**
+   * Safe redemption of beta codes using Firestore Transactions.
+   * Limits usage to a specific number of unique redemptions.
+   */
+  async redeemBetaCode(code: string, limit: number): Promise<boolean> {
+    const usageRef = doc(dbInstance, "system", "beta_usage");
+    
+    try {
+      return await runTransaction(dbInstance, async (transaction) => {
+        const usageDoc = await transaction.get(usageRef);
+        
+        let currentCount = 0;
+        if (usageDoc.exists()) {
+          currentCount = usageDoc.data()[code] || 0;
+        }
+
+        if (currentCount >= limit) {
+          return false; // Limit reached
+        }
+
+        transaction.set(usageRef, { [code]: currentCount + 1 }, { merge: true });
+        return true;
+      });
+    } catch (e) {
+      console.error("Redemption transaction failed", e);
+      return false;
     }
   }
 };

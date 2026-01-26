@@ -33,7 +33,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const FREE_DAILY_LIMIT = 3;
-const VALID_BETA_CODES = ['CHEKKIBETA', 'CHEKKI2025', 'MOMAI'];
+const BETA_CODE_MAIN = 'CHEKKI40';
+const BETA_CODE_LIMIT = 40;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
@@ -126,8 +127,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const upgradeToPro = async (code?: string): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return false;
 
-    if (code && !VALID_BETA_CODES.includes(code.toUpperCase().trim())) {
-      return false;
+    // Check if providing a code. Older codes are implicitly removed by this check.
+    if (code) {
+      const sanitizedCode = code.toUpperCase().trim();
+      if (sanitizedCode !== BETA_CODE_MAIN) {
+        return false;
+      }
+      
+      // Perform server-side check for usage limit
+      const canRedeem = await db.redeemBetaCode(sanitizedCode, BETA_CODE_LIMIT);
+      if (!canRedeem) {
+        return false; 
+      }
     }
     
     const nextMonth = new Date();
