@@ -30,7 +30,6 @@ export const LoginModal: React.FC = () => {
             if (password.length < 6) throw new Error("Password must be at least 6 characters.");
             await signUp(name, email, password);
             
-            // If they provided a school code during signup, link it immediately
             if (schoolCode.trim()) {
                 const schoolSuccess = await joinSchool(schoolCode);
                 if (!schoolSuccess) {
@@ -58,8 +57,8 @@ export const LoginModal: React.FC = () => {
           
           <div className="bg-gradient-to-br from-brand-orange/20 to-brand-purple/20 p-10 flex justify-center relative overflow-hidden">
               <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full scale-150"></div>
-              <div className="w-24 h-24 relative z-10 animate-float">
-                  <img src={ASSETS.LOGO} alt="Chekki Mascot" className="w-full h-full object-contain" />
+              <div className="w-32 h-32 relative z-10 animate-float">
+                  <img src={ASSETS.LOGO} alt="Chekki Mascot" className="w-full h-full object-contain scale-110" />
               </div>
               <button onClick={closeLoginModal} className="absolute top-6 right-8 text-white/50 hover:text-white transition-colors">✕</button>
           </div>

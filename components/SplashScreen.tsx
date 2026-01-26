@@ -32,7 +32,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
       setFeatureIndex(prev => (prev + 1) % features.length);
     }, 400); 
 
-    // Safety timeout: If assets take too long, allow app entry (2 seconds is plenty for mobile focus)
+    // Safety timeout
     const exitTimer = setTimeout(() => {
       setIsExiting(true);
     }, 2200); 
@@ -67,26 +67,21 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                   loop 
                   playsInline 
                   preload="auto" 
-                  className="w-full h-full object-contain z-10 scale-110" 
+                  className="w-full h-full object-contain z-10 scale-150" 
                   onError={() => setVideoError(true)}
-                  onAbort={() => setVideoError(true)}
-                  onStalled={() => setVideoError(true)}
-                  onSuspend={() => setVideoError(true)}
                 >
                   <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
                 </video>
               ) : (
-                <div className="w-full h-full p-8 animate-float">
+                <div className="w-full h-full flex items-center justify-center animate-float">
                    <img 
                     src={ASSETS.MASCOT_HAPPY} 
                     alt="Chekki Logo Mascot" 
-                    className="w-full h-full object-contain drop-shadow-2xl" 
+                    className="w-full h-full object-contain drop-shadow-2xl scale-150" 
                    />
                 </div>
               )}
            </div>
-           
-           {/* Glow behind the logo */}
            <div className="absolute -inset-4 bg-orange-500/20 blur-2xl rounded-full -z-10 animate-pulse"></div>
         </div>
 

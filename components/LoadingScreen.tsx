@@ -52,17 +52,17 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
                   muted 
                   loop 
                   playsInline 
-                  className="absolute inset-0 w-full h-full object-contain p-4 scale-110" 
+                  className="absolute inset-0 w-full h-full object-contain scale-125" 
                   onError={() => setVideoError(true)}
                 >
                     <source src={isNight ? ASSETS.VIDEO_SLEEPY : ASSETS.VIDEO_ANALYZING} type="video/mp4" />
                 </video>
              ) : (
-                <div className="w-full h-full p-12 flex items-center justify-center">
+                <div className="w-full h-full flex items-center justify-center">
                    <img 
                     src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} 
                     alt="Chekki Mascot" 
-                    className="w-full h-full object-contain" 
+                    className="w-full h-full object-contain scale-125" 
                    />
                 </div>
              )}
