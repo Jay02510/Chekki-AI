@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChekkiMascot } from './Icons';
+import { ASSETS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface Props {
@@ -9,23 +9,29 @@ interface Props {
 
 export const OnboardingTour: React.FC<Props> = ({ onComplete }) => {
   const [step, setStep] = useState(0);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const steps = [
     {
-      mood: "winking" as const,
+      icon: "📸",
       title: t('onb_1_title'),
       sub: t('onb_1_desc'),
       buttonText: t('onb_1_btn')
     },
     {
-      mood: "happy" as const, // Changed to happy to be safe
+      icon: "✨",
       title: t('onb_2_title'),
       sub: t('onb_2_desc'),
       buttonText: t('onb_2_btn')
     },
     {
-      mood: "happy" as const,
+      icon: "🏫",
+      title: language === 'ko' ? "우리 아이 학원과 함께" : "Academy Authorized",
+      sub: language === 'ko' ? "학원 코드를 입력하면 프리미엄 기능을 무료로 이용할 수 있어요." : "Enter your Hagwon code to unlock all Pro features for free.",
+      buttonText: t('onb_2_btn')
+    },
+    {
+      icon: "🔒",
       title: t('onb_3_title'),
       sub: t('onb_3_desc'),
       buttonText: t('onb_3_btn')
@@ -41,34 +47,56 @@ export const OnboardingTour: React.FC<Props> = ({ onComplete }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6 backdrop-blur-md">
-      <div className="w-full max-w-md bg-zinc-900 rounded-3xl p-8 border border-zinc-800 relative overflow-hidden text-center animate-fade-in-up flex flex-col items-center">
+    <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-6 backdrop-blur-xl">
+      <div className="w-full max-w-md bg-zinc-900 rounded-[2.5rem] p-10 border border-white/5 relative overflow-hidden text-center animate-fade-in-up flex flex-col items-center shadow-[0_0_100px_rgba(249,115,22,0.1)]">
         
-        <div className="flex justify-center gap-2 mb-8 w-full">
+        {/* Progress Bar */}
+        <div className="flex justify-center gap-2 mb-10 w-full">
           {steps.map((_, i) => (
-            <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === step ? 'w-8 bg-orange-500' : 'w-2 bg-zinc-700'}`}></div>
+            <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === step ? 'w-10 bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]' : 'w-2 bg-zinc-800'}`}></div>
           ))}
         </div>
 
-        <div className="mb-8 w-48 h-48 bg-zinc-800 rounded-full flex items-center justify-center shadow-2xl shadow-orange-500/10 border-4 border-zinc-800 animate-bounce-subtle overflow-hidden p-6">
-          <ChekkiMascot className="w-full h-full drop-shadow-xl" mood={steps[step].mood} />
+        {/* Mascot / Icon Area */}
+        <div className="mb-10 w-48 h-48 relative flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/20 to-brand-purple/20 rounded-full blur-2xl animate-pulse"></div>
+            <div className="relative z-10 w-full h-full bg-zinc-800/50 rounded-full border-4 border-white/5 flex items-center justify-center p-8 animate-float shadow-2xl">
+                 {step === 2 ? (
+                     <span className="text-7xl">🏫</span>
+                 ) : (
+                     <img src={ASSETS.LOGO} alt="Chekki Mascot" className="w-full h-full object-contain" />
+                 )}
+            </div>
         </div>
 
-        <div className="mb-10 space-y-3">
-          <h2 className="text-2xl font-black text-white font-korean leading-tight">
-            {steps[step].title}
-          </h2>
-          <p className="text-zinc-400 font-korean text-lg font-medium">
+        {/* Content */}
+        <div className="mb-12 space-y-4">
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-2xl mb-2">{steps[step].icon}</span>
+            <h2 className="text-2xl md:text-3xl font-black text-white font-display leading-tight">
+                {steps[step].title}
+            </h2>
+          </div>
+          <p className="text-zinc-400 font-korean text-lg font-medium leading-relaxed max-w-[280px] mx-auto">
             {steps[step].sub}
           </p>
         </div>
 
         <button 
           onClick={handleNext}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl transition-all transform hover:scale-[1.02] shadow-lg shadow-orange-500/25 font-korean text-lg"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-5 rounded-2xl transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl shadow-orange-500/25 font-korean text-xl"
         >
           {steps[step].buttonText}
         </button>
+
+        {step < steps.length - 1 && (
+            <button 
+                onClick={onComplete}
+                className="mt-6 text-zinc-600 text-[10px] font-black uppercase tracking-widest hover:text-zinc-400 transition-colors"
+            >
+                Skip Intro
+            </button>
+        )}
       </div>
     </div>
   );
