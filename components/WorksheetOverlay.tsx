@@ -20,7 +20,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
   const { t, language } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('fill');
+  const [viewMode, setViewMode] = useState<ViewMode>('fit'); // Default to Fit so they see the whole page first
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -72,60 +72,54 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
   const OverlayContent = () => (
     <div 
       ref={containerRef} 
-      className={`relative transform-gpu transition-all duration-500 ease-in-out ${
+      className={`relative transform-gpu transition-all duration-500 ease-in-out flex items-center justify-center ${
         isFullscreen 
-          ? viewMode === 'fit' ? 'h-full w-auto' : 'w-full max-w-4xl mx-auto' 
+          ? viewMode === 'fit' ? 'h-full w-auto max-h-full' : 'w-full max-w-4xl mx-auto' 
           : 'w-full min-h-[300px]'
       }`}
     >
-      <img 
-        ref={imgRef}
-        src={imageUrl} 
-        alt="Worksheet" 
-        className={`block transition-all duration-1000 ease-in-out ${
-          imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'
-        } ${
-          isFullscreen && viewMode === 'fit' ? 'h-full w-auto object-contain' : 'w-full h-auto'
-        }`}
-        onLoad={() => setImageLoaded(true)}
-        draggable={false}
-        loading="eager"
-      />
-      
-      {isLoadingItems && imageLoaded && !isFullscreen && (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[60] bg-orange-600 text-white px-6 py-2.5 rounded-full flex items-center gap-3 shadow-[0_20px_40px_rgba(234,88,12,0.4)] animate-bounce border border-white/20 backdrop-blur-xl">
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            <span className="text-xs font-black uppercase tracking-[0.2em]">{t('ws_finding_questions')}</span>
-        </div>
-      )}
-
-      {imageLoaded && items && items.map((item) => {
-        const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
-        const displayText = `${item.id}. ${item.correct_answer}`;
+      <div className="relative">
+        <img 
+            ref={imgRef}
+            src={imageUrl} 
+            alt="Worksheet" 
+            className={`block transition-all duration-1000 ease-in-out ${
+            imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'
+            } ${
+            isFullscreen && viewMode === 'fit' ? 'max-h-[calc(100vh-140px)] w-auto object-contain' : 'w-full h-auto'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            draggable={false}
+            loading="eager"
+        />
         
-        return (
-          <div
-            key={item.id}
-            style={getStyle(item)}
-            className={`absolute transition-all duration-500 pointer-events-auto animate-fade-in ${isFocused ? 'opacity-100 scale-100' : 'opacity-20 scale-90 blur-[1px]'}`}
-            onClick={(e) => { e.stopPropagation(); playAudio(displayText); }}
-          >
-             <div className={`
-                px-3 py-1.5 md:px-5 md:py-2.5 rounded-2xl shadow-2xl border-2 border-white/20 flex items-center gap-3 transform transition-all hover:scale-110 active:scale-95 group cursor-pointer min-w-fit max-w-[220px] md:max-w-[450px]
-                ${isFocused ? 'bg-orange-600 ring-4 ring-orange-500/20' : 'bg-zinc-800 ring-1 ring-white/10'}
-                ${isFocused && focusedId ? 'animate-[ping_1.5s_cubic-bezier(0,0,0.2,1)_1]' : ''}
-             `}>
-                <div className="w-5 h-5 md:w-6 md:h-6 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
-                    <span className="font-black text-[10px] md:text-xs text-white">{item.id}</span>
+        {imageLoaded && items && items.map((item) => {
+            const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
+            const displayText = `${item.id}. ${item.correct_answer}`;
+            
+            return (
+            <div
+                key={item.id}
+                style={getStyle(item)}
+                className={`absolute transition-all duration-500 pointer-events-auto animate-fade-in ${isFocused ? 'opacity-100 scale-100' : 'opacity-20 scale-90 blur-[1px]'}`}
+                onClick={(e) => { e.stopPropagation(); playAudio(displayText); }}
+            >
+                <div className={`
+                    px-3 py-1.5 md:px-5 md:py-2.5 rounded-2xl shadow-2xl border-2 border-white/20 flex items-center gap-3 transform transition-all hover:scale-110 active:scale-95 group cursor-pointer min-w-fit max-w-[220px] md:max-w-[450px]
+                    ${isFocused ? 'bg-orange-600 ring-4 ring-orange-500/20' : 'bg-zinc-800 ring-1 ring-white/10'}
+                `}>
+                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                        <span className="font-black text-[10px] md:text-xs text-white">{item.id}</span>
+                    </div>
+                    <span className={`font-hand font-bold leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md ${isFullscreen ? 'text-lg md:text-2xl' : 'text-sm md:text-xl'}`}>
+                    {item.correct_answer}
+                    </span>
+                    <span className="text-xs md:text-lg shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">🔊</span>
                 </div>
-                <span className={`font-hand font-bold leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md ${isFullscreen ? 'text-lg md:text-2xl' : 'text-sm md:text-xl'}`}>
-                  {item.correct_answer}
-                </span>
-                <span className="text-xs md:text-lg shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">🔊</span>
-             </div>
-          </div>
-        );
-      })}
+            </div>
+            );
+        })}
+      </div>
     </div>
   );
 
@@ -133,15 +127,15 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
     <>
       <div className={`w-full flex flex-col bg-zinc-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.6)] transition-all duration-700 ${className || 'h-full'}`}>
         
-        {/* Worksheet Header Actions (Normal View) */}
-        <div className="absolute top-4 right-4 z-50 flex gap-2">
+        {/* Trigger Button (Normal View) */}
+        <div className="absolute top-4 right-4 z-50">
             <button 
               onClick={() => setIsFullscreen(true)}
-              className="w-10 h-10 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-orange-500 transition-all shadow-xl group"
+              className="w-12 h-12 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-orange-600 transition-all shadow-2xl group active:scale-90"
               title="Full Screen Focus"
             >
-              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
             </button>
         </div>
@@ -163,85 +157,81 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
         </div>
       </div>
 
-      {/* FULL SCREEN PORTAL UI */}
+      {/* FULL SCREEN MODAL */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-[200] flex flex-col bg-[#050505] animate-fade-in overflow-hidden pt-[env(safe-area-inset-top)]">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-purple-500/5 pointer-events-none"></div>
+        <div className="fixed inset-0 z-[200] flex flex-col bg-[#050505] animate-fade-in overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent pointer-events-none"></div>
           
-          {/* Fullscreen Header */}
-          <div className="h-16 md:h-20 bg-black/60 backdrop-blur-3xl border-b border-white/5 px-4 md:px-6 flex items-center justify-between z-50 shrink-0">
-             <div className="flex items-center gap-3">
+          {/* High-Visibility Header */}
+          <div className="relative z-[210] pt-[env(safe-area-inset-top)] bg-black/80 backdrop-blur-2xl border-b border-white/10 shadow-2xl shrink-0">
+            <div className="h-20 px-4 md:px-8 flex items-center justify-between">
+                
+                {/* Left: Enhanced Back Button */}
                 <button 
-                  onClick={() => setIsFullscreen(false)}
-                  className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded-xl text-white font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
+                    onClick={() => setIsFullscreen(false)}
+                    className="flex items-center gap-3 bg-zinc-800 hover:bg-zinc-700 border border-white/10 px-5 py-3 rounded-2xl text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-xl"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  <span>{language === 'ko' ? '뒤로' : 'Back'}</span>
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>{language === 'ko' ? '돌아가기' : 'Back'}</span>
                 </button>
-                <div className="hidden sm:block w-px h-6 bg-white/10 mx-2"></div>
-                <div className="hidden sm:block">
-                   <h2 className="text-white font-black text-sm md:text-base font-display leading-tight">{language === 'ko' ? '집중 모드' : 'Focus Mode'}</h2>
-                   <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">{items.length} AI Answers</p>
+
+                {/* Center: View Toggles */}
+                <div className="flex bg-zinc-900/80 border border-white/10 p-1.5 rounded-2xl shadow-inner">
+                    <button 
+                        onClick={() => setViewMode('fit')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${viewMode === 'fit' ? 'bg-orange-600 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        </svg>
+                        <span className="text-[10px] font-black uppercase hidden sm:inline">{language === 'ko' ? '한눈에 보기' : 'Fit Page'}</span>
+                    </button>
+                    <button 
+                        onClick={() => setViewMode('fill')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${viewMode === 'fill' ? 'bg-orange-600 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                        </svg>
+                        <span className="text-[10px] font-black uppercase hidden sm:inline">{language === 'ko' ? '확대해서 보기' : 'Full Zoom'}</span>
+                    </button>
                 </div>
-             </div>
 
-             {/* View Controls */}
-             <div className="flex bg-white/5 border border-white/10 p-1 rounded-2xl">
+                {/* Right: Exit Icon */}
                 <button 
-                  onClick={() => setViewMode('fit')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all ${viewMode === 'fit' ? 'bg-orange-600 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
-                  title="Fit Page to Screen"
+                    onClick={() => setIsFullscreen(false)}
+                    className="w-12 h-12 flex items-center justify-center text-zinc-500 hover:text-white transition-colors bg-white/5 rounded-full hover:bg-white/10"
+                    aria-label="Exit"
                 >
-                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5" />
-                   </svg>
-                   <span className="text-[10px] font-black uppercase hidden md:inline">{language === 'ko' ? '전체보기' : 'Fit'}</span>
+                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
-                <button 
-                  onClick={() => setViewMode('fill')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all ${viewMode === 'fill' ? 'bg-orange-600 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
-                  title="Full Detail (Scrollable)"
-                >
-                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                   </svg>
-                   <span className="text-[10px] font-black uppercase hidden md:inline">{language === 'ko' ? '확대보기' : 'Fill'}</span>
-                </button>
-             </div>
-
-             <button 
-                onClick={() => setIsFullscreen(false)}
-                className="w-10 h-10 flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
-                aria-label="Exit"
-             >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-             </button>
+            </div>
           </div>
 
-          {/* Fullscreen Main Area */}
-          <div className={`flex-1 overflow-auto custom-scrollbar overscroll-contain flex justify-center ${viewMode === 'fit' ? 'items-center p-2' : 'items-start p-4 md:p-12'}`}>
+          {/* Main Scrollable Area */}
+          <div className={`flex-1 overflow-auto custom-scrollbar overscroll-contain flex justify-center ${viewMode === 'fit' ? 'items-center p-4' : 'items-start p-4 md:p-12'}`}>
              <OverlayContent />
           </div>
 
-          {/* Bottom Control Bar for Mobile */}
-          <div className="md:hidden safe-bottom pb-8 flex justify-center z-50 pointer-events-none">
-             <div className="bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 shadow-2xl pointer-events-auto ring-1 ring-white/5">
+          {/* Mobile Quick Action Bar (Floating) */}
+          <div className="md:hidden pb-10 flex justify-center z-[220] pointer-events-none">
+             <div className="bg-zinc-900/90 backdrop-blur-2xl border border-white/20 rounded-full px-4 py-3 flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] pointer-events-auto ring-1 ring-white/10">
                 <button 
                   onClick={() => setIsFullscreen(false)}
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white active:scale-90 transition-transform"
+                  className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center font-bold shadow-lg active:scale-90 transition-transform"
                 >
                    ✕
                 </button>
-                <div className="w-px h-6 bg-white/10 mx-1"></div>
+                <div className="w-px h-8 bg-white/10"></div>
                 <button 
                    onClick={() => setViewMode(viewMode === 'fit' ? 'fill' : 'fit')}
-                   className="px-4 py-2 rounded-full bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                   className="px-6 py-3 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-xl"
                 >
-                   {viewMode === 'fit' ? (language === 'ko' ? '확대' : 'Fill') : (language === 'ko' ? '축소' : 'Fit')}
+                   {viewMode === 'fit' ? (language === 'ko' ? '크게보기' : 'Zoom In') : (language === 'ko' ? '작게보기' : 'Zoom Out')}
                 </button>
              </div>
           </div>
@@ -249,14 +239,9 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
       )}
 
       <style>{`
-        @keyframes markerPulse {
-          0% { transform: scale(1) translate3d(0, 0, 0); }
-          50% { transform: scale(1.03) translate3d(0, -2px, 0); }
-          100% { transform: scale(1) translate3d(0, 0, 0); }
-        }
-        .safe-bottom {
-          padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
       `}</style>
     </>
   );
