@@ -24,6 +24,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   
   const { t, language } = useLanguage();
 
@@ -129,21 +130,53 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     </div>
   );
 
+  const VideoWalkthroughModal = () => (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowVideoModal(false)}></div>
+      <div className="relative w-full max-w-4xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up">
+         <video 
+            src={ASSETS.VIDEO_WALKTHROUGH} 
+            controls 
+            autoPlay 
+            className="w-full h-full"
+         />
+         <button 
+           onClick={() => setShowVideoModal(false)}
+           className="absolute top-6 right-6 bg-black/50 hover:bg-black text-white p-2 rounded-full transition-colors z-10"
+         >
+           ✕
+         </button>
+      </div>
+    </div>
+  );
+
   const BetaBanner = () => (
-    <div 
-      role="button"
-      aria-label="Submit Feedback"
-      onClick={() => setShowFeedbackModal(true)}
-      className="group cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-4 rounded-[2rem] flex items-center gap-4 transition-all animate-fade-in-up shadow-2xl backdrop-blur-md mb-8 md:mb-10 ring-1 ring-white/5 hover:ring-orange-500/50"
-    >
-       <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 ${isNight ? 'bg-indigo-500/20' : 'bg-orange-500/20'} flex items-center justify-center text-lg animate-pulse shadow-inner`}>✨</div>
-       <div className="flex-1 min-w-0">
-          <p className={`text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] ${isNight ? 'text-indigo-400' : 'text-orange-500'} mb-0.5`}>Beta Community</p>
-          <p className="text-xs md:text-base font-bold text-zinc-200 font-korean group-hover:text-white transition-colors leading-tight truncate">
-            {t('beta_banner')}
-          </p>
-       </div>
-       <span className={`${isNight ? 'text-indigo-400' : 'text-orange-500'} ml-auto opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 font-black`}>→</span>
+    <div className="flex flex-col md:flex-row gap-4 mb-8 md:mb-10 animate-fade-in-up">
+        <div 
+          role="button"
+          aria-label="Submit Feedback"
+          onClick={() => setShowFeedbackModal(true)}
+          className="flex-1 group cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-4 rounded-[2rem] flex items-center gap-4 transition-all shadow-2xl backdrop-blur-md ring-1 ring-white/5 hover:ring-orange-500/50"
+        >
+           <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 ${isNight ? 'bg-indigo-500/20' : 'bg-orange-500/20'} flex items-center justify-center text-lg animate-pulse shadow-inner`}>✨</div>
+           <div className="flex-1 min-w-0">
+              <p className={`text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] ${isNight ? 'text-indigo-400' : 'text-orange-500'} mb-0.5`}>Beta Community</p>
+              <p className="text-xs md:text-base font-bold text-zinc-200 font-korean group-hover:text-white transition-colors leading-tight truncate">
+                {t('beta_banner')}
+              </p>
+           </div>
+        </div>
+
+        <button 
+          onClick={() => setShowVideoModal(true)}
+          className="group cursor-pointer bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 px-6 py-4 rounded-[2rem] flex items-center gap-4 transition-all shadow-2xl backdrop-blur-md ring-1 ring-indigo-500/20 hover:ring-indigo-500/50"
+        >
+           <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 bg-indigo-500 flex items-center justify-center text-white shadow-lg">▶️</div>
+           <div className="text-left">
+              <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-0.5">Quick Guide</p>
+              <p className="text-xs md:text-base font-bold text-white font-korean">Watch Walkthrough</p>
+           </div>
+        </button>
     </div>
   );
 
@@ -152,6 +185,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     return (
       <div className="min-h-full pt-12 md:pt-28 pb-12 px-4 md:px-6 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
+        {showVideoModal && <VideoWalkthroughModal />}
+        
         <div className="w-full max-w-3xl flex flex-col items-center text-center mb-8 md:mb-10 gap-4 md:gap-6">
            <div className="space-y-1 md:space-y-2">
               {user.schoolName && (
@@ -175,7 +210,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
            </div>
         </div>
         
-        <div className="w-full max-w-2xl animate-fade-in-up">
+        <div className="w-full max-w-2xl">
            <BetaBanner />
            <DropZone size="large" />
         </div>
@@ -188,6 +223,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     <div className="min-h-full flex flex-col pt-12 md:pt-24 pb-12 overflow-x-hidden scroll-smooth">
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
+      {showVideoModal && <VideoWalkthroughModal />}
       
       {/* Hero Section */}
       <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-8 items-center mb-12 md:mb-16">
@@ -215,6 +251,13 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             <button onClick={openLoginModal} className="group relative bg-white text-black px-8 py-4 md:px-10 md:py-5 rounded-2xl font-black text-base md:text-xl transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)] font-display flex items-center gap-3 overflow-hidden">
               <span className="relative font-korean whitespace-nowrap">{t('hero_cta_btn')}</span> 
               <span className="text-xl md:text-2xl relative transition-transform group-hover:translate-x-1">→</span>
+            </button>
+            
+            <button 
+              onClick={() => setShowVideoModal(true)}
+              className="px-6 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-sm md:text-base transition-all flex items-center gap-2 backdrop-blur-sm"
+            >
+              <span>▶️</span> Watch Walkthrough
             </button>
           </div>
         </div>

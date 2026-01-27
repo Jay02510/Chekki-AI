@@ -18,6 +18,16 @@ const translations = {
     scans: "Magic Scans",
     pro_plan: "Pro Magic 🚀",
     
+    // Resource Center
+    res_title: "Flyers & Sharing",
+    res_subtitle: "Help other parents find peace.",
+    res_download: "Download",
+    res_copy: "Copy Link",
+    res_share: "Share",
+    res_copied: "Link Copied!",
+    res_kr: "Korean Flyer",
+    res_en: "English Flyer",
+    
     // Hero
     hero_title: "Homework Stress?\nJust Snap a Photo.",
     hero_title_night: "Long day?\nLet Chekki take it from here.",
@@ -144,6 +154,16 @@ const translations = {
     logout: "로그아웃",
     scans: "번의 마법 남음",
     pro_plan: "마법 프로 플랜 🚀",
+
+    // Resource Center
+    res_title: "홍보용 리플렛 & 공유",
+    res_subtitle: "다른 부모님들께 평화를 선물하세요.",
+    res_download: "저장",
+    res_copy: "링크 복사",
+    res_share: "공유하기",
+    res_copied: "복사 완료!",
+    res_kr: "한국어 리플렛",
+    res_en: "영어 리플렛",
 
     // Hero
     hero_title: "오늘 숙제 전쟁,\n사진 한 장으로 끝내세요",
