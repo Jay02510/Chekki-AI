@@ -15,6 +15,7 @@ export const LoginModal: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+  const [videoError, setVideoError] = useState(false);
 
   if (!showLoginModal) return null;
 
@@ -57,11 +58,23 @@ export const LoginModal: React.FC = () => {
           
           <div className="bg-gradient-to-br from-brand-orange/20 to-brand-purple/20 p-10 flex justify-center relative overflow-hidden">
               <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full scale-150"></div>
-              {/* MASCOT SCALED UP TO MATCH ONBOARDING */}
               <div className="w-72 h-72 md:w-80 md:h-80 relative z-10 animate-float flex items-center justify-center">
-                  <img src={ASSETS.LOGO} alt="Chekki Mascot" className="w-full h-full object-contain scale-110" />
+                  {!videoError ? (
+                    <video 
+                      autoPlay 
+                      muted 
+                      loop 
+                      playsInline 
+                      className="w-full h-full object-contain scale-125" 
+                      onError={() => setVideoError(true)}
+                    >
+                        <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <img src={ASSETS.LOGO} alt="Chekki Mascot" className="w-full h-full object-contain scale-110" />
+                  )}
               </div>
-              <button onClick={closeLoginModal} className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors bg-black/20 w-10 h-10 rounded-full flex items-center justify-center border border-white/5">✕</button>
+              <button onClick={closeLoginModal} className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors bg-black/20 w-10 h-10 rounded-full flex items-center justify-center border border-white/5 z-20">✕</button>
           </div>
 
           <div className="p-10">
