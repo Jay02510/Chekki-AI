@@ -57,7 +57,7 @@ export const LoginModal: React.FC = () => {
           
           <div className="bg-gradient-to-br from-brand-orange/20 to-brand-purple/20 p-10 flex justify-center relative overflow-hidden">
               <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full scale-150"></div>
-              <div className="w-32 h-32 relative z-10 animate-float">
+              <div className="w-40 h-40 md:w-44 md:h-44 relative z-10 animate-float">
                   <img src={ASSETS.LOGO} alt="Chekki Mascot" className="w-full h-full object-contain scale-110" />
               </div>
               <button onClick={closeLoginModal} className="absolute top-6 right-8 text-white/50 hover:text-white transition-colors">✕</button>

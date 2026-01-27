@@ -42,10 +42,10 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
     <div className={`fixed inset-0 ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-900/10 to-purple-900/10' : 'from-orange-500/5 to-purple-500/5'} opacity-50`}></div>
       
-      <div className="relative w-64 h-64 md:w-[400px] md:h-[400px] mb-12 shrink-0">
+      <div className="relative w-72 h-72 md:w-[450px] md:h-[450px] mb-12 shrink-0">
         <div className={`absolute inset-4 ${isNight ? 'bg-indigo-500/10' : 'bg-orange-500/20'} rounded-[3rem] blur-[80px] animate-pulse`}></div>
         
-        <div className={`relative w-full h-full ${isNight ? 'bg-indigo-950/30' : 'bg-zinc-900/50'} backdrop-blur-3xl rounded-[2.5rem] border border-white/5 shadow-2xl z-10 overflow-hidden`}>
+        <div className={`relative w-full h-full ${isNight ? 'bg-indigo-950/30' : 'bg-zinc-900/50'} backdrop-blur-3xl rounded-[3rem] border border-white/5 shadow-2xl z-10 overflow-hidden`}>
              {!videoError ? (
                 <video 
                   autoPlay 

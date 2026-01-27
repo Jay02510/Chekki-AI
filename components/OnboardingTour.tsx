@@ -48,7 +48,7 @@ export const OnboardingTour: React.FC<Props> = ({ onComplete }) => {
 
   return (
     <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-6 backdrop-blur-xl">
-      <div className="w-full max-w-md bg-zinc-900 rounded-[2.5rem] p-10 border border-white/5 relative overflow-hidden text-center animate-fade-in-up flex flex-col items-center shadow-[0_0_100px_rgba(249,115,22,0.1)]">
+      <div className="w-full max-w-md bg-zinc-900 rounded-[2.5rem] p-8 md:p-10 border border-white/5 relative overflow-hidden text-center animate-fade-in-up flex flex-col items-center shadow-[0_0_100px_rgba(249,115,22,0.1)]">
         
         {/* Progress Bar */}
         <div className="flex justify-center gap-2 mb-10 w-full">
@@ -57,14 +57,18 @@ export const OnboardingTour: React.FC<Props> = ({ onComplete }) => {
           ))}
         </div>
 
-        {/* Mascot / Icon Area */}
-        <div className="mb-10 w-48 h-48 relative flex items-center justify-center">
+        {/* Mascot / Icon Area - INCREASED SIZE & REMOVED PADDING */}
+        <div className="mb-10 w-64 h-64 md:w-72 md:h-72 relative flex items-center justify-center">
             <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/20 to-brand-purple/20 rounded-full blur-2xl animate-pulse"></div>
-            <div className="relative z-10 w-full h-full bg-zinc-800/50 rounded-full border-4 border-white/5 flex items-center justify-center p-8 animate-float shadow-2xl">
+            <div className="relative z-10 w-full h-full bg-zinc-800/50 rounded-full border-4 border-white/5 flex items-center justify-center p-0 animate-float shadow-2xl overflow-hidden">
                  {step === 2 ? (
-                     <span className="text-7xl">🏫</span>
+                     <span className="text-8xl md:text-9xl">🏫</span>
                  ) : (
-                     <img src={ASSETS.LOGO} alt="Chekki Mascot" className="w-full h-full object-contain" />
+                     <img 
+                        src={ASSETS.LOGO} 
+                        alt="Chekki Mascot" 
+                        className="w-full h-full object-contain scale-110" 
+                     />
                  )}
             </div>
         </div>

@@ -58,7 +58,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
 
       <div className="relative z-10 flex flex-col items-center">
         <div className="relative mb-8">
-           <div className="w-40 h-40 md:w-56 md:h-56 bg-zinc-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl border border-white/5 relative overflow-hidden">
+           <div className="w-64 h-64 md:w-80 md:h-80 bg-zinc-900 rounded-[3rem] flex items-center justify-center shadow-2xl border border-white/5 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent z-20 pointer-events-none"></div>
               {!videoError ? (
                 <video 
@@ -67,7 +67,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                   loop 
                   playsInline 
                   preload="auto" 
-                  className="w-full h-full object-contain z-10 scale-150" 
+                  className="w-full h-full object-contain z-10 scale-125" 
                   onError={() => setVideoError(true)}
                 >
                   <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
@@ -77,7 +77,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                    <img 
                     src={ASSETS.MASCOT_HAPPY} 
                     alt="Chekki Logo Mascot" 
-                    className="w-full h-full object-contain drop-shadow-2xl scale-150" 
+                    className="w-full h-full object-contain drop-shadow-2xl scale-125" 
                    />
                 </div>
               )}
@@ -86,7 +86,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
         </div>
 
         <div className="text-center space-y-2 h-24">
-          <h1 className="text-4xl font-black text-white tracking-tighter font-display leading-none">
+          <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter font-display leading-none">
             Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
           </h1>
           <div className="relative h-6 overflow-hidden mt-1">
