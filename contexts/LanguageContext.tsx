@@ -47,17 +47,19 @@ const translations = {
 
     // Trust
     trust_title: "Safe for Your Family",
-    trust_privacy: "Zero Image Storage",
-    trust_privacy_desc: "We process images in-memory and discard them immediately. Your child's privacy is our #1 priority.",
-    trust_safety: "Parent-Mediated",
-    trust_safety_desc: "Children never interact with the AI directly. You hold the authority; Chekki provides the tools.",
+    trust_privacy: "Privacy You Can Trust",
+    trust_privacy_desc: "Your family’s safety is our priority; we never store your child’s data, processing images in real-time before deleting them instantly.",
+    trust_safety: "Bonding, Not Battling",
+    trust_safety_desc: "We turn stressful correction time into a happy, high-five moment with interactive digital stamps and positive praise your child will love.",
 
     // Comparison
     diff_title: "Why Chekki?",
-    diff_ocr: "Kid-Handwriting AI",
-    diff_ocr_desc: "Unlike Google Lens, we understand messy handwriting and worksheet contexts.",
-    diff_script: "Teaching Scripts",
-    diff_script_desc: "We don't just give answers. We give you the exact words to say to your child.",
+    diff_ocr: "Confident Parenting",
+    diff_ocr_desc: "Teach with native-level confidence using our simple English scripts and high-quality audio guides—no English degree required.",
+    diff_script: "Peace of Mind for Schools",
+    diff_script_desc: "We give teachers their evenings back by automating those late-night parent questions about homework meaning and pronunciation.",
+    diff_brand: "Consistent Learning",
+    diff_brand_desc: "Ensure your child receives the same high-quality, authorized guidance at home that matches their classroom experience perfectly.",
 
     // Analysis & Loading
     processing: "Analyzing questions...",
@@ -172,17 +174,19 @@ const translations = {
 
     // Trust
     trust_title: "부모님들이 채키를 믿는 이유",
-    trust_privacy: "이미지 즉시 파기 원칙",
-    trust_privacy_desc: "아이의 숙제 사진은 서버에 저장되지 않고 분석 즉시 파기됩니다. 개인정보 걱정 없이 사용하세요.",
-    trust_safety: "부모님이 주도하는 학습",
-    trust_safety_desc: "아이가 AI와 직접 대화하지 않습니다. 부모님이 정답을 확인하고 직접 가르쳐주는 '엄마표 영어'의 가치를 지킵니다.",
+    trust_privacy: "안심할 수 있는 보안",
+    trust_privacy_desc: "우리 아이의 정보는 소중하니까요. 사진은 저장되지 않고 분석 즉시 파기되어 개인정보를 완벽하게 보호합니다.",
+    trust_safety: "혼내지 않는 즐거운 학습",
+    trust_safety_desc: "숙제 시간이 전쟁터가 아닌, 아이와 웃으며 하이파이브하는 칭찬과 교감의 시간으로 바뀝니다.",
 
     // Comparison
-    diff_title: "구글 렌즈나 파파고와 무엇이 다른가요?",
-    diff_ocr: "아이 손글씨 특화 AI",
-    diff_ocr_desc: "삐뚤빼뚤한 아이의 글씨와 영유 교재 특유의 맥락을 완벽하게 이해합니다.",
-    diff_script: "다정한 티칭 스크립트",
-    diff_script_desc: "단순한 답안지가 아닙니다. 아이에게 어떻게 설명하면 좋을지 다정한 한마디를 매칭해 드립니다.",
+    diff_title: "채키와 함께라면 다릅니다",
+    diff_ocr: "엄마 아빠의 자신감",
+    diff_ocr_desc: "영어를 몰라도 괜찮아요. 채키가 제안하는 다정한 티칭 스크립트와 원어민 발음 가이드로 완벽하게 지도할 수 있습니다.",
+    diff_script: "선생님들의 저녁이 있는 삶",
+    diff_script_desc: "늦은 밤 학부모님의 숙제 문의를 채키가 대신 해결해 드려, 선생님들의 업무 스트레스를 획기적으로 줄여줍니다.",
+    diff_brand: "학원과 집의 연결",
+    diff_brand_desc: "학원에서 배우는 내용 그대로, 집에서도 전문적인 학습 가이드를 일관성 있게 이어갈 수 있습니다.",
 
     // Analysis & Loading
     processing: "문제를 분석하고 있어요...",
