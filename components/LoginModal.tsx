@@ -53,47 +53,48 @@ export const LoginModal: React.FC = () => {
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={closeLoginModal}></div>
-        <div className="relative bg-zinc-900 rounded-[2.5rem] w-full max-md shadow-2xl border border-white/10 overflow-hidden animate-fade-in-up flex flex-col">
+        
+        <div className="relative bg-zinc-900 rounded-[2rem] w-full max-w-sm shadow-2xl border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
           
-          {/* Compact Header Image */}
-          <div className="relative h-44 md:h-56 bg-zinc-950 flex items-center justify-center overflow-hidden">
+          {/* Header Image Area - Highly Compact */}
+          <div className="relative h-24 md:h-28 bg-zinc-950 flex items-center justify-center overflow-hidden shrink-0">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/20 to-transparent opacity-50"></div>
               <img 
                 src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png" 
                 alt="Chekki Mascot" 
-                className="relative z-10 w-32 h-32 md:w-44 md:h-44 object-contain animate-float" 
+                className="relative z-10 w-16 h-16 md:w-20 md:h-20 object-contain animate-float" 
               />
-              <button onClick={closeLoginModal} className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors bg-black/40 w-8 h-8 rounded-full flex items-center justify-center border border-white/5 z-20">✕</button>
+              <button onClick={closeLoginModal} className="absolute top-3 right-3 text-white/40 hover:text-white transition-colors bg-black/40 w-7 h-7 rounded-full flex items-center justify-center border border-white/5 z-20 text-xs">✕</button>
           </div>
 
-          <div className="p-8 md:p-10 flex-1 overflow-y-auto custom-scrollbar">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-black text-white font-display mb-2">
+          <div className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl md:text-3xl font-black text-white font-display mb-1">
                     {isLoginMode ? 'Welcome Back!' : 'Create Account'}
                 </h2>
-                <p className="text-zinc-500 text-sm font-medium leading-relaxed">
+                <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">
                     {isLoginMode ? 'Sign in to continue your teaching journey' : 'Join Chekki to make homework time happy'}
                 </p>
               </div>
 
-              {error && <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 text-xs mb-6 text-center font-bold animate-shake">{error}</div>}
+              {error && <div className="bg-red-500/10 border border-red-500/50 p-2.5 rounded-xl text-red-400 text-[10px] mb-4 text-center font-bold animate-shake">{error}</div>}
               
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
                   {!isLoginMode && (
                       <div className="relative group">
-                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-lg">👋</span>
-                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Parent's Name" className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl pl-12 pr-4 py-4 text-white outline-none focus:border-orange-500 transition-colors font-medium placeholder:text-zinc-700" required />
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">👋</span>
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Parent's Name" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-orange-500 transition-colors text-xs font-medium placeholder:text-zinc-700" required />
                       </div>
                   )}
                   
                   <div className="relative group">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-lg">📧</span>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address" className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl pl-12 pr-4 py-4 text-white outline-none focus:border-orange-500 transition-colors font-medium placeholder:text-zinc-700" required />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">📧</span>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-orange-500 transition-colors text-xs font-medium placeholder:text-zinc-700" required />
                   </div>
 
                   <div className="relative group">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-lg">🔒</span>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl pl-12 pr-4 py-4 text-white outline-none focus:border-orange-500 transition-colors font-medium placeholder:text-zinc-700" required />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">🔒</span>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-orange-500 transition-colors text-xs font-medium placeholder:text-zinc-700" required />
                   </div>
 
                   {!isLoginMode && (
@@ -102,34 +103,34 @@ export const LoginModal: React.FC = () => {
                             <button 
                                 type="button" 
                                 onClick={() => setShowSchoolField(true)}
-                                className="text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors flex items-center gap-2 px-1 py-2"
+                                className="text-[9px] font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors flex items-center gap-2 px-1 py-1"
                             >
                                 🏫 I have a Hagwon Code
                             </button>
                         ) : (
                             <div className="relative group animate-fade-in-up">
-                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-lg">🏫</span>
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">🏫</span>
                                 <input 
                                     type="text" 
                                     value={schoolCode} 
                                     onChange={(e) => setSchoolCode(e.target.value.toUpperCase())} 
                                     placeholder="Enter Hagwon Code (e.g. POLY10)" 
-                                    className="w-full bg-indigo-500/5 border border-indigo-500/30 rounded-2xl pl-12 pr-4 py-4 text-white outline-none focus:border-indigo-500 transition-colors font-mono tracking-widest text-sm" 
+                                    className="w-full bg-indigo-500/5 border border-indigo-500/30 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-indigo-500 transition-colors font-mono tracking-widest text-[10px]" 
                                 />
                             </div>
                         )}
                       </div>
                   )}
 
-                  <button type="submit" disabled={isLoading} className="w-full bg-brand-orange hover:bg-orange-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-orange-500/20 transform active:scale-95 disabled:opacity-50 transition-all text-xl mt-4">
+                  <button type="submit" disabled={isLoading} className="w-full bg-brand-orange hover:bg-orange-600 text-white font-black py-3.5 rounded-xl shadow-xl shadow-orange-500/20 transform active:scale-95 disabled:opacity-50 transition-all text-base mt-2">
                       {isLoading ? 'Processing...' : (isLoginMode ? 'Log In' : 'Sign Up')}
                   </button>
               </form>
               
-              <div className="mt-8 flex flex-col items-center gap-4">
+              <div className="mt-6 flex flex-col items-center gap-3">
                   <button 
                     onClick={() => { setIsLoginMode(!isLoginMode); setShowSchoolField(false); }} 
-                    className="text-zinc-400 text-sm hover:text-white font-bold transition-colors"
+                    className="text-zinc-400 text-[11px] hover:text-white font-bold transition-colors"
                   >
                       {isLoginMode ? (
                         <>New to Chekki? <span className="text-orange-500">Sign Up</span></>
@@ -138,7 +139,7 @@ export const LoginModal: React.FC = () => {
                       )}
                   </button>
 
-                  <p className="text-[10px] text-zinc-600 text-center uppercase tracking-widest leading-relaxed max-w-[280px]">
+                  <p className="text-[8px] text-zinc-600 text-center uppercase tracking-widest leading-relaxed max-w-[200px]">
                       By continuing, you agree to our <button onClick={() => setShowLegal('terms')} className="underline">Terms</button> & <button onClick={() => setShowLegal('privacy')} className="underline">Privacy</button>
                   </p>
               </div>
