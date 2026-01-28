@@ -91,16 +91,6 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
       }`}
     >
       <div className="relative">
-        {/* Floating Exit Button on Hover */}
-        {isFullscreen && (
-          <button 
-             onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }}
-             className={`absolute -top-4 -right-4 md:top-6 md:right-6 z-[250] bg-red-600 hover:bg-red-700 text-white w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 transform active:scale-90 ring-4 ring-white/10 ${isHovering ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-75 translate-y-4'}`}
-          >
-             <span className="text-2xl md:text-3xl font-black">✕</span>
-          </button>
-        )}
-
         <img 
             ref={imgRef}
             src={imageUrl} 
@@ -153,10 +143,10 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
         <div className="absolute top-6 right-6 z-50">
             <button 
               onClick={() => setIsFullscreen(true)}
-              className="w-14 h-14 rounded-2xl bg-black/60 backdrop-blur-xl border-2 border-white/30 flex items-center justify-center text-white hover:bg-orange-600 transition-all shadow-2xl group active:scale-90"
+              className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-black/60 backdrop-blur-xl border-2 border-white/30 flex items-center justify-center text-white hover:bg-orange-600 transition-all shadow-2xl group active:scale-90"
               title="Full Screen Focus"
             >
-              <svg className="w-7 h-7 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 md:w-7 md:h-7 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
             </button>
@@ -166,8 +156,8 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
           <div className="relative w-full transform-gpu">
             {!imageLoaded && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/40 backdrop-blur-2xl min-h-[400px]">
-                 <div className="w-16 h-16 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin mb-6"></div>
-                 <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.2em] animate-pulse">Scanning Canvas...</p>
+                 <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin mb-6"></div>
+                 <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest animate-pulse">Scanning...</p>
               </div>
             )}
             <OverlayContent />
@@ -184,19 +174,15 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
         <div className="fixed inset-0 z-[200] flex flex-col bg-[#020202] animate-fade-in overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none"></div>
           
-          {/* Top Bar for Settings */}
           <div className="relative z-[220] pt-[env(safe-area-inset-top)] bg-zinc-900/95 backdrop-blur-3xl border-b border-white/10 shadow-2xl shrink-0">
-            <div className="h-20 px-6 md:px-12 flex items-center justify-between">
-                
-                {/* Size Controls */}
+            <div className="h-16 md:h-20 px-4 md:px-12 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <span className="hidden md:inline text-[9px] font-black text-zinc-500 uppercase tracking-widest mr-2">{language === 'ko' ? '글자 크기' : 'Text Size'}</span>
-                    <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10">
+                    <div className="flex bg-black/40 p-1 rounded-xl border border-white/10">
                         {(['sm', 'md', 'lg'] as TextSize[]).map((size) => (
                             <button 
                                 key={size}
                                 onClick={() => setTextSize(size)}
-                                className={`w-10 md:w-12 py-1.5 rounded-xl text-[9px] font-black uppercase transition-all ${textSize === size ? 'bg-orange-600 text-white shadow-lg' : 'text-zinc-500 hover:text-white'}`}
+                                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${textSize === size ? 'bg-orange-600 text-white shadow-lg' : 'text-zinc-500 hover:text-white'}`}
                             >
                                 {size}
                             </button>
@@ -204,25 +190,23 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
                     </div>
                 </div>
 
-                {/* Status indicator */}
                 <div className="flex items-center gap-2">
-                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                   <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">{language === 'ko' ? '집중 모드' : 'Focus Mode'}</span>
+                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                   <span className="text-[9px] font-black text-white/50 uppercase tracking-widest">{language === 'ko' ? '집중 모드' : 'Focus Mode'}</span>
                 </div>
 
-                {/* PERSISTENT EXIT BUTTON */}
                 <button 
                     onClick={() => setIsFullscreen(false)}
-                    className="flex items-center gap-3 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-2xl shadow-xl transition-all active:scale-95"
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl shadow-xl transition-all active:scale-95"
                 >
-                    <span className="text-[10px] font-black uppercase tracking-widest">{language === 'ko' ? '종료' : 'Exit'}</span>
-                    <span className="text-lg">✕</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest">{language === 'ko' ? '종료' : 'Exit'}</span>
+                    <span className="text-sm">✕</span>
                 </button>
             </div>
           </div>
 
           <div 
-            className={`flex-1 overflow-auto custom-scrollbar overscroll-contain flex justify-center ${viewMode === 'fit' ? 'items-center p-4 md:p-12' : 'items-start p-4 md:p-12'}`}
+            className="flex-1 overflow-auto custom-scrollbar overscroll-contain flex justify-center items-center p-4 md:p-12"
             onClick={() => setIsFullscreen(false)}
           >
              <div onClick={(e) => e.stopPropagation()} className="relative">
@@ -230,23 +214,16 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
              </div>
           </div>
 
-          {/* Persistent Floating Bottom Close for Thumb Reach */}
-          <div className="sm:hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[300]">
+          <div className="sm:hidden fixed bottom-[max(2rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-[300]">
               <button 
                 onClick={() => setIsFullscreen(false)}
-                className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white shadow-2xl ring-4 ring-white/10 active:scale-90"
+                className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center text-white shadow-2xl ring-4 ring-white/10 active:scale-90"
               >
-                <span className="text-2xl font-black">✕</span>
+                <span className="text-xl font-black">✕</span>
               </button>
           </div>
         </div>
       )}
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; background-clip: content-box; }
-      `}</style>
     </>
   );
 };
