@@ -19,7 +19,7 @@ const translations = {
     pro_plan: "Pro Magic 🚀",
     
     // Resource Center
-    res_title: "Flyers & Sharing",
+    res_title: "Read More",
     res_subtitle: "Help other parents find peace.",
     res_download: "Download",
     res_copy: "Copy Link",
@@ -156,7 +156,7 @@ const translations = {
     pro_plan: "마법 프로 플랜 🚀",
 
     // Resource Center
-    res_title: "홍보용 리플렛 & 공유",
+    res_title: "자세히 보기",
     res_subtitle: "다른 부모님들께 평화를 선물하세요.",
     res_download: "저장",
     res_copy: "링크 복사",
