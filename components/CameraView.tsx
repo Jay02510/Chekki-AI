@@ -169,16 +169,29 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
            </div>
         </div>
 
-        <button 
-          onClick={() => setShowVideoModal(true)}
-          className="group cursor-pointer bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 px-6 py-4 rounded-[2rem] flex items-center gap-4 transition-all shadow-2xl backdrop-blur-md ring-1 ring-indigo-500/20 hover:ring-indigo-500/50"
-        >
-           <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 bg-indigo-500 flex items-center justify-center text-white shadow-lg">▶️</div>
-           <div className="text-left">
-              <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-0.5">Quick Guide</p>
-              <p className="text-xs md:text-base font-bold text-white font-korean">Watch Walkthrough</p>
-           </div>
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button 
+            onClick={() => setShowVideoModal(true)}
+            className="group cursor-pointer bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 px-6 py-4 rounded-[2rem] flex items-center gap-4 transition-all shadow-2xl backdrop-blur-md ring-1 ring-indigo-500/20 hover:ring-indigo-500/50"
+          >
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 bg-indigo-500 flex items-center justify-center text-white shadow-lg">▶️</div>
+            <div className="text-left">
+                <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-0.5">Quick Guide</p>
+                <p className="text-xs md:text-base font-bold text-white font-korean whitespace-nowrap">{t('btn_walkthrough')}</p>
+            </div>
+          </button>
+
+          <button 
+            onClick={() => setShowFlyerModal(true)}
+            className="group cursor-pointer bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 px-6 py-4 rounded-[2rem] flex items-center gap-4 transition-all shadow-2xl backdrop-blur-md ring-1 ring-orange-500/20 hover:ring-orange-500/50"
+          >
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 bg-orange-500 flex items-center justify-center text-white shadow-lg">📢</div>
+            <div className="text-left">
+                <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] text-orange-400 mb-0.5">Marketing Kit</p>
+                <p className="text-xs md:text-base font-bold text-white font-korean whitespace-nowrap">{t('res_title')}</p>
+            </div>
+          </button>
+        </div>
     </div>
   );
 
@@ -210,18 +223,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                   <div className="w-px h-3 md:h-4 bg-white/10"></div>
                   <div className="font-bold text-white text-base md:text-xl font-display leading-none">{remaining}</div>
               </div>
-
-              <button 
-                onClick={() => setShowFlyerModal(true)}
-                className="bg-orange-500/10 border border-orange-500/20 rounded-full py-1.5 px-5 md:py-2 md:px-6 flex items-center gap-2 md:gap-3 shadow-lg hover:bg-orange-500/20 transition-all group"
-              >
-                  <span className="text-sm md:text-base group-hover:scale-110 transition-transform">📢</span>
-                  <span className="text-[9px] md:text-[10px] text-orange-400 uppercase font-black tracking-widest">{t('res_title')}</span>
-              </button>
            </div>
         </div>
         
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-3xl mx-auto">
            <BetaBanner />
            <DropZone size="large" />
         </div>
@@ -259,25 +264,27 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           <p className="text-base md:text-xl text-zinc-400 max-w-lg leading-relaxed mb-8 md:mb-10 font-korean text-left font-medium break-keep">
             {isNight ? t('hero_desc_night') : t('hero_desc')}
           </p>
-          <div className="flex flex-wrap gap-4 justify-start">
+          <div className="flex flex-wrap gap-4 justify-start items-center">
             <button onClick={openLoginModal} className="group relative bg-white text-black px-8 py-4 md:px-10 md:py-5 rounded-2xl font-black text-base md:text-xl transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)] font-display flex items-center gap-3 overflow-hidden">
               <span className="relative font-korean whitespace-nowrap">{t('hero_cta_btn')}</span> 
               <span className="text-xl md:text-2xl relative transition-transform group-hover:translate-x-1">→</span>
             </button>
             
-            <button 
-              onClick={() => setShowVideoModal(true)}
-              className="px-6 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-sm md:text-base transition-all flex items-center gap-2 backdrop-blur-sm"
-            >
-              <span>▶️</span> Watch Walkthrough
-            </button>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setShowVideoModal(true)}
+                className="px-6 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-sm md:text-base transition-all flex items-center gap-2 backdrop-blur-sm"
+              >
+                <span>▶️</span> {t('btn_walkthrough')}
+              </button>
 
-            <button 
-              onClick={() => setShowFlyerModal(true)}
-              className="px-6 py-4 rounded-2xl border border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 text-orange-400 font-bold text-sm md:text-base transition-all flex items-center gap-2 backdrop-blur-sm"
-            >
-              <span>📢</span> {t('res_title')}
-            </button>
+              <button 
+                onClick={() => setShowFlyerModal(true)}
+                className="px-6 py-4 rounded-2xl border border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 text-orange-400 font-bold text-sm md:text-base transition-all flex items-center gap-2 backdrop-blur-sm"
+              >
+                <span>📢</span> {t('res_title')}
+              </button>
+            </div>
           </div>
         </div>
         

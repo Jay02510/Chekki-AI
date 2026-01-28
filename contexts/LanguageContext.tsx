@@ -40,6 +40,7 @@ const translations = {
     
     // Camera / Dashboard
     btn_upload: "Snap Worksheet",
+    btn_walkthrough: "Watch Walkthrough",
     drop_title: "Snap the Worksheet",
     drop_subtitle: "Get your digital answer key instantly",
     supported_formats: "Images are processed temporarily and NEVER stored. Privacy first.",
@@ -177,6 +178,7 @@ const translations = {
     
     // Camera / Dashboard
     btn_upload: "숙제 사진 찍기",
+    btn_walkthrough: "사용 가이드 보기",
     drop_title: "여기에 숙제를 보여주세요",
     drop_subtitle: "종이 위에 정답이 마법처럼 나타나요",
     supported_formats: "업로드된 이미지는 분석 후 즉시 삭제됩니다. 안심하고 사용하세요.",
