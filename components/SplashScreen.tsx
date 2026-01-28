@@ -12,35 +12,38 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   const [isExiting, setIsExiting] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [featureIndex, setFeatureIndex] = useState(0);
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const features = language === 'ko' ? [
-    "🔍 AI 숙제 채점",
-    "🔊 원어민 발음",
-    "📝 오답 노트",
-    "🪄 연습문제 생성"
+    "🎯 실시간 정답 오버레이",
+    "💌 다정한 티칭 스크립트",
+    "🔊 원어민 발음 & 스피킹",
+    "🪄 연습문제 무제한 생성",
+    "📢 홍보용 리플렛 업데이트!"
   ] : [
-    "🔍 AI Grading",
-    "🔊 Pronunciation",
-    "📝 Review Notes",
-    "🪄 Practice Sheets"
+    "🎯 Instant Answer Overlays",
+    "💌 Bilingual Teaching Scripts",
+    "🔊 Native Voice & Speaking",
+    "🪄 AI Practice Generator",
+    "📢 New Flyers Available!"
   ];
 
   useEffect(() => {
     // Feature rotation timer
     const featureInterval = setInterval(() => {
       setFeatureIndex(prev => (prev + 1) % features.length);
-    }, 400); 
+    }, 450); 
 
     // Safety timeout
     const exitTimer = setTimeout(() => {
       setIsExiting(true);
-    }, 2200); 
+    }, 2800); 
 
     const cleanupTimer = setTimeout(() => {
       onFinish();
-    }, 2500);
+    }, 3100);
 
+    // FIXED: Changed 'cleanupTracker' to 'cleanupTimer' to match the variable definition above.
     return () => {
       clearInterval(featureInterval);
       clearTimeout(exitTimer);
@@ -49,7 +52,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   }, [onFinish, features.length]);
 
   return (
-    <div className={`fixed inset-0 z-[100] bg-[#050505] flex flex-col items-center justify-center transition-opacity duration-300 ${isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+    <div className={`fixed inset-0 z-[100] bg-[#050505] flex flex-col items-center justify-center transition-opacity duration-500 ${isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
       
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-orange-500/10 rounded-full blur-[100px] animate-pulse"></div>
@@ -82,6 +85,14 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                 </div>
               )}
            </div>
+           
+           {/* New Asset Notification Badge */}
+           <div className="absolute -top-4 -right-4 z-30 animate-bounce">
+              <div className="bg-orange-500 text-white text-[9px] font-black px-3 py-1.5 rounded-full shadow-2xl border border-white/20 uppercase tracking-widest">
+                New Flyers
+              </div>
+           </div>
+           
            <div className="absolute -inset-4 bg-orange-500/20 blur-2xl rounded-full -z-10 animate-pulse"></div>
         </div>
 
@@ -99,8 +110,12 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
         </div>
 
         <div className="mt-8 w-40 h-1 bg-zinc-800 rounded-full overflow-hidden relative">
-          <div className="h-full bg-gradient-to-r from-orange-500 to-pink-500 animate-[width_2.2s_linear_forwards]" style={{ width: '0%' }}></div>
+          <div className="h-full bg-gradient-to-r from-orange-500 to-pink-500 animate-[width_2.8s_linear_forwards]" style={{ width: '0%' }}></div>
         </div>
+        
+        <p className="mt-4 text-[9px] text-zinc-700 font-black uppercase tracking-widest">
+          Version 1.0.4 - "Poster Pack" Update
+        </p>
       </div>
 
       <style>{`
