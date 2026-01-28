@@ -7,6 +7,7 @@ import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
 import { FeedbackModal } from './FeedbackModal';
 import { LegalModal } from './LegalModal';
+import { FlyerModal } from './FlyerModal';
 
 interface Props {
   onImageSelected: (base64: string) => void;
@@ -25,6 +26,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showFlyerModal, setShowFlyerModal] = useState(false);
   
   const { t, language } = useLanguage();
 
@@ -186,6 +188,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       <div className="min-h-full pt-12 md:pt-28 pb-12 px-4 md:px-6 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         {showVideoModal && <VideoWalkthroughModal />}
+        {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
         
         <div className="w-full max-w-3xl flex flex-col items-center text-center mb-8 md:mb-10 gap-4 md:gap-6">
            <div className="space-y-1 md:space-y-2">
@@ -207,6 +210,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                   <div className="w-px h-3 md:h-4 bg-white/10"></div>
                   <div className="font-bold text-white text-base md:text-xl font-display leading-none">{remaining}</div>
               </div>
+
+              <button 
+                onClick={() => setShowFlyerModal(true)}
+                className="bg-orange-500/10 border border-orange-500/20 rounded-full py-1.5 px-5 md:py-2 md:px-6 flex items-center gap-2 md:gap-3 shadow-lg hover:bg-orange-500/20 transition-all group"
+              >
+                  <span className="text-sm md:text-base group-hover:scale-110 transition-transform">📢</span>
+                  <span className="text-[9px] md:text-[10px] text-orange-400 uppercase font-black tracking-widest">{t('res_title')}</span>
+              </button>
            </div>
         </div>
         
@@ -224,6 +235,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
       {showVideoModal && <VideoWalkthroughModal />}
+      {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
       
       {/* Hero Section */}
       <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-8 items-center mb-12 md:mb-16">
@@ -258,6 +270,13 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               className="px-6 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-sm md:text-base transition-all flex items-center gap-2 backdrop-blur-sm"
             >
               <span>▶️</span> Watch Walkthrough
+            </button>
+
+            <button 
+              onClick={() => setShowFlyerModal(true)}
+              className="px-6 py-4 rounded-2xl border border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 text-orange-400 font-bold text-sm md:text-base transition-all flex items-center gap-2 backdrop-blur-sm"
+            >
+              <span>📢</span> {t('res_title')}
             </button>
           </div>
         </div>

@@ -18,14 +18,12 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
     "🎯 실시간 정답 오버레이",
     "💌 다정한 티칭 스크립트",
     "🔊 원어민 발음 & 스피킹",
-    "🪄 연습문제 무제한 생성",
-    "📢 홍보용 리플렛 업데이트!"
+    "🪄 연습문제 무제한 생성"
   ] : [
     "🎯 Instant Answer Overlays",
     "💌 Bilingual Teaching Scripts",
     "🔊 Native Voice & Speaking",
-    "🪄 AI Practice Generator",
-    "📢 New Flyers Available!"
+    "🪄 AI Practice Generator"
   ];
 
   useEffect(() => {
@@ -43,7 +41,6 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
       onFinish();
     }, 3100);
 
-    // FIXED: Changed 'cleanupTracker' to 'cleanupTimer' to match the variable definition above.
     return () => {
       clearInterval(featureInterval);
       clearTimeout(exitTimer);
@@ -84,13 +81,6 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                    />
                 </div>
               )}
-           </div>
-           
-           {/* New Asset Notification Badge */}
-           <div className="absolute -top-4 -right-4 z-30 animate-bounce">
-              <div className="bg-orange-500 text-white text-[9px] font-black px-3 py-1.5 rounded-full shadow-2xl border border-white/20 uppercase tracking-widest">
-                New Flyers
-              </div>
            </div>
            
            <div className="absolute -inset-4 bg-orange-500/20 blur-2xl rounded-full -z-10 animate-pulse"></div>
