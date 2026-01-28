@@ -9,19 +9,14 @@ const SYSTEM_PROMPT_SUMMARY = `Identify EK (English Kindergarten) worksheet titl
 
 const SYSTEM_PROMPT_ITEMS = `
 You are "Chekki AI", a high-fidelity educational assistant for English Kindergarten parents.
-Extract all questions and answers from the provided image.
+Your primary task is to provide a PERFECT ANSWER KEY for the worksheet in the image.
 
-CRITICAL: For every item, you MUST provide precise "bounding_box" coordinates [ymin, xmin, ymax, xmax] normalized to 0-1000.
-Linguistic Rule: Provide ALL guides and scripts in BOTH Korean and English.
+CRITICAL PRIORITIES:
+1. ACCURATE ANSWERS: Extract every question and provide the 100% correct answer.
+2. BILINGUAL SCRIPTS: For every answer, provide a "Teaching Script" in both Korean and English. This is what the parent should SAY to the child (e.g., "Great job! Can you say 'Apple' like a big boy?").
+3. COORDINATES: Provide precise "bounding_box" coordinates [ymin, xmin, ymax, xmax] normalized to 0-1000 so we can overlay the answer directly on the question.
 
-For each item:
-1. "question_text": The question as it appears.
-2. "correct_answer": The full text answer.
-3. "teaching_script_ko": Encouraging words for the parent in Korean.
-4. "teaching_script_en": Encouraging words for the parent in English.
-5. "korean_guide": Rule explanation in Korean.
-6. "english_guide": Rule explanation in English.
-7. "bounding_box": Precise coordinates for overlay.
+Note: While you should look at the child's handwriting if present, your main goal is to provide the correct answer key so the parent can guide them, regardless of what the child wrote.
 `;
 
 const ITEM_SCHEMA = {
@@ -82,7 +77,7 @@ export default async function handler(req: any, res: any) {
     if (task === 'generate') {
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Context: ${JSON.stringify(originalItems)}. Task: 2-3 unique questions with guides.`,
+        contents: `Context: ${JSON.stringify(originalItems)}. Task: Generate 3 brand new similar questions for extra practice with bilingual guides.`,
         config: { responseMimeType: "application/json", temperature: 0.7 }
       });
       return res.status(200).json(JSON.parse(response.text || "[]"));
@@ -96,7 +91,7 @@ export default async function handler(req: any, res: any) {
         contents: {
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: image } }, 
-            { text: "Provide worksheet summary." }
+            { text: "Identify the worksheet title and goals." }
           ]
         },
         config: { systemInstruction: SYSTEM_PROMPT_SUMMARY, responseMimeType: "application/json" }
@@ -107,14 +102,14 @@ export default async function handler(req: any, res: any) {
         contents: {
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: image } }, 
-            { text: "Extract all items with coordinates and bilingual scripts." }
+            { text: "Extract the answer key with coordinates and bilingual scripts for all items." }
           ]
         },
         config: {
           systemInstruction: SYSTEM_PROMPT_ITEMS,
           responseMimeType: "application/json",
           responseSchema: ITEM_SCHEMA,
-          thinkingConfig: { thinkingBudget: 10000 }
+          thinkingConfig: { thinkingBudget: 15000 }
         }
       }).then(r => JSON.parse(r.text || "{}"))
     ]);
