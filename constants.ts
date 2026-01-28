@@ -20,7 +20,7 @@ export const ASSETS = {
   VIDEO_SLEEPY: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/Sleepy_Chekki_Night_Float_fcqkyh.mp4`,
   STAMP_SOUND: `https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3`,
   
-  // NEW WALKTHROUGH VIDEO
+  // NEW WALKTHROUGH VIDEO (Optimized to mp4)
   VIDEO_WALKTHROUGH: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/v1769504113/Chekki_AI_V0_fkdlyx.mp4`,
 
   // MARKETING ASSETS (Updated with your Poster IDs)
