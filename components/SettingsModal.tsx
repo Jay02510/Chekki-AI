@@ -110,8 +110,8 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
   };
 
   const FlyerItem = ({ title, thumb, pdf, dl }: { title: string, thumb: string, pdf: string, dl: string }) => (
-    <div className="bg-zinc-950/50 border border-white/5 rounded-2xl overflow-hidden group flex flex-col h-full">
-        <div className="relative aspect-[3/4] overflow-hidden shrink-0">
+    <div className="bg-zinc-950/50 border border-white/5 rounded-2xl overflow-hidden group flex flex-col h-full max-w-xs mx-auto">
+        <div className="relative aspect-[3/4.2] overflow-hidden shrink-0">
             <img 
               src={thumb} 
               alt={title} 
@@ -123,7 +123,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
             </div>
         </div>
         <div className="p-3 space-y-2 flex-1 flex flex-col justify-between">
-            <p className="text-[10px] font-black text-zinc-300 truncate uppercase tracking-widest">{title}</p>
+            <p className="text-[10px] font-black text-zinc-300 truncate uppercase tracking-widest text-center">{title}</p>
             <div className="flex gap-1.5">
                 <a 
                     href={dl} 
@@ -205,9 +205,8 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
               {/* --- READ MORE SECTION --- */}
               <div>
                   <h3 className="text-xs font-black text-orange-500 uppercase tracking-widest mb-4">{t('res_title')}</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                      <FlyerItem title={t('res_kr')} thumb={ASSETS.FLYER_KR_THUMB} pdf={ASSETS.PDF_KR_SHARE} dl={ASSETS.PDF_KR_DOWNLOAD} />
-                      <FlyerItem title={t('res_en')} thumb={ASSETS.FLYER_EN_THUMB} pdf={ASSETS.PDF_EN_SHARE} dl={ASSETS.PDF_EN_DOWNLOAD} />
+                  <div className="flex justify-center">
+                      <FlyerItem title={t('res_flyer')} thumb={ASSETS.FLYER_THUMB} pdf={ASSETS.PDF_SHARE} dl={ASSETS.PDF_DOWNLOAD} />
                   </div>
               </div>
 

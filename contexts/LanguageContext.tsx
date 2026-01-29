@@ -25,8 +25,7 @@ const translations = {
     res_copy: "Copy Link",
     res_share: "Share",
     res_copied: "Link Copied!",
-    res_kr: "Korean Flyer",
-    res_en: "English Flyer",
+    res_flyer: "Chekki Official Flyer",
     
     // Hero
     hero_title: "Instant Answer Key\nRight on the Paper.",
@@ -163,8 +162,7 @@ const translations = {
     res_copy: "링크 복사",
     res_share: "공유하기",
     res_copied: "복사 완료!",
-    res_kr: "한국어 리플렛",
-    res_en: "영어 리플렛",
+    res_flyer: "채키 공식 안내문",
 
     // Hero
     hero_title: "잃어버린 답지 찾지 말고,\n사진 한 장만 찍으세요",

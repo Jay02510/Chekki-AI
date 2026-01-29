@@ -34,30 +34,30 @@ export const FlyerModal: React.FC<Props> = ({ onClose }) => {
   };
 
   const FlyerItem = ({ title, thumb, pdf, dl }: { title: string, thumb: string, pdf: string, dl: string }) => (
-    <div className="bg-zinc-950/50 border border-white/5 rounded-2xl overflow-hidden group flex flex-col h-full">
-        <div className="relative aspect-[3/4] overflow-hidden shrink-0">
+    <div className="bg-zinc-950/50 border border-white/5 rounded-2xl overflow-hidden group flex flex-col h-full max-w-sm mx-auto">
+        <div className="relative aspect-[3/4.2] overflow-hidden shrink-0">
             <img 
               src={thumb} 
               alt={title} 
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 bg-zinc-900" 
-              onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x400/18181b/ffffff?text=Poster'; }}
+              onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x800/18181b/ffffff?text=Chekki+Flyer'; }}
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 px-4 backdrop-blur-sm">
-                <a href={pdf} target="_blank" rel="noopener noreferrer" className="bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black shadow-xl uppercase tracking-tighter hover:bg-zinc-200 transition-colors">View PDF</a>
+                <a href={pdf} target="_blank" rel="noopener noreferrer" className="bg-white text-black px-6 py-3 rounded-xl text-xs font-black shadow-xl uppercase tracking-tighter hover:bg-zinc-200 transition-colors">View Full Flyer</a>
             </div>
         </div>
-        <div className="p-3 space-y-2 flex-1 flex flex-col justify-between">
-            <p className="text-[10px] font-black text-zinc-300 truncate uppercase tracking-widest">{title}</p>
-            <div className="flex gap-1.5">
+        <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+            <p className="text-xs font-black text-zinc-300 truncate uppercase tracking-widest text-center">{title}</p>
+            <div className="flex gap-2">
                 <a 
                     href={dl} 
-                    className="flex-1 bg-white/5 hover:bg-white/10 text-white text-[9px] font-black py-2.5 rounded-lg text-center border border-white/10 transition-colors uppercase"
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black py-3 rounded-xl text-center border border-white/10 transition-colors uppercase"
                 >
                     {t('res_download')}
                 </a>
                 <button 
                     onClick={() => handleNativeShare(pdf, title)}
-                    className="flex-1 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[9px] font-black py-2.5 rounded-lg border border-orange-500/20 transition-colors uppercase"
+                    className="flex-1 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[10px] font-black py-3 rounded-xl border border-orange-500/20 transition-colors uppercase"
                 >
                     {t('res_share')}
                 </button>
@@ -78,18 +78,12 @@ export const FlyerModal: React.FC<Props> = ({ onClose }) => {
            <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors text-xl">✕</button>
         </div>
         <div className="p-6 overflow-y-auto custom-scrollbar">
-           <div className="grid grid-cols-2 gap-4">
+           <div className="flex justify-center">
               <FlyerItem 
-                title={t('res_kr')} 
-                thumb={ASSETS.FLYER_KR_THUMB} 
-                pdf={ASSETS.PDF_KR_SHARE} 
-                dl={ASSETS.PDF_KR_DOWNLOAD}
-              />
-              <FlyerItem 
-                title={t('res_en')} 
-                thumb={ASSETS.FLYER_EN_THUMB} 
-                pdf={ASSETS.PDF_EN_SHARE} 
-                dl={ASSETS.PDF_EN_DOWNLOAD}
+                title={t('res_flyer')} 
+                thumb={ASSETS.FLYER_THUMB} 
+                pdf={ASSETS.PDF_SHARE} 
+                dl={ASSETS.PDF_DOWNLOAD}
               />
            </div>
            {successMsg && (
