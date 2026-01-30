@@ -153,45 +153,44 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   );
 
   const BetaBanner = () => (
-    <div className="flex flex-col md:flex-row gap-4 mb-8 md:mb-10 animate-fade-in-up">
-        <div 
-          role="button"
-          aria-label="Submit Feedback"
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 md:mb-10 animate-fade-in-up w-full">
+        {/* Feedback Card */}
+        <button 
           onClick={() => setShowFeedbackModal(true)}
-          className="flex-1 group cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-4 rounded-[2rem] flex items-center gap-4 transition-all shadow-2xl backdrop-blur-md ring-1 ring-white/5 hover:ring-orange-500/50"
+          className="group cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 p-5 rounded-[2rem] flex items-center gap-4 transition-all shadow-xl backdrop-blur-md ring-1 ring-white/5 hover:ring-orange-500/50 text-left h-full"
         >
-           <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 ${isNight ? 'bg-indigo-500/20' : 'bg-orange-500/20'} flex items-center justify-center text-lg animate-pulse shadow-inner`}>✨</div>
-           <div className="flex-1 min-w-0">
-              <p className={`text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] ${isNight ? 'text-indigo-400' : 'text-orange-500'} mb-0.5`}>Beta Community</p>
-              <p className="text-xs md:text-base font-bold text-zinc-200 font-korean group-hover:text-white transition-colors leading-tight truncate">
-                {t('beta_banner')}
+           <div className={`w-10 h-10 rounded-xl flex-shrink-0 ${isNight ? 'bg-indigo-500/20' : 'bg-orange-500/20'} flex items-center justify-center text-xl animate-pulse`}>✨</div>
+           <div className="min-w-0">
+              <p className={`text-[9px] font-black uppercase tracking-[0.15em] ${isNight ? 'text-indigo-400' : 'text-orange-500'} mb-0.5`}>Feedback</p>
+              <p className="text-sm font-bold text-zinc-200 font-korean group-hover:text-white transition-colors leading-tight">
+                {language === 'ko' ? "의견 보내기" : "Share Ideas"}
               </p>
            </div>
-        </div>
+        </button>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button 
-            onClick={() => setShowVideoModal(true)}
-            className="group cursor-pointer bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 px-6 py-4 rounded-[2rem] flex items-center gap-4 transition-all shadow-2xl backdrop-blur-md ring-1 ring-indigo-500/20 hover:ring-indigo-500/50"
-          >
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 bg-indigo-500 flex items-center justify-center text-white shadow-lg">▶️</div>
-            <div className="text-left">
-                <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-0.5">Quick Guide</p>
-                <p className="text-xs md:text-base font-bold text-white font-korean whitespace-nowrap">{t('btn_walkthrough')}</p>
-            </div>
-          </button>
+        {/* Walkthrough Card */}
+        <button 
+          onClick={() => setShowVideoModal(true)}
+          className="group cursor-pointer bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 p-5 rounded-[2rem] flex items-center gap-4 transition-all shadow-xl backdrop-blur-md ring-1 ring-indigo-500/20 hover:ring-indigo-500/50 text-left h-full"
+        >
+          <div className="w-10 h-10 rounded-xl flex-shrink-0 bg-indigo-500 flex items-center justify-center text-lg shadow-lg">▶️</div>
+          <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-[0.15em] text-indigo-400 mb-0.5">Quick Guide</p>
+              <p className="text-sm font-bold text-white font-korean leading-tight">{t('btn_walkthrough')}</p>
+          </div>
+        </button>
 
-          <button 
-            onClick={() => setShowFlyerModal(true)}
-            className="group cursor-pointer bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 px-6 py-4 rounded-[2rem] flex items-center gap-4 transition-all shadow-2xl backdrop-blur-md ring-1 ring-orange-500/20 hover:ring-orange-500/50"
-          >
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 bg-orange-500 flex items-center justify-center text-white shadow-lg">📢</div>
-            <div className="text-left">
-                <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] text-orange-400 mb-0.5">Marketing Kit</p>
-                <p className="text-xs md:text-base font-bold text-white font-korean whitespace-nowrap">{t('res_title')}</p>
-            </div>
-          </button>
-        </div>
+        {/* Marketing Card */}
+        <button 
+          onClick={() => setShowFlyerModal(true)}
+          className="group cursor-pointer bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 p-5 rounded-[2rem] flex items-center gap-4 transition-all shadow-xl backdrop-blur-md ring-1 ring-orange-500/20 hover:ring-orange-500/50 text-left h-full"
+        >
+          <div className="w-10 h-10 rounded-xl flex-shrink-0 bg-orange-500 flex items-center justify-center text-lg shadow-lg">📢</div>
+          <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-[0.15em] text-orange-400 mb-0.5">Resource</p>
+              <p className="text-sm font-bold text-white font-korean leading-tight">{t('res_title')}</p>
+          </div>
+        </button>
     </div>
   );
 
@@ -226,7 +225,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
            </div>
         </div>
         
-        <div className="w-full max-w-3xl mx-auto">
+        <div className="w-full max-w-4xl mx-auto">
            <BetaBanner />
            <DropZone size="large" />
         </div>

@@ -43,6 +43,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
     const box = item.bounding_box;
     if (!box) return { display: 'none' };
     
+    // Attempt to center the bubble on the question box
     const top = Math.min(Math.max((box.ymin / 1000) * 100, 2), 95);
     const left = Math.min(Math.max((box.xmin / 1000) * 100, 5), 85);
 
@@ -57,9 +58,9 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
 
   const getTextClasses = () => {
     switch(textSize) {
-      case 'sm': return 'text-[9px] md:text-xs px-2 py-1 max-w-[120px] md:max-w-[180px]';
-      case 'lg': return 'text-lg md:text-3xl px-5 py-4 max-w-[220px] md:max-w-[550px]';
-      default: return 'text-[11px] md:text-xl px-3 py-2 max-w-[150px] md:max-w-[350px]';
+      case 'sm': return 'text-[10px] md:text-xs px-2.5 py-1.5 max-w-[140px] md:max-w-[200px]';
+      case 'lg': return 'text-xl md:text-3xl px-6 py-5 max-w-[250px] md:max-w-[600px]';
+      default: return 'text-sm md:text-xl px-4 py-3 max-w-[180px] md:max-w-[400px]';
     }
   };
 
@@ -109,27 +110,29 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
         
         {imageLoaded && items && items.map((item) => {
             const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
-            const displayText = `${item.id}. ${item.correct_answer}`;
+            // The display text now strictly uses the full pedagogical answer string from the model
+            const displayValue = item.correct_answer;
             
             return (
             <div
                 key={item.id}
                 style={getStyle(item)}
                 className={`absolute transition-all duration-500 pointer-events-auto animate-fade-in ${isFocused ? 'opacity-100 scale-100' : 'opacity-20 scale-95 blur-[1px]'}`}
-                onClick={(e) => { e.stopPropagation(); playAudio(displayText); }}
+                onClick={(e) => { e.stopPropagation(); playAudio(displayValue); }}
             >
                 <div className={`
-                    rounded-xl md:rounded-2xl shadow-2xl border-2 border-white/20 flex items-center gap-2 md:gap-3 transform transition-all hover:scale-105 active:scale-95 group cursor-pointer min-w-fit
-                    ${isFocused ? 'bg-orange-600 ring-4 ring-orange-500/20 shadow-orange-500/40' : 'bg-zinc-800 ring-1 ring-white/10'}
+                    rounded-2xl md:rounded-[1.8rem] shadow-[0_15px_35px_rgba(0,0,0,0.5)] border-2 border-white/20 flex items-center gap-3 md:gap-4 transform transition-all hover:scale-105 active:scale-95 group cursor-pointer min-w-fit
+                    ${isFocused ? 'bg-orange-600 ring-4 ring-orange-500/30 shadow-orange-600/50' : 'bg-zinc-800 ring-1 ring-white/10'}
                     ${getTextClasses()}
                 `}>
-                    <div className="w-4 h-4 md:w-8 md:h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
-                        <span className="font-black text-[8px] md:text-xs text-white">{item.id}</span>
+                    <div className="w-6 h-6 md:w-10 md:h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
+                        <span className="font-black text-[10px] md:text-sm text-white">{item.id}</span>
                     </div>
-                    <span className={`font-hand font-bold leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md`}>
-                    {item.correct_answer}
+                    <span className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md`}>
+                      {displayValue}
                     </span>
-                    <span className="text-[10px] md:text-lg shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">🔊</span>
+                    <div className="w-px h-6 bg-white/20 shrink-0"></div>
+                    <span className="text-[12px] md:text-xl shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">🔊</span>
                 </div>
             </div>
             );

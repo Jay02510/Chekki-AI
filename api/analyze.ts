@@ -9,14 +9,15 @@ const SYSTEM_PROMPT_SUMMARY = `Identify EK (English Kindergarten) worksheet titl
 
 const SYSTEM_PROMPT_ITEMS = `
 You are "Chekki AI", a high-fidelity educational assistant for English Kindergarten parents.
-Your primary task is to provide a PERFECT ANSWER KEY for the worksheet in the image.
+Your primary task is to provide a PERFECT FULL ANSWER KEY for the worksheet.
 
-CRITICAL PRIORITIES:
-1. ACCURATE ANSWERS: Extract every question and provide the 100% correct answer.
-2. BILINGUAL SCRIPTS: For every answer, provide a "Teaching Script" in both Korean and English. This is what the parent should SAY to the child (e.g., "Great job! Can you say 'Apple' like a big boy?").
-3. COORDINATES: Provide precise "bounding_box" coordinates [ymin, xmin, ymax, xmax] normalized to 0-1000 so we can overlay the answer directly on the question.
+CRITICAL EXTRACTION RULES:
+1. FULL ANSWERS ONLY: For multiple-choice questions (MCQ), do NOT just provide the letter (e.g., "A"). You MUST provide the full text of the correct option (e.g., "A. She trusted Milo"). This is mandatory for our pronunciation engine to function.
+2. ACCURATE SEQUENCING: Extract every question in reading order. Assign a numeric ID starting from 1.
+3. BILINGUAL SCRIPTS: For every answer, provide a "Teaching Script" in both Korean and English. This is what the parent should SAY to the child (e.g., "Great job! Can you say 'She trusted Milo' like a big girl?").
+4. COORDINATES: Provide precise "bounding_box" coordinates [ymin, xmin, ymax, xmax] normalized to 0-1000 so we can overlay the answer directly on the question text.
 
-Note: While you should look at the child's handwriting if present, your main goal is to provide the correct answer key so the parent can guide them, regardless of what the child wrote.
+Note: Your goal is to provide the correct answer key so the parent can guide the child, regardless of what the child might have written in the worksheet.
 `;
 
 const ITEM_SCHEMA = {
@@ -30,7 +31,7 @@ const ITEM_SCHEMA = {
           id: { type: Type.INTEGER },
           type: { type: Type.STRING },
           question_text: { type: Type.STRING },
-          correct_answer: { type: Type.STRING },
+          correct_answer: { type: Type.STRING, description: "The FULL text of the correct answer, including the option letter if it is an MCQ." },
           korean_guide: { type: Type.STRING },
           english_guide: { type: Type.STRING },
           teaching_script_ko: { type: Type.STRING },
@@ -69,7 +70,7 @@ export default async function handler(req: any, res: any) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { task, image, originalItems } = body;
+    const { task, image, originalItems, userPlan } = body;
     if (!process.env.API_KEY) return res.status(500).json({ error: "API_KEY_MISSING" });
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -85,6 +86,8 @@ export default async function handler(req: any, res: any) {
 
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
 
+    const modelToUse = userPlan === 'pro' ? 'gemini-3-pro-preview' : 'gemini-3-flash-preview';
+
     const [summaryResult, itemsResult] = await Promise.all([
       ai.models.generateContent({
         model: "gemini-3-flash-preview",
@@ -98,18 +101,18 @@ export default async function handler(req: any, res: any) {
       }).then(r => JSON.parse(r.text || "{}")),
 
       ai.models.generateContent({
-        model: "gemini-3-pro-preview",
+        model: modelToUse,
         contents: {
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: image } }, 
-            { text: "Extract the answer key with coordinates and bilingual scripts for all items." }
+            { text: "Extract the FULL answer key with coordinates and bilingual scripts for all items. Do not use abbreviations." }
           ]
         },
         config: {
           systemInstruction: SYSTEM_PROMPT_ITEMS,
           responseMimeType: "application/json",
           responseSchema: ITEM_SCHEMA,
-          thinkingConfig: { thinkingBudget: 15000 }
+          thinkingConfig: { thinkingBudget: userPlan === 'pro' ? 20000 : 0 }
         }
       }).then(r => JSON.parse(r.text || "{}"))
     ]);
