@@ -70,7 +70,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
                   muted 
                   loop 
                   playsInline 
-                  className="absolute inset-0 w-full h-full object-contain scale-110" 
+                  className="absolute inset-0 w-full h-full object-cover scale-105" 
                   onError={() => setVideoError(true)}
                 >
                     <source src={isNight ? ASSETS.VIDEO_SLEEPY : ASSETS.VIDEO_ANALYZING} type="video/mp4" />
