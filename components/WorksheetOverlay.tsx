@@ -23,8 +23,6 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('fit');
   const [textSize, setTextSize] = useState<TextSize>('md');
-  const [isHovering, setIsHovering] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
@@ -81,9 +79,6 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
 
   const OverlayContent = () => (
     <div 
-      ref={containerRef} 
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
       className={`group relative transform-gpu transition-all duration-500 ease-in-out flex items-center justify-center ${
         isFullscreen 
           ? viewMode === 'fit' ? 'h-full w-auto max-h-full' : 'w-full max-w-5xl mx-auto' 
@@ -104,6 +99,13 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
             draggable={false}
             loading="eager"
         />
+
+        {/* --- DIGITAL SCANLINE ANIMATION --- */}
+        {isLoadingItems && (
+          <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">
+             <div className="w-full h-1 bg-gradient-to-r from-transparent via-orange-500/50 to-transparent absolute top-0 animate-[scan_3s_linear_infinite] shadow-[0_0_20px_#f97316]"></div>
+          </div>
+        )}
         
         {imageLoaded && items && items.map((item) => {
             const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
@@ -224,6 +226,13 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items, focusedId, 
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes scan {
+          0% { top: 0%; }
+          100% { top: 100%; }
+        }
+      `}</style>
     </>
   );
 };
