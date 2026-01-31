@@ -12,12 +12,10 @@ You are "Chekki AI", a high-fidelity educational assistant for English Kindergar
 Your primary task is to provide a PERFECT FULL ANSWER KEY for the worksheet.
 
 CRITICAL EXTRACTION RULES:
-1. FULL ANSWERS ONLY: For multiple-choice questions (MCQ), do NOT just provide the letter (e.g., "A"). You MUST provide the full text of the correct option (e.g., "A. She trusted Milo"). This is mandatory for our pronunciation engine to function.
-2. ACCURATE SEQUENCING: Extract every question in reading order. Assign a numeric ID starting from 1.
-3. BILINGUAL SCRIPTS: For every answer, provide a "Teaching Script" in both Korean and English. This is what the parent should SAY to the child (e.g., "Great job! Can you say 'She trusted Milo' like a big girl?").
-4. COORDINATES: Provide precise "bounding_box" coordinates [ymin, xmin, ymax, xmax] normalized to 0-1000 so we can overlay the answer directly on the question text.
-
-Note: Your goal is to provide the correct answer key so the parent can guide the child, regardless of what the child might have written in the worksheet.
+1. FULL ANSWERS ONLY: For MCQ, provide the full text.
+2. ACCURATE SEQUENCING: Extract every question.
+3. BILINGUAL SCRIPTS: Provide Teaching Scripts in Korean and English.
+4. COORDINATES: Normalized 0-1000 bounding_box.
 `;
 
 const ITEM_SCHEMA = {
@@ -31,7 +29,7 @@ const ITEM_SCHEMA = {
           id: { type: Type.INTEGER },
           type: { type: Type.STRING },
           question_text: { type: Type.STRING },
-          correct_answer: { type: Type.STRING, description: "The FULL text of the correct answer, including the option letter if it is an MCQ." },
+          correct_answer: { type: Type.STRING },
           korean_guide: { type: Type.STRING },
           english_guide: { type: Type.STRING },
           teaching_script_ko: { type: Type.STRING },
@@ -49,17 +47,7 @@ const ITEM_SCHEMA = {
             required: ["ymin", "xmin", "ymax", "xmax"]
           }
         },
-        required: [
-          "id", 
-          "type", 
-          "question_text", 
-          "correct_answer", 
-          "korean_guide", 
-          "english_guide", 
-          "teaching_script_ko",
-          "teaching_script_en",
-          "bounding_box"
-        ]
+        required: ["id", "type", "question_text", "correct_answer", "korean_guide", "english_guide", "teaching_script_ko", "teaching_script_en", "bounding_box"]
       }
     }
   }
@@ -105,7 +93,7 @@ export default async function handler(req: any, res: any) {
         contents: {
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: image } }, 
-            { text: "Extract the FULL answer key with coordinates and bilingual scripts for all items. Do not use abbreviations." }
+            { text: "Extract the FULL answer key with coordinates and bilingual scripts for all items." }
           ]
         },
         config: {
