@@ -8,6 +8,7 @@ import {
   createUserWithEmailAndPassword, 
   signOut,
   deleteUser,
+  sendPasswordResetEmail,
   type User
 } from 'firebase/auth';
 
@@ -16,6 +17,7 @@ interface AuthContextType {
   firebaseUser: User | null;
   signUp: (name: string, email: string, pass: string) => Promise<void>;
   signIn: (email: string, pass: string) => Promise<void>;
+  sendResetEmail: (email: string) => Promise<void>;
   logout: () => void;
   updateProfile: (name: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
@@ -78,6 +80,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setShowLoginModal(false);
   };
 
+  const sendResetEmail = async (email: string) => {
+    await sendPasswordResetEmail(auth, email);
+  };
+
   const logout = () => signOut(auth);
 
   const updateProfile = async (name: string) => {
@@ -129,7 +135,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!firebaseUser || !userProfile) return false;
     
     const sanitized = schoolCode.toUpperCase().trim();
-    // Example schools - in production these would be in DB
     const schools: Record<string, string> = {
         'POLY10': 'Poly Academy Seocho',
         'GATE05': 'GATE Academy Bundang',
@@ -140,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const updates: Partial<UserProfile> = {
             schoolId: sanitized,
             schoolName: schools[sanitized],
-            plan: 'pro', // Auto-upgrade for partner students
+            plan: 'pro',
             maxScansPerDay: 9999
         };
         setUserProfile({ ...userProfile, ...updates });
@@ -155,8 +160,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (code) {
       const sanitizedCode = code.toUpperCase().trim();
-      
-      // Check if it's a school code first
       const isSchool = await joinSchool(sanitizedCode);
       if (isSchool) return true;
 
@@ -196,6 +199,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       firebaseUser,
       signUp,
       signIn,
+      sendResetEmail,
       logout,
       updateProfile,
       deleteAccount,
