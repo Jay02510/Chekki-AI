@@ -20,6 +20,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
     t('loading_step1'),
     t('loading_step2'),
     t('loading_step3'),
+    t('loading_thorough'),
     t('loading_step4'),
     t('loading_tip'),
     t('loading_almost')
