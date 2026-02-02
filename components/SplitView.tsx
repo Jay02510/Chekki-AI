@@ -25,6 +25,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const [showCloneModal, setShowCloneModal] = useState(false);
   const [reportContext, setReportContext] = useState<WorksheetItem | null>(null);
   const [mascotError, setMascotError] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
@@ -39,6 +40,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         behavior: 'smooth',
         block: 'center',
       });
+      setHasInteracted(true);
     }
   }, [activeItemId]);
 
@@ -119,16 +121,30 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
         {/* Right Side: Enhanced Teaching Cards */}
         <div className="w-full lg:w-1/2 h-[60%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative" onClick={() => setActiveItemId(null)}>
-          <div className="px-6 py-5 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl flex justify-between items-center shrink-0">
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 rounded-2xl bg-zinc-800 border border-white/5 flex items-center justify-center overflow-hidden shadow-xl">
-                    {!mascotError ? <img src={ASSETS.MASCOT_HAPPY} alt="Chekki" className="w-full h-full object-cover scale-110" onError={() => setMascotError(true)} /> : <span className="text-2xl">🎓</span>}
-               </div>
-               <div>
-                  <h3 className="font-black text-white font-display text-xl leading-none mb-1">{t('ws_results_title')}</h3>
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{isLoadingItems ? t('ws_scanning_header') : `${items.length} ${t('ws_items_found')}`}</p>
-               </div>
+          <div className="px-6 py-5 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl flex flex-col shrink-0">
+            <div className="flex justify-between items-center w-full">
+                <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-zinc-800 border border-white/5 flex items-center justify-center overflow-hidden shadow-xl">
+                        {!mascotError ? <img src={ASSETS.MASCOT_HAPPY} alt="Chekki" className="w-full h-full object-cover scale-110" onError={() => setMascotError(true)} /> : <span className="text-2xl">🎓</span>}
+                </div>
+                <div>
+                    <h3 className="font-black text-white font-display text-xl leading-none mb-1">{t('ws_results_title')}</h3>
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{isLoadingItems ? t('ws_scanning_header') : `${items.length} ${t('ws_items_found')}`}</p>
+                </div>
+                </div>
             </div>
+
+            {/* --- INSTRUCTIONAL TIP BANNER --- */}
+            {!isLoadingItems && items.length > 0 && !hasInteracted && (
+                <div className="mt-4 animate-fade-in-up">
+                    <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl px-4 py-2 flex items-center gap-3 animate-pulse">
+                        <span className="text-orange-500 text-sm">💡</span>
+                        <p className="text-[10px] md:text-xs font-black text-orange-400 uppercase tracking-widest leading-tight">
+                            {t('tip_click_guide')}
+                        </p>
+                    </div>
+                </div>
+            )}
           </div>
 
           <div className="overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar flex-1 overscroll-contain bg-gradient-to-b from-transparent to-zinc-950/20">
@@ -139,17 +155,25 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 </div>
             )}
 
-            {items.map((item) => {
+            {items.map((item, idx) => {
               const isActive = activeItemId === item.id;
               const flagged = isMistake(item.question_text);
               const scriptText = language === 'ko' ? item.teaching_script_ko : item.teaching_script_en;
               const guideText = language === 'ko' ? item.korean_guide : item.english_guide;
               const answerText = item.correct_answer;
+              const isFirstItem = idx === 0;
 
               return (
                 <div key={item.id} ref={(el) => { itemRefs.current[item.id] = el; }} onClick={(e) => { e.stopPropagation(); setActiveItemId(item.id); }}
                   className={`group relative rounded-[1.8rem] border transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in-up ${isActive ? 'bg-zinc-800/90 border-orange-500/50 shadow-[0_20px_40px_rgba(0,0,0,0.4)]' : 'bg-zinc-900/60 border-white/5 hover:border-white/20'}`}>
                   
+                  {/* Pulse Hint for the first item */}
+                  {isFirstItem && !hasInteracted && (
+                      <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-500 text-[8px] font-black text-white uppercase tracking-widest animate-bounce z-10 shadow-lg">
+                          <span>Click</span> 👆
+                      </div>
+                  )}
+
                   <div className="flex items-start p-4 md:p-6 gap-4">
                     <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-xs md:text-sm font-black shrink-0 transition-all duration-300 ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-zinc-800 text-zinc-500'}`}>
                       {item.id}
@@ -196,7 +220,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
               );
             })}
 
-            {/* Ideal Placement: Feedback Box at the end of results */}
             {!isLoadingItems && items.length > 0 && (
               <div className="pt-6 pb-2">
                 <InlineFeedback />

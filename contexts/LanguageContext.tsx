@@ -18,6 +18,18 @@ const translations = {
     scans: "Magic Scans",
     pro_plan: "Pro Magic 🚀",
     
+    // Instructional Tips
+    tip_click_guide: "💡 Tap any question to see your Teaching Script!",
+    tip_scroll_more: "Scroll down to see all answers",
+    
+    // Security Section
+    sec_audit_title: "Privacy & Security Audit",
+    sec_audit_desc: "Your family's safety is our #1 priority. Chekki is built on a 'Zero-Storage' architecture.",
+    sec_point_1: "Images are deleted instantly after analysis",
+    sec_point_2: "Encrypted data transmission (SSL/TLS)",
+    sec_point_3: "Child-Safe: No personal identifiers stored",
+    sec_point_4: "Authorized School codes verify identity",
+
     // Resource Center
     res_title: "Read More",
     res_subtitle: "Help other parents find peace.",
@@ -154,6 +166,18 @@ const translations = {
     logout: "로그아웃",
     scans: "번의 마법 남음",
     pro_plan: "마법 프로 플랜 🚀",
+
+    // Instructional Tips
+    tip_click_guide: "💡 문제를 누르면 다정한 티칭 가이드가 나타나요!",
+    tip_scroll_more: "아래로 스크롤하여 모든 정답을 확인하세요",
+
+    // Security Section
+    sec_audit_title: "보안 및 개인정보 진단",
+    sec_audit_desc: "우리 아이의 정보는 소중합니다. 채키는 'Zero-Storage' 설계를 통해 보안을 최우선으로 합니다.",
+    sec_point_1: "분석 완료 즉시 사진 데이터 파기",
+    sec_point_2: "SSL/TLS 암호화 데이터 전송",
+    sec_point_3: "개인 식별 정보를 저장하지 않는 익명성 유지",
+    sec_point_4: "학원 인증 코드를 통한 안전한 이용",
 
     // Resource Center
     res_title: "자세히 보기",
