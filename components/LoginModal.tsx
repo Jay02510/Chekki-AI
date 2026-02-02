@@ -5,7 +5,7 @@ import { ASSETS } from '../constants';
 import { LegalModal } from './LegalModal';
 
 export const LoginModal: React.FC = () => {
-  const { showLoginModal, closeLoginModal, signIn, signUp, sendResetEmail, joinSchool } = useAuth();
+  const { showLoginModal, closeLoginModal, signIn, signUp, sendResetEmail } = useAuth();
   const [viewMode, setViewMode] = useState<'login' | 'signup' | 'forgot'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -30,14 +30,7 @@ export const LoginModal: React.FC = () => {
             await signIn(email, password);
         } else if (viewMode === 'signup') {
             if (password.length < 6) throw new Error("Password must be at least 6 characters.");
-            await signUp(name, email, password);
-            
-            if (schoolCode.trim()) {
-                const schoolSuccess = await joinSchool(schoolCode);
-                if (!schoolSuccess) {
-                    console.warn("Invalid school code provided during signup.");
-                }
-            }
+            await signUp(name, email, password, schoolCode.trim());
         } else if (viewMode === 'forgot') {
             await sendResetEmail(email);
             setSuccess("Check your inbox for a password reset link!");
@@ -137,19 +130,19 @@ export const LoginModal: React.FC = () => {
                             <button 
                                 type="button" 
                                 onClick={() => setShowSchoolField(true)}
-                                className="text-[9px] font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors flex items-center gap-2 px-1 py-1"
+                                className="text-[9px] font-black text-orange-500 uppercase tracking-widest hover:text-orange-400 transition-colors flex items-center gap-2 px-1 py-1"
                             >
-                                🏫 I have a Hagwon Code
+                                🏷️ Use Access / Beta Code
                             </button>
                         ) : (
                             <div className="relative group animate-fade-in-up">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">🏫</span>
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">🏷️</span>
                                 <input 
                                     type="text" 
                                     value={schoolCode} 
                                     onChange={(e) => setSchoolCode(e.target.value.toUpperCase())} 
-                                    placeholder="Enter Hagwon Code (e.g. POLY10)" 
-                                    className="w-full bg-indigo-500/5 border border-indigo-500/30 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-indigo-500 transition-colors font-mono tracking-widest text-[10px]" 
+                                    placeholder="Enter Code (e.g. CHEKKI40 or POLY10)" 
+                                    className="w-full bg-orange-500/5 border border-orange-500/30 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-orange-500 transition-colors font-mono tracking-widest text-[10px]" 
                                 />
                             </div>
                         )}

@@ -15,7 +15,7 @@ import {
 interface AuthContextType {
   user: UserProfile | null;
   firebaseUser: User | null;
-  signUp: (name: string, email: string, pass: string) => Promise<void>;
+  signUp: (name: string, email: string, pass: string, code?: string) => Promise<void>;
   signIn: (email: string, pass: string) => Promise<void>;
   sendResetEmail: (email: string) => Promise<void>;
   logout: () => void;
@@ -60,16 +60,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return unsubscribe;
   }, []);
 
-  const signUp = async (name: string, email: string, pass: string) => {
+  const signUp = async (name: string, email: string, pass: string, code?: string) => {
     const res = await createUserWithEmailAndPassword(auth, email, pass);
+    let plan: 'free' | 'pro' = 'free';
+    let maxScans = FREE_DAILY_LIMIT;
+    let schoolId: string | undefined;
+    let schoolName: string | undefined;
+    let subscriptionStartedAt: string | undefined;
+    let nextBillingDate: string | undefined;
+
+    // Check if an access code was provided during signup
+    if (code) {
+      const sanitized = code.toUpperCase().trim();
+      
+      // Check School Codes
+      const schools: Record<string, string> = {
+          'POLY10': 'Poly Academy Seocho',
+          'GATE05': 'GATE Academy Bundang',
+          'ECC99': 'YBM ECC Gangnam'
+      };
+
+      if (schools[sanitized]) {
+        plan = 'pro';
+        maxScans = 9999;
+        schoolId = sanitized;
+        schoolName = schools[sanitized];
+      } else if (sanitized === BETA_CODE_MAIN) {
+        // Check Beta Code
+        const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
+        if (canRedeem) {
+            plan = 'pro';
+            maxScans = 9999;
+            subscriptionStartedAt = new Date().toISOString();
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            nextBillingDate = nextMonth.toISOString();
+        }
+      }
+    }
+
     const newProfile: UserProfile = {
       name,
       email,
-      plan: 'free',
+      plan,
       scansUsedToday: 0,
       lastScanDate: new Date().toISOString().split('T')[0],
-      maxScansPerDay: FREE_DAILY_LIMIT
+      maxScansPerDay: maxScans,
+      schoolId,
+      schoolName,
+      subscriptionStartedAt,
+      nextBillingDate
     };
+
     await db.createUser(res.user.uid, newProfile);
     setUserProfile(newProfile);
     setShowLoginModal(false);
