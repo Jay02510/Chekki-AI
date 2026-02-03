@@ -18,6 +18,14 @@ const translations = {
     scans: "Magic Scans",
     pro_plan: "Pro Magic 🚀",
     
+    // Payments & Compliance
+    pay_method_card: "Credit / Debit Card",
+    pay_method_easy: "Easy Pay (Kakao, Naver)",
+    pay_secure_notice: "Secure payment powered by Toss Payments",
+    biz_info_title: "Business Information",
+    biz_reg_num: "Reg: 123-45-67890",
+    biz_rep: "Rep: Chekki Team",
+    
     // Instructional Tips
     tip_click_guide: "💡 Tap any question to see your Teaching Script!",
     tip_scroll_more: "Scroll down to see all answers",
@@ -167,6 +175,14 @@ const translations = {
     logout: "로그아웃",
     scans: "번의 마법 남음",
     pro_plan: "마법 프로 플랜 🚀",
+
+    // Payments & Compliance
+    pay_method_card: "일반 신용/체크카드",
+    pay_method_easy: "간편 결제 (카카오페이, 네이버페이)",
+    pay_secure_notice: "토스페이먼츠를 통한 안전한 결제가 지원됩니다.",
+    biz_info_title: "사업자 정보",
+    biz_reg_num: "사업자번호: 123-45-67890",
+    biz_rep: "대표: 채키 팀",
 
     // Instructional Tips
     tip_click_guide: "💡 문제를 누르면 다정한 티칭 가이드가 나타나요!",
