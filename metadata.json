@@ -1,6 +1,19 @@
 {
-  "name": "Chekki AI Deployed",
+  "name": "Chekki AI",
+  "short_name": "Chekki",
   "description": "영어 숙제 채점 & 티칭 - 채점은 채키가, 칭찬은 부모님이. (Your Homework Helper)",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#09090b",
+  "background_color": "#09090b",
   "requestFramePermissions": [
     "camera",
     "microphone"
