@@ -22,8 +22,8 @@ const translations = {
     hero_guest_cta: "Try Guest Scan",
     login_guest_link: "Not ready? Try 1 scan as guest",
     guest_scan_badge: "Free Magic Scan Available",
-    guest_used_title: "Magic Used!",
-    guest_used_desc: "You've seen the magic. Sign up now to unlock unlimited scripts and audio!",
+    guest_used_title: "Free Scan Used!",
+    guest_used_desc: "You've seen the magic. Sign up now for more scans and unlock full scripts and audio!",
 
     // Payments & Compliance
     pay_method_card: "Credit / Debit Card",
@@ -187,8 +187,8 @@ const translations = {
     hero_guest_cta: "로그인 없이 체험하기",
     login_guest_link: "회원가입 없이 1회 무료 체험하기",
     guest_scan_badge: "무료 마법 1회 사용 가능",
-    guest_used_title: "무료 마법 사용 완료!",
-    guest_used_desc: "채키의 마법을 보셨나요? 이제 가입하고 무제한 스크립트와 발음 가이드를 누리세요!",
+    guest_used_title: "무료 체험 완료!",
+    guest_used_desc: "채키의 마법을 보셨나요? 가입하고 더 많은 스캔과 티칭 가이드를 확인하세요!",
 
     // Payments & Compliance
     pay_method_card: "일반 신용/체크카드",

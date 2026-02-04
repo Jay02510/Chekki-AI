@@ -30,6 +30,13 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   
   const { t, language } = useLanguage();
 
+  // TRACK GUEST USAGE FOR UI LOCK
+  const [guestUsed, setGuestUsed] = useState(false);
+  useEffect(() => {
+    const used = localStorage.getItem('chekki_guest_scan_used') === 'true';
+    setGuestUsed(used);
+  }, [isAuthenticated]);
+
   const processFile = async (file: File) => {
     setIsProcessing(true);
     try {
@@ -74,80 +81,102 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     </div>
   );
 
-  const DropZone = ({ size = "large" }: { size?: "large" | "compact" }) => (
-    <div className={`relative w-full ${size === 'large' ? 'min-h-[400px] md:min-h-[500px]' : 'h-[500px]'} flex items-center justify-center py-12`}>
-      {/* Visual ring background */}
-      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] border-2 ${isNight ? 'border-indigo-500/5' : 'border-white/5'} rounded-[3.5rem] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}></div>
-      
-      <div 
-        role="button"
-        id="magic-drop-zone-inner"
-        className={`relative w-full h-full max-w-2xl mx-auto ${isNight ? 'bg-indigo-950/20' : 'bg-zinc-900/30'} backdrop-blur-3xl rounded-[3rem] border-2 transition-all duration-500 flex flex-col items-center justify-center p-10 md:p-16 group cursor-pointer
-          ${dragActive ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.25)] scale-[1.02]' : 'border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.4)] hover:border-white/30 hover:shadow-[0_40px_100px_rgba(0,0,0,0.6)]'}`}
-        onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-      >
-          {/* MASCORT SPEECH BUBBLE (The "Magic Cloud") */}
-          {!isAuthenticated && (
-            <div className="absolute top-0 -translate-y-1/2 z-40 animate-[bounce_3s_ease-in-out_infinite]">
-                <div className="relative">
-                    <div className="bg-orange-500 text-white text-[10px] font-black px-6 py-2.5 rounded-full uppercase tracking-widest shadow-[0_20px_40px_rgba(249,115,22,0.6)] flex items-center gap-3 border-2 border-white/20 whitespace-nowrap">
-                        <span className="w-2 h-2 bg-white rounded-full animate-pulse shadow-sm"></span>
-                        {t('guest_scan_badge')}
+  const DropZone = ({ size = "large" }: { size?: "large" | "compact" }) => {
+    // LOCK UI FOR GUESTS WHO ALREADY USED THEIR SCAN
+    const isLocked = !isAuthenticated && guestUsed;
+
+    return (
+        <div className={`relative w-full ${size === 'large' ? 'min-h-[400px] md:min-h-[500px]' : 'h-[500px]'} flex items-center justify-center py-12 overflow-visible`}>
+          {/* Visual ring background */}
+          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border-2 ${isNight ? 'border-indigo-500/5' : 'border-white/5'} rounded-[3.5rem] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}></div>
+          
+          <div 
+            role="button"
+            id="magic-drop-zone-inner"
+            className={`relative w-full h-full max-w-2xl mx-auto ${isNight ? 'bg-indigo-950/20' : 'bg-zinc-900/30'} backdrop-blur-3xl rounded-[3rem] border-2 transition-all duration-700 flex flex-col items-center justify-center p-10 md:p-16 group cursor-pointer overflow-visible
+              ${dragActive && !isLocked ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.25)] scale-[1.02]' : 'border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.4)] hover:border-white/20'}`}
+            onDragEnter={isLocked ? undefined : handleDrag} 
+            onDragLeave={isLocked ? undefined : handleDrag} 
+            onDragOver={isLocked ? undefined : handleDrag} 
+            onDrop={isLocked ? undefined : handleDrop}
+            onClick={() => isLocked ? openLoginModal() : fileInputRef.current?.click()}
+          >
+              {/* MAGIC CLOUD / TOOLTIP */}
+              {!isAuthenticated && !isLocked && (
+                <div className="absolute top-0 -translate-y-full pb-4 z-40 animate-[bounce_4s_ease-in-out_infinite] pointer-events-none">
+                    <div className="relative">
+                        <div className="bg-orange-500 text-white text-[10px] font-black px-6 py-3 rounded-full uppercase tracking-widest shadow-[0_20px_40px_rgba(249,115,22,0.6)] flex items-center gap-3 border-2 border-white/20 whitespace-nowrap">
+                            <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
+                            {t('guest_scan_badge')}
+                        </div>
+                        {/* Speech bubble tail */}
+                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-orange-500 rotate-45 border-r-2 border-b-2 border-white/20 -z-10"></div>
                     </div>
-                    {/* Speech bubble tail */}
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-orange-500 rotate-45 border-r-2 border-b-2 border-white/20 -z-10"></div>
                 </div>
-            </div>
-          )}
+              )}
 
-          <div className="relative z-10 flex flex-col items-center text-center w-full">
-            <div className={`${size === 'large' ? 'w-40 h-40 md:w-64 md:h-64' : 'w-48 h-48'} mb-8 relative transition-all duration-700 group-hover:scale-105 group-hover:-rotate-2`}>
-                {isProcessing ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className={`w-14 h-14 md:w-20 md:h-20 border-[6px] ${isNight ? 'border-indigo-500' : 'border-orange-500'} border-t-transparent rounded-full animate-spin shadow-2xl`}></div>
-                  </div>
-                ) : (
-                  <div className="w-full h-full animate-float flex items-center justify-center">
-                    {!imgError ? (
-                       <img 
-                        src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} 
-                        alt="Chekki Mascot" 
-                        className={`w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] filter brightness-110 ${isNight ? 'scale-[1.6] md:scale-[1.8]' : ''} transition-opacity duration-700 ${mascotLoaded ? 'opacity-100' : 'opacity-0'}`} 
-                        onLoad={() => setMascotLoaded(true)}
-                        onError={() => setImgError(true)}
-                        loading="eager"
-                       />
+              <div className="relative z-10 flex flex-col items-center text-center w-full">
+                <div className={`${size === 'large' ? 'w-40 h-40 md:w-64 md:h-64' : 'w-48 h-48'} mb-8 relative transition-all duration-700 ${isLocked ? 'blur-md opacity-40 grayscale scale-90' : 'group-hover:scale-105 group-hover:-rotate-2'}`}>
+                    {isProcessing ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className={`w-14 h-14 md:w-20 md:h-20 border-[6px] ${isNight ? 'border-indigo-500' : 'border-orange-500'} border-t-transparent rounded-full animate-spin shadow-2xl`}></div>
+                      </div>
                     ) : (
-                       <ChekkiMascot className="w-full h-full drop-shadow-2xl" mood={isNight ? "sleeping" : "happy"} />
+                      <div className="w-full h-full animate-float flex items-center justify-center">
+                        {!imgError ? (
+                           <img 
+                            src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} 
+                            alt="Chekki Mascot" 
+                            className={`w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] filter brightness-110 ${isNight ? 'scale-[1.6] md:scale-[1.8]' : ''} transition-opacity duration-700 ${mascotLoaded ? 'opacity-100' : 'opacity-0'}`} 
+                            onLoad={() => setMascotLoaded(true)}
+                            onError={() => setImgError(true)}
+                            loading="eager"
+                           />
+                        ) : (
+                           <ChekkiMascot className="w-full h-full drop-shadow-2xl" mood={isNight ? "sleeping" : "happy"} />
+                        )}
+                      </div>
                     )}
-                  </div>
-                )}
-            </div>
-            
-            <div className="space-y-4 max-w-md">
-                <h3 className="text-3xl md:text-5xl font-black text-white font-display tracking-tight break-keep drop-shadow-sm">
-                {isProcessing ? t('processing') : t('drop_title')}
-                </h3>
-                <p className="text-zinc-500 font-bold font-korean text-base md:text-xl break-keep opacity-90 leading-relaxed">{t('drop_subtitle')}</p>
-            </div>
-            
-            <ClarityGuide />
-
-            <div className="mt-10 flex flex-col items-center gap-4 group/btn">
-                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full ${isNight ? 'bg-indigo-600' : 'bg-orange-500'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.4)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/60 border-4 border-white/20 active:scale-90`}>
-                    <svg className="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
                 </div>
-                <span className="text-[10px] md:text-xs font-black text-zinc-500 uppercase tracking-[0.3em] group-hover:text-white transition-colors">{t('btn_upload')}</span>
-            </div>
+                
+                {isLocked ? (
+                    <div className="animate-fade-in space-y-6">
+                        <div className="space-y-2">
+                             <h3 className="text-3xl md:text-4xl font-black text-white font-display tracking-tight break-keep">{t('guest_used_title')}</h3>
+                             <p className="text-zinc-400 font-bold font-korean text-sm md:text-lg max-w-sm mx-auto leading-relaxed">{t('guest_used_desc')}</p>
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); openLoginModal(); }} className="bg-white text-black px-10 py-4 rounded-2xl font-black text-base shadow-2xl shadow-white/10 hover:bg-zinc-200 transition-all active:scale-95 uppercase tracking-wider">
+                           {t('login')}
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div className="space-y-4 max-w-md">
+                            <h3 className="text-3xl md:text-5xl font-black text-white font-display tracking-tight break-keep">
+                            {isProcessing ? t('processing') : t('drop_title')}
+                            </h3>
+                            <p className="text-zinc-500 font-bold font-korean text-base md:text-xl break-keep opacity-90 leading-relaxed">{t('drop_subtitle')}</p>
+                        </div>
+                        
+                        <ClarityGuide />
+
+                        <div className="mt-10 flex flex-col items-center gap-4 group/btn">
+                            <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full ${isNight ? 'bg-indigo-600' : 'bg-orange-500'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.4)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/60 border-4 border-white/20 active:scale-90`}>
+                                <svg className="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <span className="text-[10px] md:text-xs font-black text-zinc-500 uppercase tracking-[0.3em] group-hover:text-white transition-colors">{t('btn_upload')}</span>
+                        </div>
+                    </>
+                )}
+              </div>
+              <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileChange} disabled={isProcessing || isLocked} />
           </div>
-          <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileChange} disabled={isProcessing} />
-      </div>
-    </div>
-  );
+        </div>
+    );
+  };
 
   const VideoWalkthroughModal = () => (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -277,15 +306,17 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             </button>
 
             {/* Discovery Shortcut */}
-            <button 
-              onClick={() => {
-                const dropZone = document.getElementById('magic-drop-zone');
-                dropZone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }} 
-              className="group px-10 py-6 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-base md:text-xl transition-all flex items-center gap-4 backdrop-blur-xl ring-1 ring-white/5 active:scale-95"
-            >
-              <span className="text-orange-500 transition-transform group-hover:rotate-[360deg] duration-700">✨</span> {t('hero_guest_cta')}
-            </button>
+            {!guestUsed && (
+                <button 
+                onClick={() => {
+                    const dropZone = document.getElementById('magic-drop-zone');
+                    dropZone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }} 
+                className="group px-10 py-6 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-base md:text-xl transition-all flex items-center gap-4 backdrop-blur-xl ring-1 ring-white/5 active:scale-95"
+                >
+                <span className="text-orange-500 transition-transform group-hover:rotate-[360deg] duration-700">✨</span> {t('hero_guest_cta')}
+                </button>
+            )}
           </div>
         </div>
         
@@ -301,7 +332,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       </div>
 
       {/* Upload Zone / Landing Context */}
-      <div id="magic-drop-zone" className="max-w-5xl mx-auto px-6 mb-32 w-full relative pt-16">
+      <div id="magic-drop-zone" className="max-w-5xl mx-auto px-6 mb-32 w-full relative pt-16 overflow-visible">
          <DropZone size="large" />
          <p className="mt-10 text-zinc-600 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-center opacity-40">{t('supported_formats')}</p>
       </div>
