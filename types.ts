@@ -30,6 +30,8 @@ export interface WorksheetItem {
   confidence_score?: number;
   group_id?: string;
   bounding_box?: BoundingBox;
+  // NEW: Support for manual repositioning
+  custom_coords?: { top: number; left: number };
 }
 
 export interface UserProfile {
@@ -42,7 +44,6 @@ export interface UserProfile {
   subscriptionStartedAt?: string;
   nextBillingDate?: string;
   isCanceled?: boolean;
-  // NEW: B2B Support
   schoolId?: string;
   schoolName?: string;
 }

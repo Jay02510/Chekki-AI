@@ -229,7 +229,7 @@ function AppContent() {
         </div>
       )}
 
-      <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-0 flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : ''}`}>
+      <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : 'pt-2 md:pt-4'}`}>
         
         {analysisState.status === 'idle' && isInApp && showInAppNotice && (
             <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
@@ -237,8 +237,8 @@ function AppContent() {
                     <span className="text-xl">⚠️</span>
                     <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
                         {language === 'ko' 
-                           ? "더 원활한 카메라 및 음성 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요." 
-                           : "Open in Safari or Chrome for full AI features (Camera/Mic)."}
+                           ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요." 
+                           : "Open in Safari or Chrome for the best experience (Camera/Mic)."}
                     </p>
                 </div>
                 <button onClick={() => setShowInAppNotice(false)} className="text-white/60 p-1 ml-2">✕</button>
@@ -262,11 +262,11 @@ function AppContent() {
              <p className="text-zinc-400 mb-8 max-w-md mx-auto font-korean leading-relaxed">
                {analysisState.errorMessage}
              </p>
-             <div className="flex flex-col sm:flex-row gap-4">
-               <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg">
+             <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
+               <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full">
                  {t('btn_scan_again_simple')}
                </button>
-               <button onClick={() => handleReset(false)} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all font-korean shadow-lg">
+               <button onClick={() => handleReset(false)} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all font-korean shadow-lg w-full">
                  {t('btn_retake')}
                </button>
              </div>
@@ -274,20 +274,20 @@ function AppContent() {
         )}
 
         {analysisState.status === 'complete' && analysisState.data && (
-          <div className="animate-fade-in-up flex flex-col flex-1 pt-14 md:pt-24 pb-4 overflow-hidden">
+          <div className="animate-fade-in-up flex flex-col flex-1 pt-12 md:pt-24 pb-4 overflow-hidden">
             <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                  <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
                     {language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "제목 없음") : (analysisState.data.worksheet_summary?.title_en || "Untitled")}
                  </h2>
                  {user?.plan === 'pro' && (
-                   <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest animate-pulse">PRO</span>
+                   <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest">PRO</span>
                  )}
               </div>
               
               <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => handleReset(true)} className="bg-zinc-800 hover:bg-zinc-700 text-white px-2.5 py-1.5 md:px-4 md:py-2 rounded-xl border border-zinc-700 transition-all shadow-xl flex items-center gap-2 group active:scale-95">
-                    <span className="text-sm md:text-lg">📸</span> 
+                  <button onClick={() => handleReset(true)} className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-xl border border-zinc-700 transition-all shadow-xl flex items-center gap-2 group active:scale-95">
+                    <span className="text-lg">📸</span> 
                     <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">{t('ws_scan_again')}</span>
                   </button>
               </div>
