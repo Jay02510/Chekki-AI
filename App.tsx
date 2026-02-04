@@ -17,6 +17,7 @@ import { ChekkiMascot } from './components/Icons';
 
 const SESSION_KEY = 'hw_last_session';
 const ONBOARDED_KEY = 'chekki_onboarded_v1';
+const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
 const isNightModeKST = () => {
   const now = new Date();
@@ -69,7 +70,6 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    // Check if onboarding is needed
     const hasOnboarded = localStorage.getItem(ONBOARDED_KEY);
     if (!hasOnboarded) {
       setShowOnboarding(true);
@@ -80,13 +80,6 @@ function AppContent() {
     localStorage.setItem(ONBOARDED_KEY, 'true');
     setShowOnboarding(false);
   };
-
-  useEffect(() => {
-    if (!isAuthenticated && analysisState.status !== 'idle') {
-      setAnalysisState({ status: 'idle', data: null, originalImage: null, errorMessage: null, showReward: false });
-      localStorage.removeItem(SESSION_KEY);
-    }
-  }, [isAuthenticated]);
 
   useEffect(() => {
     if (analysisState.status === 'idle') {
@@ -114,14 +107,20 @@ function AppContent() {
   }, [analysisState.status]);
 
   const handleImageSelected = async (base64Data: string, isRetryAttempt = false) => {
-    if (!isAuthenticated) {
+    const guestUsed = localStorage.getItem(GUEST_SCAN_KEY);
+    
+    // Marketing Hook: Allow 1 guest scan
+    if (!isAuthenticated && guestUsed) {
       openLoginModal();
       return;
     }
 
-    if (!isRetryAttempt) {
+    if (isAuthenticated && !isRetryAttempt) {
       const canScan = await incrementScan();
       if (!canScan) return; 
+    } else if (!isAuthenticated) {
+      // Mark guest scan as used
+      localStorage.setItem(GUEST_SCAN_KEY, 'true');
     }
 
     const displayUrl = `data:image/jpeg;base64,${base64Data}`;
@@ -144,7 +143,7 @@ function AppContent() {
             body: JSON.stringify({ 
               task: 'analyze', 
               image: base64Data,
-              userPlan: user?.plan 
+              userPlan: user?.plan || 'free' 
             })
         });
 

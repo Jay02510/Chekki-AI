@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }) => {
-  const { user, openLoginModal } = useAuth();
+  const { user, openLoginModal, isAuthenticated } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -87,6 +87,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       >
           <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-500/10 to-purple-500/10' : 'from-brand-orange/5 to-brand-purple/5'} opacity-50 group-hover:opacity-100 transition-opacity duration-500`}></div>
           <div className="relative z-10 flex flex-col items-center text-center">
+            
+            {/* Guest Badge for Non-Auth Users */}
+            {!isAuthenticated && (
+              <div className="absolute top-0 right-0 bg-orange-500 text-white text-[8px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest shadow-lg animate-bounce">
+                {language === 'ko' ? "무료 체험 1회 가능" : "Free Guest Scan Available"}
+              </div>
+            )}
+
             <div className={`${size === 'large' ? 'w-32 h-32 md:w-56 md:h-56' : 'w-40 h-40'} mb-4 md:mb-6 relative transition-transform duration-500 group-hover:scale-105`}>
                 {isProcessing ? (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -194,7 +202,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     </div>
   );
 
-  if (user) {
+  if (isAuthenticated && user) {
     const remaining = user.plan === 'pro' ? '∞' : Math.max(0, user.maxScansPerDay - user.scansUsedToday);
     return (
       <div className="min-h-full pt-12 md:pt-28 pb-12 px-4 md:px-6 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
@@ -300,6 +308,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 </div>
             </div>
         </div>
+      </div>
+
+      {/* Guest Mode Section (Explicitly Added for Guest Experience) */}
+      <div className="max-w-4xl mx-auto px-6 mb-24 w-full">
+         <DropZone size="large" />
+         <p className="mt-6 text-zinc-600 text-[10px] md:text-xs font-bold uppercase tracking-widest text-center">{t('supported_formats')}</p>
       </div>
 
       {/* Why Chekki Section */}
