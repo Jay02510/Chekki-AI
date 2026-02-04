@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ASSETS } from '../constants';
+import { useLanguage } from '../contexts/LanguageContext';
 import { LegalModal } from './LegalModal';
 
 export const LoginModal: React.FC = () => {
   const { showLoginModal, closeLoginModal, signIn, signUp, sendResetEmail } = useAuth();
+  const { t } = useLanguage();
   const [viewMode, setViewMode] = useState<'login' | 'signup' | 'forgot'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -172,7 +174,16 @@ export const LoginModal: React.FC = () => {
                       )}
                   </button>
 
-                  <p className="text-[8px] text-zinc-600 text-center uppercase tracking-widest leading-relaxed max-w-[200px]">
+                  {/* --- DISCOVERY: Guest Mode Alternative --- */}
+                  <div className="w-full h-px bg-white/5 my-2"></div>
+                  <button 
+                    onClick={closeLoginModal}
+                    className="text-zinc-500 text-[11px] hover:text-orange-400 font-black uppercase tracking-widest transition-all animate-pulse"
+                  >
+                    {t('login_guest_link')}
+                  </button>
+
+                  <p className="text-[8px] text-zinc-600 text-center uppercase tracking-widest leading-relaxed max-w-[200px] mt-2">
                       By continuing, you agree to our <button onClick={() => setShowLegal('terms')} className="underline">Terms</button> & <button onClick={() => setShowLegal('privacy')} className="underline">Privacy</button>
                   </p>
               </div>

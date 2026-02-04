@@ -18,6 +18,13 @@ const translations = {
     scans: "Magic Scans",
     pro_plan: "Pro Magic 🚀",
     
+    // Guest Mode CTAs
+    hero_guest_cta: "Try Guest Scan",
+    login_guest_link: "Not ready? Try 1 scan as guest",
+    guest_scan_badge: "Free Magic Scan Available",
+    guest_used_title: "Magic Used!",
+    guest_used_desc: "You've seen the magic. Sign up now to unlock unlimited scripts and audio!",
+
     // Payments & Compliance
     pay_method_card: "Credit / Debit Card",
     pay_method_easy: "Easy Pay (Kakao, Naver)",
@@ -175,6 +182,13 @@ const translations = {
     logout: "로그아웃",
     scans: "번의 마법 남음",
     pro_plan: "마법 프로 플랜 🚀",
+
+    // Guest Mode CTAs
+    hero_guest_cta: "로그인 없이 체험하기",
+    login_guest_link: "회원가입 없이 1회 무료 체험하기",
+    guest_scan_badge: "무료 마법 1회 사용 가능",
+    guest_used_title: "무료 마법 사용 완료!",
+    guest_used_desc: "채키의 마법을 보셨나요? 이제 가입하고 무제한 스크립트와 발음 가이드를 누리세요!",
 
     // Payments & Compliance
     pay_method_card: "일반 신용/체크카드",

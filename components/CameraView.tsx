@@ -79,6 +79,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] border ${isNight ? 'border-indigo-500/10' : 'border-white/5'} rounded-full animate-[spin_20s_linear_infinite] pointer-events-none`}></div>
       <div 
         role="button"
+        id="magic-drop-zone-inner"
         aria-label="Upload Worksheet"
         className={`relative w-full h-full max-w-2xl mx-auto ${isNight ? 'bg-indigo-950/20' : 'bg-zinc-900/60'} backdrop-blur-2xl rounded-[2rem] md:rounded-[2.5rem] border transition-all duration-500 flex flex-col items-center justify-center p-6 md:p-10 group cursor-pointer overflow-hidden
           ${dragActive ? 'border-brand-orange shadow-[0_0_50px_rgba(249,115,22,0.3)] scale-[1.02]' : 'border-white/10 shadow-2xl hover:border-white/30 hover:shadow-brand-orange/10'}`}
@@ -88,10 +89,13 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-500/10 to-purple-500/10' : 'from-brand-orange/5 to-brand-purple/5'} opacity-50 group-hover:opacity-100 transition-opacity duration-500`}></div>
           <div className="relative z-10 flex flex-col items-center text-center">
             
-            {/* Guest Badge for Non-Auth Users */}
+            {/* --- DISCOVERY: Pulsing Guest Badge --- */}
             {!isAuthenticated && (
-              <div className="absolute top-0 right-0 bg-orange-500 text-white text-[8px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest shadow-lg animate-bounce">
-                {language === 'ko' ? "무료 체험 1회 가능" : "Free Guest Scan Available"}
+              <div className="absolute top-4 right-4 animate-bounce z-20">
+                <div className="bg-orange-500 text-white text-[8px] md:text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-[0_10px_20px_rgba(249,115,22,0.4)] flex items-center gap-2">
+                   <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                   {t('guest_scan_badge')}
+                </div>
               </div>
             )}
 
@@ -195,7 +199,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         >
           <div className="w-10 h-10 rounded-xl flex-shrink-0 bg-orange-500 flex items-center justify-center text-lg shadow-lg">📢</div>
           <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-[0.15em] text-orange-400 mb-0.5">Resource</p>
+              <p className={`text-[9px] font-black uppercase tracking-[0.15em] text-orange-400 mb-0.5`}>Resource</p>
               <p className="text-sm font-bold text-white font-korean leading-tight">{t('res_title')}</p>
           </div>
         </button>
@@ -271,27 +275,24 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           <p className="text-base md:text-xl text-zinc-400 max-w-lg leading-relaxed mb-8 md:mb-10 font-korean text-left font-medium break-keep">
             {isNight ? t('hero_desc_night') : t('hero_desc')}
           </p>
+          
           <div className="flex flex-wrap gap-4 justify-start items-center">
-            <button onClick={openLoginModal} className="group relative bg-white text-black px-8 py-4 md:px-10 md:py-5 rounded-2xl font-black text-base md:text-xl transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)] font-display flex items-center gap-3 overflow-hidden">
+            {/* --- PRIMARY CTA --- */}
+            <button onClick={openLoginModal} className="group relative bg-white text-black px-8 py-4 md:px-10 md:py-5 rounded-2xl font-black text-base md:text-xl transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)] font-display flex items-center gap-3 overflow-hidden ring-2 ring-white/10 hover:ring-white/40">
               <span className="relative font-korean whitespace-nowrap">{t('hero_cta_btn')}</span> 
               <span className="text-xl md:text-2xl relative transition-transform group-hover:translate-x-1">→</span>
             </button>
-            
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setShowVideoModal(true)}
-                className="px-6 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-sm md:text-base transition-all flex items-center gap-2 backdrop-blur-sm"
-              >
-                <span>▶️</span> {t('btn_walkthrough')}
-              </button>
 
-              <button 
-                onClick={() => setShowFlyerModal(true)}
-                className="px-6 py-4 rounded-2xl border border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 text-orange-400 font-bold text-sm md:text-base transition-all flex items-center gap-2 backdrop-blur-sm"
-              >
-                <span>📢</span> {t('res_title')}
-              </button>
-            </div>
+            {/* --- SECONDARY CTA: DISCOVERY --- */}
+            <button 
+              onClick={() => {
+                const dropZone = document.getElementById('magic-drop-zone');
+                dropZone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }} 
+              className="px-6 py-4 md:px-8 md:py-5 rounded-2xl border-2 border-orange-500/30 bg-orange-500/5 hover:bg-orange-500/10 text-orange-400 font-black text-sm md:text-lg transition-all flex items-center gap-3 backdrop-blur-md"
+            >
+              <span className="animate-pulse">✨</span> {t('hero_guest_cta')}
+            </button>
           </div>
         </div>
         
@@ -311,7 +312,13 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       </div>
 
       {/* Guest Mode Section (Explicitly Added for Guest Experience) */}
-      <div className="max-w-4xl mx-auto px-6 mb-24 w-full">
+      <div id="magic-drop-zone" className="max-w-4xl mx-auto px-6 mb-24 w-full relative">
+         <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce pointer-events-none">
+            <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2">{t('tip_click_guide')}</span>
+            <svg className="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+         </div>
          <DropZone size="large" />
          <p className="mt-6 text-zinc-600 text-[10px] md:text-xs font-bold uppercase tracking-widest text-center">{t('supported_formats')}</p>
       </div>
