@@ -5,22 +5,35 @@ export const config = {
   maxDuration: 60, 
 };
 
-const SYSTEM_PROMPT_SUMMARY = `Identify EK (English Kindergarten) worksheet title and primary learning goal. Return JSON: { "worksheet_summary": { "title_en": "string", "title_ko": "string", "overview_ko": "string" } }`;
-
-const SYSTEM_PROMPT_ITEMS = `
+const SYSTEM_PROMPT = `
 You are "Chekki AI", a high-fidelity educational assistant for English Kindergarten parents.
-Your primary task is to provide a PERFECT FULL ANSWER KEY for the worksheet.
+Analyze the provided worksheet image and return a consolidated JSON object.
 
-CRITICAL EXTRACTION RULES:
-1. FULL ANSWERS ONLY: For MCQ, provide the full text.
-2. ACCURATE SEQUENCING: Extract every question.
-3. BILINGUAL SCRIPTS: Provide Teaching Scripts in Korean and English.
-4. COORDINATES: Normalized 0-1000 bounding_box.
+TASK 1: SUMMARY
+Identify the worksheet title (English & Korean) and a brief overview of the learning goal in Korean.
+
+TASK 2: FULL ANSWER KEY
+Extract every question with its coordinates (normalized 0-1000) and provide the correct pedagogical answer.
+Provide a "Teaching Script" in both Korean and English that a parent can read to their child.
+
+RULES:
+1. Output MUST be valid JSON.
+2. Coordinates must be accurate for overlay placement.
+3. Teaching scripts should be encouraging and warm.
 `;
 
-const ITEM_SCHEMA = {
+const CONSOLIDATED_SCHEMA = {
   type: Type.OBJECT,
   properties: {
+    worksheet_summary: {
+      type: Type.OBJECT,
+      properties: {
+        title_en: { type: Type.STRING },
+        title_ko: { type: Type.STRING },
+        overview_ko: { type: Type.STRING }
+      },
+      required: ["title_en", "title_ko", "overview_ko"]
+    },
     items: {
       type: Type.ARRAY,
       items: {
@@ -34,8 +47,6 @@ const ITEM_SCHEMA = {
           english_guide: { type: Type.STRING },
           teaching_script_ko: { type: Type.STRING },
           teaching_script_en: { type: Type.STRING },
-          teaching_tip_ko: { type: Type.STRING },
-          teaching_tip_en: { type: Type.STRING },
           bounding_box: {
             type: Type.OBJECT,
             properties: {
@@ -50,7 +61,8 @@ const ITEM_SCHEMA = {
         required: ["id", "type", "question_text", "correct_answer", "korean_guide", "english_guide", "teaching_script_ko", "teaching_script_en", "bounding_box"]
       }
     }
-  }
+  },
+  required: ["worksheet_summary", "items"]
 };
 
 export default async function handler(req: any, res: any) {
@@ -63,6 +75,7 @@ export default async function handler(req: any, res: any) {
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+    // Handle Practice Sheet Generation
     if (task === 'generate') {
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
@@ -74,40 +87,32 @@ export default async function handler(req: any, res: any) {
 
     if (!image) return res.status(400).json({ error: "NO_IMAGE" });
 
+    // MODEL ROUTING: Speed for Free, Reasoning for Pro
     const modelToUse = userPlan === 'pro' ? 'gemini-3-pro-preview' : 'gemini-3-flash-preview';
 
-    const [summaryResult, itemsResult] = await Promise.all([
-      ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: {
-          parts: [
-            { inlineData: { mimeType: "image/jpeg", data: image } }, 
-            { text: "Identify the worksheet title and goals." }
-          ]
-        },
-        config: { systemInstruction: SYSTEM_PROMPT_SUMMARY, responseMimeType: "application/json" }
-      }).then(r => JSON.parse(r.text || "{}")),
+    // SINGLE PASS INFERENCE: Much faster than concurrent calls
+    const response = await ai.models.generateContent({
+      model: modelToUse,
+      contents: {
+        parts: [
+          { inlineData: { mimeType: "image/jpeg", data: image } }, 
+          { text: "Analyze this worksheet for summary and answer key." }
+        ]
+      },
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        responseMimeType: "application/json",
+        responseSchema: CONSOLIDATED_SCHEMA,
+        // Only use thinking budget for Pro users to maintain high speed for free tier
+        thinkingConfig: { thinkingBudget: userPlan === 'pro' ? 15000 : 0 }
+      }
+    });
 
-      ai.models.generateContent({
-        model: modelToUse,
-        contents: {
-          parts: [
-            { inlineData: { mimeType: "image/jpeg", data: image } }, 
-            { text: "Extract the FULL answer key with coordinates and bilingual scripts for all items." }
-          ]
-        },
-        config: {
-          systemInstruction: SYSTEM_PROMPT_ITEMS,
-          responseMimeType: "application/json",
-          responseSchema: ITEM_SCHEMA,
-          thinkingConfig: { thinkingBudget: userPlan === 'pro' ? 20000 : 0 }
-        }
-      }).then(r => JSON.parse(r.text || "{}"))
-    ]);
+    const result = JSON.parse(response.text || "{}");
 
     return res.status(200).json({
-      worksheet_summary: summaryResult.worksheet_summary,
-      items: itemsResult.items || []
+      worksheet_summary: result.worksheet_summary,
+      items: result.items || []
     });
 
   } catch (error: any) {

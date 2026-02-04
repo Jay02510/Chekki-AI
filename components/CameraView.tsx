@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }) => {
-  const { user, openLoginModal, isAuthenticated } = useAuth();
+  const { user, openLoginModal, isAuthenticated, setShowPaywall } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -82,8 +82,18 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   );
 
   const DropZone = ({ size = "large" }: { size?: "large" | "compact" }) => {
-    // LOCK UI FOR GUESTS WHO ALREADY USED THEIR SCAN
-    const isLocked = !isAuthenticated && guestUsed;
+    // LOCK LOGIC:
+    // 1. Guest who used their 1 free scan
+    // 2. Logged-in Free User who hit their daily limit
+    const isGuestLocked = !isAuthenticated && guestUsed;
+    const isFreeUserLocked = isAuthenticated && user?.plan === 'free' && user?.scansUsedToday >= user?.maxScansPerDay;
+    const isLocked = isGuestLocked || isFreeUserLocked;
+
+    const handleAction = () => {
+        if (isGuestLocked) openLoginModal();
+        else if (isFreeUserLocked) setShowPaywall(true);
+        else fileInputRef.current?.click();
+    };
 
     return (
         <div className={`relative w-full ${size === 'large' ? 'min-h-[400px] md:min-h-[500px]' : 'h-[500px]'} flex items-center justify-center py-12 overflow-visible`}>
@@ -99,17 +109,16 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             onDragLeave={isLocked ? undefined : handleDrag} 
             onDragOver={isLocked ? undefined : handleDrag} 
             onDrop={isLocked ? undefined : handleDrop}
-            onClick={() => isLocked ? openLoginModal() : fileInputRef.current?.click()}
+            onClick={handleAction}
           >
-              {/* MAGIC CLOUD / TOOLTIP */}
-              {!isAuthenticated && !isLocked && (
+              {/* MAGIC CLOUD / TOOLTIP FOR NEW GUESTS */}
+              {!isAuthenticated && !guestUsed && (
                 <div className="absolute top-0 -translate-y-full pb-4 z-40 animate-[bounce_4s_ease-in-out_infinite] pointer-events-none">
                     <div className="relative">
                         <div className="bg-orange-500 text-white text-[10px] font-black px-6 py-3 rounded-full uppercase tracking-widest shadow-[0_20px_40px_rgba(249,115,22,0.6)] flex items-center gap-3 border-2 border-white/20 whitespace-nowrap">
                             <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
                             {t('guest_scan_badge')}
                         </div>
-                        {/* Speech bubble tail */}
                         <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-orange-500 rotate-45 border-r-2 border-b-2 border-white/20 -z-10"></div>
                     </div>
                 </div>
@@ -142,11 +151,15 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 {isLocked ? (
                     <div className="animate-fade-in space-y-6">
                         <div className="space-y-2">
-                             <h3 className="text-3xl md:text-4xl font-black text-white font-display tracking-tight break-keep">{t('guest_used_title')}</h3>
-                             <p className="text-zinc-400 font-bold font-korean text-sm md:text-lg max-w-sm mx-auto leading-relaxed">{t('guest_used_desc')}</p>
+                             <h3 className="text-3xl md:text-4xl font-black text-white font-display tracking-tight break-keep">
+                                {isGuestLocked ? t('guest_used_title') : (language === 'ko' ? "오늘의 마법 종료!" : "Daily Magic Used Up!")}
+                             </h3>
+                             <p className="text-zinc-400 font-bold font-korean text-sm md:text-lg max-w-sm mx-auto leading-relaxed">
+                                {isGuestLocked ? t('guest_used_desc') : (language === 'ko' ? "내일 다시 마법이 충전됩니다. 기다릴 수 없다면 프로로 업그레이드하세요!" : "Your scans reset at midnight. Upgrade to Pro for unlimited instant scans!")}
+                             </p>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); openLoginModal(); }} className="bg-white text-black px-10 py-4 rounded-2xl font-black text-base shadow-2xl shadow-white/10 hover:bg-zinc-200 transition-all active:scale-95 uppercase tracking-wider">
-                           {t('login')}
+                        <button onClick={(e) => { e.stopPropagation(); isGuestLocked ? openLoginModal() : setShowPaywall(true); }} className={`bg-white text-black px-10 py-4 rounded-2xl font-black text-base shadow-2xl transition-all active:scale-95 uppercase tracking-wider ${isFreeUserLocked ? 'ring-4 ring-orange-500/30' : ''}`}>
+                           {isGuestLocked ? t('login') : (language === 'ko' ? "무제한 마법 시작하기" : "Unlock Unlimited Magic")}
                         </button>
                     </div>
                 ) : (
@@ -232,6 +245,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
   if (isAuthenticated && user) {
     const remaining = user.plan === 'pro' ? '∞' : Math.max(0, user.maxScansPerDay - user.scansUsedToday);
+    const isPro = user.plan === 'pro';
+
     return (
       <div className="min-h-full pt-12 md:pt-32 pb-16 px-4 md:px-8 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
@@ -252,10 +267,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               <p className="text-zinc-400 font-bold font-korean text-lg md:text-2xl max-w-2xl mx-auto leading-relaxed break-keep opacity-80">{t('dash_subtitle')}</p>
            </div>
            
-           <div className="bg-[#0F1014] border border-white/10 rounded-full py-3 px-8 flex items-center gap-4 shadow-2xl ring-1 ring-white/5">
-                <div className="text-[11px] text-zinc-500 uppercase font-black tracking-[0.2em]">{language === 'ko' ? "오늘 남은 마법" : "Magic Left Today"}</div>
+           <div className={`border rounded-full py-3 px-8 flex items-center gap-4 shadow-2xl ring-1 ring-white/5 transition-all duration-500 ${isPro ? 'bg-orange-500/10 border-orange-500/30' : 'bg-[#0F1014] border-white/10'}`}>
+                <div className={`text-[11px] uppercase font-black tracking-[0.2em] ${isPro ? 'text-orange-400' : 'text-zinc-500'}`}>
+                    {isPro ? (language === 'ko' ? "무제한 마법 활성화됨" : "Pro Magic Active") : (language === 'ko' ? "오늘 남은 마법" : "Magic Left Today")}
+                </div>
                 <div className="w-px h-6 bg-white/10"></div>
-                <div className="font-bold text-white text-2xl font-display leading-none">{remaining}</div>
+                <div className={`font-bold text-2xl font-display leading-none ${isPro ? 'text-orange-500 scale-125 origin-left' : 'text-white'}`}>{remaining}</div>
            </div>
         </div>
         
