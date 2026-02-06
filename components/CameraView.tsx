@@ -108,20 +108,19 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             onDrop={isLocked ? undefined : handleDrop}
             onClick={handleAction}
           >
-              {/* MAGIC CLOUD / TOOLTIP FOR NEW GUESTS */}
+              {/* MAGIC BADGE: Moved inside the container for uniform alignment */}
               {!isAuthenticated && !guestUsed && (
-                <div className="absolute top-0 -translate-y-full pb-4 z-40 animate-[bounce_4s_ease-in-out_infinite] pointer-events-none">
+                <div className="absolute top-8 z-40 animate-[bounce_4s_ease-in-out_infinite] pointer-events-none">
                     <div className="relative">
-                        <div className="bg-orange-500 text-white text-[9px] md:text-[10px] font-black px-6 py-3 rounded-full uppercase tracking-widest shadow-[0_20px_40px_rgba(249,115,22,0.6)] flex items-center gap-3 border-2 border-white/20 whitespace-nowrap">
+                        <div className="bg-orange-500 text-white text-[9px] md:text-[10px] font-black px-6 py-3 rounded-full uppercase tracking-widest shadow-[0_15px_35px_rgba(249,115,22,0.5)] flex items-center gap-3 border-2 border-white/20 whitespace-nowrap">
                             <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
                             {t('guest_scan_badge')}
                         </div>
-                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-orange-500 rotate-45 border-r-2 border-b-2 border-white/20 -z-10"></div>
                     </div>
                 </div>
               )}
 
-              <div className="relative z-10 flex flex-col items-center text-center w-full">
+              <div className="relative z-10 flex flex-col items-center text-center w-full pt-8">
                 <div className={`${size === 'large' ? 'w-36 h-36 md:w-64 md:h-64' : 'w-40 h-40'} mb-6 md:mb-8 relative transition-all duration-700 ${isLocked ? 'blur-md opacity-40 grayscale scale-90' : 'group-hover:scale-105'}`}>
                     {isProcessing ? (
                       <div className="absolute inset-0 flex items-center justify-center">
