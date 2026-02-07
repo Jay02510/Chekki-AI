@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
 import { FeedbackModal } from './FeedbackModal';
-import { LegalModal } from './LegalModal';
+import { LegalModal, LegalType } from './LegalModal';
 import { FlyerModal } from './FlyerModal';
 
 interface Props {
@@ -24,7 +24,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [mascotLoaded, setMascotLoaded] = useState(false);
   
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+  const [showLegal, setShowLegal] = useState<LegalType | null>(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showFlyerModal, setShowFlyerModal] = useState(false);
   
@@ -108,7 +108,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             onDrop={isLocked ? undefined : handleDrop}
             onClick={handleAction}
           >
-              {/* MAGIC BADGE: Moved inside the container for uniform alignment */}
+              {/* MAGIC BADGE */}
               {!isAuthenticated && !guestUsed && (
                 <div className="absolute top-8 z-40 animate-[bounce_4s_ease-in-out_infinite] pointer-events-none">
                     <div className="relative">
@@ -434,18 +434,22 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               </div>
           </div>
           
-          <div className="mt-20 md:mt-24 pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                  <h4 className="text-3xl font-black text-white font-display mb-3">
+          <div className="mt-20 md:mt-24 pt-12 border-t border-white/10 flex flex-col items-center justify-between gap-12 text-center md:text-left">
+              <div className="flex flex-col items-center md:items-start">
+                  <h4 className="text-3xl font-black text-white font-display mb-4">
                     Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
                   </h4>
-                  <p className="text-zinc-500 text-xs md:text-sm font-bold font-korean tracking-[0.2em] uppercase break-keep max-w-md opacity-60">
-                    {t('footer_text')}
-                  </p>
+                  <div className="space-y-1.5 text-[10px] md:text-[11px] text-zinc-500 font-bold font-korean tracking-tight leading-relaxed max-w-md">
+                    <p>{t('biz_name')} | {t('biz_rep')}</p>
+                    <p>{t('biz_reg_num')} | 통신판매업 신고번호: 준비중</p>
+                    <p>{t('footer_text')}</p>
+                  </div>
               </div>
-              <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-[10px] md:text-sm text-zinc-500 font-black uppercase tracking-[0.3em] md:tracking-[0.4em]">
+              <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-8 text-[9px] md:text-xs text-zinc-400 font-black uppercase tracking-[0.2em] md:tracking-[0.3em]">
                   <button onClick={() => setShowLegal('privacy')} className="hover:text-white transition-colors cursor-pointer">PRIVACY</button>
                   <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors cursor-pointer">TERMS</button>
+                  <button onClick={() => setShowLegal('refund')} className="hover:text-white transition-colors cursor-pointer">REFUND</button>
+                  <button onClick={() => setShowLegal('youth')} className="hover:text-white transition-colors cursor-pointer">YOUTH</button>
                   <a href="mailto:chekkihelp@gmail.com" className="hover:text-white transition-colors cursor-pointer">SUPPORT</a>
               </div>
           </div>

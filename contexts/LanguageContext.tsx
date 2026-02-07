@@ -29,9 +29,10 @@ const translations = {
     pay_method_card: "Credit / Debit Card",
     pay_method_easy: "Easy Pay (Kakao, Naver)",
     pay_secure_notice: "Secure payment powered by Toss Payments",
+    biz_name: "Entity: Chekki AI (채키 AI)",
     biz_info_title: "Business Information",
-    biz_reg_num: "Reg: 123-45-67890",
-    biz_rep: "Rep: Chekki Team",
+    biz_reg_num: "Reg: 814-14-03096",
+    biz_rep: "CEO: Jason Benjamin",
     
     // Instructional Tips
     tip_click_guide: "💡 Tap any question to see your Teaching Script!",
@@ -194,9 +195,10 @@ const translations = {
     pay_method_card: "일반 신용/체크카드",
     pay_method_easy: "간편 결제 (카카오페이, 네이버페이)",
     pay_secure_notice: "토스페이먼츠를 통한 안전한 결제가 지원됩니다.",
+    biz_name: "상호명: Chekki AI (채키 AI)",
     biz_info_title: "사업자 정보",
-    biz_reg_num: "사업자번호: 123-45-67890",
-    biz_rep: "대표: 채키 팀",
+    biz_reg_num: "사업자번호: 814-14-03096",
+    biz_rep: "대표: Jason Benjamin (제이슨 벤자민)",
 
     // Instructional Tips
     tip_click_guide: "💡 문제를 누르면 다정한 티칭 가이드가 나타나요!",

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ASSETS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
-import { LegalModal } from './LegalModal';
+import { LegalModal, LegalType } from './LegalModal';
 
 export const LoginModal: React.FC = () => {
   const { showLoginModal, closeLoginModal, signIn, signUp, sendResetEmail } = useAuth();
@@ -17,7 +17,7 @@ export const LoginModal: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+  const [showLegal, setShowLegal] = useState<LegalType | null>(null);
 
   if (!showLoginModal) return null;
 
@@ -183,9 +183,13 @@ export const LoginModal: React.FC = () => {
                     {t('login_guest_link')}
                   </button>
 
-                  <p className="text-[8px] text-zinc-600 text-center uppercase tracking-widest leading-relaxed max-w-[200px] mt-2">
-                      By continuing, you agree to our <button onClick={() => setShowLegal('terms')} className="underline">Terms</button> & <button onClick={() => setShowLegal('privacy')} className="underline">Privacy</button>
-                  </p>
+                  <div className="text-[8px] text-zinc-600 text-center uppercase tracking-widest leading-relaxed mt-2 flex flex-wrap justify-center gap-x-2 gap-y-1 px-4">
+                      <span>By continuing, you agree to our</span>
+                      <button onClick={() => setShowLegal('terms')} className="underline text-zinc-500 hover:text-zinc-400">Terms</button>
+                      <button onClick={() => setShowLegal('privacy')} className="underline text-zinc-500 hover:text-zinc-400">Privacy</button>
+                      <button onClick={() => setShowLegal('refund')} className="underline text-zinc-500 hover:text-zinc-400">Refund</button>
+                      <button onClick={() => setShowLegal('youth')} className="underline text-zinc-500 hover:text-zinc-400">Youth</button>
+                  </div>
               </div>
           </div>
         </div>

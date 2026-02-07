@@ -14,6 +14,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { MistakeProvider } from './contexts/MistakeContext';
 import { ChekkiMascot } from './components/Icons';
+import { LegalModal, LegalType } from './components/LegalModal';
 
 const SESSION_KEY = 'hw_last_session';
 const ONBOARDED_KEY = 'chekki_onboarded_v1';
@@ -62,6 +63,17 @@ function AppContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [lastImageData, setLastImageData] = useState<string | null>(null);
 
+  // PG Audit Routing
+  const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
+
+  useEffect(() => {
+    const path = window.location.pathname.replace('/', '') as LegalType;
+    if (['terms', 'privacy', 'refund', 'youth'].includes(path)) {
+      setStandaloneLegal(path);
+      setShowSplash(false);
+    }
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setIsNight(isNightModeKST());
@@ -71,10 +83,10 @@ function AppContent() {
 
   useEffect(() => {
     const hasOnboarded = localStorage.getItem(ONBOARDED_KEY);
-    if (!hasOnboarded) {
+    if (!hasOnboarded && !standaloneLegal) {
       setShowOnboarding(true);
     }
-  }, []);
+  }, [standaloneLegal]);
 
   const handleOnboardingComplete = () => {
     localStorage.setItem(ONBOARDED_KEY, 'true');
@@ -109,7 +121,6 @@ function AppContent() {
   const handleImageSelected = async (base64Data: string, isRetryAttempt = false) => {
     const guestUsed = localStorage.getItem(GUEST_SCAN_KEY);
     
-    // Marketing Hook: Allow 1 guest scan
     if (!isAuthenticated && guestUsed) {
       openLoginModal();
       return;
@@ -119,7 +130,6 @@ function AppContent() {
       const canScan = await incrementScan();
       if (!canScan) return; 
     } else if (!isAuthenticated) {
-      // Mark guest scan as used
       localStorage.setItem(GUEST_SCAN_KEY, 'true');
     }
 
@@ -199,6 +209,7 @@ function AppContent() {
     localStorage.removeItem(SESSION_KEY);
   };
 
+  if (standaloneLegal) return <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone />;
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
 
   return (
