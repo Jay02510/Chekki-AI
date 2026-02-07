@@ -68,8 +68,8 @@ export const Header: React.FC<Props> = ({ onReset }) => {
               <h1 className="text-lg md:text-3xl font-black text-white leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-300 truncate">
                 Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
               </h1>
-              <span className="text-[7px] md:text-[11px] text-zinc-500 font-bold tracking-wider md:tracking-[0.15em] uppercase mt-0.5 opacity-80 leading-tight truncate">
-                {language === 'ko' ? "엄마표 영어 숙제 파트너" : t('tagline')}
+              <span className="text-[7px] md:text-[11px] text-zinc-500 font-black tracking-widest md:tracking-[0.2em] uppercase mt-0.5 opacity-80 leading-tight truncate">
+                {t('tagline')}
               </span>
             </div>
           </div>

@@ -435,22 +435,36 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
           
           <div className="mt-20 md:mt-24 pt-12 border-t border-white/10 flex flex-col items-center justify-between gap-12 text-center md:text-left">
-              <div className="flex flex-col items-center md:items-start">
+              <div className="flex flex-col items-center md:items-start w-full md:w-auto">
                   <h4 className="text-3xl font-black text-white font-display mb-4">
                     Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
                   </h4>
-                  <div className="space-y-1.5 text-[10px] md:text-[11px] text-zinc-500 font-bold font-korean tracking-tight leading-relaxed max-w-md">
-                    <p>{t('biz_name')} | {t('biz_rep')}</p>
-                    <p>{t('biz_reg_num')} | 통신판매업 신고번호: 준비중</p>
-                    <p>{t('footer_text')}</p>
+                  <div className="space-y-1.5 text-[10px] md:text-[11px] text-zinc-500 font-bold font-korean tracking-tight leading-relaxed max-w-md w-full">
+                    <div className="flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-1">
+                        <span>상호명: {t('biz_name')}</span>
+                        <span className="hidden md:inline">|</span>
+                        <span>{t('biz_rep')}</span>
+                    </div>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-1">
+                        <span>{t('biz_reg_num')}</span>
+                        <span className="hidden md:inline">|</span>
+                        <span>{t('biz_mail_order')}</span>
+                    </div>
+                    <p className="mt-2 opacity-60">{t('footer_text')}</p>
                   </div>
               </div>
-              <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-8 text-[9px] md:text-xs text-zinc-400 font-black uppercase tracking-[0.2em] md:tracking-[0.3em]">
-                  <button onClick={() => setShowLegal('privacy')} className="hover:text-white transition-colors cursor-pointer">PRIVACY</button>
-                  <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors cursor-pointer">TERMS</button>
-                  <button onClick={() => setShowLegal('refund')} className="hover:text-white transition-colors cursor-pointer">REFUND</button>
-                  <button onClick={() => setShowLegal('youth')} className="hover:text-white transition-colors cursor-pointer">YOUTH</button>
-                  <a href="mailto:chekkihelp@gmail.com" className="hover:text-white transition-colors cursor-pointer">SUPPORT</a>
+              <div className="flex flex-col items-center md:items-end gap-6 w-full md:w-auto">
+                  <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-8 text-[9px] md:text-xs text-zinc-400 font-black uppercase tracking-[0.2em] md:tracking-[0.3em]">
+                      <button onClick={() => setShowLegal('privacy')} className="hover:text-white transition-colors cursor-pointer">PRIVACY</button>
+                      <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors cursor-pointer">TERMS</button>
+                      <button onClick={() => setShowLegal('refund')} className="hover:text-white transition-colors cursor-pointer">REFUND</button>
+                      <button onClick={() => setShowLegal('youth')} className="hover:text-white transition-colors cursor-pointer">YOUTH</button>
+                  </div>
+                  <div className="flex items-center gap-4 text-zinc-500 font-bold text-[10px]">
+                      <a href="mailto:chekkihelp@gmail.com" className="hover:text-white transition-colors flex items-center gap-2">
+                        <span>📧</span> chekkihelp@gmail.com
+                      </a>
+                  </div>
               </div>
           </div>
       </div>

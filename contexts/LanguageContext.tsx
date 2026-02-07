@@ -12,7 +12,7 @@ interface LanguageContextType {
 const translations = {
   en: {
     app_name: "Chekki AI",
-    tagline: "Answers for You, Praise for Them",
+    tagline: "Grading by Chekki, Praise by You",
     login: "Start Free",
     logout: "Log Out",
     scans: "Magic Scans",
@@ -29,10 +29,11 @@ const translations = {
     pay_method_card: "Credit / Debit Card",
     pay_method_easy: "Easy Pay (Kakao, Naver)",
     pay_secure_notice: "Secure payment powered by Toss Payments",
-    biz_name: "Entity: Chekki AI (채키 AI)",
+    biz_name: "Chekki AI (채키 AI)",
     biz_info_title: "Business Information",
-    biz_reg_num: "Reg: 814-14-03096",
+    biz_reg_num: "Business Reg: 814-14-03096",
     biz_rep: "CEO: Jason Benjamin",
+    biz_mail_order: "Mail Order Reg: Preparing",
     
     // Instructional Tips
     tip_click_guide: "💡 Tap any question to see your Teaching Script!",
@@ -178,7 +179,7 @@ const translations = {
   },
   ko: {
     app_name: "채키 AI",
-    tagline: "정답은 채키가, 칭찬은 직접",
+    tagline: "정답은 채키가, 칭찬은 부모님이",
     login: "무료로 시작하기",
     logout: "로그아웃",
     scans: "번의 마법 남음",
@@ -195,10 +196,11 @@ const translations = {
     pay_method_card: "일반 신용/체크카드",
     pay_method_easy: "간편 결제 (카카오페이, 네이버페이)",
     pay_secure_notice: "토스페이먼츠를 통한 안전한 결제가 지원됩니다.",
-    biz_name: "상호명: Chekki AI (채키 AI)",
+    biz_name: "Chekki AI (채키 AI)",
     biz_info_title: "사업자 정보",
-    biz_reg_num: "사업자번호: 814-14-03096",
-    biz_rep: "대표: Jason Benjamin (제이슨 벤자민)",
+    biz_reg_num: "사업자등록번호: 814-14-03096",
+    biz_rep: "대표자: Jason Benjamin (제이슨 벤자민)",
+    biz_mail_order: "통신판매업신고: 준비중",
 
     // Instructional Tips
     tip_click_guide: "💡 문제를 누르면 다정한 티칭 가이드가 나타나요!",
@@ -340,7 +342,7 @@ const translations = {
     review_print_btn: "프린트용 학습지 만들기",
     print_footer: "채키 AI - 다정한 부모님용 영어 가이드",
 
-    footer_text: "채키 AI - 대한민국 모든 영유 부모님들을 진심으로 응원합니다."
+    footer_text: "대한민국 모든 영유 부모님들을 진심으로 응원합니다."
   }
 };
 
