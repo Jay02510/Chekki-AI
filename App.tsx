@@ -63,13 +63,9 @@ function AppContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [lastImageData, setLastImageData] = useState<string | null>(null);
 
-  // PG Audit Routing
-  const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
-
   useEffect(() => {
     const path = window.location.pathname.replace('/', '') as LegalType;
     if (['terms', 'privacy', 'refund', 'youth'].includes(path)) {
-      setStandaloneLegal(path);
       setShowSplash(false);
     }
   }, []);
@@ -83,10 +79,10 @@ function AppContent() {
 
   useEffect(() => {
     const hasOnboarded = localStorage.getItem(ONBOARDED_KEY);
-    if (!hasOnboarded && !standaloneLegal) {
+    if (!hasOnboarded) {
       setShowOnboarding(true);
     }
-  }, [standaloneLegal]);
+  }, []);
 
   const handleOnboardingComplete = () => {
     localStorage.setItem(ONBOARDED_KEY, 'true');
@@ -209,7 +205,6 @@ function AppContent() {
     localStorage.removeItem(SESSION_KEY);
   };
 
-  if (standaloneLegal) return <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone />;
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
 
   return (
@@ -309,6 +304,7 @@ function AppContent() {
                     imageUrl={analysisState.originalImage!} 
                     items={analysisState.data.items || []} 
                     isLoadingItems={!analysisState.isItemsLoaded}
+                    worksheetTitle={language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
                 />
             </div>
           </div>

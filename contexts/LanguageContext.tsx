@@ -18,6 +18,12 @@ const translations = {
     scans: "Magic Scans",
     pro_plan: "Pro Magic 🚀",
     
+    // Viral Sharing
+    share_title: "Spread the Peace 🕊️",
+    share_desc: "Help other parents find peace. Copy a pre-made template for your favorite Mom Cafe!",
+    share_btn: "Copy Cafe Template",
+    share_toast: "Template Copied! Ready to post.",
+    
     // Guest Mode CTAs
     hero_guest_cta: "Try Guest Scan",
     login_guest_link: "Not ready? Try 1 scan as guest",
@@ -185,6 +191,12 @@ const translations = {
     scans: "번의 마법 남음",
     pro_plan: "마법 프로 플랜 🚀",
 
+    // Viral Sharing
+    share_title: "이 평화를 다른 분들께도 🕊️",
+    share_desc: "영유 맘 카페에 채키 사용 후기를 남겨주세요! 숙제 시간이 훨씬 행복해집니다.",
+    share_btn: "맘 카페 양식 복사하기",
+    share_toast: "양식이 복사되었습니다! 카페에 바로 올려보세요.",
+
     // Guest Mode CTAs
     hero_guest_cta: "로그인 없이 체험하기",
     login_guest_link: "회원가입 없이 1회 무료 체험하기",
@@ -340,7 +352,7 @@ const translations = {
     review_empty_title: "참 잘했어요!",
     review_empty_desc: "아직 복습할 문제가 없네요. 완벽합니다!",
     review_print_btn: "프린트용 학습지 만들기",
-    print_footer: "채키 AI - 다정한 부모님용 영어 가이드",
+    print_footer: "채키 AI - 부모님용 영어 가이드",
 
     footer_text: "대한민국 모든 영유 부모님들을 진심으로 응원합니다."
   }

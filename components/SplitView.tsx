@@ -14,9 +14,10 @@ interface Props {
   imageUrl: string;
   items: WorksheetItem[];
   isLoadingItems?: boolean;
+  worksheetTitle?: string;
 }
 
-export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = false }) => {
+export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = false, worksheetTitle }) => {
   const { t, language } = useLanguage(); 
   const { toggleMistake, isMistake } = useMistakes();
   const { user, setShowPaywall, isAuthenticated, openLoginModal } = useAuth();
@@ -26,6 +27,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const [reportContext, setReportContext] = useState<WorksheetItem | null>(null);
   const [mascotError, setMascotError] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [copyStatus, setCopyStatus] = useState(false);
 
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
@@ -95,6 +97,18 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     }
   };
 
+  const handleCopyToCafe = () => {
+    const title = worksheetTitle || (language === 'ko' ? "영어 학습지" : "English Worksheet");
+    const template = language === 'ko' 
+      ? `[영유 숙제 기록] 채키 AI로 오늘 '${title}' 공부 끝냈어요! ✨\n\n아이랑 영유 숙제하다 보면 저도 가끔 헷갈릴 때가 있는데,\n채키(Chekki) 덕분에 정답 위치도 바로 확인하고\n설명도 다정하게 해줄 수 있어서 너무 편하네요.\n\n매일 밤 숙제 전쟁이었는데, 이제는 웃으면서 금방 끝내요! 영유 맘님들께 강력 추천합니다. ❤️\n\n#채키AI #영유맘 #숙제도우미 #부모표영어 #자기주도학습`
+      : `Finished '${title}' with Chekki AI tonight! 🚀\n\nHomework time is so much more peaceful now. Chekki gives me the answers and the exact words to say to encourage my child.\n\nHighly recommend to all EK parents! ❤️\n\n#ChekkiAI #HomeworkHelper #ParentingHacks`;
+    
+    navigator.clipboard.writeText(template).then(() => {
+      setCopyStatus(true);
+      setTimeout(() => setCopyStatus(false), 3000);
+    });
+  };
+
   const startPronunciationCheck = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) {
@@ -136,7 +150,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             />
         </div>
 
-        {/* Right Side: Enhanced Teaching Cards - Using a "Bottom Sheet" approach on mobile */}
+        {/* Right Side: Enhanced Teaching Cards */}
         <div className="w-full lg:w-1/2 h-[65%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-inner" onClick={() => setActiveItemId(null)}>
           <div className="px-5 py-4 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl flex flex-col shrink-0">
             <div className="flex justify-between items-center w-full">
@@ -184,7 +198,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 <div key={item.id} ref={(el) => { itemRefs.current[item.id] = el; }} onClick={(e) => { e.stopPropagation(); setActiveItemId(item.id); }}
                   className={`group relative rounded-[1.8rem] border transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in-up transform-gpu ${isActive ? 'bg-zinc-800/95 border-orange-500/50 shadow-[0_20px_60px_rgba(0,0,0,0.5)] scale-[1.01]' : 'bg-zinc-900/60 border-white/5 hover:border-white/20'}`}>
                   
-                  {/* Pulse Hint for the first item */}
                   {isFirstItem && !hasInteracted && (
                       <div className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500 text-[8px] font-black text-white uppercase tracking-widest animate-bounce z-10 shadow-lg ring-2 ring-white/10">
                           <span>Tap here</span> 👆
@@ -217,16 +230,12 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
                   {isActive && (
                     <div className="px-4 pb-6 md:px-6 md:pb-8 animate-fade-in-up space-y-4">
-                        {/* GATING: Only show the full guide to logged-in users */}
                         {!isAuthenticated ? (
                             <div className="bg-orange-500/10 border border-orange-500/30 rounded-3xl p-6 text-center space-y-4 shadow-inner">
                                 <p className="text-sm font-bold text-white font-korean leading-relaxed">
                                     {language === 'ko' ? "다정한 티칭 스크립트와 가이드를 보려면 로그인이 필요해요!" : "Log in to unlock the full teaching scripts and guides!"}
                                 </p>
-                                <button 
-                                    onClick={openLoginModal}
-                                    className="bg-white text-black px-8 py-4 rounded-2xl font-black text-sm uppercase shadow-xl active:scale-95 transition-all w-full"
-                                >
+                                <button onClick={openLoginModal} className="bg-white text-black px-8 py-4 rounded-2xl font-black text-sm uppercase shadow-xl active:scale-95 transition-all w-full">
                                     {language === 'ko' ? "지금 로그인하기" : "Log In Now"}
                                 </button>
                             </div>
@@ -258,7 +267,30 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             })}
 
             {!isLoadingItems && items.length > 0 && (
-              <div className="pt-6 pb-2">
+              <div className="space-y-6 pt-6 pb-2">
+                {/* VIRAL SHARE CARD */}
+                <div className="bg-[#03C75A]/10 border border-[#03C75A]/20 rounded-[2.5rem] p-6 md:p-8 animate-fade-in-up flex flex-col items-center text-center group">
+                    <div className="w-14 h-14 rounded-full bg-[#03C75A] flex items-center justify-center text-2xl mb-4 shadow-[0_10px_30px_rgba(3,199,90,0.3)] animate-float">
+                        🕊️
+                    </div>
+                    <h4 className="text-white font-black text-lg md:text-xl font-display mb-2">{t('share_title')}</h4>
+                    <p className="text-zinc-400 text-xs md:text-sm font-korean mb-6 leading-relaxed opacity-80 break-keep">
+                        {t('share_desc')}
+                    </p>
+                    <button 
+                        onClick={handleCopyToCafe}
+                        className={`w-full py-4 rounded-2xl font-black text-sm transition-all transform active:scale-95 flex items-center justify-center gap-3 shadow-xl ${copyStatus ? 'bg-emerald-500 text-white' : 'bg-[#03C75A] hover:bg-[#02A64B] text-white'}`}
+                    >
+                        {copyStatus ? (
+                            <span className="animate-fade-in">✓ {t('share_toast')}</span>
+                        ) : (
+                            <>
+                                <span>📋</span> {t('share_btn')}
+                            </>
+                        )}
+                    </button>
+                </div>
+
                 <InlineFeedback />
               </div>
             )}
