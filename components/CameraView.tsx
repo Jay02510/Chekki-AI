@@ -65,35 +65,70 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     if (e.dataTransfer.files && e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
   };
 
-  /**
-   * FIX: Defined missing VideoWalkthroughModal component to fix "Cannot find name" errors.
-   */
   const VideoWalkthroughModal = () => (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in" onClick={() => setShowVideoModal(false)}></div>
-      <div className="relative bg-zinc-900 rounded-[2.5rem] w-full max-w-5xl aspect-video overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up flex flex-col">
-        <div className="absolute top-4 right-4 z-50">
-           <button 
-            onClick={() => setShowVideoModal(false)}
-            className="w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md"
-           >
-             ✕
-           </button>
-        </div>
-        <video 
-          autoPlay 
-          controls 
-          className="w-full h-full object-contain bg-black"
-        >
-          <source src={ASSETS.VIDEO_WALKTHROUGH} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl" onClick={() => setShowVideoModal(false)}></div>
+      <div className="relative w-full max-w-5xl aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up">
+         <video src={ASSETS.VIDEO_WALKTHROUGH} controls autoPlay className="w-full h-full" />
+         <button onClick={() => setShowVideoModal(false)} className="absolute top-8 right-8 bg-black/50 hover:bg-black text-white p-3 rounded-full transition-colors z-10 border border-white/10 backdrop-blur-md">✕</button>
       </div>
     </div>
   );
 
+  const FeatureSection = () => (
+    <section className="py-20 px-6 max-w-7xl mx-auto w-full space-y-32">
+        {/* Comparison Section */}
+        <div className="grid md:grid-cols-3 gap-8">
+            {[
+                { id: 'ocr', emoji: '🎯', title: t('diff_ocr'), desc: t('diff_ocr_desc') },
+                { id: 'script', emoji: '💌', title: t('diff_script'), desc: t('diff_script_desc') },
+                { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc') }
+            ].map(feat => (
+                <div key={feat.id} className="p-8 rounded-[2.5rem] bg-zinc-900/40 border border-white/5 hover:border-orange-500/20 transition-colors">
+                    <span className="text-4xl block mb-6">{feat.emoji}</span>
+                    <h3 className="text-xl font-black text-white font-display mb-3">{feat.title}</h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed font-korean">{feat.desc}</p>
+                </div>
+            ))}
+        </div>
+
+        {/* How it Works Section */}
+        <div className="space-y-12">
+            <h2 className="text-3xl md:text-5xl font-black text-white text-center font-display">{t('how_title')}</h2>
+            <div className="grid md:grid-cols-3 gap-12">
+                {[1, 2, 3].map(step => (
+                    <div key={step} className="flex flex-col items-center text-center">
+                        <div className="w-16 h-16 rounded-2xl bg-orange-500 flex items-center justify-center text-2xl font-black text-white mb-6 shadow-xl shadow-orange-500/20">
+                            {step}
+                        </div>
+                        <h4 className="text-xl font-bold text-white mb-2">{t(`how_step${step}`)}</h4>
+                        <p className="text-zinc-500 text-sm font-korean">{t(`how_step${step}_desc`)}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* Trust & Security Section */}
+        <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[3.5rem] p-12 md:p-20 text-center">
+            <h2 className="text-2xl md:text-4xl font-black text-white mb-12 font-display">{t('trust_title')}</h2>
+            <div className="grid md:grid-cols-2 gap-12 text-left">
+                <div className="space-y-4">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-2xl mb-6">🔒</div>
+                    <h3 className="text-xl font-black text-white">{t('trust_privacy')}</h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed font-korean">{t('trust_privacy_desc')}</p>
+                </div>
+                <div className="space-y-4">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-2xl mb-6">🤝</div>
+                    <h3 className="text-xl font-black text-white">{t('trust_safety')}</h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed font-korean">{t('trust_safety_desc')}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+  );
+
   const ClarityGuide = () => (
-    <div className="flex flex-wrap justify-center gap-2 mt-6 md:mt-8 mb-4 px-2">
+    <div className="flex flex-wrap justify-center gap-2 mt-8 mb-4 px-2">
       {[
         { icon: '☀️', text: language === 'ko' ? '밝게' : 'Lighting' },
         { icon: '📏', text: language === 'ko' ? '수평' : 'Flat' },
@@ -192,7 +227,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                         
                         <ClarityGuide />
 
-                        <div className="mt-8 md:mt-10 flex flex-col items-center gap-4 group/btn">
+                        <div className="mt-10 md:mt-12 flex flex-col items-center gap-4 group/btn">
                             <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full ${isNight ? 'bg-indigo-600' : 'bg-orange-500'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.4)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/60 border-4 border-white/20 active:scale-90 ring-offset-4 ring-offset-black ring-white/5`}>
                                 <svg className="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -210,60 +245,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     );
   };
 
-  const FeatureSection = () => (
-    <section className="py-20 px-6 max-w-7xl mx-auto w-full space-y-32">
-        {/* Comparison Section */}
-        <div className="grid md:grid-cols-3 gap-8">
-            {[
-                { id: 'ocr', emoji: '🎯', title: t('diff_ocr'), desc: t('diff_ocr_desc') },
-                { id: 'script', emoji: '💌', title: t('diff_script'), desc: t('diff_script_desc') },
-                { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc') }
-            ].map(feat => (
-                <div key={feat.id} className="p-8 rounded-[2.5rem] bg-zinc-900/40 border border-white/5 hover:border-orange-500/20 transition-colors">
-                    <span className="text-4xl block mb-6">{feat.emoji}</span>
-                    <h3 className="text-xl font-black text-white font-display mb-3">{feat.title}</h3>
-                    <p className="text-zinc-400 text-sm leading-relaxed font-korean">{feat.desc}</p>
-                </div>
-            ))}
-        </div>
-
-        {/* How it Works Section */}
-        <div className="space-y-12">
-            <h2 className="text-3xl md:text-5xl font-black text-white text-center font-display">{t('how_title')}</h2>
-            <div className="grid md:grid-cols-3 gap-12">
-                {[1, 2, 3].map(step => (
-                    <div key={step} className="flex flex-col items-center text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-orange-500 flex items-center justify-center text-2xl font-black text-white mb-6 shadow-xl shadow-orange-500/20">
-                            {step}
-                        </div>
-                        <h4 className="text-xl font-bold text-white mb-2">{t(`how_step${step}`)}</h4>
-                        <p className="text-zinc-500 text-sm font-korean">{t(`how_step${step}_desc`)}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-
-        {/* Trust & Security Section */}
-        <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[3.5rem] p-12 md:p-20 text-center">
-            <h2 className="text-2xl md:text-4xl font-black text-white mb-12 font-display">{t('trust_title')}</h2>
-            <div className="grid md:grid-cols-2 gap-12 text-left">
-                <div className="space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-2xl mb-6">🔒</div>
-                    <h3 className="text-xl font-black text-white">{t('trust_privacy')}</h3>
-                    <p className="text-zinc-400 text-sm leading-relaxed font-korean">{t('trust_privacy_desc')}</p>
-                </div>
-                <div className="space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-2xl mb-6">🤝</div>
-                    <h3 className="text-xl font-black text-white">{t('trust_safety')}</h3>
-                    <p className="text-zinc-400 text-sm leading-relaxed font-korean">{t('trust_safety_desc')}</p>
-                </div>
-            </div>
-        </div>
-    </section>
-  );
-
   const BetaBanner = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-5 mb-8 md:mb-12 animate-fade-in-up w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-5 mb-12 md:mb-16 animate-fade-in-up w-full">
         <button 
           onClick={() => setShowFeedbackModal(true)}
           className="group bg-white/5 hover:bg-white/10 border border-white/10 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 transition-all shadow-xl backdrop-blur-md ring-1 ring-white/5 hover:ring-orange-500/40 text-left h-full"
@@ -288,7 +271,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </button>
         <button 
           onClick={() => setShowFlyerModal(true)}
-          className="group bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 transition-all shadow-xl backdrop-blur-md ring-1 ring-white/5 hover:ring-orange-500/40 text-left h-full"
+          className="group bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 transition-all shadow-xl backdrop-blur-md ring-1 ring-orange-500/20 hover:ring-orange-500/40 text-left h-full"
         >
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex-shrink-0 bg-orange-500 flex items-center justify-center text-lg md:text-xl shadow-lg">📢</div>
           <div className="min-w-0">
@@ -309,8 +292,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         {showVideoModal && <VideoWalkthroughModal />}
         {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
         
-        <div className="w-full max-w-4xl flex flex-col items-center text-center mb-8 md:mb-12 gap-6 md:gap-8">
-           <div className="space-y-2 md:space-y-3">
+        <div className="w-full max-w-4xl flex flex-col items-center text-center mb-12 md:mb-16 gap-8 md:gap-10">
+           <div className="space-y-4 md:space-y-6">
               {user.schoolName && (
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-2 shadow-xl backdrop-blur-sm">
                       <span className="text-xs">🏫</span>
@@ -348,14 +331,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       {showVideoModal && <VideoWalkthroughModal />}
       {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
       
-      <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-8 md:gap-12 lg:gap-8 items-center mb-16 md:mb-24">
+      <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-20 items-center mb-24 md:mb-32">
         <div className={`absolute top-0 left-1/4 -translate-x-1/2 w-full md:w-[900px] h-[600px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[100px] md:blur-[140px] -z-10 pointer-events-none opacity-40 mix-blend-screen`}></div>
         <div className="w-full flex flex-col items-start text-left z-10 animate-fade-in-up order-2 lg:order-1">
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/10 bg-white/5 mb-6 md:mb-8 backdrop-blur-md shadow-2xl self-start ring-1 ring-white/10">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/10 bg-white/5 mb-8 md:mb-10 backdrop-blur-md shadow-2xl self-start ring-1 ring-white/10">
             <span className={`w-2 h-2 rounded-full ${isNight ? 'bg-indigo-500 shadow-[0_0_10px_#6366f1]' : 'bg-orange-500 shadow-[0_0_10px_#f97316]'} animate-pulse`}></span>
             <span className="text-[10px] md:text-xs font-black text-zinc-200 tracking-[0.2em] uppercase">{t('hero_badge')}</span>
           </div>
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white font-display mb-6 md:mb-8 tracking-tighter text-left drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white font-display mb-8 md:mb-10 tracking-tighter text-left drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
             {isNight ? (
               <span className={`text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600`}>{t('hero_title_night')}</span>
             ) : (
@@ -366,12 +349,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               )
             )}
           </h1>
-          <p className="text-lg md:text-2xl text-zinc-400 max-w-xl leading-relaxed mb-10 md:mb-12 font-korean text-left font-medium break-keep opacity-80">
+          <p className="text-lg md:text-2xl text-zinc-400 max-w-2xl leading-relaxed mb-12 md:mb-16 font-korean text-left font-medium break-keep opacity-90">
             {isNight ? t('hero_desc_night') : t('hero_desc')}
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 md:gap-5 justify-start items-center w-full sm:w-auto">
-            <button onClick={openLoginModal} className="group bg-white text-black px-10 py-5 md:px-12 md:py-6 rounded-2xl font-black text-lg md:text-2xl transition-all transform active:scale-95 shadow-[0_20px_50px_rgba(255,255,255,0.1)] font-display flex items-center justify-center gap-4 overflow-hidden ring-2 ring-white/10 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-5 md:gap-6 justify-start items-center w-full sm:w-auto">
+            <button onClick={openLoginModal} className="group bg-white text-black px-12 py-5 md:px-14 md:py-6 rounded-2xl font-black text-xl md:text-2xl transition-all transform active:scale-95 shadow-[0_20px_50px_rgba(255,255,255,0.1)] font-display flex items-center justify-center gap-4 overflow-hidden ring-2 ring-white/10 w-full sm:w-auto">
               <span className="font-korean whitespace-nowrap">{t('hero_cta_btn')}</span> 
               <span className="text-2xl md:text-3xl transition-transform group-hover:translate-x-2">→</span>
             </button>
@@ -381,38 +364,38 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     const dropZone = document.getElementById('magic-drop-zone');
                     dropZone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }} 
-                className="group px-10 py-5 md:py-6 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-base md:text-xl transition-all flex items-center justify-center gap-4 backdrop-blur-xl ring-1 ring-white/5 active:scale-95 w-full sm:w-auto"
+                className="group px-12 py-5 md:py-6 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-lg md:text-xl transition-all flex items-center justify-center gap-4 backdrop-blur-xl ring-1 ring-white/5 active:scale-95 w-full sm:w-auto"
                 >
-                <span className="text-orange-500 transition-transform group-hover:rotate-[360deg] duration-700">✨</span> {t('hero_guest_cta')}
+                <span className="text-orange-500 transition-transform group-hover:rotate-[360deg] duration-700 text-2xl">✨</span> {t('hero_guest_cta')}
                 </button>
             )}
           </div>
         </div>
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2">
-            <div className="relative w-full max-w-[280px] md:max-w-[480px] aspect-square flex items-center justify-center">
-                <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] md:blur-[100px] animate-pulse`}></div>
-                <div className="w-full h-full relative z-10 transition-transform scale-100 md:scale-105">
+            <div className="relative w-full max-w-[320px] md:max-w-[540px] aspect-square flex items-center justify-center">
+                <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] md:blur-[120px] animate-pulse`}></div>
+                <div className="w-full h-full relative z-10 transition-transform scale-110 md:scale-115">
                    <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} alt="Chekki Hero" className="w-full h-full object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.5)] animate-float filter brightness-110" />
                 </div>
             </div>
         </div>
       </div>
 
-      <div id="magic-drop-zone" className="max-w-5xl mx-auto px-6 mb-24 md:mb-32 w-full relative pt-8 md:pt-16 overflow-visible">
+      <div id="magic-drop-zone" className="max-w-5xl mx-auto px-6 mb-32 md:mb-40 w-full relative pt-16 md:pt-24 overflow-visible">
          <DropZone size="large" />
-         <p className="mt-10 text-zinc-600 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-center opacity-40">{t('supported_formats')}</p>
+         <p className="mt-12 text-zinc-600 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-center opacity-40">{t('supported_formats')}</p>
       </div>
 
       <FeatureSection />
 
       {/* Compliance Footer (Bilingual Disclosure) */}
-      <div className="mt-20 pt-16 border-t border-white/5 bg-zinc-950/50 backdrop-blur-xl">
+      <div className="mt-32 pt-20 border-t border-white/5 bg-zinc-950/50 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-6 pb-20">
-              <div className="grid lg:grid-cols-2 gap-12 mb-16">
+              <div className="grid lg:grid-cols-2 gap-16 mb-20">
                   {/* KR Disclosure */}
-                  <div className="space-y-4 text-[11px] md:text-xs text-zinc-500 font-korean leading-relaxed">
-                      <h4 className="text-white font-black text-lg mb-4">Chekki (채키)</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                  <div className="space-y-6 text-[11px] md:text-xs text-zinc-500 font-korean leading-relaxed">
+                      <h4 className="text-white font-black text-xl mb-6 font-display">Chekki (채키)</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3">
                           <p>상호명: {t('biz_name')}</p>
                           <p>대표자: Jason Benjamin (제이슨 벤자민)</p>
                           <p>{t('biz_reg_num')}</p>
@@ -426,9 +409,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                   </div>
 
                   {/* EN Disclosure */}
-                  <div className="space-y-4 text-[10px] md:text-xs text-zinc-500 font-sans leading-relaxed lg:border-l lg:border-white/5 lg:pl-12">
-                      <h4 className="text-white font-black text-lg mb-4">{t('biz_info_title')}</h4>
-                      <div className="grid grid-cols-1 gap-y-2">
+                  <div className="space-y-6 text-[10px] md:text-xs text-zinc-500 font-sans leading-relaxed lg:border-l lg:border-white/5 lg:pl-16">
+                      <h4 className="text-white font-black text-xl mb-6 font-display">{t('biz_info_title')}</h4>
+                      <div className="grid grid-cols-1 gap-y-3">
                           <p>Business Name: Chekki</p>
                           <p>Representative: Jason Benjamin</p>
                           <p>Business Registration Number: 814-14-03096</p>
@@ -441,8 +424,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               </div>
 
               {/* REQUIRED 6-LINK NAVIGATION */}
-              <div className="mt-8 pt-8 border-t border-white/5 flex flex-col items-center gap-8">
-                  <div className="flex flex-wrap justify-center gap-6 text-[9px] md:text-xs text-zinc-400 font-black uppercase tracking-[0.2em]">
+              <div className="mt-10 pt-10 border-t border-white/5 flex flex-col items-center gap-10">
+                  <div className="flex flex-wrap justify-center gap-10 text-[10px] md:text-xs text-zinc-400 font-black uppercase tracking-[0.3em]">
                       <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">{t('nav_home')}</button>
                       <button onClick={() => setShowPaywall(true)} className="hover:text-white transition-colors">{t('nav_pricing')}</button>
                       <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors">{t('nav_terms')}</button>
@@ -450,7 +433,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       <button onClick={() => setShowLegal('refund')} className="hover:text-white transition-colors">{t('nav_refund')}</button>
                       <button onClick={() => setShowFeedbackModal(true)} className="hover:text-white transition-colors">{t('nav_contact')}</button>
                   </div>
-                  <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">{t('footer_text')}</p>
+                  <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.4em]">{t('footer_text')}</p>
               </div>
           </div>
       </div>
