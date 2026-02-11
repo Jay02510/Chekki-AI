@@ -65,6 +65,33 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     if (e.dataTransfer.files && e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
   };
 
+  /**
+   * FIX: Defined missing VideoWalkthroughModal component to fix "Cannot find name" errors.
+   */
+  const VideoWalkthroughModal = () => (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in" onClick={() => setShowVideoModal(false)}></div>
+      <div className="relative bg-zinc-900 rounded-[2.5rem] w-full max-w-5xl aspect-video overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up flex flex-col">
+        <div className="absolute top-4 right-4 z-50">
+           <button 
+            onClick={() => setShowVideoModal(false)}
+            className="w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md"
+           >
+             ✕
+           </button>
+        </div>
+        <video 
+          autoPlay 
+          controls 
+          className="w-full h-full object-contain bg-black"
+        >
+          <source src={ASSETS.VIDEO_WALKTHROUGH} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  );
+
   const ClarityGuide = () => (
     <div className="flex flex-wrap justify-center gap-2 mt-6 md:mt-8 mb-4 px-2">
       {[
@@ -183,14 +210,56 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     );
   };
 
-  const VideoWalkthroughModal = () => (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl" onClick={() => setShowVideoModal(false)}></div>
-      <div className="relative w-full max-w-5xl aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up">
-         <video src={ASSETS.VIDEO_WALKTHROUGH} controls autoPlay className="w-full h-full" />
-         <button onClick={() => setShowVideoModal(false)} className="absolute top-8 right-8 bg-black/50 hover:bg-black text-white p-3 rounded-full transition-colors z-10 border border-white/10 backdrop-blur-md">✕</button>
-      </div>
-    </div>
+  const FeatureSection = () => (
+    <section className="py-20 px-6 max-w-7xl mx-auto w-full space-y-32">
+        {/* Comparison Section */}
+        <div className="grid md:grid-cols-3 gap-8">
+            {[
+                { id: 'ocr', emoji: '🎯', title: t('diff_ocr'), desc: t('diff_ocr_desc') },
+                { id: 'script', emoji: '💌', title: t('diff_script'), desc: t('diff_script_desc') },
+                { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc') }
+            ].map(feat => (
+                <div key={feat.id} className="p-8 rounded-[2.5rem] bg-zinc-900/40 border border-white/5 hover:border-orange-500/20 transition-colors">
+                    <span className="text-4xl block mb-6">{feat.emoji}</span>
+                    <h3 className="text-xl font-black text-white font-display mb-3">{feat.title}</h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed font-korean">{feat.desc}</p>
+                </div>
+            ))}
+        </div>
+
+        {/* How it Works Section */}
+        <div className="space-y-12">
+            <h2 className="text-3xl md:text-5xl font-black text-white text-center font-display">{t('how_title')}</h2>
+            <div className="grid md:grid-cols-3 gap-12">
+                {[1, 2, 3].map(step => (
+                    <div key={step} className="flex flex-col items-center text-center">
+                        <div className="w-16 h-16 rounded-2xl bg-orange-500 flex items-center justify-center text-2xl font-black text-white mb-6 shadow-xl shadow-orange-500/20">
+                            {step}
+                        </div>
+                        <h4 className="text-xl font-bold text-white mb-2">{t(`how_step${step}`)}</h4>
+                        <p className="text-zinc-500 text-sm font-korean">{t(`how_step${step}_desc`)}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* Trust & Security Section */}
+        <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[3.5rem] p-12 md:p-20 text-center">
+            <h2 className="text-2xl md:text-4xl font-black text-white mb-12 font-display">{t('trust_title')}</h2>
+            <div className="grid md:grid-cols-2 gap-12 text-left">
+                <div className="space-y-4">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-2xl mb-6">🔒</div>
+                    <h3 className="text-xl font-black text-white">{t('trust_privacy')}</h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed font-korean">{t('trust_privacy_desc')}</p>
+                </div>
+                <div className="space-y-4">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-2xl mb-6">🤝</div>
+                    <h3 className="text-xl font-black text-white">{t('trust_safety')}</h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed font-korean">{t('trust_safety_desc')}</p>
+                </div>
+            </div>
+        </div>
+    </section>
   );
 
   const BetaBanner = () => (
@@ -219,7 +288,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </button>
         <button 
           onClick={() => setShowFlyerModal(true)}
-          className="group bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 transition-all shadow-xl backdrop-blur-md ring-1 ring-orange-500/20 hover:ring-orange-500/40 text-left h-full"
+          className="group bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 transition-all shadow-xl backdrop-blur-md ring-1 ring-white/5 hover:ring-orange-500/40 text-left h-full"
         >
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex-shrink-0 bg-orange-500 flex items-center justify-center text-lg md:text-xl shadow-lg">📢</div>
           <div className="min-w-0">
@@ -334,6 +403,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
          <p className="mt-10 text-zinc-600 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-center opacity-40">{t('supported_formats')}</p>
       </div>
 
+      <FeatureSection />
+
       {/* Compliance Footer (Bilingual Disclosure) */}
       <div className="mt-20 pt-16 border-t border-white/5 bg-zinc-950/50 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-6 pb-20">
@@ -343,10 +414,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       <h4 className="text-white font-black text-lg mb-4">Chekki (채키)</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                           <p>상호명: {t('biz_name')}</p>
-                          <p>{t('biz_rep')}</p>
+                          <p>대표자: Jason Benjamin (제이슨 벤자민)</p>
                           <p>{t('biz_reg_num')}</p>
                           <p>{t('biz_mail_order')}</p>
-                          <p className="md:col-span-2">{t('biz_address')}</p>
+                          <p className="md:col-span-2">주소: 서울특별시 종로구 종로 347, 롯데캐슬, 03113</p>
                           <p className="md:col-span-2">{t('biz_hours')}</p>
                           <p className="md:col-span-2">{t('biz_email')}</p>
                           <p className="md:col-span-2 text-zinc-600 font-bold">{t('biz_escrow')}</p>

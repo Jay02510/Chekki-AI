@@ -31,7 +31,7 @@ const translations = {
     guest_used_title: "Free Scan Used!",
     guest_used_desc: "You've seen the magic. Sign up now for more scans and unlock full scripts and audio!",
 
-    // Payments & Compliance (Toss Approval)
+    // Payments & Compliance
     pay_method_card: "Credit / Debit Card",
     pay_method_easy: "Easy Pay (Kakao, Naver)",
     pay_secure_notice: "Secure payment guaranteed via Toss Escrow",
@@ -40,22 +40,21 @@ const translations = {
     pay_cancel_notice: "Subscriptions may be cancelled anytime from the My Page section.",
     biz_name: "Chekki",
     biz_info_title: "Business Information",
-    biz_reg_num: "Business Registration Number: 814-14-03096",
-    biz_rep: "Representative: Jason Benjamin",
-    biz_address: "Address: Jongno 347, Lotte Castle, Seoul 03113, South Korea",
-    biz_mail_order: "E-commerce Registration Number: (Pending)",
-    biz_hours: "Customer Support Hours: Weekdays 10AM–6PM (KST)",
-    biz_escrow: "This service guarantees payment safety through the Purchase Safety Service (Escrow).",
-    biz_contact_notice: "Inquiries are accepted 24 hours a day and will be answered within 1 business day.",
+    biz_reg_num: "Business Registration: 814-14-03096",
+    biz_rep: "CEO: Jason Benjamin",
+    biz_address: "Address: Jongno 347, Lotte Castle, Seoul 03113",
+    biz_mail_order: "E-commerce Reg: Pending",
+    biz_hours: "Hours: Weekdays 10AM–6PM (KST)",
+    biz_escrow: "Secure payment guaranteed via Toss Escrow.",
+    biz_contact_notice: "Inquiries answered within 1 business day.",
     biz_email: "Email: jsn.benjamin@gmail.com",
     
-    // UI Labels for Footer Nav
     nav_home: "Home",
     nav_pricing: "Pricing",
-    nav_terms: "Terms of Service",
-    nav_privacy: "Privacy Policy",
-    nav_refund: "Refund Policy",
-    nav_contact: "Contact Us",
+    nav_terms: "Terms",
+    nav_privacy: "Privacy",
+    nav_refund: "Refund",
+    nav_contact: "Contact",
 
     // Instructional Tips
     tip_click_guide: "💡 Tap any question to see your Teaching Script!",
@@ -93,7 +92,7 @@ const translations = {
     btn_walkthrough: "Watch Walkthrough",
     drop_title: "Snap the Worksheet",
     drop_subtitle: "Get your digital answer key instantly",
-    supported_formats: "Images are processed temporarily and NEVER stored. Privacy first.",
+    supported_formats: "Images are processed temporarily and NEVER stored.",
     dash_welcome: "Hi,",
     dash_subtitle: "Snap a photo to see the answers and your teaching guide.",
     
@@ -109,18 +108,18 @@ const translations = {
     // Trust
     trust_title: "Safe for Your Family",
     trust_privacy: "Privacy You Can Trust",
-    trust_privacy_desc: "Your family’s safety is our priority; we never store your child’s data, processing images in real-time before deleting them instantly.",
+    trust_privacy_desc: "Your family’s safety is our priority; we never store your child’s data.",
     trust_safety: "Bonding, Not Battling",
-    trust_safety_desc: "We turn stressful correction time into a happy, high-five moment with interactive digital stamps and positive praise your child will love.",
+    trust_safety_desc: "We turn correction time into a happy, high-five moment with positive praise.",
 
     // Comparison
     diff_title: "Why Chekki?",
     diff_ocr: "The Perfect Answer Key",
-    diff_ocr_desc: "Don't waste time hunting for keys. Chekki identifies the questions and shows you exactly what to write, right on the screen.",
+    diff_ocr_desc: "Chekki identifies the questions and shows you exactly what to write, right on the screen.",
     diff_script: "Bilingual Teaching Scripts",
-    diff_script_desc: "We give you the exact words to say in Korean and English to encourage your child through the tricky parts.",
+    diff_script_desc: "We give you the exact words to say in Korean and English to encourage your child.",
     diff_brand: "Consistent Learning",
-    diff_brand_desc: "Ensure your child receives the same high-quality, authorized guidance at home that matches their classroom experience perfectly.",
+    diff_brand_desc: "Ensure your child receives authorized guidance matching their classroom experience.",
 
     // Analysis & Loading
     processing: "Generating answer key...",
@@ -129,7 +128,7 @@ const translations = {
     loading_step2: "Writing your teaching scripts...",
     loading_step3: "Syncing native audio...",
     loading_step4: "Ready! Time to teach with love...",
-    loading_thorough: "Chekki is checking thoroughly to give you the perfect answers.",
+    loading_thorough: "Chekki is checking thoroughly for perfect answers.",
     loading_tip: "💡 Complex pages take a few extra seconds!",
     loading_almost: "🚀 Almost there! Preparing your guide...",
     btn_cancel_retry: "Cancel",
@@ -148,7 +147,7 @@ const translations = {
 
     // Errors
     error_title: "Let's try one more time!",
-    err_network: "The lighting might be tricky. Try a clearer shot for perfect answers!",
+    err_network: "The lighting might be tricky. Try a clearer shot!",
     err_confirm: "Are you sure? Current data will be reset.",
     btn_scan_again_simple: "Try Again",
     btn_retake: "Retake Photo",
@@ -177,7 +176,7 @@ const translations = {
     onb_3_btn: "Start Now",
 
     // Community / Feedback
-    beta_banner: "✨ Chekki is growing! Share your feedback with us.",
+    beta_banner: "✨ Chekki is growing! Share your feedback.",
     fb_title: "Share Feedback",
     fb_desc: "How can we make teaching easier for you?",
     fb_success: "Thank you for the feedback!",
@@ -197,7 +196,7 @@ const translations = {
     review_print_btn: "Print Practice Sheet",
     print_footer: "Made with Love by Chekki AI",
 
-    footer_text: "Chekki AI - Supporting every English Kindergarten family with love."
+    footer_text: "Chekki AI - Supporting families with love."
   },
   ko: {
     app_name: "채키 AI",
@@ -220,7 +219,7 @@ const translations = {
     guest_used_title: "무료 체험 완료!",
     guest_used_desc: "채키의 마법을 보셨나요? 가입하고 더 많은 스캔과 티칭 가이드를 확인하세요!",
 
-    // Payments & Compliance (Toss Approval)
+    // Payments & Compliance
     pay_method_card: "일반 신용/체크카드",
     pay_method_easy: "간편 결제 (카카오페이, 네이버페이)",
     pay_secure_notice: "구매안전서비스(에스크로)를 통해 결제 안전을 보장합니다.",
@@ -232,13 +231,12 @@ const translations = {
     biz_reg_num: "사업자등록번호: 814-14-03096",
     biz_rep: "대표자: Jason Benjamin (제이슨 벤자민)",
     biz_address: "주소: 서울특별시 종로구 종로 347, 롯데캐슬, 03113",
-    biz_mail_order: "통신판매업 신고번호: 제2025-서울종로-XXXX호 (발급 후 기재)",
-    biz_hours: "고객센터 운영시간: 평일 10:00–18:00 (공휴일 제외)",
+    biz_mail_order: "통신판매업 신고번호: 준비중",
+    biz_hours: "고객센터: 평일 10:00–18:00 (공휴일 제외)",
     biz_escrow: "본 서비스는 구매안전서비스(에스크로)를 통해 결제 안전을 보장합니다.",
     biz_contact_notice: "문의는 24시간 접수 가능하며 1영업일 이내 답변드립니다.",
     biz_email: "이메일: jsn.benjamin@gmail.com",
 
-    // UI Labels for Footer Nav
     nav_home: "홈",
     nav_pricing: "요금 안내",
     nav_terms: "이용약관",
@@ -282,7 +280,7 @@ const translations = {
     btn_walkthrough: "사용 가이드 보기",
     drop_title: "여기에 숙제를 보여주세요",
     drop_subtitle: "종이 위에 정답이 마법처럼 나타나요",
-    supported_formats: "업로드된 이미지는 분석 후 즉시 삭제됩니다. 안심하고 사용하세요.",
+    supported_formats: "업로드된 이미지는 분석 후 즉시 삭제됩니다.",
     dash_welcome: "반가워요,",
     dash_subtitle: "사진을 찍으면 바로 정답과 티칭 가이드를 보여드려요.",
 
@@ -298,18 +296,18 @@ const translations = {
     // Trust
     trust_title: "부모님들이 채키를 믿는 이유",
     trust_privacy: "안심할 수 있는 보안",
-    trust_privacy_desc: "우리 아이의 정보는 소중하니까요. 사진은 저장되지 않고 분석 즉시 파기되어 개인정보를 완벽하게 보호합니다.",
+    trust_privacy_desc: "우리 아이의 정보는 소중하니까요. 사진은 저장되지 않고 분석 즉시 파기됩니다.",
     trust_safety: "혼내지 않는 즐거운 학습",
-    trust_safety_desc: "숙제 시간이 전쟁터가 아닌, 아이와 웃으며 하이파이브하는 칭찬과 교감의 시간으로 바뀝니다.",
+    trust_safety_desc: "숙제 시간이 전쟁터가 아닌, 아이와 웃으며 하이파이브하는 시간으로 바뀝니다.",
 
     // Comparison
     diff_title: "채키와 함께라면 다릅니다",
     diff_ocr: "마법 같은 디지털 답지",
     diff_ocr_desc: "답지를 찾을 필요가 없어요. 채키가 문제를 읽고 정답을 정확한 위치에 표시해 드립니다.",
     diff_script: "다정한 티칭 스크립트",
-    diff_script_desc: "영어를 몰라도 괜찮아요. 아이에게 어떻게 설명하면 좋을지 한국어와 영어 대본을 모두 드립니다.",
+    diff_script_desc: "아무것도 몰라도 괜찮아요. 아이에게 어떻게 설명하면 좋을지 한국어와 영어 대본을 드립니다.",
     diff_brand: "학원과 집의 연결",
-    diff_brand_desc: "학원에서 배우는 내용 그대로, 집에서도 전문적인 학습 가이드를 일관성 있게 이어갈 수 있습니다.",
+    diff_brand_desc: "학원에서 배우는 내용 그대로, 집에서도 일관성 있게 학습 가이드를 이어갈 수 있습니다.",
 
     // Analysis & Loading
     processing: "정답지를 만들고 있어요...",
@@ -337,7 +335,7 @@ const translations = {
 
     // Errors
     error_title: "다시 한번 해볼까요?",
-    err_network: "사진이 조금 흐릿해요. 정답을 정확히 찾으려면 밝은 곳에서 다시 찍어주세요!",
+    err_network: "사진이 조금 흐릿해요. 밝은 곳에서 다시 찍어주세요!",
     err_confirm: "정말 취소하시겠어요? 현재 숙제 정보가 사라집니다.",
     btn_scan_again_simple: "다시 분석하기",
     btn_retake: "사진 다시 찍기",
@@ -366,7 +364,7 @@ const translations = {
     onb_3_btn: "시작하기",
 
     // Community / Feedback
-    beta_banner: "✨ 채키는 성장 중! 더 좋은 서비스가 될 수 있게 의견을 들려주세요.",
+    beta_banner: "✨ 채키는 성장 중! 의견을 들려주세요.",
     fb_title: "의견 보내기",
     fb_desc: "채키가 어떻게 더 도와드리면 좋을까요?",
     fb_success: "소중한 의견 감사합니다!",
@@ -386,7 +384,7 @@ const translations = {
     review_print_btn: "프린트용 학습지 만들기",
     print_footer: "채키 AI - 부모님용 영어 가이드",
 
-    footer_text: "대한민국 모든 영유 부모님들을 진심으로 응원합니다."
+    footer_text: "모든 부모님들을 응원합니다."
   }
 };
 
