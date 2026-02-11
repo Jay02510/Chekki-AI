@@ -30,7 +30,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   
   const { t, language } = useLanguage();
 
-  // TRACK GUEST USAGE FOR UI LOCK
   const [guestUsed, setGuestUsed] = useState(false);
   useEffect(() => {
     const used = localStorage.getItem('chekki_guest_scan_used') === 'true';
@@ -94,9 +93,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
     return (
         <div className={`relative w-full ${size === 'large' ? 'min-h-[450px] md:min-h-[500px]' : 'h-full'} flex items-center justify-center py-8 md:py-12 overflow-visible`}>
-          {/* Visual ring background */}
           <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border-2 ${isNight ? 'border-indigo-500/5' : 'border-white/5'} rounded-[3.5rem] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}></div>
-          
           <div 
             role="button"
             id="magic-drop-zone-inner"
@@ -108,7 +105,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             onDrop={isLocked ? undefined : handleDrop}
             onClick={handleAction}
           >
-              {/* MAGIC BADGE */}
               {!isAuthenticated && !guestUsed && (
                 <div className="absolute top-8 z-40 animate-[bounce_4s_ease-in-out_infinite] pointer-events-none">
                     <div className="relative">
@@ -199,7 +195,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
   const BetaBanner = () => (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-5 mb-8 md:mb-12 animate-fade-in-up w-full">
-        {/* Feedback Card */}
         <button 
           onClick={() => setShowFeedbackModal(true)}
           className="group bg-white/5 hover:bg-white/10 border border-white/10 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 transition-all shadow-xl backdrop-blur-md ring-1 ring-white/5 hover:ring-orange-500/40 text-left h-full"
@@ -212,8 +207,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               </p>
            </div>
         </button>
-
-        {/* Walkthrough Card */}
         <button 
           onClick={() => setShowVideoModal(true)}
           className="group bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 transition-all shadow-xl backdrop-blur-md ring-1 ring-indigo-500/20 hover:ring-indigo-500/40 text-left h-full"
@@ -224,8 +217,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               <p className="text-sm md:text-base font-bold text-white font-korean leading-tight truncate">{t('btn_walkthrough')}</p>
           </div>
         </button>
-
-        {/* Marketing Card */}
         <button 
           onClick={() => setShowFlyerModal(true)}
           className="group bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 transition-all shadow-xl backdrop-blur-md ring-1 ring-orange-500/20 hover:ring-orange-500/40 text-left h-full"
@@ -288,7 +279,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       {showVideoModal && <VideoWalkthroughModal />}
       {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
       
-      {/* Hero Section */}
       <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-8 md:gap-12 lg:gap-8 items-center mb-16 md:mb-24">
         <div className={`absolute top-0 left-1/4 -translate-x-1/2 w-full md:w-[900px] h-[600px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[100px] md:blur-[140px] -z-10 pointer-events-none opacity-40 mix-blend-screen`}></div>
         <div className="w-full flex flex-col items-start text-left z-10 animate-fade-in-up order-2 lg:order-1">
@@ -312,13 +302,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 md:gap-5 justify-start items-center w-full sm:w-auto">
-            {/* Primary Action */}
             <button onClick={openLoginModal} className="group bg-white text-black px-10 py-5 md:px-12 md:py-6 rounded-2xl font-black text-lg md:text-2xl transition-all transform active:scale-95 shadow-[0_20px_50px_rgba(255,255,255,0.1)] font-display flex items-center justify-center gap-4 overflow-hidden ring-2 ring-white/10 w-full sm:w-auto">
               <span className="font-korean whitespace-nowrap">{t('hero_cta_btn')}</span> 
               <span className="text-2xl md:text-3xl transition-transform group-hover:translate-x-2">→</span>
             </button>
-
-            {/* Discovery Shortcut */}
             {!guestUsed && (
                 <button 
                 onClick={() => {
@@ -332,8 +319,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             )}
           </div>
         </div>
-        
-        {/* Mascot Hero Graphic */}
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2">
             <div className="relative w-full max-w-[280px] md:max-w-[480px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] md:blur-[100px] animate-pulse`}></div>
@@ -344,127 +329,57 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
       </div>
 
-      {/* Upload Zone / Landing Context */}
       <div id="magic-drop-zone" className="max-w-5xl mx-auto px-6 mb-24 md:mb-32 w-full relative pt-8 md:pt-16 overflow-visible">
          <DropZone size="large" />
          <p className="mt-10 text-zinc-600 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-center opacity-40">{t('supported_formats')}</p>
       </div>
 
-      {/* Differentiation Section */}
-      <div className="max-w-7xl mx-auto px-6 mb-24 md:mb-32">
-          <h2 className="text-3xl md:text-7xl font-black text-white text-center mb-12 md:mb-16 font-display break-keep tracking-tight">{t('diff_title')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
-              <div className="bg-zinc-900/40 border border-white/10 p-10 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] backdrop-blur-2xl shadow-2xl transition-all hover:border-white/20">
-                  <div className="text-4xl md:text-5xl mb-6 md:mb-8">✍️</div>
-                  <h3 className="text-xl md:text-3xl font-bold text-white mb-4 font-korean">{t('diff_ocr')}</h3>
-                  <p className="text-zinc-400 text-base md:text-lg leading-relaxed font-korean break-keep opacity-80">{t('diff_ocr_desc')}</p>
-              </div>
-              <div className="bg-zinc-900/40 border border-white/10 p-10 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] backdrop-blur-2xl shadow-2xl transition-all hover:border-white/20">
-                  <div className="text-4xl md:text-5xl mb-6 md:mb-8">💌</div>
-                  <h3 className="text-xl md:text-3xl font-bold text-white mb-4 font-korean">{t('diff_script')}</h3>
-                  <p className="text-zinc-400 text-base md:text-lg leading-relaxed font-korean break-keep opacity-80">{t('diff_script_desc')}</p>
-              </div>
-          </div>
-      </div>
-
-      {/* Safety Section */}
-      <div className="bg-white/5 border-y border-white/5 py-24 md:py-32 mb-24 md:mb-32 backdrop-blur-3xl">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-7xl font-black text-white mb-8 md:mb-10 font-display break-keep tracking-tight">{t('trust_title')}</h2>
-            <div className="grid md:grid-cols-2 gap-16 md:gap-20 mt-16 md:mt-20">
-                <div className="space-y-6 md:space-y-8 animate-fade-in-up">
-                    <div className="text-emerald-500 text-6xl md:text-7xl drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">🔒</div>
-                    <h3 className="text-2xl md:text-3xl font-bold text-white font-korean">{t('trust_privacy')}</h3>
-                    <p className="text-zinc-400 text-base md:text-lg max-w-sm mx-auto font-korean break-keep leading-relaxed opacity-80">{t('trust_privacy_desc')}</p>
-                </div>
-                <div className="space-y-6 md:space-y-8 animate-fade-in-up">
-                    <div className="text-orange-500 text-6xl md:text-7xl drop-shadow-[0_0_20px_rgba(249,115,22,0.3)]">👨‍👩‍👧</div>
-                    <h3 className="text-2xl md:text-3xl font-bold text-white font-korean">{t('trust_safety')}</h3>
-                    <p className="text-zinc-400 text-base md:text-lg max-w-sm mx-auto font-korean break-keep leading-relaxed opacity-80">{t('trust_safety_desc')}</p>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      {/* Step Process */}
-      <div className="max-w-7xl mx-auto px-6 mb-24 md:mb-32">
-          <h2 className="text-xl md:text-5xl font-black text-white text-center mb-16 md:mb-24 font-display uppercase tracking-[0.3em] md:tracking-[0.4em] break-keep">{t('how_title')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-24">
-              {[
-                  { title: t('how_step1'), desc: t('how_step1_desc'), icon: '📸' },
-                  { title: t('how_step2'), desc: t('how_step2_desc'), icon: '✨' },
-                  { title: t('how_step3'), desc: t('how_step3_desc'), icon: '🗣️' }
-              ].map((item, i) => (
-                  <div key={i} className="flex flex-col items-center text-center group">
-                      <div className="w-24 h-24 md:w-36 md:h-36 rounded-[2.5rem] md:rounded-[3rem] bg-white/5 border border-white/10 flex items-center justify-center text-4xl md:text-6xl mb-8 md:mb-10 shadow-2xl backdrop-blur-md transition-all duration-500 group-hover:scale-110">
-                        {item.icon}
+      {/* Compliance Footer (Bilingual Disclosure) */}
+      <div className="mt-20 pt-16 border-t border-white/5 bg-zinc-950/50 backdrop-blur-xl">
+          <div className="max-w-7xl mx-auto px-6 pb-20">
+              <div className="grid lg:grid-cols-2 gap-12 mb-16">
+                  {/* KR Disclosure */}
+                  <div className="space-y-4 text-[11px] md:text-xs text-zinc-500 font-korean leading-relaxed">
+                      <h4 className="text-white font-black text-lg mb-4">Chekki (채키)</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                          <p>상호명: {t('biz_name')}</p>
+                          <p>{t('biz_rep')}</p>
+                          <p>{t('biz_reg_num')}</p>
+                          <p>{t('biz_mail_order')}</p>
+                          <p className="md:col-span-2">{t('biz_address')}</p>
+                          <p className="md:col-span-2">{t('biz_hours')}</p>
+                          <p className="md:col-span-2">{t('biz_email')}</p>
+                          <p className="md:col-span-2 text-zinc-600 font-bold">{t('biz_escrow')}</p>
+                          <p className="md:col-span-2 text-zinc-600 italic">{t('biz_contact_notice')}</p>
                       </div>
-                      <h3 className="text-2xl md:text-4xl font-black text-white mb-4 md:mb-6 font-korean">{item.title}</h3>
-                      <p className="text-zinc-500 font-korean text-base md:text-xl leading-relaxed break-keep max-w-[260px] md:max-w-[280px] opacity-70">
-                        {item.desc}
-                      </p>
                   </div>
-              ))}
-          </div>
-      </div>
 
-      {/* Final Action Wrap */}
-      <div className="max-w-7xl mx-auto px-6 pb-24">
-          <div className="relative w-full rounded-[3rem] md:rounded-[4rem] overflow-hidden bg-gradient-to-r from-brand-orange via-brand-pink to-brand-purple shadow-[0_60px_120px_rgba(249,115,22,0.3)] p-10 md:p-24 lg:p-32">
-              <div className="absolute top-0 right-0 w-3/4 h-full bg-white/10 blur-[100px] md:blur-[120px] pointer-events-none rotate-12"></div>
-              <div className="relative z-10 w-full flex flex-col lg:flex-row items-center gap-12 md:gap-16">
-                  <div className="w-full lg:max-w-2xl text-center lg:text-left">
-                      <h2 className="text-5xl md:text-8xl font-black text-white mb-6 md:mb-8 font-display tracking-tight leading-tight md:leading-[0.9] drop-shadow-2xl break-keep">
-                          {t('hero_cta_title')}
-                      </h2>
-                      <p className="text-white font-korean text-xl md:text-3xl mb-10 md:mb-12 leading-relaxed break-keep font-bold opacity-90 drop-shadow-lg max-w-lg mx-auto lg:mx-0">
-                          {t('hero_cta_desc')}
-                      </p>
-                      <button 
-                        onClick={openLoginModal} 
-                        className="group bg-white text-orange-600 px-10 py-6 md:px-14 md:py-8 rounded-2xl md:rounded-[2.5rem] font-black text-xl md:text-3xl transition-all transform active:scale-95 shadow-[0_30px_60px_rgba(0,0,0,0.2)] font-display flex items-center justify-center gap-6 hover:shadow-white/30 whitespace-nowrap w-full sm:w-fit mx-auto lg:mx-0 ring-4 ring-white/10"
-                      >
-                          <span className="font-korean">{t('hero_cta_btn')}</span>
-                          <span className="text-3xl md:text-4xl transition-transform group-hover:translate-x-3">→</span>
-                      </button>
-                  </div>
-                  <div className="hidden lg:flex flex-1 justify-end items-center pointer-events-none">
-                       <img src={ASSETS.LOGO} alt="Chekki Logo" className="w-full max-w-lg animate-float drop-shadow-[0_40px_100px_rgba(255,255,255,0.4)] scale-[2.2] translate-x-12" />
+                  {/* EN Disclosure */}
+                  <div className="space-y-4 text-[10px] md:text-xs text-zinc-500 font-sans leading-relaxed lg:border-l lg:border-white/5 lg:pl-12">
+                      <h4 className="text-white font-black text-lg mb-4">{t('biz_info_title')}</h4>
+                      <div className="grid grid-cols-1 gap-y-2">
+                          <p>Business Name: Chekki</p>
+                          <p>Representative: Jason Benjamin</p>
+                          <p>Business Registration Number: 814-14-03096</p>
+                          <p>Address: Jongno 347, Lotte Castle, Seoul 03113, South Korea</p>
+                          <p>Customer Support Hours: Weekdays 10AM–6PM (KST)</p>
+                          <p>Email: jsn.benjamin@gmail.com</p>
+                          <p className="text-zinc-600 font-bold">Secure payment guaranteed via Toss Escrow.</p>
+                      </div>
                   </div>
               </div>
-          </div>
-          
-          <div className="mt-20 md:mt-24 pt-12 border-t border-white/10 flex flex-col items-center justify-between gap-12 text-center md:text-left">
-              <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-                  <h4 className="text-3xl font-black text-white font-display mb-4">
-                    Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
-                  </h4>
-                  <div className="space-y-1.5 text-[10px] md:text-[11px] text-zinc-500 font-bold font-korean tracking-tight leading-relaxed max-w-md w-full">
-                    <div className="flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-1">
-                        <span>상호명: {t('biz_name')}</span>
-                        <span className="hidden md:inline">|</span>
-                        <span>{t('biz_rep')}</span>
-                    </div>
-                    <div className="flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-1">
-                        <span>{t('biz_reg_num')}</span>
-                        <span className="hidden md:inline">|</span>
-                        <span>{t('biz_mail_order')}</span>
-                    </div>
-                    <p className="mt-2 opacity-60">{t('footer_text')}</p>
+
+              {/* REQUIRED 6-LINK NAVIGATION */}
+              <div className="mt-8 pt-8 border-t border-white/5 flex flex-col items-center gap-8">
+                  <div className="flex flex-wrap justify-center gap-6 text-[9px] md:text-xs text-zinc-400 font-black uppercase tracking-[0.2em]">
+                      <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">{t('nav_home')}</button>
+                      <button onClick={() => setShowPaywall(true)} className="hover:text-white transition-colors">{t('nav_pricing')}</button>
+                      <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors">{t('nav_terms')}</button>
+                      <button onClick={() => setShowLegal('privacy')} className="hover:text-white transition-colors">{t('nav_privacy')}</button>
+                      <button onClick={() => setShowLegal('refund')} className="hover:text-white transition-colors">{t('nav_refund')}</button>
+                      <button onClick={() => setShowFeedbackModal(true)} className="hover:text-white transition-colors">{t('nav_contact')}</button>
                   </div>
-              </div>
-              <div className="flex flex-col items-center md:items-end gap-6 w-full md:w-auto">
-                  <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-8 text-[9px] md:text-xs text-zinc-400 font-black uppercase tracking-[0.2em] md:tracking-[0.3em]">
-                      <button onClick={() => setShowLegal('privacy')} className="hover:text-white transition-colors cursor-pointer">PRIVACY</button>
-                      <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors cursor-pointer">TERMS</button>
-                      <button onClick={() => setShowLegal('refund')} className="hover:text-white transition-colors cursor-pointer">REFUND</button>
-                      <button onClick={() => setShowLegal('youth')} className="hover:text-white transition-colors cursor-pointer">YOUTH</button>
-                  </div>
-                  <div className="flex items-center gap-4 text-zinc-500 font-bold text-[10px]">
-                      <a href="mailto:chekkihelp@gmail.com" className="hover:text-white transition-colors flex items-center gap-2">
-                        <span>📧</span> chekkihelp@gmail.com
-                      </a>
-                  </div>
+                  <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">{t('footer_text')}</p>
               </div>
           </div>
       </div>

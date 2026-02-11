@@ -9,7 +9,7 @@ interface Props {
 
 export const BillingModal: React.FC<Props> = ({ onClose }) => {
   const { user, upgradeToPro, cancelSubscription, setShowPaywall } = useAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isPro = user?.plan === 'pro';
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
@@ -37,7 +37,6 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
         </div>
 
         <div className="p-8 space-y-8">
-            {/* Current Plan Card */}
             <div className={`relative p-8 rounded-[1.5rem] border-2 transition-all duration-500 ${isPro ? 'bg-orange-500/5 border-orange-500/30' : 'bg-zinc-950/50 border-white/5'}`}>
                 <div className="flex justify-between items-start mb-6">
                     <div>
@@ -54,7 +53,7 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                 <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-black/30 rounded-xl border border-white/5">
                         <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Billing Period</p>
-                        <p className="text-sm text-white font-bold">{isPro ? 'Monthly' : 'None'}</p>
+                        <p className="text-sm text-white font-bold">{isPro ? 'Monthly (Auto-Pay)' : 'None'}</p>
                     </div>
                     <div className="p-4 bg-black/30 rounded-xl border border-white/5">
                         <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Next Payment</p>
@@ -70,7 +69,10 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                         Upgrade to Pro
                     </button>
                 ) : (
-                   <div className="mt-8">
+                   <div className="mt-8 flex flex-col items-center">
+                        <p className="text-[10px] text-zinc-500 font-korean mb-4 text-center">
+                            {t('pay_cancel_notice')}
+                        </p>
                         {!showCancelConfirm ? (
                             <button 
                                 onClick={() => setShowCancelConfirm(true)}
@@ -79,7 +81,7 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                                 Cancel Subscription
                             </button>
                         ) : (
-                            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center justify-between animate-fade-in">
+                            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center justify-between animate-fade-in w-full">
                                 <p className="text-xs text-red-200 font-bold">Are you sure you want to cancel?</p>
                                 <div className="flex gap-3">
                                     <button onClick={() => { cancelSubscription(); setShowCancelConfirm(false); }} className="px-4 py-2 bg-red-600 text-white text-[10px] font-bold rounded-lg hover:bg-red-700">Confirm</button>
@@ -91,7 +93,6 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                 )}
             </div>
 
-            {/* Invoices List */}
             <div>
                 <h4 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-4">Invoice History</h4>
                 <div className="bg-zinc-950/50 border border-white/5 rounded-2xl overflow-hidden">
