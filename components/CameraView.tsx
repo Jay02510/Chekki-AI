@@ -346,7 +346,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             <span className={`w-2.5 h-2.5 rounded-full ${isNight ? 'bg-indigo-500 shadow-[0_0_12px_#6366f1]' : 'bg-orange-500 shadow-[0_0_12px_#f97316]'} animate-pulse`}></span>
             <span className="text-[10px] md:text-sm font-black text-zinc-200 tracking-[0.3em] uppercase">{t('hero_badge')}</span>
           </div>
-          <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-white font-display mb-10 md:mb-14 tracking-tighter drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
+          <h1 className="text-3xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-white font-display mb-10 md:mb-14 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.15] break-keep">
             {isNight ? (
               <span className={`text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600`}>{t('hero_title_night')}</span>
             ) : (
@@ -362,7 +362,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center lg:justify-start items-center w-full max-w-lg mx-auto lg:mx-0">
-            <button onClick={openLoginModal} className="group bg-white text-black h-16 md:h-24 px-12 md:px-16 rounded-2xl md:rounded-[2rem] font-black text-xl md:text-3xl transition-all transform active:scale-95 shadow-[0_20px_60px_rgba(255,255,255,0.1)] font-display flex items-center justify-center gap-5 overflow-hidden ring-2 ring-white/10 w-full lg:w-auto">
+            <button onClick={openLoginModal} className="group bg-white text-black h-16 md:h-24 px-6 md:px-16 rounded-2xl md:rounded-[2rem] font-black text-xl md:text-3xl transition-all transform active:scale-95 shadow-[0_20px_60px_rgba(255,255,255,0.1)] font-display flex items-center justify-center gap-4 overflow-hidden ring-2 ring-white/10 w-full lg:w-auto">
               <span className="font-korean whitespace-nowrap">{t('hero_cta_btn')}</span> 
               <span className="text-3xl md:text-4xl transition-transform group-hover:translate-x-3">→</span>
             </button>
@@ -372,9 +372,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     const dropZone = document.getElementById('magic-drop-zone');
                     dropZone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }} 
-                className="group h-16 md:h-24 px-12 md:px-16 rounded-2xl md:rounded-[2rem] border-2 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-lg md:text-2xl transition-all flex items-center justify-center gap-5 backdrop-blur-xl ring-1 ring-white/5 active:scale-95 w-full lg:w-auto"
+                className="group h-16 md:h-24 px-6 md:px-16 rounded-2xl md:rounded-[2rem] border-2 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-lg md:text-2xl transition-all flex items-center justify-center gap-4 backdrop-blur-xl ring-1 ring-white/5 active:scale-95 w-full lg:w-auto"
                 >
-                <span className="text-orange-500 transition-transform group-hover:rotate-[360deg] duration-1000 text-3xl">✨</span> {t('hero_guest_cta')}
+                <span className="text-orange-500 transition-transform group-hover:rotate-[360deg] duration-1000 text-2xl md:text-3xl">✨</span> 
+                <span className="whitespace-nowrap">{t('hero_guest_cta')}</span>
                 </button>
             )}
           </div>
