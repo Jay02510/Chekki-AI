@@ -22,11 +22,9 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('fit');
   
-  // Custom Controls for Native Feel
   const [bubbleScale, setBubbleScale] = useState(0.75); 
   const [items, setItems] = useState<WorksheetItem[]>(initialItems);
   
-  // Advanced Pointer Tracking State
   const [draggingId, setDraggingId] = useState<number | null>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,51 +40,34 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     }
   }, [imageUrl]);
 
-  // NATIVE INTERACTION: RELATIVE OFFSET TRACKING
   const handlePointerDown = (e: React.PointerEvent, item: WorksheetItem) => {
     if (!containerRef.current) return;
     e.stopPropagation();
     
-    // Prevent browser "Copy Image" or "Selection" behaviors
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    
     const rect = containerRef.current.getBoundingClientRect();
-    
-    // Calculate current bubble position in percentages
     const box = item.bounding_box;
     const currentTop = item.custom_coords ? item.custom_coords.top : (box!.ymin / 1000) * 100;
     const currentLeft = item.custom_coords ? item.custom_coords.left : (box!.xmin / 1000) * 100;
-    
-    // Convert percentages to actual container pixels
     const bubblePxX = (currentLeft / 100) * rect.width;
     const bubblePxY = (currentTop / 100) * rect.height;
     
-    // Lock the grab point (offset from bubble center to finger touch)
     dragOffset.current = {
       x: (e.clientX - rect.left) - bubblePxX,
       y: (e.clientY - rect.top) - bubblePxY
     };
 
     setDraggingId(item.id);
-    
-    // Light haptic "Pick Up" feel
     if ('vibrate' in navigator) navigator.vibrate(5);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (draggingId === null || !containerRef.current) return;
-
     const rect = containerRef.current.getBoundingClientRect();
-    
-    // New pixel target minus the locked offset
     const newPxX = (e.clientX - rect.left) - dragOffset.current.x;
     const newPxY = (e.clientY - rect.top) - dragOffset.current.y;
-
-    // Convert back to percentage for layout
     let left = (newPxX / rect.width) * 100;
     let top = (newPxY / rect.height) * 100;
-
-    // Clamp to viewport
     top = Math.min(Math.max(top, 3), 97);
     left = Math.min(Math.max(left, 3), 97);
 
@@ -101,7 +82,6 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     if (draggingId !== null) {
         (e.target as HTMLElement).releasePointerCapture(e.pointerId);
         setDraggingId(null);
-        // Haptic "Drop" feel
         if ('vibrate' in navigator) navigator.vibrate(10);
     }
   };
@@ -129,7 +109,6 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
   const getStyle = (item: WorksheetItem) => {
     const box = item.bounding_box;
     if (!box && !item.custom_coords) return { display: 'none' };
-    
     const top = item.custom_coords ? item.custom_coords.top : (box!.ymin / 1000) * 100;
     const left = item.custom_coords ? item.custom_coords.left : (box!.xmin / 1000) * 100;
     const isDragging = draggingId === item.id;
@@ -138,11 +117,10 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
       top: `${top}%`,
       left: `${left}%`,
       zIndex: isDragging ? 1000 : 10 + (item.id || 0),
-      // Use translate3d for hardware acceleration (but keep the -50% centering)
       transform: `translate3d(-50%, -50%, 0) scale(${bubbleScale * (isDragging ? 1.2 : 1)})`,
       transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.2s, left 0.2s',
       willChange: 'top, left, transform',
-      touchAction: 'none', // Prevents browser scroll during drag
+      touchAction: 'none', 
       WebkitUserSelect: 'none',
       userSelect: 'none',
     } as React.CSSProperties;
@@ -152,7 +130,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     <div 
       ref={containerRef}
       onPointerMove={handlePointerMove}
-      onContextMenu={(e) => e.preventDefault()} // Block mobile context menu
+      onContextMenu={(e) => e.preventDefault()}
       className={`group relative transform-gpu transition-all duration-500 ease-in-out flex items-center justify-center select-none ${
         isFullscreen 
           ? viewMode === 'fit' ? 'h-full w-auto max-h-full' : 'w-full max-w-5xl mx-auto' 
@@ -220,18 +198,17 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     <>
       <div className={`w-full flex flex-col bg-zinc-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full'}`}>
         
-        {/* MOBILE OPTIMIZED TOOLBAR */}
         <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-center pointer-events-none">
             <div className="flex gap-2 pointer-events-auto bg-black/50 backdrop-blur-2xl p-2 rounded-2xl border border-white/10 shadow-2xl items-center">
                  <button 
                   onClick={resetPositions}
                   className="w-10 h-10 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-all flex items-center justify-center text-lg active:scale-90"
-                  title="Reset Positions"
+                  title={language === 'ko' ? "위치 초기화" : "Reset Positions"}
                  >
                    🔄
                  </button>
                  <div className="w-px h-6 bg-white/10 mx-1"></div>
-                 <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest px-1">Size</span>
+                 <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest px-1">{language === 'ko' ? "크기" : "Size"}</span>
                  <input 
                     type="range" min="0.3" max="1.5" step="0.05" 
                     value={bubbleScale} 
@@ -256,7 +233,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
             {!imageLoaded && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/40 backdrop-blur-2xl min-h-[400px]">
                  <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin mb-6"></div>
-                 <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest animate-pulse">Scanning Paper...</p>
+                 <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest animate-pulse">{language === 'ko' ? "종이 분석 중..." : "Scanning Paper..."}</p>
               </div>
             )}
             <OverlayContent />
@@ -269,25 +246,22 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
         </div>
       </div>
 
-      {/* FULL SCREEN FOCUS MODAL (Store Submission Ready) */}
       {isFullscreen && (
         <div className="fixed inset-0 z-[200] flex flex-col bg-black animate-fade-in overflow-hidden">
-          {/* Safe Area Awareness for Notch */}
           <div className="relative z-[220] pt-[env(safe-area-inset-top)] bg-zinc-900/95 backdrop-blur-3xl border-b border-white/10 shadow-2xl shrink-0 h-16 px-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Scale</span>
+                    <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{language === 'ko' ? "크기" : "Size"}</span>
                     <input 
                         type="range" min="0.3" max="2" step="0.1" 
                         value={bubbleScale} 
                         onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
                         className="w-24 md:w-64 accent-orange-500 h-1.5 bg-zinc-800 rounded-lg appearance-none"
                     />
-                    <button onClick={resetPositions} className="text-[9px] font-black text-white hover:text-orange-500 uppercase ml-2">Reset</button>
                 </div>
 
                 <button 
                     onClick={() => setIsFullscreen(false)}
-                    className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-5 py-2 rounded-xl shadow-xl transition-all active:scale-95 border border-white/10"
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-50 text-white px-5 py-2 rounded-xl shadow-xl transition-all active:scale-95 border border-white/10"
                 >
                     <span className="text-[10px] font-black uppercase tracking-widest">{language === 'ko' ? '종료' : 'Exit'}</span>
                     <span className="text-lg">✕</span>
@@ -303,13 +277,12 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
              </div>
           </div>
 
-          {/* Large Thumb-Zone Exit Button for Mobile */}
           <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] sm:hidden animate-fade-in-up">
               <button 
                 onClick={() => setIsFullscreen(false)}
                 className="bg-white text-black px-12 py-5 rounded-full font-black text-sm uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(255,255,255,0.2)] ring-4 ring-white/10 active:scale-90 transition-all"
               >
-                Close Focus
+                {language === 'ko' ? '포커스 종료' : 'Close Focus'}
               </button>
           </div>
         </div>

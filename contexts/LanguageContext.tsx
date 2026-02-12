@@ -49,13 +49,13 @@ const translations = {
     biz_contact_notice: "Inquiries are accepted 24 hours a day and will be answered within 1 business day.",
     biz_email: "Email: jsn.benjamin@gmail.com",
     
-    // UI Labels for Footer Nav
+    // Navigation
     nav_home: "Home",
     nav_pricing: "Pricing",
-    nav_terms: "Terms of Service",
-    nav_privacy: "Privacy Policy",
-    nav_refund: "Refund Policy",
-    nav_contact: "Contact Us",
+    nav_terms: "Terms",
+    nav_privacy: "Privacy",
+    nav_refund: "Refund",
+    nav_contact: "Contact",
 
     // Hero
     hero_badge: "High-Accuracy Answer Key",
@@ -65,15 +65,43 @@ const translations = {
     hero_desc_night: "Enjoy your 'parenting retirement' 5 minutes earlier. Chekki handles the answers while you provide the hugs.",
     hero_cta_btn: "Start for Free Today",
     
-    // Camera View
+    // Camera View / Dashboard
     drop_title: "Snap the Worksheet",
     drop_subtitle: "Get your digital answer key instantly",
     btn_upload: "Snap Worksheet",
     btn_walkthrough: "Watch Walkthrough",
-    supported_formats: "Images are processed temporarily and NEVER stored. Privacy first.",
-    res_title: "Parent Resources",
+    supported_formats: "Images are processed temporarily and NEVER stored.",
     dash_welcome: "Hi,",
     dash_subtitle: "Snap a photo to see the answers and your teaching guide.",
+    lbl_feedback: "Feedback",
+    lbl_share_ideas: "Share Ideas",
+    lbl_quick_guide: "Quick Guide",
+    lbl_resource: "Resource",
+    lbl_pro_active: "Pro Magic Active",
+    lbl_magic_left: "Magic Left",
+    lbl_lighting: "Lighting",
+    lbl_flat: "Flat",
+    lbl_sharp: "Sharp",
+    res_title: "Parent Resources",
+    res_subtitle: "Help other parents find peace.",
+    res_flyer: "Official Flyer",
+    res_download: "Download",
+    res_share: "Share",
+    res_copied: "Link Copied!",
+
+    // Onboarding
+    onb_1_title: "Stop the Homework War",
+    onb_1_desc: "Chekki provides the answers, you provide the hugs.",
+    onb_1_btn: "Next Step",
+    onb_2_title: "Instant Answer Key",
+    onb_2_desc: "Answers appear right on top of the worksheet.",
+    onb_2_btn: "Got it!",
+    onb_academy_title: "Academy Authorized",
+    onb_academy_desc: "Enter your School code to unlock all Pro features for free.",
+    onb_3_title: "Safe & Private",
+    onb_3_desc: "Images are never stored. Privacy is our priority.",
+    onb_3_btn: "Start Now",
+    onb_skip: "Skip Intro",
 
     // Features Section
     how_title: "How Chekki Works",
@@ -86,17 +114,17 @@ const translations = {
 
     trust_title: "Safe for Your Family",
     trust_privacy: "Privacy You Can Trust",
-    trust_privacy_desc: "Your family’s safety is our priority; we never store your child’s data, processing images in real-time before deleting them instantly.",
+    trust_privacy_desc: "Your family’s safety is our priority; we never store your child’s data.",
     trust_safety: "Bonding, Not Battling",
-    trust_safety_desc: "We turn stressful correction time into a happy, high-five moment with interactive digital stamps and positive praise your child will love.",
+    trust_safety_desc: "We turn stressful correction time into a happy, high-five moment.",
 
     diff_title: "Why Chekki?",
     diff_ocr: "The Perfect Answer Key",
-    diff_ocr_desc: "Don't waste time hunting for keys. Chekki identifies the questions and shows you exactly what to write, right on the screen.",
+    diff_ocr_desc: "Chekki identifies the questions and shows you exactly what to write.",
     diff_script: "Bilingual Teaching Scripts",
-    diff_script_desc: "We give you the exact words to say in Korean and English to encourage your child through the tricky parts.",
+    diff_script_desc: "We give you the exact words to say in Korean and English.",
     diff_brand: "Consistent Learning",
-    diff_brand_desc: "Ensure your child receives the same high-quality, authorized guidance at home that matches their classroom experience perfectly.",
+    diff_brand_desc: "Ensure your child receives guidance matching their classroom experience.",
 
     // Analysis & Loading
     processing: "Generating answer key...",
@@ -105,7 +133,7 @@ const translations = {
     loading_step2: "Writing your teaching scripts...",
     loading_step3: "Syncing native audio...",
     loading_step4: "Ready! Time to teach with love...",
-    loading_thorough: "Chekki is checking thoroughly to give you the perfect answers.",
+    loading_thorough: "Chekki is checking thoroughly for perfect answers.",
     loading_tip: "💡 Complex pages take a few extra seconds!",
     loading_almost: "🚀 Almost there! Preparing your guide...",
     btn_cancel_retry: "Cancel",
@@ -116,6 +144,11 @@ const translations = {
     ws_voice_guide: "💡 Tap an answer to hear the pronunciation!",
     ws_gen_practice: "Extra Practice Sheet",
     ws_scan_again: "Next Page",
+    ws_scanning_header: "Generating answers...",
+    ws_scanning_detail: "Analyzing context...",
+    tip_click_guide: "💡 Tap any question to see your Teaching Script!",
+    lbl_mom_tip: "Teaching Script",
+    growing_text: "Generating...",
     
     // Paywall
     pw_title: "Buy Back Your Time",
@@ -123,13 +156,12 @@ const translations = {
     
     // Errors
     error_title: "Let's try one more time!",
-    err_network: "The lighting might be tricky. Try a clearer shot for perfect answers!",
+    err_network: "The lighting might be tricky. Try a clearer shot!",
     err_confirm: "Are you sure? Current data will be reset.",
     btn_scan_again_simple: "Try Again",
     btn_retake: "Retake Photo",
-    growing_text: "Generating...",
-    lbl_mom_tip: "Teaching Script",
-
+    
+    // Misc
     footer_text: "Chekki AI - Supporting every English Kindergarten family with love."
   },
   ko: {
@@ -159,19 +191,19 @@ const translations = {
     pay_secure_notice: "구매안전서비스(에스크로)를 통해 결제 안전을 보장합니다.",
     pay_vat_included: "부가세 포함",
     pay_auto_renew: "자동 결제 구독 상품입니다. 언제든지 해지 가능합니다.",
-    pay_cancel_notice: "구독 해지는 마이페이지에서 언제든지 가능하며, 해지 시 다음 결제일부터 과금되지 않습니다.",
+    pay_cancel_notice: "구독 해지는 마이페이지에서 언제든지 가능합니다.",
     biz_name: "Chekki (채키)",
     biz_info_title: "사업자 정보",
     biz_reg_num: "사업자등록번호: 814-14-03096",
     biz_rep: "대표자: Jason Benjamin (제이슨 벤자민)",
     biz_address: "주소: 서울특별시 종로구 종로 347, 롯데캐슬, 03113",
-    biz_mail_order: "통신판매업 신고번호: 제2025-서울종로-XXXX호 (발급 후 기재)",
-    biz_hours: "고객센터 운영시간: 평일 10:00–18:00 (공휴일 제외)",
-    biz_escrow: "본 서비스는 구매안전서비스(에스크로)를 통해 결제 안전을 보장합니다.",
-    biz_contact_notice: "문의는 24시간 접수 가능하며 1영업일 이내 답변드립니다.",
+    biz_mail_order: "통신판매업 신고번호: 준비중",
+    biz_hours: "고객센터: 평일 10:00–18:00 (KST)",
+    biz_escrow: "본 서비스는 구매안전서비스를 통해 결제 안전을 보장합니다.",
+    biz_contact_notice: "문의는 1영업일 이내 답변드립니다.",
     biz_email: "이메일: jsn.benjamin@gmail.com",
 
-    // UI Labels for Footer Nav
+    // Navigation
     nav_home: "홈",
     nav_pricing: "요금 안내",
     nav_terms: "이용약관",
@@ -187,15 +219,43 @@ const translations = {
     hero_desc_night: "육아퇴근을 5분 더 앞당겨 드릴게요. 정답은 채키가 찾을 테니, 아이를 한 번 더 안아주세요.",
     hero_cta_btn: "지금 바로 시작하기",
 
-    // Camera View
+    // Camera View / Dashboard
     drop_title: "여기에 숙제를 보여주세요",
     drop_subtitle: "종이 위에 정답이 마법처럼 나타나요",
     btn_upload: "숙제 사진 찍기",
     btn_walkthrough: "사용 가이드 보기",
-    supported_formats: "업로드된 이미지는 분석 후 즉시 삭제됩니다. 안심하고 사용하세요.",
-    res_title: "학부모 리소스",
+    supported_formats: "이미지는 분석 후 즉시 삭제됩니다.",
     dash_welcome: "반가워요,",
     dash_subtitle: "사진을 찍으면 바로 정답과 티칭 가이드를 보여드려요.",
+    lbl_feedback: "의견 보내기",
+    lbl_share_ideas: "의견 보내기",
+    lbl_quick_guide: "사용 가이드",
+    lbl_resource: "학부모 리소스",
+    lbl_pro_active: "프로 마법 활성화됨",
+    lbl_magic_left: "남은 마법",
+    lbl_lighting: "밝게",
+    lbl_flat: "수평",
+    lbl_sharp: "선명",
+    res_title: "학부모 리소스",
+    res_subtitle: "다른 부모님들께 평화를 선물하세요.",
+    res_flyer: "공식 안내문",
+    res_download: "저장",
+    res_share: "공유",
+    res_copied: "복사 완료!",
+
+    // Onboarding
+    onb_1_title: "숙제 전쟁, 이제 그만",
+    onb_1_desc: "채점은 채키가 할게요. 부모님은 칭찬만 해주세요.",
+    onb_1_btn: "다음 단계로",
+    onb_2_title: "마법 같은 정답지",
+    onb_2_desc: "사진만 찍으면 종이 위에 정답이 바로 나타나요.",
+    onb_2_btn: "확인했어요!",
+    onb_academy_title: "우리 아이 학원과 함께",
+    onb_academy_desc: "학원 코드를 입력하면 모든 기능을 무료로 이용할 수 있어요.",
+    onb_3_title: "안심하고 사용하세요",
+    onb_3_desc: "사진은 저장되지 않고 즉시 삭제됩니다.",
+    onb_3_btn: "시작하기",
+    onb_skip: "건너뛰기",
 
     // Features Section
     how_title: "채키는 이렇게 도와드려요",
@@ -208,17 +268,17 @@ const translations = {
 
     trust_title: "부모님들이 채키를 믿는 이유",
     trust_privacy: "안심할 수 있는 보안",
-    trust_privacy_desc: "우리 아이의 정보는 소중하니까요. 사진은 저장되지 않고 분석 즉시 파기되어 개인정보를 완벽하게 보호합니다.",
+    trust_privacy_desc: "우리 아이의 정보는 소중하니까요. 사진은 저장되지 않습니다.",
     trust_safety: "혼내지 않는 즐거운 학습",
-    trust_safety_desc: "숙제 시간이 전쟁터가 아닌, 아이와 웃으며 하이파이브하는 칭찬과 교감의 시간으로 바뀝니다.",
+    trust_safety_desc: "숙제 시간이 전쟁터가 아닌 웃음 가득한 시간이 됩니다.",
 
     diff_title: "채키와 함께라면 다릅니다",
-    diff_ocr: "마법 같은 디지털 답지",
-    diff_ocr_desc: "답지를 찾을 필요가 없어요. 채키가 문제를 읽고 정답을 정확한 위치에 표시해 드립니다.",
+    diff_ocr: "정확한 디지털 답지",
+    diff_ocr_desc: "답지를 찾을 필요 없이 채키가 정답을 바로 보여줍니다.",
     diff_script: "다정한 티칭 스크립트",
-    diff_script_desc: "영어를 몰라도 괜찮아요. 아이에게 어떻게 설명하면 좋을지 한국어와 영어 대본을 모두 드립니다.",
-    diff_brand: "학원과 집의 연결",
-    diff_brand_desc: "학원에서 배우는 내용 그대로, 집에서도 전문적인 학습 가이드를 일관성 있게 이어갈 수 있습니다.",
+    diff_script_desc: "아이에게 어떻게 설명할지 대본을 한국어와 영어로 드립니다.",
+    diff_brand: "학원과의 연결",
+    diff_brand_desc: "학원에서 배우는 내용 그대로 집에서도 일관성 있게 학습하세요.",
 
     // Analysis & Loading
     processing: "정답지를 만들고 있어요...",
@@ -238,6 +298,11 @@ const translations = {
     ws_voice_guide: "💡 정답을 누르면 원어민 발음을 들려드려요!",
     ws_gen_practice: "추가 복습 문제 만들기",
     ws_scan_again: "다음 페이지 찍기",
+    ws_scanning_header: "정답을 찾는 중...",
+    ws_scanning_detail: "맥락을 분석하고 있어요...",
+    tip_click_guide: "💡 문제를 누르면 다정한 티칭 가이드가 나타나요!",
+    lbl_mom_tip: "티칭 가이드",
+    growing_text: "생성 중...",
 
     // Paywall
     pw_title: "매일 밤 평화를 구매하세요",
@@ -245,13 +310,12 @@ const translations = {
     
     // Errors
     error_title: "다시 한번 해볼까요?",
-    err_network: "사진이 조금 흐릿해요. 정답을 정확히 찾으려면 밝은 곳에서 다시 찍어주세요!",
+    err_network: "사진이 조금 흐릿해요. 밝은 곳에서 다시 찍어주세요!",
     err_confirm: "정말 취소하시겠어요? 현재 숙제 정보가 사라집니다.",
     btn_scan_again_simple: "다시 분석하기",
     btn_retake: "사진 다시 찍기",
-    growing_text: "생성 중...",
-    lbl_mom_tip: "티칭 가이드",
-
+    
+    // Misc
     footer_text: "대한민국 모든 영유 부모님들을 진심으로 응원합니다."
   }
 };
@@ -271,9 +335,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [language]);
 
   const t = (key: string): string => {
-    return (translations[language] as any)[key] || (translations['en'] as any)[key] || key;
+    const translation = translations[language];
+    if (translation && (translation as any)[key]) return (translation as any)[key];
+    const englishFallback = (translations['en'] as any)[key];
+    if (englishFallback) return englishFallback;
+    return key;
   };
 
+  /* Fixed broken JSX syntax: added missing opening bracket for LanguageContext.Provider */
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}

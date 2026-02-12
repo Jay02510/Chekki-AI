@@ -77,7 +77,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
   const FeatureSection = () => (
     <section className="py-16 md:py-32 px-6 max-w-7xl mx-auto w-full space-y-24 md:space-y-40">
-        {/* Comparison Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
             {[
                 { id: 'ocr', emoji: '🎯', title: t('diff_ocr'), desc: t('diff_ocr_desc') },
@@ -92,7 +91,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             ))}
         </div>
 
-        {/* How it Works Section */}
         <div className="space-y-12 md:space-y-20">
             <h2 className="text-3xl md:text-6xl font-black text-white text-center font-display tracking-tight">{t('how_title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
@@ -108,7 +106,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             </div>
         </div>
 
-        {/* Trust & Security Section */}
         <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[3rem] md:rounded-[4rem] p-10 md:p-24 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none"></div>
             <h2 className="text-2xl md:text-5xl font-black text-white mb-12 md:mb-20 font-display relative z-10">{t('trust_title')}</h2>
@@ -131,9 +128,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const ClarityGuide = () => (
     <div className="flex flex-wrap justify-center gap-3 mt-10 md:mt-12 mb-6 px-2">
       {[
-        { icon: '☀️', text: language === 'ko' ? '밝게' : 'Lighting' },
-        { icon: '📏', text: language === 'ko' ? '수평' : 'Flat' },
-        { icon: '🔍', text: language === 'ko' ? '선명' : 'Sharp' }
+        { icon: '☀️', text: t('lbl_lighting') },
+        { icon: '📏', text: t('lbl_flat') },
+        { icon: '🔍', text: t('lbl_sharp') }
       ].map((tip, i) => (
         <div key={i} className="flex items-center gap-2.5 bg-white/5 border border-white/10 px-4 py-2 md:px-5 md:py-2.5 rounded-2xl shrink-0 backdrop-blur-md hover:bg-white/10 transition-all cursor-default">
           <span className="text-base">{tip.icon}</span>
@@ -254,9 +251,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         >
            <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex-shrink-0 ${isNight ? 'bg-indigo-500/20' : 'bg-orange-500/20'} flex items-center justify-center text-2xl md:text-3xl shadow-inner`}>✨</div>
            <div className="min-w-0">
-              <p className={`text-[10px] md:text-xs font-black uppercase tracking-[0.2em] ${isNight ? 'text-indigo-400' : 'text-orange-500'} mb-1.5`}>Feedback</p>
+              <p className={`text-[10px] md:text-xs font-black uppercase tracking-[0.2em] ${isNight ? 'text-indigo-400' : 'text-orange-500'} mb-1.5`}>{t('lbl_feedback')}</p>
               <p className="text-base md:text-xl font-bold text-zinc-200 font-korean group-hover:text-white transition-colors leading-tight truncate">
-                {language === 'ko' ? "의견 보내기" : "Share Ideas"}
+                {t('lbl_share_ideas')}
               </p>
            </div>
         </button>
@@ -266,7 +263,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         >
           <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex-shrink-0 bg-indigo-500 flex items-center justify-center text-xl md:text-2xl shadow-lg">▶️</div>
           <div className="min-w-0">
-              <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-indigo-400 mb-1.5">Quick Guide</p>
+              <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-indigo-400 mb-1.5">{t('lbl_quick_guide')}</p>
               <p className="text-base md:text-xl font-bold text-white font-korean leading-tight truncate">{t('btn_walkthrough')}</p>
           </div>
         </button>
@@ -276,7 +273,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         >
           <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex-shrink-0 bg-orange-500 flex items-center justify-center text-xl md:text-2xl shadow-lg">📢</div>
           <div className="min-w-0">
-              <p className={`text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-orange-400 mb-1.5`}>Resource</p>
+              <p className={`text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-orange-400 mb-1.5`}>{t('lbl_resource')}</p>
               <p className="text-base md:text-xl font-bold text-white font-korean leading-tight truncate">{t('res_title')}</p>
           </div>
         </button>
@@ -309,7 +306,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
            
            <div className={`border rounded-[2rem] py-4 px-8 md:py-5 md:px-12 flex items-center gap-6 shadow-2xl ring-1 ring-white/5 transition-all duration-500 ${isPro ? 'bg-orange-500/10 border-orange-500/30' : 'bg-[#0F1014] border-white/10'}`}>
                 <div className={`text-[11px] md:text-sm uppercase font-black tracking-[0.3em] ${isPro ? 'text-orange-400' : 'text-zinc-500'}`}>
-                    {isPro ? (language === 'ko' ? "무제한 마법 활성" : "Pro Magic Active") : (language === 'ko' ? "남은 마법" : "Magic Left")}
+                    {isPro ? t('lbl_pro_active') : t('lbl_magic_left')}
                 </div>
                 <div className="w-px h-6 md:h-8 bg-white/10"></div>
                 <div className={`font-bold text-2xl md:text-4xl font-display leading-none ${isPro ? 'text-orange-500 scale-110' : 'text-white'}`}>{remaining}</div>
@@ -332,11 +329,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       {showVideoModal && <VideoWalkthroughModal />}
       {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
       
-      {/* MOBILE OPTIMIZED HERO SECTION */}
       <div className="relative max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-24 items-center mb-24 md:mb-40">
         <div className={`absolute top-0 left-1/4 -translate-x-1/2 w-full md:w-[1000px] h-[700px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[100px] md:blur-[180px] -z-10 pointer-events-none opacity-40 mix-blend-screen`}></div>
         
-        {/* Visual Hero Image for Mobile - Appears first for impact */}
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2 px-4 md:px-0">
             <div className="relative w-full max-w-[280px] sm:max-w-[340px] md:max-w-[580px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[80px] md:blur-[140px] animate-pulse`}></div>
@@ -393,11 +388,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
       <FeatureSection />
 
-      {/* Compliance Footer (Bilingual Disclosure) */}
       <div className="mt-40 pt-24 border-t border-white/5 bg-zinc-950/50 backdrop-blur-2xl">
           <div className="max-w-7xl mx-auto px-6 pb-24">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-24">
-                  {/* KR Disclosure */}
                   <div className="space-y-8 text-[11px] md:text-sm text-zinc-500 font-korean leading-relaxed">
                       <h4 className="text-white font-black text-2xl mb-8 font-display">Chekki (채키)</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
@@ -413,7 +406,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       </div>
                   </div>
 
-                  {/* EN Disclosure */}
                   <div className="space-y-8 text-[10px] md:text-sm text-zinc-500 font-sans leading-relaxed lg:border-l lg:border-white/5 lg:pl-20">
                       <h4 className="text-white font-black text-2xl mb-8 font-display">{t('biz_info_title')}</h4>
                       <div className="grid grid-cols-1 gap-y-4">
@@ -428,7 +420,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                   </div>
               </div>
 
-              {/* REQUIRED 6-LINK NAVIGATION */}
               <div className="mt-12 pt-12 border-t border-white/5 flex flex-col items-center gap-12">
                   <div className="flex flex-wrap justify-center gap-8 md:gap-14 text-[11px] md:text-sm text-zinc-400 font-black uppercase tracking-[0.4em]">
                       <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">{t('nav_home')}</button>
