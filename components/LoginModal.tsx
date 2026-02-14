@@ -69,49 +69,52 @@ export const LoginModal: React.FC = () => {
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={closeLoginModal}></div>
         
-        <div className="relative bg-zinc-900 rounded-[2rem] w-full max-sm shadow-2xl border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+        <div className="relative bg-zinc-900 rounded-[2.5rem] w-full max-w-sm shadow-2xl border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
           
-          <div className="relative h-24 md:h-28 bg-zinc-950 flex items-center justify-center overflow-hidden shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/20 to-transparent opacity-50"></div>
+          <div className="relative h-36 md:h-44 bg-zinc-950 flex items-center justify-center shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/30 to-purple-500/20 opacity-60"></div>
+              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-500/20 rounded-full blur-3xl"></div>
+              
               <img 
                 src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png" 
                 alt="Chekki Mascot" 
-                className="relative z-10 w-16 h-16 md:w-20 md:h-20 object-contain animate-float" 
+                className="relative z-10 w-28 h-28 md:w-36 md:h-36 object-contain animate-float drop-shadow-[0_20px_50px_rgba(249,115,22,0.4)]" 
               />
-              <button onClick={closeLoginModal} className="absolute top-3 right-3 text-white/40 hover:text-white transition-colors bg-black/40 w-7 h-7 rounded-full flex items-center justify-center border border-white/5 z-20 text-xs">✕</button>
+              
+              <button onClick={closeLoginModal} className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors bg-black/60 w-8 h-8 rounded-full flex items-center justify-center border border-white/10 z-20 text-sm shadow-xl">✕</button>
           </div>
 
           <div className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl md:text-3xl font-black text-white font-display mb-1">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-black text-white font-display mb-1.5 tracking-tight">
                     {getTitle()}
                 </h2>
-                <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">
+                <p className="text-zinc-500 text-[11px] md:text-xs font-medium leading-relaxed max-w-[220px] mx-auto">
                     {getSubtitle()}
                 </p>
               </div>
 
-              {error && <div className="bg-red-500/10 border border-red-500/50 p-2.5 rounded-xl text-red-400 text-[10px] mb-4 text-center font-bold animate-shake">{error}</div>}
-              {success && <div className="bg-emerald-500/10 border border-emerald-500/50 p-2.5 rounded-xl text-emerald-400 text-[10px] mb-4 text-center font-bold">{success}</div>}
+              {error && <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 text-[10px] md:text-xs mb-5 text-center font-bold animate-shake">{error}</div>}
+              {success && <div className="bg-emerald-500/10 border border-emerald-500/50 p-3 rounded-xl text-emerald-400 text-[10px] md:text-xs mb-5 text-center font-bold">{success}</div>}
               
-              <form onSubmit={handleSubmit} className="space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-3.5">
                   {viewMode === 'signup' && (
                       <div className="relative group">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">👋</span>
-                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Parent's Name" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-orange-500 transition-colors text-xs font-medium placeholder:text-zinc-700" required />
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Parent's Name" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3.5 text-white outline-none focus:border-orange-500 transition-colors text-xs font-medium placeholder:text-zinc-700" required />
                       </div>
                   )}
                   
                   <div className="relative group">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">📧</span>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-orange-500 transition-colors text-xs font-medium placeholder:text-zinc-700" required />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3.5 text-white outline-none focus:border-orange-500 transition-colors text-xs font-medium placeholder:text-zinc-700" required />
                   </div>
 
                   {viewMode !== 'forgot' && (
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                         <div className="relative group">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">🔒</span>
-                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-orange-500 transition-colors text-xs font-medium placeholder:text-zinc-700" required />
+                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3.5 text-white outline-none focus:border-orange-500 transition-colors text-xs font-medium placeholder:text-zinc-700" required />
                         </div>
                         {viewMode === 'login' && (
                             <div className="flex justify-end px-1">
@@ -133,7 +136,7 @@ export const LoginModal: React.FC = () => {
                             <button 
                                 type="button" 
                                 onClick={() => setShowSchoolField(true)}
-                                className="text-[9px] font-black text-orange-500 uppercase tracking-widest hover:text-orange-400 transition-colors flex items-center gap-2 px-1 py-1"
+                                className="text-[10px] font-black text-orange-500 uppercase tracking-widest hover:text-orange-400 transition-colors flex items-center gap-2 px-1 py-1"
                             >
                                 🏷️ Use Access / Beta Code
                             </button>
@@ -152,12 +155,12 @@ export const LoginModal: React.FC = () => {
                       </div>
                   )}
 
-                  <button type="submit" disabled={isLoading} className="w-full bg-brand-orange hover:bg-orange-600 text-white font-black py-3.5 rounded-xl shadow-xl shadow-orange-500/20 transform active:scale-95 disabled:opacity-50 transition-all text-base mt-2">
+                  <button type="submit" disabled={isLoading} className="w-full bg-brand-orange hover:bg-orange-600 text-white font-black py-4 rounded-xl shadow-xl shadow-orange-500/20 transform active:scale-95 disabled:opacity-50 transition-all text-base mt-3">
                       {isLoading ? 'Processing...' : (viewMode === 'login' ? 'Log In' : viewMode === 'signup' ? 'Sign Up' : 'Send Reset Link')}
                   </button>
               </form>
               
-              <div className="mt-6 flex flex-col items-center gap-3">
+              <div className="mt-8 flex flex-col items-center gap-4">
                   <button 
                     onClick={() => { 
                         if (viewMode === 'forgot') setViewMode('login');
@@ -175,11 +178,11 @@ export const LoginModal: React.FC = () => {
                       )}
                   </button>
 
-                  {/* --- DISCOVERY: Guest Mode Alternative --- */}
-                  <div className="w-full h-px bg-white/5 my-2"></div>
+                  <div className="w-full h-px bg-white/5 my-1"></div>
+                  
                   <button 
                     onClick={closeLoginModal}
-                    className="text-zinc-500 text-[11px] hover:text-orange-400 font-black uppercase tracking-widest transition-all animate-pulse"
+                    className="text-zinc-500 text-[10px] hover:text-orange-400 font-black uppercase tracking-widest transition-all animate-pulse"
                   >
                     {t('login_guest_link')}
                   </button>
