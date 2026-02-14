@@ -22,19 +22,17 @@ export interface WorksheetItem {
   correct_answer: string;
   korean_guide: string;
   english_guide?: string;
-  teaching_tip_ko: string;
-  teaching_script_ko?: string;
+  teaching_script_ko: string; // Standardized
   teaching_script_en?: string;
-  teaching_tip_en?: string;
   handwriting_tip_ko?: string;
   confidence_score?: number;
   group_id?: string;
   bounding_box?: BoundingBox;
-  // NEW: Support for manual repositioning
   custom_coords?: { top: number; left: number };
 }
 
 export interface UserProfile {
+  uid?: string;
   name: string;
   email: string;
   plan: 'free' | 'pro';
@@ -66,6 +64,8 @@ export interface WorksheetAnalysis {
 
 export type AppView = 'onboarding' | 'camera' | 'analyzing' | 'workspace';
 export type WorkspaceMode = 'overlay' | 'split';
+// Define LegalType here to be accessible throughout the app
+export type LegalType = 'privacy' | 'terms' | 'refund' | 'youth';
 
 export interface AnalysisState {
   status: 'idle' | 'analyzing' | 'complete' | 'error';

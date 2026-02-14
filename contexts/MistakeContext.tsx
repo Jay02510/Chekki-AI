@@ -12,7 +12,7 @@ interface MistakeItem extends WorksheetItem {
 interface MistakeContextType {
   mistakes: MistakeItem[];
   toggleMistake: (item: WorksheetItem) => void;
-  isMistake: (questionText: string) => boolean;
+  isMistake: (questionText: string, correctAnswer: string) => boolean;
   removeMistake: (uniqueId: string) => void;
   showMistakeModal: boolean;
   setShowMistakeModal: (show: boolean) => void;
@@ -27,7 +27,6 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [showMistakeModal, setShowMistakeModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load mistakes when user changes
   useEffect(() => {
     const loadMistakes = async () => {
         if (!firebaseUser) {
@@ -36,11 +35,10 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
         setIsLoading(true);
         try {
-            // The database service now handles fallbacks internally
             const data = await db.getMistakes(firebaseUser.uid);
             setMistakes(data);
         } catch (e) {
-            console.error("Critical error loading mistakes:", e);
+            console.error("Error loading mistakes:", e);
         } finally {
             setIsLoading(false);
         }
@@ -51,7 +49,11 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const toggleMistake = async (item: WorksheetItem) => {
     if (!firebaseUser) return;
 
-    const exists = mistakes.find(m => m.question_text === item.question_text && m.correct_answer === item.correct_answer);
+    // Use Question + Answer for better identity tracking
+    const exists = mistakes.find(m => 
+      m.question_text === item.question_text && 
+      m.correct_answer === item.correct_answer
+    );
 
     if (exists) {
       setMistakes(prev => prev.filter(m => m.uniqueId !== exists.uniqueId));
@@ -73,8 +75,11 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await db.removeMistake(uniqueId, firebaseUser.uid);
   };
 
-  const isMistake = (questionText: string) => {
-    return mistakes.some(m => m.question_text === questionText);
+  const isMistake = (questionText: string, correctAnswer: string) => {
+    return mistakes.some(m => 
+      m.question_text === questionText && 
+      m.correct_answer === correctAnswer
+    );
   };
 
   return (

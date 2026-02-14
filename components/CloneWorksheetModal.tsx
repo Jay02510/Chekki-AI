@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { WorksheetItem } from '../types';
 import { generateSimilarWorksheet } from '../services/geminiService';
 import { ChekkiMascot } from './Icons';
@@ -22,17 +22,33 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
     const [isDrawing, setIsDrawing] = useState(false);
     const [hasDrawn, setHasDrawn] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
-    const fetchClone = async () => {
+    const fetchClone = useCallback(async (itemsToClone: WorksheetItem[]) => {
+        if (abortControllerRef.current) abortControllerRef.current.abort();
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        
         setLoading(true);
-        const newItems = await generateSimilarWorksheet(originalItems);
-        setItems(newItems);
-        setLoading(false);
-    };
+        try {
+            const newItems = await generateSimilarWorksheet(itemsToClone, controller.signal);
+            setItems(newItems);
+        } catch (e: any) {
+            if (e.name === 'AbortError') return;
+            console.error("Failed to generate clone", e);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        fetchClone();
-    }, [originalItems]);
+        if (originalItems.length > 0) {
+            fetchClone(originalItems);
+        }
+        return () => {
+            if (abortControllerRef.current) abortControllerRef.current.abort();
+        };
+    }, [originalItems, fetchClone]);
 
     useEffect(() => {
         if (isDigitalMode && canvasRef.current && containerRef.current) {
@@ -145,19 +161,19 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
                             <p className="text-xs text-gray-500 font-medium">Extra practice for your child</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">✕</button>
+                    <button onClick={onClose} className="min-w-[48px] min-h-[48px] rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">✕</button>
                 </div>
                 
                 <div className="bg-gray-50 px-6 py-2 border-b border-gray-200 flex items-center justify-between">
                      <div className="flex items-center gap-2">
-                         <button onClick={() => setIsDigitalMode(false)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all ${!isDigitalMode ? 'bg-zinc-800 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>Read / Print</button>
-                         <button onClick={() => setIsDigitalMode(true)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all ${isDigitalMode ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>✏️ Tablet / Trace</button>
+                         <button onClick={() => setIsDigitalMode(false)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${!isDigitalMode ? 'bg-zinc-800 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>Read / Print</button>
+                         <button onClick={() => setIsDigitalMode(true)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${isDigitalMode ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>✏️ Tablet / Trace</button>
                      </div>
                      {isDigitalMode && (
                          <div className="flex items-center gap-3">
-                             <button onClick={clearCanvas} className="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-200">Clear</button>
+                             <button onClick={clearCanvas} className="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 min-h-[44px]">Clear</button>
                              {hasDrawn && (
-                                 <button onClick={() => setShowReward(true)} className="bg-green-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-lg animate-bounce">Finish & Get Stamp!</button>
+                                 <button onClick={() => setShowReward(true)} className="bg-green-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-lg animate-bounce min-h-[44px]">Finish & Get Stamp!</button>
                              )}
                          </div>
                      )}
@@ -221,9 +237,9 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
                 </div>
 
                 <div className="bg-white p-6 border-t border-gray-200 flex justify-end gap-3 shrink-0 z-10">
-                    <button onClick={onClose} className="px-8 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100">Cancel</button>
+                    <button onClick={onClose} className="px-8 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 min-h-[48px]">Cancel</button>
                     {!isDigitalMode && (
-                        <button onClick={handlePrint} className="px-10 py-3 rounded-xl font-bold bg-zinc-900 text-white shadow-xl flex items-center gap-2 transform transition-all active:scale-95">
+                        <button onClick={handlePrint} className="px-10 py-3 rounded-xl font-bold bg-zinc-900 text-white shadow-xl flex items-center gap-2 transform transition-all active:scale-95 min-h-[48px]">
                             <span>🖨️</span> Print PDF
                         </button>
                     )}

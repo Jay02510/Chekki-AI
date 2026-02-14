@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
@@ -10,12 +10,13 @@ interface Props {
 }
 
 export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [textIndex, setTextIndex] = useState(0);
   const [videoError, setVideoError] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
 
-  const loadingTexts = [
+  // Stable memoized dependency
+  const loadingTexts = useMemo(() => [
     t('loading_step0'),
     t('loading_step1'),
     t('loading_step2'),
@@ -24,7 +25,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
     t('loading_step4'),
     t('loading_tip'),
     t('loading_almost')
-  ];
+  ], [t]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -37,13 +38,12 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
       clearInterval(interval);
       clearTimeout(cancelTimer);
     };
-  }, [loadingTexts.length]);
+  }, [loadingTexts]);
 
   return (
     <div className={`fixed inset-0 ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-900/20 to-purple-900/20' : 'from-orange-500/10 to-purple-500/10'} opacity-50`}></div>
       
-      {/* --- FLOATING LIGHT PARTICLES --- */}
       <div className="absolute inset-0 pointer-events-none">
          {[...Array(12)].map((_, i) => (
            <div 
@@ -60,7 +60,6 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
       </div>
 
       <div className="relative w-72 h-72 md:w-[480px] md:h-[480px] mb-12 shrink-0 group">
-        {/* Futuristic Outer Glow Ring */}
         <div className={`absolute -inset-8 ${isNight ? 'bg-indigo-500/10' : 'bg-orange-500/20'} rounded-full blur-[100px] animate-pulse group-hover:opacity-100 transition-opacity`}></div>
         <div className={`absolute -inset-1 border-2 ${isNight ? 'border-indigo-500/20' : 'border-orange-500/30'} rounded-[3.5rem] animate-[spin_10s_linear_infinite] opacity-40`}></div>
         
@@ -86,7 +85,6 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
                 </div>
              )}
              
-             {/* Digital Scanline Overlay */}
              <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden opacity-30">
                 <div className={`w-full h-1 bg-gradient-to-r from-transparent ${isNight ? 'via-indigo-400' : 'via-orange-400'} to-transparent absolute top-0 animate-[scan_4s_linear_infinite]`}></div>
              </div>
@@ -113,7 +111,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
         {showCancel && onCancel && (
           <button 
             onClick={onCancel}
-            className="px-8 py-3 rounded-2xl border border-white/10 bg-white/5 text-zinc-500 hover:text-white hover:border-white/30 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all animate-fade-in shadow-xl backdrop-blur-md"
+            className="px-8 py-3 rounded-2xl border border-white/10 bg-white/5 text-zinc-500 hover:text-white hover:border-white/30 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all animate-fade-in shadow-xl backdrop-blur-md min-h-[48px]"
           >
             {t('btn_cancel_retry')}
           </button>

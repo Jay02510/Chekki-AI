@@ -7,12 +7,9 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const { rating, comment, context, userEmail, userName } = req.body;
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { rating, comment, context, userEmail, userName } = body;
     const developerEmail = 'jsn.benjamin@gmail.com';
-    
-    // In production, integrate a mailer here:
-    // const mailer = new Mailer(process.env.MAIL_KEY);
-    // await mailer.send({ to: developerEmail, subject: `New Chekki Feedback from ${userName}`, body: ... });
     
     console.log(`[ALERT] New User Feedback Received`);
     console.log(`[ROUTING] To: ${developerEmail}`);

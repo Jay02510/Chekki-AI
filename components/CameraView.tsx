@@ -6,7 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
 import { FeedbackModal } from './FeedbackModal';
-import { LegalModal, LegalType } from './LegalModal';
+import { LegalModal } from './LegalModal';
+import { LegalType } from '../types';
 import { FlyerModal } from './FlyerModal';
 
 interface Props {

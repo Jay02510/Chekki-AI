@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ASSETS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
-import { LegalModal, LegalType } from './LegalModal';
+import { LegalModal } from './LegalModal';
+import { LegalType } from '../types';
 
 export const LoginModal: React.FC = () => {
   const { showLoginModal, closeLoginModal, signIn, signUp, sendResetEmail } = useAuth();
@@ -68,7 +69,7 @@ export const LoginModal: React.FC = () => {
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={closeLoginModal}></div>
         
-        <div className="relative bg-zinc-900 rounded-[2rem] w-full max-w-sm shadow-2xl border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+        <div className="relative bg-zinc-900 rounded-[2rem] w-full max-sm shadow-2xl border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
           
           <div className="relative h-24 md:h-28 bg-zinc-950 flex items-center justify-center overflow-hidden shrink-0">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/20 to-transparent opacity-50"></div>

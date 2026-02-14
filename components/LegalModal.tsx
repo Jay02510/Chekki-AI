@@ -1,7 +1,6 @@
 
 import React from 'react';
-
-export type LegalType = 'privacy' | 'terms' | 'refund' | 'youth';
+import { LegalType } from '../types';
 
 interface Props {
   type: LegalType;

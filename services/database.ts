@@ -106,10 +106,11 @@ export const db = {
         timestamp: new Date().toISOString()
       });
 
+      const body = { ...feedback, userId: uid };
       await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(feedback)
+        body: JSON.stringify(body)
       });
       
     } catch (e: any) {
@@ -119,47 +120,20 @@ export const db = {
 
   async redeemBetaCode(code: string, limit: number): Promise<boolean> {
     const usageRef = doc(dbInstance, "system", "beta_usage");
-    
     try {
       return await runTransaction(dbInstance, async (transaction) => {
         const usageDoc = await transaction.get(usageRef);
-        
         let currentCount = 0;
         if (usageDoc.exists()) {
           currentCount = usageDoc.data()[code] || 0;
         }
-
-        if (currentCount >= limit) {
-          return false; // Limit reached
-        }
-
+        if (currentCount >= limit) return false;
         transaction.set(usageRef, { [code]: currentCount + 1 }, { merge: true });
         return true;
       });
     } catch (e) {
       console.error("Redemption transaction failed", e);
       return false;
-    }
-  },
-
-  // NEW: Admin helper to track growth
-  async getSystemStats() {
-    try {
-      const userCol = collection(dbInstance, "users");
-      const userSnapshot = await getCountFromServer(userCol);
-      const totalUsers = userSnapshot.data().count;
-
-      const betaRef = doc(dbInstance, "system", "beta_usage");
-      const betaSnap = await getDoc(betaRef);
-      const betaData = betaSnap.exists() ? betaSnap.data() : {};
-
-      return {
-        totalUsers,
-        betaUsage: betaData
-      };
-    } catch (e) {
-      console.error("Failed to fetch system stats", e);
-      return null;
     }
   }
 };

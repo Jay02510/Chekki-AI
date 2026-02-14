@@ -1,7 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
-import { auth, db } from '../services/database';
+import { auth, db, dbInstance } from '../services/database';
+import { doc, updateDoc, increment } from 'firebase/firestore';
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
@@ -69,11 +70,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let subscriptionStartedAt: string | undefined;
     let nextBillingDate: string | undefined;
 
-    // Check if an access code was provided during signup
     if (code) {
       const sanitized = code.toUpperCase().trim();
-      
-      // Check School Codes
       const schools: Record<string, string> = {
           'POLY10': 'Poly Academy Seocho',
           'GATE05': 'GATE Academy Bundang',
@@ -86,7 +84,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         schoolId = sanitized;
         schoolName = schools[sanitized];
       } else if (sanitized === BETA_CODE_MAIN) {
-        // Check Beta Code
         const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
         if (canRedeem) {
             plan = 'pro';
@@ -156,14 +153,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
 
+    // Atomic increment in Firestore to prevent race conditions
+    const userRef = doc(dbInstance, "users", firebaseUser.uid);
     const updates = { 
-      scansUsedToday: currentScans + 1,
+      scansUsedToday: isNewDay ? 1 : increment(1),
       lastScanDate: today
     };
     
-    setUserProfile({ ...userProfile, ...updates });
-    await db.updateUser(firebaseUser.uid, updates);
-    return true;
+    try {
+      await updateDoc(userRef, updates);
+      // Update local state based on actual Firestore logic
+      setUserProfile(prev => prev ? { 
+        ...prev, 
+        scansUsedToday: isNewDay ? 1 : prev.scansUsedToday + 1,
+        lastScanDate: today
+      } : null);
+      return true;
+    } catch (e) {
+      console.error("Failed to increment scan:", e);
+      return false;
+    }
   };
 
   const cancelSubscription = async () => {
