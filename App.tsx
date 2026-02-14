@@ -22,7 +22,8 @@ const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
 // Root Error Boundary Component - Fixed property issues by using property initializers and explicit typing
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
-  // Declare state property to fix "Property 'state' does not exist" errors
+  // Explicitly declare props and state properties to fix "Property 'state/props' does not exist" errors
+  props: { children: React.ReactNode };
   state: { hasError: boolean } = { hasError: false };
 
   static getDerivedStateFromError() { 
@@ -33,9 +34,16 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
-          <ChekkiMascot className="w-32 h-32 mb-8" mood="thinking" />
-          <h1 className="text-2xl font-black text-white mb-4">Something went wrong.</h1>
-          <button onClick={() => window.location.reload()} className="bg-orange-500 text-white px-8 py-4 rounded-2xl font-black shadow-lg">Reload App</button>
+          <div className="w-32 h-32 mb-8">
+             <ChekkiMascot className="w-full h-full" mood="thinking" />
+          </div>
+          <h1 className="text-2xl font-black text-white mb-4 font-display">Something went wrong.</h1>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-orange-500 text-white px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-orange-600 transition-all active:scale-95"
+          >
+            Reload App
+          </button>
         </div>
       );
     }
