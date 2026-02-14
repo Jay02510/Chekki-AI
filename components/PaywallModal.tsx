@@ -29,72 +29,72 @@ export const PaywallModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-4">
       <div className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in" onClick={() => setShowPaywall(false)}></div>
       
-      <div className="relative bg-zinc-900 rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border border-white/10 animate-fade-in-up flex flex-col max-h-[90vh]">
+      <div className="relative bg-zinc-900 rounded-[2rem] md:rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border border-white/10 animate-fade-in-up flex flex-col max-h-[92vh]">
         
-        <div className="p-8 md:p-10 text-center relative overflow-hidden shrink-0">
+        <div className="p-6 md:p-10 text-center relative overflow-hidden shrink-0">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none"></div>
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-2 font-display leading-tight">
+            <h2 className="text-2xl md:text-5xl font-black text-white mb-1 md:mb-2 font-display leading-tight">
                 {t('pw_title')}
             </h2>
-            <p className="text-zinc-400 text-base md:text-lg font-medium font-korean max-w-2xl mx-auto">
+            <p className="text-zinc-400 text-sm md:text-lg font-medium font-korean max-w-2xl mx-auto">
                 {t('pw_desc')}
             </p>
-            <button onClick={() => setShowPaywall(false)} className="absolute top-6 right-8 text-zinc-500 hover:text-white transition-colors text-2xl">✕</button>
+            <button onClick={() => setShowPaywall(false)} className="absolute top-4 right-6 md:top-6 md:right-8 text-zinc-500 hover:text-white transition-colors text-xl md:text-2xl p-1">✕</button>
         </div>
 
-        <div className="px-8 pb-10 grid md:grid-cols-2 gap-6 overflow-y-auto custom-scrollbar flex-1">
-            <div className="bg-zinc-950/50 border border-white/5 rounded-[2rem] p-6 flex flex-col opacity-60">
-                <div className="mb-6">
-                    <h3 className="text-lg font-bold text-zinc-400 mb-1">Free Explorer</h3>
-                    <div className="text-2xl font-black text-white font-display">₩0 <span className="text-xs font-medium text-zinc-500">/ forever</span></div>
+        <div className="px-6 md:px-8 pb-8 md:pb-10 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 overflow-y-auto custom-scrollbar flex-1 overscroll-contain">
+            <div className="bg-zinc-950/50 border border-white/5 rounded-2xl md:rounded-[2rem] p-5 md:p-6 flex flex-col opacity-60">
+                <div className="mb-4 md:mb-6">
+                    <h3 className="text-sm md:text-lg font-bold text-zinc-400 mb-0.5 md:mb-1">Free Explorer</h3>
+                    <div className="text-xl md:text-2xl font-black text-white font-display">₩0 <span className="text-[10px] md:text-xs font-medium text-zinc-500">/ forever</span></div>
                 </div>
-                <ul className="space-y-3 mb-8 flex-1">
-                    <li className="flex items-center gap-3 text-xs text-zinc-400">
+                <ul className="space-y-2 md:space-y-3 mb-6 md:mb-8 flex-1">
+                    <li className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-zinc-400">
                         <span className="text-zinc-600">✓</span> 3 Scans per Day
                     </li>
-                    <li className="flex items-center gap-3 text-xs text-zinc-400">
+                    <li className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-zinc-400">
                         <span className="text-zinc-600">✓</span> Basic Answer Key
                     </li>
-                    <li className="flex items-center gap-3 text-xs text-zinc-700 line-through">
+                    <li className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-zinc-700 line-through">
                         <span>✕</span> AI Practice Generator
                     </li>
                 </ul>
-                <button disabled className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-500 font-bold cursor-not-allowed text-sm">
+                <button disabled className="w-full py-3 rounded-xl bg-zinc-800 text-zinc-500 font-bold cursor-not-allowed text-[11px] md:text-sm">
                     Current Plan
                 </button>
             </div>
 
-            <div className={`relative bg-gradient-to-b from-zinc-800 to-zinc-900 border-2 rounded-[2rem] p-6 flex flex-col shadow-2xl transition-all duration-300 ${error ? 'border-red-500' : 'border-orange-500'}`}>
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap">
+            <div className={`relative bg-gradient-to-b from-zinc-800 to-zinc-900 border-2 rounded-2xl md:rounded-[2rem] p-5 md:p-6 flex flex-col shadow-2xl transition-all duration-300 ${error ? 'border-red-500' : 'border-orange-500'}`}>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[8px] md:text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap">
                     Best Value for Parents
                 </div>
                 
-                <div className="mb-6 pt-2">
-                    <h3 className="text-lg font-bold text-orange-500 mb-1">Chekki Pro</h3>
+                <div className="mb-4 md:mb-6 pt-1 md:pt-2">
+                    <h3 className="text-sm md:text-lg font-bold text-orange-500 mb-0.5 md:mb-1">Chekki Pro</h3>
                     <div className="flex flex-col">
-                        <div className="text-2xl font-black text-white font-display">₩9,900 <span className="text-xs font-medium text-zinc-500">/ month</span></div>
-                        <p className="text-[10px] text-zinc-400 font-bold uppercase mt-1 tracking-widest">
+                        <div className="text-xl md:text-2xl font-black text-white font-display">₩9,900 <span className="text-[10px] md:text-xs font-medium text-zinc-500">/ month</span></div>
+                        <p className="text-[8px] md:text-[10px] text-zinc-400 font-bold uppercase mt-0.5 md:mt-1 tracking-widest">
                             ({t('pay_vat_included')})
                         </p>
                     </div>
                 </div>
 
-                <ul className="space-y-3 mb-6 flex-1">
-                    <li className="flex items-center gap-3 text-xs text-zinc-200">
-                        <span className="text-orange-500 text-base">✨</span> <strong>Unlimited Scans</strong>
+                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 flex-1">
+                    <li className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-zinc-200">
+                        <span className="text-orange-500 text-sm md:text-base">✨</span> <strong>Unlimited Scans</strong>
                     </li>
-                    <li className="flex items-center gap-3 text-xs text-zinc-200">
-                        <span className="text-orange-500 text-base">🪄</span> <strong>AI Practice Sheet Generator</strong>
+                    <li className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-zinc-200">
+                        <span className="text-orange-500 text-sm md:text-base">🪄</span> <strong>AI Practice Sheet Generator</strong>
                     </li>
-                    <li className="flex items-center gap-3 text-xs text-zinc-200">
-                        <span className="text-orange-500 text-base">🚀</span> <strong>Deep Reasoning Mode</strong>
+                    <li className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-zinc-200">
+                        <span className="text-orange-500 text-sm md:text-base">🚀</span> <strong>Deep Reasoning Mode</strong>
                     </li>
                 </ul>
 
-                <div className="mb-6 bg-black/20 p-3 rounded-xl border border-white/5">
+                <div className="mb-4 md:mb-6 bg-black/20 p-2 md:p-3 rounded-xl border border-white/5">
                     <p className="text-[9px] text-zinc-300 font-korean leading-relaxed">
                         {t('pay_auto_renew')}
                     </p>
@@ -102,40 +102,46 @@ export const PaywallModal: React.FC = () => {
                 </div>
 
                 {!showCodeInput ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2 md:space-y-3">
                         <button 
                             onClick={() => upgradeToPro()}
-                            className="w-full py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-lg shadow-xl shadow-orange-500/20 transform active:scale-95 transition-all"
+                            className="w-full py-3 md:py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base md:text-lg shadow-xl active:scale-95 transition-all"
                         >
                             {t('pay_method_easy')}
                         </button>
                         <button 
                             onClick={() => upgradeToPro()}
-                            className="w-full py-4 rounded-xl border border-white/20 hover:bg-white/5 text-white font-bold text-sm transition-all"
+                            className="w-full py-3 rounded-xl border border-white/20 hover:bg-white/5 text-white font-bold text-[11px] md:text-sm transition-all"
                         >
                             {t('pay_method_card')}
                         </button>
+                        <button 
+                            onClick={() => setShowCodeInput(true)}
+                            className="w-full text-center py-1 text-[9px] text-zinc-500 hover:text-zinc-300 font-bold uppercase tracking-widest mt-2"
+                        >
+                            Use Access Code
+                        </button>
                     </div>
                 ) : (
-                    <div className="space-y-3 animate-fade-in">
+                    <div className="space-y-2 md:space-y-3 animate-fade-in">
                         <input 
                             type="text" 
                             value={betaCode}
                             onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
                             placeholder="ENTER ACCESS CODE"
-                            className={`w-full bg-black/40 border ${error ? 'border-red-500' : 'border-zinc-700'} rounded-xl px-4 py-3 text-white text-center font-mono tracking-widest outline-none focus:border-orange-500 text-xs`}
+                            className={`w-full bg-black/40 border ${error ? 'border-red-500' : 'border-zinc-700'} rounded-xl px-4 py-3 text-white text-center font-mono tracking-widest outline-none focus:border-orange-500 text-[11px]`}
                         />
                         <div className="flex gap-2">
                              <button 
                                 onClick={handleRedeem}
                                 disabled={isProcessing}
-                                className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg disabled:opacity-50"
+                                className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] disabled:opacity-50"
                             >
                                 {isProcessing ? 'Verifying...' : 'Redeem'}
                             </button>
                             <button 
                                 onClick={() => { setShowCodeInput(false); setError(false); }}
-                                className="px-4 py-3 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-xs"
+                                className="px-4 py-3 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-[11px]"
                             >
                                 Back
                             </button>
