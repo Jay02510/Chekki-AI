@@ -191,7 +191,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                                 {isGuestLocked ? t('guest_used_desc') : (language === 'ko' ? "오늘의 무료 스캔을 모두 사용했어요. 내일 다시 충전됩니다!" : "Daily free scans used. We refill your magic at midnight!")}
                              </p>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); isGuestLocked ? openLoginModal() : setShowPaywall(true); }} className={`bg-white text-black px-8 py-3 md:px-16 md:py-6 rounded-xl md:rounded-[2rem] font-black text-sm md:text-2xl transition-all active:scale-95 uppercase tracking-wider w-full md:w-auto`}>
+                        <button onClick={(e) => { e.stopPropagation(); isGuestLocked ? openLoginModal() : setShowPaywall(true); }} className={`bg-white text-black px-8 py-3 md:px-16 md:py-6 rounded-xl md:rounded-[2rem] font-black text-sm md:text-2xl transition-all active:scale-95 uppercase tracking-wider w-full md:w-auto shadow-xl`}>
                            {isGuestLocked ? t('login') : (language === 'ko' ? "무제한 마법 시작하기" : "Unlock Unlimited Magic")}
                         </button>
                     </div>
@@ -340,10 +340,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             {isNight ? t('hero_desc_night') : t('hero_desc')}
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-8 justify-center lg:justify-start items-center w-full max-w-sm sm:max-w-lg mx-auto lg:mx-0">
-            <button onClick={openLoginModal} className="group bg-white text-black h-12 md:h-24 px-4 md:px-16 rounded-xl md:rounded-[2rem] font-black text-sm md:text-3xl transition-all transform active:scale-95 shadow-[0_15px_40px_rgba(255,255,255,0.05)] font-display flex items-center justify-center gap-2 overflow-hidden w-full lg:w-auto">
-              <span className="font-korean whitespace-nowrap">{t('hero_cta_btn')}</span> 
-              <span className="text-xl md:text-4xl transition-transform group-hover:translate-x-1">→</span>
+          <div className="flex flex-col sm:flex-row gap-4 md:gap-8 justify-center lg:justify-start items-center w-full max-w-sm sm:max-w-lg mx-auto lg:mx-0">
+            <button onClick={openLoginModal} className="group bg-white text-black py-4 md:py-6 px-6 md:px-16 rounded-xl md:rounded-[2rem] font-black text-base md:text-3xl transition-all transform active:scale-95 shadow-[0_15px_40px_rgba(255,255,255,0.05)] font-display flex items-center justify-center gap-3 overflow-hidden w-full lg:w-auto">
+              <span className="font-korean">{t('hero_cta_btn')}</span> 
+              <span className="text-xl md:text-4xl transition-transform group-hover:translate-x-2">→</span>
             </button>
             {!guestUsed && (
                 <button 
@@ -351,10 +351,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     const dropZone = document.getElementById('magic-drop-zone');
                     dropZone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }} 
-                className="group h-12 md:h-24 px-4 md:px-16 rounded-xl md:rounded-[2rem] border border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-sm md:text-2xl transition-all flex items-center justify-center gap-2 backdrop-blur-xl active:scale-95 w-full lg:w-auto"
+                className="group py-4 md:py-6 px-6 md:px-16 rounded-xl md:rounded-[2rem] border border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-base md:text-2xl transition-all flex items-center justify-center gap-3 backdrop-blur-xl active:scale-95 w-full lg:w-auto"
                 >
                 <span className="text-orange-500 transition-transform group-hover:rotate-[360deg] duration-1000 text-lg md:text-3xl">✨</span> 
-                <span className="whitespace-nowrap">{t('hero_guest_cta')}</span>
+                <span>{t('hero_guest_cta')}</span>
                 </button>
             )}
           </div>
