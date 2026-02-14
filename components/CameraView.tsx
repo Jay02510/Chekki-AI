@@ -340,8 +340,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             {isNight ? t('hero_desc_night') : t('hero_desc')}
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 md:gap-8 justify-center lg:justify-start items-center w-full max-w-sm sm:max-w-lg mx-auto lg:mx-0">
-            <button onClick={openLoginModal} className="group bg-white text-black py-4 md:py-6 px-6 md:px-16 rounded-xl md:rounded-[2rem] font-black text-base md:text-3xl transition-all transform active:scale-95 shadow-[0_15px_40px_rgba(255,255,255,0.05)] font-display flex items-center justify-center gap-3 overflow-hidden w-full lg:w-auto">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center lg:justify-start items-center w-full max-w-md md:max-w-2xl mx-auto lg:mx-0">
+            <button onClick={openLoginModal} className="group bg-white text-black py-4 md:py-6 px-6 md:px-16 rounded-xl md:rounded-[2rem] font-black text-base md:text-3xl transition-all transform active:scale-95 shadow-[0_15px_40px_rgba(255,255,255,0.05)] font-display flex items-center justify-center gap-3 overflow-hidden w-full md:w-auto whitespace-nowrap min-w-fit">
               <span className="font-korean">{t('hero_cta_btn')}</span> 
               <span className="text-xl md:text-4xl transition-transform group-hover:translate-x-2">→</span>
             </button>
@@ -351,10 +351,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     const dropZone = document.getElementById('magic-drop-zone');
                     dropZone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }} 
-                className="group py-4 md:py-6 px-6 md:px-16 rounded-xl md:rounded-[2rem] border border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-base md:text-2xl transition-all flex items-center justify-center gap-3 backdrop-blur-xl active:scale-95 w-full lg:w-auto"
+                className="group py-4 md:py-6 px-6 md:px-16 rounded-xl md:rounded-[2rem] border border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-base md:text-2xl transition-all flex items-center justify-center gap-3 backdrop-blur-xl active:scale-95 w-full md:w-auto whitespace-nowrap min-w-fit"
                 >
                 <span className="text-orange-500 transition-transform group-hover:rotate-[360deg] duration-1000 text-lg md:text-3xl">✨</span> 
-                <span>{t('hero_guest_cta')}</span>
+                <span className="whitespace-nowrap">{t('hero_guest_cta')}</span>
                 </button>
             )}
           </div>
