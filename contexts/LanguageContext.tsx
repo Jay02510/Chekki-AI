@@ -152,7 +152,7 @@ const translations = {
     
     // Paywall
     pw_title: "Buy Back Your Time",
-    pw_desc: "Unlimited scans and AI practice sheets for the price of a latte.",
+    pw_desc: "Unlimited scans and AI practice sheets starting today.",
     
     // Errors
     error_title: "Let's try one more time!",
@@ -230,7 +230,7 @@ const translations = {
     lbl_feedback: "의견 보내기",
     lbl_share_ideas: "의견 보내기",
     lbl_quick_guide: "사용 가이드",
-    lbl_resource: "학부모 리소스",
+    lbl_resource: "학부모 자료",
     lbl_pro_active: "프로 마법 활성화됨",
     lbl_magic_left: "남은 마법",
     lbl_lighting: "밝게",
@@ -306,7 +306,7 @@ const translations = {
 
     // Paywall
     pw_title: "매일 밤 평화를 구매하세요",
-    pw_desc: "커피 한 잔 값으로 무제한 스캔과 AI 복습 문제 생성 기능을 누리세요.",
+    pw_desc: "무제한 스캔과 AI 복습 문제 생성 기능을 누리세요.",
     
     // Errors
     error_title: "다시 한번 해볼까요?",
@@ -342,7 +342,6 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return key;
   };
 
-  /* Fixed broken JSX syntax: added missing opening bracket for LanguageContext.Provider */
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
