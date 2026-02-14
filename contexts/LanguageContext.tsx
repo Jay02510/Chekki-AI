@@ -22,7 +22,7 @@ const translations = {
     share_title: "Spread the Peace 🕊️",
     share_desc: "Help other parents find peace. Copy a pre-made template for your favorite Mom Cafe!",
     share_btn: "Copy Cafe Template",
-    share_toast: "Template Copied! Ready to post.",
+    share_toast: "Template copied! Ready to post.",
     
     // Guest Mode CTAs
     hero_guest_cta: "Try Guest Scan",
@@ -89,6 +89,11 @@ const translations = {
     res_share: "Share",
     res_copied: "Link Copied!",
 
+    // Usage Limits
+    refill_title: "Refill Required!",
+    refill_desc: "Daily free scans used. We refill your magic at midnight!",
+    refill_cta: "Unlock Unlimited Magic",
+
     // Onboarding
     onb_1_title: "Stop the Homework War",
     onb_1_desc: "Chekki provides the answers, you provide the hugs.",
@@ -149,6 +154,39 @@ const translations = {
     tip_click_guide: "💡 Tap any question to see your Teaching Script!",
     lbl_mom_tip: "Teaching Script",
     growing_text: "Generating...",
+    
+    // Feedback Form
+    fb_title: "Send Feedback",
+    fb_desc: "How is your experience with Chekki?",
+    fb_error_desc: "Something went wrong? Let us know.",
+    fb_rating: "Rating",
+    fb_comment: "Comment",
+    fb_submit: "Submit Feedback",
+    fb_success: "Feedback Sent!",
+
+    // Review / Mistake Note
+    review_title: "Review Note",
+    review_empty_title: "No Mistakes Yet!",
+    review_empty_desc: "All caught up. Good job!",
+    review_print_btn: "Print Review Sheet",
+    lbl_mistakes_count: "items to review",
+    lbl_question: "Question",
+    lbl_write_answer: "Write the answer here...",
+    lbl_correct_answer: "Correct Answer:",
+    print_footer: "Chekki AI - Growing together every day.",
+
+    // Gamification
+    reward_job: "Great Job!",
+    reward_stamp: "Sticker",
+    reward_tap: "Tap to get your stamp!",
+
+    // Security Settings
+    sec_audit_title: "Security Audit",
+    sec_audit_desc: "Your data safety is our priority.",
+    sec_point_1: "Zero-storage policy active",
+    sec_point_2: "End-to-end encryption",
+    sec_point_3: "Anonymous processing",
+    sec_point_4: "Safe for kids",
     
     // Paywall
     pw_title: "Buy Back Your Time",
@@ -243,6 +281,11 @@ const translations = {
     res_share: "공유",
     res_copied: "복사 완료!",
 
+    // Usage Limits
+    refill_title: "마법 충전 필요!",
+    refill_desc: "오늘의 무료 스캔을 모두 사용했어요. 내일 다시 충전됩니다!",
+    refill_cta: "무제한 마법 시작하기",
+
     // Onboarding
     onb_1_title: "숙제 전쟁, 이제 그만",
     onb_1_desc: "채점은 채키가 할게요. 부모님은 칭찬만 해주세요.",
@@ -303,6 +346,39 @@ const translations = {
     tip_click_guide: "💡 문제를 누르면 다정한 티칭 가이드가 나타나요!",
     lbl_mom_tip: "티칭 가이드",
     growing_text: "생성 중...",
+
+    // Feedback Form
+    fb_title: "의견 보내기",
+    fb_desc: "채키를 사용해보니 어떠신가요?",
+    fb_error_desc: "불편한 점이 있으셨나요? 알려주세요.",
+    fb_rating: "별점",
+    fb_comment: "의견",
+    fb_submit: "의견 제출하기",
+    fb_success: "소중한 의견 감사합니다!",
+
+    // Review / Mistake Note
+    review_title: "오답 노트",
+    review_empty_title: "복습할 문제가 없어요!",
+    review_empty_desc: "모든 숙제를 완벽하게 마스터했습니다!",
+    review_print_btn: "복습 시트 프린트하기",
+    lbl_mistakes_count: "개의 복습할 문제",
+    lbl_question: "문제",
+    lbl_write_answer: "여기에 정답을 써보세요...",
+    lbl_correct_answer: "정답:",
+    print_footer: "채키 AI와 함께 매일 조금씩 성장합니다.",
+
+    // Gamification
+    reward_job: "잘했어요!",
+    reward_stamp: "참 잘했어요",
+    reward_tap: "도장을 찍어주세요!",
+
+    // Security Settings
+    sec_audit_title: "보안 감사 완료",
+    sec_audit_desc: "채키는 개인정보 보호를 최우선으로 합니다.",
+    sec_point_1: "이미지 즉시 삭제 정책",
+    sec_point_2: "데이터 암호화 전송",
+    sec_point_3: "익명 분석 처리",
+    sec_point_4: "자녀 안심 서비스",
 
     // Paywall
     pw_title: "매일 밤 평화를 구매하세요",

@@ -186,14 +186,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     <div className="animate-fade-in space-y-4 px-4">
                         <div className="space-y-1">
                              <h3 className="text-xl md:text-5xl font-black text-white font-display tracking-tight break-keep leading-tight">
-                                {isGuestLocked ? t('guest_used_title') : (language === 'ko' ? "마법 충전 필요!" : "Refill Required!")}
+                                {isGuestLocked ? t('guest_used_title') : t('refill_title')}
                              </h3>
                              <p className="text-zinc-400 font-bold font-korean text-xs md:text-2xl max-w-md mx-auto leading-relaxed opacity-80">
-                                {isGuestLocked ? t('guest_used_desc') : (language === 'ko' ? "오늘의 무료 스캔을 모두 사용했어요. 내일 다시 충전됩니다!" : "Daily free scans used. We refill your magic at midnight!")}
+                                {isGuestLocked ? t('guest_used_desc') : t('refill_desc')}
                              </p>
                         </div>
                         <button onClick={(e) => { e.stopPropagation(); isGuestLocked ? openLoginModal() : setShowPaywall(true); }} className={`bg-white text-black px-8 py-3 md:px-16 md:py-6 rounded-xl md:rounded-[2rem] font-black text-sm md:text-2xl transition-all active:scale-95 uppercase tracking-wider w-full md:w-auto shadow-xl`}>
-                           {isGuestLocked ? t('login') : (language === 'ko' ? "무제한 마법 시작하기" : "Unlock Unlimited Magic")}
+                           {isGuestLocked ? t('login') : t('refill_cta')}
                         </button>
                     </div>
                 ) : (
