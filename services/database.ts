@@ -12,8 +12,7 @@ import {
   getDocs,
   deleteDoc,
   addDoc,
-  runTransaction,
-  getCountFromServer
+  runTransaction
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { UserProfile } from '../types';
@@ -41,6 +40,16 @@ export const db = {
         return docSnap.exists() ? (docSnap.data() as UserProfile) : null;
     } catch (e: any) {
         return null;
+    }
+  },
+
+  async isAdmin(uid: string): Promise<boolean> {
+    try {
+        const adminRef = doc(dbInstance, "admins", uid);
+        const adminSnap = await getDoc(adminRef);
+        return adminSnap.exists();
+    } catch (e) {
+        return false;
     }
   },
 
@@ -105,14 +114,6 @@ export const db = {
         userId: uid,
         timestamp: new Date().toISOString()
       });
-
-      const body = { ...feedback, userId: uid };
-      await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      
     } catch (e: any) {
       console.error("[Chekki DB] sendFeedback failed:", e.message);
     }

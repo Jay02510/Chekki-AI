@@ -4,29 +4,41 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function to check if user is an admin
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
     // User Profiles: Users can only read/write their own profile
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
     
-    // Mistakes: Users can only see and edit their own mistake records
+    // Mistakes: Strict ownership check. No one can list all mistakes.
     match /mistakes/{mistakeId} {
       allow read, write: if request.auth != null && (
-        (resource != null && resource.data.userId == request.auth.uid) ||
-        (request.resource.data.userId == request.auth.uid)
+        (request.resource.data.userId == request.auth.uid) ||
+        (resource.data.userId == request.auth.uid) ||
+        isAdmin()
       );
     }
 
-    // Feedback: Authenticated users can create feedback entries
+    // Feedback: Authenticated users can create, only admins can read.
     match /feedback/{feedbackId} {
       allow create: if request.auth != null;
-      allow read: if false; 
+      allow read: if request.auth != null && isAdmin();
     }
 
-    // System: Only authenticated users can read (for code checks), no client-side writes except via transaction
+    // System: Only admins can write system-wide configs.
     match /system/{docId} {
       allow read: if request.auth != null;
-      allow write: if false; // Transactions must respect this or used for atomic increments only
+      allow write: if request.auth != null && isAdmin();
+    }
+    
+    // Admins collection: Private.
+    match /admins/{adminId} {
+      allow read: if request.auth != null && request.auth.uid == adminId;
+      allow write: if false; // Only manageable via Firebase Console
     }
   }
 }

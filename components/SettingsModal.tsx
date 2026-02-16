@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LegalModal } from './LegalModal';
 import { FeedbackModal } from './FeedbackModal';
-import { ASSETS } from '../constants';
 import { db } from '../services/database';
 
 interface Props {
@@ -20,29 +19,27 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Deep Diagnostics
-  const [isRunningDiag, setIsRunningDiag] = useState(false);
   const [diagResults, setDiagResults] = useState({
     camera: '...',
     mic: '...',
-    apiLatency: '...',
     speech: '...',
     auth: '...'
   });
 
-  const isAdmin = firebaseUser?.email === 'jsn.benjamin@gmail.com';
-  const [adminStats, setAdminStats] = useState<any>(null);
-
   useEffect(() => {
     if (user) setName(user.name);
+    if (firebaseUser) {
+        db.isAdmin(firebaseUser.uid).then(setIsAdmin);
+    }
     runQuickDiag();
-  }, [user]);
+  }, [user, firebaseUser]);
 
   const runQuickDiag = async () => {
     const results: any = { ...diagResults };
     
-    // Check Hardware
     try {
       const cam = await navigator.permissions.query({ name: 'camera' as any });
       results.camera = cam.state;
@@ -53,7 +50,6 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
       results.mic = 'restricted';
     }
 
-    // Check Audio/Speech APIs
     results.speech = ('speechSynthesis' in window && 'webkitSpeechRecognition' in window) ? 'ready' : 'legacy';
     results.auth = firebaseUser ? 'verified' : 'anonymous';
 
@@ -83,6 +79,17 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
 
           <div className="p-6 md:p-8 space-y-8 overflow-y-auto custom-scrollbar flex-1 pb-24">
               
+              {/* --- ADMIN BADGE (Conditional) --- */}
+              {isAdmin && (
+                <div className="bg-purple-500/10 rounded-3xl p-6 border border-purple-500/30 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-black text-purple-400 uppercase tracking-widest leading-none mb-1">Admin Access</h3>
+                        <p className="text-[10px] text-zinc-500 font-bold">System management enabled</p>
+                    </div>
+                    <span className="text-2xl">⚡</span>
+                </div>
+              )}
+
               {/* --- SECURITY AUDIT SECTION --- */}
               <div className="bg-emerald-500/5 rounded-3xl p-6 border border-emerald-500/20">
                   <div className="flex items-center gap-3 mb-4">
