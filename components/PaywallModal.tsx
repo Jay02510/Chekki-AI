@@ -45,6 +45,34 @@ export const PaywallModal: React.FC = () => {
             <button onClick={() => setShowPaywall(false)} className="absolute top-4 right-6 md:top-6 md:right-8 text-zinc-500 hover:text-white transition-colors text-xl md:text-2xl p-1">✕</button>
         </div>
 
+        {/* --- BETA ANNOUNCEMENT BANNER --- */}
+        <div className="px-6 md:px-10 mb-6 shrink-0">
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center gap-4 shadow-xl">
+                <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-white text-2xl shrink-0 shadow-lg shadow-amber-500/20">
+                    🚧
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                        <span className="bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Beta Phase</span>
+                        <h4 className="text-white font-bold text-xs md:text-sm uppercase tracking-wide">Help us test the magic</h4>
+                    </div>
+                    <p className="text-[10px] md:text-xs text-zinc-400 font-medium leading-relaxed">
+                        {language === 'ko' 
+                          ? "채키는 현재 베타 테스트 중입니다! 프리미엄 기능(무제한 스캔, AI 연습문제)을 베타 코드를 통해 무료로 이용해보실 수 있습니다." 
+                          : "Chekki is currently in BETA. You can unlock Pro features for free using an access code while we finish polishing the experience."}
+                    </p>
+                </div>
+                {!showCodeInput && (
+                    <button 
+                        onClick={() => setShowCodeInput(true)}
+                        className="hidden md:block bg-white text-black px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-lg active:scale-95"
+                    >
+                        Redeem Code
+                    </button>
+                )}
+            </div>
+        </div>
+
         <div className="px-6 md:px-8 pb-8 md:pb-10 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 overflow-y-auto custom-scrollbar flex-1 overscroll-contain">
             <div className="bg-zinc-950/50 border border-white/5 rounded-2xl md:rounded-[2rem] p-5 md:p-6 flex flex-col opacity-60">
                 <div className="mb-4 md:mb-6">
