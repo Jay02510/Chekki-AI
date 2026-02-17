@@ -1,29 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Header } from './components/Header';
-import { CameraView } from './components/CameraView';
-import { LoadingScreen } from './components/LoadingScreen';
-import { SplitView } from './components/SplitView';
-import { PaywallModal } from './components/PaywallModal';
-import { OnboardingTour } from './components/OnboardingTour';
-import { OdapNoteModal } from './components/OdapNoteModal';
-import { LoginModal } from './components/LoginModal';
-import { SplashScreen } from './components/SplashScreen';
-import { AnalysisState, LegalType } from './types';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
-import { MistakeProvider } from './contexts/MistakeContext';
-import { ChekkiMascot } from './components/Icons';
-import { analyzeWorksheet } from './services/geminiService';
+import React, { useState, useEffect, useRef, Component } from 'react';
+import { Header } from './Header';
+import { CameraView } from './CameraView';
+import { LoadingScreen } from './LoadingScreen';
+import { SplitView } from './SplitView';
+import { PaywallModal } from './PaywallModal';
+import { OnboardingTour } from './OnboardingTour';
+import { OdapNoteModal } from './OdapNoteModal';
+import { LoginModal } from './LoginModal';
+import { SplashScreen } from './SplashScreen';
+import { AnalysisState, LegalType } from '../types';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { LanguageProvider, useLanguage } from '../contexts/LanguageContext';
+import { MistakeProvider } from '../contexts/MistakeContext';
+import { ChekkiMascot } from './Icons';
+import { analyzeWorksheet } from '../services/geminiService';
 
 const SESSION_KEY = 'hw_last_session';
 const ONBOARDED_KEY = 'chekki_onboarded_v1';
 const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
-// Root Error Boundary Component - Fixed property issues by using property initializers and explicit typing
-class ErrorBoundary extends React.Component<{children?: React.ReactNode}, {hasError: boolean}> {
-  // Explicitly declare props and state properties to fix "Property 'state/props' does not exist" errors in some environments
-  props: { children?: React.ReactNode };
-  state: { hasError: boolean } = { hasError: false };
+/**
+ * ErrorBoundary class component.
+ * Fixed property access errors by using class property initializers and explicit Component import.
+ */
+class ErrorBoundary extends Component<{children?: React.ReactNode}, {hasError: boolean}> {
+  state = { hasError: false };
 
   static getDerivedStateFromError() { 
     return { hasError: true }; 
@@ -134,7 +135,6 @@ function AppContent() {
   }, []);
 
   const handleImageSelected = async (base64Data: string, isRetryAttempt = false) => {
-    // Abort any existing analysis
     if (abortControllerRef.current) abortControllerRef.current.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -167,7 +167,6 @@ function AppContent() {
     try {
         const result = await analyzeWorksheet(base64Data, controller.signal, user?.plan || 'free');
         
-        // ONLY mark guest scan as used if it was successful and they aren't authenticated
         if (!isAuthenticated) {
           localStorage.setItem(GUEST_SCAN_KEY, 'true');
         }
@@ -183,7 +182,6 @@ function AppContent() {
         };
 
         setAnalysisState(newState);
-        // Only store critical data in localStorage to keep it light
         localStorage.setItem(SESSION_KEY, JSON.stringify({ state: newState, timestamp: Date.now() }));
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 3000);

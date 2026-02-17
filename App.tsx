@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Component } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -28,24 +28,18 @@ interface EBState {
   hasError: boolean;
 }
 
-// Fixed ErrorBoundary to explicitly declare state and props for better TypeScript compatibility
-class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Explicitly declare state and props to fix "Property 'state/props' does not exist" errors
-  state: EBState;
-  props: EBProps;
-
-  constructor(props: EBProps) {
-    super(props);
-    this.state = { hasError: false };
-    this.props = props;
-  }
+/**
+ * ErrorBoundary class component.
+ * Fixed property access errors by using class property initializers and explicit Component import.
+ */
+class ErrorBoundary extends Component<EBProps, EBState> {
+  state: EBState = { hasError: false };
 
   static getDerivedStateFromError() { 
     return { hasError: true }; 
   }
 
   render() {
-    // Correctly accessing state via this.state
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -55,7 +49,6 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
         </div>
       );
     }
-    // Correctly accessing props via this.props
     return this.props.children;
   }
 }
@@ -81,6 +74,7 @@ function AppContent() {
   const { user, openLoginModal, isAuthenticated, incrementScan } = useAuth();
   const { t, language } = useLanguage();
   const { track } = useAnalytics();
+  const isInApp = useInAppBrowser();
   
   const [isNight, setIsNight] = useState(isNightModeKST());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
@@ -173,7 +167,6 @@ function AppContent() {
     try {
         const result = await analyzeWorksheet(base64Data, controller.signal, user?.plan || 'free');
         
-        // CRITICAL: Only mark guest scan as used if analysis succeeded
         if (!isAuthenticated) localStorage.setItem(GUEST_SCAN_KEY, 'true');
 
         const newState: AnalysisState = {

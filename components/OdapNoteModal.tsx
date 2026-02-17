@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMistakes } from '../contexts/MistakeContext';
 import { useLanguage } from '../contexts/LanguageContext';
