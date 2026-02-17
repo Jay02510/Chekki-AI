@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -24,7 +23,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const { user, setShowPaywall, isAuthenticated, openLoginModal } = useAuth();
   const { track } = useAnalytics();
   
-  const [activeItemId] = useState<number | null>(null); // State controlled via activeItemId logic
   const [activeItem, setActiveItem] = useState<number | null>(null);
   const [showCloneModal, setShowCloneModal] = useState(false);
   const [reportContext, setReportContext] = useState<WorksheetItem | null>(null);
@@ -38,6 +36,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const recognitionRef = useRef<any>(null);
 
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+
+  const isPro = user?.plan === 'pro';
 
   useEffect(() => {
     if (activeItem !== null && itemRefs.current[activeItem]) {
@@ -98,7 +98,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
   const playAudio = (text: string, id: number) => {
     if (!isAuthenticated) { openLoginModal(); return; }
-    if (user?.plan !== 'pro') { setShowPaywall(true); return; }
+    if (!isPro) { setShowPaywall(true); return; }
     
     track('audio_played', { itemId: id, text });
 
@@ -127,7 +127,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const startPronunciationCheck = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) { openLoginModal(); return; }
-    if (user?.plan !== 'pro') { setShowPaywall(true); return; }
+    if (!isPro) { setShowPaywall(true); return; }
     if (!recognitionRef.current) return;
     
     track('speaking_check_started', { itemId: activeItem });
@@ -139,6 +139,12 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const handleMistakeToggle = (item: WorksheetItem) => {
       track('mistake_toggled', { itemId: item.id, active: !isMistake(item.question_text, item.correct_answer) });
       toggleMistake(item);
+  };
+
+  const handlePremiumFeatureClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) openLoginModal();
+    else if (!isPro) setShowPaywall(true);
   };
 
   return (
@@ -219,7 +225,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                   </div>
 
                   {isActive && (
-                    <div className="px-4 pb-6 md:px-6 md:pb-8 animate-fade-in-up space-y-4">
+                    <div className="px-4 pb-6 md:px-6 md:pb-8 animate-fade-in-up space-y-4 relative">
                         {!isAuthenticated ? (
                             <div className="bg-orange-500/10 border border-orange-500/30 rounded-3xl p-6 text-center space-y-4 shadow-inner">
                                 <p className="text-sm font-bold text-white font-korean leading-relaxed">
@@ -230,25 +236,36 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                                 </button>
                             </div>
                         ) : (
-                            <>
-                                <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-3xl p-5 flex items-center gap-5 shadow-inner">
-                                    <button onClick={startPronunciationCheck} disabled={isListening} className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600'} text-white shadow-xl active:scale-90 min-w-[48px] min-h-[48px]`}>
-                                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-                                    </button>
-                                    <div>
-                                        <p className="text-xs text-white font-black uppercase tracking-widest mb-1">{isListening ? (language === 'ko' ? "듣는 중..." : "Listening...") : (language === 'ko' ? "발음 연습" : "Speaking Coach")}</p>
-                                        <p className="text-[10px] text-indigo-300/80 font-bold leading-relaxed">{isListening ? (language === 'ko' ? "아이의 목소리를 듣고 있어요" : "Listening to your child...") : (language === 'ko' ? "원어민처럼 읽어보고 도장을 받아보세요!" : "Try speaking to get a digital stamp!")}</p>
+                            <div className="space-y-4 relative" onClick={!isPro ? handlePremiumFeatureClick : undefined}>
+                                {!isPro && (
+                                  <div className="absolute inset-0 z-10 bg-zinc-900/60 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center p-4 text-center cursor-pointer group/lock border border-white/5">
+                                      <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-white mb-3 shadow-lg transform group-hover/lock:scale-110 transition-transform">
+                                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C9.243 2 7 4.243 7 7V10H6C4.897 10 4 10.897 4 12V20C4 21.103 4.897 22 6 22H18C19.103 22 20 21.103 20 20V12C20 10.897 19.103 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM12 18C10.897 18 10 17.103 10 16C10 14.897 10.897 14 12 14C13.103 14 14 14.897 14 16C14 17.103 13.103 18 12 18Z"/></svg>
+                                      </div>
+                                      <p className="text-white font-black text-sm uppercase tracking-widest mb-1">{language === 'ko' ? "프리미엄 기능" : "Premium Feature"}</p>
+                                      <p className="text-zinc-400 text-[10px] font-bold font-korean">{language === 'ko' ? "티칭 가이드를 보려면 Pro로 업그레이드 하세요" : "Upgrade to Pro to unlock teaching guides"}</p>
+                                  </div>
+                                )}
+                                <div className={`space-y-4 ${!isPro ? 'opacity-30 pointer-events-none' : ''}`}>
+                                    <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-3xl p-5 flex items-center gap-5 shadow-inner">
+                                        <button onClick={startPronunciationCheck} disabled={isListening} className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600'} text-white shadow-xl active:scale-90 min-w-[48px] min-h-[48px]`}>
+                                            <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                                        </button>
+                                        <div>
+                                            <p className="text-xs text-white font-black uppercase tracking-widest mb-1">{isListening ? (language === 'ko' ? "듣는 중..." : "Listening...") : (language === 'ko' ? "발음 연습" : "Speaking Coach")}</p>
+                                            <p className="text-[10px] text-indigo-300/80 font-bold leading-relaxed">{isListening ? (language === 'ko' ? "아이의 목소리를 듣고 있어요" : "Listening to your child...") : (language === 'ko' ? "원어민처럼 읽어보고 도장을 받아보세요!" : "Try speaking to get a digital stamp!")}</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-5 shadow-inner">
+                                        <p className="text-[10px] font-black uppercase text-orange-500 mb-2 tracking-widest">{t('lbl_mom_tip')}</p>
+                                        <p className="text-sm md:text-base text-zinc-200 font-korean leading-relaxed font-bold italic">"{scriptText}"</p>
+                                    </div>
+                                    <div className="bg-zinc-950/40 border border-white/5 rounded-3xl p-5 shadow-inner">
+                                        <p className="text-[10px] font-black uppercase text-zinc-500 mb-2 tracking-widest">Learning Guide</p>
+                                        <p className="text-xs md:text-sm text-zinc-400 font-korean leading-relaxed break-keep">{guideText}</p>
                                     </div>
                                 </div>
-                                <div className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-5 shadow-inner">
-                                    <p className="text-[10px] font-black uppercase text-orange-500 mb-2 tracking-widest">{t('lbl_mom_tip')}</p>
-                                    <p className="text-sm md:text-base text-zinc-200 font-korean leading-relaxed font-bold italic">"{scriptText}"</p>
-                                </div>
-                                <div className="bg-zinc-950/40 border border-white/5 rounded-3xl p-5 shadow-inner">
-                                    <p className="text-[10px] font-black uppercase text-zinc-500 mb-2 tracking-widest">Learning Guide</p>
-                                    <p className="text-xs md:text-sm text-zinc-400 font-korean leading-relaxed break-keep">{guideText}</p>
-                                </div>
-                            </>
+                            </div>
                         )}
                     </div>
                   )}
@@ -278,7 +295,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
              <button 
                 onClick={() => {
                    if(!isAuthenticated) openLoginModal();
-                   else if(user?.plan !== 'pro') setShowPaywall(true);
+                   else if(!isPro) setShowPaywall(true);
                    else {
                      track('practice_sheet_generated', { worksheetTitle });
                      setShowCloneModal(true);

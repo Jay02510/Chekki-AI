@@ -22,12 +22,14 @@ const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
 /**
  * ErrorBoundary class component.
- * Explicitly using React.Component to resolve type inference issues with this.props.
+ * Fixed property access errors by extending Component class directly with explicit types.
  */
-class ErrorBoundary extends React.Component<{children?: React.ReactNode}, {hasError: boolean}> {
+// Fix: Correctly inherit from React.Component to resolve 'state' and 'props' access issues
+class ErrorBoundary extends Component<{children?: React.ReactNode}, {hasError: boolean}> {
   // Constructor to ensure props and state are initialized with correct types for TS
   constructor(props: {children?: React.ReactNode}) {
     super(props);
+    // Fix: Explicitly initialize state
     this.state = { hasError: false };
   }
 
@@ -36,6 +38,7 @@ class ErrorBoundary extends React.Component<{children?: React.ReactNode}, {hasEr
   }
 
   render() {
+    // Fix: Access state safely through this.state
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -45,6 +48,7 @@ class ErrorBoundary extends React.Component<{children?: React.ReactNode}, {hasEr
         </div>
       );
     }
+    // Fix: Access children safely through this.props
     return this.props.children;
   }
 }

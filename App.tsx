@@ -31,12 +31,14 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Explicitly using React.Component to resolve type inference issues with this.props.
+ * Updated to use imported Component class directly to resolve type inference issues with this.props and this.state.
  */
-class ErrorBoundary extends React.Component<EBProps, EBState> {
+// Fix: Use Component directly and ensure proper generic typing for React class component
+class ErrorBoundary extends Component<EBProps, EBState> {
   // Use constructor to ensure this.props and this.state are properly typed
   constructor(props: EBProps) {
     super(props);
+    // Fix: initialize state correctly within the constructor context
     this.state = { hasError: false };
   }
 
@@ -45,6 +47,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
   }
 
   render() {
+    // Fix: Access state via this.state
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -54,6 +57,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
         </div>
       );
     }
+    // Fix: Access props via this.props
     return this.props.children;
   }
 }
