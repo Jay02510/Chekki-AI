@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ChekkiMascot } from './Icons';
@@ -104,7 +103,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
         </div>
         
         <p className="mt-4 text-[9px] text-zinc-700 font-black uppercase tracking-widest">
-          Version 1.0.4 - "Poster Pack" Update
+          Version 1.0.0
         </p>
       </div>
 

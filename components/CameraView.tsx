@@ -201,35 +201,35 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   );
 
   const PrivacySection = () => (
-    <section className="py-16 md:py-32 px-4 max-w-5xl mx-auto w-full">
+    <section className="py-16 md:py-32 px-4 max-w-6xl mx-auto w-full">
         <div className="bg-zinc-900/30 border border-white/5 rounded-[4rem] p-8 md:p-24 relative overflow-hidden text-center group">
             <div className={`absolute inset-0 bg-gradient-to-b ${isNight ? 'from-indigo-500/5' : 'from-orange-500/5'} to-transparent pointer-events-none`}></div>
             
-            {/* ENLARGED MASCOT: Increased from w-56/h-56 to w-80/h-80 on desktop */}
-            <div className="w-48 h-48 md:w-80 md:h-80 mx-auto mb-10 md:mb-20 relative">
-                <div className="absolute inset-0 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
-                <ChekkiMascot className="w-full h-full animate-float drop-shadow-2xl" mood={isNight ? "sleeping" : "happy"} />
+            {/* HERO-SIZE MASCOT: Enlarged significantly to md:w-[500px] to match text impact */}
+            <div className="w-64 h-64 md:w-[500px] md:h-[500px] mx-auto mb-12 md:mb-24 relative">
+                <div className="absolute inset-0 bg-white/5 rounded-full blur-[120px] animate-pulse"></div>
+                <ChekkiMascot className="w-full h-full animate-float drop-shadow-[0_40px_100px_rgba(0,0,0,0.8)]" mood={isNight ? "sleeping" : "happy"} />
             </div>
 
-            <h2 className="text-2xl md:text-6xl font-black text-white font-display mb-6 md:mb-12 tracking-tight">{t('trust_title')}</h2>
-            <p className="text-zinc-400 text-sm md:text-2xl font-korean font-medium max-w-2xl mx-auto leading-relaxed mb-12 md:mb-24 break-keep">
+            <h2 className="text-3xl md:text-8xl font-black text-white font-display mb-6 md:mb-12 tracking-tight leading-tight">{t('trust_title')}</h2>
+            <p className="text-zinc-400 text-sm md:text-3xl font-korean font-medium max-w-3xl mx-auto leading-relaxed mb-12 md:mb-32 break-keep">
                 {language === 'ko' ? "채키는 자녀의 소중한 정보를 저장하지 않으며, 부모님과 아이가 함께 즐겁게 공부하는 시간을 만드는 데에만 집중합니다." : "Chekki never stores your child's data. We focus only on making study time a happy bonding moment for you and your little one."}
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 text-left">
-                <div className="p-6 md:p-10 rounded-[2.5rem] bg-black/40 border border-white/5 hover:border-white/10 transition-colors shadow-2xl">
-                    <div className="flex items-center gap-4 mb-4">
-                        <span className="text-2xl md:text-4xl">🔒</span>
-                        <h4 className="text-lg md:text-2xl font-black text-white font-display uppercase tracking-tight">{t('trust_privacy')}</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 text-left">
+                <div className="p-8 md:p-14 rounded-[3rem] bg-black/40 border border-white/5 hover:border-white/10 transition-all shadow-2xl">
+                    <div className="flex items-center gap-5 mb-6">
+                        <span className="text-3xl md:text-5xl">🔒</span>
+                        <h4 className="text-xl md:text-4xl font-black text-white font-display uppercase tracking-tight">{t('trust_privacy')}</h4>
                     </div>
-                    <p className="text-zinc-500 text-xs md:text-lg font-korean leading-relaxed">{t('trust_privacy_desc')}</p>
+                    <p className="text-zinc-500 text-sm md:text-xl font-korean leading-relaxed opacity-80">{t('trust_privacy_desc')}</p>
                 </div>
-                <div className="p-6 md:p-10 rounded-[2.5rem] bg-black/40 border border-white/5 hover:border-white/10 transition-colors shadow-2xl">
-                    <div className="flex items-center gap-4 mb-4">
-                        <span className="text-2xl md:text-4xl">🏠</span>
-                        <h4 className="text-lg md:text-2xl font-black text-white font-display uppercase tracking-tight">{t('trust_safety')}</h4>
+                <div className="p-8 md:p-14 rounded-[3rem] bg-black/40 border border-white/5 hover:border-white/10 transition-all shadow-2xl">
+                    <div className="flex items-center gap-5 mb-6">
+                        <span className="text-3xl md:text-5xl">🏠</span>
+                        <h4 className="text-xl md:text-4xl font-black text-white font-display uppercase tracking-tight">{t('trust_safety')}</h4>
                     </div>
-                    <p className="text-zinc-500 text-xs md:text-lg font-korean leading-relaxed">{t('trust_safety_desc')}</p>
+                    <p className="text-zinc-500 text-sm md:text-xl font-korean leading-relaxed opacity-80">{t('trust_safety_desc')}</p>
                 </div>
             </div>
         </div>

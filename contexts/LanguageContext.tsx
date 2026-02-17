@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'en' | 'ko';
@@ -194,9 +193,9 @@ const translations = {
     sec_point_3: "Anonymous processing",
     sec_point_4: "Safe for kids",
     
-    // Paywall
-    pw_title: "Buy Back Your Time",
-    pw_desc: "Unlimited scans and AI practice sheets starting today.",
+    // Paywall (Redesigned for Early Access)
+    pw_title: "Join Early Access",
+    pw_desc: "Chekki is currently invite-only. Please enter your access code to unlock Pro features.",
     
     // Errors
     error_title: "Let's try one more time!",
@@ -392,9 +391,9 @@ const translations = {
     sec_point_3: "익명 분석 처리",
     sec_point_4: "자녀 안심 서비스",
 
-    // Paywall
-    pw_title: "매일 밤 평화를 구매하세요",
-    pw_desc: "무제한 스캔과 AI 복습 문제 생성 기능을 누리세요.",
+    // Paywall (Redesigned for Early Access)
+    pw_title: "얼리 액세스 참여하기",
+    pw_desc: "채키는 현재 초대 전용으로 운영됩니다. 초대 코드를 입력하여 프로 기능을 체험해 보세요.",
     
     // Errors
     error_title: "다시 한번 해볼까요?",
