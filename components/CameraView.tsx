@@ -109,8 +109,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     }, [slides.length]);
 
     return (
-      <div className="w-full max-w-6xl mx-auto px-4 animate-fade-in-up">
-        <div className="text-center mb-10 md:mb-12">
+      <div className="w-full max-w-6xl mx-auto px-4 animate-fade-in-up py-12 md:py-24">
+        <div className="text-center mb-10 md:mb-16">
           <h2 className="text-2xl md:text-5xl font-black text-white font-display mb-4 tracking-tight">
             {language === 'ko' ? "눈으로 확인하는 마법" : "See the Magic in Action"}
           </h2>
@@ -177,7 +177,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   };
 
   const WhyChekkiSection = () => (
-    <section className="py-12 md:py-24 px-4 max-w-7xl mx-auto w-full">
+    <section className="py-16 md:py-32 px-4 max-w-7xl mx-auto w-full">
         <div className="text-center mb-12 md:mb-20">
             <h2 className="text-2xl md:text-6xl font-black text-white font-display mb-6 tracking-tight">{t('diff_title')}</h2>
             <div className="w-20 h-1.5 bg-orange-500 mx-auto rounded-full"></div>
@@ -189,9 +189,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc'), color: 'from-purple-500/20' }
             ].map(feat => (
                 <div key={feat.id} className={`p-8 md:p-12 rounded-[3rem] bg-gradient-to-br ${feat.color} to-zinc-900/30 border border-white/5 hover:border-white/10 transition-all group relative overflow-hidden`}>
-                    {/* 
-                        REMOVED: The absolute background emoji to prevent double-image clutter.
-                    */}
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/5 flex items-center justify-center text-4xl md:text-5xl mb-8 group-hover:scale-110 transition-transform">
                       {feat.emoji}
                     </div>
@@ -204,29 +201,30 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   );
 
   const PrivacySection = () => (
-    <section className="py-12 md:py-24 px-4 max-w-5xl mx-auto w-full">
+    <section className="py-16 md:py-32 px-4 max-w-5xl mx-auto w-full">
         <div className="bg-zinc-900/30 border border-white/5 rounded-[4rem] p-8 md:p-24 relative overflow-hidden text-center group">
             <div className={`absolute inset-0 bg-gradient-to-b ${isNight ? 'from-indigo-500/5' : 'from-orange-500/5'} to-transparent pointer-events-none`}></div>
             
-            <div className="w-32 h-32 md:w-56 md:h-56 mx-auto mb-10 md:mb-16 relative">
+            {/* ENLARGED MASCOT: Increased from w-56/h-56 to w-80/h-80 on desktop */}
+            <div className="w-48 h-48 md:w-80 md:h-80 mx-auto mb-10 md:mb-20 relative">
                 <div className="absolute inset-0 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
                 <ChekkiMascot className="w-full h-full animate-float drop-shadow-2xl" mood={isNight ? "sleeping" : "happy"} />
             </div>
 
-            <h2 className="text-2xl md:text-6xl font-black text-white font-display mb-6 md:mb-10 tracking-tight">{t('trust_title')}</h2>
-            <p className="text-zinc-400 text-sm md:text-2xl font-korean font-medium max-w-2xl mx-auto leading-relaxed mb-12 md:mb-20 break-keep">
+            <h2 className="text-2xl md:text-6xl font-black text-white font-display mb-6 md:mb-12 tracking-tight">{t('trust_title')}</h2>
+            <p className="text-zinc-400 text-sm md:text-2xl font-korean font-medium max-w-2xl mx-auto leading-relaxed mb-12 md:mb-24 break-keep">
                 {language === 'ko' ? "채키는 자녀의 소중한 정보를 저장하지 않으며, 부모님과 아이가 함께 즐겁게 공부하는 시간을 만드는 데에만 집중합니다." : "Chekki never stores your child's data. We focus only on making study time a happy bonding moment for you and your little one."}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 text-left">
-                <div className="p-6 md:p-10 rounded-[2.5rem] bg-black/40 border border-white/5 hover:border-white/10 transition-colors">
+                <div className="p-6 md:p-10 rounded-[2.5rem] bg-black/40 border border-white/5 hover:border-white/10 transition-colors shadow-2xl">
                     <div className="flex items-center gap-4 mb-4">
                         <span className="text-2xl md:text-4xl">🔒</span>
                         <h4 className="text-lg md:text-2xl font-black text-white font-display uppercase tracking-tight">{t('trust_privacy')}</h4>
                     </div>
                     <p className="text-zinc-500 text-xs md:text-lg font-korean leading-relaxed">{t('trust_privacy_desc')}</p>
                 </div>
-                <div className="p-6 md:p-10 rounded-[2.5rem] bg-black/40 border border-white/5 hover:border-white/10 transition-colors">
+                <div className="p-6 md:p-10 rounded-[2.5rem] bg-black/40 border border-white/5 hover:border-white/10 transition-colors shadow-2xl">
                     <div className="flex items-center gap-4 mb-4">
                         <span className="text-2xl md:text-4xl">🏠</span>
                         <h4 className="text-lg md:text-2xl font-black text-white font-display uppercase tracking-tight">{t('trust_safety')}</h4>
@@ -432,7 +430,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
            </div>
         </div>
         
-        <div className="w-full max-w-6xl mx-auto flex flex-col gap-10 md:gap-20">
+        <div className="w-full max-w-6xl mx-auto flex flex-col gap-10 md:gap-24">
            <BetaBanner />
            <DropZone size="large" />
            <p className="text-zinc-600 text-[10px] md:text-sm font-black uppercase tracking-[0.25em] text-center opacity-60">{t('supported_formats')}</p>
@@ -504,7 +502,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
       </div>
 
-      <div id="magic-drop-zone" className="max-w-7xl mx-auto px-4 md:px-6 mb-16 md:mb-32 w-full relative pt-12 md:pt-24">
+      <div id="magic-drop-zone" className="max-w-7xl mx-auto px-4 md:px-6 mb-16 md:mb-48 w-full relative pt-12 md:pt-32">
          <DropZone size="large" />
          <p className="mt-12 text-zinc-600 text-[10px] md:text-sm font-black uppercase tracking-[0.25em] text-center opacity-40">{t('supported_formats')}</p>
       </div>
