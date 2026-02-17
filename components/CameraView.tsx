@@ -67,6 +67,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
   const ScreenshotCarousel = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [expandedImage, setExpandedImage] = useState<string | null>(null);
+
     const slides = [
       {
         url: "https://res.cloudinary.com/dginphpy4/image/upload/v1771328734/Story_Upload_ubfd9l.png",
@@ -104,12 +106,38 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
 
     useEffect(() => {
-      const timer = setInterval(nextSlide, 6000);
-      return () => clearInterval(timer);
-    }, [slides.length]);
+      if (!expandedImage) {
+        const timer = setInterval(nextSlide, 6000);
+        return () => clearInterval(timer);
+      }
+    }, [slides.length, expandedImage]);
 
     return (
       <div className="w-full max-w-6xl mx-auto px-4 animate-fade-in-up py-12 md:py-24">
+        {expandedImage && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 animate-fade-in">
+            <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={() => setExpandedImage(null)}></div>
+            <div className="relative w-full max-w-5xl max-h-[90vh] flex flex-col items-center gap-6">
+              <button 
+                onClick={() => setExpandedImage(null)}
+                className="absolute -top-12 right-0 md:top-0 md:-right-16 text-white/60 hover:text-white transition-colors p-2 bg-white/10 rounded-full"
+              >
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <img 
+                src={expandedImage} 
+                alt="Enlarged screenshot" 
+                className="w-full h-full object-contain shadow-2xl rounded-3xl animate-scale-in"
+              />
+              <p className="text-zinc-500 font-black uppercase tracking-[0.3em] text-[10px] animate-pulse">
+                {language === 'ko' ? "탭하여 닫기" : "Tap anywhere to close"}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="text-center mb-10 md:mb-16">
           <h2 className="text-2xl md:text-5xl font-black text-white font-display mb-4 tracking-tight">
             {language === 'ko' ? "눈으로 확인하는 마법" : "See the Magic in Action"}
@@ -140,7 +168,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             {slides.map((slide, idx) => (
               <div 
                 key={idx}
-                className={`absolute inset-0 transition-all duration-1000 ease-in-out transform flex items-center justify-center p-4 md:p-12 ${idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                className={`absolute inset-0 transition-all duration-1000 ease-in-out transform flex items-center justify-center p-4 md:p-12 cursor-zoom-in ${idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                onClick={() => setExpandedImage(slide.url)}
               >
                 <img 
                   src={slide.url} 
@@ -156,6 +185,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     </div>
                     <h4 className="text-xs md:text-2xl font-black text-white/90 font-korean">{slide.titleKo}</h4>
                     <p className="text-[10px] md:text-base text-zinc-400 font-bold font-korean leading-relaxed opacity-90">{slide.desc}</p>
+                    <span className="mt-2 text-[8px] text-zinc-500 font-black uppercase tracking-widest md:hidden">Tap to enlarge</span>
                   </div>
                 </div>
               </div>

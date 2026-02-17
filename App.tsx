@@ -31,12 +31,14 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Simplified using property initializer to ensure TypeScript correctly 
- * identifies inherited properties like 'props' and 'state' from React.Component.
+ * Added constructor to resolve TypeScript generic inheritance issues for 'props' and 'state'.
  */
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Use property initializer for state to avoid constructor-related TypeScript generic resolution issues
-  state: EBState = { hasError: false };
+  // Fix: Explicit constructor ensures TypeScript correctly identifies 'props' and 'state' from React.Component
+  constructor(props: EBProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError() { 
     return { hasError: true }; 
