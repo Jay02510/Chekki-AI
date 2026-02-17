@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useRef, Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -31,14 +30,12 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Updated to use imported Component class directly to resolve type inference issues with this.props and this.state.
+ * Fixed by adding constructor to correctly initialize props and state for TypeScript.
  */
-// Fix: Use Component directly and ensure proper generic typing for React class component
-class ErrorBoundary extends Component<EBProps, EBState> {
-  // Use constructor to ensure this.props and this.state are properly typed
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  // Define constructor to explicitly handle props and state
   constructor(props: EBProps) {
     super(props);
-    // Fix: initialize state correctly within the constructor context
     this.state = { hasError: false };
   }
 
@@ -47,8 +44,11 @@ class ErrorBoundary extends Component<EBProps, EBState> {
   }
 
   render() {
-    // Fix: Access state via this.state
-    if (this.state.hasError) {
+    // Destructuring state and props from this to resolve access issues
+    const { hasError } = this.state;
+    const { children } = this.props;
+
+    if (hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
           <div className="w-32 h-32 mb-8"><ChekkiMascot className="w-full h-full" mood="thinking" /></div>
@@ -57,8 +57,8 @@ class ErrorBoundary extends Component<EBProps, EBState> {
         </div>
       );
     }
-    // Fix: Access props via this.props
-    return this.props.children;
+    // Return children via destructured variable
+    return children;
   }
 }
 

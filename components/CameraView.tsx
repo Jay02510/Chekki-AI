@@ -66,6 +66,101 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     if (e.dataTransfer.files && e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
   };
 
+  const ScreenshotCarousel = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const slides = [
+      {
+        url: "https://res.cloudinary.com/dginphpy4/image/upload/v1771328734/Story_Upload_ubfd9l.png",
+        titleEn: "1. Homework Upload",
+        titleKo: "숙제 사진 업로드",
+        desc: language === 'ko' ? "복잡한 학습지도 사진 한 장이면 분석 준비 끝!" : "Snap any complex worksheet with just one shot."
+      },
+      {
+        url: "https://res.cloudinary.com/dginphpy4/image/upload/v1771328734/Story_Gen_Text_d2lwgj.png",
+        titleEn: "2. Smart Overlay",
+        titleKo: "마법 같은 정답 오버레이",
+        desc: language === 'ko' ? "종이 위에 정답이 디지털로 정확히 나타납니다." : "Answers appear digitally right on top of the paper."
+      },
+      {
+        url: "https://res.cloudinary.com/dginphpy4/image/upload/v1771328730/Kor_Pronunciation_v6bxaq.png",
+        titleEn: "3. Teacher Guide",
+        titleKo: "다정한 티칭 가이드",
+        desc: language === 'ko' ? "한국어 대본과 교육 팁을 즉시 제공합니다." : "Get Korean scripts and learning tips instantly."
+      },
+      {
+        url: "https://res.cloudinary.com/dginphpy4/image/upload/v1771328724/Eng_Questions_Pronunciation_irbcxk.png",
+        titleEn: "4. English Pronunciation",
+        titleKo: "원어민 발음 가이드",
+        desc: language === 'ko' ? "아이에게 들려줄 정확한 원어민 발음을 확인하세요." : "Check the perfect native pronunciation for success."
+      },
+      {
+        url: "https://res.cloudinary.com/dginphpy4/image/upload/v1771329421/Practice_Worksheet_p6oxaq.png",
+        titleEn: "5. AI Practice Sheet",
+        titleKo: "무제한 연습문제 생성",
+        desc: language === 'ko' ? "틀린 문제와 유사한 유형을 AI가 새로 만들어줍니다." : "AI generates new worksheets based on struggle areas."
+      }
+    ];
+
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % slides.length);
+      }, 5000);
+      return () => clearInterval(timer);
+    }, [slides.length]);
+
+    return (
+      <div className="w-full max-w-5xl mx-auto py-12 md:py-32 px-4 animate-fade-in-up">
+        <div className="text-center mb-10 md:mb-16">
+          <h2 className="text-2xl md:text-6xl font-black text-white font-display mb-4 tracking-tight">
+            {language === 'ko' ? "눈으로 확인하는 마법" : "See the Magic in Action"}
+          </h2>
+          <p className="text-zinc-500 text-xs md:text-xl font-korean font-bold opacity-80 uppercase tracking-widest">
+            {language === 'ko' ? "영유 부모님들의 필수 육아템, 채키 AI" : "The Essential Tool for EK Parents"}
+          </p>
+        </div>
+
+        <div className="relative group">
+          {/* Main Visual Frame */}
+          <div className="relative aspect-[16/10] md:aspect-[16/9] bg-zinc-900 rounded-[2rem] md:rounded-[4rem] overflow-hidden border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none"></div>
+            
+            {slides.map((slide, idx) => (
+              <div 
+                key={idx}
+                className={`absolute inset-0 transition-all duration-1000 ease-in-out transform ${idx === currentIndex ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-105 translate-x-10'}`}
+              >
+                <img src={slide.url} alt={slide.titleEn} className="w-full h-full object-cover" />
+                
+                {/* Content Overlay */}
+                <div className={`absolute bottom-6 left-6 right-6 md:bottom-12 md:left-12 md:right-12 z-20 transition-all duration-700 delay-300 ${idx === currentIndex ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                  <div className="flex flex-col gap-1 md:gap-3 bg-black/40 backdrop-blur-md p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-white/10 max-w-3xl">
+                    <div className="flex items-center gap-3">
+                      <span className="bg-orange-500 text-white text-[8px] md:text-xs font-black px-2 py-1 md:px-4 md:py-1.5 rounded-full uppercase tracking-widest shadow-lg">Step {idx + 1}</span>
+                      <h3 className="text-lg md:text-4xl font-black text-white font-display">{slide.titleEn}</h3>
+                    </div>
+                    <h4 className="text-base md:text-3xl font-black text-white/90 font-korean">{slide.titleKo}</h4>
+                    <p className="text-[10px] md:text-lg text-zinc-400 font-bold font-korean leading-relaxed">{slide.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Nav Dots */}
+          <div className="absolute -bottom-8 md:-bottom-12 left-1/2 -translate-x-1/2 flex gap-3 md:gap-4 z-30">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`h-1.5 md:h-2 transition-all duration-500 rounded-full ${idx === currentIndex ? 'w-8 md:w-16 bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.6)]' : 'w-2 md:w-3 bg-zinc-800 hover:bg-zinc-700'}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const VideoWalkthroughModal = () => (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl" onClick={() => setShowVideoModal(false)}></div>
@@ -368,6 +463,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       </div>
 
       <FeatureSection />
+
+      {/* Corrected Screenshot Carousel Section */}
+      <ScreenshotCarousel />
 
       <div className="mt-12 md:mt-40 pt-12 md:pt-24 border-t border-white/5 bg-zinc-950/50 backdrop-blur-2xl">
           <div className="max-w-7xl mx-auto px-4 md:px-6 pb-16">

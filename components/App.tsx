@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useRef, Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './Header';
 import { CameraView } from './CameraView';
 import { LoadingScreen } from './LoadingScreen';
@@ -20,16 +19,22 @@ const SESSION_KEY = 'hw_last_session';
 const ONBOARDED_KEY = 'chekki_onboarded_v1';
 const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
+interface EBProps {
+  children?: React.ReactNode;
+}
+
+interface EBState {
+  hasError: boolean;
+}
+
 /**
  * ErrorBoundary class component.
- * Fixed property access errors by extending Component class directly with explicit types.
+ * Fixed by adding constructor to correctly initialize props and state for TypeScript.
  */
-// Fix: Correctly inherit from React.Component to resolve 'state' and 'props' access issues
-class ErrorBoundary extends Component<{children?: React.ReactNode}, {hasError: boolean}> {
-  // Constructor to ensure props and state are initialized with correct types for TS
-  constructor(props: {children?: React.ReactNode}) {
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  // Define constructor to correctly initialize props and state
+  constructor(props: EBProps) {
     super(props);
-    // Fix: Explicitly initialize state
     this.state = { hasError: false };
   }
 
@@ -38,8 +43,11 @@ class ErrorBoundary extends Component<{children?: React.ReactNode}, {hasError: b
   }
 
   render() {
-    // Fix: Access state safely through this.state
-    if (this.state.hasError) {
+    // Access state and props via destructuring to ensure correct typed access
+    const { hasError } = this.state;
+    const { children } = this.props;
+
+    if (hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
           <ChekkiMascot className="w-32 h-32 mb-8" mood="thinking" />
@@ -48,8 +56,8 @@ class ErrorBoundary extends Component<{children?: React.ReactNode}, {hasError: b
         </div>
       );
     }
-    // Fix: Access children safely through this.props
-    return this.props.children;
+    // Return children via destructured variable
+    return children;
   }
 }
 

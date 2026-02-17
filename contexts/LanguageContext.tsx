@@ -155,6 +155,12 @@ const translations = {
     lbl_mom_tip: "Teaching Script",
     growing_text: "Generating...",
     
+    // Premium Alert
+    pw_alert_title: "Unlock Premium Features",
+    pw_alert_desc: "Get unlimited Native Audio pronunciation, Teaching Scripts, and AI Practice Sheets to support your child's journey.",
+    pw_alert_cta: "See Pricing Plans",
+    pw_alert_back: "Go Back",
+
     // Feedback Form
     fb_title: "Send Feedback",
     fb_desc: "How is your experience with Chekki?",
@@ -346,6 +352,12 @@ const translations = {
     tip_click_guide: "💡 문제를 누르면 다정한 티칭 가이드가 나타나요!",
     lbl_mom_tip: "티칭 가이드",
     growing_text: "생성 중...",
+    
+    // Premium Alert
+    pw_alert_title: "프리미엄 기능 안내",
+    pw_alert_desc: "Pro 멤버십으로 업그레이드하고 무제한 원어민 발음, 다정한 티칭 스크립트, 그리고 AI 연습문제 생성 기능을 이용해보세요.",
+    pw_alert_cta: "플랜 확인하기",
+    pw_alert_back: "뒤로가기",
 
     // Feedback Form
     fb_title: "의견 보내기",

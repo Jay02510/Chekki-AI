@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -29,6 +30,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const [mascotError, setMascotError] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [copyStatus, setCopyStatus] = useState(false);
+  const [showPremiumAlert, setShowPremiumAlert] = useState(false);
 
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
@@ -98,7 +100,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
   const playAudio = (text: string, id: number) => {
     if (!isAuthenticated) { openLoginModal(); return; }
-    if (!isPro) { setShowPaywall(true); return; }
+    if (!isPro) { setShowPremiumAlert(true); return; }
     
     track('audio_played', { itemId: id, text });
 
@@ -127,7 +129,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const startPronunciationCheck = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) { openLoginModal(); return; }
-    if (!isPro) { setShowPaywall(true); return; }
+    if (!isPro) { setShowPremiumAlert(true); return; }
     if (!recognitionRef.current) return;
     
     track('speaking_check_started', { itemId: activeItem });
@@ -144,13 +146,44 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const handlePremiumFeatureClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) openLoginModal();
-    else if (!isPro) setShowPaywall(true);
+    else if (!isPro) setShowPremiumAlert(true);
   };
+
+  const PremiumAlertModal = () => (
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-md animate-fade-in" onClick={() => setShowPremiumAlert(false)}></div>
+        <div className="relative bg-zinc-900 border border-white/10 rounded-[2.5rem] p-8 max-w-sm w-full text-center animate-fade-in-up shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-pink-500"></div>
+            <div className="w-20 h-20 bg-orange-500 rounded-3xl flex items-center justify-center text-white text-4xl mb-6 mx-auto shadow-2xl shadow-orange-500/20">
+                ⭐
+            </div>
+            <h3 className="text-white font-black text-2xl mb-3 font-display">{t('pw_alert_title')}</h3>
+            <p className="text-zinc-400 font-bold font-korean text-sm leading-relaxed mb-8 break-keep">
+                {t('pw_alert_desc')}
+            </p>
+            <div className="flex flex-col gap-3">
+                <button 
+                    onClick={() => { setShowPremiumAlert(false); setShowPaywall(true); }} 
+                    className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl active:scale-95 transition-all"
+                >
+                    {t('pw_alert_cta')}
+                </button>
+                <button 
+                    onClick={() => setShowPremiumAlert(false)} 
+                    className="w-full bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all"
+                >
+                    {t('pw_alert_back')}
+                </button>
+            </div>
+        </div>
+    </div>
+  );
 
   return (
     <>
       {showCloneModal && <CloneWorksheetModal originalItems={items} onClose={() => setShowCloneModal(false)} />}
       {reportContext && <FeedbackModal context={reportContext} onClose={() => setReportContext(null)} />}
+      {showPremiumAlert && <PremiumAlertModal />}
 
       <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-[calc(100dvh-140px)] lg:h-[calc(100vh-250px)] min-h-[500px]">
         <div className="w-full lg:w-1/2 h-[35%] lg:h-full">
@@ -295,7 +328,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
              <button 
                 onClick={() => {
                    if(!isAuthenticated) openLoginModal();
-                   else if(!isPro) setShowPaywall(true);
+                   else if(!isPro) setShowPremiumAlert(true);
                    else {
                      track('practice_sheet_generated', { worksheetTitle });
                      setShowCloneModal(true);
