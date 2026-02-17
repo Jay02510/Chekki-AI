@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { Header } from './Header';
 import { CameraView } from './CameraView';
@@ -21,10 +22,14 @@ const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
 /**
  * ErrorBoundary class component.
- * Fixed property access errors by using class property initializers and explicit Component import.
+ * Explicitly using React.Component to resolve type inference issues with this.props.
  */
-class ErrorBoundary extends Component<{children?: React.ReactNode}, {hasError: boolean}> {
-  state = { hasError: false };
+class ErrorBoundary extends React.Component<{children?: React.ReactNode}, {hasError: boolean}> {
+  // Constructor to ensure props and state are initialized with correct types for TS
+  constructor(props: {children?: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError() { 
     return { hasError: true }; 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -30,10 +31,14 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Fixed property access errors by using class property initializers and explicit Component import.
+ * Explicitly using React.Component to resolve type inference issues with this.props.
  */
-class ErrorBoundary extends Component<EBProps, EBState> {
-  state: EBState = { hasError: false };
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  // Use constructor to ensure this.props and this.state are properly typed
+  constructor(props: EBProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError() { 
     return { hasError: true }; 
