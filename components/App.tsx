@@ -150,8 +150,6 @@ function AppContent() {
     if (isAuthenticated && !isRetryAttempt) {
       const canScan = await incrementScan();
       if (!canScan) return; 
-    } else if (!isAuthenticated) {
-      localStorage.setItem(GUEST_SCAN_KEY, 'true');
     }
 
     const displayUrl = `data:image/jpeg;base64,${base64Data}`;
@@ -170,6 +168,11 @@ function AppContent() {
     try {
         const result = await analyzeWorksheet(base64Data, controller.signal, user?.plan || 'free');
         
+        // ONLY mark guest scan as used if it was successful and they aren't authenticated
+        if (!isAuthenticated) {
+          localStorage.setItem(GUEST_SCAN_KEY, 'true');
+        }
+
         const newState: AnalysisState = {
             status: 'complete',
             data: result,
@@ -248,7 +251,7 @@ function AppContent() {
         {confirmDialog && (
             <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
                 <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setConfirmDialog(null)}></div>
-                <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full text-center animate-fade-in-up">
+                <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-sm w-full text-center animate-fade-in-up">
                     <p className="text-white font-bold text-lg mb-8 font-korean">{confirmDialog.title}</p>
                     <div className="flex gap-4">
                         <button onClick={() => setConfirmDialog(null)} className="flex-1 bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-xs">No</button>

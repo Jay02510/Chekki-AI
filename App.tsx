@@ -157,8 +157,6 @@ function AppContent() {
     if (isAuthenticated && !isRetryAttempt) {
       const canScan = await incrementScan();
       if (!canScan) return; 
-    } else if (!isAuthenticated) {
-      localStorage.setItem(GUEST_SCAN_KEY, 'true');
     }
 
     const displayUrl = `data:image/jpeg;base64,${base64Data}`;
@@ -177,6 +175,11 @@ function AppContent() {
     try {
         const result = await analyzeWorksheet(base64Data, controller.signal, user?.plan || 'free');
         
+        // ONLY mark guest scan as used if it was successful and they aren't authenticated
+        if (!isAuthenticated) {
+          localStorage.setItem(GUEST_SCAN_KEY, 'true');
+        }
+
         const newState: AnalysisState = {
             status: 'complete',
             data: result,
