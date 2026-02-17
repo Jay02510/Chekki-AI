@@ -4,6 +4,7 @@ import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useMistakes } from '../contexts/MistakeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useAnalytics } from '../contexts/AnalyticsContext';
 import { CloneWorksheetModal } from './CloneWorksheetModal';
 import { FeedbackModal } from './FeedbackModal';
 import { WorksheetOverlay } from './WorksheetOverlay';
@@ -21,8 +22,10 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const { t, language } = useLanguage(); 
   const { toggleMistake, isMistake } = useMistakes();
   const { user, setShowPaywall, isAuthenticated, openLoginModal } = useAuth();
+  const { track } = useAnalytics();
   
-  const [activeItemId, setActiveItemId] = useState<number | null>(null);
+  const [activeItemId] = useState<number | null>(null); // State controlled via activeItemId logic
+  const [activeItem, setActiveItem] = useState<number | null>(null);
   const [showCloneModal, setShowCloneModal] = useState(false);
   const [reportContext, setReportContext] = useState<WorksheetItem | null>(null);
   const [mascotError, setMascotError] = useState(false);
@@ -37,22 +40,21 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   useEffect(() => {
-    if (activeItemId !== null && itemRefs.current[activeItemId]) {
-      itemRefs.current[activeItemId]?.scrollIntoView({
+    if (activeItem !== null && itemRefs.current[activeItem]) {
+      itemRefs.current[activeItem]?.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
       });
       setHasInteracted(true);
+      track('item_focused', { itemId: activeItem, worksheetTitle });
     }
     
-    // Stop any active recognition when selection changes
     if (recognitionRef.current && isListening) {
         recognitionRef.current.abort();
         setIsListening(false);
     }
-  }, [activeItemId]);
+  }, [activeItem]);
 
-  // Handle Speech Recognition Setup & Cleanup
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition && !recognitionRef.current) {
@@ -63,18 +65,21 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript.toLowerCase();
-        const activeItem = items.find(i => i.id === activeItemId);
-        if (activeItem) {
-          const cleanAnswer = activeItem.correct_answer.toLowerCase().replace(/[^\w\s]/g, '').trim();
+        const currentItem = items.find(i => i.id === activeItem);
+        if (currentItem) {
+          const cleanAnswer = currentItem.correct_answer.toLowerCase().replace(/[^\w\s]/g, '').trim();
           const cleanSpeech = transcript.replace(/[^\w\s]/g, '').trim();
           
-          if (cleanSpeech.includes(cleanAnswer) || cleanAnswer.includes(cleanSpeech)) {
-            setSpeechResult({ id: activeItem.id, success: true });
+          const success = cleanSpeech.includes(cleanAnswer) || cleanAnswer.includes(cleanSpeech);
+          setSpeechResult({ id: currentItem.id, success });
+          
+          track('speaking_check_result', { itemId: currentItem.id, success, transcript });
+
+          if (success) {
             if ('vibrate' in navigator) navigator.vibrate(50);
             const audio = new Audio(ASSETS.STAMP_SOUND);
             audio.play().catch(() => {});
           } else {
-            setSpeechResult({ id: activeItem.id, success: false });
             if ('vibrate' in navigator) navigator.vibrate([30, 30, 30]);
           }
         }
@@ -87,21 +92,16 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     }
 
     return () => {
-        if (recognitionRef.current) {
-            recognitionRef.current.abort();
-        }
+        if (recognitionRef.current) recognitionRef.current.abort();
     };
-  }, [items, activeItemId]); // Refresh when items or active state changes
+  }, [items, activeItem]);
 
-  const playAudio = (text: string) => {
-    if (!isAuthenticated) {
-        openLoginModal();
-        return;
-    }
-    if (user?.plan !== 'pro') {
-      setShowPaywall(true);
-      return;
-    }
+  const playAudio = (text: string, id: number) => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    if (user?.plan !== 'pro') { setShowPaywall(true); return; }
+    
+    track('audio_played', { itemId: id, text });
+
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
@@ -112,10 +112,11 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   };
 
   const handleCopyToCafe = () => {
+    track('cafe_template_copied', { worksheetTitle });
     const title = worksheetTitle || (language === 'ko' ? "영어 학습지" : "English Worksheet");
     const template = language === 'ko' 
-      ? `[영유 숙제 기록] 채키 AI로 오늘 '${title}' 공부 끝냈어요! ✨\n\n아이랑 영유 숙제하다 보면 저도 가끔 헷갈릴 때가 있는데,\n채키(Chekki) 덕분에 정답 위치도 바로 확인하고\n설명도 다정하게 해줄 수 있어서 너무 편하네요.\n\n매일 밤 숙제 전쟁이었는데, 이제는 웃으면서 금방 끝내요! 영유 맘님들께 강력 추천합니다. ❤️\n\n#채키AI #영유맘 #숙제도우미 #부모표영어 #자기주도학습`
-      : `Finished '${title}' with Chekki AI tonight! 🚀\n\nHomework time is so much more peaceful now. Chekki gives me the answers and the exact words to say to encourage my child.\n\nHighly recommend to all EK parents! ❤️\n\n#ChekkiAI #HomeworkHelper #ParentingHacks`;
+      ? `[영유 숙제 기록] 채키 AI로 오늘 '${title}' 공부 끝냈어요! ✨\n\n#채키AI #영유맘 #숙제도우미`
+      : `Finished '${title}' with Chekki AI tonight! 🚀\n\n#ChekkiAI #HomeworkHelper`;
     
     navigator.clipboard.writeText(template).then(() => {
       setCopyStatus(true);
@@ -125,27 +126,19 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
   const startPronunciationCheck = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!isAuthenticated) {
-        openLoginModal();
-        return;
-    }
-    if (user?.plan !== 'pro') {
-      setShowPaywall(true);
-      return;
-    }
+    if (!isAuthenticated) { openLoginModal(); return; }
+    if (user?.plan !== 'pro') { setShowPaywall(true); return; }
     if (!recognitionRef.current) return;
+    
+    track('speaking_check_started', { itemId: activeItem });
     setSpeechResult(null);
     setIsListening(true);
     recognitionRef.current.start();
   };
 
-  const handleActionClick = (e: React.MouseEvent, action: () => void) => {
-      e.stopPropagation();
-      if (!isAuthenticated) {
-          openLoginModal();
-      } else {
-          action();
-      }
+  const handleMistakeToggle = (item: WorksheetItem) => {
+      track('mistake_toggled', { itemId: item.id, active: !isMistake(item.question_text, item.correct_answer) });
+      toggleMistake(item);
   };
 
   return (
@@ -158,12 +151,12 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             <WorksheetOverlay 
                 imageUrl={imageUrl} 
                 items={items} 
-                focusedId={activeItemId}
+                focusedId={activeItem}
                 isLoadingItems={isLoadingItems}
             />
         </div>
 
-        <div className="w-full lg:w-1/2 h-[65%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-inner" onClick={() => setActiveItemId(null)}>
+        <div className="w-full lg:w-1/2 h-[65%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-inner" onClick={() => setActiveItem(null)}>
           <div className="px-5 py-4 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl flex flex-col shrink-0">
             <div className="flex justify-between items-center w-full">
                 <div className="flex items-center gap-3">
@@ -190,31 +183,17 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
           </div>
 
           <div className="overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar flex-1 overscroll-contain bg-gradient-to-b from-transparent to-zinc-950/20">
-            {isLoadingItems && items.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center space-y-4 py-20">
-                    <div className="w-10 h-10 border-2 border-white/5 border-t-orange-500 rounded-full animate-spin"></div>
-                    <p className="text-xs font-bold text-zinc-500 font-korean">{t('ws_scanning_detail')}</p>
-                </div>
-            )}
-
             {items.map((item, idx) => {
-              const isActive = activeItemId === item.id;
+              const isActive = activeItem === item.id;
               const flagged = isMistake(item.question_text, item.correct_answer);
               const scriptText = language === 'ko' ? item.teaching_script_ko : item.teaching_script_en;
               const guideText = language === 'ko' ? item.korean_guide : item.english_guide;
               const answerText = item.correct_answer;
-              const isFirstItem = idx === 0;
 
               return (
-                <div key={item.id} ref={(el) => { itemRefs.current[item.id] = el; }} onClick={(e) => { e.stopPropagation(); setActiveItemId(item.id); }}
+                <div key={item.id} ref={(el) => { itemRefs.current[item.id] = el; }} onClick={(e) => { e.stopPropagation(); setActiveItem(item.id); }}
                   className={`group relative rounded-[1.8rem] border transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in-up transform-gpu ${isActive ? 'bg-zinc-800/95 border-orange-500/50 shadow-[0_20px_60px_rgba(0,0,0,0.5)] scale-[1.01]' : 'bg-zinc-900/60 border-white/5 hover:border-white/20'}`}>
                   
-                  {isFirstItem && !hasInteracted && (
-                      <div className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500 text-[8px] font-black text-white uppercase tracking-widest animate-bounce z-10 shadow-lg ring-2 ring-white/10">
-                          <span>Tap here</span> 👆
-                      </div>
-                  )}
-
                   <div className="flex items-start p-4 md:p-6 gap-4">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs md:text-base font-black shrink-0 transition-all duration-300 ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-zinc-800 text-zinc-500'}`}>
                       {item.id}
@@ -230,10 +209,10 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                     </div>
 
                     <div className="flex flex-col gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} active:scale-90 min-w-[44px] min-h-[44px]`}>
+                        <button onClick={(e) => { e.stopPropagation(); playAudio(answerText, item.id); }} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} active:scale-90 min-w-[44px] min-h-[44px]`}>
                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z"/></svg>
                         </button>
-                        <button onClick={(e) => handleActionClick(e, () => toggleMistake(item))} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} active:scale-90 min-w-[44px] min-h-[44px]`}>
+                        <button onClick={(e) => { e.stopPropagation(); handleMistakeToggle(item); }} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} active:scale-90 min-w-[44px] min-h-[44px]`}>
                            <svg className="w-5 h-5" fill={flagged ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                         </button>
                     </div>
@@ -280,27 +259,16 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             {!isLoadingItems && items.length > 0 && (
               <div className="space-y-6 pt-6 pb-2">
                 <div className="bg-[#03C75A]/10 border border-[#03C75A]/20 rounded-[2.5rem] p-6 md:p-8 animate-fade-in-up flex flex-col items-center text-center group">
-                    <div className="w-14 h-14 rounded-full bg-[#03C75A] flex items-center justify-center text-2xl mb-4 shadow-[0_10px_30px_rgba(3,199,90,0.3)] animate-float">
-                        🕊️
-                    </div>
+                    <div className="w-14 h-14 rounded-full bg-[#03C75A] flex items-center justify-center text-2xl mb-4 shadow-[0_10px_30px_rgba(3,199,90,0.3)] animate-float">🕊️</div>
                     <h4 className="text-white font-black text-lg md:text-xl font-display mb-2">{t('share_title')}</h4>
-                    <p className="text-zinc-400 text-xs md:text-sm font-korean mb-6 leading-relaxed opacity-80 break-keep">
-                        {t('share_desc')}
-                    </p>
+                    <p className="text-zinc-400 text-xs md:text-sm font-korean mb-6 leading-relaxed opacity-80 break-keep">{t('share_desc')}</p>
                     <button 
                         onClick={handleCopyToCafe}
                         className={`w-full py-4 rounded-2xl font-black text-sm transition-all transform active:scale-95 flex items-center justify-center gap-3 shadow-xl min-h-[48px] ${copyStatus ? 'bg-emerald-500 text-white' : 'bg-[#03C75A] hover:bg-[#02A64B] text-white'}`}
                     >
-                        {copyStatus ? (
-                            <span className="animate-fade-in">✓ {t('share_toast')}</span>
-                        ) : (
-                            <>
-                                <span>📋</span> {t('share_btn')}
-                            </>
-                        )}
+                        {copyStatus ? <span className="animate-fade-in">✓ {t('share_toast')}</span> : <><span className="text-lg">📋</span> {t('share_btn')}</>}
                     </button>
                 </div>
-
                 <InlineFeedback />
               </div>
             )}
@@ -308,7 +276,14 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
           <div className="p-5 md:p-6 bg-zinc-900/90 backdrop-blur-3xl border-t border-white/5 shrink-0 z-10 shadow-[0_-20px_40px_rgba(0,0,0,0.4)]" onClick={(e) => e.stopPropagation()}>
              <button 
-                onClick={() => { if(!isAuthenticated) openLoginModal(); else if(user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }} 
+                onClick={() => {
+                   if(!isAuthenticated) openLoginModal();
+                   else if(user?.plan !== 'pro') setShowPaywall(true);
+                   else {
+                     track('practice_sheet_generated', { worksheetTitle });
+                     setShowCloneModal(true);
+                   }
+                }} 
                 disabled={isLoadingItems}
                 className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-base shadow-[0_15px_40px_rgba(249,115,22,0.4)] flex items-center justify-center gap-3 transform transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 ring-2 ring-white/10 min-h-[56px]"
              >

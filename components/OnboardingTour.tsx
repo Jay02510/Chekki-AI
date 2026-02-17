@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ASSETS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAnalytics } from '../contexts/AnalyticsContext';
 
 interface Props {
   onComplete: () => void;
@@ -10,40 +11,31 @@ interface Props {
 export const OnboardingTour: React.FC<Props> = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const { t } = useLanguage();
+  const { track } = useAnalytics();
+
+  useEffect(() => {
+    track('onboarding_step_view', { step });
+  }, [step]);
 
   const steps = [
-    {
-      icon: "📸",
-      title: t('onb_1_title'),
-      sub: t('onb_1_desc'),
-      buttonText: t('onb_1_btn')
-    },
-    {
-      icon: "✨",
-      title: t('onb_2_title'),
-      sub: t('onb_2_desc'),
-      buttonText: t('onb_2_btn')
-    },
-    {
-      icon: "🏫",
-      title: t('onb_academy_title'),
-      sub: t('onb_academy_desc'),
-      buttonText: t('onb_2_btn')
-    },
-    {
-      icon: "🔒",
-      title: t('onb_3_title'),
-      sub: t('onb_3_desc'),
-      buttonText: t('onb_3_btn')
-    }
+    { icon: "📸", title: t('onb_1_title'), sub: t('onb_1_desc'), buttonText: t('onb_1_btn') },
+    { icon: "✨", title: t('onb_2_title'), sub: t('onb_2_desc'), buttonText: t('onb_2_btn') },
+    { icon: "🏫", title: t('onb_academy_title'), sub: t('onb_academy_desc'), buttonText: t('onb_2_btn') },
+    { icon: "🔒", title: t('onb_3_title'), sub: t('onb_3_desc'), buttonText: t('onb_3_btn') }
   ];
 
   const handleNext = () => {
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
+      track('onboarding_complete');
       onComplete();
     }
+  };
+
+  const handleSkip = () => {
+      track('onboarding_skipped', { lastStep: step });
+      onComplete();
   };
 
   return (
@@ -62,11 +54,7 @@ export const OnboardingTour: React.FC<Props> = ({ onComplete }) => {
                  {step === 2 ? (
                      <span className="text-5xl md:text-8xl transition-transform transform hover:scale-110">🏫</span>
                  ) : (
-                     <img 
-                        src={ASSETS.LOGO} 
-                        alt="Chekki Mascot" 
-                        className="w-full h-full object-contain scale-[1.1] md:scale-[1.15]" 
-                     />
+                     <img src={ASSETS.LOGO} alt="Chekki Mascot" className="w-full h-full object-contain scale-[1.1] md:scale-[1.15]" />
                  )}
             </div>
         </div>
@@ -74,29 +62,18 @@ export const OnboardingTour: React.FC<Props> = ({ onComplete }) => {
         <div className="mb-6 md:mb-10 space-y-2 md:space-y-4 overflow-y-auto custom-scrollbar">
           <div className="flex flex-col items-center gap-1 md:gap-2">
             <span className="text-xl md:text-3xl mb-0.5">{steps[step].icon}</span>
-            <h2 className="text-xl md:text-3xl font-black text-white font-display leading-tight tracking-tight break-keep">
-                {steps[step].title}
-            </h2>
+            <h2 className="text-xl md:text-3xl font-black text-white font-display leading-tight tracking-tight break-keep">{steps[step].title}</h2>
           </div>
-          <p className="text-zinc-400 font-korean text-sm md:text-lg font-medium leading-snug max-w-[260px] mx-auto opacity-90 break-keep">
-            {steps[step].sub}
-          </p>
+          <p className="text-zinc-400 font-korean text-sm md:text-lg font-medium leading-snug max-w-[260px] mx-auto opacity-90 break-keep">{steps[step].sub}</p>
         </div>
 
         <div className="w-full shrink-0">
-            <button 
-            onClick={handleNext}
-            className="w-full py-4 md:py-6 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl md:rounded-[1.5rem] transition-all transform active:scale-95 shadow-xl font-korean text-base md:text-xl"
-            >
-            {steps[step].buttonText}
+            <button onClick={handleNext} className="w-full py-4 md:py-6 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl md:rounded-[1.5rem] transition-all transform active:scale-95 shadow-xl font-korean text-base md:text-xl">
+              {steps[step].buttonText}
             </button>
-
             {step < steps.length - 1 && (
-                <button 
-                    onClick={onComplete}
-                    className="mt-3 md:mt-6 text-zinc-500 text-[9px] font-black uppercase tracking-[0.2em] hover:text-zinc-300 transition-colors py-1.5 px-3"
-                >
-                    {t('onb_skip')}
+                <button onClick={handleSkip} className="mt-3 md:mt-6 text-zinc-500 text-[9px] font-black uppercase tracking-[0.2em] hover:text-zinc-300 transition-colors py-1.5 px-3">
+                  {t('onb_skip')}
                 </button>
             )}
         </div>
