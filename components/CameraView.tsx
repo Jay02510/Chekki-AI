@@ -120,7 +120,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
 
         <div className="relative group flex items-center">
-          {/* Side Arrows */}
           <button 
             onClick={(e) => { e.stopPropagation(); prevSlide(); }}
             className="absolute left-2 md:-left-8 z-30 p-3 md:p-5 rounded-full bg-zinc-900/80 border border-white/10 text-white hover:bg-orange-500 transition-all opacity-0 group-hover:opacity-100 hidden md:block"
@@ -135,7 +134,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7"/></svg>
           </button>
 
-          {/* Main Visual Frame - Updated to ensure full visibility */}
           <div className="relative w-full aspect-[16/11] md:aspect-[16/9] bg-zinc-950 rounded-[2.5rem] md:rounded-[4rem] overflow-hidden border border-white/5 shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 pointer-events-none"></div>
             
@@ -144,17 +142,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 key={idx}
                 className={`absolute inset-0 transition-all duration-1000 ease-in-out transform flex items-center justify-center p-4 md:p-12 ${idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
               >
-                {/* 
-                  USE OBJECT-CONTAIN: 
-                  This ensures the image is NEVER cropped, regardless of container size. 
-                */}
                 <img 
                   src={slide.url} 
                   alt={slide.titleEn} 
                   className="w-full h-full object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]" 
                 />
                 
-                {/* Content Overlay */}
                 <div className={`absolute bottom-4 left-4 right-4 md:bottom-12 md:left-12 md:right-12 z-20 transition-all duration-700 delay-300 flex justify-center ${idx === currentIndex ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                   <div className="flex flex-col gap-1 md:gap-3 bg-black/70 backdrop-blur-xl p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-white/10 w-full max-w-2xl text-center md:text-left shadow-2xl">
                     <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mb-1">
@@ -169,7 +162,6 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             ))}
           </div>
 
-          {/* Nav Dots */}
           <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-2 md:gap-3 z-30">
             {slides.map((_, idx) => (
               <button
@@ -185,19 +177,21 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   };
 
   const WhyChekkiSection = () => (
-    <section className="py-16 md:py-32 px-4 max-w-7xl mx-auto w-full">
-        <div className="text-center mb-16 md:mb-24">
+    <section className="py-12 md:py-24 px-4 max-w-7xl mx-auto w-full">
+        <div className="text-center mb-12 md:mb-20">
             <h2 className="text-2xl md:text-6xl font-black text-white font-display mb-6 tracking-tight">{t('diff_title')}</h2>
             <div className="w-20 h-1.5 bg-orange-500 mx-auto rounded-full"></div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
             {[
                 { id: 'ocr', emoji: '🎯', title: t('diff_ocr'), desc: t('diff_ocr_desc'), color: 'from-orange-500/20' },
                 { id: 'script', emoji: '💌', title: t('diff_script'), desc: t('diff_script_desc'), color: 'from-indigo-500/20' },
                 { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc'), color: 'from-purple-500/20' }
             ].map(feat => (
                 <div key={feat.id} className={`p-8 md:p-12 rounded-[3rem] bg-gradient-to-br ${feat.color} to-zinc-900/30 border border-white/5 hover:border-white/10 transition-all group relative overflow-hidden`}>
-                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity text-6xl md:text-8xl">{feat.emoji}</div>
+                    {/* 
+                        REMOVED: The absolute background emoji to prevent double-image clutter.
+                    */}
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/5 flex items-center justify-center text-4xl md:text-5xl mb-8 group-hover:scale-110 transition-transform">
                       {feat.emoji}
                     </div>
@@ -210,7 +204,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   );
 
   const PrivacySection = () => (
-    <section className="py-16 md:py-32 px-4 max-w-5xl mx-auto w-full">
+    <section className="py-12 md:py-24 px-4 max-w-5xl mx-auto w-full">
         <div className="bg-zinc-900/30 border border-white/5 rounded-[4rem] p-8 md:p-24 relative overflow-hidden text-center group">
             <div className={`absolute inset-0 bg-gradient-to-b ${isNight ? 'from-indigo-500/5' : 'from-orange-500/5'} to-transparent pointer-events-none`}></div>
             
@@ -313,9 +307,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                       <div className="w-full h-full animate-float flex items-center justify-center">
                         {!imgError ? (
                            <img 
-                            src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY} 
+                            src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.LOGO} 
                             alt="Chekki Mascot" 
-                            className={`w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] filter brightness-110 ${isNight ? 'scale-[1.6] md:scale-[2.0]' : 'scale-110 md:scale-125'} transition-opacity duration-700 ${mascotLoaded ? 'opacity-100' : 'opacity-0'}`} 
+                            className={`w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] filter brightness-110 ${isNight ? 'scale-[1.6] md:scale-[2.0]' : 'scale-100 md:scale-110'} transition-opacity duration-700 ${mascotLoaded ? 'opacity-100' : 'opacity-0'}`} 
                             onLoad={() => setMascotLoaded(true)}
                             onError={() => setImgError(true)}
                             loading="eager"
@@ -371,7 +365,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   };
 
   const BetaBanner = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mb-12 md:mb-24 animate-fade-in-up w-full px-2">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mb-8 md:mb-16 animate-fade-in-up w-full px-2">
         <button 
           onClick={() => setShowFeedbackModal(true)}
           className="group bg-white/5 hover:bg-white/10 border border-white/10 p-5 md:p-10 rounded-[2rem] flex items-center gap-4 md:gap-6 transition-all"
@@ -415,7 +409,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         {showVideoModal && <VideoWalkthroughModal />}
         {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
         
-        <div className="w-full max-w-5xl flex flex-col items-center text-center mb-12 md:mb-24 gap-6 md:gap-14">
+        <div className="w-full max-w-5xl flex flex-col items-center text-center mb-8 md:mb-16 gap-6 md:gap-14">
            <div className="space-y-4 md:space-y-8">
               {user.schoolName && (
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-2 shadow-xl backdrop-blur-sm">
@@ -438,7 +432,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
            </div>
         </div>
         
-        <div className="w-full max-w-6xl mx-auto flex flex-col gap-12 md:gap-24">
+        <div className="w-full max-w-6xl mx-auto flex flex-col gap-10 md:gap-20">
            <BetaBanner />
            <DropZone size="large" />
            <p className="text-zinc-600 text-[10px] md:text-sm font-black uppercase tracking-[0.25em] text-center opacity-60">{t('supported_formats')}</p>
@@ -457,24 +451,24 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       {showVideoModal && <VideoWalkthroughModal />}
       {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
       
-      <div className="relative max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 md:gap-24 items-center mb-16 md:mb-40">
+      <div className="relative max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 md:gap-24 items-center mb-16 md:mb-32">
         <div className={`absolute top-0 left-1/4 -translate-x-1/2 w-full md:w-[1000px] h-[700px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[60px] md:blur-[180px] -z-10 pointer-events-none opacity-20 mix-blend-screen`}></div>
         
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2 px-2 md:px-0">
             <div className="relative w-full max-w-[240px] sm:max-w-[380px] md:max-w-[620px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[40px] md:blur-[140px] animate-pulse`}></div>
                 <div className="w-full h-full relative z-10 transition-transform scale-110 md:scale-125">
-                   <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} alt="Chekki Hero" className="w-full h-full object-contain drop-shadow-[0_20px_60px_rgba(0,0,0,0.6)] animate-float filter brightness-110" />
+                   <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.LOGO} alt="Chekki Hero" className="w-full h-full object-contain drop-shadow-[0_20px_60px_rgba(0,0,0,0.6)] animate-float filter brightness-110" />
                 </div>
             </div>
         </div>
 
         <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left z-10 animate-fade-in-up order-2 lg:order-1 mt-4 lg:mt-0 px-2 md:px-0">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 mb-6 md:mb-12 backdrop-blur-md shadow-2xl self-center lg:self-start">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 mb-6 md:mb-10 backdrop-blur-md shadow-2xl self-center lg:self-start">
             <span className={`w-2 h-2 rounded-full ${isNight ? 'bg-indigo-500 shadow-[0_0_10px_#6366f1]' : 'bg-orange-500 shadow-[0_0_10px_#f97316]'} animate-pulse`}></span>
             <span className="text-[10px] md:text-sm font-black text-zinc-200 tracking-[0.15em] uppercase">{t('hero_badge')}</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-9xl font-black text-white font-display mb-6 md:mb-14 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-9xl font-black text-white font-display mb-6 md:mb-12 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
             {isNight ? (
               <span className={`text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600`}>{t('hero_title_night')}</span>
             ) : (
@@ -485,7 +479,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
               )
             )}
           </h1>
-          <p className="text-base md:text-3xl text-zinc-400 max-w-2xl leading-relaxed mb-10 md:mb-20 font-korean font-medium break-keep opacity-95 mx-auto lg:mx-0">
+          <p className="text-base md:text-3xl text-zinc-400 max-w-2xl leading-relaxed mb-10 md:mb-16 font-korean font-medium break-keep opacity-95 mx-auto lg:mx-0">
             {isNight ? t('hero_desc_night') : t('hero_desc')}
           </p>
           
@@ -510,7 +504,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
       </div>
 
-      <div id="magic-drop-zone" className="max-w-7xl mx-auto px-4 md:px-6 mb-24 md:mb-48 w-full relative pt-12 md:pt-32">
+      <div id="magic-drop-zone" className="max-w-7xl mx-auto px-4 md:px-6 mb-16 md:mb-32 w-full relative pt-12 md:pt-24">
          <DropZone size="large" />
          <p className="mt-12 text-zinc-600 text-[10px] md:text-sm font-black uppercase tracking-[0.25em] text-center opacity-40">{t('supported_formats')}</p>
       </div>
