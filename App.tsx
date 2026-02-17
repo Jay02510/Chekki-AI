@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -21,11 +20,32 @@ const SESSION_KEY = 'hw_last_session';
 const ONBOARDED_KEY = 'chekki_onboarded_v1';
 const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
-  props: { children: React.ReactNode };
-  state: { hasError: boolean } = { hasError: false };
-  static getDerivedStateFromError() { return { hasError: true }; }
+interface EBProps {
+  children?: React.ReactNode;
+}
+
+interface EBState {
+  hasError: boolean;
+}
+
+// Fixed ErrorBoundary to explicitly declare state and props for better TypeScript compatibility
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  // Explicitly declare state and props to fix "Property 'state/props' does not exist" errors
+  state: EBState;
+  props: EBProps;
+
+  constructor(props: EBProps) {
+    super(props);
+    this.state = { hasError: false };
+    this.props = props;
+  }
+
+  static getDerivedStateFromError() { 
+    return { hasError: true }; 
+  }
+
   render() {
+    // Correctly accessing state via this.state
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -35,6 +55,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
         </div>
       );
     }
+    // Correctly accessing props via this.props
     return this.props.children;
   }
 }
@@ -60,7 +81,6 @@ function AppContent() {
   const { user, openLoginModal, isAuthenticated, incrementScan } = useAuth();
   const { t, language } = useLanguage();
   const { track } = useAnalytics();
-  const isInApp = useInAppBrowser();
   
   const [isNight, setIsNight] = useState(isNightModeKST());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
@@ -153,6 +173,7 @@ function AppContent() {
     try {
         const result = await analyzeWorksheet(base64Data, controller.signal, user?.plan || 'free');
         
+        // CRITICAL: Only mark guest scan as used if analysis succeeded
         if (!isAuthenticated) localStorage.setItem(GUEST_SCAN_KEY, 'true');
 
         const newState: AnalysisState = {

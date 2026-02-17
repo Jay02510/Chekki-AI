@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -21,9 +20,9 @@ const ONBOARDED_KEY = 'chekki_onboarded_v1';
 const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
 // Root Error Boundary Component - Fixed property issues by using property initializers and explicit typing
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
+class ErrorBoundary extends React.Component<{children?: React.ReactNode}, {hasError: boolean}> {
   // Explicitly declare props and state properties to fix "Property 'state/props' does not exist" errors in some environments
-  props: { children: React.ReactNode };
+  props: { children?: React.ReactNode };
   state: { hasError: boolean } = { hasError: false };
 
   static getDerivedStateFromError() { 

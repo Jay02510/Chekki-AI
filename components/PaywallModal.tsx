@@ -53,13 +53,13 @@ export const PaywallModal: React.FC = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                        <span className="bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Beta Phase</span>
+                        <span className="bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter">BETA PHASE</span>
                         <h4 className="text-white font-bold text-xs md:text-sm uppercase tracking-wide">Help us test the magic</h4>
                     </div>
                     <p className="text-[10px] md:text-xs text-zinc-400 font-medium leading-relaxed">
                         {language === 'ko' 
                           ? "채키는 현재 베타 테스트 중입니다! 프리미엄 기능(무제한 스캔, AI 연습문제)을 베타 코드를 통해 무료로 이용해보실 수 있습니다." 
-                          : "Chekki is currently in BETA. You can unlock Pro features for free using an access code while we finish polishing the experience."}
+                          : "Chekki is still in BETA. You can access the premium version for free using a BETA code while we polish the experience."}
                     </p>
                 </div>
                 {!showCodeInput && (
@@ -147,7 +147,7 @@ export const PaywallModal: React.FC = () => {
                             onClick={() => setShowCodeInput(true)}
                             className="w-full text-center py-1 text-[9px] text-zinc-500 hover:text-zinc-300 font-bold uppercase tracking-widest mt-2"
                         >
-                            Use Access Code
+                            Use BETA Code
                         </button>
                     </div>
                 ) : (
@@ -156,7 +156,7 @@ export const PaywallModal: React.FC = () => {
                             type="text" 
                             value={betaCode}
                             onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
-                            placeholder="ENTER ACCESS CODE"
+                            placeholder="ENTER BETA CODE"
                             className={`w-full bg-black/40 border ${error ? 'border-red-500' : 'border-zinc-700'} rounded-xl px-4 py-3 text-white text-center font-mono tracking-widest outline-none focus:border-orange-500 text-[11px]`}
                         />
                         <div className="flex gap-2">

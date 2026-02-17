@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useMistakes } from '../contexts/MistakeContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -110,7 +111,7 @@ export const OdapNoteModal: React.FC = () => {
                   </div>
 
                   <div class="tip">
-                    <strong>${t('lbl_mom_tip')}</strong> ${language === 'ko' ? m.teaching_tip_ko : (m.teaching_tip_en || m.teaching_tip_ko)}
+                    <strong>${t('lbl_mom_tip')}</strong> ${language === 'ko' ? m.teaching_script_ko : (m.teaching_script_en || m.teaching_script_ko)}
                   </div>
                 </div>
               `).join('')}
