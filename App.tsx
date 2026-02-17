@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -33,18 +34,15 @@ interface EBState {
  * Fixed by adding constructor to correctly initialize props and state for TypeScript.
  */
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Define constructor to explicitly handle props and state
-  constructor(props: EBProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
+  // Fix: Declare state as a class field to resolve property existence issues in TypeScript
+  state: EBState = { hasError: false };
 
   static getDerivedStateFromError() { 
     return { hasError: true }; 
   }
 
   render() {
-    // Destructuring state and props from this to resolve access issues
+    // Fix: Access state and props via 'this' context in class components to satisfy TypeScript property checks
     const { hasError } = this.state;
     const { children } = this.props;
 
