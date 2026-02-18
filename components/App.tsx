@@ -30,21 +30,18 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Added constructor to resolve TypeScript generic inheritance issues for 'props' and 'state'.
+ * Fixed property access errors by using class fields for state.
  */
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Fix: Explicit constructor ensures TypeScript correctly identifies 'props' and 'state' from React.Component
-  constructor(props: EBProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
+  // Fix: Declare state as a class field to resolve property existence error in TypeScript
+  state: EBState = { hasError: false };
 
   static getDerivedStateFromError() { 
     return { hasError: true }; 
   }
 
   render() {
-    // Access state and props directly via 'this' to resolve property access errors in TypeScript
+    // Fix: Using this.state and this.props explicitly after declaring state on the class level
     const { hasError } = this.state;
     const { children } = this.props;
 
@@ -294,12 +291,12 @@ function AppContent() {
             </div>
         )}
 
-        <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : 'pt-2 md:pt-4'}`}>
+        <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col ${analysisState.status === 'idle' ? 'pt-16 md:pt-24' : 'pt-2 md:pt-4'}`}>
             
             {analysisState.status === 'idle' && isInApp && showInAppNotice && (
-                <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
+                <div className="fixed top-20 left-4 right-4 z-[60] bg-orange-600 text-white p-3 rounded-xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
                     <div className="flex items-center gap-3">
-                        <span className="text-xl">⚠️</span>
+                        <span className="text-lg">⚠️</span>
                         <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
                             {language === 'ko' 
                             ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요." 
@@ -339,7 +336,7 @@ function AppContent() {
             )}
 
             {analysisState.status === 'complete' && analysisState.data && (
-            <div className="animate-fade-in-up flex flex-col flex-1 pt-12 md:pt-24 pb-4 overflow-hidden">
+            <div className="animate-fade-in-up flex flex-col flex-1 pt-10 md:pt-20 pb-4 overflow-hidden">
                 <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                     <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
