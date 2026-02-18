@@ -31,18 +31,21 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Fixed property access errors by using class fields for state.
+ * Explicitly define constructor and super(props) to ensure this.props is recognized by TypeScript.
  */
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Fix: Initializing state as a class field ensures TypeScript recognizes it as a property of ErrorBoundary
-  state: EBState = { hasError: false };
+  // Initialize state with explicit type and values
+  constructor(props: EBProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError() { 
     return { hasError: true }; 
   }
 
   render() {
-    // Fix: Accessing state and props via 'this' after explicit generic definition in React.Component
+    // Standard access to state and props via 'this'
     const { hasError } = this.state;
     const { children } = this.props;
 
@@ -80,7 +83,7 @@ function AppContent() {
   const { user, openLoginModal, isAuthenticated, incrementScan } = useAuth();
   const { t, language } = useLanguage();
   const { track } = useAnalytics();
-  const isInApp = useInAppBrowser(); // Added missing isInApp definition
+  const isInApp = useInAppBrowser();
   
   const [isNight, setIsNight] = useState(isNightModeKST());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
@@ -281,7 +284,7 @@ function AppContent() {
         <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : 'pt-2 md:pt-4'}`}>
             
             {analysisState.status === 'idle' && isInApp && showInAppNotice && (
-                <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
+                <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2 shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
                     <div className="flex items-center gap-3">
                         <span className="text-xl">⚠️</span>
                         <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">{language === 'ko' ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요." : "Open in Safari or Chrome for the best experience (Camera/Mic)."}</p>

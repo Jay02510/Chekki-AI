@@ -58,11 +58,12 @@ const translations = {
 
     // Hero
     hero_badge: "High-Accuracy Answer Key",
-    hero_title: "Instant Answer Key\nRight on the Paper.",
+    hero_title: "Homework Stress?\nJust Snap a Photo.",
     hero_title_night: "Long day?\nLet Chekki handle the grading.",
     hero_desc: "The homework war is over. Get instant answer overlays and 'Teaching Scripts' so you can teach with confidence and love. No more guessing.",
     hero_desc_night: "Enjoy your 'parenting retirement' 5 minutes earlier. Chekki handles the answers while you provide the hugs.",
     hero_cta_btn: "Start for Free Today",
+    btn_read_more: "Read More",
     
     // Camera View / Dashboard
     drop_title: "Snap the Worksheet",
@@ -256,11 +257,12 @@ const translations = {
 
     // Hero
     hero_badge: "정확한 디지털 답지 제공",
-    hero_title: "잃어버린 답지 찾지 말고,\n사진 한 장만 찍으세요",
+    hero_title: "숙제 때문에 힘드신가요?\n사진 한 장만 찍으세요.",
     hero_title_night: "오늘도 고생 많으셨어요.",
     hero_desc: "영유 숙제, 정답 찾느라 헤매지 마세요. 마법처럼 종이 위에 나타나는 정답과 '티칭 스크립트'로 다정하게 지도하세요.",
     hero_desc_night: "육아퇴근을 5분 더 앞당겨 드릴게요. 정답은 채키가 찾을 테니, 아이를 한 번 더 안아주세요.",
     hero_cta_btn: "지금 바로 시작하기",
+    btn_read_more: "더 알아보기",
 
     // Camera View / Dashboard
     drop_title: "여기에 숙제를 보여주세요",
