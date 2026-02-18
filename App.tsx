@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -31,27 +30,19 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Fix: Explicitly declare state and props to resolve TypeScript property access errors.
+ * Fix: Explicitly declare state and remove constructor to assist TypeScript property inference on this.props/this.state.
  */
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Explicitly declaring state property helps TypeScript recognize it when inference from generics fails.
+  // Use class field for state to avoid constructor property shadowing issues
   public state: EBState = { hasError: false };
 
-  constructor(props: EBProps) {
-    super(props);
-  }
-
-  // Updated to include proper static return type for state updates.
   static getDerivedStateFromError(): EBState { 
     return { hasError: true }; 
   }
 
   render() {
-    // Accessing state and props via 'this'
-    const { hasError } = this.state;
-    const { children } = this.props;
-
-    if (hasError) {
+    // Fix: Access properties directly via 'this' to avoid line 47 TypeScript error
+    if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
           <div className="w-32 h-32 mb-8"><ChekkiMascot className="w-full h-full" mood="thinking" /></div>
@@ -60,7 +51,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
         </div>
       );
     }
-    return children;
+    return this.props.children;
   }
 }
 
@@ -85,6 +76,7 @@ function AppContent() {
   const { user, openLoginModal, isAuthenticated, incrementScan } = useAuth();
   const { t, language } = useLanguage();
   const { track } = useAnalytics();
+  const isInApp = useInAppBrowser();
   
   const [isNight, setIsNight] = useState(isNightModeKST());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
