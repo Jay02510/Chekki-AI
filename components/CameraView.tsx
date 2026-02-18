@@ -480,7 +480,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             <div className="relative w-full max-w-[280px] sm:max-w-[450px] md:max-w-[700px] aspect-square flex items-center justify-center">
                 <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[40px] md:blur-[140px] animate-pulse`}></div>
                 <div className="w-full h-full relative z-10 transition-transform scale-110 md:scale-125">
-                   <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.LOGO} alt="Chekki Hero" className="w-full h-full object-contain drop-shadow-[0_20px_60px_rgba(0,0,0,0.6)] animate-float filter brightness-110" />
+                   <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} alt="Chekki Hero" className="w-full h-full object-contain drop-shadow-[0_20px_60px_rgba(0,0,0,0.6)] animate-float filter brightness-110" />
                 </div>
             </div>
         </div>

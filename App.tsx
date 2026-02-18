@@ -31,21 +31,23 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Explicitly define constructor and super(props) to ensure this.props is recognized by TypeScript.
+ * Fix: Explicitly declare state and props to resolve TypeScript property access errors.
  */
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Initialize state with explicit type and values
+  // Explicitly declaring state property helps TypeScript recognize it when inference from generics fails.
+  public state: EBState = { hasError: false };
+
   constructor(props: EBProps) {
     super(props);
-    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError() { 
+  // Updated to include proper static return type for state updates.
+  static getDerivedStateFromError(): EBState { 
     return { hasError: true }; 
   }
 
   render() {
-    // Standard access to state and props via 'this'
+    // Accessing state and props via 'this'
     const { hasError } = this.state;
     const { children } = this.props;
 
@@ -83,7 +85,6 @@ function AppContent() {
   const { user, openLoginModal, isAuthenticated, incrementScan } = useAuth();
   const { t, language } = useLanguage();
   const { track } = useAnalytics();
-  const isInApp = useInAppBrowser();
   
   const [isNight, setIsNight] = useState(isNightModeKST());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
