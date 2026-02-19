@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Chekki AI</string>
+    <string name="title_activity_main">Chekki AI</string>
+    <string name="package_name">com.chekkiai.app</string>
+    <string name="custom_url_scheme">com.chekkiai.app</string>
+</resources>

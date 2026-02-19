@@ -16,7 +16,7 @@ interface Props {
 type ViewMode = 'fit' | 'fill';
 
 export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItems, focusedId, className, isLoadingItems = false }) => {
-  const { user, setShowPaywall, isAuthenticated, openLoginModal } = useAuth();
+  const { user, setShowPaywall } = useAuth();
   const { t, language } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -29,8 +29,6 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
   const dragOffset = useRef({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-
-  const isPro = user?.plan === 'pro';
 
   useEffect(() => {
     setItems(initialItems);
@@ -94,11 +92,11 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     }
   };
 
-  // Fix: Renamed SynthesisUtterance to SpeechSynthesisUtterance
   const playAudio = (text: string) => {
-    if (!isAuthenticated) { openLoginModal(); return; }
-    if (!isPro) { setShowPaywall(true); return; }
-
+    if (user?.plan !== 'pro') {
+      setShowPaywall(true);
+      return;
+    }
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);

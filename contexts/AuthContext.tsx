@@ -1,11 +1,12 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { auth, db, dbInstance } from '../services/database';
 import { doc, updateDoc, increment } from 'firebase/firestore';
-import { 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   deleteUser,
   sendPasswordResetEmail,
@@ -22,6 +23,7 @@ interface AuthContextType {
   updateProfile: (name: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   incrementScan: () => Promise<boolean>;
+  checkScanLimit: () => boolean;
   upgradeToPro: (code?: string) => Promise<boolean>;
   joinSchool: (schoolCode: string) => Promise<boolean>;
   cancelSubscription: () => Promise<void>;
@@ -35,7 +37,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const GUEST_LIMIT = 1;
+const FREE_DAILY_LIMIT = 3;
 const BETA_CODE_MAIN = 'CHEKKI40';
 const BETA_CODE_LIMIT = 40;
 
@@ -48,70 +50,112 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log('[AuthContext] Auth state changed:', user ? 'User logged in' : 'User logged out');
       setFirebaseUser(user);
       if (user) {
+        console.log('[AuthContext] Fetching profile for user...', user.uid);
         const profile = await db.getUser(user.uid);
+        console.log('[AuthContext] Profile fetch result:', profile ? 'Found' : 'Not Found');
         setUserProfile(profile);
       } else {
         setUserProfile(null);
       }
       setIsLoading(false);
+      console.log('[AuthContext] Loading state set to false');
     });
     return unsubscribe;
   }, []);
 
   const signUp = async (name: string, email: string, pass: string, code?: string) => {
-    const res = await createUserWithEmailAndPassword(auth, email, pass);
-    
-    let plan: 'free' | 'pro' = 'free';
-    let maxScans = 9999; // Members get unlimited basic magic scans
-    let schoolId: string | undefined;
-    let schoolName: string | undefined;
-    let subscriptionStartedAt: string | undefined;
+    console.log('[AuthContext] signUp starting for:', email);
 
-    if (code) {
-      const sanitized = code.toUpperCase().trim();
-      const schools: Record<string, string> = {
+    // Timeout wrapper to prevent infinite hang
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Sign up timed out. Please check your internet connection and try again.')), 15000);
+    });
+
+    const signUpFlow = async () => {
+      console.log('[AuthContext] Step 1: Creating Firebase Auth user...');
+      const res = await createUserWithEmailAndPassword(auth, email, pass);
+      console.log('[AuthContext] Step 2: Firebase Auth user created:', res.user.uid);
+
+      let plan: 'free' | 'pro' = 'free';
+      let maxScans = FREE_DAILY_LIMIT;
+      let schoolId: string | undefined;
+      let schoolName: string | undefined;
+      let subscriptionStartedAt: string | undefined;
+      let nextBillingDate: string | undefined;
+
+      if (code) {
+        const sanitized = code.toUpperCase().trim();
+        console.log('[AuthContext] Step 3: Processing code:', sanitized);
+        const schools: Record<string, string> = {
           'POLY10': 'Poly Academy Seocho',
           'GATE05': 'GATE Academy Bundang',
           'ECC99': 'YBM ECC Gangnam'
-      };
+        };
 
-      if (schools[sanitized]) {
-        plan = 'pro';
-        schoolId = sanitized;
-        schoolName = schools[sanitized];
-      } else if (sanitized === BETA_CODE_MAIN) {
-        const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
-        if (canRedeem) {
+        if (schools[sanitized]) {
+          plan = 'pro';
+          maxScans = 9999;
+          schoolId = sanitized;
+          schoolName = schools[sanitized];
+        } else if (sanitized === BETA_CODE_MAIN) {
+          const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
+          if (canRedeem) {
             plan = 'pro';
+            maxScans = 9999;
             subscriptionStartedAt = new Date().toISOString();
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            nextBillingDate = nextMonth.toISOString();
+          }
         }
       }
-    }
 
-    const newProfile: UserProfile = {
-      name,
-      email,
-      plan,
-      scansUsedToday: 0,
-      lastScanDate: new Date().toISOString().split('T')[0],
-      maxScansPerDay: maxScans,
-      schoolId,
-      schoolName,
-      subscriptionStartedAt
+      const newProfile: UserProfile = {
+        name,
+        email,
+        plan,
+        scansUsedToday: 0,
+        lastScanDate: new Date().toISOString().split('T')[0],
+        maxScansPerDay: maxScans,
+        schoolId,
+        schoolName,
+        subscriptionStartedAt,
+        nextBillingDate
+      };
+
+      console.log('[AuthContext] Step 4: Creating Firestore user doc...');
+      await db.createUser(res.user.uid, newProfile);
+      console.log('[AuthContext] Step 5: Firestore doc created. Done!');
+      setUserProfile(newProfile);
+      setShowLoginModal(false);
     };
 
-    await db.createUser(res.user.uid, newProfile);
-    setUserProfile(newProfile);
-    setShowLoginModal(false);
+    await Promise.race([signUpFlow(), timeoutPromise]);
   };
 
   const signIn = async (email: string, pass: string) => {
-    await signInWithEmailAndPassword(auth, email, pass);
-    setShowLoginModal(false);
-  };
+    console.log('[AuthContext] Signing in...', email);
 
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Login timed out. Please check your internet connection and try again.')), 15000);
+    });
+
+    const signInFlow = async () => {
+      await signInWithEmailAndPassword(auth, email, pass);
+      console.log('[AuthContext] Sign in success');
+      setShowLoginModal(false);
+    };
+
+    try {
+      await Promise.race([signInFlow(), timeoutPromise]);
+    } catch (error) {
+      console.error('[AuthContext] Sign in error:', error);
+      throw error;
+    }
+  };
   const sendResetEmail = async (email: string) => {
     await sendPasswordResetEmail(auth, email);
   };
@@ -133,60 +177,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setFirebaseUser(null);
   };
 
+  const checkScanLimit = (): boolean => {
+    // Paywalls removed: always return true
+    return true;
+  };
+
   const incrementScan = async (): Promise<boolean> => {
-    if (!firebaseUser || !userProfile) {
-        // Guest logic handled in App.tsx via localStorage
-        return true;
-    }
-    
-    // AUTHENTICATED USERS: No limit on "Magic Scans" (Answer Key Overlays)
-    // Limits only exist for Guests to drive signup.
+    if (!firebaseUser || !userProfile) return true;
+
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastScanDate !== today;
 
+    // Logic removed: paywall no longer triggers here
+
+    // Atomic increment in Firestore to prevent race conditions
     const userRef = doc(dbInstance, "users", firebaseUser.uid);
-    const updates = { 
+    const updates = {
       scansUsedToday: isNewDay ? 1 : increment(1),
       lastScanDate: today
     };
-    
+
     try {
       await updateDoc(userRef, updates);
-      setUserProfile(prev => prev ? { 
-        ...prev, 
+      // Update local state based on actual Firestore logic
+      setUserProfile(prev => prev ? {
+        ...prev,
         scansUsedToday: isNewDay ? 1 : prev.scansUsedToday + 1,
         lastScanDate: today
       } : null);
       return true;
     } catch (e) {
       console.error("Failed to increment scan:", e);
-      return true; // Don't block user on network failure for analytics
+      return false;
     }
   };
 
   const cancelSubscription = async () => {
     if (!firebaseUser || !userProfile) return;
+    const updates: Partial<UserProfile> = { isCanceled: true };
+    setUserProfile({ ...userProfile, ...updates });
+    await db.updateUser(firebaseUser.uid, updates);
   };
 
   const joinSchool = async (schoolCode: string): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return false;
-    
+
     const sanitized = schoolCode.toUpperCase().trim();
     const schools: Record<string, string> = {
-        'POLY10': 'Poly Academy Seocho',
-        'GATE05': 'GATE Academy Bundang',
-        'ECC99': 'YBM ECC Gangnam'
+      'POLY10': 'Poly Academy Seocho',
+      'GATE05': 'GATE Academy Bundang',
+      'ECC99': 'YBM ECC Gangnam'
     };
 
     if (schools[sanitized]) {
-        const updates: Partial<UserProfile> = {
-            schoolId: sanitized,
-            schoolName: schools[sanitized],
-            plan: 'pro'
-        };
-        setUserProfile({ ...userProfile, ...updates });
-        await db.updateUser(firebaseUser.uid, updates);
-        return true;
+      const updates: Partial<UserProfile> = {
+        schoolId: sanitized,
+        schoolName: schools[sanitized],
+        plan: 'pro',
+        maxScansPerDay: 9999
+      };
+      setUserProfile({ ...userProfile, ...updates });
+      await db.updateUser(firebaseUser.uid, updates);
+      return true;
     }
     return false;
   };
@@ -199,19 +251,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const isSchool = await joinSchool(sanitizedCode);
       if (isSchool) return true;
 
-      if (sanitizedCode !== BETA_CODE_MAIN) return false;
-      
+      if (sanitizedCode !== BETA_CODE_MAIN) {
+        return false;
+      }
+
       const canRedeem = await db.redeemBetaCode(sanitizedCode, BETA_CODE_LIMIT);
-      if (!canRedeem) return false; 
-    } else {
-      return false;
+      if (!canRedeem) {
+        return false;
+      }
     }
-    
-    const updates: Partial<UserProfile> = { 
-      plan: 'pro', 
-      subscriptionStartedAt: new Date().toISOString()
+
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+    const updates: Partial<UserProfile> = {
+      plan: 'pro',
+      maxScansPerDay: 9999,
+      subscriptionStartedAt: new Date().toISOString(),
+      nextBillingDate: nextMonth.toISOString(),
+      isCanceled: false
     };
-    
+
     setUserProfile({ ...userProfile, ...updates });
     await db.updateUser(firebaseUser.uid, updates);
     setShowPaywall(false);
@@ -222,7 +282,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const closeLoginModal = () => setShowLoginModal(false);
 
   return (
-    <AuthContext.Provider value={{ 
+    <AuthContext.Provider value={{
       user: userProfile,
       firebaseUser,
       signUp,
@@ -231,6 +291,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logout,
       updateProfile,
       deleteAccount,
+      checkScanLimit,
       incrementScan,
       upgradeToPro,
       joinSchool,
