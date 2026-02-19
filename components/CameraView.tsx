@@ -186,6 +186,29 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     );
   };
 
+  const FeatureShowcase = () => (
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-24 border-t border-white/5 mt-12">
+        <div className="text-center mb-12 md:mb-20">
+            <h2 className="text-3xl md:text-6xl font-black text-white font-display mb-4 tracking-tight">{t('feat_title')}</h2>
+            <div className="w-20 h-1.5 bg-gradient-to-r from-orange-500 to-pink-500 mx-auto rounded-full"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+            {[
+                { title: t('feat_1_title'), desc: t('feat_1_desc'), icon: "✍️", bg: "bg-orange-500/10", border: "border-orange-500/20" },
+                { title: t('feat_2_title'), desc: t('feat_2_desc'), icon: "💌", bg: "bg-pink-500/10", border: "border-pink-500/20" },
+                { title: t('feat_3_title'), desc: t('feat_3_desc'), icon: "🔊", bg: "bg-indigo-500/10", border: "border-indigo-500/20" },
+                { title: t('feat_4_title'), desc: t('feat_4_desc'), icon: "🪄", bg: "bg-purple-500/10", border: "border-purple-500/20" }
+            ].map((f, i) => (
+                <div key={i} className={`p-8 md:p-12 rounded-[2.5rem] ${f.bg} border ${f.border} backdrop-blur-3xl flex flex-col items-center md:items-start text-center md:text-left transition-all hover:scale-[1.02] group`}>
+                    <span className="text-5xl md:text-7xl mb-6 block drop-shadow-2xl animate-float" style={{ animationDelay: `${i * 0.5}s` }}>{f.icon}</span>
+                    <h3 className="text-xl md:text-3xl font-black text-white font-display mb-4 tracking-tight group-hover:text-orange-400 transition-colors">{f.title}</h3>
+                    <p className="text-zinc-400 font-bold font-korean text-sm md:text-xl leading-relaxed opacity-80 break-keep">{f.desc}</p>
+                </div>
+            ))}
+        </div>
+    </div>
+  );
+
   const BetaBanner = () => (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-8 animate-fade-in-up w-full px-2">
         <button 
@@ -331,6 +354,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
          <DropZone size="large" />
          <p className="mt-4 text-zinc-600 text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-center opacity-40">{language === 'ko' ? '지원 형식: JPG, PNG, PDF' : 'Supported formats: JPG, PNG, PDF'}</p>
       </div>
+
+      {!isAuthenticated && <FeatureShowcase />}
     </div>
   );
 };

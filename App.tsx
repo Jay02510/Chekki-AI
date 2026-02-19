@@ -1,4 +1,3 @@
-
 import React, { Component, useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -29,8 +28,8 @@ interface EBState {
   hasError: boolean;
 }
 
-// Fix: Explicitly extend React.Component and use property initialization for state to ensure TypeScript correctly identifies state and props.
-class ErrorBoundary extends React.Component<EBProps, EBState> {
+// Fix: Use the named Component import to ensure TypeScript correctly identifies state and props on the ErrorBoundary class.
+class ErrorBoundary extends Component<EBProps, EBState> {
   state: EBState = { hasError: false };
 
   static getDerivedStateFromError(): EBState { 

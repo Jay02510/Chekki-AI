@@ -1,4 +1,3 @@
-
 import React, { Component, useState, useEffect, useRef } from 'react';
 import { Header } from './Header';
 import { CameraView } from './CameraView';
@@ -30,9 +29,9 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Fix: Explicitly extend React.Component and use property initialization for state to ensure TypeScript correctly identifies state and props.
+ * Fix: Use the named Component import to ensure TypeScript correctly identifies state and props on the ErrorBoundary class.
  */
-class ErrorBoundary extends React.Component<EBProps, EBState> {
+class ErrorBoundary extends Component<EBProps, EBState> {
   state: EBState = { hasError: false };
 
   static getDerivedStateFromError(): EBState { 
@@ -257,11 +256,11 @@ function AppContent() {
         {confirmDialog && (
             <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
                 <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setConfirmDialog(null)}></div>
-                <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full text-center animate-fade-in-up">
+                <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-sm w-full text-center animate-fade-in-up">
                     <p className="text-white font-bold text-lg mb-8 font-korean">{confirmDialog.title}</p>
                     <div className="flex gap-4">
                         <button onClick={() => setConfirmDialog(null)} className="flex-1 bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-xs">No</button>
-                        <button onClick={confirmDialog.onConfirm} className="flex-1 bg-white text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl">Yes</button>
+                        <button onClick(confirmDialog.onConfirm) className="flex-1 bg-white text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl">Yes</button>
                     </div>
                 </div>
             </div>

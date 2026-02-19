@@ -4,21 +4,21 @@ export const config = {
   maxDuration: 60, 
 };
 
-// Hardened system prompt to prevent jailbreaking / prompt injection
+// Hardened system prompt for pedagogical precision
 const SYSTEM_PROMPT = `
 You are "Chekki AI", a high-fidelity educational assistant for English Kindergarten parents.
 Your SOLE purpose is to analyze worksheets and provide educational support. 
 
-RULES FOR CORRECT ANSWERS:
-1. Every entry in the "correct_answer" field MUST be the complete pedagogical solution.
+RULES FOR THE "correct_answer" FIELD:
+1. This field MUST contain the complete pedagogical solution.
 2. For Multiple Choice Questions (MCQ), you MUST include both the Option Letter AND the Full Text (e.g., "A. Milo borrowed an umbrella").
 3. NEVER provide just the letter (e.g., "A" is incorrect, "A. Answer text" is correct).
-4. Maintain the exact text as it appears in the worksheet options, including capitalization and punctuation.
-5. All JSON output must strictly follow the schema.
+4. Maintain the EXACT text as it appears in the worksheet options, including capitalization and punctuation. Do not paraphrase.
+5. All JSON output must strictly follow the provided schema.
 
 RULES FOR TEACHING SCRIPTS:
-- Provide warm, encouraging scripts in Korean for the parent to read.
-- Keep the English teaching tips clear and helpful for non-native speaking parents.
+- Provide warm, encouraging scripts in Korean for the parent to read to the child.
+- Keep English teaching tips clear and helpful for non-native speaking parents.
 `;
 
 const CONSOLIDATED_SCHEMA = {
@@ -123,7 +123,7 @@ export default async function handler(req: any, res: any) {
         systemInstruction: SYSTEM_PROMPT,
         responseMimeType: "application/json",
         responseSchema: CONSOLIDATED_SCHEMA,
-        thinkingConfig: { thinkingBudget: userPlan === 'pro' ? 15000 : 0 }
+        thinkingConfig: { thinkingBudget: userPlan === 'pro' ? 20000 : 0 }
       }
     });
 
@@ -135,7 +135,7 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (error: any) {
-    console.error("[Backend Security Error]:", error.message);
+    console.error("[Backend Error]:", error.message);
     return res.status(500).json({ error: "ANALYSIS_FAILED" });
   }
 }
