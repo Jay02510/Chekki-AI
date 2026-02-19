@@ -16,7 +16,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
     const [loading, setLoading] = useState(true);
     const [showReward, setShowReward] = useState(false);
     const { t } = useLanguage();
-    
+
     const [isDigitalMode, setIsDigitalMode] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -28,7 +28,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
         if (abortControllerRef.current) abortControllerRef.current.abort();
         const controller = new AbortController();
         abortControllerRef.current = controller;
-        
+
         setLoading(true);
         try {
             const newItems = await generateSimilarWorksheet(itemsToClone, controller.signal);
@@ -60,7 +60,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
             if (ctx) {
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
-                ctx.strokeStyle = '#3b82f6'; 
+                ctx.strokeStyle = '#3b82f6';
                 ctx.lineWidth = 4;
             }
         }
@@ -91,7 +91,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
     };
 
     const stopDrawing = () => setIsDrawing(false);
-    
+
     const clearCanvas = () => {
         if (!canvasRef.current) return;
         const ctx = canvasRef.current.getContext('2d');
@@ -146,11 +146,11 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose}></div>
-            
+
             {showReward && <RewardOverlay score={100} onClose={() => { setShowReward(false); onClose(); }} />}
 
             <div className="relative bg-[#f9fafb] rounded-2xl w-full max-w-4xl h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in-up">
-                
+
                 <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-10 shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
@@ -163,63 +163,63 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
                     </div>
                     <button onClick={onClose} className="min-w-[48px] min-h-[48px] rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">✕</button>
                 </div>
-                
+
                 <div className="bg-gray-50 px-6 py-2 border-b border-gray-200 flex items-center justify-between">
-                     <div className="flex items-center gap-2">
-                         <button onClick={() => setIsDigitalMode(false)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${!isDigitalMode ? 'bg-zinc-800 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>Read / Print</button>
-                         <button onClick={() => setIsDigitalMode(true)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${isDigitalMode ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>✏️ Tablet / Trace</button>
-                     </div>
-                     {isDigitalMode && (
-                         <div className="flex items-center gap-3">
-                             <button onClick={clearCanvas} className="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 min-h-[44px]">Clear</button>
-                             {hasDrawn && (
-                                 <button onClick={() => setShowReward(true)} className="bg-green-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-lg animate-bounce min-h-[44px]">Finish & Get Stamp!</button>
-                             )}
-                         </div>
-                     )}
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => setIsDigitalMode(false)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${!isDigitalMode ? 'bg-zinc-800 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>Read / Print</button>
+                        <button onClick={() => setIsDigitalMode(true)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${isDigitalMode ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>✏️ Tablet / Trace</button>
+                    </div>
+                    {isDigitalMode && (
+                        <div className="flex items-center gap-3">
+                            <button onClick={clearCanvas} className="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 min-h-[44px]">Clear</button>
+                            {hasDrawn && (
+                                <button onClick={() => setShowReward(true)} className="bg-green-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-lg animate-bounce min-h-[44px]">Finish & Get Stamp!</button>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className={`flex-1 overflow-y-auto custom-scrollbar bg-gray-100 p-8 flex justify-center relative ${isDigitalMode ? 'overflow-hidden touch-none' : ''}`}>
-                     {loading ? (
-                         <div className="flex flex-col items-center justify-center space-y-6">
-                             <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                             <p className="text-gray-500 font-bold animate-pulse">Designing practice sheet...</p>
-                         </div>
-                     ) : (
-                         <div className="relative w-full max-w-[210mm] min-h-[297mm] shadow-2xl animate-fade-in-up">
-                             <div ref={containerRef} className="bg-white w-full h-full p-[20mm] flex flex-col pointer-events-none select-none">
-                                 <div className="flex justify-between items-end border-b-2 border-gray-900 pb-8 mb-12">
-                                     <div>
-                                         <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">Daily Practice</h1>
-                                         <span className="text-xs font-bold text-indigo-600">Generated by Chekki AI</span>
-                                     </div>
-                                     <div className="flex gap-10">
-                                         <div className="flex flex-col gap-1"><span className="text-[10px] font-bold text-gray-400 uppercase">Name</span><div className="w-40 border-b border-gray-300"></div></div>
-                                         <div className="flex flex-col gap-1"><span className="text-[10px] font-bold text-gray-400 uppercase">Date</span><div className="w-40 border-b border-gray-300"></div></div>
-                                     </div>
-                                 </div>
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center space-y-6">
+                            <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                            <p className="text-gray-500 font-bold animate-pulse">Designing practice sheet...</p>
+                        </div>
+                    ) : (
+                        <div className="relative w-full max-w-[210mm] min-h-[297mm] shadow-2xl animate-fade-in-up">
+                            <div ref={containerRef} className="bg-white w-full h-full p-[20mm] flex flex-col pointer-events-none select-none">
+                                <div className="flex justify-between items-end border-b-2 border-gray-900 pb-8 mb-12">
+                                    <div>
+                                        <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">Daily Practice</h1>
+                                        <span className="text-xs font-bold text-indigo-600">Generated by Chekki AI</span>
+                                    </div>
+                                    <div className="flex gap-10">
+                                        <div className="flex flex-col gap-1"><span className="text-[10px] font-bold text-gray-400 uppercase">Name</span><div className="w-40 border-b border-gray-300"></div></div>
+                                        <div className="flex flex-col gap-1"><span className="text-[10px] font-bold text-gray-400 uppercase">Date</span><div className="w-40 border-b border-gray-300"></div></div>
+                                    </div>
+                                </div>
 
-                                 <div className="flex-1 space-y-12">
-                                     {items.map((item, idx) => (
-                                         <div key={idx} className="flex flex-col gap-4">
-                                             <div className="flex gap-4 items-baseline">
-                                                 <span className="text-xl font-black text-indigo-600">{idx + 1}.</span>
-                                                 <span className="text-xl font-bold text-gray-800 leading-tight">{item.question_text}</span>
-                                             </div>
-                                             <div className="w-full h-16 border-b-2 border-dashed border-gray-200 relative flex items-center justify-center">
-                                                <div className="font-hand text-4xl text-gray-100 tracking-widest">{item.correct_answer}</div>
-                                             </div>
-                                         </div>
-                                     ))}
-                                 </div>
+                                <div className="flex-1 space-y-8 md:space-y-12 h-full">
+                                    {items.map((item, idx) => (
+                                        <div key={idx} className="flex flex-col gap-3 md:gap-4 pb-6 md:pb-10 border-b border-gray-100 last:border-0">
+                                            <div className="flex gap-4 items-baseline">
+                                                <span className="text-xl font-black text-indigo-600">{idx + 1}.</span>
+                                                <span className="text-lg md:text-xl font-bold text-gray-800 leading-tight">{item.question_text}</span>
+                                            </div>
+                                            <div className="w-full min-h-[60px] md:min-h-[80px] border-b-2 border-dashed border-gray-200 relative flex items-center justify-center py-4">
+                                                <div className="font-hand text-3xl md:text-4xl text-gray-100 tracking-widest text-center select-none uppercase">{item.correct_answer}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
 
-                                 <div className="mt-auto pt-10 border-t border-gray-100 flex justify-between text-[11px] text-gray-400 font-bold uppercase tracking-widest">
-                                     <span>Chekki AI Practice</span>
-                                     <span>Great Work Today! 🌟</span>
-                                 </div>
-                             </div>
+                                <div className="mt-auto pt-10 border-t border-gray-100 flex justify-between text-[11px] text-gray-400 font-bold uppercase tracking-widest">
+                                    <span>Chekki AI Practice</span>
+                                    <span>Great Work Today! 🌟</span>
+                                </div>
+                            </div>
 
-                             {isDigitalMode && (
+                            {isDigitalMode && (
                                 <canvas
                                     ref={canvasRef}
                                     className="absolute inset-0 z-50 cursor-crosshair touch-none"
@@ -231,9 +231,9 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
                                     onTouchMove={draw}
                                     onTouchEnd={stopDrawing}
                                 />
-                             )}
-                         </div>
-                     )}
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="bg-white p-6 border-t border-gray-200 flex justify-end gap-3 shrink-0 z-10">

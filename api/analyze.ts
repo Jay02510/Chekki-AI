@@ -108,33 +108,44 @@ export default async function handler(req: any, res: any) {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. 
+        model: "gemini-1.5-flash",
+        contents: [{
+          role: 'user', parts: [{
+            text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. 
         Task: Generate 3 brand new similar questions for extra practice with bilingual guides. 
-        STRICT RULE: All "correct_answer" fields must contain the FULL answer text including question identifiers (e.g., "A. Milo wanted the ball."). Do not use abbreviations, single letters, or simple indices.`,
+        STRICT RULE: All "correct_answer" fields must contain the FULL answer text including question identifiers (e.g., "A. Milo wanted the ball."). Do not use abbreviations, single letters, or simple indices.` }]
+        }],
         config: { responseMimeType: "application/json", temperature: 0.7 }
       });
-      return res.status(200).json(JSON.parse(response.text || "[]"));
+
+      const text = response.text;
+      try {
+        return res.status(200).json(JSON.parse(text || "[]"));
+      } catch (e) {
+        console.error("[Backend] Failed to parse generated content:", text);
+        return res.status(500).json({ error: "PARSING_FAILED" });
+      }
     }
 
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
-    // MODEL ROUTING
-    const modelToUse = userPlan === 'pro' ? 'gemini-3-pro-preview' : 'gemini-3-flash-preview';
+    // MODEL ROUTING - Corrected to stable 1.5 names
+    const modelToUse = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
 
     const response = await ai.models.generateContent({
       model: modelToUse,
-      contents: {
+      contents: [{
+        role: 'user',
         parts: [
           { inlineData: { mimeType: "image/jpeg", data: image } },
           { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
         ]
-      },
+      }],
       config: {
         systemInstruction: SYSTEM_PROMPT,
         responseMimeType: "application/json",
-        responseSchema: CONSOLIDATED_SCHEMA,
-        thinkingConfig: { thinkingBudget: userPlan === 'pro' ? 15000 : 0 },
+        responseSchema: CONSOLIDATED_SCHEMA as any,
+        thinkingConfig: { includeThoughts: userPlan === 'pro' },
         safetySettings: [
           { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
           { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
@@ -144,7 +155,8 @@ export default async function handler(req: any, res: any) {
       }
     });
 
-    const result = JSON.parse(response.text || "{}");
+    const resultText = response.text;
+    const result = JSON.parse(resultText || "{}");
 
     return res.status(200).json({
       worksheet_summary: result.worksheet_summary,

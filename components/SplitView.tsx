@@ -83,7 +83,13 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         setIsListening(false);
       };
 
-      recognition.onerror = () => setIsListening(false);
+      recognition.onerror = (e: any) => {
+        console.error("Speech Recognition Error", e);
+        setIsListening(false);
+        if (e.error === 'not-allowed') {
+          alert("Microphone access was denied. Please check your browser settings.");
+        }
+      };
       recognition.onend = () => setIsListening(false);
       recognitionRef.current = recognition;
     }
@@ -256,12 +262,28 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                       ) : (
                         <>
                           <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-3xl p-5 flex items-center gap-5 shadow-inner">
-                            <button onClick={startPronunciationCheck} disabled={isListening} className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600'} text-white shadow-xl active:scale-90 min-w-[48px] min-h-[48px]`}>
-                              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" /><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" /></svg>
+                            <button
+                              onClick={startPronunciationCheck}
+                              disabled={isListening}
+                              className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-[pulse_1s_infinite] ring-4 ring-red-500/40' : 'bg-indigo-600 hover:bg-indigo-500'} text-white shadow-[0_15px_35px_rgba(79,70,229,0.3)] active:scale-90 min-w-[56px] min-h-[56px]`}
+                            >
+                              {isListening ? (
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-1.5 h-6 bg-white rounded-full animate-[mic-wave_1s_ease-in-out_infinite_0s]"></div>
+                                  <div className="w-1.5 h-8 bg-white rounded-full animate-[mic-wave_1s_ease-in-out_infinite_0.1s]"></div>
+                                  <div className="w-1.5 h-6 bg-white rounded-full animate-[mic-wave_1s_ease-in-out_infinite_0.2s]"></div>
+                                </div>
+                              ) : (
+                                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" /><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" /></svg>
+                              )}
                             </button>
-                            <div>
-                              <p className="text-xs text-white font-black uppercase tracking-widest mb-1">{isListening ? (language === 'ko' ? "듣는 중..." : "Listening...") : (language === 'ko' ? "발음 연습" : "Speaking Coach")}</p>
-                              <p className="text-[10px] text-indigo-300/80 font-bold leading-relaxed">{isListening ? (language === 'ko' ? "아이의 목소리를 듣고 있어요" : "Listening to your child...") : (language === 'ko' ? "원어민처럼 읽어보고 도장을 받아보세요!" : "Try speaking to get a digital stamp!")}</p>
+                            <div className="flex-1">
+                              <p className="text-xs text-white font-black uppercase tracking-widest mb-1">
+                                {isListening ? (language === 'ko' ? "듣고 있어요..." : "Listening...") : (language === 'ko' ? "원어민처럼 말하기" : "Speaking Coach")}
+                              </p>
+                              <p className="text-[10px] text-indigo-300/80 font-bold leading-relaxed">
+                                {isListening ? (language === 'ko' ? "아이의 목소리를 분석 중입니다" : "Analyzing your child's voice...") : (language === 'ko' ? "버튼을 누르고 발음해보세요! (영어만 가능)" : "Tap to speak and get a digital stamp!")}
+                              </p>
                             </div>
                           </div>
                           {user?.plan === 'pro' ? (
