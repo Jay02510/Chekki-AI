@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { auth, db, dbInstance } from '../services/database';
@@ -36,7 +35,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const FREE_DAILY_LIMIT = 3;
+const GUEST_LIMIT = 1;
 const BETA_CODE_MAIN = 'CHEKKI40';
 const BETA_CODE_LIMIT = 40;
 
@@ -63,12 +62,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (name: string, email: string, pass: string, code?: string) => {
     const res = await createUserWithEmailAndPassword(auth, email, pass);
+    
     let plan: 'free' | 'pro' = 'free';
-    let maxScans = FREE_DAILY_LIMIT;
+    let maxScans = 9999; // Members get unlimited basic magic scans
     let schoolId: string | undefined;
     let schoolName: string | undefined;
     let subscriptionStartedAt: string | undefined;
-    let nextBillingDate: string | undefined;
 
     if (code) {
       const sanitized = code.toUpperCase().trim();
@@ -80,18 +79,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (schools[sanitized]) {
         plan = 'pro';
-        maxScans = 9999;
         schoolId = sanitized;
         schoolName = schools[sanitized];
       } else if (sanitized === BETA_CODE_MAIN) {
         const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
         if (canRedeem) {
             plan = 'pro';
-            maxScans = 9999;
             subscriptionStartedAt = new Date().toISOString();
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            nextBillingDate = nextMonth.toISOString();
         }
       }
     }
@@ -105,8 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       maxScansPerDay: maxScans,
       schoolId,
       schoolName,
-      subscriptionStartedAt,
-      nextBillingDate
+      subscriptionStartedAt
     };
 
     await db.createUser(res.user.uid, newProfile);
@@ -141,19 +134,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const incrementScan = async (): Promise<boolean> => {
-    if (!firebaseUser || !userProfile) return true;
+    if (!firebaseUser || !userProfile) {
+        // Guest logic handled in App.tsx via localStorage
+        return true;
+    }
     
+    // AUTHENTICATED USERS: No limit on "Magic Scans" (Answer Key Overlays)
+    // Limits only exist for Guests to drive signup.
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastScanDate !== today;
-    
-    let currentScans = isNewDay ? 0 : userProfile.scansUsedToday;
-    
-    if (userProfile.plan === 'free' && currentScans >= userProfile.maxScansPerDay) {
-      setShowPaywall(true);
-      return false;
-    }
 
-    // Atomic increment in Firestore to prevent race conditions
     const userRef = doc(dbInstance, "users", firebaseUser.uid);
     const updates = { 
       scansUsedToday: isNewDay ? 1 : increment(1),
@@ -162,7 +152,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       await updateDoc(userRef, updates);
-      // Update local state based on actual Firestore logic
       setUserProfile(prev => prev ? { 
         ...prev, 
         scansUsedToday: isNewDay ? 1 : prev.scansUsedToday + 1,
@@ -171,15 +160,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return true;
     } catch (e) {
       console.error("Failed to increment scan:", e);
-      return false;
+      return true; // Don't block user on network failure for analytics
     }
   };
 
   const cancelSubscription = async () => {
     if (!firebaseUser || !userProfile) return;
-    const updates: Partial<UserProfile> = { isCanceled: true };
-    setUserProfile({ ...userProfile, ...updates });
-    await db.updateUser(firebaseUser.uid, updates);
   };
 
   const joinSchool = async (schoolCode: string): Promise<boolean> => {
@@ -196,8 +182,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const updates: Partial<UserProfile> = {
             schoolId: sanitized,
             schoolName: schools[sanitized],
-            plan: 'pro',
-            maxScansPerDay: 9999
+            plan: 'pro'
         };
         setUserProfile({ ...userProfile, ...updates });
         await db.updateUser(firebaseUser.uid, updates);
@@ -214,25 +199,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const isSchool = await joinSchool(sanitizedCode);
       if (isSchool) return true;
 
-      if (sanitizedCode !== BETA_CODE_MAIN) {
-        return false;
-      }
+      if (sanitizedCode !== BETA_CODE_MAIN) return false;
       
       const canRedeem = await db.redeemBetaCode(sanitizedCode, BETA_CODE_LIMIT);
-      if (!canRedeem) {
-        return false; 
-      }
+      if (!canRedeem) return false; 
+    } else {
+      return false;
     }
     
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-
     const updates: Partial<UserProfile> = { 
       plan: 'pro', 
-      maxScansPerDay: 9999,
-      subscriptionStartedAt: new Date().toISOString(),
-      nextBillingDate: nextMonth.toISOString(),
-      isCanceled: false
+      subscriptionStartedAt: new Date().toISOString()
     };
     
     setUserProfile({ ...userProfile, ...updates });

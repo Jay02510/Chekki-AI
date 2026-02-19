@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { Component, useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -30,18 +31,20 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Fix: Explicitly declare state and remove constructor to assist TypeScript property inference on this.props/this.state.
+ * Fix: Explicitly use React.Component to ensure props and state are correctly inherited from the React namespace.
  */
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Use class field for state to avoid constructor property shadowing issues
-  public state: EBState = { hasError: false };
+  constructor(props: EBProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError(): EBState { 
     return { hasError: true }; 
   }
 
   render() {
-    // Fix: Access properties directly via 'this' to avoid line 47 TypeScript error
+    // Access state and props via 'this'
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -76,7 +79,6 @@ function AppContent() {
   const { user, openLoginModal, isAuthenticated, incrementScan } = useAuth();
   const { t, language } = useLanguage();
   const { track } = useAnalytics();
-  const isInApp = useInAppBrowser();
   
   const [isNight, setIsNight] = useState(isNightModeKST());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
@@ -301,7 +303,7 @@ function AppContent() {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('error_title')}</h3>
                 <p className="text-zinc-400 mb-8 max-w-md mx-auto font-korean leading-relaxed">{analysisState.errorMessage}</p>
-                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
+                <div className="flex flex-col sm:row gap-4 w-full max-w-xs sm:max-w-none">
                 <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]">{t('btn_scan_again_simple')}</button>
                 <button onClick={() => handleReset(false)} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all font-korean shadow-lg w-full min-h-[48px]">{t('btn_retake')}</button>
                 </div>

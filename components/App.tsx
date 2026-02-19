@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { Component, useState, useEffect, useRef } from 'react';
 import { Header } from './Header';
 import { CameraView } from './CameraView';
 import { LoadingScreen } from './LoadingScreen';
@@ -29,19 +30,19 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Fix: Removed destructuring in render and simplified property access to resolve line 51 TypeScript error.
+ * Fix: Explicitly use React.Component to ensure props and state are correctly inherited from the React namespace.
  */
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Use class field for state to avoid constructor property shadowing issues
-  public state: EBState = { hasError: false };
+  constructor(props: EBProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-  // Updated to include proper static return type for state updates.
   static getDerivedStateFromError(): EBState { 
     return { hasError: true }; 
   }
 
   render() {
-    // Fix: Access properties directly via 'this' to avoid line 51 TypeScript error
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -98,10 +99,7 @@ function AppContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [lastImageData, setLastImageData] = useState<string | null>(null);
 
-  // Global Confirmation State
   const [confirmDialog, setConfirmDialog] = useState<{title: string, onConfirm: () => void} | null>(null);
-
-  // AbortController to prevent stale fetches
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -150,16 +148,18 @@ function AppContent() {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const guestUsed = localStorage.getItem(GUEST_SCAN_KEY);
-    
-    if (!isAuthenticated && guestUsed) {
-      openLoginModal();
-      return;
+    // GUEST LOGIC: 1 free trial scan
+    if (!isAuthenticated) {
+        const guestUsed = localStorage.getItem(GUEST_SCAN_KEY);
+        if (guestUsed === 'true') {
+            openLoginModal();
+            return;
+        }
     }
 
+    // MEMBER LOGIC: Unlimited magic scans (handled in incrementScan)
     if (isAuthenticated && !isRetryAttempt) {
-      const canScan = await incrementScan();
-      if (!canScan) return; 
+      await incrementScan();
     }
 
     const displayUrl = `data:image/jpeg;base64,${base64Data}`;
@@ -178,6 +178,7 @@ function AppContent() {
     try {
         const result = await analyzeWorksheet(base64Data, controller.signal, user?.plan || 'free');
         
+        // Mark guest scan as used upon success
         if (!isAuthenticated) {
           localStorage.setItem(GUEST_SCAN_KEY, 'true');
         }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,7 +10,6 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
   const { user, upgradeToPro, cancelSubscription, setShowPaywall } = useAuth();
   const { language, t } = useLanguage();
   const isPro = user?.plan === 'pro';
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const formatDate = (isoStr?: string) => {
     if (!isoStr) return "N/A";
@@ -30,8 +28,8 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
         
         <div className="bg-zinc-950 px-8 py-6 border-b border-white/5 flex justify-between items-center">
           <div className="flex items-center gap-3">
-             <span className="text-2xl">💳</span>
-             <h2 className="text-2xl font-black text-white font-display">Billing & Subscription</h2>
+             <span className="text-2xl">✨</span>
+             <h2 className="text-2xl font-black text-white font-display">Subscription Status</h2>
           </div>
           <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">✕</button>
         </div>
@@ -40,9 +38,9 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
             <div className={`relative p-8 rounded-[1.5rem] border-2 transition-all duration-500 ${isPro ? 'bg-orange-500/5 border-orange-500/30' : 'bg-zinc-950/50 border-white/5'}`}>
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Your Current Plan</p>
+                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Your Current Status</p>
                         <h3 className={`text-3xl font-black ${isPro ? 'text-white' : 'text-zinc-400'} font-display`}>
-                            {isPro ? 'Chekki Pro' : 'Free Explorer'}
+                            {isPro ? 'Beta Pro Access' : 'Free Explorer'}
                         </h3>
                     </div>
                     {isPro && (
@@ -50,72 +48,45 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                     )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 bg-black/30 rounded-xl border border-white/5">
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Billing Period</p>
-                        <p className="text-sm text-white font-bold">{isPro ? 'Monthly (Auto-Pay)' : 'None'}</p>
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Account Type</p>
+                        <p className="text-sm text-white font-bold">{isPro ? 'Beta Tester' : 'Standard'}</p>
                     </div>
                     <div className="p-4 bg-black/30 rounded-xl border border-white/5">
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Next Payment</p>
-                        <p className="text-sm text-white font-bold">{isPro ? formatDate(user?.nextBillingDate) : 'N/A'}</p>
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Access Granted</p>
+                        <p className="text-sm text-white font-bold">{isPro ? formatDate(user?.subscriptionStartedAt) : 'N/A'}</p>
                     </div>
                 </div>
 
-                {!isPro ? (
+                {!isPro && (
                     <button 
                         onClick={() => { onClose(); setShowPaywall(true); }}
                         className="mt-8 w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-zinc-200 transition-all shadow-xl active:scale-95"
                     >
-                        Upgrade to Pro
+                        Enter Beta Code
                     </button>
-                ) : (
-                   <div className="mt-8 flex flex-col items-center">
-                        <p className="text-[10px] text-zinc-500 font-korean mb-4 text-center">
-                            {t('pay_cancel_notice')}
-                        </p>
-                        {!showCancelConfirm ? (
-                            <button 
-                                onClick={() => setShowCancelConfirm(true)}
-                                className="text-zinc-500 hover:text-red-400 text-xs font-bold transition-colors underline underline-offset-4"
-                            >
-                                Cancel Subscription
-                            </button>
-                        ) : (
-                            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center justify-between animate-fade-in w-full">
-                                <p className="text-xs text-red-200 font-bold">Are you sure you want to cancel?</p>
-                                <div className="flex gap-3">
-                                    <button onClick={() => { cancelSubscription(); setShowCancelConfirm(false); }} className="px-4 py-2 bg-red-600 text-white text-[10px] font-bold rounded-lg hover:bg-red-700">Confirm</button>
-                                    <button onClick={() => setShowCancelConfirm(false)} className="px-4 py-2 bg-zinc-800 text-white text-[10px] font-bold rounded-lg">Keep Pro</button>
-                                </div>
-                            </div>
-                        )}
-                   </div>
                 )}
+
+                <div className="mt-8 pt-6 border-t border-white/5">
+                    <div className="bg-indigo-500/10 rounded-2xl p-5 border border-indigo-500/20">
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="text-xl">🚀</span>
+                            <h4 className="text-indigo-400 font-black text-sm uppercase tracking-widest">Coming Soon</h4>
+                        </div>
+                        <p className="text-zinc-400 text-xs font-medium leading-relaxed font-korean opacity-80 break-keep">
+                            {language === 'ko' 
+                                ? "정식 출시 후 다양한 정기 구독 플랜이 도입될 예정입니다. 현재는 베타 테스트 기간으로, 코드를 소지하신 분들께 모든 기능을 무료로 제공하고 있습니다." 
+                                : "Official subscription plans will be introduced upon full launch. During this beta period, we are offering full access to invited users with valid codes."}
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <div>
-                <h4 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-4">Invoice History</h4>
-                <div className="bg-zinc-950/50 border border-white/5 rounded-2xl overflow-hidden">
-                    {isPro ? (
-                        <div className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors border-b border-white/5">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center">📄</div>
-                                <div>
-                                    <p className="text-sm font-bold text-white">Pro Plan Subscription</p>
-                                    <p className="text-[10px] text-zinc-500">{formatDate(user?.subscriptionStartedAt)}</p>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-sm font-black text-emerald-400">₩9,900</p>
-                                <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Paid</span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="py-12 text-center text-zinc-600 text-sm italic">
-                            No payment history yet.
-                        </div>
-                    )}
-                </div>
+            <div className="text-center pb-4">
+                <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.2em]">
+                    Pre-Launch Version 1.0.0
+                </p>
             </div>
         </div>
       </div>

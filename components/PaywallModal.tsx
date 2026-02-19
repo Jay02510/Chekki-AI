@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const PaywallModal: React.FC = () => {
-  const { showPaywall, setShowPaywall, upgradeToPro, user } = useAuth();
+  const { showPaywall, setShowPaywall, upgradeToPro } = useAuth();
   const { t, language } = useLanguage();
   
   const [betaCode, setBetaCode] = useState('');
@@ -72,18 +72,18 @@ export const PaywallModal: React.FC = () => {
                     {isProcessing ? (
                         <div className="w-6 h-6 border-3 border-zinc-400 border-t-zinc-900 rounded-full animate-spin"></div>
                     ) : (
-                        <span>{language === 'ko' ? "얼리 액세스 시작하기" : "Join Early Access"}</span>
+                        <span>{language === 'ko' ? "프로 기능 시작하기" : "Unlock Pro Features"}</span>
                     )}
                 </button>
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
-                <h4 className="text-zinc-300 font-black text-[10px] uppercase tracking-widest mb-4 text-center">Exclusive Pro Benefits</h4>
+                <h4 className="text-zinc-300 font-black text-[10px] uppercase tracking-widest mb-4 text-center">Beta Pro Benefits</h4>
                 <ul className="space-y-3">
                     {[
-                        { icon: '🚀', text: language === 'ko' ? '제한 없는 무제한 스캔' : 'Unlimited Daily Scans' },
-                        { icon: '🪄', text: language === 'ko' ? 'AI 복습 문제 무제한 생성' : 'AI Practice Sheet Generator' },
-                        { icon: '🔊', text: language === 'ko' ? '고성능 Deep Reasoning 모델' : 'Deep Reasoning Mode' }
+                        { icon: '🚀', text: language === 'ko' ? '제한 없는 일일 스캔' : 'Unlimited Daily Scans' },
+                        { icon: '🪄', text: language === 'ko' ? 'AI 복습 문제 생성' : 'AI Practice Sheets' },
+                        { icon: '🔊', text: language === 'ko' ? '원어민 발음 & 티칭 가이드' : 'Native Audio & Teaching Scripts' }
                     ].map((item, i) => (
                         <li key={i} className="flex items-center gap-3 text-xs text-zinc-400 font-bold">
                             <span className="text-lg">{item.icon}</span>
@@ -92,12 +92,6 @@ export const PaywallModal: React.FC = () => {
                     ))}
                 </ul>
             </div>
-
-            <p className="text-[9px] text-zinc-600 font-black uppercase tracking-[0.2em] text-center px-4">
-                {language === 'ko' 
-                    ? "채키는 현재 초대 전용 베타 기간입니다. 정식 출시 후 인앱 결제가 도입될 예정입니다." 
-                    : "Chekki is currently in invite-only beta. Official subscriptions will be available upon full launch."}
-            </p>
         </div>
       </div>
     </div>

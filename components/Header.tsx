@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -143,7 +142,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                              onClick={() => { setShowUserMenu(false); setShowBilling(true); }}
                              className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-lg transition-colors flex items-center gap-3 leading-tight"
                            >
-                             <span>💳</span> Billing
+                             <span>✨</span> Beta Access
                           </button>
                        </div>
 
