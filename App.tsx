@@ -1,4 +1,5 @@
-import React, { Component, useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -28,9 +29,12 @@ interface EBState {
   hasError: boolean;
 }
 
-// Fix: Use the named Component import to ensure TypeScript correctly identifies state and props on the ErrorBoundary class.
-class ErrorBoundary extends Component<EBProps, EBState> {
-  state: EBState = { hasError: false };
+// Fixed ErrorBoundary inheritance and property access for TypeScript
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  constructor(props: EBProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError(): EBState { 
     return { hasError: true }; 
@@ -255,7 +259,7 @@ function AppContent() {
                     <p className="text-white font-bold text-lg mb-8 font-korean">{confirmDialog.title}</p>
                     <div className="flex gap-4">
                         <button onClick={() => setConfirmDialog(null)} className="flex-1 bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-xs">No</button>
-                        <button onClick={confirmDialog.onConfirm} className="flex-1 bg-white text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl">Yes</button>
+                        <button onClick={() => confirmDialog.onConfirm()} className="flex-1 bg-white text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl">Yes</button>
                     </div>
                 </div>
             </div>
