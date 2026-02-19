@@ -72,6 +72,14 @@ const translations = {
     lbl_write_answer: "Practice Area",
     print_footer: "Made with love by Chekki AI",
 
+    // Business Info
+    biz_name: "Chekki AI Labs",
+    biz_ceo: "Representative: Jason Benjamin",
+    biz_addr: "Address: Gangnam-daero, Seoul, Republic of Korea",
+    biz_reg: "Business Registration: [Pending]",
+    biz_mail: "Mail Order Business: [Pending]",
+    biz_contact: "Contact: chekkihelp@gmail.com",
+
     // Misc
     guest_scan_badge: "1 Free Magic Scan Ready",
     guest_used_title: "Free Scan Used!",
@@ -160,6 +168,14 @@ const translations = {
     lbl_correct_answer: "정답",
     lbl_write_answer: "직접 써보기",
     print_footer: "채키 AI와 함께하는 즐거운 숙제 시간",
+
+    // Business Info
+    biz_name: "채키 AI 랩스",
+    biz_ceo: "대표자: Jason Benjamin",
+    biz_addr: "주소: 서울특별시 강남대로 (준비 중)",
+    biz_reg: "사업자등록번호: 준비 중",
+    biz_mail: "통신판매업신고: 준비 중",
+    biz_contact: "고객지원: chekkihelp@gmail.com",
 
     // Misc
     guest_scan_badge: "무료 마법 1회 가능",

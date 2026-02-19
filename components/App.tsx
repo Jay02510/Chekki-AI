@@ -29,8 +29,12 @@ interface EBState {
   hasError: boolean;
 }
 
-// Fixed ErrorBoundary inheritance and property access for TypeScript
-class ErrorBoundary extends React.Component<EBProps, EBState> {
+/**
+ * Fixed ErrorBoundary inheritance and property access for TypeScript
+ * by explicitly extending Component<EBProps, EBState> to ensure
+ * this.state and this.props are recognized.
+ */
+class ErrorBoundary extends Component<EBProps, EBState> {
   constructor(props: EBProps) {
     super(props);
     this.state = { hasError: false };

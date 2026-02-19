@@ -209,6 +209,61 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     </div>
   );
 
+  const ScreenshotCarousel = () => {
+    const images = [
+        "https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1769504113/preview1.jpg",
+        "https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1769504113/preview2.jpg",
+        "https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1769504113/preview3.jpg",
+        "https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1769504113/preview4.jpg"
+    ];
+
+    return (
+        <div className="w-full overflow-hidden py-12 md:py-24">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 mb-12">
+                <h2 className="text-2xl md:text-5xl font-black text-white font-display text-center">{language === 'ko' ? "채키의 실제 모습" : "Chekki in Action"}</h2>
+            </div>
+            <div className="flex gap-4 md:gap-8 overflow-x-auto px-4 md:px-12 pb-8 custom-scrollbar scroll-smooth">
+                {images.map((src, i) => (
+                    <div key={i} className="min-w-[280px] md:min-w-[400px] aspect-[9/19] bg-zinc-900 rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl transition-transform hover:scale-[1.02] duration-500">
+                        <img src={src} alt={`Preview ${i+1}`} className="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+  };
+
+  const BusinessInfo = () => (
+    <footer className="bg-[#030305] border-t border-white/5 py-12 md:py-20 px-6 mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-12">
+            <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                    <img src={ASSETS.LOGO} alt="Chekki Logo" className="w-8 h-8 opacity-60" />
+                    <h2 className="text-xl font-black text-zinc-400 font-display">Chekki<span className="text-zinc-600">AI</span></h2>
+                </div>
+                <div className="text-zinc-600 text-[10px] md:text-xs space-y-1.5 leading-relaxed font-medium uppercase tracking-widest">
+                    <p>{t('biz_name')}</p>
+                    <p>{t('biz_ceo')}</p>
+                    <p>{t('biz_addr')}</p>
+                    <p>{t('biz_reg')}</p>
+                    <p>{t('biz_mail')}</p>
+                    <p>{t('biz_contact')}</p>
+                </div>
+            </div>
+            <div className="flex flex-col md:items-end gap-6">
+                <div className="flex gap-4">
+                    <button onClick={() => setShowLegal('terms')} className="text-zinc-500 hover:text-white text-[10px] uppercase font-black tracking-widest transition-colors underline underline-offset-4">Terms</button>
+                    <button onClick={() => setShowLegal('privacy')} className="text-zinc-500 hover:text-white text-[10px] uppercase font-black tracking-widest transition-colors underline underline-offset-4">Privacy</button>
+                    <button onClick={() => setShowLegal('refund')} className="text-zinc-500 hover:text-white text-[10px] uppercase font-black tracking-widest transition-colors underline underline-offset-4">Refund</button>
+                </div>
+                <p className="text-zinc-700 text-[10px] font-bold uppercase tracking-[0.2em] md:text-right">
+                    © 2025 Chekki AI Labs. All Rights Reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+  );
+
   const BetaBanner = () => (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-8 animate-fade-in-up w-full px-2">
         <button 
@@ -268,7 +323,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
            </div>
            
            <div className={`border rounded-[1.2rem] md:rounded-[2rem] py-2 px-4 md:py-3 md:px-10 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 ${isPro ? 'bg-orange-500/10 border-orange-500/30' : 'bg-[#0F1014] border-white/10'}`}>
-                <div className={`text-[9px] md:text-sm uppercase font-black tracking-[0.1em] ${isPro ? 'text-orange-400' : 'text-zinc-500'}`}>
+                <div className={`text-[9px] md:text-sm uppercase font-black tracking-[0.1em] ${isPro ? t('lbl_pro_active') : t('lbl_member_active')}`}>
                     {isPro ? t('lbl_pro_active') : t('lbl_member_active')}
                 </div>
                 <div className="w-px h-4 md:h-8 bg-white/10"></div>
@@ -286,7 +341,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   }
 
   return (
-    <div className="min-h-full flex flex-col pt-2 md:pt-16 pb-12 overflow-x-hidden scroll-smooth">
+    <div className="min-h-full flex flex-col pt-2 md:pt-16 overflow-x-hidden scroll-smooth">
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
       {showVideoModal && <VideoWalkthroughModal onClose={() => setShowVideoModal(false)} />}
@@ -355,7 +410,25 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
          <p className="mt-4 text-zinc-600 text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-center opacity-40">{language === 'ko' ? '지원 형식: JPG, PNG, PDF' : 'Supported formats: JPG, PNG, PDF'}</p>
       </div>
 
-      {!isAuthenticated && <FeatureShowcase />}
+      {!isAuthenticated && (
+        <>
+            <FeatureShowcase />
+            <ScreenshotCarousel />
+            
+            <div className="max-w-7xl mx-auto px-4 md:px-6 py-20 text-center">
+                <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/10 p-12 md:p-24 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 blur-[100px] rounded-full"></div>
+                    <div className="relative z-10">
+                        <h2 className="text-3xl md:text-6xl font-black text-white font-display mb-6">{language === 'ko' ? '지금 바로 시작하세요' : 'Get Started Now'}</h2>
+                        <p className="text-zinc-400 md:text-xl font-korean mb-10 max-w-2xl mx-auto opacity-80">{language === 'ko' ? '숙제 전쟁을 멈추고 아이와 더 많은 추억을 만드세요.' : 'Stop the homework war and make more memories with your child.'}</p>
+                        <button onClick={openLoginModal} className="bg-white text-black px-12 py-5 rounded-2xl font-black text-lg md:text-2xl shadow-xl hover:bg-zinc-200 active:scale-95 transition-all">{t('login')}</button>
+                    </div>
+                </div>
+            </div>
+            
+            <BusinessInfo />
+        </>
+      )}
     </div>
   );
 };
