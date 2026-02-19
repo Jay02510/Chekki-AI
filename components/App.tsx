@@ -29,13 +29,9 @@ interface EBState {
   hasError: boolean;
 }
 
-// Fix: Explicitly using Component from react and declaring state to ensure TS correctly identifies inherited members
-class ErrorBoundary extends Component<EBProps, EBState> {
+// Fix: Simplified ErrorBoundary to use property initializers and ensure TS recognizes props and state from React.Component
+class ErrorBoundary extends React.Component<EBProps, EBState> {
   public state: EBState = { hasError: false };
-
-  constructor(props: EBProps) {
-    super(props);
-  }
 
   static getDerivedStateFromError(): EBState { 
     return { hasError: true }; 
@@ -251,7 +247,7 @@ function AppContent() {
         {confirmDialog && (
             <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
                 <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setConfirmDialog(null)}></div>
-                <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full text-center animate-fade-in-up">
+                <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-sm w-full text-center animate-fade-in-up">
                     <p className="text-white font-bold text-lg mb-8 font-korean">{confirmDialog.title}</p>
                     <div className="flex gap-4">
                         <button onClick={() => setConfirmDialog(null)} className="flex-1 bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-xs">No</button>
