@@ -30,11 +30,9 @@ interface EBState {
 }
 
 /**
- * ErrorBoundary uses Component from React to handle runtime errors gracefully.
- * Using the named Component import to resolve TypeScript property access issues where this.props was not recognized.
+ * Fix ErrorBoundary property access by explicitly extending React.Component with generics.
  */
-class ErrorBoundary extends Component<EBProps, EBState> {
-  // Explicitly declare state property for TypeScript compatibility
+class ErrorBoundary extends React.Component<EBProps, EBState> {
   public state: EBState = { hasError: false };
 
   constructor(props: EBProps) {
@@ -46,7 +44,6 @@ class ErrorBoundary extends Component<EBProps, EBState> {
   }
 
   render() {
-    // Accessing state which is now recognized via Component inheritance
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -56,7 +53,6 @@ class ErrorBoundary extends Component<EBProps, EBState> {
         </div>
       );
     }
-    // Accessing props which is now recognized via Component inheritance
     return this.props.children;
   }
 }
@@ -253,9 +249,14 @@ function AppContent() {
     localStorage.removeItem(SESSION_KEY);
   };
 
-  // Standalone Policy View
+  // Standalone Legal Policy Route Detection
   if (standaloneLegal) {
-    return <LegalModal type={standaloneLegal} onClose={() => {}} isStandalone={true} />;
+    return (
+        <div className="fixed inset-0 bg-zinc-950 z-[500] flex flex-col">
+            <Header onReset={() => window.location.href = '/'} />
+            <LegalModal type={standaloneLegal} onClose={() => window.location.href = '/'} isStandalone={true} />
+        </div>
+    );
   }
 
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;

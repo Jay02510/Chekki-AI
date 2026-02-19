@@ -29,10 +29,9 @@ interface EBState {
 }
 
 /**
- * Fixed ErrorBoundary inheritance and property access for TypeScript
- * by explicitly extending the named Component import to ensure this.state and this.props are correctly recognized by the TS compiler.
+ * Fix ErrorBoundary property access by explicitly extending React.Component with generics.
  */
-class ErrorBoundary extends Component<EBProps, EBState> {
+class ErrorBoundary extends React.Component<EBProps, EBState> {
   // Explicitly declare state property for TypeScript compatibility
   public state: EBState = { hasError: false };
 
