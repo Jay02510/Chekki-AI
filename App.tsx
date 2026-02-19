@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, Component } from 'react';
+
+import React, { Component, useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -29,14 +30,11 @@ interface EBState {
   hasError: boolean;
 }
 
-/**
- * Fix ErrorBoundary property access by explicitly extending React.Component with generics.
- */
+// Fix: Explicitly using React.Component to ensure that 'props' and 'state' are correctly recognized as inherited members from the base class
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  public state: EBState = { hasError: false };
-
   constructor(props: EBProps) {
     super(props);
+    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError(): EBState { 
@@ -46,7 +44,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
+        <div className="fixed inset-0 bg-[#050505] flex flex-col items-center justify-center p-6 text-center">
           <div className="w-32 h-32 mb-8"><ChekkiMascot className="w-full h-full" mood="thinking" /></div>
           <h1 className="text-2xl font-black text-white mb-4 font-display">Something went wrong.</h1>
           <button onClick={() => window.location.reload()} className="bg-orange-500 text-white px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-orange-600 transition-all active:scale-95">Reload App</button>
@@ -249,10 +247,10 @@ function AppContent() {
     localStorage.removeItem(SESSION_KEY);
   };
 
-  // Standalone Legal Policy Route Detection
+  // Standalone Legal Policy Route View
   if (standaloneLegal) {
     return (
-        <div className="fixed inset-0 bg-zinc-950 z-[500] flex flex-col">
+        <div className="fixed inset-0 bg-[#050505] z-[500] flex flex-col">
             <Header onReset={() => window.location.href = '/'} />
             <LegalModal type={standaloneLegal} onClose={() => window.location.href = '/'} isStandalone={true} />
         </div>
@@ -263,7 +261,7 @@ function AppContent() {
 
   return (
     <ErrorBoundary>
-        <div className={`min-h-[100dvh] ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} text-zinc-100 font-sans overflow-x-hidden transition-colors duration-1000 flex flex-col`}>
+        <div className={`min-h-[100dvh] bg-[#050505] text-zinc-100 font-sans overflow-x-hidden transition-colors duration-1000 flex flex-col`}>
         <Header onReset={() => handleReset(false)} />
         <PaywallModal />
         <OdapNoteModal />
@@ -274,7 +272,7 @@ function AppContent() {
         {confirmDialog && (
             <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
                 <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setConfirmDialog(null)}></div>
-                <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full text-center animate-fade-in-up">
+                <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-sm w-full text-center animate-fade-in-up">
                     <p className="text-white font-bold text-lg mb-8 font-korean">{confirmDialog.title}</p>
                     <div className="flex gap-4">
                         <button onClick={() => setConfirmDialog(null)} className="flex-1 bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-xs">No</button>
@@ -292,7 +290,7 @@ function AppContent() {
             </div>
         )}
 
-        <main className={`flex-1 w-full flex flex-col ${analysisState.status === 'idle' ? 'pt-16 md:pt-24' : 'max-w-7xl mx-auto p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))]'}`}>
+        <main className={`flex-1 w-full flex flex-col ${analysisState.status === 'idle' ? '' : 'max-w-7xl mx-auto p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-20 md:pt-32'}`}>
             
             {analysisState.status === 'idle' && isInApp && showInAppNotice && (
                 <div className="fixed top-20 md:top-28 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md max-w-lg mx-auto">

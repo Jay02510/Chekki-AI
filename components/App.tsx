@@ -1,3 +1,4 @@
+
 import React, { Component, useState, useEffect, useRef } from 'react';
 import { Header } from './Header';
 import { CameraView } from './CameraView';
@@ -28,15 +29,11 @@ interface EBState {
   hasError: boolean;
 }
 
-/**
- * Fix ErrorBoundary property access by explicitly extending React.Component with generics.
- */
+// Fix: Explicitly using React.Component to ensure that 'props' and 'state' are correctly recognized as inherited members from the base class
 class ErrorBoundary extends React.Component<EBProps, EBState> {
-  // Explicitly declare state property for TypeScript compatibility
-  public state: EBState = { hasError: false };
-
   constructor(props: EBProps) {
     super(props);
+    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError(): EBState { 
@@ -44,7 +41,6 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
   }
 
   render() {
-    // Accessing state which is now correctly recognized via Component inheritance
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -54,7 +50,6 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
         </div>
       );
     }
-    // Accessing props which is now correctly recognized via Component inheritance
     return this.props.children;
   }
 }
