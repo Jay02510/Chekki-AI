@@ -30,10 +30,9 @@ interface EBState {
 
 /**
  * Fixed ErrorBoundary inheritance and property access for TypeScript
- * by explicitly extending React.Component<EBProps, EBState> and declaring state
- * to ensure this.state and this.props are recognized.
+ * by explicitly extending the named Component import to ensure this.state and this.props are correctly recognized by the TS compiler.
  */
-class ErrorBoundary extends React.Component<EBProps, EBState> {
+class ErrorBoundary extends Component<EBProps, EBState> {
   // Explicitly declare state property for TypeScript compatibility
   public state: EBState = { hasError: false };
 
@@ -46,7 +45,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
   }
 
   render() {
-    // Accessing state which is now recognized
+    // Accessing state which is now correctly recognized via Component inheritance
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -56,7 +55,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
         </div>
       );
     }
-    // Accessing props which is now recognized
+    // Accessing props which is now correctly recognized via Component inheritance
     return this.props.children;
   }
 }

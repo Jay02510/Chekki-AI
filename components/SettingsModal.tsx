@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -17,11 +16,10 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
   const [name, setName] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | 'refund' | 'youth' | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Deep Diagnostics
   const [diagResults, setDiagResults] = useState({
     camera: '...',
     mic: '...',
@@ -79,7 +77,6 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
 
           <div className="p-6 md:p-8 space-y-8 overflow-y-auto custom-scrollbar flex-1 pb-24">
               
-              {/* --- ADMIN BADGE (Conditional) --- */}
               {isAdmin && (
                 <div className="bg-purple-500/10 rounded-3xl p-6 border border-purple-500/30 flex items-center justify-between">
                     <div>
@@ -90,24 +87,6 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                 </div>
               )}
 
-              {/* --- SECURITY AUDIT SECTION --- */}
-              <div className="bg-emerald-500/5 rounded-3xl p-6 border border-emerald-500/20">
-                  <div className="flex items-center gap-3 mb-4">
-                      <span className="text-2xl">🛡️</span>
-                      <h3 className="text-sm font-black text-emerald-500 uppercase tracking-widest leading-none">{t('sec_audit_title')}</h3>
-                  </div>
-                  <p className="text-[11px] text-zinc-400 font-medium mb-4 leading-relaxed">{t('sec_audit_desc')}</p>
-                  <div className="space-y-2">
-                      {[1,2,3,4].map(idx => (
-                          <div key={idx} className="flex items-center gap-2 text-[10px] text-zinc-300 font-bold">
-                              <span className="text-emerald-500">✓</span>
-                              {t(`sec_point_${idx}`)}
-                          </div>
-                      ))}
-                  </div>
-              </div>
-
-              {/* --- ADVANCED DIAGNOSTICS --- */}
               <div className="bg-zinc-800/50 rounded-3xl p-6 border border-white/5 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4">
                   <div className={`w-2 h-2 rounded-full ${diagResults.auth === 'verified' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-zinc-700'} animate-pulse`}></div>
@@ -130,7 +109,6 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                 </div>
               </div>
 
-              {/* --- PROFILE --- */}
               <div>
                   <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4">Parent Profile</h3>
                   <div className="space-y-4">
@@ -144,7 +122,28 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                   </div>
               </div>
 
-              {/* --- PREFERENCES --- */}
+              <div>
+                  <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4">Legal & Privacy</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => setShowLegal('privacy')} className="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-left hover:border-zinc-600 transition-colors">
+                      <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Privacy Policy</p>
+                      <p className="text-[8px] text-zinc-500 mt-1">Data protection & storage</p>
+                    </button>
+                    <button onClick={() => setShowLegal('terms')} className="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-left hover:border-zinc-600 transition-colors">
+                      <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Terms of Service</p>
+                      <p className="text-[8px] text-zinc-500 mt-1">Rules & usage conditions</p>
+                    </button>
+                    <button onClick={() => setShowLegal('refund')} className="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-left hover:border-zinc-600 transition-colors">
+                      <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Refund Policy</p>
+                      <p className="text-[8px] text-zinc-500 mt-1">Cancellation & billing</p>
+                    </button>
+                    <button onClick={() => setShowLegal('youth')} className="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-left hover:border-zinc-600 transition-colors">
+                      <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Youth Policy</p>
+                      <p className="text-[8px] text-zinc-500 mt-1">Children safety measures</p>
+                    </button>
+                  </div>
+              </div>
+
               <div>
                   <div className="flex items-center justify-between">
                       <div className="text-sm font-bold text-white">App Language</div>
@@ -157,7 +156,6 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
 
               <div className="h-px bg-white/5"></div>
 
-              {/* --- DANGER ZONE --- */}
               <div>
                   {!showDeleteConfirm ? (
                       <button onClick={() => setShowDeleteConfirm(true)} className="w-full text-center px-5 py-4 rounded-2xl border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/10 transition-all">Delete Account</button>
