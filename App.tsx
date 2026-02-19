@@ -29,12 +29,9 @@ interface EBState {
   hasError: boolean;
 }
 
-// Fix: Use Component directly to ensure state and props are correctly inherited from the React namespace
-class ErrorBoundary extends Component<EBProps, EBState> {
-  constructor(props: EBProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
+// Fix: Explicitly extend React.Component and use property initialization for state to ensure TypeScript correctly identifies state and props.
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  state: EBState = { hasError: false };
 
   static getDerivedStateFromError(): EBState { 
     return { hasError: true }; 

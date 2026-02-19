@@ -30,13 +30,10 @@ interface EBState {
 
 /**
  * ErrorBoundary class component.
- * Fix: Extend Component directly from React to ensure state and props are correctly inherited.
+ * Fix: Explicitly extend React.Component and use property initialization for state to ensure TypeScript correctly identifies state and props.
  */
-class ErrorBoundary extends Component<EBProps, EBState> {
-  constructor(props: EBProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  state: EBState = { hasError: false };
 
   static getDerivedStateFromError(): EBState { 
     return { hasError: true }; 

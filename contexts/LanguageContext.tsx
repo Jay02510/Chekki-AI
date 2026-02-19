@@ -17,6 +17,20 @@ const translations = {
     scans: "Magic Scans",
     pro_plan: "Beta Pro 🚀",
     
+    // Onboarding
+    onb_1_title: "Stop the Homework War",
+    onb_1_desc: "Chekki provides the answers, you provide the hugs.",
+    onb_1_btn: "Sounds Good!",
+    onb_2_title: "Unlimited Digital Answers",
+    onb_2_desc: "Sign up for free to get unlimited digital answer keys forever.",
+    onb_2_btn: "Tell Me More",
+    onb_academy_title: "Curriculum Context",
+    onb_academy_desc: "We analyze context based on top EK academy standards (Poly, ECC, GATE).",
+    onb_3_title: "Bilingual Teaching Scripts",
+    onb_3_desc: "Confidently guide your child with scripts provided in both languages.",
+    onb_3_btn: "Let's Start",
+    onb_skip: "Skip Tour",
+
     // Guest Mode CTAs
     hero_guest_cta: "Try 1 Free Scan",
     login_guest_link: "Not ready? Try 1 scan as guest",
@@ -32,14 +46,11 @@ const translations = {
     lbl_magic_unlimited: "Unlimited Magic Scans",
     lbl_member_active: "Unlimited Magic Scans Active",
     lbl_member_subtitle: "All your answer overlays are free and unlimited.",
+    lbl_mom_tip: "Teaching Script",
 
-    // Onboarding
-    onb_1_title: "Stop the Homework War",
-    onb_1_desc: "Chekki provides the answers, you provide the hugs.",
-    onb_2_title: "Unlimited Digital Answers",
-    onb_2_desc: "Sign up for free to get unlimited digital answer keys forever.",
-    
     // Paywall Alert
+    pw_title: "Upgrade to Pro",
+    pw_desc: "Unlock the full pedagogical power of Chekki.",
     pw_alert_title: "Beta Pro Feature",
     pw_alert_desc: "Audio, Scripts, and Practice Sheets require Beta Access. Your Magic Scans remain unlimited!",
     pw_alert_cta: "Enter Beta Code",
@@ -49,8 +60,50 @@ const translations = {
     ws_results_title: "Your Digital Guide",
     ws_voice_guide: "💡 Tap an answer to hear the pronunciation!",
     ws_gen_practice: "AI Practice Sheet",
+    ws_scanning_header: "AI is Scanning...",
+    ws_items_found: "questions analyzed",
+    ws_scan_again: "Scan New",
     tip_click_guide: "💡 Tap any question to see your teaching tips!",
+    growing_text: "Generating Sheet...",
+
+    // Review / Mistakes
+    review_title: "Review Note",
+    review_empty_title: "All Caught Up!",
+    review_empty_desc: "No questions added to the review note yet. Focus on new learning!",
+    review_print_btn: "Print Review Sheet",
+    review_print_desc: "Generate a custom worksheet based on previous mistakes.",
+    lbl_mistakes_count: "mistakes recorded",
+    lbl_question: "Question",
+    lbl_correct_answer: "Answer",
+    lbl_write_answer: "Practice Area",
+    print_footer: "Made with love by Chekki AI",
+
+    // Rewards
+    reward_job: "Great Job!",
+    reward_stamp: "Digital Stamp",
+    reward_tap: "Tap to stamp!",
+
+    // Share
+    share_title: "Mom's Lounge",
+    share_desc: "Share your child's success with other parents.",
+    share_btn: "Copy Share Template",
+    share_toast: "Copied to Clipboard!",
     
+    // Error
+    error_title: "Scan Failed",
+    err_network: "Network error. Please check your connection and try again.",
+    err_confirm: "Start over and scan a new worksheet?",
+    btn_retake: "Retake Photo",
+    btn_scan_again_simple: "Try Again",
+
+    // Resources
+    res_title: "Resources",
+    res_subtitle: "Spread the magic",
+    res_flyer: "Promotional Flyer",
+    res_download: "Download PDF",
+    res_share: "Share Link",
+    res_copied: "Link Copied!",
+
     // Misc
     footer_text: "Chekki AI - Supporting every English Kindergarten family with love."
   },
@@ -61,6 +114,20 @@ const translations = {
     logout: "로그아웃",
     scans: "번의 마법 남음",
     pro_plan: "베타 프로 🚀",
+
+    // Onboarding
+    onb_1_title: "숙제 전쟁, 이제 그만",
+    onb_1_desc: "채점은 채키가 할게요. 부모님은 칭찬만 해주세요.",
+    onb_1_btn: "좋아요!",
+    onb_2_title: "무제한 디지털 답지",
+    onb_2_desc: "가입만 하면 모든 숙제의 정답 오버레이를 평생 무제한으로 볼 수 있어요.",
+    onb_2_btn: "더 궁금해요",
+    onb_academy_title: "영유 맞춤 분석",
+    onb_academy_desc: "폴리, ECC, 게이트 등 주요 영유 커리큘럼 맥락을 완벽히 이해합니다.",
+    onb_3_title: "다정한 티칭 가이드",
+    onb_3_desc: "엄마의 목소리로 다정하게 설명해줄 수 있도록 대본을 드려요.",
+    onb_3_btn: "시작하기",
+    onb_skip: "건너뛰기",
 
     // Guest Mode CTAs
     hero_guest_cta: "1회 무료 체험하기",
@@ -77,14 +144,11 @@ const translations = {
     lbl_magic_unlimited: "무제한 마법 스캔",
     lbl_member_active: "무제한 디지털 답지 활성화",
     lbl_member_subtitle: "가입 회원님은 모든 숙제의 정답을 무제한으로 볼 수 있습니다.",
-
-    // Onboarding
-    onb_1_title: "숙제 전쟁, 이제 그만",
-    onb_1_desc: "채점은 채키가 할게요. 부모님은 칭찬만 해주세요.",
-    onb_2_title: "무제한 디지털 답지",
-    onb_2_desc: "가입만 하면 모든 숙제의 정답 오버레이를 평생 무제한으로 볼 수 있어요.",
+    lbl_mom_tip: "티칭 스크립트",
 
     // Paywall Alert
+    pw_title: "프로로 업그레이드",
+    pw_desc: "채키의 모든 학습 기능을 무제한으로 즐기세요.",
     pw_alert_title: "베타 프로 전용 기능",
     pw_alert_desc: "원어민 오디오, 티칭 스크립트, 복습 문제는 베타 코드가 필요합니다. 무제한 답지 기능은 계속 무료입니다!",
     pw_alert_cta: "베타 코드 입력하기",
@@ -94,7 +158,49 @@ const translations = {
     ws_results_title: "디지털 정답 가이드",
     ws_voice_guide: "💡 정답을 누르면 원어민 발음을 들려드려요!",
     ws_gen_practice: "AI 복습 문제 만들기",
+    ws_scanning_header: "AI 분석 중...",
+    ws_items_found: "개의 문제를 찾았습니다",
+    ws_scan_again: "새로 찍기",
     tip_click_guide: "💡 문제를 누르면 다정한 티칭 가이드가 나타나요!",
+    growing_text: "문제 생성 중...",
+
+    // Review / Mistakes
+    review_title: "오답 노트",
+    review_empty_title: "완벽해요!",
+    review_empty_desc: "아직 등록된 오답이 없어요. 새로운 공부를 시작해볼까요?",
+    review_print_btn: "오답 학습지 출력",
+    review_print_desc: "틀렸던 문제들만 모아 맞춤형 학습지를 만듭니다.",
+    lbl_mistakes_count: "개의 오답이 기록됨",
+    lbl_question: "문제",
+    lbl_correct_answer: "정답",
+    lbl_write_answer: "직접 써보기",
+    print_footer: "채키 AI와 함께하는 즐거운 숙제 시간",
+
+    // Rewards
+    reward_job: "참 잘했어요!",
+    reward_stamp: "디지털 참잘했어요 도장",
+    reward_tap: "도장을 꾹 눌러주세요!",
+
+    // Share
+    share_title: "맘스 라운지",
+    share_desc: "아이의 성장 기록을 다른 부모님들과 공유해보세요.",
+    share_btn: "공유 템플릿 복사",
+    share_toast: "클립보드에 복사되었습니다!",
+
+    // Error
+    error_title: "분석 실패",
+    err_network: "네트워크 오류가 발생했습니다. 다시 시도해주세요.",
+    err_confirm: "현재 분석 결과를 지우고 새로 찍으시겠습니까?",
+    btn_retake: "다시 찍기",
+    btn_scan_again_simple: "재시도",
+
+    // Resources
+    res_title: "홍보 자료",
+    res_subtitle: "채키의 마법을 널리 알려주세요",
+    res_flyer: "홍보 전단지",
+    res_download: "PDF 다운로드",
+    res_share: "링크 공유",
+    res_copied: "링크가 복사되었습니다!",
     
     // Misc
     footer_text: "대한민국 모든 영유 부모님들을 진심으로 응원합니다."
