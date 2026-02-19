@@ -17,7 +17,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
   const [name, setName] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | null>(null);
+  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | 'refund' | 'youth' | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -202,6 +202,18 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                 className="text-[10px] text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-widest underline decoration-zinc-800"
               >
                 Terms of Service
+              </button>
+              <button
+                onClick={() => setShowLegal('refund')}
+                className="text-[10px] text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-widest underline decoration-zinc-800"
+              >
+                Refund Policy
+              </button>
+              <button
+                onClick={() => setShowLegal('youth')}
+                className="text-[10px] text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-widest underline decoration-zinc-800"
+              >
+                Youth Protection
               </button>
             </div>
 
