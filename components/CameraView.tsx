@@ -224,7 +224,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             </div>
             <div className="flex gap-4 md:gap-8 overflow-x-auto px-4 md:px-12 pb-8 custom-scrollbar scroll-smooth">
                 {images.map((src, i) => (
-                    <div key={i} className="min-w-[280px] md:min-w-[400px] aspect-[9/19] bg-zinc-900 rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl transition-transform hover:scale-[1.02] duration-500">
+                    <div key={i} className="min-w-[280px] md:min-w-[400px] aspect-[9/19] bg-zinc-900 rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl transition-transform hover:scale-[1.02] duration-500 shrink-0">
                         <img src={src} alt={`Preview ${i+1}`} className="w-full h-full object-cover" loading="lazy" />
                     </div>
                 ))}
@@ -323,7 +323,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
            </div>
            
            <div className={`border rounded-[1.2rem] md:rounded-[2rem] py-2 px-4 md:py-3 md:px-10 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 ${isPro ? 'bg-orange-500/10 border-orange-500/30' : 'bg-[#0F1014] border-white/10'}`}>
-                <div className={`text-[9px] md:text-sm uppercase font-black tracking-[0.1em] ${isPro ? t('lbl_pro_active') : t('lbl_member_active')}`}>
+                <div className={`text-[9px] md:text-sm uppercase font-black tracking-[0.1em] ${isPro ? 'text-orange-400' : 'text-zinc-500'}`}>
                     {isPro ? t('lbl_pro_active') : t('lbl_member_active')}
                 </div>
                 <div className="w-px h-4 md:h-8 bg-white/10"></div>
@@ -333,7 +333,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         
         <div className="w-full max-w-6xl mx-auto flex flex-col gap-6 md:gap-12">
            <BetaBanner />
-           <DropZone size="large" />
+           <div id="magic-drop-zone-auth" className="w-full relative">
+              <DropZone size="large" />
+           </div>
            <p className="text-zinc-600 text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-center opacity-60">{language === 'ko' ? '지원 형식: JPG, PNG, PDF' : 'Supported formats: JPG, PNG, PDF'}</p>
         </div>
       </div>

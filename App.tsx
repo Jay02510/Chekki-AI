@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -31,13 +30,15 @@ interface EBState {
 
 /**
  * Fixed ErrorBoundary inheritance and property access for TypeScript
- * by explicitly extending Component<EBProps, EBState> to ensure
- * this.state and this.props are recognized.
+ * by explicitly extending React.Component<EBProps, EBState> and declaring state
+ * to ensure this.state and this.props are recognized.
  */
-class ErrorBoundary extends Component<EBProps, EBState> {
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  // Explicitly declare state property for TypeScript compatibility
+  public state: EBState = { hasError: false };
+
   constructor(props: EBProps) {
     super(props);
-    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError(): EBState { 
@@ -45,6 +46,7 @@ class ErrorBoundary extends Component<EBProps, EBState> {
   }
 
   render() {
+    // Accessing state which is now recognized
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -54,6 +56,7 @@ class ErrorBoundary extends Component<EBProps, EBState> {
         </div>
       );
     }
+    // Accessing props which is now recognized
     return this.props.children;
   }
 }
@@ -316,7 +319,7 @@ function AppContent() {
                 <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                     <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">{language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "제목 없음") : (analysisState.data.worksheet_summary?.title_en || "Untitled")}</h2>
-                    {user?.plan === 'pro' && <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest">PRO</span>}
+                    {user?.plan === 'pro' && <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[8px] md:text-9px] font-black px-2 py-0.5 rounded-full tracking-widest">PRO</span>}
                 </div>
                 
                 <div className="flex items-center gap-2 shrink-0">

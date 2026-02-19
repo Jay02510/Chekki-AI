@@ -1,4 +1,3 @@
-
 import React, { Component, useState, useEffect, useRef } from 'react';
 import { Header } from './Header';
 import { CameraView } from './CameraView';
@@ -31,13 +30,15 @@ interface EBState {
 
 /**
  * Fixed ErrorBoundary inheritance and property access for TypeScript
- * by explicitly extending Component<EBProps, EBState> to ensure
- * this.state and this.props are recognized.
+ * by explicitly extending React.Component<EBProps, EBState> and declaring state
+ * to ensure this.state and this.props are recognized.
  */
-class ErrorBoundary extends Component<EBProps, EBState> {
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  // Explicitly declare state property for TypeScript compatibility
+  public state: EBState = { hasError: false };
+
   constructor(props: EBProps) {
     super(props);
-    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError(): EBState { 
@@ -45,6 +46,7 @@ class ErrorBoundary extends Component<EBProps, EBState> {
   }
 
   render() {
+    // Accessing state which is now recognized
     if (this.state.hasError) {
       return (
         <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -54,6 +56,7 @@ class ErrorBoundary extends Component<EBProps, EBState> {
         </div>
       );
     }
+    // Accessing props which is now recognized
     return this.props.children;
   }
 }
@@ -99,11 +102,6 @@ function AppContent() {
   const [lastImageData, setLastImageData] = useState<string | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{title: string, onConfirm: () => void} | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    const path = window.location.pathname.replace('/', '') as LegalType;
-    if (['terms', 'privacy', 'refund', 'youth'].includes(path)) setShowSplash(false);
-  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setIsNight(isNightModeKST()), 60000);
@@ -277,10 +275,10 @@ function AppContent() {
             </div>
         )}
 
-        <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col ${analysisState.status === 'idle' ? 'pt-20 md:pt-32' : 'pt-2 md:pt-4'}`}>
+        <main className={`flex-1 w-full flex flex-col ${analysisState.status === 'idle' ? 'pt-16 md:pt-24' : 'max-w-7xl mx-auto p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))]'}`}>
             
             {analysisState.status === 'idle' && isInApp && showInAppNotice && (
-                <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2 shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
+                <div className="fixed top-20 md:top-28 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md max-w-lg mx-auto">
                     <div className="flex items-center gap-3">
                         <span className="text-xl">⚠️</span>
                         <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">{language === 'ko' ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요." : "Open in Safari or Chrome for the best experience (Camera/Mic)."}</p>
@@ -298,7 +296,7 @@ function AppContent() {
             {analysisState.status === 'analyzing' && <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />}
 
             {analysisState.status === 'error' && (
-            <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
+            <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24 max-w-7xl mx-auto">
                 <div className="w-32 h-32 md:w-40 md:h-40 bg-red-950/20 rounded-full flex items-center justify-center mb-10 border border-red-500/30 relative">
                 <ChekkiMascot className="w-20 h-20 md:w-28 md:h-28" mood={isNight ? "sleeping" : "thinking"} />
                 </div>
@@ -312,8 +310,8 @@ function AppContent() {
             )}
 
             {analysisState.status === 'complete' && analysisState.data && (
-            <div className="animate-fade-in-up flex flex-col flex-1 pt-12 md:pt-24 pb-4 overflow-hidden">
-                <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
+            <div className="animate-fade-in-up flex flex-col flex-1 pt-12 md:pt-24 pb-4 overflow-hidden max-w-7xl mx-auto w-full">
+                <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0 px-2">
                 <div className="flex items-center gap-3 min-w-0">
                     <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">{language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "제목 없음") : (analysisState.data.worksheet_summary?.title_en || "Untitled")}</h2>
                     {user?.plan === 'pro' && <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest">PRO</span>}
