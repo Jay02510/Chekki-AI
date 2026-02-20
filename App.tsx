@@ -336,8 +336,8 @@ function AppContent() {
 
           {analysisState.status === 'error' && (
             <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
-              <div className="w-32 h-32 md:w-40 md:h-40 bg-red-950/20 rounded-full flex items-center justify-center mb-10 border border-red-500/30 relative">
-                <ChekkiMascot className="w-20 h-20 md:w-28 md:h-28" mood={isNight ? "sleeping" : "thinking"} />
+              <div className="w-32 h-32 md:w-40 md:h-40 bg-red-950/20 rounded-full flex items-center justify-center mb-10 border border-red-500/30 relative overflow-hidden">
+                <img src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png" alt="Chekki" className="w-24 h-24 md:w-32 md:h-32 object-contain" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('error_title')}</h3>
               <p className="text-zinc-400 mb-8 max-w-md mx-auto font-korean leading-relaxed">

@@ -108,7 +108,7 @@ export default async function handler(req: any, res: any) {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.0-flash",
         contents: [{
           role: 'user', parts: [{
             text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. 
@@ -129,8 +129,8 @@ export default async function handler(req: any, res: any) {
 
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
-    // MODEL ROUTING - Corrected to stable 1.5 names
-    const modelToUse = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+    // MODEL ROUTING - Use current stable model names
+    const modelToUse = userPlan === 'pro' ? 'gemini-2.5-pro' : 'gemini-2.0-flash';
 
     const response = await ai.models.generateContent({
       model: modelToUse,
@@ -145,6 +145,7 @@ export default async function handler(req: any, res: any) {
         systemInstruction: SYSTEM_PROMPT,
         responseMimeType: "application/json",
         responseSchema: CONSOLIDATED_SCHEMA as any,
+        thinkingConfig: userPlan === 'pro' ? { thinkingBudget: 8000 } : undefined,
         safetySettings: [
           { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
           { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
