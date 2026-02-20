@@ -164,7 +164,7 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (error: any) {
-    console.error("[Backend Security Error]:", error.message);
-    return res.status(500).json({ error: "ANALYSIS_FAILED" });
+    console.error("[Backend Security Error]:", error);
+    return res.status(500).json({ error: "ANALYSIS_FAILED", details: error.message || String(error), stack: error.stack });
   }
 }
