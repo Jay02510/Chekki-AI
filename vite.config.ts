@@ -28,21 +28,29 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
           }
 
           // Mock Vercel response object properties needed by the handler
-          const json = (data: any) => {
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify(data));
-          };
-
-          const status = (code: number) => {
-            res.statusCode = code;
-            return { json };
-          };
 
           const vercelRes = {
-            status,
+            setHeader: (key: string, value: string) => {
+              res.setHeader(key, value);
+            },
+            status: (code: number) => {
+              res.statusCode = code;
+              return {
+                json: (data: any) => {
+                  res.setHeader('Content-Type', 'application/json');
+                  res.end(JSON.stringify(data));
+                },
+                end: () => {
+                  res.end();
+                }
+              };
+            },
             json: (data: any) => {
               res.setHeader('Content-Type', 'application/json');
               res.end(JSON.stringify(data));
+            },
+            end: () => {
+              res.end();
             }
           };
 
