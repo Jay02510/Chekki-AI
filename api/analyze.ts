@@ -108,7 +108,7 @@ export default async function handler(req: any, res: any) {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         contents: [{
           role: 'user', parts: [{
             text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. 
@@ -129,35 +129,77 @@ export default async function handler(req: any, res: any) {
 
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
-    // MODEL ROUTING - Use current stable model names
-    const modelToUse = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
-    console.log(`[Backend] Using model: ${modelToUse} for plan: ${userPlan}`);
+    // MODEL ROUTING - Use experimental 2.5 models as primary
+    const modelToUse = userPlan === 'pro' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
+    console.log(`[Backend] Using primary model: ${modelToUse} for plan: ${userPlan}`);
 
-    const response = await ai.models.generateContent({
-      model: modelToUse,
-      contents: [{
-        role: 'user',
-        parts: [
-          { inlineData: { mimeType: "image/jpeg", data: image } },
-          { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
-        ]
-      }],
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        responseMimeType: "application/json",
-        responseSchema: CONSOLIDATED_SCHEMA as any,
-        thinkingConfig: userPlan === 'pro' ? { thinkingBudget: 8000 } : undefined,
-        safetySettings: [
-          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE }
-        ]
+    let response;
+    let resultText = "";
+
+    try {
+      response = await ai.models.generateContent({
+        model: modelToUse,
+        contents: [{
+          role: 'user',
+          parts: [
+            { inlineData: { mimeType: "image/jpeg", data: image } },
+            { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
+          ]
+        }],
+        config: {
+          systemInstruction: SYSTEM_PROMPT,
+          responseMimeType: "application/json",
+          responseSchema: CONSOLIDATED_SCHEMA as any,
+          thinkingConfig: userPlan === 'pro' ? { thinkingBudget: 8000 } : undefined,
+          safetySettings: [
+            { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+            { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+            { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+            { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE }
+          ]
+        }
+      });
+      resultText = response.text || "{}";
+    } catch (primaryError: any) {
+      console.error(`[Backend] Primary model (${modelToUse}) failed:`, primaryError.message);
+
+      // Fallback logic for PRO users
+      if (userPlan === 'pro') {
+        console.log(`[Backend] Attempting fallback to stable gemini-1.5-flash...`);
+        try {
+          response = await ai.models.generateContent({
+            model: "gemini-1.5-flash",
+            contents: [{
+              role: 'user',
+              parts: [
+                { inlineData: { mimeType: "image/jpeg", data: image } },
+                { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
+              ]
+            }],
+            config: {
+              systemInstruction: SYSTEM_PROMPT,
+              responseMimeType: "application/json",
+              responseSchema: CONSOLIDATED_SCHEMA as any,
+              safetySettings: [
+                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE }
+              ]
+            }
+          });
+          resultText = response.text || "{}";
+          console.log(`[Backend] Fallback successful.`);
+        } catch (fallbackError: any) {
+          console.error("[Backend] Fallback also failed:", fallbackError.message);
+          throw fallbackError;
+        }
+      } else {
+        throw primaryError;
       }
-    });
+    }
 
-    const resultText = response.text;
-    const result = JSON.parse(resultText || "{}");
+    const result = JSON.parse(resultText);
 
     return res.status(200).json({
       worksheet_summary: result.worksheet_summary,
