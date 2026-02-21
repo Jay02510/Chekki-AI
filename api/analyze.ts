@@ -133,73 +133,31 @@ export default async function handler(req: any, res: any) {
     const modelToUse = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
     console.log(`[Backend] Using model: ${modelToUse} for plan: ${userPlan}`);
 
-    let response;
-    let resultText = "";
-
-    try {
-      response = await ai.models.generateContent({
-        model: modelToUse,
-        contents: [{
-          role: 'user',
-          parts: [
-            { inlineData: { mimeType: "image/jpeg", data: image } },
-            { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
-          ]
-        }],
-        config: {
-          systemInstruction: SYSTEM_PROMPT,
-          responseMimeType: "application/json",
-          responseSchema: CONSOLIDATED_SCHEMA as any,
-          thinkingConfig: userPlan === 'pro' ? { thinkingBudget: 8000 } : undefined,
-          safetySettings: [
-            { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-            { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-            { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-            { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE }
-          ]
-        }
-      });
-      resultText = response.text || "{}";
-    } catch (primaryError: any) {
-      console.error(`[Backend] Primary model (${modelToUse}) failed:`, primaryError.message);
-
-      // Fallback logic for PRO users
-      if (userPlan === 'pro') {
-        console.log(`[Backend] Attempting fallback to gemini-1.5-flash...`);
-        try {
-          response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: [{
-              role: 'user',
-              parts: [
-                { inlineData: { mimeType: "image/jpeg", data: image } },
-                { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
-              ]
-            }],
-            config: {
-              systemInstruction: SYSTEM_PROMPT,
-              responseMimeType: "application/json",
-              responseSchema: CONSOLIDATED_SCHEMA as any,
-              safetySettings: [
-                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE }
-              ]
-            }
-          });
-          resultText = response.text || "{}";
-          console.log(`[Backend] Fallback successful.`);
-        } catch (fallbackError: any) {
-          console.error("[Backend] Fallback also failed:", fallbackError.message);
-          throw fallbackError; // Throw the fallback error to be caught by the outer catch
-        }
-      } else {
-        throw primaryError; // If not PRO, just throw the original error
+    const response = await ai.models.generateContent({
+      model: modelToUse,
+      contents: [{
+        role: 'user',
+        parts: [
+          { inlineData: { mimeType: "image/jpeg", data: image } },
+          { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
+        ]
+      }],
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        responseMimeType: "application/json",
+        responseSchema: CONSOLIDATED_SCHEMA as any,
+        thinkingConfig: userPlan === 'pro' ? { thinkingBudget: 8000 } : undefined,
+        safetySettings: [
+          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE }
+        ]
       }
-    }
+    });
 
-    const result = JSON.parse(resultText);
+    const resultText = response.text;
+    const result = JSON.parse(resultText || "{}");
 
     return res.status(200).json({
       worksheet_summary: result.worksheet_summary,
