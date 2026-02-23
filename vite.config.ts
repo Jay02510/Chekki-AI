@@ -1,7 +1,6 @@
-
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-import analyzeHandler from './api/analyze';
+// import analyzeHandler from './api/analyze'; // Removed to avoid build issues
 
 // Custom middleware to handle Vercel-like API routes in Vite
 const apiMiddleware = ({ mode }: { mode: string }) => {
@@ -54,6 +53,8 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
             }
           };
 
+          // Dynamic import to avoid loading this during build
+          const { default: analyzeHandler } = await import('./api/analyze');
           await analyzeHandler(req, vercelRes);
           return;
         }
