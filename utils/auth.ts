@@ -14,15 +14,23 @@ if (!apps.length) {
 
 export async function verifyAuth(req: any) {
     const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
-        throw new Error('UNAUTHORIZED');
+    if (!authHeader?.startsWith('Bearer ') || authHeader.endsWith(' undefined') || authHeader.endsWith(' null')) {
+        return null; // Guest or unauthenticated
     }
 
     const idToken = authHeader.split('Bearer ')[1];
+
+    // Check if Firebase is configured
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_PRIVATE_KEY) {
+        console.warn("Firebase Admin not configured, skipping token verification");
+        return null;
+    }
+
     try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         return decodedToken;
     } catch (error) {
+        console.error("Token verification failed:", error);
         throw new Error('INVALID_TOKEN');
     }
 }

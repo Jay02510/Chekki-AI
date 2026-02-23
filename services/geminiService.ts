@@ -35,7 +35,14 @@ export const analyzeWorksheet = async (
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const text = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(text);
+      } catch (e) {
+        // Not JSON, return raw first 100 chars
+        errorData = { error: `HTTP_${response.status}: ${text.substring(0, 100)}` };
+      }
       throw new Error(errorData.error || "BACKEND_FAILED");
     }
     return await response.json();

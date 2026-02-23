@@ -92,10 +92,15 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
 
   try {
-    await verifyAuth(req);
-
+    const authUser = await verifyAuth(req);
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { task, image, originalItems, userPlan } = body;
+
+    // If guest, force free plan regardless of what the body says
+    const effectivePlan = authUser ? (body.userPlan || 'free') : 'free';
+    const { task, image, originalItems } = body;
+    const userPlan = effectivePlan;
+
+    console.log(`[Analysis] Task: ${task}, Plan: ${userPlan}, Auth: ${authUser ? 'User' : 'Guest'}`);
 
     if (image && image.length > 10 * 1024 * 1024) {
       return res.status(413).json({ error: "PAYLOAD_TOO_LARGE" });
