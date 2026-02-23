@@ -1,42 +1,54 @@
 
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, SchemaType } from "@google/generative-ai";
-import { verifyAuth } from "../utils/auth";
 
 export const config = {
   maxDuration: 60,
 };
 
 export default async function handler(req: any, res: any) {
-  // 1. Immediate CORS & Method Check
+  // 1. Immediate CORS
   const allowedOrigins = ['capacitor://localhost', 'http://localhost', 'https://chekki-ai.vercel.app'];
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
 
-  // Persistent diagnostic vars
-  let body: any = {};
-  let authError = "";
-  let authUser = null;
-  let taskName = "unknown";
-
   try {
-    // 2. Define Scope Constants
-    const SYSTEM_PROMPT = `You are "Chekki AI", a high-fidelity educational assistant. Analyze worksheets and provide educational support. Output MUST be valid JSON according to schema. Extract question text, pedagogical answer (Full Text + Letter), and teaching scripts. bounding_box uses normalized coordinates 0-1000.`;
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const { task, image, originalItems } = body;
+
+    // 2. ULTRA-ISOLATION: No external auth utils during this test
+    // We are mocking auth status entirely to confirm if firebase-admin is the crasher
+    const userPlan = (body.userPlan || 'free') as string;
+
+    if (task === 'ping') return res.status(200).json({ status: "ok", time: new Date().toISOString() });
+
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: "API_KEY_MISSING" });
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    if (task === 'generate') {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1beta" });
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: `Generate 3 similar questions: ${JSON.stringify(originalItems).substring(0, 1000)}` }] }],
+        generationConfig: { responseMimeType: "application/json" }
+      });
+      return res.status(200).json(JSON.parse(result.response.text()));
+    }
+
+    if (!image) return res.status(400).json({ error: "NO_IMAGE" });
+
+    const SYSTEM_PROMPT = `Analyze worksheet. Valid JSON according to schema. Coordinates 0-1000. Extract text, answers, and scripts.`;
 
     const CONSOLIDATED_SCHEMA = {
       type: SchemaType.OBJECT,
       properties: {
         worksheet_summary: {
           type: SchemaType.OBJECT,
-          properties: {
-            title_en: { type: SchemaType.STRING },
-            title_ko: { type: SchemaType.STRING },
-            overview_ko: { type: SchemaType.STRING }
-          },
+          properties: { title_en: { type: SchemaType.STRING }, title_ko: { type: SchemaType.STRING }, overview_ko: { type: SchemaType.STRING } },
           required: ["title_en", "title_ko", "overview_ko"]
         },
         items: {
@@ -54,12 +66,7 @@ export default async function handler(req: any, res: any) {
               teaching_script_en: { type: SchemaType.STRING },
               bounding_box: {
                 type: SchemaType.OBJECT,
-                properties: {
-                  ymin: { type: SchemaType.NUMBER },
-                  xmin: { type: SchemaType.NUMBER },
-                  ymax: { type: SchemaType.NUMBER },
-                  xmax: { type: SchemaType.NUMBER }
-                },
+                properties: { ymin: { type: SchemaType.NUMBER }, xmin: { type: SchemaType.NUMBER }, ymax: { type: SchemaType.NUMBER }, xmax: { type: SchemaType.NUMBER } },
                 required: ["ymin", "xmin", "ymax", "xmax"]
               }
             },
@@ -70,90 +77,20 @@ export default async function handler(req: any, res: any) {
       required: ["worksheet_summary", "items"]
     };
 
-    // 3. Request Parsing
-    try {
-      body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    } catch (e) { }
+    const model = genAI.getGenerativeModel(
+      { model: userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash', systemInstruction: SYSTEM_PROMPT },
+      { apiVersion: "v1beta" }
+    );
 
-    const { task, image, originalItems } = body;
-    taskName = task || "scan";
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ inlineData: { mimeType: "image/jpeg", data: image } }, { text: "Scan." }] }],
+      generationConfig: { responseMimeType: "application/json", responseSchema: CONSOLIDATED_SCHEMA as any, temperature: 0.1 }
+    });
 
-    // 4. Auth Layer
-    try {
-      authUser = await verifyAuth(req);
-    } catch (e: any) {
-      if (!e.message.includes("No Firebase Project ID")) {
-        authError = e.message;
-      }
-    }
-
-    const userPlanRaw = body.userPlan || 'free';
-    const userPlan: string = typeof userPlanRaw === 'string' ? userPlanRaw : 'free';
-
-    if (task === 'ping') return res.status(200).json({ status: "ok", sdk: "generative-ai", time: new Date().toISOString(), auth: !!authUser });
-
-    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: "SERVER_CONFIGURATION_ERROR" });
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    if (task === 'generate') {
-      if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1beta" });
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: `Generate 3 similar questions: ${JSON.stringify(originalItems).substring(0, 1000)}` }] }],
-        generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
-      });
-      return res.status(200).json(JSON.parse(result.response.text() || "[]"));
-    }
-
-    if (!image) return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
-
-    // 5. Execution with Fallback
-    const runScan = async (modelName: string) => {
-      const model = genAI.getGenerativeModel(
-        { model: modelName, systemInstruction: SYSTEM_PROMPT },
-        { apiVersion: "v1beta" }
-      );
-      const result = await model.generateContent({
-        contents: [{
-          role: 'user',
-          parts: [
-            { inlineData: { mimeType: "image/jpeg", data: image } },
-            { text: "Analyze worksheet." }
-          ]
-        }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: CONSOLIDATED_SCHEMA as any,
-          temperature: 0.1,
-        },
-        safetySettings: [
-          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE }
-        ]
-      });
-      return result.response.text();
-    };
-
-    let resultText = "";
-    try {
-      resultText = await runScan(userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash');
-    } catch (e: any) {
-      console.warn("[Retry] Primary Model Failed:", e.message);
-      resultText = await runScan('gemini-1.5-flash');
-    }
-
-    return res.status(200).json(JSON.parse(resultText));
+    return res.status(200).json(JSON.parse(result.response.text()));
 
   } catch (error: any) {
-    console.error("[Critical] Handler Crash:", error.message);
-    return res.status(500).json({
-      error: "INTERNAL_SERVER_ERROR",
-      message: error.message,
-      detail: `Task:${taskName}, Plan:${body.userPlan || "free"}, AuthErr:${authError || "none"}`
-    });
+    console.error("Critical Failure:", error.message);
+    return res.status(500).json({ error: "INTERNAL_ERROR", detail: error.message });
   }
 }
