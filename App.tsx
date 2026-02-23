@@ -386,6 +386,54 @@ function AppContent() {
           )}
         </main>
 
+        {/* --- PROFESSIONAL BUSINESS FOOTER --- */}
+        <footer className="w-full bg-zinc-950/50 border-t border-white/5 py-12 px-6">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center">
+                  <ChekkiMascot className="w-5 h-5 text-white" mood="happy" />
+                </div>
+                <h2 className="text-xl font-black text-white font-display">Chekki<span className="text-orange-500">AI</span></h2>
+              </div>
+              <p className="text-zinc-500 text-xs font-medium leading-relaxed max-w-sm">
+                {language === 'ko'
+                  ? "채키 AI는 부모님과 아이들의 즐거운 학습 경험을 위해 최선을 다합니다. 혁신적인 AI 기술로 숙제와 공부가 더 즐거워지는 세상을 만듭니다."
+                  : "Chekki AI is dedicated to creating joyful learning experiences for parents and children through innovative AI technology."}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{language === 'ko' ? '사업자 정보' : 'Business Info'}</h4>
+                <div className="space-y-2 text-[10px] md:text-xs text-zinc-500 font-medium">
+                  <p><span className="text-zinc-400">{language === 'ko' ? '상호명:' : 'Business Name:'}</span> 채키 AI (Chekki AI)</p>
+                  <p><span className="text-zinc-400">{language === 'ko' ? '대표자명:' : 'Representative:'}</span> BENJAMIN JASON</p>
+                  <p><span className="text-zinc-400">{language === 'ko' ? '사업자등록번호:' : 'Business Registration Number:'}</span> 814-14-03096</p>
+                  <p><span className="text-zinc-400">{language === 'ko' ? '통신판매신고:' : 'E-commerce Permit:'}</span> (Pending/심사중)</p>
+                  <p className="pt-2 text-[10px] italic text-zinc-600 font-korean">{language === 'ko' ? '간이과세자' : 'Simplified Taxpayer'}</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{language === 'ko' ? '고객 센터' : 'Contact Us'}</h4>
+                <div className="space-y-2 text-[10px] md:text-xs text-zinc-500 font-medium font-korean">
+                  <p><span className="text-zinc-400">{language === 'ko' ? '주소:' : 'Address:'}</span> 서울특별시 종로구 종로 347, 1413호(숭인동)</p>
+                  <p><span className="text-zinc-400">{language === 'ko' ? '연락처:' : 'Phone:'}</span> 010-5371-9266</p>
+                  <p><span className="text-zinc-400">{language === 'ko' ? '이메일:' : 'Email:'}</span> jsn.benjamin@gmail.com</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">© 2026 CHEKKI AI. ALL RIGHTS RESERVED.</p>
+            <div className="flex gap-6">
+              <button onClick={() => setStandaloneLegal('privacy')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Privacy</button>
+              <button onClick={() => setStandaloneLegal('terms')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Terms</button>
+              <button onClick={() => setStandaloneLegal('refund')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Refund</button>
+            </div>
+          </div>
+        </footer>
+
         <style>{`
             @keyframes confetti {
             0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }

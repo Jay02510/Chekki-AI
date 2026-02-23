@@ -58,16 +58,18 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p><strong>본 서비스는 전자상거래 등에서의 소비자보호에 관한 법률을 준수합니다.</strong></p>
                                         <p>본 약관은 Chekki (채키) (이하 “서비스”)가 제공하는 온라인 학습 보조 서비스의 이용 조건 및 절차, 이용자와 운영자 간의 권리와 의무를 규정함을 목적으로 합니다.</p>
                                         <p>
-                                            <strong>제1조 (서비스 목적)</strong><br />
-                                            Chekki (채키)는 부모가 가정에서 자녀의 영어 학습을 보다 원활하게 지도할 수 있도록 돕는 학습 보조 도구입니다.
+                                            <strong>제1조 (서비스 목적 및 내용)</strong><br />
+                                            Chekki (채키)는 부모가 가정에서 자녀의 영어 학습을 보다 원활하게 지도할 수 있도록 돕는 학습 보조 도구입니다. 제공되는 서비스는 AI를 활용한 학습지 분석 및 오답 노트 관리 기능을 포함합니다.
                                         </p>
                                         <p>
-                                            <strong>제2조 (유료 서비스 및 자동 결제)</strong><br />
-                                            유료 서비스는 월 구독 형태로 제공되며, 매월 정기적으로 자동 결제가 진행됩니다. 구독 해지는 마이페이지 또는 설정에서 언제든지 가능하며, 해지 시 다음 결제일부터 과금되지 않습니다.
+                                            <strong>제2조 (유료 서비스 및 이용 기간)</strong><br />
+                                            1. 유료 서비스(Standard Pro)는 월 구독 형태로 제공되며, 1회 결제 시 이용 기간은 결제일로부터 30일입니다.<br />
+                                            2. 구독 서비스는 이용자가 해지하기 전까지 매월 정기적으로 자동 결제가 진행됩니다.
                                         </p>
                                         <p>
-                                            <strong>제3조 (이용자의 의무)</strong><br />
-                                            이용자는 본인의 계정 정보를 안전하게 관리해야 하며, 타인에게 양도하거나 대여할 수 없습니다.
+                                            <strong>제3조 (청약철회 및 서비스 해지)</strong><br />
+                                            1. 이용자는 결제 후 7일 이내에 서비스를 이용하지 않은 경우 청약철회(환불)를 요청할 수 있습니다.<br />
+                                            2. 서비스 해지(자동 결제 중단)는 설정 메뉴 내 '구독 관리'를 통해 언제든지 가능하며, 해지 시 다음 결제 예정일부터 과금이 중단됩니다.
                                         </p>
                                     </div>
                                 </div>
@@ -77,16 +79,18 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p><strong>This service complies with the Korean Act on Consumer Protection in Electronic Commerce.</strong></p>
                                         <p>These terms govern your use of the Chekki ("Service") online learning assistance tool. By using the Service, you agree to these terms.</p>
                                         <p>
-                                            <strong>1. Service Purpose</strong><br />
-                                            Chekki is a tool designed to help parents guide their children's English learning at home.
+                                            <strong>1. Service Purpose & Content</strong><br />
+                                            Chekki is a tool designed to help parents guide their children's English learning at home, including AI-powered worksheet analysis and review notes.
                                         </p>
                                         <p>
-                                            <strong>2. Subscriptions & Billing</strong><br />
-                                            Paid services are provided as monthly subscriptions with automatic recurring billing. Subscriptions can be cancelled at any time through the app settings. Cancellation prevents future billing.
+                                            <strong>2. Subscriptions & Service Period</strong><br />
+                                            1. Paid services (Standard Pro) are provided as monthly subscriptions. Each billing cycle covers a period of 30 days.<br />
+                                            2. Subscriptions renew automatically every 30 days unless cancelled by the user.
                                         </p>
                                         <p>
-                                            <strong>3. User Obligations</strong><br />
-                                            Users are responsible for maintaining the confidentiality of their account credentials and may not share or transfer their account to others.
+                                            <strong>3. Cancellation & Refunds</strong><br />
+                                            1. Users may request a full refund within 7 days of purchase if the service has not been used.<br />
+                                            2. Subscription cancellation can be performed at any time through the "Settings" menu. Cancellation prevents future recurring charges.
                                         </p>
                                     </div>
                                 </div>
@@ -139,6 +143,44 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                             User data is retained until account deletion. You may delete your account and all associated data at any time through the app settings.</p>
 
                                         <p>Data Protection Officer: Jason Benjamin (jsn.benjamin@gmail.com)</p>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    )}
+                    {type === 'refund' && (
+                        <div className="space-y-8">
+                            <section className="space-y-4">
+                                <div className="bg-white/5 p-5 rounded-xl border border-white/10">
+                                    <h3 className="text-white font-black text-sm mb-4 border-b border-white/10 pb-2">[KR] 환불 및 교환 정책</h3>
+                                    <div className="text-zinc-300 text-[10px] leading-relaxed space-y-4">
+                                        <p><strong>1. 환불 규정 (청약철회)</strong><br />
+                                            - 결제 후 7일 이내에 서비스를 전혀 이용하지 않은 경우 전액 환불이 가능합니다.<br />
+                                            - 서비스 이용 내역(학습지 분석 등)이 있는 경우, 디지털 콘텐츠 특성상 중도 환불이 제한될 수 있습니다.</p>
+
+                                        <p><strong>2. 교환 및 재제공 정책</strong><br />
+                                            - 시스템 오류나 기술적 결함으로 인해 유료 서비스를 정상적으로 이용하지 못한 경우, 동일한 가치의 서비스를 재제공하거나 이용 기간을 연장해 드립니다.</p>
+
+                                        <p><strong>3. 구독 해지</strong><br />
+                                            - 정기 결제 해지는 언제든지 가능하며, 해지 후에도 이미 결제된 남은 이용 기간(30일 중 잔여일) 동안은 서비스를 계속 이용하실 수 있습니다.</p>
+
+                                        <p>환불 문의: jsn.benjamin@gmail.com</p>
+                                    </div>
+                                </div>
+                                <div className="bg-white/5 p-5 rounded-xl border border-white/10">
+                                    <h3 className="text-white font-black text-sm mb-4 border-b border-white/10 pb-2">[EN] Refund & Exchange Policy</h3>
+                                    <div className="text-zinc-300 text-[10px] leading-relaxed space-y-4">
+                                        <p><strong>1. Refund Policy</strong><br />
+                                            - A full refund is available within 7 days of purchase if no services have been accessed.<br />
+                                            - Refunds may be restricted for used digital content once analysis or pro features have been accessed.</p>
+
+                                        <p><strong>2. Exchange & Service Guarantee</strong><br />
+                                            - If technical defects prevent normal service use, we will compensate by extending the service period or granting equivalent access levels.</p>
+
+                                        <p><strong>3. Cancellation</strong><br />
+                                            - You can cancel recurring billing at any time. You will retain access to pro features for the remainder of your current 30-day billing cycle.</p>
+
+                                        <p>Inquiries: jsn.benjamin@gmail.com</p>
                                     </div>
                                 </div>
                             </section>
