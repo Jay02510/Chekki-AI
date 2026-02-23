@@ -92,13 +92,18 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
 
   try {
+    let body = {};
+    try {
+      body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    } catch (e) {
+      console.error("Body parsing failed:", e);
+    }
+
+    const { task, image, originalItems } = body as any;
     const authUser = await verifyAuth(req);
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
     // If guest, force free plan regardless of what the body says
-    const effectivePlan = authUser ? (body.userPlan || 'free') : 'free';
-    const { task, image, originalItems } = body;
-    const userPlan = effectivePlan;
+    const userPlan = authUser ? ((body as any).userPlan || 'free') : 'free';
 
     console.log(`[Analysis] Task: ${task}, Plan: ${userPlan}, Auth: ${authUser ? 'User' : 'Guest'}`);
 
