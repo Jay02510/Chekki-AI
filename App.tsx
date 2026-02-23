@@ -216,9 +216,15 @@ function AppContent() {
 
     } catch (e: any) {
       if (e.name === 'AbortError') return;
+
+      // Use specific error message if available, otherwise generic
+      const errorMsg = e.message && e.message !== 'ANALYSIS_FAILED'
+        ? e.message
+        : t('err_network');
+
       setAnalysisState({
         status: 'error',
-        errorMessage: t('err_network'),
+        errorMessage: errorMsg,
         data: null,
         originalImage: displayUrl,
         isSummaryLoaded: false,

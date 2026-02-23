@@ -101,9 +101,10 @@ export default async function handler(req: any, res: any) {
       return res.status(413).json({ error: "PAYLOAD_TOO_LARGE" });
     }
 
-    if (!process.env.API_KEY) return res.status(500).json({ error: "SERVER_CONFIGURATION_ERROR" });
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: "SERVER_CONFIGURATION_ERROR" });
 
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey });
 
     if (task === 'generate') {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
@@ -156,28 +157,28 @@ export default async function handler(req: any, res: any) {
       });
       resultText = response.text || "{}";
     } catch (primaryError: any) {
-      if (userPlan === 'pro') {
-        try {
-          response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: [{
-              role: 'user',
-              parts: [
-                { inlineData: { mimeType: "image/jpeg", data: image } },
-                { text: "Analyze this worksheet." }
-              ]
-            }],
-            config: {
-              systemInstruction: SYSTEM_PROMPT,
-              responseMimeType: "application/json",
-              responseSchema: CONSOLIDATED_SCHEMA as any
-            }
-          });
-          resultText = response.text || "{}";
-        } catch (fallbackError: any) {
-          throw new Error("MODEL_ERROR");
-        }
-      } else {
+      console.error("Primary model failed:", primaryError);
+      // Fallback logic for both Pro and Free
+      const fallbackModel = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+      try {
+        response = await ai.models.generateContent({
+          model: fallbackModel,
+          contents: [{
+            role: 'user',
+            parts: [
+              { inlineData: { mimeType: "image/jpeg", data: image } },
+              { text: "Analyze this worksheet." }
+            ]
+          }],
+          config: {
+            systemInstruction: SYSTEM_PROMPT,
+            responseMimeType: "application/json",
+            responseSchema: CONSOLIDATED_SCHEMA as any
+          }
+        });
+        resultText = response.text || "{}";
+      } catch (fallbackError: any) {
+        console.error("Fallback model failed:", fallbackError);
         throw new Error("MODEL_ERROR");
       }
     }
@@ -189,9 +190,10 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (error: any) {
+    console.error("Analysis handler error:", error);
     if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
       return res.status(401).json({ error: error.message });
     }
-    return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
+    return res.status(500).json({ error: error.message || "INTERNAL_SERVER_ERROR" });
   }
 }

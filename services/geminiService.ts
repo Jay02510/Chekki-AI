@@ -35,12 +35,13 @@ export const analyzeWorksheet = async (
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new Error("BACKEND_FAILED");
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "BACKEND_FAILED");
     }
     return await response.json();
   } catch (error: any) {
     if (error.name === 'AbortError') throw error;
-    throw new Error("ANALYSIS_FAILED");
+    throw error;
   }
 };
 
