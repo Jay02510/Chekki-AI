@@ -2,14 +2,18 @@ import * as admin from 'firebase-admin';
 
 const apps = admin.apps || [];
 
-if (!apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-    });
+if (!apps.length && process.env.FIREBASE_PROJECT_ID) {
+    try {
+        admin.initializeApp({
+            credential: admin.credential.cert({
+                projectId: process.env.FIREBASE_PROJECT_ID,
+                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            }),
+        });
+    } catch (e) {
+        console.error("Firebase Admin initialization failed:", e);
+    }
 }
 
 export async function verifyAuth(req: any) {

@@ -114,8 +114,8 @@ export default async function handler(req: any, res: any) {
     if (task === 'generate') {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+      const genResponse = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
         contents: [{
           role: 'user', parts: [{
             text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. Task: Generate 3 brand new similar questions.`
@@ -125,7 +125,7 @@ export default async function handler(req: any, res: any) {
       });
 
       try {
-        return res.status(200).json(JSON.parse(response.text || "[]"));
+        return res.status(200).json(JSON.parse(genResponse.text || "[]"));
       } catch (e) {
         return res.status(500).json({ error: "GENERATION_FAILED" });
       }
@@ -133,12 +133,11 @@ export default async function handler(req: any, res: any) {
 
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
-    const modelToUse = userPlan === 'pro' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
-    let response;
+    const modelToUse = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-2.0-flash';
     let resultText = "";
 
     try {
-      response = await ai.models.generateContent({
+      const response = await ai.models.generateContent({
         model: modelToUse,
         contents: [{
           role: 'user',
@@ -151,7 +150,6 @@ export default async function handler(req: any, res: any) {
           systemInstruction: SYSTEM_PROMPT,
           responseMimeType: "application/json",
           responseSchema: CONSOLIDATED_SCHEMA as any,
-          thinkingConfig: userPlan === 'pro' ? { thinkingBudget: 8000 } : undefined,
           safetySettings: [
             { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
             { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
@@ -166,7 +164,7 @@ export default async function handler(req: any, res: any) {
       // Fallback logic for both Pro and Free
       const fallbackModel = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
       try {
-        response = await ai.models.generateContent({
+        const response = await ai.models.generateContent({
           model: fallbackModel,
           contents: [{
             role: 'user',
