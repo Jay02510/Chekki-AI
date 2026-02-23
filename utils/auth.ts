@@ -5,7 +5,10 @@ async function getFirebaseAdmin() {
     if (!process.env.FIREBASE_PROJECT_ID) return null;
 
     try {
-        const admin = await import('firebase-admin');
+        const adminModule = await import('firebase-admin');
+        // Handle both CJS (default) and ESM patterns
+        const admin = adminModule.default || adminModule;
+
         const apps = admin.apps || [];
         if (!apps.length) {
             admin.initializeApp({
