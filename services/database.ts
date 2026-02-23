@@ -32,14 +32,8 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const isNativePlatform = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.();
 export const auth = (() => {
   try {
-    if (isNativePlatform && getApps().length === 1) {
-      console.log('[Firebase] Using localStorage persistence for native platform');
-      return initializeAuth(app, {
-        persistence: browserLocalPersistence
-      });
-    }
   } catch (e) {
-    console.warn('[Firebase] initializeAuth failed, falling back to getAuth:', e);
+    // Fallback silently in production
   }
   return getAuth(app);
 })();
@@ -53,11 +47,9 @@ try {
   if (!isNative) {
     analyticsInstance = getAnalytics(app);
   } else {
-    console.log('[Firebase] Skipping Analytics on native platform');
+    // Silently skip on native
   }
-} catch (e) {
-  console.warn('[Firebase] Analytics init failed:', e);
-}
+} catch (e) { }
 export const analytics = analyticsInstance;
 
 const getLocalKey = (uid: string) => `chekki_mistakes_${uid}`;
@@ -65,13 +57,10 @@ const getLocalKey = (uid: string) => `chekki_mistakes_${uid}`;
 export const db = {
   async getUser(uid: string): Promise<UserProfile | null> {
     try {
-      console.log('[Database] Fetching user profile for:', uid);
       const docRef = doc(dbInstance, "users", uid);
       const docSnap = await getDoc(docRef);
-      console.log('[Database] User profile found:', docSnap.exists());
       return docSnap.exists() ? (docSnap.data() as UserProfile) : null;
     } catch (e: any) {
-      console.error('[Database] getUser error:', e);
       return null;
     }
   },
@@ -88,11 +77,8 @@ export const db = {
 
   async createUser(uid: string, profile: UserProfile): Promise<void> {
     try {
-      console.log('[Database] Creating user document for:', uid);
       await setDoc(doc(dbInstance, "users", uid), { ...profile, uid });
-      console.log('[Database] User document created successfully');
     } catch (e: any) {
-      console.error('[Database] createUser error:', e.message || e);
       throw e;
     }
   },
@@ -152,9 +138,7 @@ export const db = {
         userId: uid,
         timestamp: new Date().toISOString()
       });
-    } catch (e: any) {
-      console.error("[Chekki DB] sendFeedback failed:", e.message);
-    }
+    } catch (e: any) { }
   },
 
   async redeemBetaCode(code: string, limit: number): Promise<boolean> {
@@ -171,7 +155,6 @@ export const db = {
         return true;
       });
     } catch (e) {
-      console.error("Redemption transaction failed", e);
       return false;
     }
   },
@@ -180,10 +163,7 @@ export const db = {
     try {
       if (analytics) {
         logEvent(analytics, eventName, params);
-        console.log(`[Analytics] Logged event: ${eventName}`, params);
       }
-    } catch (e) {
-      console.warn("[Analytics] Failed to log event:", e);
-    }
+    } catch (e) { }
   }
 };

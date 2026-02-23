@@ -29,21 +29,16 @@ export const LoginModal: React.FC = () => {
 
     try {
       if (viewMode === 'login') {
-        console.log('[Login Debug] Attempting sign in with:', email);
         await signIn(email, password);
-        console.log('[Login Debug] Sign in successful');
       } else if (viewMode === 'signup') {
         if (password.length < 6) throw new Error("Password must be at least 6 characters.");
-        console.log('[Login Debug] Attempting sign up');
         await signUp(name, email, password, schoolCode.trim());
       } else if (viewMode === 'forgot') {
-        console.log('[Login Debug] Sending reset email');
         await sendResetEmail(email);
         setSuccess("Check your inbox for a password reset link!");
         setTimeout(() => setViewMode('login'), 5000);
       }
     } catch (err: any) {
-      console.error('[Login Debug] Error:', err);
       let msg = err.message;
       if (err.code === 'auth/user-not-found') msg = "No account found with this email.";
       if (err.code === 'auth/wrong-password') msg = "Incorrect password.";

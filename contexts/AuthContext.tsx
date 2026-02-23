@@ -27,6 +27,7 @@ interface AuthContextType {
   upgradeToPro: (code?: string) => Promise<boolean>;
   joinSchool: (schoolCode: string) => Promise<boolean>;
   cancelSubscription: () => Promise<void>;
+  requestLimitReset: (reason: string) => Promise<boolean>;
   isAuthenticated: boolean;
   isLoading: boolean;
   showPaywall: boolean;
@@ -50,112 +51,99 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log('[AuthContext] Auth state changed:', user ? 'User logged in' : 'User logged out');
       setFirebaseUser(user);
       if (user) {
-        console.log('[AuthContext] Fetching profile for user...', user.uid);
         const profile = await db.getUser(user.uid);
-        console.log('[AuthContext] Profile fetch result:', profile ? 'Found' : 'Not Found');
         setUserProfile(profile);
+
+        // Session Expiration Check
+        const lastLogin = localStorage.getItem('chekki_last_auth');
+        const now = Date.now();
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+        if (lastLogin && now - parseInt(lastLogin) > TWENTY_FOUR_HOURS) {
+          signOut(auth);
+          localStorage.removeItem('chekki_last_auth');
+        } else if (!lastLogin) {
+          localStorage.setItem('chekki_last_auth', now.toString());
+        }
       } else {
         setUserProfile(null);
+        localStorage.removeItem('chekki_last_auth');
       }
       setIsLoading(false);
-      console.log('[AuthContext] Loading state set to false');
     });
     return unsubscribe;
   }, []);
 
   const signUp = async (name: string, email: string, pass: string, code?: string) => {
-    console.log('[AuthContext] signUp starting for:', email);
+    const res = await createUserWithEmailAndPassword(auth, email, pass);
 
-    // Timeout wrapper to prevent infinite hang
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Sign up timed out. Please check your internet connection and try again.')), 15000);
-    });
+    let plan: 'free' | 'pro' = 'free';
+    let maxScans = FREE_DAILY_LIMIT;
+    let schoolId: string | undefined;
+    let schoolName: string | undefined;
+    let subscriptionStartedAt: string | undefined;
+    let nextBillingDate: string | undefined;
 
-    const signUpFlow = async () => {
-      console.log('[AuthContext] Step 1: Creating Firebase Auth user...');
-      const res = await createUserWithEmailAndPassword(auth, email, pass);
-      console.log('[AuthContext] Step 2: Firebase Auth user created:', res.user.uid);
-
-      let plan: 'free' | 'pro' = 'free';
-      let maxScans = FREE_DAILY_LIMIT;
-      let schoolId: string | undefined;
-      let schoolName: string | undefined;
-      let subscriptionStartedAt: string | undefined;
-      let nextBillingDate: string | undefined;
-
-      if (code) {
-        const sanitized = code.toUpperCase().trim();
-        console.log('[AuthContext] Step 3: Processing code:', sanitized);
-        const schools: Record<string, string> = {
-          'POLY10': 'Poly Academy Seocho',
-          'GATE05': 'GATE Academy Bundang',
-          'ECC99': 'YBM ECC Gangnam'
-        };
-
-        if (schools[sanitized]) {
-          plan = 'pro';
-          maxScans = 9999;
-          schoolId = sanitized;
-          schoolName = schools[sanitized];
-        } else if (sanitized === BETA_CODE_MAIN) {
-          const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
-          if (canRedeem) {
-            plan = 'pro';
-            maxScans = 9999;
-            subscriptionStartedAt = new Date().toISOString();
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            nextBillingDate = nextMonth.toISOString();
-          }
-        }
-      }
-
-      const newProfile: UserProfile = {
-        name,
-        email,
-        plan,
-        scansUsedToday: 0,
-        lastScanDate: new Date().toISOString().split('T')[0],
-        maxScansPerDay: maxScans,
-        schoolId,
-        schoolName,
-        subscriptionStartedAt,
-        nextBillingDate
+    if (code) {
+      const sanitized = code.toUpperCase().trim();
+      const schools: Record<string, string> = {
+        'POLY10': 'Poly Academy Seocho',
+        'GATE05': 'GATE Academy Bundang',
+        'ECC99': 'YBM ECC Gangnam'
       };
 
-      console.log('[AuthContext] Step 4: Creating Firestore user doc...');
-      await db.createUser(res.user.uid, newProfile);
-      console.log('[AuthContext] Step 5: Firestore doc created. Done!');
-      setUserProfile(newProfile);
-      setShowLoginModal(false);
+      if (schools[sanitized]) {
+        plan = 'pro';
+        maxScans = 9999;
+        schoolId = sanitized;
+        schoolName = schools[sanitized];
+      } else if (sanitized === BETA_CODE_MAIN) {
+        const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
+        if (canRedeem) {
+          plan = 'pro';
+          maxScans = 9999;
+          subscriptionStartedAt = new Date().toISOString();
+          const nextMonth = new Date();
+          nextMonth.setMonth(nextMonth.getMonth() + 1);
+          nextBillingDate = nextMonth.toISOString();
+        }
+      }
+    }
+
+    const newProfile: UserProfile = {
+      name,
+      email,
+      plan,
+      scansUsedToday: 0,
+      lastScanDate: new Date().toISOString().split('T')[0],
+      maxScansPerDay: maxScans,
+      schoolId,
+      schoolName,
+      subscriptionStartedAt,
+      nextBillingDate
     };
 
-    await Promise.race([signUpFlow(), timeoutPromise]);
+    await db.createUser(res.user.uid, newProfile);
+    setUserProfile(newProfile);
+    setShowLoginModal(false);
   };
 
   const signIn = async (email: string, pass: string) => {
-    console.log('[AuthContext] Signing in...', email);
-
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Login timed out. Please check your internet connection and try again.')), 15000);
     });
 
     const signInFlow = async () => {
       await signInWithEmailAndPassword(auth, email, pass);
-      console.log('[AuthContext] Sign in success');
+      localStorage.setItem('chekki_last_auth', Date.now().toString());
       setShowLoginModal(false);
     };
 
-    try {
-      await Promise.race([signInFlow(), timeoutPromise]);
-    } catch (error) {
-      console.error('[AuthContext] Sign in error:', error);
-      throw error;
-    }
+    await Promise.race([signInFlow(), timeoutPromise]);
   };
+
   const sendResetEmail = async (email: string) => {
     await sendPasswordResetEmail(auth, email);
   };
@@ -177,10 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setFirebaseUser(null);
   };
 
-  const checkScanLimit = (): boolean => {
-    // Paywalls removed: always return true
-    return true;
-  };
+  const checkScanLimit = (): boolean => true;
 
   const incrementScan = async (): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return true;
@@ -188,9 +173,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastScanDate !== today;
 
-    // Logic removed: paywall no longer triggers here
-
-    // Atomic increment in Firestore to prevent race conditions
     const userRef = doc(dbInstance, "users", firebaseUser.uid);
     const updates = {
       scansUsedToday: isNewDay ? 1 : increment(1),
@@ -199,7 +181,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       await updateDoc(userRef, updates);
-      // Update local state based on actual Firestore logic
       setUserProfile(prev => prev ? {
         ...prev,
         scansUsedToday: isNewDay ? 1 : prev.scansUsedToday + 1,
@@ -207,7 +188,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } : null);
       return true;
     } catch (e) {
-      console.error("Failed to increment scan:", e);
       return false;
     }
   };
@@ -217,6 +197,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updates: Partial<UserProfile> = { isCanceled: true };
     setUserProfile({ ...userProfile, ...updates });
     await db.updateUser(firebaseUser.uid, updates);
+  };
+
+  const requestLimitReset = async (reason: string): Promise<boolean> => {
+    if (!firebaseUser) return false;
+    try {
+      // Send a high-priority feedback as a "reset request"
+      await db.sendFeedback(firebaseUser.uid, {
+        comment: `[RESET_REQUEST] ${reason}`,
+        userEmail: firebaseUser.email || '',
+        userName: userProfile?.name || 'User'
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
   };
 
   const joinSchool = async (schoolCode: string): Promise<boolean> => {
@@ -296,6 +291,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       upgradeToPro,
       joinSchool,
       cancelSubscription,
+      requestLimitReset,
       isAuthenticated: !!firebaseUser,
       isLoading,
       showPaywall,

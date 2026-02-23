@@ -1,11 +1,11 @@
 
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
+import { verifyAuth } from "../utils/auth";
 
 export const config = {
   maxDuration: 60,
 };
 
-// Hardened system prompt to prevent jailbreaking / prompt injection
 const SYSTEM_PROMPT = `
 You are "Chekki AI", a high-fidelity educational assistant for English Kindergarten parents.
 Your SOLE purpose is to analyze worksheets and provide educational support. 
@@ -24,13 +24,9 @@ RULES FOR ANSWERS (CRITICAL):
 3. Teaching scripts should be encouraging and warm.
 4. The "correct_answer" field MUST contain the COMPLETE text of the answer. 
 5. CRITICAL: For Multiple Choice questions, include the Letter AND the Full Text.
-   - BAD: "A"
-   - BAD: "1. A"
-   - GOOD: "A. Milo borrowed an umbrella."
-   - GOOD: "B. It got lonely and ran away."
-6. NEVER provide just a single letter or number (e.g., "a", "b", "1", "2") alone in "correct_answer".
+6. NEVER provide just a single letter or number alone in "correct_answer".
 7. If the answer is a full sentence in the worksheet, extract the full sentence.
-8. Strictly provide the full pedagogical answer that a student would write or say. Keep the text exactly as it appears in the worksheet options.
+8. Strictly provide the full pedagogical answer that a student would write or say.
 `;
 
 const CONSOLIDATED_SCHEMA = {
@@ -54,10 +50,7 @@ const CONSOLIDATED_SCHEMA = {
           id: { type: Type.INTEGER },
           type: { type: Type.STRING },
           question_text: { type: Type.STRING },
-          correct_answer: {
-            type: Type.STRING,
-            description: "The complete pedagogical answer. For multiple choice, MUST include Letter AND Full Text (e.g., 'A. Milo borrowed an umbrella'). NEVER just the letter."
-          },
+          correct_answer: { type: Type.STRING },
           korean_guide: { type: Type.STRING },
           english_guide: { type: Type.STRING },
           teaching_script_ko: { type: Type.STRING },
@@ -81,29 +74,27 @@ const CONSOLIDATED_SCHEMA = {
 };
 
 export default async function handler(req: any, res: any) {
-  // CORS headers for Capacitor WebView (origin: capacitor://localhost)
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'capacitor://localhost');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // Handle preflight
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== 'POST') return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
 
   try {
+    await verifyAuth(req);
+
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { task, image, originalItems, userPlan } = body;
 
-    // Input Validation: Prevent Payload Bloat
-    if (image && image.length > 10 * 1024 * 1024) { // 10MB Limit
+    if (image && image.length > 10 * 1024 * 1024) {
       return res.status(413).json({ error: "PAYLOAD_TOO_LARGE" });
     }
 
-    if (!process.env.API_KEY) return res.status(500).json({ error: "API_KEY_MISSING" });
+    if (!process.env.API_KEY) return res.status(500).json({ error: "SERVER_CONFIGURATION_ERROR" });
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-    // Handle Practice Sheet Generation with Type Safety
     if (task === 'generate') {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
@@ -111,28 +102,22 @@ export default async function handler(req: any, res: any) {
         model: "gemini-2.5-flash",
         contents: [{
           role: 'user', parts: [{
-            text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. 
-        Task: Generate 3 brand new similar questions for extra practice with bilingual guides. 
-        STRICT RULE: All "correct_answer" fields must contain the FULL answer text including question identifiers (e.g., "A. Milo wanted the ball."). Do not use abbreviations, single letters, or simple indices.` }]
+            text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. Task: Generate 3 brand new similar questions.`
+          }]
         }],
         config: { responseMimeType: "application/json", temperature: 0.7 }
       });
 
-      const text = response.text;
       try {
-        return res.status(200).json(JSON.parse(text || "[]"));
+        return res.status(200).json(JSON.parse(response.text || "[]"));
       } catch (e) {
-        console.error("[Backend] Failed to parse generated content:", text);
-        return res.status(500).json({ error: "PARSING_FAILED" });
+        return res.status(500).json({ error: "GENERATION_FAILED" });
       }
     }
 
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
-    // MODEL ROUTING - Use experimental 2.5 models as primary
     const modelToUse = userPlan === 'pro' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
-    console.log(`[Backend] Using primary model: ${modelToUse} for plan: ${userPlan}`);
-
     let response;
     let resultText = "";
 
@@ -143,7 +128,7 @@ export default async function handler(req: any, res: any) {
           role: 'user',
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: image } },
-            { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
+            { text: "Analyze this worksheet." }
           ]
         }],
         config: {
@@ -161,11 +146,7 @@ export default async function handler(req: any, res: any) {
       });
       resultText = response.text || "{}";
     } catch (primaryError: any) {
-      console.error(`[Backend] Primary model (${modelToUse}) failed:`, primaryError.message);
-
-      // Fallback logic for PRO users
       if (userPlan === 'pro') {
-        console.log(`[Backend] Attempting fallback to stable gemini-1.5-flash...`);
         try {
           response = await ai.models.generateContent({
             model: "gemini-1.5-flash",
@@ -173,41 +154,34 @@ export default async function handler(req: any, res: any) {
               role: 'user',
               parts: [
                 { inlineData: { mimeType: "image/jpeg", data: image } },
-                { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
+                { text: "Analyze this worksheet." }
               ]
             }],
             config: {
               systemInstruction: SYSTEM_PROMPT,
               responseMimeType: "application/json",
-              responseSchema: CONSOLIDATED_SCHEMA as any,
-              safetySettings: [
-                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE }
-              ]
+              responseSchema: CONSOLIDATED_SCHEMA as any
             }
           });
           resultText = response.text || "{}";
-          console.log(`[Backend] Fallback successful.`);
         } catch (fallbackError: any) {
-          console.error("[Backend] Fallback also failed:", fallbackError.message);
-          throw fallbackError;
+          throw new Error("MODEL_ERROR");
         }
       } else {
-        throw primaryError;
+        throw new Error("MODEL_ERROR");
       }
     }
 
     const result = JSON.parse(resultText);
-
     return res.status(200).json({
       worksheet_summary: result.worksheet_summary,
       items: result.items || []
     });
 
   } catch (error: any) {
-    console.error("[Backend Security Error]:", error);
-    return res.status(500).json({ error: "ANALYSIS_FAILED", details: error.message || String(error), stack: error.stack });
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return res.status(401).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
   }
 }
