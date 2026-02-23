@@ -114,23 +114,26 @@ export default async function handler(req: any, res: any) {
     const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: "SERVER_CONFIGURATION_ERROR" });
 
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({ apiKey, apiVersion: 'v1beta' });
 
     if (task === 'generate') {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
-      const genResponse = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+      const response = await ai.models.generateContent({
+        model: "gemini-1.5-flash",
         contents: [{
           role: 'user', parts: [{
             text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. Task: Generate 3 brand new similar questions.`
           }]
         }],
-        config: { responseMimeType: "application/json", temperature: 0.7 }
+        config: {
+          responseMimeType: "application/json",
+          temperature: 0.7
+        }
       });
 
       try {
-        return res.status(200).json(JSON.parse(genResponse.text || "[]"));
+        return res.status(200).json(JSON.parse(response.text || "[]"));
       } catch (e) {
         return res.status(500).json({ error: "GENERATION_FAILED" });
       }
@@ -138,7 +141,8 @@ export default async function handler(req: any, res: any) {
 
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
-    const modelToUse = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-2.0-flash';
+    // Use Gemini 1.5 for maximum stability/latency balance on Vercel
+    const modelToUse = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
     let resultText = "";
 
     try {
@@ -166,11 +170,11 @@ export default async function handler(req: any, res: any) {
       resultText = response.text || "{}";
     } catch (primaryError: any) {
       console.error("Primary model failed:", primaryError);
-      // Fallback logic for both Pro and Free
-      const fallbackModel = userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+
+      // Secondary fallback
       try {
         const response = await ai.models.generateContent({
-          model: fallbackModel,
+          model: 'gemini-1.5-flash',
           contents: [{
             role: 'user',
             parts: [
