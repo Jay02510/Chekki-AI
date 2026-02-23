@@ -6,7 +6,17 @@ export const config = {
 };
 
 export default async function handler(req: any, res: any) {
-  res.setHeader('Access-Control-Allow-Origin', 'capacitor://localhost');
+  const allowedOrigins = [
+    'capacitor://localhost',
+    'http://localhost',
+    'https://chekki-ai.vercel.app'
+  ];
+
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -15,8 +25,6 @@ export default async function handler(req: any, res: any) {
 
   try {
     await verifyAuth(req);
-
-    // Feedback logic simplified to avoid debug logs in production
     return res.status(200).json({
       success: true,
       message: "FEEDBACK_SUBMITTED"

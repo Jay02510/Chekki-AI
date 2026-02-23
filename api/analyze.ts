@@ -74,7 +74,17 @@ const CONSOLIDATED_SCHEMA = {
 };
 
 export default async function handler(req: any, res: any) {
-  res.setHeader('Access-Control-Allow-Origin', 'capacitor://localhost');
+  const allowedOrigins = [
+    'capacitor://localhost',
+    'http://localhost',
+    'https://chekki-ai.vercel.app'
+  ];
+
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
