@@ -17,8 +17,14 @@ export default async function handler(req: any, res: any) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
 
+  // Persistent diagnostic vars
+  let body: any = {};
+  let authError = "";
+  let authUser = null;
+  let taskName = "unknown";
+
   try {
-    // 2. Define Scope Constants (Inside handler for maximum safety)
+    // 2. Define Scope Constants
     const SYSTEM_PROMPT = `You are "Chekki AI", a high-fidelity educational assistant. Analyze worksheets and provide educational support. Output MUST be valid JSON according to schema. Extract question text, pedagogical answer (Full Text + Letter), and teaching scripts. bounding_box uses normalized coordinates 0-1000.`;
 
     const CONSOLIDATED_SCHEMA = {
@@ -64,20 +70,27 @@ export default async function handler(req: any, res: any) {
       required: ["worksheet_summary", "items"]
     };
 
-    // 3. Safe Body Padding & Mocked Auth for Stability Test
-    let body: any = {};
+    // 3. Request Parsing
     try {
       body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     } catch (e) { }
 
     const { task, image, originalItems } = body;
+    taskName = task || "scan";
 
-    // TEMPORARY: Skip verifyAuth to see if firebase-admin load is the blocker
-    // const authUser = await verifyAuth(req);
-    // const userPlan = authUser ? (body.userPlan || 'free') : 'free';
-    const userPlan = 'free' as string;
+    // 4. Auth Layer
+    try {
+      authUser = await verifyAuth(req);
+    } catch (e: any) {
+      if (!e.message.includes("No Firebase Project ID")) {
+        authError = e.message;
+      }
+    }
 
-    if (task === 'ping') return res.status(200).json({ status: "ok", sdk: "generative-ai", time: new Date().toISOString() });
+    const userPlanRaw = body.userPlan || 'free';
+    const userPlan: string = typeof userPlanRaw === 'string' ? userPlanRaw : 'free';
+
+    if (task === 'ping') return res.status(200).json({ status: "ok", sdk: "generative-ai", time: new Date().toISOString(), auth: !!authUser });
 
     const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: "SERVER_CONFIGURATION_ERROR" });
@@ -86,7 +99,7 @@ export default async function handler(req: any, res: any) {
 
     if (task === 'generate') {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1beta" });
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: `Generate 3 similar questions: ${JSON.stringify(originalItems).substring(0, 1000)}` }] }],
         generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
@@ -96,12 +109,12 @@ export default async function handler(req: any, res: any) {
 
     if (!image) return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
-    // 4. Execution with Fallback using standard SDK
+    // 5. Execution with Fallback
     const runScan = async (modelName: string) => {
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        systemInstruction: SYSTEM_PROMPT
-      });
+      const model = genAI.getGenerativeModel(
+        { model: modelName, systemInstruction: SYSTEM_PROMPT },
+        { apiVersion: "v1beta" }
+      );
       const result = await model.generateContent({
         contents: [{
           role: 'user',
@@ -113,7 +126,7 @@ export default async function handler(req: any, res: any) {
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: CONSOLIDATED_SCHEMA as any,
-          temperature: 0.1, // Lower temperature for more stable JSON
+          temperature: 0.1,
         },
         safetySettings: [
           { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
@@ -128,8 +141,8 @@ export default async function handler(req: any, res: any) {
     let resultText = "";
     try {
       resultText = await runScan(userPlan === 'pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash');
-    } catch (e) {
-      console.warn("[Retry] Primary Model Failed, falling back to flash...");
+    } catch (e: any) {
+      console.warn("[Retry] Primary Model Failed:", e.message);
       resultText = await runScan('gemini-1.5-flash');
     }
 
@@ -137,6 +150,10 @@ export default async function handler(req: any, res: any) {
 
   } catch (error: any) {
     console.error("[Critical] Handler Crash:", error.message);
-    return res.status(500).json({ error: "INTERNAL_SERVER_ERROR", detail: error.message });
+    return res.status(500).json({
+      error: "INTERNAL_SERVER_ERROR",
+      message: error.message,
+      detail: `Task:${taskName}, Plan:${body.userPlan || "free"}, AuthErr:${authError || "none"}`
+    });
   }
 }
