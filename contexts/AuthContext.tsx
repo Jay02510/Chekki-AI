@@ -12,6 +12,7 @@ import {
   sendPasswordResetEmail,
   type User
 } from 'firebase/auth';
+import { requestProSubscription } from '../services/paymentService';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -25,6 +26,7 @@ interface AuthContextType {
   incrementScan: () => Promise<boolean>;
   checkScanLimit: () => boolean;
   upgradeToPro: (code?: string) => Promise<boolean>;
+  processPayment: () => Promise<{ success: boolean; message?: string }>;
   joinSchool: (schoolCode: string) => Promise<boolean>;
   cancelSubscription: () => Promise<void>;
   requestLimitReset: (reason: string) => Promise<boolean>;
@@ -273,6 +275,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
+  const processPayment = async (): Promise<{ success: boolean; message?: string }> => {
+    if (!firebaseUser || !userProfile) {
+      return { success: false, message: "Please log in to subscribe." };
+    }
+
+    const response = await requestProSubscription(userProfile.email, userProfile.name);
+
+    if (response.success) {
+      const upgraded = await upgradeToPro();
+      if (upgraded) {
+        return { success: true };
+      } else {
+        return { success: false, message: "Payment succeeded but profile update failed. Please contact support." };
+      }
+    }
+
+    return { success: false, message: response.message };
+  };
+
   const openLoginModal = () => setShowLoginModal(true);
   const closeLoginModal = () => setShowLoginModal(false);
 
@@ -289,6 +310,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       checkScanLimit,
       incrementScan,
       upgradeToPro,
+      processPayment,
       joinSchool,
       cancelSubscription,
       requestLimitReset,

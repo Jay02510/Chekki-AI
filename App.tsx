@@ -426,6 +426,7 @@ function AppContent() {
                   <p><span className="text-zinc-400">{language === 'ko' ? '주소:' : 'Address:'}</span> 서울특별시 종로구 종로 347, 1413호(숭인동)</p>
                   <p><span className="text-zinc-400">{language === 'ko' ? '연락처:' : 'Phone:'}</span> 010-5371-9266</p>
                   <p><span className="text-zinc-400">{language === 'ko' ? '이메일:' : 'Email:'}</span> jsn.benjamin@gmail.com</p>
+                  <p className="pt-2"><span className="text-zinc-400">{language === 'ko' ? '개인정보관리책임자:' : 'Privacy Officer:'}</span> Jason Benjamin</p>
                 </div>
               </div>
             </div>

@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const PaywallModal: React.FC = () => {
-    const { showPaywall, setShowPaywall, upgradeToPro, user } = useAuth();
+    const { showPaywall, setShowPaywall, upgradeToPro, processPayment, user } = useAuth();
     const { t, language } = useLanguage();
 
     const [showCodeInput, setShowCodeInput] = useState(false);
@@ -24,6 +24,18 @@ export const PaywallModal: React.FC = () => {
             // Logic handled in AuthContext
         } else {
             setError(true);
+            setIsProcessing(false);
+        }
+    };
+
+    const handleSubscribe = async () => {
+        setIsProcessing(true);
+        setError(false);
+        const result = await processPayment();
+        if (result.success) {
+            // Success handled in AuthContext (setShowPaywall(false))
+        } else {
+            alert(result.message || "Payment failed");
             setIsProcessing(false);
         }
     };
@@ -68,8 +80,13 @@ export const PaywallModal: React.FC = () => {
                                     <span className="text-orange-500">✓</span> {language === 'ko' ? '우선 순위 지원' : 'Priority Support'}
                                 </li>
                             </ul>
-                            <button className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl text-xs uppercase tracking-widest transition-colors shadow-lg shadow-orange-500/20">
-                                {language === 'ko' ? '지금 구독하기' : 'Subscribe Now'}
+                            <button
+                                onClick={handleSubscribe}
+                                disabled={isProcessing}
+                                className="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-700 text-white font-black rounded-xl text-xs uppercase tracking-widest transition-colors shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2"
+                            >
+                                {isProcessing && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+                                {isProcessing ? 'Processing...' : (language === 'ko' ? '지금 구독하기' : 'Subscribe Now')}
                             </button>
                         </div>
 
