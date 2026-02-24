@@ -39,11 +39,11 @@ export interface UserProfile {
   scansUsedToday: number;
   lastScanDate: string;
   maxScansPerDay: number;
-  subscriptionStartedAt?: string;
-  nextBillingDate?: string;
+  subscriptionStartedAt?: string | null;
+  nextBillingDate?: string | null;
   isCanceled?: boolean;
-  schoolId?: string;
-  schoolName?: string;
+  schoolId?: string | null;
+  schoolName?: string | null;
 }
 
 export interface WorksheetSummary {
