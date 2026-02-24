@@ -308,7 +308,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     );
   };
 
-  const BetaBanner = () => {
+  const FeatureBanner = () => {
     const banners = [
       {
         id: 'feedback',
@@ -395,7 +395,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
 
         <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 md:gap-10">
-          <BetaBanner />
+          <FeatureBanner />
           <DropZone size="large" />
         </div>
         <p className="mt-8 text-zinc-600 text-[9px] md:text-sm font-black uppercase tracking-[0.2em] text-center opacity-60">{t('supported_formats')}</p>

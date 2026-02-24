@@ -42,7 +42,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const FREE_DAILY_LIMIT = 3;
 const BETA_CODE_MAIN = 'CHEKKI40';
-const BETA_CODE_LIMIT = 40;
+const BETA_CODE_LIMIT = 9999;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);

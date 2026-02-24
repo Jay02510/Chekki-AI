@@ -194,10 +194,10 @@ const translations = {
     sec_point_4: "Safe for kids",
 
     // Paywall
-    pw_title: "Beta Access Only",
-    pw_desc: "Chekki is currently in a free beta period. Enter your invitation code to unlock all pro features immediately.",
-    subs_coming_soon: "Subscriptions coming soon",
-    beta_access_title: "Beta Access",
+    pw_title: "Chekki Pro Access",
+    pw_desc: "Unlock all pro features immediately and enjoy the full magic of Chekki.",
+    subs_coming_soon: "Full Access Included",
+    beta_access_title: "Redeem Access Code",
 
     // Errors
     error_title: "Let's try one more time!",
@@ -393,10 +393,10 @@ const translations = {
     sec_point_4: "자녀 안심 서비스",
 
     // Paywall
-    pw_title: "베타 액세스 전용",
-    pw_desc: "채키는 현재 무료 베타 기간입니다. 초대 코드를 입력하여 곧바로 모든 프로 기능을 사용해 보세요.",
-    subs_coming_soon: "정기 구독 서비스 준비 중",
-    beta_access_title: "베타 액세스",
+    pw_title: "채키 프로 액세스",
+    pw_desc: "지금 바로 프로 기능을 활성화하고 채키의 모든 마법을 경험해보세요.",
+    subs_coming_soon: "모든 기능 포함됨",
+    beta_access_title: "액세스 코드 입력",
 
     // Errors
     error_title: "다시 한번 해볼까요?",

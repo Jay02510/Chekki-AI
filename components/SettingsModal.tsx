@@ -133,8 +133,8 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
             {/* --- BETA / PREMIUM ACCESS --- */}
             <div className="bg-orange-500/5 rounded-3xl p-6 border border-orange-500/20">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-black text-orange-500 uppercase tracking-widest">{t('beta_access_title')}</h3>
-                <span className="text-[9px] font-black text-orange-500/40 uppercase tracking-widest">{t('subs_coming_soon')}</span>
+                <h3 className="text-xs font-black text-orange-500 uppercase tracking-widest">{language === 'ko' ? '프로 액세스' : 'PRO ACCESS'}</h3>
+                <span className="text-[9px] font-black text-orange-500/40 uppercase tracking-widest">{language === 'ko' ? '액세스 활성화' : 'ACCESS ACTIVE'}</span>
               </div>
 
               {user?.plan === 'pro' ? (
@@ -142,21 +142,21 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                   <span className="text-xl">🚀</span>
                   <div>
                     <p className="text-[10px] font-black text-white uppercase tracking-wider">Pro Magic Active</p>
-                    <p className="text-[9px] text-zinc-500 font-bold">Unlimited access during beta</p>
+                    <p className="text-[9px] text-zinc-500 font-bold">{language === 'ko' ? '프로 기능을 제한 없이 이용 중입니다' : 'Unlimited Pro features active'}</p>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-3">
                   <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">
                     {language === 'ko'
-                      ? "베타 기간 동안 초대 코드를 입력하여 무제한 기능을 사용해 보세요."
-                      : "Unlock unlimited features for free during our beta period."}
+                      ? "그룹 코드를 입력하여 프로 기능을 무료로 활성화하세요."
+                      : "Enter your group code to unlock all Pro features for free."}
                   </p>
                   <button
                     onClick={() => { onClose(); setShowPaywall(true); }}
                     className="w-full bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                   >
-                    Redeem Beta Code
+                    {language === 'ko' ? '액세스 코드 입력' : 'Redeem Access Code'}
                   </button>
                 </div>
               )}
@@ -239,7 +239,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
 
           </div>
         </div>
-      </div>
+      </div >
     </>
   );
 };

@@ -10,7 +10,7 @@ interface Props {
 }
 
 export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureName = 'pronunciation' }) => {
-    const { upgradeToPro } = useAuth();
+    const { upgradeToPro, processPayment } = useAuth();
     const { language, t } = useLanguage();
 
     const [showCodeInput, setShowCodeInput] = useState(false);
@@ -106,34 +106,53 @@ export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureNa
                 {/* Action Buttons */}
                 <div className="px-6 pb-8 space-y-3">
                     <div className="space-y-3 animate-fade-in">
-                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <span className="text-amber-500 text-lg">✨</span>
-                                <p className="text-[10px] text-zinc-300 font-medium leading-relaxed">
-                                    {language === 'ko'
-                                        ? '베타 기간 동안 무료로 체험해 보세요!'
-                                        : 'Free access during our beta period!'}
-                                </p>
-                            </div>
-                            <span className="text-[8px] font-black text-orange-500/40 uppercase tracking-widest">{t('subs_coming_soon')}</span>
+                        <button
+                            onClick={async () => {
+                                setIsProcessing(true);
+                                const result = await processPayment();
+                                if (result.success) {
+                                    onClose();
+                                } else {
+                                    if (result.message) alert(result.message);
+                                    setIsProcessing(false);
+                                }
+                            }}
+                            disabled={isProcessing}
+                            className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base shadow-xl disabled:opacity-50 active:scale-95 transition-all ring-2 ring-white/10 min-h-[52px] flex items-center justify-center gap-2"
+                        >
+                            {isProcessing ? (
+                                <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            ) : <span>💳</span>}
+                            {language === 'ko' ? '카드 / 간편 결제' : 'Pay with Card / Easy Pay'}
+                        </button>
+
+                        <div className="flex items-center gap-3 py-2">
+                            <div className="h-px flex-1 bg-white/5"></div>
+                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{language === 'ko' ? '또는' : 'OR'}</span>
+                            <div className="h-px flex-1 bg-white/5"></div>
                         </div>
-                        <input
-                            type="text"
-                            value={betaCode}
-                            onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
-                            placeholder="ENTER ACCESS CODE"
-                            className={`w-full bg-black/40 border ${error ? 'border-red-500' : 'border-zinc-700'} rounded-xl px-4 py-3 text-white text-center font-mono tracking-widest outline-none focus:border-orange-500 text-sm`}
-                        />
+
+                        <div className="relative group">
+                            <input
+                                type="text"
+                                value={betaCode}
+                                onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
+                                placeholder={language === 'ko' ? "액세스 코드 입력" : "ENTER ACCESS CODE"}
+                                className={`w-full bg-black/40 border ${error ? 'border-red-500' : 'border-zinc-700'} rounded-xl px-4 py-3 text-white text-center font-mono tracking-widest outline-none focus:border-orange-500 text-sm`}
+                            />
+                        </div>
+
                         <button
                             onClick={handleRedeem}
-                            disabled={isProcessing}
-                            className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-base shadow-xl disabled:opacity-50 active:scale-95 transition-all ring-2 ring-white/10 min-h-[52px]"
+                            disabled={isProcessing || !betaCode}
+                            className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-black text-xs uppercase tracking-[0.2em] transition-all border border-white/10"
                         >
-                            {isProcessing ? (language === 'ko' ? '확인 중...' : 'Verifying...') : (language === 'ko' ? '코드 사용하기' : 'Redeem Access')}
+                            {isProcessing && !betaCode ? '...' : (language === 'ko' ? '코드 사용하기' : 'Redeem Access')}
                         </button>
+
                         {error && (
-                            <p className="text-center text-red-400 text-xs font-bold">
-                                {language === 'ko' ? '유효하지 않은 코드입니다' : 'Invalid code. Please try again.'}
+                            <p className="text-center text-red-400 text-[10px] font-black uppercase tracking-widest">
+                                {language === 'ko' ? '유효하지 않은 코드입니다' : 'Invalid code'}
                             </p>
                         )}
                     </div>
