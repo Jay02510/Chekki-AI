@@ -79,60 +79,82 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (name: string, email: string, pass: string, code?: string) => {
-    const res = await createUserWithEmailAndPassword(auth, email, pass);
+    try {
+      const res = await createUserWithEmailAndPassword(auth, email, pass);
 
-    let plan: 'free' | 'pro' = 'free';
-    let maxScans = FREE_DAILY_LIMIT;
-    let schoolId: string | undefined;
-    let schoolName: string | undefined;
-    let subscriptionStartedAt: string | undefined;
-    let nextBillingDate: string | undefined;
+      let plan: 'free' | 'pro' = 'free';
+      let maxScans = FREE_DAILY_LIMIT;
+      let schoolId: string | undefined;
+      let schoolName: string | undefined;
+      let subscriptionStartedAt: string | undefined;
+      let nextBillingDate: string | undefined;
 
-    if (code) {
-      const sanitized = code.toUpperCase().trim();
-      const schools: Record<string, string> = {
-        'POLY10': 'Poly Academy Seocho',
-        'GATE05': 'GATE Academy Bundang',
-        'ECC99': 'YBM ECC Gangnam'
-      };
+      if (code) {
+        const sanitized = code.toUpperCase().trim();
+        const schools: Record<string, string> = {
+          'POLY10': 'Poly Academy Seocho',
+          'GATE05': 'GATE Academy Bundang',
+          'ECC99': 'YBM ECC Gangnam'
+        };
 
-      if (schools[sanitized]) {
-        plan = 'pro';
-        maxScans = 9999;
-        schoolId = sanitized;
-        schoolName = schools[sanitized];
-      } else if (sanitized === BETA_CODE_MAIN) {
-        const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
-        if (canRedeem) {
+        if (schools[sanitized]) {
           plan = 'pro';
           maxScans = 9999;
-          subscriptionStartedAt = new Date().toISOString();
-          const nextMonth = new Date();
-          nextMonth.setMonth(nextMonth.getMonth() + 1);
-          nextBillingDate = nextMonth.toISOString();
+          schoolId = sanitized;
+          schoolName = schools[sanitized];
+        } else if (sanitized === BETA_CODE_MAIN) {
+          const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
+          if (canRedeem) {
+            plan = 'pro';
+            maxScans = 9999;
+            subscriptionStartedAt = new Date().toISOString();
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            nextBillingDate = nextMonth.toISOString();
+          }
         }
       }
+
+      const newProfile: UserProfile = {
+        name,
+        email,
+        plan,
+        scansUsedToday: 0,
+        lastScanDate: new Date().toISOString().split('T')[0],
+        maxScansPerDay: maxScans,
+        schoolId,
+        schoolName,
+        subscriptionStartedAt,
+        nextBillingDate
+      };
+
+      await db.createUser(res.user.uid, newProfile);
+      setUserProfile(newProfile);
+      setShowLoginModal(false);
+    } catch (err: any) {
+      console.error("Signup error details:", err);
+      // Re-throw to be caught by the UI
+      throw err;
     }
-
-    const newProfile: UserProfile = {
-      name,
-      email,
-      plan,
-      scansUsedToday: 0,
-      lastScanDate: new Date().toISOString().split('T')[0],
-      maxScansPerDay: maxScans,
-      schoolId,
-      schoolName,
-      subscriptionStartedAt,
-      nextBillingDate
-    };
-
-    await db.createUser(res.user.uid, newProfile);
-    setUserProfile(newProfile);
-    setShowLoginModal(false);
   };
 
   const signIn = async (email: string, pass: string) => {
+    // 🍎 Apple Review Demo Account Bypass
+    if (email === 'test@example.com' && pass === 'Test123') {
+      const demoProfile: UserProfile = {
+        name: 'Apple Reviewer',
+        email: 'test@example.com',
+        plan: 'pro',
+        scansUsedToday: 0,
+        lastScanDate: new Date().toISOString().split('T')[0],
+        maxScansPerDay: 9999
+      };
+      setUserProfile(demoProfile);
+      setShowLoginModal(false);
+      localStorage.setItem('chekki_last_auth', Date.now().toString());
+      return;
+    }
+
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Login timed out. Please check your internet connection and try again.')), 15000);
     });

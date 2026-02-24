@@ -95,7 +95,7 @@ export const PaywallModal: React.FC = () => {
                             <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl mb-4">✨</div>
                             <h3 className="text-white font-black text-lg mb-2">Have a Code?</h3>
                             <p className="text-zinc-500 text-xs mb-6 max-w-[200px]">
-                                {language === 'ko' ? '베타 초대 코드가 있다면 입력하여 무료로 시작하세요.' : 'Enter your invitation code to unlock pro features for free.'}
+                                {language === 'ko' ? '초대 코드가 있다면 입력하여 무료로 시작하세요.' : 'Enter your invitation code to unlock pro features for free.'}
                             </p>
                             <button
                                 onClick={() => setShowCodeInput(true)}

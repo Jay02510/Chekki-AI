@@ -15,6 +15,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
             case 'terms': return { title: "이용약관 / Terms of Service", icon: "📜" };
             case 'refund': return { title: "환불 정책 / Refund Policy", icon: "💳" };
             case 'youth': return { title: "청소년 보호 정책 / Youth Protection", icon: "🛡️" };
+            case 'support': return { title: "고객 지원 / Customer Support", icon: "💬" };
             default: return { title: "Legal", icon: "⚖️" };
         }
     };
@@ -208,6 +209,41 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p><strong>2. Blocking Harmful Content</strong><br />We utilize AI safety filters and monitoring to proactively block inappropriate language, violence, or adult content from being processed or displayed.</p>
                                         <p><strong>3. Reporting & Grievances</strong><br />For any concerns regarding youth safety or to report inappropriate content, please contact our Youth Protection Officer.</p>
                                         <p>Youth Protection Officer: Jason Benjamin (jsn.benjamin@gmail.com)</p>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    )}
+
+                    {type === 'support' && (
+                        <div className="space-y-8">
+                            <section className="space-y-4">
+                                <div className="bg-white/5 p-5 rounded-xl border border-white/10">
+                                    <h3 className="text-white font-black text-sm mb-4 border-b border-white/10 pb-2">[KR] 고객 지원 및 문의</h3>
+                                    <div className="text-zinc-300 text-[10px] leading-relaxed space-y-4">
+                                        <p>Chekki AI를 이용해 주셔서 감사합니다. 서비스 이용 중 궁금한 점이나 기술적인 도움이 필요하시면 언제든지 문의해 주세요.</p>
+
+                                        <div className="space-y-2 bg-black/30 p-4 rounded-lg border border-white/5">
+                                            <p><strong>📧 이메일 문의:</strong> jsn.benjamin@gmail.com</p>
+                                            <p><strong>📞 전화 문의:</strong> 010-5371-9266</p>
+                                            <p><strong>⏰ 운영 시간:</strong> 평일 10:00 - 18:00 (주말/공휴일 제외)</p>
+                                        </div>
+
+                                        <p>이미지 분석 오류나 결제 관련 문의는 스크린샷과 함께 이메일로 보내주시면 더욱 신속하게 도와드릴 수 있습니다.</p>
+                                    </div>
+                                </div>
+                                <div className="bg-white/5 p-5 rounded-xl border border-white/10">
+                                    <h3 className="text-white font-black text-sm mb-4 border-b border-white/10 pb-2">[EN] Customer Support</h3>
+                                    <div className="text-zinc-300 text-[10px] leading-relaxed space-y-4">
+                                        <p>Thank you for using Chekki AI. If you have any questions or need technical assistance, please feel free to contact us.</p>
+
+                                        <div className="space-y-2 bg-black/30 p-4 rounded-lg border border-white/5">
+                                            <p><strong>📧 Email Support:</strong> jsn.benjamin@gmail.com</p>
+                                            <p><strong>📞 Phone Support:</strong> +82 10-5371-9266</p>
+                                            <p><strong>⏰ Business Hours:</strong> Weekdays 10:00 AM - 6:00 PM KST</p>
+                                        </div>
+
+                                        <p>For issues regarding image analysis or payments, please include a screenshot and your account email for faster resolution.</p>
                                     </div>
                                 </div>
                             </section>

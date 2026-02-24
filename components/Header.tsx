@@ -146,7 +146,6 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                           <div className="flex items-center gap-3">
                             <span>💳</span> Billing
                           </div>
-                          <span className="text-[7px] font-black text-orange-500/50 uppercase tracking-widest border border-orange-500/20 px-1 rounded">Soon</span>
                         </button>
                       </div>
 

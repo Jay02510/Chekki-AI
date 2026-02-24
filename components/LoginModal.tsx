@@ -31,6 +31,8 @@ export const LoginModal: React.FC = () => {
       if (viewMode === 'login') {
         await signIn(email, password);
       } else if (viewMode === 'signup') {
+        if (!name.trim()) throw new Error("Please enter your name.");
+        if (!email.includes('@')) throw new Error("Please enter a valid email address.");
         if (password.length < 6) throw new Error("Password must be at least 6 characters.");
         await signUp(name, email, password, schoolCode.trim());
       } else if (viewMode === 'forgot') {
@@ -138,7 +140,7 @@ export const LoginModal: React.FC = () => {
                       onClick={() => setShowSchoolField(true)}
                       className="text-[10px] font-black text-orange-500 uppercase tracking-widest hover:text-orange-400 transition-colors flex items-center gap-2 px-1 py-1"
                     >
-                      🏷️ Use Access / Beta Code
+                      🏷️ Use Access Code
                     </button>
                   ) : (
                     <div className="relative group animate-fade-in-up">

@@ -65,12 +65,12 @@ export interface WorksheetAnalysis {
 export type AppView = 'onboarding' | 'camera' | 'analyzing' | 'workspace';
 export type WorkspaceMode = 'overlay' | 'split';
 // Define LegalType here to be accessible throughout the app
-export type LegalType = 'privacy' | 'terms' | 'refund' | 'youth';
+export type LegalType = 'privacy' | 'terms' | 'refund' | 'youth' | 'support';
 
 export interface AnalysisState {
   status: 'idle' | 'analyzing' | 'complete' | 'error';
   data: WorksheetAnalysis | null;
-  originalImage: string | null; 
+  originalImage: string | null;
   errorMessage: string | null;
   showReward?: boolean;
   isSummaryLoaded?: boolean;

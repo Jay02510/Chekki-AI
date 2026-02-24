@@ -106,7 +106,7 @@ function AppContent() {
 
   useEffect(() => {
     const path = window.location.pathname.replace('/', '') as LegalType;
-    if (['terms', 'privacy', 'refund', 'youth'].includes(path)) {
+    if (['terms', 'privacy', 'refund', 'youth', 'support'].includes(path)) {
       setShowSplash(false);
       setStandaloneLegal(path);
     }
@@ -438,6 +438,7 @@ function AppContent() {
             <div className="flex gap-6">
               <button onClick={() => setStandaloneLegal('privacy')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Privacy</button>
               <button onClick={() => setStandaloneLegal('terms')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Terms</button>
+              <button onClick={() => setStandaloneLegal('support')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Support</button>
               <button onClick={() => setStandaloneLegal('refund')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Refund</button>
             </div>
           </div>
