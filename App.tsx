@@ -412,21 +412,23 @@ function AppContent() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="space-y-3">
                 <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{language === 'ko' ? '사업자 정보' : 'Business Info'}</h4>
-                <div className="space-y-2 text-[10px] md:text-xs text-zinc-500 font-medium">
-                  <p><span className="text-zinc-400">{language === 'ko' ? '상호명:' : 'Business Name:'}</span> 채키 AI (Chekki AI)</p>
-                  <p><span className="text-zinc-400">{language === 'ko' ? '대표자명:' : 'Representative:'}</span> BENJAMIN JASON</p>
-                  <p><span className="text-zinc-400">{language === 'ko' ? '사업자등록번호:' : 'Business Registration Number:'}</span> 814-14-03096</p>
-                  <p><span className="text-zinc-400">{language === 'ko' ? '통신판매신고:' : 'E-commerce Permit:'}</span> (Pending/심사중)</p>
-                  <p className="pt-2 text-[10px] italic text-zinc-600 font-korean">{language === 'ko' ? '간이과세자' : 'Simplified Taxpayer'}</p>
+                <div className="space-y-1.5 text-[9px] md:text-[10px] text-zinc-500 font-medium">
+                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '상호:' : 'Biz:'}</span> 채키 AI (Chekki AI)</p>
+                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '대표:' : 'Rep:'}</span> BENJAMIN JASON</p>
+                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '사업자번호:' : 'Reg No:'}</span> 814-14-03096</p>
+                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '통신판매:' : 'E-comm:'}</span> (Pending/심사중)</p>
+                  <p className="text-[8px] italic text-zinc-700 font-korean mt-1 opacity-60">
+                    {language === 'ko' ? '*간이과세자' : '*Simplified Taxpayer'}
+                  </p>
                 </div>
               </div>
               <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{language === 'ko' ? '고객 센터' : 'Contact Us'}</h4>
-                <div className="space-y-2 text-[10px] md:text-xs text-zinc-500 font-medium font-korean">
-                  <p><span className="text-zinc-400">{language === 'ko' ? '주소:' : 'Address:'}</span> 서울특별시 종로구 종로 347, 1413호(숭인동)</p>
-                  <p><span className="text-zinc-400">{language === 'ko' ? '연락처:' : 'Phone:'}</span> 010-5371-9266</p>
-                  <p><span className="text-zinc-400">{language === 'ko' ? '이메일:' : 'Email:'}</span> jsn.benjamin@gmail.com</p>
-                  <p className="pt-2"><span className="text-zinc-400">{language === 'ko' ? '개인정보관리책임자:' : 'Privacy Officer:'}</span> Jason Benjamin</p>
+                <h4 className="text-[10px] font-black text-white opacity-40 uppercase tracking-[0.2em]">{language === 'ko' ? '고객 센터' : 'Contact Us'}</h4>
+                <div className="space-y-1.5 text-[9px] md:text-[10px] text-zinc-500 font-medium font-korean">
+                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '주소:' : 'Address:'}</span> 서울특별시 종로구 종로 347, 1413호(숭인동)</p>
+                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '연락처:' : 'Phone:'}</span> 010-5371-9266</p>
+                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '이메일:' : 'Email:'}</span> jsn.benjamin@gmail.com</p>
+                  <p className="pt-1"><span className="text-zinc-600 font-bold">{language === 'ko' ? '개인정보책임자:' : 'Privacy:'}</span> Jason Benjamin</p>
                 </div>
               </div>
             </div>
