@@ -193,6 +193,7 @@ export const LoginModal: React.FC = () => {
                 <span>By continuing, you agree to our</span>
                 <button onClick={() => setShowLegal('terms')} className="underline text-zinc-500 hover:text-zinc-400">Terms</button>
                 <button onClick={() => setShowLegal('privacy')} className="underline text-zinc-500 hover:text-zinc-400">Privacy</button>
+                <button onClick={() => setShowLegal('support')} className="underline text-zinc-500 hover:text-zinc-400">Support</button>
                 <button onClick={() => setShowLegal('refund')} className="underline text-zinc-500 hover:text-zinc-400">Refund</button>
                 <button onClick={() => setShowLegal('youth')} className="underline text-zinc-500 hover:text-zinc-400">Youth</button>
               </div>
