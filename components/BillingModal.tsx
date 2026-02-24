@@ -13,7 +13,7 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
     const isPro = user?.plan === 'pro';
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-    const formatDate = (isoStr?: string) => {
+    const formatDate = (isoStr?: string | null) => {
         if (!isoStr) return "N/A";
         return new Date(isoStr).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', {
             year: 'numeric',
