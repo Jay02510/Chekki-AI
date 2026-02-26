@@ -44,6 +44,26 @@ export interface UserProfile {
   isCanceled?: boolean;
   schoolId?: string | null;
   schoolName?: string | null;
+  subscriptionPlatform?: SubscriptionPlatform;
+}
+
+// --- Subscription System ---
+export type SubscriptionStatus = 'active' | 'expired' | 'none' | 'cancelled';
+export type SubscriptionPlatform = 'apple' | 'google' | 'web' | 'none';
+
+export interface SubscriptionRecord {
+  user_id: string;
+  subscription_status: SubscriptionStatus;
+  subscription_platform: SubscriptionPlatform;
+  subscription_expiry_date: string | null;
+  subscription_start_date?: string | null;
+  apple_receipt?: string | null;
+  apple_original_transaction_id?: string | null;
+  apple_product_id?: string | null;
+  google_purchase_token?: string | null;
+  web_subscription_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface WorksheetSummary {

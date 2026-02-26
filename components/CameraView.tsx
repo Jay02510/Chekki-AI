@@ -493,7 +493,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <p>Representative: Jason Benjamin</p>
                 <p>Business Registration Number: 814-14-03096</p>
                 <p>Address: Jongno 347, Lotte Castle, Seoul 03113, South Korea</p>
-                <p>Email: jsn.benjamin@gmail.com</p>
+                <p>Email: chekkihelp@gmail.com</p>
               </div>
             </div>
           </div>

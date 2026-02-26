@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserProfile } from '../types';
+import { UserProfile, SubscriptionRecord, SubscriptionPlatform } from '../types';
 import { auth, db, dbInstance } from '../services/database';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import {
@@ -12,11 +12,12 @@ import {
   sendPasswordResetEmail,
   type User
 } from 'firebase/auth';
-import { requestProSubscription } from '../services/paymentService';
+import { subscriptionService, AppleProducts } from '../services/subscriptionService';
 
 interface AuthContextType {
   user: UserProfile | null;
   firebaseUser: User | null;
+  subscriptionRecord: SubscriptionRecord | null;
   signUp: (name: string, email: string, pass: string, code?: string) => Promise<void>;
   signIn: (email: string, pass: string) => Promise<void>;
   sendResetEmail: (email: string) => Promise<void>;
@@ -26,7 +27,8 @@ interface AuthContextType {
   incrementScan: () => Promise<boolean>;
   checkScanLimit: () => boolean;
   upgradeToPro: (code?: string) => Promise<boolean>;
-  processPayment: () => Promise<{ success: boolean; message?: string }>;
+  processPayment: (productId?: string) => Promise<{ success: boolean; message?: string }>;
+  restorePurchases: () => Promise<{ success: boolean; message?: string }>;
   joinSchool: (schoolCode: string) => Promise<boolean>;
   cancelSubscription: () => Promise<void>;
   requestLimitReset: (reason: string) => Promise<boolean>;
@@ -47,6 +49,7 @@ const BETA_CODE_LIMIT = 9999;
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [subscriptionRecord, setSubscriptionRecord] = useState<SubscriptionRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -56,7 +59,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setFirebaseUser(user);
       if (user) {
         const profile = await db.getUser(user.uid);
-        setUserProfile(profile);
+        let finalProfile = profile;
+
+        // --- Unified subscription check via backend ---
+        try {
+          const idToken = await user.getIdToken();
+          const subRecord = await subscriptionService.initialize(user.uid, idToken);
+          setSubscriptionRecord(subRecord);
+
+          const isSubActive = subRecord.subscription_status === 'active';
+
+          if (profile) {
+            if (isSubActive && profile.plan !== 'pro') {
+              finalProfile = { ...profile, plan: 'pro', maxScansPerDay: 9999, subscriptionPlatform: subRecord.subscription_platform };
+              await updateDoc(doc(dbInstance, 'users', user.uid), {
+                plan: 'pro',
+                maxScansPerDay: 9999,
+              });
+            } else if (!isSubActive && profile.plan === 'pro' && subRecord.subscription_status === 'expired') {
+              // Subscription expired — show renewal prompt
+              setShowPaywall(true);
+            }
+            if (subRecord.subscription_platform !== 'none') {
+              finalProfile = { ...(finalProfile || profile!), subscriptionPlatform: subRecord.subscription_platform };
+            }
+          }
+        } catch {
+          // Subscription check failed — fallback to existing profile state
+        }
+
+        setUserProfile(finalProfile);
 
         // Session Expiration Check
         const lastLogin = localStorage.getItem('chekki_last_auth');
@@ -71,6 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         setUserProfile(null);
+        setSubscriptionRecord(null);
+        subscriptionService.clearCache();
         localStorage.removeItem('chekki_last_auth');
       }
       setIsLoading(false);
@@ -132,8 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserProfile(newProfile);
       setShowLoginModal(false);
     } catch (err: any) {
-      console.error("Signup error details:", err);
-      // Re-throw to be caught by the UI
+      console.error('Signup error details:', err);
       throw err;
     }
   };
@@ -172,13 +205,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await sendPasswordResetEmail(auth, email);
   };
 
-  const logout = () => signOut(auth);
+  const logout = () => {
+    if (userProfile?.email === 'test@example.com') {
+      setUserProfile(null);
+      setSubscriptionRecord(null);
+      subscriptionService.clearCache();
+      localStorage.removeItem('chekki_last_auth');
+      return;
+    }
+    subscriptionService.clearCache();
+    signOut(auth);
+  };
 
   const updateProfile = async (name: string) => {
+    if (userProfile?.email === 'test@example.com') {
+      setUserProfile({ ...userProfile, name });
+      return;
+    }
     if (!firebaseUser || !userProfile) return;
-    const updates = { name };
-    setUserProfile({ ...userProfile, ...updates });
-    await db.updateUser(firebaseUser.uid, updates);
+    setUserProfile({ ...userProfile, name });
+    await db.updateUser(firebaseUser.uid, { name });
   };
 
   const deleteAccount = async () => {
@@ -187,6 +233,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await deleteUser(firebaseUser);
     setUserProfile(null);
     setFirebaseUser(null);
+    setSubscriptionRecord(null);
+    subscriptionService.clearCache();
   };
 
   const checkScanLimit = (): boolean => true;
@@ -197,7 +245,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastScanDate !== today;
 
-    const userRef = doc(dbInstance, "users", firebaseUser.uid);
+    const userRef = doc(dbInstance, 'users', firebaseUser.uid);
     const updates = {
       scansUsedToday: isNewDay ? 1 : increment(1),
       lastScanDate: today
@@ -217,6 +265,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const cancelSubscription = async () => {
+    if (userProfile?.email === 'test@example.com') {
+      setUserProfile({ ...userProfile, isCanceled: true });
+      return;
+    }
     if (!firebaseUser || !userProfile) return;
     const updates: Partial<UserProfile> = { isCanceled: true };
     setUserProfile({ ...userProfile, ...updates });
@@ -226,7 +278,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const requestLimitReset = async (reason: string): Promise<boolean> => {
     if (!firebaseUser) return false;
     try {
-      // Send a high-priority feedback as a "reset request"
       await db.sendFeedback(firebaseUser.uid, {
         comment: `[RESET_REQUEST] ${reason}`,
         userEmail: firebaseUser.email || '',
@@ -270,14 +321,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const isSchool = await joinSchool(sanitizedCode);
       if (isSchool) return true;
 
-      if (sanitizedCode !== BETA_CODE_MAIN) {
-        return false;
-      }
+      if (sanitizedCode !== BETA_CODE_MAIN) return false;
 
       const canRedeem = await db.redeemBetaCode(sanitizedCode, BETA_CODE_LIMIT);
-      if (!canRedeem) {
-        return false;
-      }
+      if (!canRedeem) return false;
     }
 
     const nextMonth = new Date();
@@ -297,23 +344,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
-  const processPayment = async (): Promise<{ success: boolean; message?: string }> => {
+  // Platform-aware payment: delegates to subscriptionService
+  const processPayment = async (productId: string = AppleProducts.MONTHLY): Promise<{ success: boolean; message?: string }> => {
     if (!firebaseUser || !userProfile) {
-      return { success: false, message: "Please log in to subscribe." };
+      return { success: false, message: 'Please log in to subscribe.' };
     }
 
-    const response = await requestProSubscription(userProfile.email, userProfile.name);
+    const idToken = await firebaseUser.getIdToken();
+    const response = await subscriptionService.purchase(productId, firebaseUser.uid, idToken);
 
     if (response.success) {
       const upgraded = await upgradeToPro();
-      if (upgraded) {
-        return { success: true };
-      } else {
-        return { success: false, message: "Payment succeeded but profile update failed. Please contact support." };
-      }
+      const newSubRecord = subscriptionService.getStatus();
+      if (newSubRecord) setSubscriptionRecord(newSubRecord);
+      if (upgraded) return { success: true };
+      return { success: false, message: 'Payment succeeded but profile update failed. Please contact support.' };
     }
 
-    return { success: false, message: response.message };
+    return { success: false, message: response.error?.message || 'An error occurred during payment.' };
+  };
+
+  const restorePurchases = async (): Promise<{ success: boolean; message?: string }> => {
+    if (!firebaseUser) return { success: false, message: 'Not logged in.' };
+
+    const res = await subscriptionService.restorePurchases(firebaseUser.uid);
+    if (res.success && userProfile?.plan !== 'pro') {
+      await upgradeToPro();
+      const newSubRecord = subscriptionService.getStatus();
+      if (newSubRecord) setSubscriptionRecord(newSubRecord);
+    }
+    return res;
   };
 
   const openLoginModal = () => setShowLoginModal(true);
@@ -323,6 +383,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider value={{
       user: userProfile,
       firebaseUser,
+      subscriptionRecord,
       signUp,
       signIn,
       sendResetEmail,
@@ -333,6 +394,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       incrementScan,
       upgradeToPro,
       processPayment,
+      restorePurchases,
       joinSchool,
       cancelSubscription,
       requestLimitReset,

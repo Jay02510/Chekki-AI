@@ -11,6 +11,8 @@ import { LoginModal } from './components/LoginModal';
 import { DebugConsole } from './components/DebugConsole';
 import { SplashScreen } from './components/SplashScreen';
 import { LegalModal } from './components/LegalModal';
+import { MobileAppBanner } from './components/MobileAppBanner';
+import SubscribePage from './src/pages/SubscribePage';
 import { AnalysisState, LegalType } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -18,6 +20,8 @@ import { MistakeProvider } from './contexts/MistakeContext';
 import { ChekkiMascot } from './components/Icons';
 import { analyzeWorksheet } from './services/geminiService';
 import { db } from './services/database';
+import { NativePurchases } from '@capgo/native-purchases';
+import { Capacitor } from '@capacitor/core';
 
 const SESSION_KEY = 'hw_last_session';
 const ONBOARDED_KEY = 'chekki_onboarded_v1';
@@ -97,6 +101,8 @@ function AppContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [lastImageData, setLastImageData] = useState<string | null>(null);
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
+  const [showSubscribePage, setShowSubscribePage] = useState(false);
+  const platform = Capacitor.getPlatform();
 
   // Global Confirmation State
   const [confirmDialog, setConfirmDialog] = useState<{ title: string, onConfirm: () => void } | null>(null);
@@ -109,6 +115,12 @@ function AppContent() {
     if (['terms', 'privacy', 'refund', 'youth', 'support'].includes(path)) {
       setShowSplash(false);
       setStandaloneLegal(path);
+    }
+
+    // /subscribe route — web only
+    if (window.location.pathname === '/subscribe' && Capacitor.getPlatform() === 'web') {
+      setShowSplash(false);
+      setShowSubscribePage(true);
     }
   }, []);
 
@@ -233,6 +245,12 @@ function AppContent() {
     }
   };
 
+  const translateError = (msg: string) => {
+    if (msg.includes('OFFLINE_ERROR')) return language === 'ko' ? "인터넷 연결을 확인해주세요." : "Please check your internet connection.";
+    if (msg.includes('NETWORK_ERROR')) return language === 'ko' ? "서버에 연결할 수 없습니다. 시뮬레이터 설정을 확인해주세요." : "Cannot connect to server. Check simulator setup.";
+    return msg;
+  };
+
   const handleScanAgain = () => {
     if (lastImageData) handleImageSelected(lastImageData, true);
     else handleReset(false);
@@ -268,6 +286,7 @@ function AppContent() {
   };
 
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  if (showSubscribePage && platform === 'web') return <SubscribePage />;
 
   return (
     <ErrorBoundary>
@@ -278,6 +297,8 @@ function AppContent() {
           </div>
         )}
         <Header onReset={() => handleReset(false)} />
+        {/* Web-only mobile download banner */}
+        {platform === 'web' && <MobileAppBanner />}
         <PaywallModal />
         <OdapNoteModal />
         <LoginModal />
@@ -346,9 +367,16 @@ function AppContent() {
                 <img src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png" alt="Chekki" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('error_title')}</h3>
-              <p className="text-zinc-400 mb-8 max-w-md mx-auto font-korean leading-relaxed">
-                {analysisState.errorMessage}
-              </p>
+              <div className="space-y-2 mb-8 max-w-md mx-auto">
+                <p className="text-zinc-400 font-korean leading-relaxed">
+                  {translateError(analysisState.errorMessage || "")}
+                </p>
+                {analysisState.errorMessage && analysisState.errorMessage.includes('NETWORK_ERROR') && (
+                  <p className="text-[10px] text-zinc-600 font-mono break-all opacity-50">
+                    {analysisState.errorMessage}
+                  </p>
+                )}
+              </div>
               <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
                 <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]">
                   {t('btn_scan_again_simple')}
@@ -427,7 +455,7 @@ function AppContent() {
                 <div className="space-y-1.5 text-[9px] md:text-[10px] text-zinc-500 font-medium font-korean">
                   <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '주소:' : 'Address:'}</span> 서울특별시 종로구 종로 347, 1413호(숭인동)</p>
                   <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '연락처:' : 'Phone:'}</span> 010-5371-9266</p>
-                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '이메일:' : 'Email:'}</span> jsn.benjamin@gmail.com</p>
+                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '이메일:' : 'Email:'}</span> chekkihelp@gmail.com</p>
                   <p className="pt-1"><span className="text-zinc-600 font-bold">{language === 'ko' ? '개인정보책임자:' : 'Privacy:'}</span> Jason Benjamin</p>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -8,23 +9,51 @@ interface Props {
 }
 
 export const BillingModal: React.FC<Props> = ({ onClose }) => {
-    const { user, upgradeToPro, cancelSubscription, setShowPaywall } = useAuth();
+    const { user, subscriptionRecord, cancelSubscription, setShowPaywall } = useAuth();
     const { language, t } = useLanguage();
     const isPro = user?.plan === 'pro';
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const platform = Capacitor.getPlatform();
 
     const formatDate = (isoStr?: string | null) => {
-        if (!isoStr) return "N/A";
+        if (!isoStr) return 'N/A';
         return new Date(isoStr).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+            year: 'numeric', month: 'long', day: 'numeric'
         });
+    };
+
+    const platformBadge = () => {
+        const p = subscriptionRecord?.subscription_platform;
+        if (!p || p === 'none') return null;
+        const labels: Record<string, string> = {
+            apple: '🍎 ' + t('sub_platformApple'),
+            google: '🤖 ' + t('sub_platformGoogle'),
+            web: '🌐 ' + t('sub_platformWeb'),
+        };
+        return (
+            <span className="text-[9px] bg-orange-500/10 border border-orange-500/20 text-orange-400 px-3 py-1 rounded-full font-black uppercase tracking-widest">
+                {labels[p] || p}
+            </span>
+        );
+    };
+
+    const cancelInstructions = () => {
+        if (subscriptionRecord?.subscription_platform === 'apple') {
+            return language === 'ko'
+                ? 'Apple 구독을 취소하려면 iPhone의 설정 > [본인 이름] > 구독으로 이동하세요.'
+                : 'To cancel your Apple subscription, go to Settings > [Your Name] > Subscriptions on your iPhone.';
+        }
+        if (subscriptionRecord?.subscription_platform === 'google') {
+            return language === 'ko'
+                ? 'Google Play 구독을 취소하려면 Google Play 스토어 > 구독으로 이동하세요.'
+                : 'To cancel your Google subscription, go to Google Play Store > Subscriptions.';
+        }
+        return null;
     };
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
             <div className="relative bg-zinc-900 rounded-[2rem] w-full max-w-2xl shadow-2xl border border-white/5 overflow-hidden animate-fade-in-up">
 
@@ -36,72 +65,54 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                     <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">✕</button>
                 </div>
 
-                <div className="p-12 flex flex-col items-center text-center space-y-6">
-                    <div className="w-24 h-24 rounded-full bg-orange-500/10 flex items-center justify-center text-5xl mb-4 animate-bounce">
+                <div className="p-10 flex flex-col items-center text-center space-y-5">
+                    <div className="w-20 h-20 rounded-full bg-orange-500/10 flex items-center justify-center text-4xl">
                         💳
                     </div>
 
                     {isPro ? (
                         <>
-                            <h3 className="text-3xl font-black text-white font-display uppercase tracking-tight">Active Subscription</h3>
-                            <div className="space-y-2 text-zinc-400 font-medium">
-                                <p>Plan: <span className="text-orange-500">Standard Pro (9,900원)</span></p>
-                                <p>Started: {formatDate(user.subscriptionStartedAt)}</p>
-                                <p>Next Billing: {formatDate(user.nextBillingDate)}</p>
+                            <h3 className="text-2xl font-black text-white font-display uppercase">Active Subscription</h3>
+                            {platformBadge()}
+                            <div className="space-y-1.5 text-zinc-400 font-medium text-sm">
+                                <p>Plan: <span className="text-orange-500">Chekki Pro</span></p>
+                                {user.subscriptionStartedAt && <p>Started: {formatDate(user.subscriptionStartedAt)}</p>}
+                                {user.nextBillingDate && <p>Next Billing: {formatDate(user.nextBillingDate)}</p>}
+                                {subscriptionRecord?.subscription_expiry_date && (
+                                    <p>Expires: {formatDate(subscriptionRecord.subscription_expiry_date)}</p>
+                                )}
+                                {user.isCanceled && (
+                                    <p className="text-red-400 text-xs font-bold mt-2">Canceled — access continues until expiry.</p>
+                                )}
                             </div>
-                            <button
-                                onClick={() => setShowCancelConfirm(true)}
-                                className="text-zinc-500 hover:text-red-500 text-[10px] font-black uppercase tracking-[0.2em] transition-colors mt-8"
-                            >
-                                Cancel Subscription
-                            </button>
+
+                            {/* Cancel instructions — platform-specific */}
+                            {cancelInstructions() && (
+                                <div className="bg-zinc-800/50 border border-white/5 rounded-2xl p-4 max-w-sm text-left">
+                                    <p className="text-[10px] text-zinc-400 leading-relaxed">{cancelInstructions()}</p>
+                                </div>
+                            )}
                         </>
                     ) : (
                         <>
-                            <h3 className="text-3xl font-black text-white font-display uppercase tracking-tight">
-                                {language === 'ko' ? '프로 요금제 구독' : 'Subscribe to Pro'}
+                            <h3 className="text-2xl font-black text-white font-display uppercase">
+                                {language === 'ko' ? '프로 구독' : 'Subscribe to Pro'}
                             </h3>
-                            <div className="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-6 w-full max-w-sm">
-                                <p className="text-white font-black text-2xl mb-1">9,900원 <span className="text-zinc-500 text-xs">/ 30일</span></p>
-                                <p className="text-zinc-400 text-[10px] font-medium leading-relaxed">
-                                    {language === 'ko'
-                                        ? "모든 AI 분석 도구와 오답 노트를 무제한으로 사용하세요."
-                                        : "Unlock all AI tools and unlimited review notes."}
-                                </p>
-                            </div>
-
+                            <p className="text-zinc-400 text-sm max-w-xs">
+                                {language === 'ko'
+                                    ? '모든 AI 기능을 무제한으로 사용하세요.'
+                                    : 'Unlock all AI tools with unlimited access.'}
+                            </p>
                             <button
-                                onClick={async () => {
-                                    if (!(window as any).IMP) return alert("Payment SDK not loaded.");
-                                    const { IMP } = window as any;
-                                    IMP.init("imp78430160"); // Actual PortOne merchant code
-
-                                    IMP.request_pay({
-                                        pg: "html5_inicis",
-                                        pay_method: "card",
-                                        merchant_uid: `mid_${new Date().getTime()}`,
-                                        name: "Chekki AI Standard Pro (30 Days)",
-                                        amount: 9900,
-                                        buyer_email: user?.email,
-                                        buyer_name: user?.name,
-                                        buyer_tel: "010-0000-0000",
-                                    }, async (rsp: any) => {
-                                        if (rsp.success) {
-                                            const success = await upgradeToPro();
-                                            if (success) alert(language === 'ko' ? "결제가 완료되었습니다!" : "Payment successful!");
-                                        } else {
-                                            alert(language === 'ko' ? `결제 실패: ${rsp.error_msg}` : `Payment failed: ${rsp.error_msg}`);
-                                        }
-                                    });
-                                }}
-                                className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
+                                onClick={() => { onClose(); setShowPaywall(true); }}
+                                className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
                             >
-                                {language === 'ko' ? '9,900원 결제하기' : 'Pay 9,900 KRW'}
+                                {language === 'ko' ? '구독 시작하기' : 'View Plans'}
                             </button>
                         </>
                     )}
 
-                    <div className="h-px w-12 bg-zinc-800 my-4"></div>
+                    <div className="h-px w-12 bg-zinc-800" />
                     <button
                         onClick={onClose}
                         className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
@@ -109,6 +120,30 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                         Back to App
                     </button>
                 </div>
+
+                {showCancelConfirm && (
+                    <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-md flex flex-col justify-center items-center p-8 text-center animate-fade-in z-50">
+                        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-3xl mb-6">⚠️</div>
+                        <h3 className="text-2xl font-black text-white font-display mb-2">Cancel Subscription?</h3>
+                        <p className="text-zinc-400 text-sm font-medium mb-8 max-w-sm">
+                            You will lose Pro access at the end of your billing cycle.
+                        </p>
+                        <div className="flex flex-col gap-3 w-full max-w-xs">
+                            <button
+                                onClick={async () => { await cancelSubscription(); setShowCancelConfirm(false); }}
+                                className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black transition-all active:scale-95"
+                            >
+                                Yes, Cancel
+                            </button>
+                            <button
+                                onClick={() => setShowCancelConfirm(false)}
+                                className="w-full bg-zinc-800 hover:bg-zinc-700 text-white py-4 rounded-xl font-black transition-all"
+                            >
+                                Keep Subscription
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

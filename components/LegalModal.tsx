@@ -121,7 +121,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p><strong>4. 개인정보의 보유 및 파기</strong><br />
                                             이용자가 계정 탈퇴를 요청할 경우 수집된 개인정보는 즉시 파기됩니다.</p>
 
-                                        <p>개인정보 관리책임자: Jason Benjamin (jsn.benjamin@gmail.com)</p>
+                                        <p>개인정보 관리책임자: Chekki 지원팀 (chekkihelp@gmail.com)</p>
                                     </div>
                                 </div>
                                 <div className="bg-white/5 p-5 rounded-xl border border-white/10">
@@ -143,7 +143,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p><strong>4. Data Retention & Deletion</strong><br />
                                             User data is retained until account deletion. You may delete your account and all associated data at any time through the app settings.</p>
 
-                                        <p>Data Protection Officer: Jason Benjamin (jsn.benjamin@gmail.com)</p>
+                                        <p>Data Protection Officer: Chekki Support Team (chekkihelp@gmail.com)</p>
                                     </div>
                                 </div>
                             </section>
@@ -165,7 +165,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p><strong>3. 구독 해지</strong><br />
                                             - 정기 결제 해지는 언제든지 가능하며, 해지 후에도 이미 결제된 남은 이용 기간(30일 중 잔여일) 동안은 서비스를 계속 이용하실 수 있습니다.</p>
 
-                                        <p>환불 문의: jsn.benjamin@gmail.com</p>
+                                        <p>환불 문의: chekkihelp@gmail.com</p>
                                     </div>
                                 </div>
                                 <div className="bg-white/5 p-5 rounded-xl border border-white/10">
@@ -181,7 +181,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p><strong>3. Cancellation</strong><br />
                                             - You can cancel recurring billing at any time. You will retain access to pro features for the remainder of your current 30-day billing cycle.</p>
 
-                                        <p>Inquiries: jsn.benjamin@gmail.com</p>
+                                        <p>Inquiries: chekkihelp@gmail.com</p>
                                     </div>
                                 </div>
                             </section>
@@ -198,7 +198,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p><strong>1. 기본 원칙</strong><br />서비스는 아동 및 청소년의 정서적 발달에 유해한 콘텐츠를 생성하거나 가공하지 않으며, 건전한 교육 환경을 제공하기 위해 노력합니다.</p>
                                         <p><strong>2. 유해 정보 차단</strong><br />AI 기술과 내부 모니터링을 통해 부적절한 언어, 폭력적 내용, 성인용 콘텐츠가 학습 보조 자료에 포함되지 않도록 원천적으로 차단합니다.</p>
                                         <p><strong>3. 피해 상담 및 고충 처리</strong><br />청소년 보호와 관련하여 건의사항이나 피해가 발생한 경우, 아래 이메일로 연락주시면 즉시 조치하도록 하겠습니다.</p>
-                                        <p>청소년 보호 책임자: Jason Benjamin (jsn.benjamin@gmail.com)</p>
+                                        <p>청소년 보호 책임자: Chekki 지원팀 (chekkihelp@gmail.com)</p>
                                     </div>
                                 </div>
                                 <div className="bg-white/5 p-5 rounded-xl border border-white/10">
@@ -208,7 +208,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p><strong>1. Core Principles</strong><br />We ensure that AI-generated educational materials are appropriate for youth and free from harmful emotional or psychological content.</p>
                                         <p><strong>2. Blocking Harmful Content</strong><br />We utilize AI safety filters and monitoring to proactively block inappropriate language, violence, or adult content from being processed or displayed.</p>
                                         <p><strong>3. Reporting & Grievances</strong><br />For any concerns regarding youth safety or to report inappropriate content, please contact our Youth Protection Officer.</p>
-                                        <p>Youth Protection Officer: Jason Benjamin (jsn.benjamin@gmail.com)</p>
+                                        <p>Youth Protection Officer: Chekki Support Team (chekkihelp@gmail.com)</p>
                                     </div>
                                 </div>
                             </section>
@@ -224,7 +224,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p>Chekki AI를 이용해 주셔서 감사합니다. 서비스 이용 중 궁금한 점이나 기술적인 도움이 필요하시면 언제든지 문의해 주세요.</p>
 
                                         <div className="space-y-2 bg-black/30 p-4 rounded-lg border border-white/5">
-                                            <p><strong>📧 이메일 문의:</strong> jsn.benjamin@gmail.com</p>
+                                            <p><strong>📧 이메일 문의:</strong> chekkihelp@gmail.com</p>
                                             <p><strong>📞 전화 문의:</strong> 010-5371-9266</p>
                                             <p><strong>⏰ 운영 시간:</strong> 평일 10:00 - 18:00 (주말/공휴일 제외)</p>
                                         </div>
@@ -238,7 +238,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p>Thank you for using Chekki AI. If you have any questions or need technical assistance, please feel free to contact us.</p>
 
                                         <div className="space-y-2 bg-black/30 p-4 rounded-lg border border-white/5">
-                                            <p><strong>📧 Email Support:</strong> jsn.benjamin@gmail.com</p>
+                                            <p><strong>📧 Email Support:</strong> chekkihelp@gmail.com</p>
                                             <p><strong>📞 Phone Support:</strong> +82 10-5371-9266</p>
                                             <p><strong>⏰ Business Hours:</strong> Weekdays 10:00 AM - 6:00 PM KST</p>
                                         </div>
