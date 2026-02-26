@@ -29,6 +29,8 @@ export interface WorksheetItem {
   group_id?: string;
   bounding_box?: BoundingBox;
   custom_coords?: { top: number; left: number };
+  student_response?: string;
+  is_correct?: boolean;
 }
 
 export interface UserProfile {

@@ -11,6 +11,10 @@ import { Capacitor } from '@capacitor/core';
 const DEVELOPER_LOCAL_IP = 'localhost';
 const USE_LOCAL_BACKEND = false;
 
+// If you want to bypass the network entirely and use mock data (great for screenshots):
+export const MOCK_MODE = false;
+export const MOCK_DELAY = 1500;
+
 const getApiBaseUrl = () => {
     const platform = Capacitor.getPlatform();
 
