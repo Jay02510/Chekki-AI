@@ -63,7 +63,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
 
-            <div className="relative bg-zinc-900 rounded-3xl w-full max-w-lg h-[80vh] flex flex-col shadow-2xl border border-zinc-700 animate-fade-in-up">
+            <div className="relative bg-zinc-900 rounded-3xl w-full max-w-lg md:max-w-2xl h-[80vh] flex flex-col shadow-2xl border border-zinc-700 animate-fade-in-up">
 
                 {/* Header */}
                 <div className="bg-zinc-950 p-4 border-b border-zinc-800 flex justify-between items-center shrink-0">

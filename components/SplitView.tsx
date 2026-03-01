@@ -163,7 +163,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       <PremiumUpsellModal isOpen={upsellFeature !== null} onClose={() => setUpsellFeature(null)} featureName={upsellFeature || 'pronunciation'} />
 
       <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-[calc(100dvh-140px)] lg:h-[calc(100vh-250px)] min-h-[500px]">
-        <div className="w-full lg:w-1/2 h-[35%] lg:h-full">
+        <div className="w-full lg:w-[55%] h-[35%] lg:h-full">
           <WorksheetOverlay
             imageUrl={imageUrl}
             items={items}
@@ -172,7 +172,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
           />
         </div>
 
-        <div className="w-full lg:w-1/2 h-[65%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-inner" onClick={() => setActiveItemId(null)}>
+        <div className="w-full lg:w-[45%] h-[65%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-inner" onClick={() => setActiveItemId(null)}>
           <div className="px-5 py-4 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl flex flex-col shrink-0">
             <div className="flex justify-between items-center w-full">
               <div className="flex items-center gap-3">

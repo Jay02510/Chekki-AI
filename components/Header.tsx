@@ -50,7 +50,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
             onClick={onReset}
           >
             {!logoError ? (
-              <div className="relative w-12 h-12 md:w-32 md:h-32 flex-shrink-0">
+              <div className="relative w-12 h-12 md:w-32 md:h-32 lg:w-40 lg:h-40 flex-shrink-0">
                 <img
                   src={ASSETS.LOGO}
                   alt="Chekki AI"
@@ -59,16 +59,16 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                 />
               </div>
             ) : (
-              <div className="w-10 h-10 md:w-14 md:h-14 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
-                <ChekkiMascot className="w-6 h-6 text-white drop-shadow-md" mood="happy" />
+              <div className="w-10 h-10 md:w-14 md:h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
+                <ChekkiMascot className="w-6 h-6 lg:w-10 lg:h-10 text-white drop-shadow-md" mood="happy" />
               </div>
             )}
 
-            <div className="flex flex-col justify-center -ml-2 md:-ml-12 relative z-10 pt-1 min-w-0">
-              <h1 className="text-lg md:text-3xl font-black text-white leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-300 truncate">
+            <div className="flex flex-col justify-center -ml-2 md:-ml-12 lg:-ml-16 relative z-10 pt-1 min-w-0">
+              <h1 className="text-lg md:text-3xl lg:text-4xl font-black text-white leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-300 truncate">
                 Chekki<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">AI</span>
               </h1>
-              <span className="text-[7px] md:text-[11px] text-zinc-500 font-black tracking-widest md:tracking-[0.2em] uppercase mt-0.5 opacity-80 leading-tight truncate">
+              <span className="text-[7px] md:text-[11px] lg:text-[13px] text-zinc-500 font-black tracking-widest md:tracking-[0.2em] uppercase mt-0.5 opacity-80 leading-tight truncate">
                 {t('tagline')}
               </span>
             </div>

@@ -414,9 +414,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         <div className={`absolute top-0 left-1/4 -translate-x-1/2 w-full md:w-[1000px] h-[700px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[60px] md:blur-[180px] -z-10 pointer-events-none opacity-20 mix-blend-screen`}></div>
 
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2 px-2 md:px-0 mt-8 lg:mt-0">
-          <div className="relative w-full max-w-[180px] sm:max-w-[300px] md:max-w-[580px] aspect-square flex items-center justify-center">
+          <div className="relative w-full max-w-[180px] sm:max-w-[300px] md:max-w-[580px] lg:max-w-[720px] xl:max-w-[850px] aspect-square flex items-center justify-center lg:translate-x-10 lg:translate-y-6">
             <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[40px] md:blur-[140px] animate-pulse`}></div>
-            <div className="w-full h-full relative z-10 transition-transform scale-100 md:scale-110">
+            <div className="w-full h-full relative z-10 transition-transform scale-100 md:scale-110 lg:scale-[1.3] xl:scale-[1.4]">
               <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} alt="Chekki Hero" className="w-full h-full object-contain drop-shadow-[0_15px_40px_rgba(0,0,0,0.6)] animate-float filter brightness-110" />
             </div>
           </div>
@@ -427,7 +427,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             <span className={`w-1.5 h-1.5 rounded-full ${isNight ? 'bg-indigo-500 shadow-[0_0_8px_#6366f1]' : 'bg-orange-500 shadow-[0_0_8px_#f97316]'} animate-pulse`}></span>
             <span className="text-[8px] md:text-sm font-black text-zinc-200 tracking-[0.1em] uppercase">{t('hero_badge')}</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl md:text-7xl lg:text-9xl font-black text-white font-display mb-4 md:mb-14 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.2] break-keep">
+          <h1 className="text-2xl sm:text-4xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-white font-display mb-4 md:mb-14 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
             {isNight ? (
               <span className={`text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600`}>{t('hero_title_night')}</span>
             ) : (
