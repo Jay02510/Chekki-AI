@@ -231,12 +231,17 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="sticky bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md pt-4 pb-2 flex items-center justify-between border-t border-white/5">
-              <span className="text-emerald-500 text-[10px] font-black uppercase tracking-widest">{successMsg}</span>
-              <button onClick={handleSave} className="bg-white text-black px-10 py-4 rounded-2xl font-black text-sm active:scale-95 shadow-2xl transition-all">Save Changes</button>
-            </div>
-
+          {/* --- FIXED FOOTER --- */}
+          <div className="bg-zinc-900/95 backdrop-blur-md px-8 py-5 flex items-center justify-between border-t border-white/5 shrink-0">
+            <span className="text-emerald-500 text-[10px] font-black uppercase tracking-widest">{successMsg}</span>
+            <button
+              onClick={handleSave}
+              className="bg-white text-black px-10 py-4 rounded-2xl font-black text-sm active:scale-95 shadow-2xl transition-all hover:bg-zinc-100"
+            >
+              Save Changes
+            </button>
           </div>
         </div>
       </div >
