@@ -75,7 +75,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureNa
                     <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white text-lg shrink-0 shadow-lg">⭐</div>
                         <div className="flex-1">
-                            <h4 className="text-white font-bold text-xs uppercase tracking-wide">Chekki Pro</h4>
+                            <h4 className="text-white font-bold text-xs uppercase tracking-wide">Premium</h4>
                             <p className="text-[10px] text-zinc-400 font-medium">
                                 {language === 'ko'
                                     ? '발음 연습, 원어민 음성, 티칭 가이드 등 모든 프리미엄 기능'

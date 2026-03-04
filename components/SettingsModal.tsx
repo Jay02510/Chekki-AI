@@ -220,7 +220,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                     <p className="text-[11px] text-zinc-400 font-medium leading-relaxed">
                       {language === 'ko'
                         ? '구독하여 모든 프로 기능을 무제한으로 이용하세요.'
-                        : 'Subscribe to unlock all Pro features and unlimited AI magic.'}
+                        : 'Subscribe to unlock all premium features and unlimited AI magic.'}
                     </p>
                     {Capacitor.getPlatform() === 'web' ? (
                       <div className="space-y-4">

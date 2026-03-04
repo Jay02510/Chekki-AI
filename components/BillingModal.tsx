@@ -70,18 +70,20 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                         💳
                     </div>
 
-                    {isPro ? (
+                    {subscriptionRecord?.subscription_status === 'active' ? (
                         <>
                             <h3 className="text-2xl font-black text-white font-display uppercase">{t('billing_active')}</h3>
                             {platformBadge()}
                             <div className="space-y-1.5 text-zinc-400 font-medium text-sm">
-                                <p>{t('billing_plan')}: <span className="text-orange-500">Chekki Pro</span></p>
-                                {user.subscriptionStartedAt && <p>{t('billing_started')}: {formatDate(user.subscriptionStartedAt)}</p>}
-                                {user.nextBillingDate && <p>{t('billing_next')}: {formatDate(user.nextBillingDate)}</p>}
+                                <p>{t('billing_plan')}: <span className="text-orange-500">
+                                    {subscriptionRecord.apple_product_id === 'com.chekkiai.app.yearly' ? t('sub_yearly') : t('sub_monthly')}
+                                </span></p>
+                                {user?.subscriptionStartedAt && <p>{t('billing_started')}: {formatDate(user.subscriptionStartedAt)}</p>}
+                                {user?.nextBillingDate && <p>{t('billing_next')}: {formatDate(user.nextBillingDate)}</p>}
                                 {subscriptionRecord?.subscription_expiry_date && (
                                     <p>{t('billing_expires')}: {formatDate(subscriptionRecord.subscription_expiry_date)}</p>
                                 )}
-                                {user.isCanceled && (
+                                {user?.isCanceled && (
                                     <p className="text-red-400 text-xs font-bold mt-2">{t('billing_canceled_notice')}</p>
                                 )}
                             </div>
@@ -96,7 +98,7 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                     ) : (
                         <>
                             <h3 className="text-2xl font-black text-white font-display uppercase">
-                                {language === 'ko' ? '프로 구독' : 'Subscribe to Pro'}
+                                {t('sub_no_active')}
                             </h3>
                             <p className="text-zinc-400 text-sm max-w-xs">
                                 {language === 'ko'
@@ -107,7 +109,7 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                                 onClick={() => { onClose(); setShowPaywall(true); }}
                                 className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
                             >
-                                {language === 'ko' ? '구독 시작하기' : 'View Plans'}
+                                {t('sub_subscribe_now')}
                             </button>
                         </>
                     )}

@@ -16,7 +16,7 @@ const translations = {
     login: "Try Magic Scan",
     logout: "Log Out",
     scans: "Magic Scans",
-    pro_plan: "Pro Magic 🚀",
+    pro_plan: "Premium 🚀",
 
     // Viral Sharing
     share_title: "Spread the Peace 🕊️",
@@ -40,7 +40,7 @@ const translations = {
     pay_cancel_notice: "Subscriptions may be cancelled anytime from the My Page section.",
 
     // --- Subscription System ---
-    sub_title: "Chekki Pro",
+    sub_title: "Premium",
     sub_subtitle: "Unlimited AI homework magic",
     sub_monthly: "Monthly",
     sub_yearly: "Yearly",
@@ -111,7 +111,7 @@ const translations = {
     billing_canceled_notice: "Canceled — access continues until expiry.",
     billing_back: "Back to App",
     billing_cancel_btn: "Cancel Subscription?",
-    billing_cancel_desc: "You will lose Pro access at the end of your billing cycle.",
+    billing_cancel_desc: "You will lose premium access at the end of your billing cycle.",
     billing_cancel_yes: "Yes, Cancel",
     billing_cancel_no: "Keep Subscription",
 
@@ -146,7 +146,7 @@ const translations = {
     lbl_share_ideas: "Share Ideas",
     lbl_quick_guide: "Quick Guide",
     lbl_resource: "Resource",
-    lbl_pro_active: "Pro Magic Active",
+    lbl_pro_active: "Premium Active",
     lbl_magic_left: "Magic Left",
     lbl_lighting: "Lighting",
     lbl_flat: "Flat",
@@ -171,7 +171,7 @@ const translations = {
     onb_2_desc: "Answers appear right on top of the worksheet.",
     onb_2_btn: "Got it!",
     onb_academy_title: "Academy Authorized",
-    onb_academy_desc: "Enter your School code to unlock all Pro features.",
+    onb_academy_desc: "Enter your School code to unlock all premium features.",
     onb_3_title: "Safe & Private",
     onb_3_desc: "Images are never stored. Privacy is our priority.",
     onb_3_btn: "Start Now",
@@ -263,8 +263,8 @@ const translations = {
     sec_point_4: "Safe for kids",
 
     // Paywall
-    pw_title: "Chekki Pro Access",
-    pw_desc: "Unlock all pro features immediately and enjoy the full magic of Chekki.",
+    pw_title: "Premium Access",
+    pw_desc: "Unlock all premium features immediately and enjoy the full magic of Chekki.",
     subs_coming_soon: "Full Access Included",
     beta_access_title: "Redeem Access Code",
 
@@ -308,7 +308,7 @@ const translations = {
     login: "체험 시작하기",
     logout: "로그아웃",
     scans: "매직 스캔",
-    pro_plan: "프로 매직 🚀",
+    pro_plan: "프리미엄 🚀",
 
     // Viral Sharing
     share_title: "평화를 선물하세요 🕊️",
@@ -403,7 +403,7 @@ const translations = {
     billing_canceled_notice: "구독이 해지되었습니다. 만료일까지는 모든 기능을 이용하실 수 있습니다.",
     billing_back: "앱으로 돌아가기",
     billing_cancel_btn: "정말 구독을 해지하시겠습니까?",
-    billing_cancel_desc: "해지 시 다음 결제 주기가 끝난 후 프로 기능을 이용하실 수 없게 됩니다.",
+    billing_cancel_desc: "해지 시 다음 결제 주기가 끝난 후 프리미엄 기능을 이용하실 수 없게 됩니다.",
     billing_cancel_yes: "네, 해지합니다",
     billing_cancel_no: "구독 유지하기",
 
@@ -438,7 +438,7 @@ const translations = {
     lbl_share_ideas: "의견 보내기",
     lbl_quick_guide: "사용 가이드",
     lbl_resource: "학부모 자료",
-    lbl_pro_active: "프로 마법 활성화됨",
+    lbl_pro_active: "프리미엄 활성화됨",
     lbl_magic_left: "남은 마법",
     lbl_lighting: "밝게",
     lbl_flat: "수평",
@@ -555,8 +555,8 @@ const translations = {
     sec_point_4: "자녀 안심 서비스",
 
     // Paywall
-    pw_title: "채키 프로 액세스",
-    pw_desc: "지금 바로 프로 기능을 활성화하고 채키의 모든 마법을 경험해보세요.",
+    pw_title: "프리미엄 액세스",
+    pw_desc: "지금 바로 프리미엄 기능을 활성화하고 채키의 모든 마법을 경험해보세요.",
     subs_coming_soon: "모든 기능 포함됨",
     beta_access_title: "액세스 코드 입력",
 
