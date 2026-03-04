@@ -229,15 +229,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteAccount = async () => {
     if (!firebaseUser) return;
-    await db.updateUser(firebaseUser.uid, { name: 'Deleted User' });
-    await deleteUser(firebaseUser);
-    setUserProfile(null);
-    setFirebaseUser(null);
-    setSubscriptionRecord(null);
-    subscriptionService.clearCache();
+    try {
+      await db.updateUser(firebaseUser.uid, { name: 'Deleted User' });
+      await deleteUser(firebaseUser);
+    } catch (e: any) {
+      console.error('Account deletion error:', e);
+      // If re-authentication is needed, Firebase will throw 'auth/requires-recent-login'
+      if (e.code === 'auth/requires-recent-login') {
+        throw new Error("Sensitive operation. Please log out and log back in before deleting your account.");
+      }
+      throw e;
+    } finally {
+      setUserProfile(null);
+      setFirebaseUser(null);
+      setSubscriptionRecord(null);
+      subscriptionService.clearCache();
+    }
   };
 
-  const checkScanLimit = (): boolean => true;
+  const checkScanLimit = (): boolean => {
+    if (!userProfile || userProfile.plan === 'pro') return true;
+
+    const today = new Date().toISOString().split('T')[0];
+    const isNewDay = userProfile.lastScanDate !== today;
+
+    const currentScans = isNewDay ? 0 : userProfile.scansUsedToday;
+    const limit = userProfile.maxScansPerDay || FREE_DAILY_LIMIT;
+
+    if (currentScans >= limit) {
+      setShowPaywall(true);
+      return false;
+    }
+    return true;
+  };
 
   const incrementScan = async (): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return true;

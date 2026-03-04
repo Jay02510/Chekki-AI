@@ -13,8 +13,6 @@ export const LoginModal: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [schoolCode, setSchoolCode] = useState('');
-  const [showSchoolField, setShowSchoolField] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +32,7 @@ export const LoginModal: React.FC = () => {
         if (!name.trim()) throw new Error("Please enter your name.");
         if (!email.includes('@')) throw new Error("Please enter a valid email address.");
         if (password.length < 6) throw new Error("Password must be at least 6 characters.");
-        await signUp(name, email, password, schoolCode.trim());
+        await signUp(name, email, password);
       } else if (viewMode === 'forgot') {
         await sendResetEmail(email);
         setSuccess("Check your inbox for a password reset link!");
@@ -132,31 +130,6 @@ export const LoginModal: React.FC = () => {
                 </div>
               )}
 
-              {viewMode === 'signup' && (
-                <div className="pt-1">
-                  {!showSchoolField ? (
-                    <button
-                      type="button"
-                      onClick={() => setShowSchoolField(true)}
-                      className="text-[10px] font-black text-orange-500 uppercase tracking-widest hover:text-orange-400 transition-colors flex items-center gap-2 px-1 py-1"
-                    >
-                      🏷️ Use Access Code
-                    </button>
-                  ) : (
-                    <div className="relative group animate-fade-in-up">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">🏷️</span>
-                      <input
-                        type="text"
-                        value={schoolCode}
-                        onChange={(e) => setSchoolCode(e.target.value.toUpperCase())}
-                        placeholder="Enter Code (e.g. CHEKKI40 or POLY10)"
-                        className="w-full bg-orange-500/5 border border-orange-500/30 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-orange-500 transition-colors font-mono tracking-widest text-[10px]"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-
               <button type="submit" disabled={isLoading} className="w-full bg-brand-orange hover:bg-orange-600 text-white font-black py-4 rounded-xl shadow-xl shadow-orange-500/20 transform active:scale-95 disabled:opacity-50 transition-all text-base mt-3">
                 {isLoading ? 'Processing...' : (viewMode === 'login' ? 'Log In' : viewMode === 'signup' ? 'Sign Up' : 'Send Reset Link')}
               </button>
@@ -167,7 +140,6 @@ export const LoginModal: React.FC = () => {
                 onClick={() => {
                   if (viewMode === 'forgot') setViewMode('login');
                   else setViewMode(viewMode === 'login' ? 'signup' : 'login');
-                  setShowSchoolField(false);
                 }}
                 className="text-zinc-400 text-[11px] hover:text-white font-bold transition-colors"
               >

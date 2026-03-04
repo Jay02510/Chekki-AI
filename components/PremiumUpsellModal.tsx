@@ -10,27 +10,10 @@ interface Props {
 }
 
 export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureName = 'pronunciation' }) => {
-    const { upgradeToPro, setShowPaywall } = useAuth();
-    const { language, t } = useLanguage();
-
-    const [betaCode, setBetaCode] = useState('');
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [error, setError] = useState(false);
+    const { setShowPaywall } = useAuth();
+    const { language } = useLanguage();
 
     if (!isOpen) return null;
-
-    const handleRedeem = async () => {
-        if (!betaCode) return;
-        setIsProcessing(true);
-        setError(false);
-        const success = await upgradeToPro(betaCode);
-        if (success) {
-            onClose();
-        } else {
-            setError(true);
-            setIsProcessing(false);
-        }
-    };
 
     const featureInfo = {
         pronunciation: {
@@ -103,7 +86,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureNa
                 </div>
 
                 {/* Action Buttons */}
-                <div className="px-6 pb-8 space-y-3">
+                <div className="px-6 pb-8">
                     {/* Primary CTA — opens PaywallModal which handles platform detection */}
                     <button
                         onClick={() => {
@@ -115,39 +98,6 @@ export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureNa
                         <span>💳</span>
                         {language === 'ko' ? '구독 옵션 보기' : 'View Subscription Options'}
                     </button>
-
-                    {/* Access Code */}
-                    <div className="space-y-3 pb-4">
-                        <div className="flex items-center gap-3 py-2">
-                            <div className="h-px flex-1 bg-white/5" />
-                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{language === 'ko' ? '또는' : 'OR'}</span>
-                            <div className="h-px flex-1 bg-white/5" />
-                        </div>
-
-                        <div className="relative group">
-                            <input
-                                type="text"
-                                value={betaCode}
-                                onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
-                                placeholder={language === 'ko' ? '액세스 코드 입력' : 'ENTER ACCESS CODE'}
-                                className={`w-full bg-black/40 border ${error ? 'border-red-500' : 'border-zinc-700'} rounded-xl px-4 py-3 text-white text-center font-mono tracking-widest outline-none focus:border-orange-500 text-sm`}
-                            />
-                        </div>
-
-                        <button
-                            onClick={handleRedeem}
-                            disabled={isProcessing || !betaCode}
-                            className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-black text-xs uppercase tracking-[0.2em] transition-all border border-white/10"
-                        >
-                            {isProcessing ? '...' : (language === 'ko' ? '코드 사용하기' : 'Redeem Access')}
-                        </button>
-
-                        {error && (
-                            <p className="text-center text-red-400 text-[10px] font-black uppercase tracking-widest mt-2">
-                                {language === 'ko' ? '유효하지 않은 코드입니다' : 'Invalid code'}
-                            </p>
-                        )}
-                    </div>
                 </div>
             </div>
         </div>

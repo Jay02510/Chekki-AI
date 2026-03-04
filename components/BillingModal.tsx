@@ -60,7 +60,7 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                 <div className="bg-zinc-950 px-8 py-6 border-b border-white/5 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <span className="text-2xl">💳</span>
-                        <h2 className="text-2xl font-black text-white font-display">Billing & Subscription</h2>
+                        <h2 className="text-2xl font-black text-white font-display">{t('billing_title')}</h2>
                     </div>
                     <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">✕</button>
                 </div>
@@ -72,17 +72,17 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
 
                     {isPro ? (
                         <>
-                            <h3 className="text-2xl font-black text-white font-display uppercase">Active Subscription</h3>
+                            <h3 className="text-2xl font-black text-white font-display uppercase">{t('billing_active')}</h3>
                             {platformBadge()}
                             <div className="space-y-1.5 text-zinc-400 font-medium text-sm">
-                                <p>Plan: <span className="text-orange-500">Chekki Pro</span></p>
-                                {user.subscriptionStartedAt && <p>Started: {formatDate(user.subscriptionStartedAt)}</p>}
-                                {user.nextBillingDate && <p>Next Billing: {formatDate(user.nextBillingDate)}</p>}
+                                <p>{t('billing_plan')}: <span className="text-orange-500">Chekki Pro</span></p>
+                                {user.subscriptionStartedAt && <p>{t('billing_started')}: {formatDate(user.subscriptionStartedAt)}</p>}
+                                {user.nextBillingDate && <p>{t('billing_next')}: {formatDate(user.nextBillingDate)}</p>}
                                 {subscriptionRecord?.subscription_expiry_date && (
-                                    <p>Expires: {formatDate(subscriptionRecord.subscription_expiry_date)}</p>
+                                    <p>{t('billing_expires')}: {formatDate(subscriptionRecord.subscription_expiry_date)}</p>
                                 )}
                                 {user.isCanceled && (
-                                    <p className="text-red-400 text-xs font-bold mt-2">Canceled — access continues until expiry.</p>
+                                    <p className="text-red-400 text-xs font-bold mt-2">{t('billing_canceled_notice')}</p>
                                 )}
                             </div>
 
@@ -117,29 +117,29 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                         onClick={onClose}
                         className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
                     >
-                        Back to App
+                        {t('billing_back')}
                     </button>
                 </div>
 
                 {showCancelConfirm && (
                     <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-md flex flex-col justify-center items-center p-8 text-center animate-fade-in z-50">
                         <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-3xl mb-6">⚠️</div>
-                        <h3 className="text-2xl font-black text-white font-display mb-2">Cancel Subscription?</h3>
+                        <h3 className="text-2xl font-black text-white font-display mb-2">{t('billing_cancel_btn')}</h3>
                         <p className="text-zinc-400 text-sm font-medium mb-8 max-w-sm">
-                            You will lose Pro access at the end of your billing cycle.
+                            {t('billing_cancel_desc')}
                         </p>
                         <div className="flex flex-col gap-3 w-full max-w-xs">
                             <button
                                 onClick={async () => { await cancelSubscription(); setShowCancelConfirm(false); }}
                                 className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black transition-all active:scale-95"
                             >
-                                Yes, Cancel
+                                {t('billing_cancel_yes')}
                             </button>
                             <button
                                 onClick={() => setShowCancelConfirm(false)}
                                 className="w-full bg-zinc-800 hover:bg-zinc-700 text-white py-4 rounded-xl font-black transition-all"
                             >
-                                Keep Subscription
+                                {t('billing_cancel_no')}
                             </button>
                         </div>
                     </div>

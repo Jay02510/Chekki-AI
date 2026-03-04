@@ -137,14 +137,14 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                           onClick={() => { setShowUserMenu(false); setShowSettings(true); }}
                           className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-lg transition-colors flex items-center gap-3 leading-tight"
                         >
-                          <span>⚙️</span> Settings
+                          <span>⚙️</span> {t('nav_settings')}
                         </button>
                         <button
                           onClick={() => { setShowUserMenu(false); setShowBilling(true); }}
                           className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-lg transition-colors flex items-center justify-between group leading-tight"
                         >
                           <div className="flex items-center gap-3">
-                            <span>💳</span> Billing
+                            <span>💳</span> {t('nav_billing')}
                           </div>
                         </button>
                       </div>
