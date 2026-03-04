@@ -13,7 +13,7 @@ const translations = {
   en: {
     app_name: "Chekki AI",
     tagline: "Grading by Chekki, Praise by You",
-    login: "Start Free",
+    login: "Try Magic Scan",
     logout: "Log Out",
     scans: "Magic Scans",
     pro_plan: "Pro Magic 🚀",
@@ -27,8 +27,8 @@ const translations = {
     // Guest Mode CTAs
     hero_guest_cta: "Try Guest Scan",
     login_guest_link: "Not ready? Try 1 scan as guest",
-    guest_scan_badge: "Free Magic Scan Available",
-    guest_used_title: "Free Scan Used!",
+    guest_scan_badge: "Magic Scan Available",
+    guest_used_title: "Magic Scan Used!",
     guest_used_desc: "You've seen the magic. Sign up now for more scans and unlock full scripts and audio!",
 
     // Payments & Compliance
@@ -132,7 +132,7 @@ const translations = {
     hero_title_night: "Long day?\nLet Chekki handle the grading.",
     hero_desc: "The homework war is over. Get instant answer overlays and 'Teaching Scripts' so you can teach with confidence and love. No more guessing.",
     hero_desc_night: "Enjoy your 'parenting retirement' 5 minutes earlier. Chekki handles the answers while you provide the hugs.",
-    hero_cta_btn: "Start for Free Today",
+    hero_cta_btn: "Start Now",
 
     // Camera View / Dashboard
     drop_title: "Snap the Worksheet",
@@ -160,7 +160,7 @@ const translations = {
 
     // Usage Limits
     refill_title: "Refill Required!",
-    refill_desc: "Daily free scans used. We refill your magic at midnight!",
+    refill_desc: "Daily scans used. We refill your magic at midnight!",
     refill_cta: "Unlock Unlimited Magic",
 
     // Onboarding
@@ -171,7 +171,7 @@ const translations = {
     onb_2_desc: "Answers appear right on top of the worksheet.",
     onb_2_btn: "Got it!",
     onb_academy_title: "Academy Authorized",
-    onb_academy_desc: "Enter your School code to unlock all Pro features for free.",
+    onb_academy_desc: "Enter your School code to unlock all Pro features.",
     onb_3_title: "Safe & Private",
     onb_3_desc: "Images are never stored. Privacy is our priority.",
     onb_3_btn: "Start Now",
@@ -287,7 +287,7 @@ const translations = {
     subs_cancelAnytime: "Cancel anytime",
     subs_bestValue: "Best Value",
     subs_mostPopular: "Most Popular",
-    subs_trialTitle: "7-Day Free Trial",
+    subs_trialTitle: "7-Day Trial",
     subs_trialSubtitle: "Subscription automatically starts after trial",
     subs_terms: "Subscription is billed to your iTunes account and will automatically renew unless cancelled at least 24 hours before the end of the current period. Manage or cancel your subscription in your account settings after purchase.",
     subs_manageTitle: "Manage Subscription",
@@ -305,22 +305,22 @@ const translations = {
   ko: {
     app_name: "채키 AI",
     tagline: "정답은 채키가, 칭찬은 부모님이",
-    login: "무료로 시작하기",
+    login: "체험 시작하기",
     logout: "로그아웃",
-    scans: "번의 마법 남음",
-    pro_plan: "마법 프로 플랜 🚀",
+    scans: "매직 스캔",
+    pro_plan: "프로 매직 🚀",
 
     // Viral Sharing
-    share_title: "이 평화를 다른 분들께도 🕊️",
-    share_desc: "영유 맘 카페에 채키 사용 후기를 남겨주세요! 숙제 시간이 훨씬 행복해집니다.",
-    share_btn: "맘 카페 양식 복사하기",
-    share_toast: "양식이 복사되었습니다! 카페에 바로 올려보세요.",
+    share_title: "평화를 선물하세요 🕊️",
+    share_desc: "다른 부모님들도 평화를 찾을 수 있게 도와주세요. 맘카페에 바로 올릴 수 있는 템플릿을 복사해 드릴게요!",
+    share_btn: "카페 템플릿 복사",
+    share_toast: "템플릿이 복사되었습니다! 카페에 바로 붙여넣으세요.",
 
     // Guest Mode CTAs
-    hero_guest_cta: "로그인 없이 체험하기",
-    login_guest_link: "회원가입 없이 1회 무료 체험하기",
-    guest_scan_badge: "무료 마법 1회 사용 가능",
-    guest_used_title: "무료 체험 완료!",
+    hero_guest_cta: "게스트 스캔 체험",
+    login_guest_link: "회원가입 없이 1회 체험하기",
+    guest_scan_badge: "마법 스캔 1회 사용 가능",
+    guest_used_title: "체험 완료!",
     guest_used_desc: "채키의 마법을 보셨나요? 가입하고 더 많은 스캔과 티칭 가이드를 확인하세요!",
 
     // Payments & Compliance
@@ -452,7 +452,7 @@ const translations = {
 
     // Usage Limits
     refill_title: "마법 충전 필요!",
-    refill_desc: "오늘의 무료 스캔을 모두 사용했어요. 내일 다시 충전됩니다!",
+    refill_desc: "오늘의 스캔을 모두 사용했어요. 내일 다시 충전됩니다!",
     refill_cta: "무제한 마법 시작하기",
 
     // Onboarding
@@ -463,7 +463,7 @@ const translations = {
     onb_2_desc: "사진만 찍으면 종이 위에 정답이 바로 나타나요.",
     onb_2_btn: "확인했어요!",
     onb_academy_title: "우리 아이 학원과 함께",
-    onb_academy_desc: "학원 코드를 입력하면 모든 기능을 무료로 이용할 수 있어요.",
+    onb_academy_desc: "학원 코드를 입력하면 모든 기능을 이용할 수 있어요.",
     onb_3_title: "안심하고 사용하세요",
     onb_3_desc: "사진은 저장되지 않고 즉시 삭제됩니다.",
     onb_3_btn: "시작하기",
@@ -579,7 +579,7 @@ const translations = {
     subs_cancelAnytime: "언제든지 취소 가능",
     subs_bestValue: "최고의 가치",
     subs_mostPopular: "가장 인기 있는",
-    subs_trialTitle: "7일 무료 체험",
+    subs_trialTitle: "7일 체험",
     subs_trialSubtitle: "체험 후 자동으로 구독이 시작됩니다",
     subs_terms: "구독 시 서비스 이용약관 및 개인정보 처리방침에 동의하게 됩니다. 구독은 iTunes 계정으로 청구되며, 현재 구독 기간 종료 최소 24시간 전에 취소하지 않으면 자동으로 갱신됩니다. 구독 관리 및 자동 갱신 해제는 구매 후 계정 설정에서 가능합니다.",
     subs_manageTitle: "구독 관리",
