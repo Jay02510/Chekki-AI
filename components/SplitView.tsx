@@ -162,8 +162,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       {reportContext && <FeedbackModal context={reportContext} onClose={() => setReportContext(null)} />}
       <PremiumUpsellModal isOpen={upsellFeature !== null} onClose={() => setUpsellFeature(null)} featureName={upsellFeature || 'pronunciation'} />
 
-      <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-[calc(100dvh-140px)] lg:h-[calc(100vh-250px)] min-h-[500px]">
-        <div className="w-full lg:w-[55%] h-[35%] lg:h-full">
+      <div className="flex flex-col lg:flex-row gap-4 md:gap-8 h-[calc(100dvh-140px)] lg:h-[calc(100vh-280px)] min-h-[600px]">
+        <div className="w-full lg:w-[50%] h-[40%] lg:h-full">
           <WorksheetOverlay
             imageUrl={imageUrl}
             items={items}
@@ -177,7 +177,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             <div className="flex justify-between items-center w-full">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-zinc-800 border border-white/5 flex items-center justify-center overflow-hidden shadow-xl">
-                  {!mascotError ? <img src={ASSETS.MASCOT_HAPPY} alt="Chekki" className="w-full h-full object-cover scale-110" onError={() => setMascotError(true)} /> : <span className="text-xl">🎓</span>}
+                  {!mascotError ? <img src={ASSETS.MASCOT_HAPPY} alt="Chekki" className="w-full h-full object-contain scale-105" onError={() => setMascotError(true)} /> : <span className="text-xl">🎓</span>}
                 </div>
                 <div>
                   <h3 className="font-black text-white font-display text-lg leading-none mb-0.5">{t('ws_results_title')}</h3>

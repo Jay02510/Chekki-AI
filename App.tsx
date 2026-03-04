@@ -424,11 +424,11 @@ function AppContent() {
         <footer className="w-full bg-zinc-950/50 border-t border-white/5 py-12 px-6">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center">
-                  <ChekkiMascot className="w-5 h-5 text-white" mood="happy" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                  <ChekkiMascot className="w-8 h-8 text-white" mood="happy" />
                 </div>
-                <h2 className="text-xl font-black text-white font-display">Chekki<span className="text-orange-500">AI</span></h2>
+                <h2 className="text-2xl font-black text-white font-display">Chekki<span className="text-orange-500">AI</span></h2>
               </div>
               <p className="text-zinc-500 text-xs font-medium leading-relaxed max-w-sm">
                 {language === 'ko'

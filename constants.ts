@@ -10,7 +10,7 @@ import { WorksheetAnalysis, ItemType } from "./types";
  */
 export const ASSETS = {
   VIDEO_INTRO: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/chekki-intro_y7hj7c.mp4`,
-  LOGO: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1765769939/chekki-logo_q5xeux.png`,
+  LOGO: './chekki-actual.png',
   MASCOT_HAPPY: './chekki-actual.png',
   MASCOT_THINKING: './chekki-actual.png',
   MASCOT_SCAN: './chekki-actual.png',

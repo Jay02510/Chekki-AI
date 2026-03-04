@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useLanguage } from '../contexts/LanguageContext';
+import { AppleLogo } from './AppleLogo';
+import { ChekkiMascot } from './Icons';
 
 const BANNER_DISMISSED_KEY = 'chekki_banner_dismissed_until';
 const APP_STORE_URL = 'https://apps.apple.com/app/id6741479840';
@@ -56,8 +58,8 @@ export const MobileAppBanner: React.FC = () => {
     return (
         <div className="fixed top-0 left-0 right-0 z-[200] bg-zinc-900 border-b border-white/10 px-4 py-3 flex items-center gap-3 shadow-xl animate-fade-in">
             {/* App icon */}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-xl shrink-0 shadow-lg">
-                ✅
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shrink-0 shadow-lg">
+                <ChekkiMascot className="w-8 h-8" mood="happy" />
             </div>
 
             {/* Text */}
@@ -77,7 +79,7 @@ export const MobileAppBanner: React.FC = () => {
                 rel="noopener noreferrer"
                 className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black px-3 py-2 rounded-xl transition-colors whitespace-nowrap"
             >
-                {mobilePlatform === 'ios' ? '🍎' : '🤖'} {language === 'ko' ? '다운로드' : 'Download'}
+                {mobilePlatform === 'ios' ? <AppleLogo className="w-4 h-4" /> : '🤖'} {language === 'ko' ? '다운로드' : 'Download'}
             </a>
 
             {/* Dismiss */}

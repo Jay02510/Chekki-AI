@@ -253,7 +253,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     <img
                       src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY}
                       alt="Chekki Mascot"
-                      className={`w-full h-full object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] filter brightness-110 ${isNight ? 'scale-[1.5] md:scale-[1.9]' : 'scale-110 md:scale-125'} transition-opacity duration-700 ${mascotLoaded ? 'opacity-100' : 'opacity-0'}`}
+                      className={`w-full h-full object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] filter brightness-110 ${isNight ? 'scale-[1.3] md:scale-[1.6] lg:scale-[1.8]' : 'scale-110 md:scale-125 lg:scale-[1.4]'} transition-opacity duration-700 ${mascotLoaded ? 'opacity-100' : 'opacity-0'}`}
                       onLoad={() => setMascotLoaded(true)}
                       onError={() => setImgError(true)}
                       loading="eager"
@@ -416,7 +416,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2 px-2 md:px-0 mt-8 lg:mt-0">
           <div className="relative w-full max-w-[180px] sm:max-w-[300px] md:max-w-[580px] lg:max-w-[720px] xl:max-w-[850px] aspect-square flex items-center justify-center lg:translate-x-10 lg:translate-y-6">
             <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[40px] md:blur-[140px] animate-pulse`}></div>
-            <div className="w-full h-full relative z-10 transition-transform scale-100 md:scale-110 lg:scale-[1.3] xl:scale-[1.4]">
+            <div className="w-full h-full relative z-10 transition-transform scale-100 md:scale-110 lg:scale-[1.2] xl:scale-[1.3]">
               <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} alt="Chekki Hero" className="w-full h-full object-contain drop-shadow-[0_15px_40px_rgba(0,0,0,0.6)] animate-float filter brightness-110" />
             </div>
           </div>
@@ -443,9 +443,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </p>
 
           <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center lg:justify-start items-center w-full max-w-md md:max-w-2xl mx-auto lg:mx-0">
-            <button onClick={openLoginModal} className="group bg-white text-black py-4 md:py-6 px-6 md:px-16 rounded-xl md:rounded-[2rem] font-black text-base md:text-3xl transition-all transform active:scale-95 shadow-[0_15px_40px_rgba(255,255,255,0.05)] font-display flex items-center justify-center gap-3 overflow-hidden w-full md:w-auto whitespace-nowrap min-w-fit">
+            <button onClick={openLoginModal} className="group bg-white text-black py-4 md:py-7 px-6 md:px-20 rounded-xl md:rounded-[2.5rem] font-black text-base md:text-4xl transition-all transform active:scale-95 shadow-[0_15px_40px_rgba(255,255,255,0.05)] font-display flex items-center justify-center gap-3 overflow-hidden w-full md:w-auto whitespace-nowrap min-w-fit">
               <span className="font-korean">{t('hero_cta_btn')}</span>
-              <span className="text-xl md:text-4xl transition-transform group-hover:translate-x-2">→</span>
+              <span className="text-xl md:text-5xl transition-transform group-hover:translate-x-2">→</span>
             </button>
             {!guestUsed && (
               <button

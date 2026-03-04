@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { subscriptionService, AppleProducts } from '../services/subscriptionService';
 import { Product } from '@capgo/native-purchases';
 import { LegalModal } from './LegalModal';
+import { AppleLogo } from './AppleLogo';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -93,44 +94,64 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
 
     return (
         <div className="space-y-6">
+            {/* Benefits List */}
+            <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-6 md:p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-x-8 md:gap-y-6">
+                    {[
+                        { icon: '🪄', key: 'bene_unlimited' },
+                        { icon: '🔊', key: 'bene_pronounce' },
+                        { icon: '📖', key: 'bene_scripts' },
+                        { icon: '⭐', key: 'bene_stamps' },
+                        { icon: '🛡️', key: 'bene_anytime' },
+                    ].map((item) => (
+                        <div key={item.key} className="flex items-center gap-4 group">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-xl md:text-2xl group-hover:scale-110 transition-transform">
+                                {item.icon}
+                            </div>
+                            <span className="text-sm md:text-lg font-bold text-zinc-200">{t(item.key as any)}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* Plans */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                 {/* Monthly */}
                 <button
                     onClick={() => setSelectedProduct(AppleProducts.MONTHLY)}
-                    className={`text-left rounded-[2rem] p-6 border-2 transition-all relative overflow-hidden group ${selectedProduct === AppleProducts.MONTHLY
+                    className={`text-left rounded-[2rem] p-6 md:p-8 border-2 transition-all relative overflow-hidden group ${selectedProduct === AppleProducts.MONTHLY
                         ? 'bg-orange-500/10 border-orange-500 shadow-[0_20px_40px_rgba(249,115,22,0.1)]'
                         : 'bg-white/5 border-white/10 hover:border-white/20'}`}
                 >
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_monthly')}</p>
+                    <p className="text-[10px] md:text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_monthly')}</p>
                     <div className="flex items-baseline gap-1">
-                        <p className="text-3xl font-black text-white">
+                        <p className="text-3xl md:text-4xl font-black text-white">
                             {monthlyProduct?.priceString || '$4.99'}
                         </p>
-                        <p className="text-sm font-bold text-zinc-500">{t('sub_perMonth')}</p>
+                        <p className="text-sm md:text-base font-bold text-zinc-500">{t('sub_perMonth')}</p>
                     </div>
                 </button>
 
                 {/* Yearly */}
                 <button
                     onClick={() => setSelectedProduct(AppleProducts.YEARLY)}
-                    className={`text-left rounded-[2.5rem] p-8 border-2 transition-all relative overflow-hidden group ${selectedProduct === AppleProducts.YEARLY
+                    className={`text-left rounded-[2.5rem] p-8 md:p-10 border-2 transition-all relative overflow-hidden group ${selectedProduct === AppleProducts.YEARLY
                         ? 'bg-orange-500/10 border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.15)] scale-[1.02]'
                         : 'bg-white/5 border-white/10 hover:border-white/20'}`}
                 >
                     <div className="absolute top-4 right-6">
-                        <span className="text-[9px] bg-emerald-500 text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                        <span className="text-[9px] md:text-xs bg-emerald-500 text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
                             {t('sub_bestValue')}
                         </span>
                     </div>
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_yearly')}</p>
+                    <p className="text-[10px] md:text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_yearly')}</p>
                     <div className="flex items-baseline gap-1">
-                        <p className="text-4xl font-black text-white">
+                        <p className="text-4xl md:text-5xl font-black text-white">
                             {yearlyProduct?.priceString || '$39.99'}
                         </p>
-                        <p className="text-sm font-bold text-zinc-500">{t('sub_perYear')}</p>
+                        <p className="text-sm md:text-lg font-bold text-zinc-500">{t('sub_perYear')}</p>
                     </div>
-                    <p className="text-[10px] text-emerald-500 font-black uppercase mt-2 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                    <p className="text-[10px] md:text-xs text-emerald-500 font-black uppercase mt-2 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 leading-relaxed">
                         {language === 'ko' ? '기본 플랜 대비 33% 절약' : 'SAVE 33% OVER MONTHLY'} →
                     </p>
                 </button>
@@ -193,8 +214,8 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 
@@ -253,10 +274,9 @@ export const SubscriptionScreen: React.FC<Props> = ({ onClose }) => {
                 </h2>
                 <p className="text-zinc-400 text-sm font-medium">{t('sub_subtitle')}</p>
 
-                {/* Platform badge */}
                 <div className="mt-3 flex justify-center">
-                    <span className="text-[9px] bg-white/5 border border-white/10 text-zinc-500 px-3 py-1 rounded-full font-black uppercase tracking-widest">
-                        {platform === 'ios' ? '🍎 iOS' : platform === 'android' ? '🤖 Android' : '🌐 Web'}
+                    <span className="text-[9px] bg-white/5 border border-white/10 text-zinc-500 px-3 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1.5">
+                        {platform === 'ios' ? <><AppleLogo className="w-2.5 h-2.5" /> iOS</> : platform === 'android' ? '🤖 Android' : '🌐 Web'}
                     </span>
                 </div>
             </div>

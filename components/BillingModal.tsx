@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { AppleLogo } from './AppleLogo';
 
 interface Props {
     onClose: () => void;
@@ -25,14 +26,16 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
     const platformBadge = () => {
         const p = subscriptionRecord?.subscription_platform;
         if (!p || p === 'none') return null;
-        const labels: Record<string, string> = {
-            apple: '🍎 ' + t('sub_platformApple'),
-            google: '🤖 ' + t('sub_platformGoogle'),
-            web: '🌐 ' + t('sub_platformWeb'),
+        const badgeContent = () => {
+            if (p === 'apple') return <><AppleLogo className="w-2.5 h-2.5" /> {t('sub_platformApple')}</>;
+            if (p === 'google') return <>{'🤖 ' + t('sub_platformGoogle')}</>;
+            if (p === 'web') return <>{'🌐 ' + t('sub_platformWeb')}</>;
+            return p;
         };
+
         return (
-            <span className="text-[9px] bg-orange-500/10 border border-orange-500/20 text-orange-400 px-3 py-1 rounded-full font-black uppercase tracking-widest">
-                {labels[p] || p}
+            <span className="text-[9px] bg-orange-500/10 border border-orange-500/20 text-orange-400 px-3 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1.5">
+                {badgeContent()}
             </span>
         );
     };

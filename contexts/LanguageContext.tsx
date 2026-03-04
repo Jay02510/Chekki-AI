@@ -262,6 +262,13 @@ const translations = {
     sec_point_3: "Anonymous processing",
     sec_point_4: "Safe for kids",
 
+    // Benefits List
+    bene_unlimited: "Unlimited AI Magic Scans",
+    bene_pronounce: "Native English Pronunciation",
+    bene_scripts: "Step-by-Step Teaching Scripts",
+    bene_stamps: "Digital Stamps & Rewards",
+    bene_anytime: "Cancel Anytime",
+
     // Paywall
     pw_title: "Premium Access",
     pw_desc: "Unlock all premium features immediately and enjoy the full magic of Chekki.",
@@ -553,6 +560,13 @@ const translations = {
     sec_point_2: "데이터 암호화 전송",
     sec_point_3: "익명 분석 처리",
     sec_point_4: "자녀 안심 서비스",
+
+    // Benefits List
+    bene_unlimited: "무제한 AI 매직 스캔",
+    bene_pronounce: "원어민 영어 발음 듣기",
+    bene_scripts: "단계별 티칭 가이드 & 스크립트",
+    bene_stamps: "디지털 도장 및 보상",
+    bene_anytime: "언제든지 해지 가능",
 
     // Paywall
     pw_title: "프리미엄 액세스",

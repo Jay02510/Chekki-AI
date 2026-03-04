@@ -167,7 +167,10 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
                 <div className="bg-gray-50 px-6 py-2 border-b border-gray-200 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <button onClick={() => setIsDigitalMode(false)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${!isDigitalMode ? 'bg-zinc-800 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>Read / Print</button>
-                        <button onClick={() => setIsDigitalMode(true)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${isDigitalMode ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>✏️ Tablet / Trace</button>
+                        <button onClick={() => setIsDigitalMode(true)} className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] flex items-center gap-2 ${isDigitalMode ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}>
+                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            Tablet / Trace
+                        </button>
                     </div>
                     {isDigitalMode && (
                         <div className="flex items-center gap-3">
