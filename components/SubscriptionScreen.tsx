@@ -116,18 +116,18 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
             </div>
 
             {/* Plans */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-end">
                 {/* Monthly */}
                 <button
                     onClick={() => setSelectedProduct(AppleProducts.MONTHLY)}
-                    className={`text-left rounded-[2rem] p-6 md:p-6 border-2 transition-all relative overflow-hidden group flex flex-col items-center md:items-start text-center md:text-left ${selectedProduct === AppleProducts.MONTHLY
+                    className={`text-left rounded-[2rem] p-6 md:p-6 border-2 transition-all relative overflow-hidden group flex flex-col items-center lg:items-start text-center lg:text-left ${selectedProduct === AppleProducts.MONTHLY
                         ? 'bg-orange-500/10 border-orange-500 shadow-[0_20px_40px_rgba(249,115,22,0.1)]'
                         : 'bg-white/5 border-white/10 hover:border-white/20'}`}
                 >
-                    <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_monthly')}</p>
+                    <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1 truncate w-full">{t('sub_monthly')}</p>
                     <div className="flex items-baseline gap-1">
-                        <p className="text-2xl md:text-3xl font-black text-white">
-                            {SCREENSHOT_MODE ? t('sub_monthly') : (monthlyProduct?.priceString || '$4.99')}
+                        <p className={`font-black text-white ${SCREENSHOT_MODE ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
+                            {SCREENSHOT_MODE ? t('sub_monthly') : (monthlyProduct?.priceString || '$9.99')}
                         </p>
                         {!SCREENSHOT_MODE && <p className="text-xs md:text-sm font-bold text-zinc-500">{t('sub_perMonth')}</p>}
                     </div>
@@ -136,19 +136,19 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
                 {/* Yearly */}
                 <button
                     onClick={() => setSelectedProduct(AppleProducts.YEARLY)}
-                    className={`text-left rounded-[2.5rem] p-8 md:p-8 border-2 transition-all relative overflow-hidden group flex flex-col items-center md:items-start text-center md:text-left ${selectedProduct === AppleProducts.YEARLY
+                    className={`text-left rounded-[2.5rem] p-6 md:p-8 border-2 transition-all relative overflow-hidden group flex flex-col items-center lg:items-start text-center lg:text-left ${selectedProduct === AppleProducts.YEARLY
                         ? 'bg-orange-500/10 border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.15)] md:scale-[1.02]'
                         : 'bg-white/5 border-white/10 hover:border-white/20'}`}
                 >
-                    <div className="absolute top-3 right-3 md:top-4 md:right-4">
-                        <span className="text-[8px] md:text-[10px] bg-emerald-500 text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                    <div className="absolute top-2 right-2 md:top-4 md:right-4">
+                        <span className="text-[8px] md:text-[10px] bg-emerald-500 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
                             {t('sub_bestValue')}
                         </span>
                     </div>
-                    <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_yearly')}</p>
+                    <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1 truncate w-full">{t('sub_yearly')}</p>
                     <div className="flex items-baseline gap-1">
-                        <p className="text-3xl md:text-4xl font-black text-white">
-                            {SCREENSHOT_MODE ? t('sub_yearly') : (yearlyProduct?.priceString || '$39.99')}
+                        <p className={`font-black text-white ${SCREENSHOT_MODE ? 'text-2xl' : 'text-3xl md:text-4xl'}`}>
+                            {SCREENSHOT_MODE ? t('sub_yearly') : (yearlyProduct?.priceString || '$69.99')}
                         </p>
                         {!SCREENSHOT_MODE && <p className="text-xs md:text-sm font-bold text-zinc-500">{t('sub_perYear')}</p>}
                     </div>
@@ -193,27 +193,29 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
 
                     <div className="bg-white/5 rounded-3xl p-6 border border-white/5 space-y-4">
                         <p className="text-[10px] text-zinc-500 leading-relaxed text-center font-medium">
-                            {t('sub_disclosure')}
+                            {t('sub_disclosure')} {yearlyProduct && yearlyProduct.price ? `A ${yearlyProduct.priceString}/year subscription is equivalent to ${yearlyProduct.currencySymbol || '$'}${(yearlyProduct.price / 12).toFixed(2)}/month.` : 'A $69.99/year subscription is equivalent to $5.83/month.'}
                         </p>
 
                         <div className="flex justify-center gap-4 text-[10px] font-black uppercase tracking-widest">
-                            <a
-                                href="https://chekki-ai.vercel.app/privacy"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-orange-500 hover:underline"
+                            <button
+                                onClick={() => {
+                                    const event = new CustomEvent('show-legal', { detail: 'privacy' });
+                                    window.dispatchEvent(event);
+                                }}
+                                className="text-orange-500 hover:underline bg-transparent border-none p-0"
                             >
                                 {language === 'ko' ? '개인정보 처리방침' : 'Privacy Policy'}
-                            </a>
+                            </button>
                             <span className="text-zinc-800">|</span>
-                            <a
-                                href="https://chekki-ai.vercel.app/terms"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-orange-500 hover:underline"
+                            <button
+                                onClick={() => {
+                                    const event = new CustomEvent('show-legal', { detail: 'terms' });
+                                    window.dispatchEvent(event);
+                                }}
+                                className="text-orange-500 hover:underline bg-transparent border-none p-0"
                             >
                                 {language === 'ko' ? '이용약관' : 'Terms of Use'}
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>

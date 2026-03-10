@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "mobile": "npm run build && npx cap sync"
+    "mobile": "npm run build && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html && npx cap sync"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",

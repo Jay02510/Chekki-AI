@@ -33,13 +33,16 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
     }, 450);
 
     // Safety timeout
+    const isIPad = /iPad|Macintosh/i.test(navigator.userAgent) && (navigator.maxTouchPoints > 1);
+    const timeoutDuration = isIPad ? 2200 : 2800; // Faster for iPad to avoid 'stuck' feeling
+
     const exitTimer = setTimeout(() => {
       setIsExiting(true);
-    }, 2800);
+    }, timeoutDuration);
 
     const cleanupTimer = setTimeout(() => {
       onFinish();
-    }, 3100);
+    }, timeoutDuration + 300);
 
     return () => {
       clearInterval(featureInterval);

@@ -319,9 +319,9 @@
     .panel-headline {
       font-family: 'Fraunces', serif;
       font-weight: 900;
-      font-size: clamp(44px, 6vw, 92px);
-      line-height: 0.95;
-      letter-spacing: -0.05em;
+      font-size: clamp(32px, 4.5vw, 80px);
+      line-height: 1.0;
+      letter-spacing: -0.04em;
       margin-bottom: 28px;
       opacity: 0;
       transform: translateY(16px);
@@ -1163,7 +1163,27 @@
 
       .panel {
         width: 100% !important;
-        min-height: 50vh;
+        min-height: 55vh;
+      }
+
+      /* Reduce padding on mobile panels */
+      .panel-content {
+        padding: clamp(24px, 6vw, 48px) !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+      }
+
+      /* Left-align teachers panel on mobile */
+      .panel-teachers .eyebrow {
+        flex-direction: row !important;
+      }
+
+      .panel-teachers .features {
+        align-items: flex-start !important;
+      }
+
+      .panel-teachers .features li {
+        flex-direction: row !important;
       }
 
       .spine {
@@ -1179,8 +1199,68 @@
         width: 100%;
       }
 
+      /* Mobile mascot banner – shown between the two panels */
+      .mobile-mascot-banner {
+        display: flex !important;
+      }
+
       .dest-nav-links {
         display: none;
+      }
+
+      /* Compact nav on mobile */
+      .dest-nav {
+        padding: 0 16px;
+        height: 56px;
+      }
+
+      .dest-nav-logo {
+        font-size: 16px;
+      }
+
+      .dest-nav-switch {
+        font-size: 10px;
+        padding: 6px 12px;
+      }
+
+      /* Hero section mobile */
+      .dest-hero {
+        padding: 40px 20px 32px;
+      }
+
+      .dest-hero h1 {
+        font-size: clamp(32px, 9vw, 56px);
+      }
+
+      /* Product grid single column */
+      .dest-grid {
+        padding: 0 16px 48px;
+        gap: 12px;
+      }
+
+      .dest-tile {
+        padding: 20px;
+      }
+
+      /* YouTube strip stacks */
+      .yt-strip-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 24px 20px;
+        gap: 16px;
+      }
+
+      /* Footer wraps properly */
+      .dest-footer {
+        padding: 32px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .soc-btn {
+        padding: 10px 16px;
+        font-size: 13px;
       }
     }
   </style>
@@ -1254,12 +1334,82 @@
       </div>
     </div>
 
-    <!-- CENTRE SPINE -->
+    <!-- Mobile Mascot Banner (hidden on desktop, shown on mobile between panels) -->
+    <div class="mobile-mascot-banner" style="
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #050505;
+    padding: 32px 24px;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  ">
+      <div
+        style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(232,130,12,0.12) 0%,transparent 70%);pointer-events:none;">
+      </div>
+      <img
+        src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_dropshadow:azimuth_220;elevation_60;spread_20/f_png,e_improve,e_sharpen/v1765769939/chekki-logo_q5xeux.png"
+        alt="Chekki Mascot"
+        style="width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 12px 24px rgba(0,0,0,0.5));position:relative;z-index:1;">
+      <a href="https://apps.apple.com/app/id6741479840" target="_blank" rel="noopener noreferrer" style="
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: #E8820C;
+      color: #FDFAF5;
+      border-radius: 100px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 8px 28px rgba(232,130,12,0.45);
+      position: relative;
+      z-index: 1;
+    "><svg xmlns="http://www.w3.org/2000/svg" width="14" height="17" viewBox="0 0 814 1000"
+          style="fill:#FDFAF5;flex-shrink:0;">
+          <path
+            d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-43.4-150.3-112.7C172.5 728 116 560 116 403.1c0-250 155.5-386.3 308.5-386.3c82.7 0 151.5 54.9 198.1 54.9c44.6 0 121.9-58.3 217.9-58.3c35.5 0 137.4 3.2 208.3 99.2zm-430.8-8.9c-5.3-26.1-9-48.9-9-73.5 0-21.1 3.8-43.5 9-63.8C380 228 302 299.8 267.2 365.2c-28.6 54.3-44 107.2-44 161.1 0 96.8 38.8 176.4 92.7 231.8 26.4 27.9 59.8 46.9 97.8 46.9 9.7 0 19.9-2.2 29.8-6c14.7-5.5 28.4-11.8 43.5-11.8 16.5 0 30.8 6.7 46.2 12.5 9.2 3.4 18.9 5.3 28.9 5.3 36.7 0 68.4-18.4 93.8-44.4 17.7-17.8 31.9-40.4 41.3-65.3-26.2-10.5-73.4-34.6-102.5-78.4-18.9-28.5-29.1-62.6-29.1-99.3 0-73 37.1-138.2 96.9-165.1l-3.3-1.9z" />
+        </svg> Join Waitlist →</a>
+      <p
+        style="font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(253,250,245,0.35);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;position:relative;z-index:1;">
+        The flagship app ↓</p>
+    </div>
+
+    <!-- CENTRE SPINE (desktop) -->
     <div class="spine" id="spine">
       <div class="spine-logo">
         <img
           src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_dropshadow:azimuth_220;elevation_60;spread_20/f_png,e_improve,e_sharpen/v1765769939/chekki-logo_q5xeux.png"
           alt="Chekki Mascot">
+        <a href="https://apps.apple.com/app/id6741479840" target="_blank" rel="noopener noreferrer"
+          onclick="event.stopPropagation()" style="
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 24px;
+          padding: 12px 24px;
+          background: #E8820C;
+          color: #FDFAF5;
+          border-radius: 100px;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 13px;
+          font-weight: 700;
+          text-decoration: none;
+          box-shadow: 0 8px 28px rgba(232,130,12,0.45);
+          transition: transform 0.2s, box-shadow 0.2s;
+          white-space: nowrap;
+          pointer-events: all;
+        " onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 14px 36px rgba(232,130,12,0.6)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 28px rgba(232,130,12,0.45)'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="17" viewBox="0 0 814 1000"
+            style="fill:#FDFAF5;flex-shrink:0;">
+            <path
+              d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-43.4-150.3-112.7C172.5 728 116 560 116 403.1c0-250 155.5-386.3 308.5-386.3c82.7 0 151.5 54.9 198.1 54.9c44.6 0 121.9-58.3 217.9-58.3c35.5 0 137.4 3.2 208.3 99.2zm-430.8-8.9c-5.3-26.1-9-48.9-9-73.5 0-21.1 3.8-43.5 9-63.8C380 228 302 299.8 267.2 365.2c-28.6 54.3-44 107.2-44 161.1 0 96.8 38.8 176.4 92.7 231.8 26.4 27.9 59.8 46.9 97.8 46.9 9.7 0 19.9-2.2 29.8-6c14.7-5.5 28.4-11.8 43.5-11.8 16.5 0 30.8 6.7 46.2 12.5 9.2 3.4 18.9 5.3 28.9 5.3 36.7 0 68.4-18.4 93.8-44.4 17.7-17.8 31.9-40.4 41.3-65.3-26.2-10.5-73.4-34.6-102.5-78.4-18.9-28.5-29.1-62.6-29.1-99.3 0-73 37.1-138.2 96.9-165.1l-3.3-1.9z" />
+          </svg> Join Waitlist
+        </a>
       </div>
     </div>
 
@@ -1339,8 +1489,10 @@
       <a class="dest-nav-logo" onclick="goBack()">Chekki<span>AI</span></a>
       <ul class="dest-nav-links">
         <li><a href="#fam-products">Products</a></li>
-        <li><a href="https://www.youtube.com/@chekkienglish" target="_blank">YouTube</a></li>
-        <li><a href="https://chekki-ai.vercel.app/app">Try App</a></li>
+        <li><a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" target="_blank" rel="noopener noreferrer">YouTube</a>
+        </li>
+        <li><a href="https://apps.apple.com/app/id6741479840" target="_blank" rel="noopener noreferrer">App Store</a>
+        </li>
       </ul>
       <button class="dest-nav-switch" onclick="goBack()">← Switch to Teachers</button>
     </nav>
@@ -1350,8 +1502,8 @@
       <h1>영어 숙제?<br><em>채키가 할게요.</em></h1>
       <p class="dest-hero-sub">AI homework help for Korean parents. No English required — Chekki reads the
         worksheet, checks the answers, and tells you exactly what to say.</p>
-      <a href="https://chekki-ai.vercel.app/app" class="dest-hero-cta">
-        Try Chekki →
+      <a href="https://apps.apple.com/app/id6741479840" class="dest-hero-cta" target="_blank" rel="noopener noreferrer">
+        Join Waitlist →
       </a>
     </div>
 
@@ -1365,7 +1517,7 @@
         <span class="tile-action">Get Started <span>→</span></span>
       </a>
 
-      <a href="https://www.youtube.com/@chekkienglish" target="_blank" class="dest-tile">
+      <a href="https://www.youtube.com/@chekkienglish" target="_blank" rel="noopener noreferrer" class="dest-tile">
         <span class="tile-emoji">🎬</span>
         <span class="tile-meta">YouTube</span>
         <span class="tile-name">AI Bedtime Stories</span>
@@ -1374,22 +1526,24 @@
         <span class="tile-action">Watch Now <span>→</span></span>
       </a>
 
-      <a href="https://www.teacherspayteachers.com/store/chekkiai" target="_blank" class="dest-tile">
+      <a href="https://www.teacherspayteachers.com/store/chekki-ai" target="_blank" rel="noopener noreferrer"
+        class="dest-tile">
         <span class="tile-emoji">📖</span>
-        <span class="tile-meta">TPT · Story Packs</span>
+        <span class="tile-meta">Teachers Pay Teachers</span>
         <span class="tile-name">Printable Story Packs</span>
         <span class="tile-desc">Worksheets, vocabulary flashcards, colouring pages and a parent home guide. One complete
           pack per story.</span>
-        <span class="tile-action">Browse packs <span>→</span></span>
+        <span class="tile-action">Browse on TPT <span>→</span></span>
       </a>
 
-      <a href="https://chekkiai.gumroad.com" target="_blank" class="dest-tile">
-        <span class="tile-emoji">🎁</span>
-        <span class="tile-meta">Gumroad · Bundles</span>
-        <span class="tile-name">Family Resource Bundles</span>
-        <span class="tile-desc">The complete Korean Family English Guide and full story bundle — everything your child
-          needs in one place.</span>
-        <span class="tile-action">See bundles <span>→</span></span>
+      <a href="https://open.spotify.com/show/2onH0XU5yky37cBxdqKaY8" target="_blank" rel="noopener noreferrer"
+        class="dest-tile">
+        <span class="tile-emoji">🎙️</span>
+        <span class="tile-meta">Spotify Podcast</span>
+        <span class="tile-name">Chekki English Podcast</span>
+        <span class="tile-desc">Listen to English pronunciation guides and parenting tips for Korean EK families
+          anywhere, anytime.</span>
+        <span class="tile-action">Listen on Spotify <span>→</span></span>
       </a>
     </div>
 
@@ -1401,16 +1555,22 @@
             on
             YouTube — forever.</p>
         </div>
-        <a href="https://www.youtube.com/@chekkienglish" class="yt-btn" target="_blank">▶ Watch on YouTube</a>
+        <a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" class="yt-btn" target="_blank" rel="noopener noreferrer">▶
+          Watch on YouTube</a>
       </div>
     </div>
 
     <footer class="dest-footer">
       <div class="social-row">
-        <a href="https://www.instagram.com/chekkienglish" class="soc-btn" target="_blank">📸 Instagram</a>
-        <a href="https://www.tiktok.com/@chekkienglish" class="soc-btn" target="_blank">🎵 TikTok</a>
-        <a href="https://www.x.com/chekkienglish" class="soc-btn" target="_blank">𝕏 X</a>
-        <a href="https://www.youtube.com/@chekkienglish" class="soc-btn" target="_blank">▶ YouTube</a>
+        <a href="https://www.instagram.com/chekki__ai" class="soc-btn" target="_blank" rel="noopener noreferrer">📸
+          Instagram</a>
+        <a href="https://open.spotify.com/show/2onH0XU5yky37cBxdqKaY8" class="soc-btn" target="_blank"
+          rel="noopener noreferrer">🎙️ Spotify</a>
+        <a href="https://x.com/ChekkiAI" class="soc-btn" target="_blank" rel="noopener noreferrer">𝕏 X / Twitter</a>
+        <a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" class="soc-btn" target="_blank"
+          rel="noopener noreferrer">▶ YouTube</a>
+        <a href="https://www.facebook.com/people/Chekki-AI/61587594414020/" class="soc-btn" target="_blank"
+          rel="noopener noreferrer">📘 Facebook</a>
       </div>
       <p class="footer-copy">© 2026 ChekkiAI · chekki-ai.vercel.app</p>
     </footer>
@@ -1426,8 +1586,10 @@
       <a class="dest-nav-logo" onclick="goBack()">Chekki<span>AI</span></a>
       <ul class="dest-nav-links">
         <li><a href="#tch-products">Products</a></li>
-        <li><a href="https://www.youtube.com/@chekkienglish" target="_blank">YouTube</a></li>
-        <li><a href="https://www.etsy.com/shop/chekkiforteachers" target="_blank">Etsy Store</a></li>
+        <li><a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" target="_blank" rel="noopener noreferrer">YouTube</a>
+        </li>
+        <li><a href="https://www.etsy.com/shop/ChekkiAI?dd_referrer=" target="_blank" rel="noopener noreferrer">Etsy
+            Store</a></li>
       </ul>
       <button class="dest-nav-switch" onclick="goBack()">← Switch to Families</button>
     </nav>
@@ -1437,37 +1599,40 @@
       <h1>Plan less.<br><em>Teach more.</em></h1>
       <p class="dest-hero-sub">300+ AI lesson planning frameworks across 12 teaching modules. Built by an EFL teacher
         with 10+ years in Korea. Generate a complete lesson plan in under 60 seconds.</p>
-      <a href="https://www.etsy.com/shop/chekkiforteachers" class="dest-hero-cta" target="_blank">
+      <a href="https://www.etsy.com/shop/ChekkiAI?dd_referrer=" class="dest-hero-cta" target="_blank"
+        rel="noopener noreferrer">
         Get the Workspace →
       </a>
     </div>
 
     <div class="dest-grid" id="tch-products">
-      <a href="https://www.etsy.com/shop/chekkiforteachers" target="_blank" class="dest-tile">
+      <a href="https://www.etsy.com/shop/ChekkiAI?dd_referrer=" target="_blank" rel="noopener noreferrer"
+        class="dest-tile">
         <span class="tile-emoji">🗂️</span>
-        <span class="tile-meta">Etsy · Notion Template</span>
+        <span class="tile-meta">Etsy Shop</span>
         <span class="tile-name">ESL AI Planning Workspace</span>
         <span class="tile-desc">300+ frameworks across 12 modules. Weekly planner. 6 database views. Works with ChatGPT,
           Claude, or Gemini.</span>
-        <span class="tile-action">Get workspace <span>→</span></span>
+        <span class="tile-action">Get on Etsy <span>→</span></span>
       </a>
 
-      <a href="https://www.teacherspayteachers.com/store/chekkiai" target="_blank" class="dest-tile">
+      <a href="https://www.teacherspayteachers.com/store/chekki-ai" target="_blank" rel="noopener noreferrer"
+        class="dest-tile">
         <span class="tile-emoji">🦁</span>
-        <span class="tile-meta">TPT · Classroom Resources</span>
+        <span class="tile-meta">Teachers Pay Teachers</span>
         <span class="tile-name">Story Pack Classroom Sets</span>
         <span class="tile-desc">Complete classroom-ready packs: comprehension, vocabulary, grammar, and answer keys.
           A2–B1 CEFR level.</span>
-        <span class="tile-action">Browse packs <span>→</span></span>
+        <span class="tile-action">Browse on TPT <span>→</span></span>
       </a>
 
-      <a href="https://www.youtube.com/@chekkienglish" target="_blank" class="dest-tile">
+      <a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" target="_blank" rel="noopener noreferrer" class="dest-tile">
         <span class="tile-emoji">🎧</span>
-        <span class="tile-meta">YouTube · Listening</span>
+        <span class="tile-meta">YouTube</span>
         <span class="tile-name">EFL Classroom Stories</span>
         <span class="tile-desc">8 graded listening stories on YouTube. Native pronunciation. Perfect for EFL
           warm-ups and listening tasks.</span>
-        <span class="tile-action">Watch Now <span>→</span></span>
+        <span class="tile-action">Watch on YouTube <span>→</span></span>
       </a>
 
       <a href="mailto:chekkihelp@gmail.com" class="dest-tile">
@@ -1488,25 +1653,34 @@
             — no
             licence required.</p>
         </div>
-        <a href="https://www.youtube.com/@chekkienglish" class="yt-btn" target="_blank">▶ Watch on YouTube</a>
+        <a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" class="yt-btn" target="_blank" rel="noopener noreferrer">▶
+          Watch on YouTube</a>
       </div>
     </div>
 
     <footer class="dest-footer">
       <div class="social-row">
-        <a href="https://www.instagram.com/chekkienglish" class="soc-btn" target="_blank">📸 Instagram</a>
-        <a href="https://www.tiktok.com/@chekkienglish" class="soc-btn" target="_blank">🎵 TikTok</a>
-        <a href="https://www.x.com/chekkienglish" class="soc-btn" target="_blank">𝕏 X</a>
-        <a href="https://www.etsy.com/shop/chekkiforteachers" class="soc-btn" target="_blank">🧡 Etsy</a>
-        <a href="https://www.teacherspayteachers.com/store/chekkiai" class="soc-btn" target="_blank">🛍 TPT</a>
+        <a href="https://www.instagram.com/chekki__ai" class="soc-btn" target="_blank" rel="noopener noreferrer">📸
+          Instagram</a>
+        <a href="https://x.com/ChekkiAI" class="soc-btn" target="_blank" rel="noopener noreferrer">𝕏 X / Twitter</a>
+        <a href="https://www.facebook.com/people/Chekki-AI/61587594414020/" class="soc-btn" target="_blank"
+          rel="noopener noreferrer">📘 Facebook</a>
+        <a href="https://www.etsy.com/shop/ChekkiAI?dd_referrer=" class="soc-btn" target="_blank"
+          rel="noopener noreferrer">🧡 Etsy Shop</a>
+        <a href="https://www.teacherspayteachers.com/store/chekki-ai" class="soc-btn" target="_blank"
+          rel="noopener noreferrer">🛍️ Teachers Pay Teachers</a>
       </div>
-      <p class="footer-copy">© 2026 ChekkiAI · Built by an EFL teacher, for EFL teachers · chekkiforteachers.etsy.com
+      <p class="footer-copy">© 2026 ChekkiAI · Built by an EFL teacher, for EFL teachers · chekki-ai.vercel.app
       </p>
     </footer>
 
   </div>
 
   <script>
+    // Web-only guard: if running inside Capacitor native app, redirect to app entry
+    if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+      window.location.replace('/app.html');
+    }
     function choose(side, isPopState = false) {
       const split = document.getElementById('split');
       const dest = document.getElementById(side === 'families' ? 'destFamilies' : 'destTeachers');

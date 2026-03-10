@@ -66,7 +66,7 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
 };
 
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), apiMiddleware({ mode })],
+  plugins: [react(), ...(mode === 'development' ? [apiMiddleware({ mode })] : [])],
   server: {
     port: 3000,
     host: true,

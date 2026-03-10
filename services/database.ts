@@ -42,12 +42,10 @@ export const dbInstance = getFirestore(app);
 // Analytics may not work in Capacitor native WebView — init safely
 let analyticsInstance: ReturnType<typeof getAnalytics> | null = null;
 try {
-  // Only init analytics in browser, not native Capacitor
+  // Only init analytics in browser (or Android if permitted)
   const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.();
   if (!isNative) {
     analyticsInstance = getAnalytics(app);
-  } else {
-    // Silently skip on native
   }
 } catch (e) { }
 export const analytics = analyticsInstance;
