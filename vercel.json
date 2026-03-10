@@ -5,12 +5,12 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/",
-      "destination": "/landing.html"
+      "source": "/app",
+      "destination": "/app.html"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/(terms|privacy|refund|youth|support|subscribe)",
+      "destination": "/app.html"
     }
   ],
   "functions": {

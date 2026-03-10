@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 // import analyzeHandler from './api/analyze'; // Removed to avoid build issues
 
 // Custom middleware to handle Vercel-like API routes in Vite
@@ -75,6 +76,10 @@ export default defineConfig(({ mode }) => ({
     sourcemap: true,
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        app: resolve(__dirname, 'app.html')
+      },
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
