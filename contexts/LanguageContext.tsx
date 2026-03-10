@@ -13,7 +13,7 @@ const translations = {
   en: {
     app_name: "Chekki AI",
     tagline: "Grading by Chekki, Praise by You",
-    login: "Try Magic Scan",
+    login: "Scan Worksheet",
     logout: "Log Out",
     scans: "Magic Scans",
     pro_plan: "Premium 🚀",
@@ -25,7 +25,7 @@ const translations = {
     share_toast: "Template copied! Ready to post.",
 
     // Guest Mode CTAs
-    hero_guest_cta: "Try Guest Scan",
+    hero_guest_cta: "Quick Scan",
     login_guest_link: "Not ready? Try 1 scan as guest",
     guest_scan_badge: "Magic Scan Available",
     guest_used_title: "Magic Scan Used!",
@@ -312,7 +312,7 @@ const translations = {
   ko: {
     app_name: "채키 AI",
     tagline: "정답은 채키가, 칭찬은 부모님이",
-    login: "체험 시작하기",
+    login: "스캔 시작하기",
     logout: "로그아웃",
     scans: "매직 스캔",
     pro_plan: "프리미엄 🚀",
@@ -324,7 +324,7 @@ const translations = {
     share_toast: "템플릿이 복사되었습니다! 카페에 바로 붙여넣으세요.",
 
     // Guest Mode CTAs
-    hero_guest_cta: "게스트 스캔 체험",
+    hero_guest_cta: "빠른 스캔",
     login_guest_link: "회원가입 없이 1회 체험하기",
     guest_scan_badge: "마법 스캔 1회 사용 가능",
     guest_used_title: "체험 완료!",

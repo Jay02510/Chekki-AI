@@ -136,10 +136,14 @@ function AppContent() {
     if (!hasOnboarded) setShowOnboarding(true);
   }, []);
 
-  const handleOnboardingComplete = () => {
+  const handleOnboardingComplete = React.useCallback(() => {
     localStorage.setItem(ONBOARDED_KEY, 'true');
     setShowOnboarding(false);
-  };
+  }, []);
+
+  const handleSplashFinish = React.useCallback(() => {
+    setShowSplash(false);
+  }, []);
 
   useEffect(() => {
     // Log app open
@@ -285,7 +289,7 @@ function AppContent() {
     localStorage.removeItem(SESSION_KEY);
   };
 
-  if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
   if (showSubscribePage && platform === 'web') return <SubscribePage />;
 
   return (
