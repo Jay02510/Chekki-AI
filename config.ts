@@ -14,6 +14,7 @@ const USE_LOCAL_BACKEND = false;
 // If you want to bypass the network entirely and use mock data (great for screenshots):
 export const MOCK_MODE = false;
 export const MOCK_DELAY = 1500;
+export const SCREENSHOT_MODE = false;
 
 const getApiBaseUrl = () => {
     const platform = Capacitor.getPlatform();

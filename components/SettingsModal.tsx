@@ -52,7 +52,8 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
     }
 
     results.speech = ('speechSynthesis' in window && 'webkitSpeechRecognition' in window) ? 'ready' : 'legacy';
-    results.auth = firebaseUser ? 'verified' : 'anonymous';
+    const isDemo = ['test@example.com', 'expired@example.com'].includes(user?.email || '');
+    results.auth = (firebaseUser || isDemo) ? 'verified' : 'anonymous';
 
     setDiagResults(results);
   };
@@ -71,7 +72,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in" onClick={onClose}></div>
 
-        <div className="relative bg-zinc-900 rounded-[2.5rem] w-full max-w-lg shadow-[0_50px_100px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+        <div className="relative bg-zinc-900 rounded-[2.5rem] md:rounded-[3rem] w-full max-w-lg md:max-w-xl lg:max-w-2xl shadow-[0_50px_100px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
 
           <div className="bg-zinc-950 px-8 py-6 border-b border-white/5 flex justify-between items-center shrink-0">
             <h2 className="text-xl font-black text-white font-display uppercase tracking-widest">{t('settings_title')}</h2>
@@ -203,7 +204,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                         {subscriptionRecord.subscription_expiry_date && (
                           <p className="text-[10px] text-zinc-500 font-bold">
                             {new Date(subscriptionRecord.subscription_expiry_date).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                            {t('sub_expired_on')}
+                            {' '}{t('sub_expired_on')}
                           </p>
                         )}
                       </div>

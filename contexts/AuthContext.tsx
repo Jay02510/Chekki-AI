@@ -188,6 +188,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    // 🍎 Apple Review Demo Account Bypass (Expired)
+    if (email === 'expired@example.com' && pass === 'Test123') {
+      const expiredProfile: UserProfile = {
+        name: 'Apple Reviewer (Expired)',
+        email: 'expired@example.com',
+        plan: 'free',
+        scansUsedToday: 0,
+        lastScanDate: new Date().toISOString().split('T')[0],
+        maxScansPerDay: 3
+      };
+
+      const expiredRecord: SubscriptionRecord = {
+        user_id: 'demo-expired-uid',
+        subscription_status: 'expired',
+        subscription_platform: 'apple',
+        subscription_expiry_date: new Date().toISOString()
+      };
+
+      setUserProfile(expiredProfile);
+      setSubscriptionRecord(expiredRecord);
+      setShowPaywall(true); // Force paywall for expired account
+      setShowLoginModal(false);
+      localStorage.setItem('chekki_last_auth', Date.now().toString());
+      return;
+    }
+
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Login timed out. Please check your internet connection and try again.')), 15000);
     });
@@ -206,7 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    if (userProfile?.email === 'test@example.com') {
+    if (userProfile?.email === 'test@example.com' || userProfile?.email === 'expired@example.com') {
       setUserProfile(null);
       setSubscriptionRecord(null);
       subscriptionService.clearCache();
@@ -218,7 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateProfile = async (name: string) => {
-    if (userProfile?.email === 'test@example.com') {
+    if (userProfile?.email === 'test@example.com' || userProfile?.email === 'expired@example.com') {
       setUserProfile({ ...userProfile, name });
       return;
     }
@@ -289,7 +315,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const cancelSubscription = async () => {
-    if (userProfile?.email === 'test@example.com') {
+    if (userProfile?.email === 'test@example.com' || userProfile?.email === 'expired@example.com') {
       setUserProfile({ ...userProfile, isCanceled: true });
       return;
     }
@@ -370,12 +396,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Platform-aware payment: delegates to subscriptionService
   const processPayment = async (productId: string = AppleProducts.MONTHLY): Promise<{ success: boolean; message?: string }> => {
-    if (!firebaseUser || !userProfile) {
+    const isDemo = ['test@example.com', 'expired@example.com'].includes(userProfile?.email || '');
+    if (!isDemo && (!firebaseUser || !userProfile)) {
       return { success: false, message: 'Please log in to subscribe.' };
     }
 
-    const idToken = await firebaseUser.getIdToken();
-    const response = await subscriptionService.purchase(productId, firebaseUser.uid, idToken);
+    const idToken = isDemo ? 'demo-token' : await firebaseUser!.getIdToken();
+    const response = await subscriptionService.purchase(productId, firebaseUser?.uid || 'demo-uid', idToken);
 
     if (response.success) {
       const upgraded = await upgradeToPro();
@@ -422,7 +449,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       joinSchool,
       cancelSubscription,
       requestLimitReset,
-      isAuthenticated: !!firebaseUser || userProfile?.email === 'test@example.com',
+      isAuthenticated: !!firebaseUser || ['test@example.com', 'expired@example.com'].includes(userProfile?.email || ''),
       isLoading,
       showPaywall,
       setShowPaywall,

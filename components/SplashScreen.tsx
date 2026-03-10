@@ -104,7 +104,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
         </div>
 
         <p className="mt-4 text-[9px] text-zinc-700 font-black uppercase tracking-widest">
-          Version 1.0.1
+          Version 1.0.2
         </p>
       </div>
 

@@ -7,6 +7,7 @@ import { subscriptionService, AppleProducts } from '../services/subscriptionServ
 import { Product } from '@capgo/native-purchases';
 import { LegalModal } from './LegalModal';
 import { AppleLogo } from './AppleLogo';
+import { SCREENSHOT_MODE } from '../config';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -95,8 +96,8 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
     return (
         <div className="space-y-6">
             {/* Benefits List */}
-            <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-6 md:p-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-x-8 md:gap-y-6">
+            <div className="bg-white/5 border border-white/10 rounded-[2rem] md:rounded-[3rem] p-6 md:p-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 sm:gap-x-6 sm:gap-y-4">
                     {[
                         { icon: '🪄', key: 'bene_unlimited' },
                         { icon: '🔊', key: 'bene_pronounce' },
@@ -104,11 +105,11 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
                         { icon: '⭐', key: 'bene_stamps' },
                         { icon: '🛡️', key: 'bene_anytime' },
                     ].map((item) => (
-                        <div key={item.key} className="flex items-center gap-4 group">
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-xl md:text-2xl group-hover:scale-110 transition-transform">
+                        <div key={item.key} className="flex items-center gap-3 md:gap-4 group">
+                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-lg md:text-xl group-hover:scale-110 transition-transform flex-shrink-0">
                                 {item.icon}
                             </div>
-                            <span className="text-sm md:text-lg font-bold text-zinc-200">{t(item.key as any)}</span>
+                            <span className="text-xs md:text-sm font-bold text-zinc-200 leading-tight">{t(item.key as any)}</span>
                         </div>
                     ))}
                 </div>
@@ -119,41 +120,43 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
                 {/* Monthly */}
                 <button
                     onClick={() => setSelectedProduct(AppleProducts.MONTHLY)}
-                    className={`text-left rounded-[2rem] p-6 md:p-8 border-2 transition-all relative overflow-hidden group ${selectedProduct === AppleProducts.MONTHLY
+                    className={`text-left rounded-[2rem] p-6 md:p-6 border-2 transition-all relative overflow-hidden group flex flex-col items-center md:items-start text-center md:text-left ${selectedProduct === AppleProducts.MONTHLY
                         ? 'bg-orange-500/10 border-orange-500 shadow-[0_20px_40px_rgba(249,115,22,0.1)]'
                         : 'bg-white/5 border-white/10 hover:border-white/20'}`}
                 >
-                    <p className="text-[10px] md:text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_monthly')}</p>
+                    <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_monthly')}</p>
                     <div className="flex items-baseline gap-1">
-                        <p className="text-3xl md:text-4xl font-black text-white">
-                            {monthlyProduct?.priceString || '$4.99'}
+                        <p className="text-2xl md:text-3xl font-black text-white">
+                            {SCREENSHOT_MODE ? t('sub_monthly') : (monthlyProduct?.priceString || '$4.99')}
                         </p>
-                        <p className="text-sm md:text-base font-bold text-zinc-500">{t('sub_perMonth')}</p>
+                        {!SCREENSHOT_MODE && <p className="text-xs md:text-sm font-bold text-zinc-500">{t('sub_perMonth')}</p>}
                     </div>
                 </button>
 
                 {/* Yearly */}
                 <button
                     onClick={() => setSelectedProduct(AppleProducts.YEARLY)}
-                    className={`text-left rounded-[2.5rem] p-8 md:p-10 border-2 transition-all relative overflow-hidden group ${selectedProduct === AppleProducts.YEARLY
-                        ? 'bg-orange-500/10 border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.15)] scale-[1.02]'
+                    className={`text-left rounded-[2.5rem] p-8 md:p-8 border-2 transition-all relative overflow-hidden group flex flex-col items-center md:items-start text-center md:text-left ${selectedProduct === AppleProducts.YEARLY
+                        ? 'bg-orange-500/10 border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.15)] md:scale-[1.02]'
                         : 'bg-white/5 border-white/10 hover:border-white/20'}`}
                 >
-                    <div className="absolute top-4 right-6">
-                        <span className="text-[9px] md:text-xs bg-emerald-500 text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                    <div className="absolute top-3 right-3 md:top-4 md:right-4">
+                        <span className="text-[8px] md:text-[10px] bg-emerald-500 text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
                             {t('sub_bestValue')}
                         </span>
                     </div>
-                    <p className="text-[10px] md:text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_yearly')}</p>
+                    <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{t('sub_yearly')}</p>
                     <div className="flex items-baseline gap-1">
-                        <p className="text-4xl md:text-5xl font-black text-white">
-                            {yearlyProduct?.priceString || '$39.99'}
+                        <p className="text-3xl md:text-4xl font-black text-white">
+                            {SCREENSHOT_MODE ? t('sub_yearly') : (yearlyProduct?.priceString || '$39.99')}
                         </p>
-                        <p className="text-sm md:text-lg font-bold text-zinc-500">{t('sub_perYear')}</p>
+                        {!SCREENSHOT_MODE && <p className="text-xs md:text-sm font-bold text-zinc-500">{t('sub_perYear')}</p>}
                     </div>
-                    <p className="text-[10px] md:text-xs text-emerald-500 font-black uppercase mt-2 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 leading-relaxed">
-                        {language === 'ko' ? '기본 플랜 대비 33% 절약' : 'SAVE 33% OVER MONTHLY'} →
-                    </p>
+                    {!SCREENSHOT_MODE && (
+                        <p className="text-[10px] md:text-[11px] text-emerald-500 font-black uppercase mt-1.5 md:mt-2 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 leading-relaxed">
+                            {language === 'ko' ? '기본 플랜 대비 33% 절약' : 'SAVE 33% OVER MONTHLY'} →
+                        </p>
+                    )}
                 </button>
             </div>
 

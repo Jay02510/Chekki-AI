@@ -5,6 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
+import { SCREENSHOT_MODE } from '../config';
 import { FeedbackModal } from './FeedbackModal';
 import { LegalModal } from './LegalModal';
 import { LegalType } from '../types';
@@ -253,7 +254,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                     <img
                       src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY}
                       alt="Chekki Mascot"
-                      className={`w-full h-full object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] filter brightness-110 ${isNight ? 'scale-[1.3] md:scale-[1.6] lg:scale-[1.8]' : 'scale-110 md:scale-125 lg:scale-[1.4]'} transition-opacity duration-700 ${mascotLoaded ? 'opacity-100' : 'opacity-0'}`}
+                      className={`w-full h-full object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] filter brightness-110 ${isNight ? 'scale-[1.3] md:scale-[1.4] lg:scale-[1.5]' : 'scale-110 md:scale-115 lg:scale-[1.2]'} transition-opacity duration-700 ${mascotLoaded ? 'opacity-100' : 'opacity-0'}`}
                       onLoad={() => setMascotLoaded(true)}
                       onError={() => setImgError(true)}
                       loading="eager"
@@ -337,7 +338,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     ];
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6 mb-8 md:mb-24 animate-fade-in-up w-full px-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6 mb-8 md:mb-16 animate-fade-in-up w-full px-2 max-w-5xl mx-auto">
         {banners.map((banner) => (
           <button
             key={banner.id}
@@ -379,7 +380,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <span className="text-[8px] md:text-xs font-black text-indigo-400 uppercase tracking-[0.1em]">{user.schoolName}</span>
               </div>
             )}
-            <h1 className="text-3xl md:text-8xl font-black text-white font-display break-keep leading-tight">
+            <h1 className="text-3xl md:text-6xl lg:text-7xl font-black text-white font-display break-keep leading-tight">
               {t('dash_welcome')} <span className={`text-transparent bg-clip-text bg-gradient-to-r ${isNight ? 'from-indigo-400 to-purple-500' : 'from-orange-400 to-pink-500'}`}>{user.name}!</span>
             </h1>
             <p className="text-zinc-400 font-bold font-korean text-sm md:text-3xl max-w-3xl mx-auto leading-relaxed break-keep opacity-80">{t('dash_subtitle')}</p>
@@ -427,14 +428,16 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             <span className={`w-1.5 h-1.5 rounded-full ${isNight ? 'bg-indigo-500 shadow-[0_0_8px_#6366f1]' : 'bg-orange-500 shadow-[0_0_8px_#f97316]'} animate-pulse`}></span>
             <span className="text-[8px] md:text-sm font-black text-zinc-200 tracking-[0.1em] uppercase">{t('hero_badge')}</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-white font-display mb-4 md:mb-14 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
+          <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white font-display mb-4 md:mb-10 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
             {isNight ? (
               <span className={`text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600`}>{t('hero_title_night')}</span>
             ) : (
               language === 'ko' ? (
                 <>숙제 전쟁 끝, <br /> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>웃으며 공부하세요</span></>
               ) : (
-                <>Stress Free <br /> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>Homework Prep.</span></>
+                <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6 animate-fade-in drop-shadow-2xl">
+                  <>{SCREENSHOT_MODE ? 'Peaceful' : 'Stress Free'} <br /> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>Homework Prep.</span></>
+                </h2>
               )
             )}
           </h1>

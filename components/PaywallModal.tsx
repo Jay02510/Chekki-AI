@@ -15,7 +15,7 @@ export const PaywallModal: React.FC = () => {
                 onClick={() => setShowPaywall(false)}
             />
 
-            <div className="relative bg-zinc-900 rounded-[2rem] md:rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border border-white/10 animate-fade-in-up">
+            <div className="relative bg-zinc-900 rounded-[2.5rem] md:rounded-[3rem] w-full max-w-lg md:max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border border-white/10 animate-fade-in-up">
 
                 {/* Gradient glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-40 bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none" />

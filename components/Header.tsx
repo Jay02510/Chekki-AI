@@ -8,6 +8,7 @@ import { CommunityModal } from './CommunityModal';
 import { SettingsModal } from './SettingsModal';
 import { BillingModal } from './BillingModal';
 import { ASSETS } from '../constants';
+import { SCREENSHOT_MODE } from '../config';
 
 interface Props {
   onReset: () => void;
@@ -127,7 +128,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                         <p className="text-[10px] text-zinc-500 truncate mb-2 leading-tight">{user.email}</p>
                         <div className="flex items-center gap-2">
                           <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${user.plan === 'pro' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/20' : 'bg-zinc-800 text-zinc-400 border border-zinc-700'}`}>
-                            {user.plan === 'pro' ? 'PRO' : 'FREE'}
+                            {user.plan === 'pro' ? 'PRO' : (SCREENSHOT_MODE ? 'STANDARD' : 'FREE')}
                           </span>
                         </div>
                       </div>
