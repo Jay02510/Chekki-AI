@@ -4,13 +4,29 @@ import { auth, dbInstance } from '../../services/database';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
+const ADMIN_PASSCODE = 'ChekkiAdmin2026!';
+
 export default function AdminPage() {
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [passcode, setPasscode] = useState('');
+  
+  // User Creation State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('1_month');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+
+  const handleAuthorize = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passcode === ADMIN_PASSCODE) {
+      setIsAuthorized(true);
+      setMessage({ text: '', type: '' });
+    } else {
+      setMessage({ text: 'Incorrect Passcode', type: 'error' });
+    }
+  };
 
   const handleCreateProUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,9 +98,31 @@ export default function AdminPage() {
           </div>
         )}
 
-        <form onSubmit={handleCreateProUser} className="space-y-4 relative z-10">
-          <div>
-            <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">User's Name</label>
+        {!isAuthorized ? (
+          <form onSubmit={handleAuthorize} className="space-y-4 relative z-10">
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider text-center">Enter Master Passcode</label>
+              <input 
+                type="password" 
+                required
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all placeholder:text-zinc-700 font-medium text-center"
+                placeholder="••••••••••••"
+                autoFocus
+              />
+            </div>
+            <button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-purple-600 hover:to-pink-600 text-white font-black py-4 rounded-xl mt-4 shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+              Verify
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleCreateProUser} className="space-y-4 relative z-10 animate-fade-in">
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">User's Name</label>
             <input 
               type="text" 
               required
@@ -142,6 +180,7 @@ export default function AdminPage() {
             {loading ? 'Processing...' : 'Create Pro Account'}
           </button>
         </form>
+        )}
       </div>
 
       <a href="/app.html" className="mt-8 text-zinc-500 text-sm font-bold hover:text-white transition-colors">← Back to App</a>
