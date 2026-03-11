@@ -143,12 +143,17 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                   </span>
                 )}
                 {subscriptionRecord?.subscription_status === 'active' && (
-                  <span className="text-[8px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-emerald-500/20">
-                    {t('sub_active')}
+                  <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest border ${subscriptionRecord.subscription_expiry_date && (new Date(subscriptionRecord.subscription_expiry_date).getTime() - new Date().getTime()) < 8 * 24 * 60 * 60 * 1000 // Simple logic for trial detection: if expiry is within ~7 days of now
+                      ? 'bg-orange-500/10 text-orange-500 border-orange-500/20'
+                      : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                    }`}>
+                    {subscriptionRecord.subscription_expiry_date && (new Date(subscriptionRecord.subscription_expiry_date).getTime() - new Date().getTime()) < 8 * 24 * 60 * 60 * 1000
+                      ? t('sub_trial_badge')
+                      : t('sub_active')}
                   </span>
                 )}
                 {subscriptionRecord?.subscription_status === 'expired' && (
-                  <span className="text-[8px] bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-orange-500/20">
+                  <span className="text-[8px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-red-500/20">
                     {t('sub_expired')}
                   </span>
                 )}
@@ -162,9 +167,25 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                         🚀
                       </div>
                       <div>
-                        <p className="text-sm font-black text-white">
-                          {user?.plan === 'pro' ? (language === 'ko' ? '프리미엄 플랜' : 'Premium Plan') : (language === 'ko' ? '기본 플랜' : 'Basic Plan')}
-                        </p>
+                        {subscriptionRecord.subscription_expiry_date && (new Date(subscriptionRecord.subscription_expiry_date).getTime() - new Date().getTime()) < 8 * 24 * 60 * 60 * 1000 ? (
+                          <>
+                            <p className="text-sm font-black text-white">
+                              {(() => {
+                                const days = Math.ceil((new Date(subscriptionRecord.subscription_expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                                return t('sub_trial_status').replace('{days}', days.toString());
+                              })()}
+                            </p>
+                            {Math.ceil((new Date(subscriptionRecord.subscription_expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) <= 2 && (
+                              <p className="text-[10px] text-orange-500 font-bold animate-pulse">
+                                {t('sub_trial_ending')}
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          <p className="text-sm font-black text-white">
+                            {user?.plan === 'pro' ? (language === 'ko' ? '프리미엄 플랜' : 'Premium Plan') : (language === 'ko' ? '기본 플랜' : 'Basic Plan')}
+                          </p>
+                        )}
                         <p className="text-[10px] text-zinc-500 font-bold">
                           {subscriptionRecord.subscription_platform === 'apple' ? t('sub_platformApple') :
                             subscriptionRecord.subscription_platform === 'google' ? t('sub_platformGoogle') :

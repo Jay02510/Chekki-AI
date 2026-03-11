@@ -64,26 +64,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // --- Unified subscription check via backend ---
         try {
           const idToken = await user.getIdToken();
-          const subRecord = await subscriptionService.initialize(user.uid, idToken);
-          setSubscriptionRecord(subRecord);
 
-          const isSubActive = subRecord.subscription_status === 'active';
+          // Race the subscription check against a 10s timeout to prevent hangs on simulator
+          const subCheckTimeout = new Promise<SubscriptionRecord | null>((resolve) => setTimeout(() => resolve(null), 10000));
+          const subRecord = await Promise.race([
+            subscriptionService.initialize(user.uid, idToken) as Promise<SubscriptionRecord | null>,
+            subCheckTimeout
+          ]);
 
-          if (profile) {
-            if (isSubActive && profile.plan !== 'pro') {
-              finalProfile = { ...profile, plan: 'pro', maxScansPerDay: 9999, subscriptionPlatform: subRecord.subscription_platform };
-              await updateDoc(doc(dbInstance, 'users', user.uid), {
-                plan: 'pro',
-                maxScansPerDay: 9999,
-              });
-            } else if (!isSubActive && profile.plan === 'pro' && subRecord.subscription_status === 'expired') {
-              // Subscription expired — show renewal prompt
-              setShowPaywall(true);
-            }
-            if (subRecord.subscription_platform !== 'none') {
-              finalProfile = { ...(finalProfile || profile!), subscriptionPlatform: subRecord.subscription_platform };
+          if (subRecord) {
+            setSubscriptionRecord(subRecord);
+
+            const isSubActive = subRecord.subscription_status === 'active';
+
+            if (profile) {
+              if (isSubActive && profile.plan !== 'pro') {
+                finalProfile = { ...profile, plan: 'pro', maxScansPerDay: 9999, subscriptionPlatform: subRecord.subscription_platform };
+                await updateDoc(doc(dbInstance, 'users', user.uid), {
+                  plan: 'pro',
+                  maxScansPerDay: 9999,
+                });
+              } else if (!isSubActive && profile.plan === 'pro' && subRecord.subscription_status === 'expired') {
+                // Subscription expired — show renewal prompt
+                setShowPaywall(true);
+              }
+              if (subRecord.subscription_platform !== 'none') {
+                finalProfile = { ...(finalProfile || profile!), subscriptionPlatform: subRecord.subscription_platform };
+              }
             }
           }
+          // If subRecord is null (timeout), we continue with the existing profile — no crash
         } catch {
           // Subscription check failed — fallback to existing profile state
         }

@@ -80,7 +80,7 @@ const useInAppBrowser = () => {
 };
 
 function AppContent() {
-  const { user, openLoginModal, isAuthenticated, incrementScan, checkScanLimit } = useAuth();
+  const { user, openLoginModal, isAuthenticated, incrementScan, checkScanLimit, setShowPaywall } = useAuth();
   const { t, language } = useLanguage();
   const isInApp = useInAppBrowser();
 
@@ -154,7 +154,7 @@ function AppContent() {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          const isFresh = parsed.timestamp && (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000);
+          const isFresh = parsed.timestamp && (Date.now() - parsed.timestamp < 10 * 60 * 1000);
           if (isFresh && parsed.state && parsed.state.status === 'complete') {
             setAnalysisState(parsed.state);
           }
@@ -220,6 +220,13 @@ function AppContent() {
       setAnalysisState(newState);
       // Only store critical data in localStorage to keep it light
       localStorage.setItem(SESSION_KEY, JSON.stringify({ state: newState, timestamp: Date.now() }));
+
+      // --- Onboarding Trigger: Show Paywall after 1st scan ---
+      const hasTriggeredPaywall = localStorage.getItem('chekki_paywall_triggered_v1');
+      if (!hasTriggeredPaywall && user?.plan !== 'pro') {
+        localStorage.setItem('chekki_paywall_triggered_v1', 'true');
+        setTimeout(() => setShowPaywall(true), 2000); // Small delay for effect
+      }
 
       // Log Analytics
       db.logUserEvent("scan_completed", {

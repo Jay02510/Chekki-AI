@@ -61,8 +61,6 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
         setError('');
         const result = await restorePurchases();
         if (result.success) {
-            // Success logic is handled in AuthContext (updates status)
-            // Show toast or alert if possible, or just close if pro
             onClose?.();
         } else {
             setError(result.message || t('sub_error'));
@@ -93,134 +91,210 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
         );
     }
 
+    const features = [
+        { icon: '🪄', key: 'bene_unlimited' },
+        { icon: '✨', key: 'bene_overlays' },
+        { icon: '📖', key: 'bene_scripts' },
+        { icon: '🔊', key: 'bene_pronounce' },
+        { icon: '⭐', key: 'bene_stamps' },
+        { icon: '🛡️', key: 'bene_anytime' },
+    ];
+
     return (
-        <div className="space-y-6">
-            {/* Benefits List */}
-            <div className="bg-white/5 border border-white/10 rounded-[2rem] md:rounded-[3rem] p-6 md:p-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 sm:gap-x-6 sm:gap-y-4">
-                    {[
-                        { icon: '🪄', key: 'bene_unlimited' },
-                        { icon: '🔊', key: 'bene_pronounce' },
-                        { icon: '📖', key: 'bene_scripts' },
-                        { icon: '⭐', key: 'bene_stamps' },
-                        { icon: '🛡️', key: 'bene_anytime' },
-                    ].map((item) => (
-                        <div key={item.key} className="flex items-center gap-3 md:gap-4 group">
-                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-lg md:text-xl group-hover:scale-110 transition-transform flex-shrink-0">
+        <div className="space-y-5">
+
+            {/* ── Hero Headline ── */}
+            <div className="text-center space-y-2 pb-2">
+                <div className="inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 rounded-full px-4 py-1.5 mb-1">
+                    <span className="text-orange-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                        {language === 'ko' ? '🎉 7일 무료 체험' : '🎉 7-Day Free Trial'}
+                    </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">
+                    {t('sub_trial_headline')}
+                </h2>
+                <p className="text-zinc-400 text-sm font-medium leading-relaxed max-w-sm mx-auto">
+                    {t('sub_trial_subtext')}
+                </p>
+            </div>
+
+            {/* ── Features List ── */}
+            <div className="bg-white/5 border border-white/10 rounded-[2rem] p-5 md:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 sm:gap-x-6">
+                    {features.map((item) => (
+                        <div key={item.key} className="flex items-center gap-3 group">
+                            <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-orange-500/10 flex items-center justify-center text-base flex-shrink-0 group-hover:scale-110 transition-transform">
                                 {item.icon}
                             </div>
-                            <span className="text-xs md:text-sm font-bold text-zinc-200 leading-tight">{t(item.key as any)}</span>
+                            <span className="text-xs md:text-sm font-bold text-zinc-200 leading-tight">
+                                {t(item.key as any)}
+                            </span>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Plans */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-end">
+            {/* ── Plan Cards ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+
+                {/* Yearly (featured first, larger) */}
+                <button
+                    onClick={() => setSelectedProduct(AppleProducts.YEARLY)}
+                    className={`text-left rounded-[2rem] p-5 md:p-7 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 lg:order-first ${selectedProduct === AppleProducts.YEARLY
+                        ? 'bg-gradient-to-br from-orange-500/15 to-orange-500/5 border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.2)]'
+                        : 'bg-white/5 border-white/10 hover:border-white/30'}`}
+                >
+                    {/* Badges row */}
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[9px] md:text-[10px] bg-emerald-500 text-white px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                            {t('sub_bestValue')}
+                        </span>
+                        <span className="text-[9px] md:text-[10px] bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest">
+                            {t('sub_trial_badge')}
+                        </span>
+                    </div>
+
+                    <p className="text-[10px] md:text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                        {SCREENSHOT_MODE ? t('sub_yearly') : t('sub_yearly')}
+                    </p>
+
+                    <div className="flex items-baseline gap-1.5">
+                        <p className="font-black text-white text-3xl md:text-4xl">
+                            {SCREENSHOT_MODE ? t('sub_yearly') : (yearlyProduct?.priceString || '$69.99')}
+                        </p>
+                        {!SCREENSHOT_MODE && (
+                            <p className="text-sm font-bold text-zinc-500">{t('sub_perYear')}</p>
+                        )}
+                    </div>
+
+                    {!SCREENSHOT_MODE && (
+                        <p className="text-[10px] md:text-[11px] text-emerald-400 font-black uppercase tracking-wide mt-0.5">
+                            ✓ {t('sub_save_yearly')}
+                        </p>
+                    )}
+
+                    {/* Selected indicator */}
+                    {selectedProduct === AppleProducts.YEARLY && (
+                        <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
+                            <span className="text-white text-[10px]">✓</span>
+                        </div>
+                    )}
+                </button>
+
                 {/* Monthly */}
                 <button
                     onClick={() => setSelectedProduct(AppleProducts.MONTHLY)}
-                    className={`text-left rounded-[2rem] p-6 md:p-6 border-2 transition-all relative overflow-hidden group flex flex-col items-center lg:items-start text-center lg:text-left ${selectedProduct === AppleProducts.MONTHLY
+                    className={`text-left rounded-[1.5rem] p-4 md:p-5 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 ${selectedProduct === AppleProducts.MONTHLY
                         ? 'bg-orange-500/10 border-orange-500 shadow-[0_20px_40px_rgba(249,115,22,0.1)]'
-                        : 'bg-white/5 border-white/10 hover:border-white/20'}`}
+                        : 'bg-white/5 border-white/10 hover:border-white/30'}`}
                 >
-                    <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1 truncate w-full">{t('sub_monthly')}</p>
-                    <div className="flex items-baseline gap-1">
-                        <p className={`font-black text-white ${SCREENSHOT_MODE ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
-                            {SCREENSHOT_MODE ? t('sub_monthly') : (monthlyProduct?.priceString || '$9.99')}
-                        </p>
-                        {!SCREENSHOT_MODE && <p className="text-xs md:text-sm font-bold text-zinc-500">{t('sub_perMonth')}</p>}
-                    </div>
-                </button>
-
-                {/* Yearly */}
-                <button
-                    onClick={() => setSelectedProduct(AppleProducts.YEARLY)}
-                    className={`text-left rounded-[2.5rem] p-6 md:p-8 border-2 transition-all relative overflow-hidden group flex flex-col items-center lg:items-start text-center lg:text-left ${selectedProduct === AppleProducts.YEARLY
-                        ? 'bg-orange-500/10 border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.15)] md:scale-[1.02]'
-                        : 'bg-white/5 border-white/10 hover:border-white/20'}`}
-                >
-                    <div className="absolute top-2 right-2 md:top-4 md:right-4">
-                        <span className="text-[8px] md:text-[10px] bg-emerald-500 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
-                            {t('sub_bestValue')}
+                    <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[9px] bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">
+                            {t('sub_trial_badge')}
                         </span>
                     </div>
-                    <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1 truncate w-full">{t('sub_yearly')}</p>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                        {t('sub_monthly')}
+                    </p>
                     <div className="flex items-baseline gap-1">
-                        <p className={`font-black text-white ${SCREENSHOT_MODE ? 'text-2xl' : 'text-3xl md:text-4xl'}`}>
-                            {SCREENSHOT_MODE ? t('sub_yearly') : (yearlyProduct?.priceString || '$69.99')}
+                        <p className="font-black text-white text-2xl md:text-3xl">
+                            {SCREENSHOT_MODE ? t('sub_monthly') : (monthlyProduct?.priceString || '$6.99')}
                         </p>
-                        {!SCREENSHOT_MODE && <p className="text-xs md:text-sm font-bold text-zinc-500">{t('sub_perYear')}</p>}
+                        {!SCREENSHOT_MODE && (
+                            <p className="text-xs font-bold text-zinc-500">{t('sub_perMonth')}</p>
+                        )}
                     </div>
-                    {!SCREENSHOT_MODE && (
-                        <p className="text-[10px] md:text-[11px] text-emerald-500 font-black uppercase mt-1.5 md:mt-2 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 leading-relaxed">
-                            {language === 'ko' ? '기본 플랜 대비 33% 절약' : 'SAVE 33% OVER MONTHLY'} →
-                        </p>
+
+                    {selectedProduct === AppleProducts.MONTHLY && (
+                        <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
+                            <span className="text-white text-[10px]">✓</span>
+                        </div>
                     )}
                 </button>
             </div>
 
-            {/* Disclosure & Legal */}
-            <div className="space-y-6 pt-4">
-                <div className="space-y-4">
-                    <button
-                        onClick={handleSubscribe}
-                        disabled={isProcessing}
-                        className="w-full py-5 rounded-[2rem] bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-black text-lg shadow-2xl shadow-orange-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
-                    >
-                        {isProcessing ? (
-                            <div className="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin" />
-                        ) : (
-                            t('sub_subscribe')
-                        )}
-                    </button>
-
-                    {error && (
-                        <p className="text-center text-red-500 text-[10px] font-black uppercase tracking-widest animate-shake">
-                            {error}
-                        </p>
+            {/* ── CTA Button ── */}
+            <div className="space-y-3">
+                <button
+                    onClick={handleSubscribe}
+                    disabled={isProcessing}
+                    className="w-full py-5 rounded-[2rem] bg-orange-500 hover:bg-orange-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-black text-lg shadow-2xl shadow-orange-500/40 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                >
+                    {isProcessing ? (
+                        <div className="w-5 h-5 border-[3px] border-white/20 border-t-white rounded-full animate-spin" />
+                    ) : (
+                        <>
+                            <span>{t('sub_cta_trial')}</span>
+                            <span className="text-orange-200 text-sm font-bold">
+                                — {selectedProduct === AppleProducts.YEARLY
+                                    ? (language === 'ko' ? '연간' : 'Yearly')
+                                    : (language === 'ko' ? '월간' : 'Monthly')}
+                            </span>
+                        </>
                     )}
+                </button>
+
+                {error && (
+                    <p className="text-center text-red-500 text-[10px] font-black uppercase tracking-widest">
+                        {error}
+                    </p>
+                )}
+
+                {/* Trust signals */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-y-1.5 gap-x-4 pt-1">
+                    {[
+                        { icon: '🔒', key: 'sub_trial_no_charge' },
+                        { icon: '✓', key: 'sub_cancelAnytimeSettings' },
+                        { icon: '↩', key: 'sub_trial_restore' },
+                    ].map((item) => (
+                        <span key={item.key} className="text-[9px] md:text-[10px] text-zinc-500 font-bold flex items-center gap-1">
+                            <span>{item.icon}</span>
+                            {t(item.key as any)}
+                        </span>
+                    ))}
                 </div>
+            </div>
 
-                <div className="flex flex-col items-center gap-6">
-                    <button
-                        onClick={handleRestore}
-                        disabled={isProcessing}
-                        className="text-zinc-400 hover:text-white font-black text-[10px] uppercase tracking-widest transition-colors"
-                    >
-                        {t('sub_restore')}
-                    </button>
+            {/* ── Restore + Legal ── */}
+            <div className="flex flex-col items-center gap-5">
+                <button
+                    onClick={handleRestore}
+                    disabled={isProcessing}
+                    className="text-zinc-400 hover:text-white font-black text-[10px] uppercase tracking-widest transition-colors"
+                >
+                    {t('sub_restore')}
+                </button>
 
-                    <div className="bg-white/5 rounded-3xl p-6 border border-white/5 space-y-4">
-                        <p className="text-[10px] text-zinc-500 leading-relaxed text-center font-medium">
-                            {t('sub_disclosure')} {yearlyProduct && yearlyProduct.price ? `A ${yearlyProduct.priceString}/year subscription is equivalent to ${yearlyProduct.currencySymbol || '$'}${(yearlyProduct.price / 12).toFixed(2)}/month.` : 'A $69.99/year subscription is equivalent to $5.83/month.'}
-                        </p>
+                <div className="bg-white/5 rounded-3xl p-5 border border-white/5 space-y-4 w-full">
+                    <p className="text-[10px] text-zinc-500 leading-relaxed text-center font-medium">
+                        {t('sub_disclosure_trial')}
+                    </p>
 
-                        <div className="flex justify-center gap-4 text-[10px] font-black uppercase tracking-widest">
-                            <button
-                                onClick={() => {
-                                    const event = new CustomEvent('show-legal', { detail: 'privacy' });
-                                    window.dispatchEvent(event);
-                                }}
-                                className="text-orange-500 hover:underline bg-transparent border-none p-0"
-                            >
-                                {language === 'ko' ? '개인정보 처리방침' : 'Privacy Policy'}
-                            </button>
-                            <span className="text-zinc-800">|</span>
-                            <button
-                                onClick={() => {
-                                    const event = new CustomEvent('show-legal', { detail: 'terms' });
-                                    window.dispatchEvent(event);
-                                }}
-                                className="text-orange-500 hover:underline bg-transparent border-none p-0"
-                            >
-                                {language === 'ko' ? '이용약관' : 'Terms of Use'}
-                            </button>
-                        </div>
+                    <div className="flex justify-center gap-4 text-[10px] font-black uppercase tracking-widest">
+                        <a
+                            href="https://chekki-ai.vercel.app/privacy.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-orange-500 hover:underline"
+                        >
+                            {language === 'ko' ? '개인정보 처리방침' : 'Privacy Policy'}
+                        </a>
+                        <span className="text-zinc-800">|</span>
+                        <a
+                            href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-orange-500 hover:underline"
+                        >
+                            {language === 'ko' ? '이용약관' : 'Terms of Use'}
+                        </a>
                     </div>
+                    <p className="text-[9px] text-zinc-600 text-center uppercase tracking-tight">
+                        Subscription follows Apple Standard EULA
+                    </p>
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 
@@ -289,7 +363,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ onClose }) => {
             {/* Platform-specific content */}
             {platform === 'ios' && <AppleSubscriptionView onClose={onClose} />}
             {platform === 'android' && <AndroidSubscriptionView />}
-            {platform === 'web' && <WebSubscriptionView />}
+            {platform === 'web' && <AppleSubscriptionView onClose={onClose} />}
         </div>
     );
 };
