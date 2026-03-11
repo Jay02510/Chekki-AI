@@ -1,9 +1,30 @@
-
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 
 export const config = {
   maxDuration: 60,
 };
+
+function initAdmin() {
+    if (getApps().length > 0) return;
+
+    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (serviceAccount) {
+        try {
+            const parsed = JSON.parse(serviceAccount);
+            initializeApp({ credential: cert(parsed) });
+        } catch (e) {
+            console.error('[analyze.ts] Failed to parse FIREBASE_SERVICE_ACCOUNT:', e);
+            initializeApp();
+        }
+    } else {
+        initializeApp();
+    }
+}
+
+initAdmin();
+const adminAuth = getAuth();
 
 // Hardened system prompt to prevent jailbreaking / prompt injection
 const SYSTEM_PROMPT = `
@@ -89,6 +110,22 @@ export default async function handler(req: any, res: any) {
   // Handle preflight
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: "Method not allowed" });
+
+  // --- SECURITY: Verify Firebase ID Token ---
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'UNAUTHORIZED: Missing authorization header' });
+  }
+  const idToken = authHeader.split('Bearer ')[1].trim();
+  
+  let decodedToken;
+  try {
+      decodedToken = await adminAuth.verifyIdToken(idToken);
+  } catch (err: any) {
+      console.error('[analyze.ts] Token Verification Failed:', err);
+      return res.status(401).json({ error: 'UNAUTHORIZED: Invalid or expired token' });
+  }
+  // --- END SECURITY CHECK ---
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
