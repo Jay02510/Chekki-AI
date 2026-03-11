@@ -77,7 +77,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       transition: width 0.9s var(--ease);
-      cursor: pointer;
+      cursor: default;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1418,16 +1418,7 @@
   <div class="split" id="split">
 
     <!-- FAMILIES PANEL -->
-    <div class="panel panel-families" id="panelFamilies" onclick="choose('families')" role="button" tabindex="0"
-      aria-label="Enter Families Section" lang="ko">
-
-      <!-- Floating stats -->
-      <div class="float-stat stat-bl">
-        <div class="float-stat-inner">
-          <span class="float-num">8</span>
-          <span class="float-label">Bedtime stories</span>
-        </div>
-      </div>
+    <div class="panel panel-families" id="panelFamilies" role="region" aria-label="Families Section" lang="ko">
 
       <div class="panel-content">
         <div class="eyebrow">
@@ -1466,16 +1457,12 @@
           </li>
         </ul>
 
-        <a class="panel-cta" onclick="event.stopPropagation(); choose('families')">
+        <a class="panel-cta" onclick="choose('families')">
           Enter <span class="cta-arrow">→</span>
         </a>
       </div>
 
-      <div class="hover-hint">
-        <span class="hint-line"></span>
-        Click to enter
-        <span class="hint-line"></span>
-      </div>
+
     </div>
 
     <!-- Mobile Mascot Banner (hidden on desktop, shown on mobile between panels) -->
@@ -1497,7 +1484,7 @@
         src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_dropshadow:azimuth_220;elevation_60;spread_20/f_png,e_improve,e_sharpen/v1765769939/chekki-logo_q5xeux.png"
         alt="Chekki Mascot"
         style="width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 12px 24px rgba(0,0,0,0.5));position:relative;z-index:1;">
-      <a onclick="openWaitlistModal()" style="
+      <a href="https://apps.apple.com/us/app/chekkiai/id6759361725" target="_blank" rel="noopener noreferrer" style="
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -1517,7 +1504,7 @@
           style="fill:#FDFAF5;flex-shrink:0;">
           <path
             d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-43.4-150.3-112.7C172.5 728 116 560 116 403.1c0-250 155.5-386.3 308.5-386.3c82.7 0 151.5 54.9 198.1 54.9c44.6 0 121.9-58.3 217.9-58.3c35.5 0 137.4 3.2 208.3 99.2zm-430.8-8.9c-5.3-26.1-9-48.9-9-73.5 0-21.1 3.8-43.5 9-63.8C380 228 302 299.8 267.2 365.2c-28.6 54.3-44 107.2-44 161.1 0 96.8 38.8 176.4 92.7 231.8 26.4 27.9 59.8 46.9 97.8 46.9 9.7 0 19.9-2.2 29.8-6c14.7-5.5 28.4-11.8 43.5-11.8 16.5 0 30.8 6.7 46.2 12.5 9.2 3.4 18.9 5.3 28.9 5.3 36.7 0 68.4-18.4 93.8-44.4 17.7-17.8 31.9-40.4 41.3-65.3-26.2-10.5-73.4-34.6-102.5-78.4-18.9-28.5-29.1-62.6-29.1-99.3 0-73 37.1-138.2 96.9-165.1l-3.3-1.9z" />
-        </svg> Join Waitlist →</a>
+        </svg> Download on App Store →</a>
       <p
         style="font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(253,250,245,0.35);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;position:relative;z-index:1;">
         The flagship app ↓</p>
@@ -1529,7 +1516,7 @@
         <img
           src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_dropshadow:azimuth_220;elevation_60;spread_20/f_png,e_improve,e_sharpen/v1765769939/chekki-logo_q5xeux.png"
           alt="Chekki Mascot">
-        <a onclick="event.stopPropagation(); openWaitlistModal()" style="
+        <a href="https://apps.apple.com/us/app/chekkiai/id6759361725" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="
           display: inline-flex;
           align-items: center;
           gap: 8px;
@@ -1553,28 +1540,13 @@
             style="fill:#FDFAF5;flex-shrink:0;">
             <path
               d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-43.4-150.3-112.7C172.5 728 116 560 116 403.1c0-250 155.5-386.3 308.5-386.3c82.7 0 151.5 54.9 198.1 54.9c44.6 0 121.9-58.3 217.9-58.3c35.5 0 137.4 3.2 208.3 99.2zm-430.8-8.9c-5.3-26.1-9-48.9-9-73.5 0-21.1 3.8-43.5 9-63.8C380 228 302 299.8 267.2 365.2c-28.6 54.3-44 107.2-44 161.1 0 96.8 38.8 176.4 92.7 231.8 26.4 27.9 59.8 46.9 97.8 46.9 9.7 0 19.9-2.2 29.8-6c14.7-5.5 28.4-11.8 43.5-11.8 16.5 0 30.8 6.7 46.2 12.5 9.2 3.4 18.9 5.3 28.9 5.3 36.7 0 68.4-18.4 93.8-44.4 17.7-17.8 31.9-40.4 41.3-65.3-26.2-10.5-73.4-34.6-102.5-78.4-18.9-28.5-29.1-62.6-29.1-99.3 0-73 37.1-138.2 96.9-165.1l-3.3-1.9z" />
-          </svg> Join Waitlist
+          </svg> Download on App Store
         </a>
       </div>
     </div>
 
     <!-- TEACHERS PANEL -->
-    <div class="panel panel-teachers" id="panelTeachers" onclick="choose('teachers')" role="button" tabindex="0"
-      aria-label="Enter Teachers Section" lang="en">
-
-      <!-- Floating stats -->
-      <div class="float-stat stat-tr">
-        <div class="float-stat-inner">
-          <span class="float-num">300+</span>
-          <span class="float-label">AI frameworks</span>
-        </div>
-      </div>
-      <div class="float-stat stat-br">
-        <div class="float-stat-inner">
-          <span class="float-num">60s</span>
-          <span class="float-label">Complete lesson plan</span>
-        </div>
-      </div>
+    <div class="panel panel-teachers" id="panelTeachers" role="region" aria-label="Teachers Section" lang="en">
 
       <div class="panel-content">
         <div class="eyebrow">
@@ -1611,16 +1583,12 @@
           </li>
         </ul>
 
-        <a class="panel-cta" onclick="event.stopPropagation(); choose('teachers')">
+        <a class="panel-cta" onclick="choose('teachers')">
           Enter <span class="cta-arrow">→</span>
         </a>
       </div>
 
-      <div class="hover-hint">
-        <span class="hint-line"></span>
-        Click to enter
-        <span class="hint-line"></span>
-      </div>
+
     </div>
 
   </div>
@@ -1636,7 +1604,7 @@
         <li><a href="#fam-products">Products</a></li>
         <li><a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" target="_blank" rel="noopener noreferrer">YouTube</a>
         </li>
-        <li><a href="https://apps.apple.com/app/id6741479840" target="_blank" rel="noopener noreferrer">App Store</a>
+        <li><a href="https://apps.apple.com/us/app/chekkiai/id6759361725" target="_blank" rel="noopener noreferrer">App Store</a>
         </li>
       </ul>
       <button class="dest-nav-switch" onclick="goBack()">← Switch to Teachers</button>
@@ -1647,8 +1615,8 @@
       <h1>영어 숙제?<br><em>채키가 할게요.</em></h1>
       <p class="dest-hero-sub">AI homework help for Korean parents. No English required — Chekki reads the
         worksheet, checks the answers, and tells you exactly what to say.</p>
-      <a onclick="openWaitlistModal()" class="dest-hero-cta">
-        Join Waitlist →
+      <a href="https://apps.apple.com/us/app/chekkiai/id6759361725" target="_blank" rel="noopener noreferrer" class="dest-hero-cta">
+        Download on the App Store →
       </a>
     </div>
 
