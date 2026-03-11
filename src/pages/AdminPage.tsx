@@ -8,6 +8,7 @@ export default function AdminPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [duration, setDuration] = useState('1_month');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
 
@@ -22,8 +23,16 @@ export default function AdminPage() {
       const uid = res.user.uid;
 
       // 2. Provision Pro Profile directly
-      const nextMonth = new Date();
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      let nextBillingDateStr: string | null = null;
+      if (duration === '1_month') {
+        const d = new Date();
+        d.setMonth(d.getMonth() + 1);
+        nextBillingDateStr = d.toISOString();
+      } else if (duration === '1_year') {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() + 1);
+        nextBillingDateStr = d.toISOString();
+      }
 
       const profile = {
         name,
@@ -33,7 +42,7 @@ export default function AdminPage() {
         lastScanDate: new Date().toISOString().split('T')[0],
         maxScansPerDay: 9999,
         subscriptionStartedAt: new Date().toISOString(),
-        nextBillingDate: nextMonth.toISOString(),
+        nextBillingDate: nextBillingDateStr,
       };
 
       await setDoc(doc(dbInstance, "users", uid), { ...profile, uid });
@@ -106,6 +115,23 @@ export default function AdminPage() {
               className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all placeholder:text-zinc-700 font-medium"
               placeholder="••••••••"
             />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Pro Duration</label>
+            <div className="relative">
+              <select
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all font-medium appearance-none"
+              >
+                <option value="1_month">1 Month</option>
+                <option value="1_year">1 Year</option>
+                <option value="lifetime">Lifetime</option>
+              </select>
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
           </div>
 
           <button 

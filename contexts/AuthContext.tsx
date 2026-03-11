@@ -60,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (user) {
         const profile = await db.getUser(user.uid);
         let finalProfile = profile;
+        let hasActiveAppStoreSub = false;
 
         // --- Unified subscription check via backend ---
         try {
@@ -72,10 +73,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             subCheckTimeout
           ]);
 
-          if (subRecord) {
+            if (subRecord) {
             setSubscriptionRecord(subRecord);
 
             const isSubActive = subRecord.subscription_status === 'active';
+            hasActiveAppStoreSub = isSubActive;
 
             if (profile) {
               if (isSubActive && profile.plan !== 'pro') {
@@ -96,6 +98,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // If subRecord is null (timeout), we continue with the existing profile — no crash
         } catch {
           // Subscription check failed — fallback to existing profile state
+        }
+
+        // --- Manual Expiration Check (Admin Provisioned) ---
+        if (finalProfile?.plan === 'pro' && finalProfile.nextBillingDate) {
+          const expirationMs = new Date(finalProfile.nextBillingDate).getTime();
+          const nowMs = Date.now();
+          
+          if (nowMs > expirationMs && !hasActiveAppStoreSub) {
+             finalProfile = { ...finalProfile, plan: 'free', maxScansPerDay: FREE_DAILY_LIMIT };
+             await updateDoc(doc(dbInstance, 'users', user.uid), {
+               plan: 'free',
+               maxScansPerDay: FREE_DAILY_LIMIT
+             });
+             setShowPaywall(true);
+          }
         }
 
         setUserProfile(finalProfile);
