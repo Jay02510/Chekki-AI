@@ -9,7 +9,7 @@
       "destination": "/app.html"
     },
     {
-      "source": "/(terms|privacy|refund|youth|support|subscribe)",
+      "source": "/(terms|privacy|refund|youth|support|subscribe|admin)",
       "destination": "/app.html"
     }
   ],

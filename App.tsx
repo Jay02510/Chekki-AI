@@ -13,6 +13,7 @@ import { SplashScreen } from './components/SplashScreen';
 import { LegalModal } from './components/LegalModal';
 import { MobileAppBanner } from './components/MobileAppBanner';
 import SubscribePage from './src/pages/SubscribePage';
+import AdminPage from './src/pages/AdminPage';
 import { AnalysisState, LegalType } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -102,6 +103,7 @@ function AppContent() {
   const [lastImageData, setLastImageData] = useState<string | null>(null);
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
   const [showSubscribePage, setShowSubscribePage] = useState(false);
+  const [showAdminPage, setShowAdminPage] = useState(false);
   const platform = Capacitor.getPlatform();
 
   // Global Confirmation State
@@ -121,6 +123,12 @@ function AppContent() {
     if (window.location.pathname === '/subscribe' && Capacitor.getPlatform() === 'web') {
       setShowSplash(false);
       setShowSubscribePage(true);
+    }
+
+    // /admin route — web only
+    if (window.location.pathname === '/admin' && Capacitor.getPlatform() === 'web') {
+      setShowSplash(false);
+      setShowAdminPage(true);
     }
   }, []);
 
@@ -298,6 +306,7 @@ function AppContent() {
 
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
   if (showSubscribePage && platform === 'web') return <SubscribePage />;
+  if (showAdminPage && platform === 'web') return <AdminPage />;
 
   return (
     <ErrorBoundary>
