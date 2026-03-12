@@ -4,6 +4,27 @@ import { Capacitor } from '@capacitor/core';
 import { auth } from "./database";
 import { API_BASE_URL, MOCK_MODE, MOCK_DELAY } from "../config";
 
+const getValidIdToken = async (maxRetries = 10): Promise<string | null> => {
+  for (let i = 0; i < maxRetries; i++) {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const token = await user.getIdToken();
+        console.log(`[geminiService] Token retrieved successfully for ${user.uid}`);
+        if (token) return token;
+      } catch (e) {
+        console.warn(`[geminiService] Token refresh failed (attempt ${i + 1}):`, e);
+      }
+    } else {
+      console.log(`[geminiService] auth.currentUser is null on attempt ${i + 1}`);
+    }
+    // Wait 500ms before next check
+    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log(`[geminiService] Waiting for auth token... (attempt ${i + 1})`);
+  }
+  return null;
+};
+
 export const analyzeWorksheet = async (
   base64Image: string,
   signal?: AbortSignal,
@@ -45,9 +66,9 @@ export const analyzeWorksheet = async (
   const baseUrl = API_BASE_URL;
 
   try {
-    const idToken = await auth.currentUser?.getIdToken();
+    const idToken = await getValidIdToken();
     if (!idToken) {
-      console.warn("[geminiService] No ID token found - might be guest or login issue.");
+      console.error("[geminiService] Final attempt: No ID token found after retries.");
     }
 
     const timeoutController = new AbortController();
@@ -119,12 +140,12 @@ export const generateSimilarWorksheet = async (originalItems: WorksheetItem[], s
     }));
   }
   try {
-    const idToken = await auth.currentUser?.getIdToken();
-    const response = await fetch('/api/analyze', {
+    const idToken = await getValidIdToken();
+    const response = await fetch(`${API_BASE_URL}/api/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`
+        'Authorization': idToken ? `Bearer ${idToken}` : ''
       },
       signal,
       body: JSON.stringify({

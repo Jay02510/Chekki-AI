@@ -6,25 +6,32 @@ export const config = {
   maxDuration: 60,
 };
 
-function initAdmin() {
-    if (getApps().length > 0) return;
+function getAdminApp() {
+    if (!process.env.GOOGLE_CLOUD_PROJECT) {
+        process.env.GOOGLE_CLOUD_PROJECT = 'homework-assistant-c00b9';
+    }
+    const apps = getApps();
+    if (apps.length > 0) {
+        const app = apps[0];
+        // If the existing app is missing a projectId, but we know it, we can't easily re-init
+        // but we can at least log it.
+        return app;
+    }
 
     const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
     if (serviceAccount) {
         try {
             const parsed = JSON.parse(serviceAccount);
-            initializeApp({ credential: cert(parsed) });
+            return initializeApp({ credential: cert(parsed) });
         } catch (e) {
-            console.error('[analyze.ts] Failed to parse FIREBASE_SERVICE_ACCOUNT:', e);
-            initializeApp();
+            return initializeApp({ projectId: "homework-assistant-c00b9" });
         }
     } else {
-        initializeApp();
+        return initializeApp({
+            projectId: "homework-assistant-c00b9"
+        });
     }
 }
-
-initAdmin();
-const adminAuth = getAuth();
 
 // Hardened system prompt to prevent jailbreaking / prompt injection
 const SYSTEM_PROMPT = `
@@ -102,10 +109,13 @@ const CONSOLIDATED_SCHEMA = {
 };
 
 export default async function handler(req: any, res: any) {
+  const app = getAdminApp();
+  const adminAuth = getAuth(app);
+
   // CORS headers for Capacitor WebView (origin: capacitor://localhost)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // Handle preflight
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -122,7 +132,7 @@ export default async function handler(req: any, res: any) {
   try {
       decodedToken = await adminAuth.verifyIdToken(idToken);
   } catch (err: any) {
-      console.error('[analyze.ts] Token Verification Failed:', err);
+      console.error('[analyze.ts] Token Verification Failed:', err.message);
       return res.status(401).json({ error: 'UNAUTHORIZED: Invalid or expired token' });
   }
   // --- END SECURITY CHECK ---

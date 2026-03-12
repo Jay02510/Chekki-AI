@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInAnonymously,
   signOut,
   deleteUser,
   sendPasswordResetEmail,
@@ -51,9 +52,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  // Flag to prevent onAuthStateChanged from wiping the profile during signup
+  const isSigningUpRef = React.useRef(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log("[AuthContext] onAuthStateChanged fired.", { uid: user?.uid, email: user?.email, isAnonymous: user?.isAnonymous });
       setFirebaseUser(user);
       if (user) {
         const profile = await db.getUser(user.uid);
@@ -113,6 +117,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
 
+        // --- Demo Account Override ---
+        if (user.email === 'test@example.com') {
+          finalProfile = { 
+            ...(finalProfile || {} as UserProfile), 
+            email: 'test@example.com',
+            name: 'Apple Reviewer',
+            plan: 'pro', 
+            maxScansPerDay: 9999,
+          };
+        } else if (user.email === 'expired@example.com') {
+          finalProfile = { 
+            ...(finalProfile || {} as UserProfile), 
+            email: 'expired@example.com',
+            name: 'Apple Reviewer (Expired)',
+            plan: 'free', 
+            maxScansPerDay: 3 
+          };
+          if (!hasActiveAppStoreSub) {
+             setShowPaywall(true);
+          }
+        }
+
         setUserProfile(finalProfile);
 
         // Session Expiration Check
@@ -127,10 +153,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem('chekki_last_auth', now.toString());
         }
       } else {
+        // If we are in the middle of signing up, a transient null user fires here.
+        // Skip wiping state to avoid a race condition where the new profile gets cleared.
+        if (isSigningUpRef.current) {
+          setIsLoading(false);
+          return;
+        }
         setUserProfile(null);
         setSubscriptionRecord(null);
         subscriptionService.clearCache();
         localStorage.removeItem('chekki_last_auth');
+        
+        // --- GUEST AUTH: Ensure every session has a token ---
+        console.log("[AuthContext] Signing in anonymously for guest session...");
+        try {
+          await signInAnonymously(auth);
+          // onAuthStateChanged will fire again with the new anon user — return here
+          // so we don't call setIsLoading(false) twice.
+          return;
+        } catch (err) {
+          console.error("[AuthContext] Anonymous sign-in failed:", err);
+        }
       }
       setIsLoading(false);
     });
@@ -138,6 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (name: string, email: string, pass: string, code?: string) => {
+    isSigningUpRef.current = true;
     try {
       const cleanEmail = email.toLowerCase().trim();
       const cleanPass = pass.trim();
@@ -185,6 +229,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       console.error('Signup error details:', err);
       throw err;
+    } finally {
+      isSigningUpRef.current = false;
     }
   };
 
@@ -192,46 +238,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const cleanEmail = email.toLowerCase().trim();
     const cleanPass = pass.trim();
 
-    // 🍎 Apple Review Demo Account Bypass
-    if (cleanEmail === 'test@example.com' && cleanPass === 'Test123') {
-      const demoProfile: UserProfile = {
-        name: 'Apple Reviewer',
-        email: 'test@example.com',
-        plan: 'pro',
-        scansUsedToday: 0,
-        lastScanDate: new Date().toISOString().split('T')[0],
-        maxScansPerDay: 9999
-      };
-      setUserProfile(demoProfile);
-      setShowLoginModal(false);
-      localStorage.setItem('chekki_last_auth', Date.now().toString());
-      return;
-    }
-
     // 🍎 Apple Review Demo Account Bypass (Expired)
+    // For demo accounts, we still authenticate with Firebase (e.g., anonymous or specific demo user)
+    // but override the UI state in onAuthStateChanged for consistent demo experience.
+    // We set these here to ensure they are ready before onAuthStateChanged fully processes.
     if (cleanEmail === 'expired@example.com' && cleanPass === 'Test123') {
-      const expiredProfile: UserProfile = {
-        name: 'Apple Reviewer (Expired)',
-        email: 'expired@example.com',
-        plan: 'free',
-        scansUsedToday: 0,
-        lastScanDate: new Date().toISOString().split('T')[0],
-        maxScansPerDay: 3
-      };
-
       const expiredRecord: SubscriptionRecord = {
-        user_id: 'demo-expired-uid',
+        user_id: 'demo-expired-uid', // This will be replaced by actual UID in onAuthStateChanged
         subscription_status: 'expired',
         subscription_platform: 'apple',
         subscription_expiry_date: new Date().toISOString()
       };
-
-      setUserProfile(expiredProfile);
       setSubscriptionRecord(expiredRecord);
       setShowPaywall(true); // Force paywall for expired account
-      setShowLoginModal(false);
-      localStorage.setItem('chekki_last_auth', Date.now().toString());
-      return;
     }
 
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -252,15 +271,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    if (userProfile?.email === 'test@example.com' || userProfile?.email === 'expired@example.com') {
-      setUserProfile(null);
-      setSubscriptionRecord(null);
-      subscriptionService.clearCache();
-      localStorage.removeItem('chekki_last_auth');
-      return;
-    }
     subscriptionService.clearCache();
     signOut(auth);
+    localStorage.removeItem('chekki_last_auth');
+    setUserProfile(null);
+    setSubscriptionRecord(null);
   };
 
   const updateProfile = async (name: string) => {
@@ -464,7 +479,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       joinSchool,
       cancelSubscription,
       requestLimitReset,
-      isAuthenticated: !!firebaseUser || ['test@example.com', 'expired@example.com'].includes(userProfile?.email || ''),
+      isAuthenticated: !!userProfile,
       isLoading,
       showPaywall,
       setShowPaywall,
