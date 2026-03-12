@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc --skipLibCheck && vite build",
     "preview": "vite preview",
     "mobile": "npm run build && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html && npx cap sync"
   },
