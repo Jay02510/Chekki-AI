@@ -43,8 +43,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const FREE_DAILY_LIMIT = 3;
-const BETA_CODE_MAIN = 'CHEKKI40';
-const BETA_CODE_LIMIT = 9999;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
@@ -163,16 +161,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           maxScans = 9999;
           schoolId = sanitized;
           schoolName = schools[sanitized];
-        } else if (sanitized === BETA_CODE_MAIN) {
-          const canRedeem = await db.redeemBetaCode(sanitized, BETA_CODE_LIMIT);
-          if (canRedeem) {
-            plan = 'pro';
-            maxScans = 9999;
-            subscriptionStartedAt = new Date().toISOString();
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            nextBillingDate = nextMonth.toISOString();
-          }
         }
       }
 
@@ -397,11 +385,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const sanitizedCode = code.toUpperCase().trim();
       const isSchool = await joinSchool(sanitizedCode);
       if (isSchool) return true;
-
-      if (sanitizedCode !== BETA_CODE_MAIN) return false;
-
-      const canRedeem = await db.redeemBetaCode(sanitizedCode, BETA_CODE_LIMIT);
-      if (!canRedeem) return false;
     }
 
     const nextMonth = new Date();

@@ -32,8 +32,13 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const isNativePlatform = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.();
 export const auth = (() => {
   try {
+    if (isNativePlatform) {
+      return initializeAuth(app, {
+        persistence: indexedDBLocalPersistence
+      });
+    }
   } catch (e) {
-    // Fallback silently in production
+    console.error("Firebase auth initialization error:", e);
   }
   return getAuth(app);
 })();
@@ -137,24 +142,6 @@ export const db = {
         timestamp: new Date().toISOString()
       });
     } catch (e: any) { }
-  },
-
-  async redeemBetaCode(code: string, limit: number): Promise<boolean> {
-    const usageRef = doc(dbInstance, "system", "beta_usage");
-    try {
-      return await runTransaction(dbInstance, async (transaction) => {
-        const usageDoc = await transaction.get(usageRef);
-        let currentCount = 0;
-        if (usageDoc.exists()) {
-          currentCount = usageDoc.data()[code] || 0;
-        }
-        if (currentCount >= limit) return false;
-        transaction.set(usageRef, { [code]: currentCount + 1 }, { merge: true });
-        return true;
-      });
-    } catch (e) {
-      return false;
-    }
   },
 
   logUserEvent(eventName: string, params?: any) {

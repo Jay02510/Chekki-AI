@@ -35,8 +35,18 @@ export default function AdminPage() {
 
     try {
       // 1. Create purely via Auth
-      const res = await createUserWithEmailAndPassword(auth, email, password);
-      const uid = res.user.uid;
+      let uid = '';
+      try {
+        const res = await createUserWithEmailAndPassword(auth, email, password);
+        uid = res.user.uid;
+      } catch (authErr: any) {
+        // If user already exists, we might want to just upgrade them if we could get UID
+        // But for security/simplicity, we'll just report the error.
+        if (authErr.code === 'auth/email-already-in-use') {
+          throw new Error('This email is already registered. Please use the "Upgrade" feature (coming soon) or contact support.');
+        }
+        throw authErr;
+      }
 
       // 2. Provision Pro Profile directly
       let nextBillingDateStr: string | null = null;
@@ -48,9 +58,13 @@ export default function AdminPage() {
         const d = new Date();
         d.setFullYear(d.getFullYear() + 1);
         nextBillingDateStr = d.toISOString();
+      } else if (duration === 'lifetime') {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() + 100); // 100 years for lifetime
+        nextBillingDateStr = d.toISOString();
       }
 
-      const profile = {
+      const profile: any = {
         name,
         email,
         plan: 'pro',
@@ -59,11 +73,14 @@ export default function AdminPage() {
         maxScansPerDay: 9999,
         subscriptionStartedAt: new Date().toISOString(),
         nextBillingDate: nextBillingDateStr,
+        subscriptionPlatform: 'web', // Explicitly set for admin-created users
+        uid,
       };
 
-      await setDoc(doc(dbInstance, "users", uid), { ...profile, uid });
+      await setDoc(doc(dbInstance, "users", uid), profile);
 
-      // 3. Immediately log out so admin can create another
+      // 3. Immediately log out so admin session isn't replaced by the new user
+      // We do this after the setDoc to ensure the token is still valid if needed
       await signOut(auth);
 
       setMessage({ text: '✅ Pro User Created Successfully!', type: 'success' });
