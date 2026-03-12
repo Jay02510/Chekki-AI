@@ -22,7 +22,7 @@ export default function AdminPage() {
 
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode === ADMIN_PASSCODE) {
+    if (passcode.trim() === ADMIN_PASSCODE) {
       setIsAuthorized(true);
       setMessage({ text: '', type: '' });
     } else {
@@ -36,10 +36,14 @@ export default function AdminPage() {
     setMessage({ text: '', type: '' });
 
     try {
+      // 0. Sanitize inputs
+      const cleanEmail = email.toLowerCase().trim();
+      const cleanPassword = password.trim();
+
       // 1. Create purely via Auth
       let uid = '';
       try {
-        const res = await createUserWithEmailAndPassword(auth, email, password);
+        const res = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPassword);
         uid = res.user.uid;
       } catch (authErr: any) {
         // If user already exists, we might want to just upgrade them if we could get UID
@@ -68,7 +72,7 @@ export default function AdminPage() {
 
       const profile: any = {
         name,
-        email,
+        email: cleanEmail,
         plan: 'pro',
         scansUsedToday: 0,
         lastScanDate: new Date().toISOString().split('T')[0],

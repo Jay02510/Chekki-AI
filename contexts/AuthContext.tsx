@@ -139,7 +139,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (name: string, email: string, pass: string, code?: string) => {
     try {
-      const res = await createUserWithEmailAndPassword(auth, email, pass);
+      const cleanEmail = email.toLowerCase().trim();
+      const cleanPass = pass.trim();
+      const res = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPass);
 
       let plan: 'free' | 'pro' = 'free';
       let maxScans = FREE_DAILY_LIMIT;
@@ -166,7 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const newProfile: UserProfile = {
         name,
-        email,
+        email: email.toLowerCase().trim(),
         plan,
         scansUsedToday: 0,
         lastScanDate: new Date().toISOString().split('T')[0],
@@ -187,8 +189,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, pass: string) => {
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanPass = pass.trim();
+
     // 🍎 Apple Review Demo Account Bypass
-    if (email === 'test@example.com' && pass === 'Test123') {
+    if (cleanEmail === 'test@example.com' && cleanPass === 'Test123') {
       const demoProfile: UserProfile = {
         name: 'Apple Reviewer',
         email: 'test@example.com',
@@ -204,7 +209,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // 🍎 Apple Review Demo Account Bypass (Expired)
-    if (email === 'expired@example.com' && pass === 'Test123') {
+    if (cleanEmail === 'expired@example.com' && cleanPass === 'Test123') {
       const expiredProfile: UserProfile = {
         name: 'Apple Reviewer (Expired)',
         email: 'expired@example.com',
@@ -234,7 +239,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     const signInFlow = async () => {
-      await signInWithEmailAndPassword(auth, email, pass);
+      await signInWithEmailAndPassword(auth, cleanEmail, cleanPass);
       localStorage.setItem('chekki_last_auth', Date.now().toString());
       setShowLoginModal(false);
     };
@@ -243,7 +248,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendResetEmail = async (email: string) => {
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, email.toLowerCase().trim());
   };
 
   const logout = () => {
