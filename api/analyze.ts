@@ -3,7 +3,7 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
 export const config = {
-  maxDuration: 60,
+  maxDuration: 300,
 };
 
 function getAdminApp() {

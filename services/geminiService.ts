@@ -72,7 +72,7 @@ export const analyzeWorksheet = async (
     }
 
     const timeoutController = new AbortController();
-    const timeoutId = setTimeout(() => timeoutController.abort(), 60000);
+    const timeoutId = setTimeout(() => timeoutController.abort(), 300000);
     const activeSignal = signal || timeoutController.signal;
 
     console.log(`[geminiService] Fetching: ${baseUrl}/api/analyze (Auth: ${!!idToken})`);

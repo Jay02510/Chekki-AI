@@ -131,6 +131,40 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     });
   };
 
+  const handleShare = async () => {
+    const title = worksheetTitle || (language === 'ko' ? "영어 학습지" : "English Worksheet");
+    const shareData = {
+      title: 'Chekki AI',
+      text: language === 'ko' 
+        ? `채키 AI로 오늘 '${title}' 공부 끝냈어요! ✨`
+        : `Finished '${title}' with Chekki AI tonight! 🚀`,
+      url: window.location.origin
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        handleCopyToCafe();
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
+
+  const handleSaveToPhone = () => {
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = `chekki-worksheet-${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Alert or Toast for confirmation
+    setCopyStatus(true);
+    setTimeout(() => setCopyStatus(false), 3000);
+  };
+
   const startPronunciationCheck = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) {
@@ -239,10 +273,10 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                     </div>
 
                     <div className="flex flex-col gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                      <button onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} active:scale-90 min-w-[44px] min-h-[44px]`}>
+                      <button onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]`}>
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z" /></svg>
                       </button>
-                      <button onClick={(e) => handleActionClick(e, () => toggleMistake(item))} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} active:scale-90 min-w-[44px] min-h-[44px]`}>
+                      <button onClick={(e) => handleActionClick(e, () => toggleMistake(item))} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]`}>
                         <svg className="w-5 h-5" fill={flagged ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                       </button>
                     </div>
@@ -314,6 +348,21 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
             {!isLoadingItems && items.length > 0 && (
               <div className="space-y-6 pt-6 pb-2">
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={handleShare}
+                    className="flex-1 bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-xl"
+                  >
+                    <span>📤</span> {language === 'ko' ? '공유하기' : 'Share'}
+                  </button>
+                  <button
+                    onClick={handleSaveToPhone}
+                    className="flex-1 bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-xl"
+                  >
+                    <span>💾</span> {language === 'ko' ? '저장하기' : 'Save'}
+                  </button>
+                </div>
+
                 <div className="bg-[#03C75A]/10 border border-[#03C75A]/20 rounded-[2.5rem] p-6 md:p-8 animate-fade-in-up flex flex-col items-center text-center group">
                   <div className="w-14 h-14 rounded-full bg-[#03C75A] flex items-center justify-center text-2xl mb-4 shadow-[0_10px_30px_rgba(3,199,90,0.3)] animate-float">
                     🕊️

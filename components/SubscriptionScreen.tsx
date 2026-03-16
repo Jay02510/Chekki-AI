@@ -271,23 +271,19 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
                     </p>
 
                     <div className="flex justify-center gap-4 text-[10px] font-black uppercase tracking-widest">
-                        <a
-                            href="https://chekki-ai.vercel.app/privacy.html"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <button
+                            onClick={() => window.dispatchEvent(new CustomEvent('show-legal', { detail: 'privacy' }))}
                             className="text-orange-500 hover:underline"
                         >
                             {language === 'ko' ? '개인정보 처리방침' : 'Privacy Policy'}
-                        </a>
+                        </button>
                         <span className="text-zinc-800">|</span>
-                        <a
-                            href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <button
+                            onClick={() => window.dispatchEvent(new CustomEvent('show-legal', { detail: 'terms' }))}
                             className="text-orange-500 hover:underline"
                         >
                             {language === 'ko' ? '이용약관' : 'Terms of Use'}
-                        </a>
+                        </button>
                     </div>
                     <p className="text-[9px] text-zinc-600 text-center uppercase tracking-tight">
                         Subscription follows Apple Standard EULA
