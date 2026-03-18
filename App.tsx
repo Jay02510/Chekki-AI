@@ -21,8 +21,8 @@ import { MistakeProvider } from './contexts/MistakeContext';
 import { ChekkiMascot } from './components/Icons';
 import { analyzeWorksheet } from './services/geminiService';
 import { db } from './services/database';
-import { NativePurchases } from '@capgo/native-purchases';
 import { Capacitor } from '@capacitor/core';
+import { revenueCatService } from './services/revenueCatService';
 
 const SESSION_KEY = 'hw_last_session';
 const ONBOARDED_KEY = 'chekki_onboarded_v1';
@@ -133,6 +133,9 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
+    // Initialize RevenueCat
+    revenueCatService.initialize();
+
     const timer = setInterval(() => {
       setIsNight(isNightModeKST());
     }, 60000);
@@ -251,7 +254,9 @@ function AppContent() {
       // Use specific error message if available, otherwise generic
       const errorMsg = e.message && e.message !== 'ANALYSIS_FAILED'
         ? e.message
-        : t('err_network');
+        : language === 'ko' 
+            ? "분석에 실패했어요. 밝은 곳에서 사진을 다시 찍어주세요!" 
+            : "Analysis failed. Please try taking a clearer picture in good lighting!";
 
       setAnalysisState({
         status: 'error',

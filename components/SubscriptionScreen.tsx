@@ -4,7 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { subscriptionService, AppleProducts } from '../services/subscriptionService';
-import { Product } from '@capgo/native-purchases';
+import { revenueCatService } from '../services/revenueCatService';
 import { LegalModal } from './LegalModal';
 import { AppleLogo } from './AppleLogo';
 import { SCREENSHOT_MODE } from '../config';
@@ -14,7 +14,7 @@ import { SCREENSHOT_MODE } from '../config';
 const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     const { processPayment, restorePurchases } = useAuth();
     const { language, t } = useLanguage();
-    const [products, setProducts] = useState<Product[]>([]);
+    const [products, setProducts] = useState<any[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<string>(AppleProducts.YEARLY);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +47,11 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
     const handleSubscribe = async () => {
         setIsProcessing(true);
         setError('');
-        const result = await processPayment(selectedProduct);
+        
+        // Find the full product object better trial/introductory offer detection
+        const productObj = products.find(p => p.identifier === selectedProduct) || selectedProduct;
+
+        const result = await processPayment(productObj);
         if (!result.success) {
             setError(result.message || t('sub_error'));
         } else {

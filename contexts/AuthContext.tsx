@@ -14,6 +14,7 @@ import {
   type User
 } from 'firebase/auth';
 import { subscriptionService, AppleProducts } from '../services/subscriptionService';
+import { revenueCatService } from '../services/revenueCatService';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -28,7 +29,7 @@ interface AuthContextType {
   incrementScan: () => Promise<boolean>;
   checkScanLimit: () => boolean;
   upgradeToPro: (code?: string) => Promise<boolean>;
-  processPayment: (productId?: string) => Promise<{ success: boolean; message?: string }>;
+  processPayment: (product?: any) => Promise<{ success: boolean; message?: string }>;
   restorePurchases: () => Promise<{ success: boolean; message?: string }>;
   joinSchool: (schoolCode: string) => Promise<boolean>;
   cancelSubscription: () => Promise<void>;
@@ -60,6 +61,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("[AuthContext] onAuthStateChanged fired.", { uid: user?.uid, email: user?.email, isAnonymous: user?.isAnonymous });
       setFirebaseUser(user);
       if (user) {
+        // Identify in RevenueCat
+        revenueCatService.identify(user.uid);
+
         const profile = await db.getUser(user.uid);
         let finalProfile = profile;
         let hasActiveAppStoreSub = false;
@@ -75,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             subCheckTimeout
           ]);
 
-            if (subRecord) {
+          if (subRecord) {
             setSubscriptionRecord(subRecord);
 
             const isSubActive = subRecord.subscription_status === 'active';
@@ -106,36 +110,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (finalProfile?.plan === 'pro' && finalProfile.nextBillingDate) {
           const expirationMs = new Date(finalProfile.nextBillingDate).getTime();
           const nowMs = Date.now();
-          
+
           if (nowMs > expirationMs && !hasActiveAppStoreSub) {
-             finalProfile = { ...finalProfile, plan: 'free', maxScansPerDay: FREE_DAILY_LIMIT };
-             await updateDoc(doc(dbInstance, 'users', user.uid), {
-               plan: 'free',
-               maxScansPerDay: FREE_DAILY_LIMIT
-             });
-             setShowPaywall(true);
+            finalProfile = { ...finalProfile, plan: 'free', maxScansPerDay: FREE_DAILY_LIMIT };
+            await updateDoc(doc(dbInstance, 'users', user.uid), {
+              plan: 'free',
+              maxScansPerDay: FREE_DAILY_LIMIT
+            });
+            setShowPaywall(true);
           }
         }
 
         // --- Demo Account Override ---
         if (user.email === 'test@example.com') {
-          finalProfile = { 
-            ...(finalProfile || {} as UserProfile), 
+          finalProfile = {
+            ...(finalProfile || {} as UserProfile),
             email: 'test@example.com',
             name: 'Apple Reviewer',
-            plan: 'pro', 
+            plan: 'pro',
             maxScansPerDay: 9999,
           };
         } else if (user.email === 'expired@example.com') {
-          finalProfile = { 
-            ...(finalProfile || {} as UserProfile), 
+          finalProfile = {
+            ...(finalProfile || {} as UserProfile),
             email: 'expired@example.com',
             name: 'Apple Reviewer (Expired)',
-            plan: 'free', 
-            maxScansPerDay: 3 
+            plan: 'free',
+            maxScansPerDay: 3
           };
           if (!hasActiveAppStoreSub) {
-             setShowPaywall(true);
+            setShowPaywall(true);
           }
         }
 
@@ -163,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSubscriptionRecord(null);
         subscriptionService.clearCache();
         localStorage.removeItem('chekki_last_auth');
-        
+
         // --- GUEST AUTH: Ensure every session has a token ---
         console.log("[AuthContext] Signing in anonymously for guest session...");
         try {
@@ -272,6 +276,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     subscriptionService.clearCache();
+    revenueCatService.logout();
     signOut(auth);
     localStorage.removeItem('chekki_last_auth');
     setUserProfile(null);
@@ -425,14 +430,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Platform-aware payment: delegates to subscriptionService
-  const processPayment = async (productId: string = AppleProducts.MONTHLY): Promise<{ success: boolean; message?: string }> => {
+  const processPayment = async (product: any = AppleProducts.MONTHLY): Promise<{ success: boolean; message?: string }> => {
     const isDemo = ['test@example.com', 'expired@example.com'].includes(userProfile?.email || '');
     if (!isDemo && (!firebaseUser || !userProfile)) {
       return { success: false, message: 'Please log in to subscribe.' };
     }
 
     const idToken = isDemo ? 'demo-token' : await firebaseUser!.getIdToken();
-    const response = await subscriptionService.purchase(productId, firebaseUser?.uid || 'demo-uid', idToken);
+    const response = await subscriptionService.purchase(product, firebaseUser?.uid || 'demo-uid', idToken);
 
     if (response.success) {
       const upgraded = await upgradeToPro();

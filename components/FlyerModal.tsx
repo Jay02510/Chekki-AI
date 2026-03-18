@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ASSETS } from '../constants';
+import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
+
 
 interface Props {
   onClose: () => void;
@@ -12,13 +15,24 @@ export const FlyerModal: React.FC<Props> = ({ onClose }) => {
   const [successMsg, setSuccessMsg] = useState('');
 
   const handleNativeShare = async (url: string, title: string) => {
-    if (navigator.share) {
+    const shareData = {
+      title: 'Chekki AI Flyer',
+      text: `Check out Chekki AI - ${title}`,
+      url: url,
+    };
+
+    if (Capacitor.isNativePlatform()) {
       try {
-        await navigator.share({
-          title: 'Chekki AI Flyer',
-          text: `Check out Chekki AI - ${title}`,
-          url: url,
+        await Share.share({
+          ...shareData,
+          dialogTitle: 'Share Flyer',
         });
+      } catch (err) {
+        console.error('Native share failed', err);
+      }
+    } else if (navigator.share) {
+      try {
+        await navigator.share(shareData);
       } catch (err) {
         if (err instanceof Error && err.name !== 'AbortError') {
           navigator.clipboard.writeText(url);
@@ -32,6 +46,7 @@ export const FlyerModal: React.FC<Props> = ({ onClose }) => {
       setTimeout(() => setSuccessMsg(''), 2000);
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">

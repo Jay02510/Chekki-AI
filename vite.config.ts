@@ -81,13 +81,13 @@ export default defineConfig(({ mode }) => ({
         main: resolve(__dirname, 'index.html'),
         app: resolve(__dirname, 'app.html')
       },
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        }
-      }
+      // output: {
+      //   manualChunks(id) {
+      //     if (id.includes('node_modules')) {
+      //       return 'vendor';
+      //     }
+      //   }
+      // }
     }
   }
 }));

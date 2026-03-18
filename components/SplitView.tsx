@@ -10,6 +10,9 @@ import { FeedbackModal } from './FeedbackModal';
 import { WorksheetOverlay } from './WorksheetOverlay';
 import { InlineFeedback } from './InlineFeedback';
 import { ASSETS } from '../constants';
+import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
+
 
 interface Props {
   imageUrl: string;
@@ -142,7 +145,14 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     };
 
     try {
-      if (navigator.share) {
+      if (Capacitor.isNativePlatform()) {
+        await Share.share({
+          title: shareData.title,
+          text: shareData.text,
+          url: shareData.url,
+          dialogTitle: 'Share with Chekki AI',
+        });
+      } else if (navigator.share) {
         await navigator.share(shareData);
       } else {
         handleCopyToCafe();
@@ -152,18 +162,32 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     }
   };
 
-  const handleSaveToPhone = () => {
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = `chekki-worksheet-${Date.now()}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleSaveToPhone = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        // On mobile, the share sheet is the most reliable way to "Save Image" 
+        // especially if we have a remote URL or base64.
+        await Share.share({
+          title: 'Save Image',
+          url: imageUrl,
+        });
+      } catch (err) {
+        console.error('Error saving image:', err);
+      }
+    } else {
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.download = `chekki-worksheet-${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
     
     // Alert or Toast for confirmation
     setCopyStatus(true);
     setTimeout(() => setCopyStatus(false), 3000);
   };
+
 
   const startPronunciationCheck = (e: React.MouseEvent) => {
     e.stopPropagation();

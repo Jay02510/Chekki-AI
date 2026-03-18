@@ -37,7 +37,10 @@
 	<string>Chekki needs access to your microphone for pronunciation practice.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Chekki needs access to your photos to let you select worksheets to analyze.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Chekki needs access to your photos to save scanned results and practice sheets.</string>
 	<key>UILaunchStoryboardName</key>
+
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>

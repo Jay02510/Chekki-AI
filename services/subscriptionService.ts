@@ -1,7 +1,7 @@
-import { NativePurchases, Product, Transaction } from '@capgo/native-purchases';
 import { Capacitor } from '@capacitor/core';
 import { SubscriptionRecord, SubscriptionStatus, SubscriptionPlatform } from '../types';
 import { API_BASE_URL } from '../config';
+import { revenueCatService } from './revenueCatService';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 export const AppleProducts = {
@@ -44,13 +44,9 @@ export const subscriptionService = {
         // On iOS: also check StoreKit directly for real-time accuracy
         if (platform === 'ios') {
             try {
-                const purchases = await NativePurchases.getPurchases();
-                const hasActiveSub = purchases?.purchases?.length > 0;
+                const customerInfo = await revenueCatService.getCustomerInfo();
+                const hasActiveSub = Object.keys(customerInfo.customerInfo.entitlements.active).length > 0;
                 if (hasActiveSub) {
-                    // Has a local StoreKit purchase — sync it to backend
-                    const latest = purchases.purchases[purchases.purchases.length - 1];
-                    // We'll validate the receipt server-side when the user purchases
-                    // For session start, trust StoreKit locally
                     const localRecord: SubscriptionRecord = {
                         user_id: userId,
                         subscription_status: 'active',
@@ -99,44 +95,33 @@ export const subscriptionService = {
         return none;
     },
 
-    /**
-     * Check if the user currently has premium access.
-     * Uses cached status for performance — call initialize() first.
-     */
     isPremium(): boolean {
         const cached = getCachedRecord();
         return cached?.subscription_status === 'active';
     },
 
-    /**
-     * Get the cached subscription record.
-     */
     getStatus(): SubscriptionRecord | null {
         return getCachedRecord();
     },
 
-    /**
-     * Initiate a native purchase. Platform-aware.
-     */
-    async purchase(productId: string, userId: string, idToken: string): Promise<{ success: boolean; transaction?: Transaction; error?: any }> {
+    async purchase(product: any, userId: string, idToken: string): Promise<{ success: boolean; transaction?: any; error?: any }> {
         const platform = Capacitor.getPlatform();
 
         if (platform === 'ios') {
-            return this._purchaseApple(productId, userId, idToken);
+            return this._purchaseApple(product, userId, idToken);
         } else if (platform === 'android') {
-            return { success: false, error: { message: 'Android billing coming soon.' } };
+            return this._purchaseAndroid(product, userId, idToken);
         } else {
-            // Web: redirect to subscribe page
             window.location.href = '/subscribe';
             return { success: false, error: { message: 'Redirecting to subscribe page.' } };
         }
     },
 
-    async _purchaseApple(productId: string, userId: string, idToken: string): Promise<{ success: boolean; transaction?: Transaction; error?: any }> {
+    async _purchaseApple(product: any, userId: string, idToken: string): Promise<{ success: boolean; transaction?: any; error?: any }> {
         try {
-            const transaction = await NativePurchases.purchaseProduct({ productIdentifier: productId });
+            const result = await revenueCatService.purchaseProduct(product);
+            const transaction = result.transaction;
 
-            // Send receipt to backend for validation + Firestore update
             const receiptData = (transaction as any).receipt || '';
             if (receiptData) {
                 try {
@@ -158,7 +143,6 @@ export const subscriptionService = {
                         });
                     }
                 } catch {
-                    // Backend validation failed — still treat as success locally (StoreKit confirmed)
                     cacheRecord({
                         user_id: userId,
                         subscription_status: 'active',
@@ -167,7 +151,6 @@ export const subscriptionService = {
                     });
                 }
             } else {
-                // No receipt in transaction — still mark active from StoreKit confirmation
                 cacheRecord({
                     user_id: userId,
                     subscription_status: 'active',
@@ -183,9 +166,6 @@ export const subscriptionService = {
         }
     },
 
-    /**
-     * Restore purchases — iOS only.
-     */
     async restorePurchases(userId: string): Promise<{ success: boolean; message?: string }> {
         const platform = Capacitor.getPlatform();
         if (platform !== 'ios') {
@@ -193,9 +173,8 @@ export const subscriptionService = {
         }
 
         try {
-            await NativePurchases.restorePurchases();
-            const { purchases } = await NativePurchases.getPurchases();
-            const hasActiveSub = purchases && purchases.length > 0;
+            const { customerInfo } = await revenueCatService.restorePurchases();
+            const hasActiveSub = Object.keys(customerInfo.entitlements.active).length > 0;
 
             if (hasActiveSub) {
                 cacheRecord({
@@ -214,14 +193,19 @@ export const subscriptionService = {
         }
     },
 
-    /**
-     * Fetch Apple products dynamically from StoreKit.
-     */
-    async fetchAppleProducts(): Promise<Product[]> {
+    async _purchaseAndroid(product: any, userId: string, idToken: string): Promise<{ success: boolean; transaction?: any; error?: any }> {
         try {
-            const { products } = await NativePurchases.getProducts({
-                productIdentifiers: [AppleProducts.MONTHLY, AppleProducts.YEARLY],
-            });
+            const result = await revenueCatService.purchaseProduct(product);
+            return { success: true, transaction: result.transaction };
+        } catch (error: any) {
+            console.error('[subscriptionService] Android purchase error:', error);
+            return { success: false, error };
+        }
+    },
+
+    async fetchAppleProducts(): Promise<any[]> {
+        try {
+            const products = await revenueCatService.getProducts([AppleProducts.MONTHLY, AppleProducts.YEARLY]);
             return products;
         } catch (error) {
             console.error('[subscriptionService] Error fetching Apple products:', error);
@@ -229,8 +213,5 @@ export const subscriptionService = {
         }
     },
 
-    /**
-     * Clear cached subscription data (on logout).
-     */
     clearCache,
 };

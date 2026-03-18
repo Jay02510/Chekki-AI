@@ -9,6 +9,14 @@ const config: CapacitorConfig = {
       enabled: true,
     },
   },
+  android: {
+    buildOptions: {
+      keystorePath: undefined,
+      keystoreAlias: undefined,
+    },
+    allowMixedContent: true,
+    minWebViewVersion: 60,
+  },
 };
 
 export default config;

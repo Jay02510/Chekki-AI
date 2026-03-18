@@ -4,23 +4,26 @@ import { Capacitor } from '@capacitor/core';
 import { auth } from "./database";
 import { API_BASE_URL, MOCK_MODE, MOCK_DELAY } from "../config";
 
-const getValidIdToken = async (maxRetries = 10): Promise<string | null> => {
-  for (let i = 0; i < maxRetries; i++) {
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        const token = await user.getIdToken();
-        console.log(`[geminiService] Token retrieved successfully for ${user.uid}`);
-        if (token) return token;
-      } catch (e) {
-        console.warn(`[geminiService] Token refresh failed (attempt ${i + 1}):`, e);
-      }
-    } else {
-      console.log(`[geminiService] auth.currentUser is null on attempt ${i + 1}`);
+const getValidIdToken = async (maxRetries = 3): Promise<string | null> => {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      return await user.getIdToken();
+    } catch (e) {
+      console.warn("[geminiService] Direct token retrieval failed:", e);
     }
-    // Wait 500ms before next check
-    await new Promise(resolve => setTimeout(resolve, 500));
-    console.log(`[geminiService] Waiting for auth token... (attempt ${i + 1})`);
+  }
+
+  // If no user or direct retrieval failed, wait a bit for auth to initialize
+  for (let i = 0; i < maxRetries; i++) {
+    const activeUser = auth.currentUser;
+    if (activeUser) {
+      try {
+        const token = await activeUser.getIdToken();
+        if (token) return token;
+      } catch (e) { }
+    }
+    await new Promise(resolve => setTimeout(resolve, 800));
   }
   return null;
 };
@@ -66,16 +69,19 @@ export const analyzeWorksheet = async (
   const baseUrl = API_BASE_URL;
 
   try {
-    const idToken = await getValidIdToken();
+    // Start getting token and checking network in parallel
+    const idTokenPromise = getValidIdToken();
+
+    const idToken = await idTokenPromise;
     if (!idToken) {
-      console.error("[geminiService] Final attempt: No ID token found after retries.");
+      console.warn("[geminiService] Proceeding without ID token (Auth not ready)");
     }
 
     const timeoutController = new AbortController();
     const timeoutId = setTimeout(() => timeoutController.abort(), 300000);
     const activeSignal = signal || timeoutController.signal;
 
-    console.log(`[geminiService] Fetching: ${baseUrl}/api/analyze (Auth: ${!!idToken})`);
+    console.log(`[geminiService] Fetching: ${baseUrl}/api/analyze`);
 
     const response = await fetch(`${baseUrl}/api/analyze`, {
       method: 'POST',
@@ -99,7 +105,6 @@ export const analyzeWorksheet = async (
       try {
         errorData = JSON.parse(text);
       } catch (e) {
-        // Not JSON, return raw first 100 chars
         errorData = { error: `HTTP_${response.status}: ${text.substring(0, 100)}` };
       }
       throw new Error(errorData.error || "BACKEND_FAILED");
@@ -108,20 +113,14 @@ export const analyzeWorksheet = async (
   } catch (error: any) {
     if (error.name === 'AbortError') throw error;
 
-    // Detailed logging for native/simulator debugging
-    console.error("[geminiService] API Call Failed:", {
-      message: error.message,
-      baseUrl,
-      online: navigator.onLine,
-      stack: error.stack
-    });
+    console.error("[geminiService] API Call Failed:", error.message);
 
     if (!navigator.onLine) {
       throw new Error("OFFLINE_ERROR");
     }
 
     if (error.message === 'Failed to fetch' || error.message.includes('Load failed')) {
-      throw new Error(`NETWORK_ERROR: ${error.message}${Capacitor.isNativePlatform() ? ' (Check simulator connectivity/URL)' : ''}`);
+      throw new Error(`NETWORK_ERROR: Check connectivity to ${baseUrl}`);
     }
 
     throw error;
