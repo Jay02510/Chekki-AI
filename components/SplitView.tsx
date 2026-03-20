@@ -11,9 +11,104 @@ import { WorksheetOverlay } from './WorksheetOverlay';
 import { InlineFeedback } from './InlineFeedback';
 import { ASSETS } from '../constants';
 import { Share } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
+import { PUBLIC_APP_URL } from '../config';
+import { toJpeg } from 'html-to-image';
 
+const generateCompositeImage = async (imgUrl: string, items: WorksheetItem[]): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    
+    if (!imgUrl.startsWith('data:') && !imgUrl.includes('localhost') && !imgUrl.startsWith('capacitor://') && !imgUrl.startsWith('file://')) {
+      img.crossOrigin = 'anonymous';
+    }
 
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('No 2D context'));
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const MathMax = Math.max;
+        const scale = canvas.width / 1000;
+        
+        items.forEach(item => {
+          const box = item.bounding_box;
+          if (!box && !item.custom_coords) return;
+          const topPercent = item.custom_coords ? item.custom_coords.top : (box!.ymin / 1000) * 100;
+          const leftPercent = item.custom_coords ? item.custom_coords.left : (box!.xmin / 1000) * 100;
+
+          const baseFontSize = MathMax(16, 28 * scale);
+          const cx = (leftPercent / 100) * canvas.width;
+          const cy = (topPercent / 100) * canvas.height;
+
+          const textId = item.id.toString();
+          const textAnswer = item.correct_answer;
+          
+          ctx.font = `900 ${baseFontSize}px sans-serif`;
+          const idMetrics = ctx.measureText(textId);
+          const answerMetrics = ctx.measureText(textAnswer);
+          
+          const paddingX = baseFontSize * 0.8;
+          const paddingY = baseFontSize * 0.6;
+          
+          const idBoxWidth = MathMax(baseFontSize * 1.5, idMetrics.width + paddingX);
+          const answerBoxWidth = answerMetrics.width + paddingX;
+          const rectWidth = idBoxWidth + answerBoxWidth + paddingX * 0.5;
+          const rectHeight = baseFontSize + paddingY * 2;
+          
+          const startX = cx - rectWidth / 2;
+          const startY = cy - rectHeight / 2;
+
+          ctx.save();
+          ctx.shadowColor = 'rgba(0,0,0,0.5)';
+          ctx.shadowBlur = 12 * scale;
+          ctx.shadowOffsetY = 8 * scale;
+          
+          ctx.fillStyle = '#ea580c'; 
+          ctx.beginPath();
+          ctx.roundRect(startX, startY, rectWidth, rectHeight, baseFontSize * 0.6);
+          ctx.fill();
+
+          ctx.shadowColor = 'transparent';
+          ctx.lineWidth = 2 * scale;
+          ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+          ctx.stroke();
+
+          ctx.fillStyle = 'rgba(255,255,255,0.2)';
+          ctx.beginPath();
+          ctx.roundRect(startX + paddingX * 0.4, startY + paddingY * 0.5, idBoxWidth - paddingX * 0.4, rectHeight - paddingY, baseFontSize * 0.4);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.textBaseline = 'middle';
+          
+          ctx.textAlign = 'center';
+          ctx.font = `900 ${baseFontSize * 0.85}px sans-serif`;
+          ctx.fillText(textId, startX + paddingX * 0.2 + idBoxWidth / 2, cy);
+          
+          ctx.textAlign = 'left';
+          ctx.font = `900 ${baseFontSize}px 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif`;
+          ctx.fillText(textAnswer, startX + idBoxWidth + paddingX * 0.4, cy);
+
+          ctx.restore();
+        });
+
+        resolve(canvas.toDataURL('image/jpeg', 0.95));
+      } catch (e) {
+        reject(e);
+      }
+    };
+
+    img.onerror = (e) => reject(new Error('Image load failed for composite'));
+    img.src = imgUrl;
+  });
+};
 interface Props {
   imageUrl: string;
   items: WorksheetItem[];
@@ -33,6 +128,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const [hasInteracted, setHasInteracted] = useState(false);
   const [copyStatus, setCopyStatus] = useState(false);
   const [upsellFeature, setUpsellFeature] = useState<'pronunciation' | 'audio' | 'guide' | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
@@ -135,57 +231,86 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   };
 
   const handleShare = async () => {
+    setIsSharing(true);
     const title = worksheetTitle || (language === 'ko' ? "영어 학습지" : "English Worksheet");
     const shareData = {
       title: 'Chekki AI',
       text: language === 'ko' 
         ? `채키 AI로 오늘 '${title}' 공부 끝냈어요! ✨`
         : `Finished '${title}' with Chekki AI tonight! 🚀`,
-      url: window.location.origin
+      url: PUBLIC_APP_URL
     };
 
     try {
+      let finalBase64Data = imageUrl.includes('base64,') ? imageUrl.split('base64,')[1] : null;
+
+      try {
+        const compositeDataUrl = await generateCompositeImage(imageUrl, items);
+        finalBase64Data = compositeDataUrl.split('base64,')[1];
+      } catch (canvasErr) {
+        console.error("Canvas composite failed, falling back to html-to-image", canvasErr);
+        const node = document.getElementById('worksheet-overlay-capture');
+        if (node) {
+          try {
+            const finalDataUrl = await toJpeg(node, { quality: 0.95, pixelRatio: 2, skipFonts: true });
+            finalBase64Data = finalDataUrl.split('base64,')[1];
+          } catch (captureErr) {
+            console.error("Failed to capture image composite", captureErr);
+          }
+        }
+      }
+
+      const fallbackBase64 = imageUrl.includes('base64,') ? imageUrl.split('base64,')[1] : imageUrl;
+      const dataToSave = finalBase64Data || fallbackBase64;
+
       if (Capacitor.isNativePlatform()) {
+        const fileName = `chekki-share-${Date.now()}.jpg`;
+
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: dataToSave,
+          directory: Directory.Cache,
+        });
+
         await Share.share({
           title: shareData.title,
           text: shareData.text,
           url: shareData.url,
+          files: [savedFile.uri],
           dialogTitle: 'Share with Chekki AI',
         });
       } else if (navigator.share) {
-        await navigator.share(shareData);
+        try {
+          if (finalBase64Data) {
+            const byteCharacters = atob(finalBase64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'image/jpeg' });
+            const file = new File([blob], `chekki-share-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                  ...shareData,
+                  files: [file]
+              });
+              return;
+            }
+          }
+          await navigator.share(shareData);
+        } catch (e) {
+          await navigator.share(shareData);
+        }
       } else {
         handleCopyToCafe();
       }
     } catch (err) {
       console.error('Error sharing:', err);
+    } finally {
+      setIsSharing(false);
     }
-  };
-
-  const handleSaveToPhone = async () => {
-    if (Capacitor.isNativePlatform()) {
-      try {
-        // On mobile, the share sheet is the most reliable way to "Save Image" 
-        // especially if we have a remote URL or base64.
-        await Share.share({
-          title: 'Save Image',
-          url: imageUrl,
-        });
-      } catch (err) {
-        console.error('Error saving image:', err);
-      }
-    } else {
-      const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = `chekki-worksheet-${Date.now()}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-    
-    // Alert or Toast for confirmation
-    setCopyStatus(true);
-    setTimeout(() => setCopyStatus(false), 3000);
   };
 
 
@@ -372,18 +497,17 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
             {!isLoadingItems && items.length > 0 && (
               <div className="space-y-6 pt-6 pb-2">
-                <div className="flex gap-3 pt-2">
+                <div className="pt-2">
                   <button
                     onClick={handleShare}
-                    className="flex-1 bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-xl"
+                    disabled={isSharing}
+                    className="w-full bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-xl disabled:opacity-50"
                   >
-                    <span>📤</span> {language === 'ko' ? '공유하기' : 'Share'}
-                  </button>
-                  <button
-                    onClick={handleSaveToPhone}
-                    className="flex-1 bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-xl"
-                  >
-                    <span>💾</span> {language === 'ko' ? '저장하기' : 'Save'}
+                    {isSharing ? (
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <><span>📤</span> {language === 'ko' ? '공유 & 저장하기' : 'Share & Save'}</>
+                    )}
                   </button>
                 </div>
 

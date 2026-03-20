@@ -12,6 +12,11 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
     name: 'api-middleware',
     configureServer(server: any) {
       server.middlewares.use(async (req: any, res: any, next: any) => {
+        // Redirect root to app.html in dev mode if requested
+        if (req.url === '/' || req.url === '/index.html') {
+          req.url = '/app.html';
+        }
+
         if (req.url?.startsWith('/api/analyze')) {
           // Parse body if method is POST
           if (req.method === 'POST') {
@@ -55,8 +60,15 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
           };
 
           // Dynamic import to avoid loading this during build
-          const { default: analyzeHandler } = await import('./api/analyze');
-          await analyzeHandler(req, vercelRes);
+          try {
+            console.log(`[Vite Dev API] Handling ${req.method} ${req.url}`);
+            const { default: analyzeHandler } = await import('./api/analyze');
+            await analyzeHandler(req, vercelRes);
+          } catch (e: any) {
+            console.error(`[Vite Dev API Error]:`, e);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: "INTERNAL_DEV_ERROR", details: e.message }));
+          }
           return;
         }
         next();

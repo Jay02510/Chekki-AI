@@ -62,7 +62,9 @@ RULES FOR ANSWERS (CRITICAL):
    - GOOD: "A. Milo borrowed an umbrella."
 5. NEVER provide just a single letter or number (e.g., "a", "b", "1", "2") alone in "correct_answer".
 6. If the answer is a full sentence in the worksheet, extract the full sentence.
-7. Strictly provide the full pedagogical answer that a student would write or say. Keep the text exactly as it appears in the worksheet options.
+7. Coordinates MUST be provided as approximate integers (0-1000).
+8. Strictly provide the full pedagogical answer that a student would write or say. Keep the text exactly as it appears in the worksheet options.
+9. Output MUST be valid JSON. Do not include any text outside the JSON structure.
 `;
 
 const CONSOLIDATED_SCHEMA = {
@@ -180,7 +182,7 @@ export default async function handler(req: any, res: any) {
 
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
-    // MODEL ROUTING - Use current stable model names
+    // MODEL ROUTING - Using stable version 2.5 as confirmed by user
     const modelToUse = userPlan === 'pro' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
 
     const response = await ai.models.generateContent({
@@ -218,6 +220,9 @@ export default async function handler(req: any, res: any) {
 
   } catch (error: any) {
     console.error("[Backend Security Error]:", error);
-    return res.status(500).json({ error: "ANALYSIS_FAILED", details: error.message || String(error), stack: error.stack });
+    return res.status(500).json({ 
+      error: "ANALYSIS_FAILED", 
+      details: error.message || "An unexpected error occurred during analysis." 
+    });
   }
 }

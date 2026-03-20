@@ -128,6 +128,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
 
   const OverlayContent = () => (
     <div 
+      id="worksheet-overlay-capture"
       ref={containerRef}
       onPointerMove={handlePointerMove}
       onContextMenu={(e) => e.preventDefault()}

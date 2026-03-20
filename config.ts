@@ -32,5 +32,6 @@ const getApiBaseUrl = () => {
 };
 
 export const API_BASE_URL = getApiBaseUrl();
+export const PUBLIC_APP_URL = 'https://chekki-ai.vercel.app';
 
 console.log(`[Config] API Base URL: ${API_BASE_URL || '(relative)'}`);
