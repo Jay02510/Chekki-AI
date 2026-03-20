@@ -74,14 +74,16 @@ export const analyzeWorksheet = async (
 
     const idToken = await idTokenPromise;
     if (!idToken) {
-      console.warn("[geminiService] Proceeding without ID token (Auth not ready)");
+      console.warn("[geminiService] ⚠️ No auth token — proceeding as guest. API will likely reject with UNAUTHORIZED.");
+    } else {
+      console.log(`[geminiService] ✅ Auth token retrieved (length: ${idToken.length})`);
     }
 
     const timeoutController = new AbortController();
     const timeoutId = setTimeout(() => timeoutController.abort(), 300000);
     const activeSignal = signal || timeoutController.signal;
 
-    console.log(`[geminiService] Fetching: ${baseUrl}/api/analyze`);
+    console.log(`[geminiService] 📡 Fetching: ${baseUrl}/api/analyze (plan: ${userPlan})`);
 
     const response = await fetch(`${baseUrl}/api/analyze`, {
       method: 'POST',
@@ -107,7 +109,11 @@ export const analyzeWorksheet = async (
       } catch (e) {
         errorData = { error: `HTTP_${response.status}: ${text.substring(0, 100)}` };
       }
-      throw new Error(errorData.error || "BACKEND_FAILED");
+      const detailedMsg = errorData.details
+        ? `${errorData.error || "BACKEND_FAILED"}: ${errorData.details}`
+        : (errorData.error || "BACKEND_FAILED");
+      console.error("[geminiService] Backend error response:", errorData);
+      throw new Error(detailedMsg);
     }
     return await response.json();
   } catch (error: any) {

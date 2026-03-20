@@ -251,12 +251,15 @@ function AppContent() {
     } catch (e: any) {
       if (e.name === 'AbortError') return;
 
+      console.error("[App] Analysis error:", e.message, e);
+
       // Use specific error message if available, otherwise generic
-      const errorMsg = e.message && e.message !== 'ANALYSIS_FAILED'
-        ? e.message
-        : language === 'ko' 
+      const isGenericFail = !e.message || e.message === 'ANALYSIS_FAILED';
+      const errorMsg = isGenericFail
+        ? (language === 'ko' 
             ? "분석에 실패했어요. 밝은 곳에서 사진을 다시 찍어주세요!" 
-            : "Analysis failed. Please try taking a clearer picture in good lighting!";
+            : "Analysis failed. Please try taking a clearer picture in good lighting!")
+        : e.message;
 
       setAnalysisState({
         status: 'error',
@@ -272,6 +275,9 @@ function AppContent() {
   const translateError = (msg: string) => {
     if (msg.includes('OFFLINE_ERROR')) return language === 'ko' ? "인터넷 연결을 확인해주세요." : "Please check your internet connection.";
     if (msg.includes('NETWORK_ERROR')) return language === 'ko' ? "서버에 연결할 수 없습니다. 시뮬레이터 설정을 확인해주세요." : "Cannot connect to server. Check simulator setup.";
+    if (msg.includes('UNAUTHORIZED')) return language === 'ko' ? "로그인이 필요합니다. 다시 로그인해주세요." : "Authorization failed. Please log out and log back in.";
+    if (msg.includes('API_KEY_MISSING')) return language === 'ko' ? "서버 설정 오류입니다. 관리자에게 문의하세요." : "Server configuration error. Please contact support.";
+    if (msg.includes('ANALYSIS_FAILED') && msg.length > 'ANALYSIS_FAILED'.length) return msg; // show details
     return msg;
   };
 
@@ -396,7 +402,7 @@ function AppContent() {
                 <p className="text-zinc-400 font-korean leading-relaxed">
                   {translateError(analysisState.errorMessage || "")}
                 </p>
-                {analysisState.errorMessage && analysisState.errorMessage.includes('NETWORK_ERROR') && (
+                {analysisState.errorMessage && (analysisState.errorMessage.includes('NETWORK_ERROR') || analysisState.errorMessage.includes('ANALYSIS_FAILED') || analysisState.errorMessage.includes('UNAUTHORIZED')) && (
                   <p className="text-[10px] text-zinc-600 font-mono break-all opacity-50">
                     {analysisState.errorMessage}
                   </p>

@@ -63,7 +63,7 @@ export const subscriptionService = {
 
         // Fetch from backend
         try {
-            const response = await fetch(`${BACKEND_BASE}/api/subscription/status`, {
+            const response = await fetch(`${BACKEND_BASE}/api/subscription-status`, {
                 headers: { Authorization: `Bearer ${idToken}` },
             });
             if (response.ok) {
@@ -125,7 +125,7 @@ export const subscriptionService = {
             const receiptData = (transaction as any).receipt || '';
             if (receiptData) {
                 try {
-                    const validationResp = await fetch(`${BACKEND_BASE}/api/subscription/validate/apple`, {
+                    const validationResp = await fetch(`${BACKEND_BASE}/api/subscription-validate-apple`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
