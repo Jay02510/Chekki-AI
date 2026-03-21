@@ -26,13 +26,25 @@ const generateCompositeImage = async (imgUrl: string, items: WorksheetItem[]): P
 
     img.onload = () => {
       try {
+        let finalWidth = img.naturalWidth || img.width;
+        let finalHeight = img.naturalHeight || img.height;
+
+        // Downscale massive camera photos to a reasonable dimension (e.g. 2000px max)
+        // This drastically speeds up canvas processing and saves memory, without losing perceived quality for sharing.
+        const MAX_DIM = 2000;
+        if (finalWidth > MAX_DIM || finalHeight > MAX_DIM) {
+          const ratio = Math.min(MAX_DIM / finalWidth, MAX_DIM / finalHeight);
+          finalWidth = Math.round(finalWidth * ratio);
+          finalHeight = Math.round(finalHeight * ratio);
+        }
+
         const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
+        canvas.width = finalWidth;
+        canvas.height = finalHeight;
         const ctx = canvas.getContext('2d');
         if (!ctx) return reject(new Error('No 2D context'));
 
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, finalWidth, finalHeight);
 
         const MathMax = Math.max;
         const scale = canvas.width / 1000;
@@ -151,12 +163,14 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       recognitionRef.current.abort();
       setIsListening(false);
     }
+    // Clear speech result on active item change
+    setSpeechResult(null);
   }, [activeItemId]);
 
   // Handle Speech Recognition Setup & Cleanup
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition && !recognitionRef.current) {
+    if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
@@ -175,6 +189,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             const audio = new Audio(ASSETS.STAMP_SOUND);
             audio.play().catch(() => { });
           } else {
+            console.log(`[Speech] Expected: ${cleanAnswer}, Heard: ${cleanSpeech}`);
             setSpeechResult({ id: activeItem.id, success: false });
             if ('vibrate' in navigator) navigator.vibrate([30, 30, 30]);
           }
@@ -189,13 +204,17 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
           alert("Microphone access was denied. Please check your browser settings.");
         }
       };
+      
       recognition.onend = () => setIsListening(false);
       recognitionRef.current = recognition;
     }
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.abort();
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {}
+        recognitionRef.current = null;
       }
     };
   }, [items, activeItemId]); // Refresh when items or active state changes
@@ -252,7 +271,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         const node = document.getElementById('worksheet-overlay-capture');
         if (node) {
           try {
-            const finalDataUrl = await toJpeg(node, { quality: 0.95, pixelRatio: 2, skipFonts: true });
+            // Lowering pixelRatio to 1 and quality to 0.85 significantly improves speed and memory usage on devices falling back to html-to-image
+            const finalDataUrl = await toJpeg(node, { quality: 0.85, pixelRatio: 1, skipFonts: true });
             finalBase64Data = finalDataUrl.split('base64,')[1];
           } catch (captureErr) {
             console.error("Failed to capture image composite", captureErr);
@@ -324,10 +344,24 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       setUpsellFeature('pronunciation');
       return;
     }
-    if (!recognitionRef.current) return;
+    if (!recognitionRef.current) {
+      alert(language === 'ko' ? "이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 이용해주세요." : "Speech recognition is not supported in this browser. Please use Chrome.");
+      return;
+    }
+    
     setSpeechResult(null);
     setIsListening(true);
-    recognitionRef.current.start();
+    
+    try {
+      recognitionRef.current.start();
+    } catch (err: any) {
+      console.warn("Speech recognition start failed:", err);
+      // If it's already started, just ignore the error.
+      // If it failed for another reason, we should stop the UI state.
+      if (err.name !== 'InvalidStateError') {
+        setIsListening(false);
+      }
+    }
   };
 
   const handleActionClick = (e: React.MouseEvent, action: () => void) => {
@@ -401,7 +435,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 <div key={item.id} ref={(el) => { itemRefs.current[item.id] = el; }} onClick={(e) => { e.stopPropagation(); setActiveItemId(item.id); }}
                   className={`group relative rounded-[1.8rem] border transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in-up transform-gpu ${isActive ? 'bg-zinc-800/95 border-orange-500/50 shadow-[0_20px_60px_rgba(0,0,0,0.5)] scale-[1.01]' : 'bg-zinc-900/60 border-white/5 hover:border-white/20'}`}>
 
-                  {isFirstItem && !hasInteracted && (
+                  {isFirstItem && !hasInteracted && !isActive && (
                     <div className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500 text-[8px] font-black text-white uppercase tracking-widest animate-bounce z-10 shadow-lg ring-2 ring-white/10">
                       <span>Tap here</span> 👆
                     </div>
@@ -416,15 +450,37 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                       <h4 className={`text-sm md:text-lg font-bold leading-relaxed mb-3 transition-colors break-keep ${isActive ? 'text-white' : 'text-zinc-400'}`}>
                         {item.question_text.replace(/^\d+[\.\)\s]+/, '')}
                       </h4>
-                      <div className="bg-white/5 rounded-2xl px-4 py-1.5 border border-white/5 w-fit shadow-inner">
-                        <span className="font-hand text-2xl md:text-3xl text-emerald-400 font-bold">{answerText}</span>
+                      
+                      {/* Dynamic Visual Feedback for Speech Recognition */}
+                      <div className={`relative rounded-2xl px-4 py-1.5 border w-fit shadow-inner transition-all duration-500 ease-in-out transform-gpu ${speechResult?.id === item.id ? (speechResult.success ? 'border-green-400 bg-green-500/20 shadow-[0_0_25px_rgba(34,197,94,0.3)] scale-110 z-10' : 'border-red-400 bg-red-500/20 translate-x-1 shadow-[0_0_15px_rgba(239,68,68,0.2)]') : 'bg-white/5 border-white/5'}`}>
+                        <span className={`font-hand text-2xl md:text-3xl font-bold transition-colors duration-500 ${speechResult?.id === item.id ? (speechResult.success ? 'text-green-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' : 'text-red-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]') : 'text-emerald-400'}`}>
+                          {answerText}
+                        </span>
+                        
+                        {/* Success/Fail Achievement Stamps */}
+                        {speechResult?.id === item.id && speechResult.success && (
+                          <div className="absolute -top-4 -right-4 text-3xl animate-[bounce_1s_ease-in-out_infinite] drop-shadow-lg z-20">🌟</div>
+                        )}
+                        {speechResult?.id === item.id && !speechResult.success && (
+                          <div className="absolute -top-3 -right-3 text-2xl animate-pulse drop-shadow-lg z-20">🤔</div>
+                        )}
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      {isActive && (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setActiveItemId(null); }}
+                          className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white ring-1 ring-white/5 shadow-lg hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                      )}
+                      
                       <button onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]`}>
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z" /></svg>
                       </button>
+                      
                       <button onClick={(e) => handleActionClick(e, () => toggleMistake(item))} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]`}>
                         <svg className="w-5 h-5" fill={flagged ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                       </button>

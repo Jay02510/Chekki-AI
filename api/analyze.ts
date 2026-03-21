@@ -182,36 +182,63 @@ export default async function handler(req: any, res: any) {
 
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
-    // MODEL ROUTING - Using stable version 2.5 as confirmed by user
-    const modelToUse = userPlan === 'pro' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
-
-    const response = await ai.models.generateContent({
-      model: modelToUse,
-      contents: [{
-        role: 'user',
-        parts: [
-          { inlineData: { mimeType: "image/jpeg", data: image } },
-          { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
-        ]
-      }],
-      config: {
+    const performAnalysis = async (useThinking: boolean) => {
+      const configOpts: any = {
         systemInstruction: SYSTEM_PROMPT,
         responseMimeType: "application/json",
         responseSchema: CONSOLIDATED_SCHEMA as any,
-        thinkingConfig: userPlan === 'pro' ? { thinkingBudget: 8000 } : undefined,
         safetySettings: [
           { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
           { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
           { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
           { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE }
         ]
-      }
-    });
+      };
 
-    let resultText = response.text || "{}";
-    // Strip markdown formatting if the LLM hallucinated it
-    resultText = resultText.replace(/```json\n?|```/g, "").trim();
-    const result = JSON.parse(resultText);
+      // Determine model based on the pass tier
+      let currentModel = 'gemini-2.5-flash'; // Always default to lightning-fast Flash for the initial pass
+      
+      if (useThinking && userPlan === 'pro') {
+        currentModel = 'gemini-2.5-pro'; // Upgrade to Pro model for the heavy fallback
+        configOpts.thinkingConfig = { thinkingBudget: 8000 };
+      }
+
+      return ai.models.generateContent({
+        model: currentModel,
+        contents: [{
+          role: 'user',
+          parts: [
+            { inlineData: { mimeType: "image/jpeg", data: image } },
+            { text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter." }
+          ]
+        }],
+        config: configOpts
+      });
+    };
+
+    let result;
+    try {
+      // Fast Pass: Attempt the analysis without the 8000 token thinking budget for speed.
+      const fastResponse = await performAnalysis(false);
+      let resultText = fastResponse.text || "{}";
+      resultText = resultText.replace(/```json\n?|```/g, "").trim();
+      result = JSON.parse(resultText);
+
+      // If the fast pass mysteriously finds 0 questions on a Pro plan, treat it as a false-negative and trigger fallback.
+      if (userPlan === 'pro' && (!result.items || result.items.length === 0)) {
+        throw new Error("TriggerFallback");
+      }
+    } catch (e: any) {
+      if (userPlan === 'pro') {
+        console.log("[Backend] Fast pass failed or found 0 questions. Falling back to deep thinking (8000 tokens)...");
+        const fallbackResponse = await performAnalysis(true);
+        let resultText = fallbackResponse.text || "{}";
+        resultText = resultText.replace(/```json\n?|```/g, "").trim();
+        result = JSON.parse(resultText);
+      } else {
+        throw e;
+      }
+    }
 
     return res.status(200).json({
       worksheet_summary: result.worksheet_summary,

@@ -5,8 +5,8 @@ import { resolve } from 'path';
 
 // Custom middleware to handle Vercel-like API routes in Vite
 const apiMiddleware = ({ mode }: { mode: string }) => {
-  // Load env vars
-  process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+  // Load ALL env vars (not just VITE_ prefixed ones) for the backend mock
+  process.env = { ...process.env, ...loadEnv(mode, process.cwd(), '') };
 
   return {
     name: 'api-middleware',
