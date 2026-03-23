@@ -35,6 +35,8 @@
 	<string>Chekki needs access to your camera to scan worksheets and analyze them.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Chekki needs access to your microphone for pronunciation practice.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Chekki needs speech recognition to help your child practice pronunciation.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Chekki needs access to your photos to let you select worksheets to analyze.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

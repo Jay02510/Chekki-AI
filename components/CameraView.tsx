@@ -436,7 +436,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <>숙제 전쟁 끝, <br /> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>웃으며 공부하세요</span></>
               ) : (
                 <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6 animate-fade-in drop-shadow-2xl">
-                  <>{SCREENSHOT_MODE ? 'Peaceful' : 'Stress Free'} <br /> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>Homework Prep.</span></>
+                  <>Peaceful <br /> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>Homework Prep.</span></>
                 </h2>
               )
             )}

@@ -15,6 +15,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
 import { PUBLIC_APP_URL } from '../config';
 import { toJpeg } from 'html-to-image';
+import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 
 const generateCompositeImage = async (imgUrl: string, items: WorksheetItem[]): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -167,11 +168,14 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     setSpeechResult(null);
   }, [activeItemId]);
 
-  // Handle Speech Recognition Setup & Cleanup
+  // Handle Speech Recognition Setup & Cleanup (Web Speech API fallback for browsers only)
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
+    // On native platforms, we use @capgo/capacitor-speech-recognition instead
+    if (Capacitor.isNativePlatform()) return;
+
+    const WebSpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (WebSpeechRecognition) {
+      const recognition = new WebSpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.lang = 'en-US';
@@ -213,11 +217,28 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
-        } catch (e) {}
+        } catch (e) { }
         recognitionRef.current = null;
       }
     };
   }, [items, activeItemId]); // Refresh when items or active state changes
+
+  const stopPronunciationCheck = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await SpeechRecognition.stop();
+      } catch (err) {
+        console.error("Native speech recognition stop error:", err);
+      } finally {
+        setIsListening(false);
+      }
+    } else if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (err) { }
+      setIsListening(false);
+    }
+  };
 
   const playAudio = (text: string) => {
     if (!isAuthenticated) {
@@ -334,7 +355,23 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   };
 
 
-  const startPronunciationCheck = (e: React.MouseEvent) => {
+  const evaluateSpeechResult = (transcript: string, itemForCheck: WorksheetItem) => {
+    const cleanAnswer = itemForCheck.correct_answer.toLowerCase().replace(/[^\w\s]/g, '').trim();
+    const cleanSpeech = transcript.toLowerCase().replace(/[^\w\s]/g, '').trim();
+
+    if (cleanSpeech.includes(cleanAnswer) || cleanAnswer.includes(cleanSpeech)) {
+      setSpeechResult({ id: itemForCheck.id, success: true });
+      if ('vibrate' in navigator) navigator.vibrate(50);
+      const audio = new Audio(ASSETS.STAMP_SOUND);
+      audio.play().catch(() => { });
+    } else {
+      console.log(`[Speech] Expected: ${cleanAnswer}, Heard: ${cleanSpeech}`);
+      setSpeechResult({ id: itemForCheck.id, success: false });
+      if ('vibrate' in navigator) navigator.vibrate([30, 30, 30]);
+    }
+  };
+
+  const startPronunciationCheck = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) {
       openLoginModal();
@@ -344,6 +381,57 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       setUpsellFeature('pronunciation');
       return;
     }
+
+    const activeItem = items.find(i => i.id === activeItemId);
+    if (!activeItem) return;
+
+    if (isListening) {
+      await stopPronunciationCheck();
+      return;
+    }
+
+    // Native path: use @capgo/capacitor-speech-recognition
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { available } = await SpeechRecognition.available();
+        if (!available) {
+          alert(language === 'ko' ? "이 기기에서 음성 인식을 사용할 수 없습니다." : "Speech recognition is not available on this device.");
+          return;
+        }
+
+        const permStatus = await SpeechRecognition.requestPermissions();
+        if (permStatus.speechRecognition !== 'granted') {
+          alert(language === 'ko' ? "마이크 및 음성 인식 권한을 허용해주세요." : "Please allow microphone and speech recognition permissions.");
+          return;
+        }
+
+        setSpeechResult(null);
+        setIsListening(true);
+
+        const result = await SpeechRecognition.start({
+          language: 'en-US',
+          partialResults: false,
+          maxResults: 3,
+        });
+
+        setIsListening(false);
+
+        if (result.matches && result.matches.length > 0) {
+          evaluateSpeechResult(result.matches[0], activeItem);
+        } else {
+          setSpeechResult({ id: activeItem.id, success: false });
+        }
+      } catch (err: any) {
+        console.error("Native speech recognition error:", err);
+        setIsListening(false);
+        if (err?.message?.includes('denied') || err?.message?.includes('permission')) {
+          alert(language === 'ko' ? "마이크 및 음성 인식 권한을 허용해주세요." : "Please allow microphone and speech recognition permissions in Settings.");
+        }
+      }
+      return;
+    }
+
+    // Web fallback: use Web Speech API
     if (!recognitionRef.current) {
       alert(language === 'ko' ? "이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 이용해주세요." : "Speech recognition is not supported in this browser. Please use Chrome.");
       return;
@@ -356,8 +444,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       recognitionRef.current.start();
     } catch (err: any) {
       console.warn("Speech recognition start failed:", err);
-      // If it's already started, just ignore the error.
-      // If it failed for another reason, we should stop the UI state.
       if (err.name !== 'InvalidStateError') {
         setIsListening(false);
       }
@@ -503,7 +589,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                           <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-3xl p-5 flex items-center gap-5 shadow-inner">
                             <button
                               onClick={startPronunciationCheck}
-                              disabled={isListening}
                               className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-[pulse_1s_infinite] ring-4 ring-red-500/40' : 'bg-indigo-600 hover:bg-indigo-500'} text-white shadow-[0_15px_35px_rgba(79,70,229,0.3)] active:scale-90 min-w-[56px] min-h-[56px]`}
                             >
                               {isListening ? (
