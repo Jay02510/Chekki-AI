@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
+import { Capacitor } from '@capacitor/core';
 
 interface Props {
   onFinish: () => void;
@@ -73,7 +74,8 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                 className="w-full h-full object-contain z-10 scale-110"
                 onError={() => setVideoError(true)}
               >
-                <source src={ASSETS.VIDEO_INTRO} type="video/mp4" />
+                {/* Use local file on web (avoids CORS/autoplay issues), Cloudinary on native */}
+                <source src={Capacitor.isNativePlatform() ? ASSETS.VIDEO_INTRO : '/chekki-intro.mp4'} type="video/mp4" />
               </video>
             ) : (
               <div className="w-full h-full flex items-center justify-center animate-float">
