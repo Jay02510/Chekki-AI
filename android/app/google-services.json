@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "123535525914",
+    "project_id": "homework-assistant-c00b9",
+    "storage_bucket": "homework-assistant-c00b9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123535525914:android:28df2faf1cfc611aa0a9a3",
+        "android_client_info": {
+          "package_name": "com.chekkiai.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "123535525914-iimsom1o5hqrm8rgpqfr8dtt6d9p239v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chekkiai.app",
+            "certificate_hash": "85acafcdf7da04c94d2ade5bfe091fd543f74e61"
+          }
+        },
+        {
+          "client_id": "123535525914-q2esntlljtd0asrqcd4h2tpto9i0qfmp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFBxGt_2cbJvt4V5hMX7bAoczDBp-6wAo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "123535525914-q2esntlljtd0asrqcd4h2tpto9i0qfmp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

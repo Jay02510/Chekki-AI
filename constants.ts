@@ -9,15 +9,17 @@ import { WorksheetAnalysis, ItemType } from "./types";
  * fl_attachment: Forces the browser to download the file instead of opening it
  */
 export const ASSETS = {
-  VIDEO_INTRO: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/chekki-intro_y7hj7c.mp4`,
+  // Switched back to Cloudinary URL for reliable Capacitor/WKWebView video loading
+  VIDEO_INTRO: 'https://res.cloudinary.com/dginphpy4/video/upload/chekki-intro_y7hj7c.mp4',
   LOGO: './chekki-actual.png',
   MASCOT_HAPPY: './chekki-actual.png',
   MASCOT_THINKING: './chekki-actual.png',
   MASCOT_SCAN: './chekki-actual.png',
+
   HERO_IMAGE: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto,e_background_removal/v1765770525/Chekki_Futuristic_Background_i8foqe.png`,
   HERO_SLEEPY: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1766246089/Sleepy-Chekki_xvg2n6.svg`,
 
-  // PRIMARY LOADING ANIMATION (Updated with new High-Fidelity Screen)
+  // PRIMARY LOADING ANIMATION (Local path recommended for smoothness)
   VIDEO_ANALYZING: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/Chekki_Loading_Screen_x7fdky.mp4`,
   VIDEO_SLEEPY: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/Sleepy_Chekki_Night_Float_fcqkyh.mp4`,
 

@@ -16,6 +16,7 @@ import { Capacitor } from '@capacitor/core';
 import { PUBLIC_APP_URL } from '../config';
 import { toJpeg } from 'html-to-image';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
+import { normalizeText, compareSpeech } from '../utils/speechUtils';
 
 const generateCompositeImage = async (imgUrl: string, items: WorksheetItem[]): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -147,6 +148,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const [isListening, setIsListening] = useState(false);
   const [speechResult, setSpeechResult] = useState<{ id: number; success: boolean } | null>(null);
   const recognitionRef = useRef<any>(null);
+  const nativeListenerRef = useRef<any>(null);
+  const lastTranscriptRef = useRef<string>("");
 
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
@@ -181,22 +184,10 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       recognition.lang = 'en-US';
 
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript.toLowerCase();
+        const transcript = event.results[0][0].transcript;
         const activeItem = items.find(i => i.id === activeItemId);
         if (activeItem) {
-          const cleanAnswer = activeItem.correct_answer.toLowerCase().replace(/[^\w\s]/g, '').trim();
-          const cleanSpeech = transcript.replace(/[^\w\s]/g, '').trim();
-
-          if (cleanSpeech.includes(cleanAnswer) || cleanAnswer.includes(cleanSpeech)) {
-            setSpeechResult({ id: activeItem.id, success: true });
-            if ('vibrate' in navigator) navigator.vibrate(50);
-            const audio = new Audio(ASSETS.STAMP_SOUND);
-            audio.play().catch(() => { });
-          } else {
-            console.log(`[Speech] Expected: ${cleanAnswer}, Heard: ${cleanSpeech}`);
-            setSpeechResult({ id: activeItem.id, success: false });
-            if ('vibrate' in navigator) navigator.vibrate([30, 30, 30]);
-          }
+          evaluateSpeechResult(transcript, activeItem);
         }
         setIsListening(false);
       };
@@ -220,6 +211,10 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         } catch (e) { }
         recognitionRef.current = null;
       }
+      if (nativeListenerRef.current) {
+        nativeListenerRef.current.remove().catch(() => { });
+        nativeListenerRef.current = null;
+      }
     };
   }, [items, activeItemId]); // Refresh when items or active state changes
 
@@ -227,6 +222,18 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     if (Capacitor.isNativePlatform()) {
       try {
         await SpeechRecognition.stop();
+        if (nativeListenerRef.current) {
+           await nativeListenerRef.current.remove();
+           nativeListenerRef.current = null;
+        }
+        
+        const activeItem = items.find(i => i.id === activeItemId);
+        if (activeItem && lastTranscriptRef.current) {
+          evaluateSpeechResult(lastTranscriptRef.current, activeItem);
+        } else if (activeItem && !speechResult) {
+          // If stopped without any transcript, mark as failed
+          setSpeechResult({ id: activeItem.id, success: false });
+        }
       } catch (err) {
         console.error("Native speech recognition stop error:", err);
       } finally {
@@ -356,16 +363,16 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
 
   const evaluateSpeechResult = (transcript: string, itemForCheck: WorksheetItem) => {
-    const cleanAnswer = itemForCheck.correct_answer.toLowerCase().replace(/[^\w\s]/g, '').trim();
-    const cleanSpeech = transcript.toLowerCase().replace(/[^\w\s]/g, '').trim();
+    const isMatch = compareSpeech(transcript, itemForCheck.correct_answer);
 
-    if (cleanSpeech.includes(cleanAnswer) || cleanAnswer.includes(cleanSpeech)) {
+    if (isMatch) {
       setSpeechResult({ id: itemForCheck.id, success: true });
       if ('vibrate' in navigator) navigator.vibrate(50);
       const audio = new Audio(ASSETS.STAMP_SOUND);
       audio.play().catch(() => { });
     } else {
-      console.log(`[Speech] Expected: ${cleanAnswer}, Heard: ${cleanSpeech}`);
+      console.log(`[Speech Match Failed] Expected: "${itemForCheck.correct_answer}", Heard: "${transcript}"`);
+      console.log(`[Normalized] Expected: "${normalizeText(itemForCheck.correct_answer)}", Heard: "${normalizeText(transcript)}"`);
       setSpeechResult({ id: itemForCheck.id, success: false });
       if ('vibrate' in navigator) navigator.vibrate([30, 30, 30]);
     }
@@ -406,24 +413,47 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         }
 
         setSpeechResult(null);
+        lastTranscriptRef.current = "";
         setIsListening(true);
 
-        const result = await SpeechRecognition.start({
-          language: 'en-US',
-          partialResults: false,
-          maxResults: 3,
+        // Add listener for results
+        if (nativeListenerRef.current) await nativeListenerRef.current.remove();
+        nativeListenerRef.current = await SpeechRecognition.addListener('partialResults', (event) => {
+          if (event.matches && event.matches.length > 0) {
+            lastTranscriptRef.current = event.matches[0];
+          }
         });
 
-        setIsListening(false);
+        // Add listener for automatic stop (silence detection)
+        const endListener = await SpeechRecognition.addListener('listeningState', (event) => {
+          if (event.status === 'stopped') {
+            setIsListening(false);
+            endListener.remove();
+            if (nativeListenerRef.current) {
+              nativeListenerRef.current.remove();
+              nativeListenerRef.current = null;
+            }
+            if (lastTranscriptRef.current) {
+              evaluateSpeechResult(lastTranscriptRef.current, activeItem);
+            } else {
+              setSpeechResult({ id: activeItem.id, success: false });
+            }
+          }
+        });
 
-        if (result.matches && result.matches.length > 0) {
-          evaluateSpeechResult(result.matches[0], activeItem);
-        } else {
-          setSpeechResult({ id: activeItem.id, success: false });
-        }
+        await SpeechRecognition.start({
+          language: 'en-US',
+          partialResults: true,
+          maxResults: 1,
+        });
+
       } catch (err: any) {
         console.error("Native speech recognition error:", err);
         setIsListening(false);
+        if (nativeListenerRef.current) {
+          await nativeListenerRef.current.remove();
+          nativeListenerRef.current = null;
+        }
         if (err?.message?.includes('denied') || err?.message?.includes('permission')) {
           alert(language === 'ko' ? "마이크 및 음성 인식 권한을 허용해주세요." : "Please allow microphone and speech recognition permissions in Settings.");
         }

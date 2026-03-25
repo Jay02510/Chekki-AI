@@ -126,7 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           finalProfile = {
             ...(finalProfile || {} as UserProfile),
             email: 'test@example.com',
-            name: 'Apple Reviewer',
+            name: 'Reviewer',
             plan: 'pro',
             maxScansPerDay: 9999,
           };
@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           finalProfile = {
             ...(finalProfile || {} as UserProfile),
             email: 'expired@example.com',
-            name: 'Apple Reviewer (Expired)',
+            name: 'Reviewer (Expired)',
             plan: 'free',
             maxScansPerDay: 3
           };
