@@ -23,6 +23,8 @@ import { analyzeWorksheet } from './services/geminiService';
 import { db } from './services/database';
 import { Capacitor } from '@capacitor/core';
 import { revenueCatService } from './services/revenueCatService';
+import { useWorksheetAnalysis } from './src/hooks/useWorksheetAnalysis';
+import { APP_VERSION } from './src/version';
 
 const SESSION_KEY = 'hw_last_session';
 const ONBOARDED_KEY = 'chekki_onboarded_v1';
@@ -85,22 +87,20 @@ function AppContent() {
   const { t, language } = useLanguage();
   const isInApp = useInAppBrowser();
 
+  const {
+    analysisState,
+    setAnalysisState,
+    handleImageSelected: baseHandleImageSelected,
+    handleScanAgain: hookHandleScanAgain,
+    executeReset: hookExecuteReset
+  } = useWorksheetAnalysis();
+
   const [isNight, setIsNight] = useState(isNightModeKST());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
-  const [analysisState, setAnalysisState] = useState<AnalysisState>({
-    status: 'idle',
-    data: { worksheet_summary: { title_en: "", title_ko: "", overview_ko: "" }, items: [] },
-    originalImage: null,
-    errorMessage: null,
-    showReward: false,
-    isSummaryLoaded: false,
-    isItemsLoaded: false
-  });
 
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [lastImageData, setLastImageData] = useState<string | null>(null);
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
   const [showSubscribePage, setShowSubscribePage] = useState(false);
   const [showAdminPage, setShowAdminPage] = useState(false);
@@ -108,9 +108,6 @@ function AppContent() {
 
   // Global Confirmation State
   const [confirmDialog, setConfirmDialog] = useState<{ title: string, onConfirm: () => void } | null>(null);
-
-  // AbortController to prevent stale fetches
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const path = window.location.pathname.replace('/', '') as LegalType;
@@ -174,101 +171,13 @@ function AppContent() {
         }
       }
     }
-  }, []);
+  }, [analysisState.status, setAnalysisState]);
 
-  const handleImageSelected = async (base64Data: string, isRetryAttempt = false) => {
-    // Abort any existing analysis
-    if (abortControllerRef.current) abortControllerRef.current.abort();
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    const guestUsed = localStorage.getItem(GUEST_SCAN_KEY);
-
-    if (!isAuthenticated && guestUsed) {
-      openLoginModal();
-      return;
-    }
-
-    if (isAuthenticated) {
-      const canScan = checkScanLimit();
-      if (!canScan) return;
-    }
-    // Guest check is implicitly handled by the guestUsed check above
-
-    const displayUrl = `data:image/jpeg;base64,${base64Data}`;
-    setLastImageData(base64Data);
-
-    setAnalysisState({
-      status: 'analyzing',
-      data: null,
-      originalImage: displayUrl,
-      errorMessage: null,
-      showReward: false,
-      isSummaryLoaded: false,
-      isItemsLoaded: false
-    });
-
-    try {
-      const result = await analyzeWorksheet(base64Data, controller.signal, user?.plan || 'free');
-
-      // SUCCESS: Now we increment the scan usage
-      if (isAuthenticated) {
-        await incrementScan();
-      } else {
-        localStorage.setItem(GUEST_SCAN_KEY, 'true');
-      }
-
-      const newState: AnalysisState = {
-        status: 'complete',
-        data: result,
-        originalImage: displayUrl,
-        errorMessage: null,
-        showReward: false,
-        isSummaryLoaded: true,
-        isItemsLoaded: true
-      };
-
-      setAnalysisState(newState);
-      // Only store critical data in localStorage to keep it light
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ state: newState, timestamp: Date.now() }));
-
-      // --- Onboarding Trigger: Show Paywall after 1st scan ---
-      const hasTriggeredPaywall = localStorage.getItem('chekki_paywall_triggered_v1');
-      if (!hasTriggeredPaywall && user?.plan !== 'pro') {
-        localStorage.setItem('chekki_paywall_triggered_v1', 'true');
-        setTimeout(() => setShowPaywall(true), 2000); // Small delay for effect
-      }
-
-      // Log Analytics
-      db.logUserEvent("scan_completed", {
-        plan: user?.plan || 'free',
-        summary: newState.data?.worksheet_summary?.title_en || 'Start'
-      });
-
+  const handleImageSelected = async (base64Data: string) => {
+    const success = await baseHandleImageSelected(base64Data);
+    if (success) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
-
-    } catch (e: any) {
-      if (e.name === 'AbortError') return;
-
-      console.error("[App] Analysis error:", e.message, e);
-
-      // Use specific error message if available, otherwise generic
-      const isGenericFail = !e.message || e.message === 'ANALYSIS_FAILED';
-      const errorMsg = isGenericFail
-        ? (language === 'ko' 
-            ? "분석에 실패했어요. 밝은 곳에서 사진을 다시 찍어주세요!" 
-            : "Analysis failed. Please try taking a clearer picture in good lighting!")
-        : e.message;
-
-      setAnalysisState({
-        status: 'error',
-        errorMessage: errorMsg,
-        data: null,
-        originalImage: displayUrl,
-        isSummaryLoaded: false,
-        isItemsLoaded: false
-      });
     }
   };
 
@@ -282,8 +191,7 @@ function AppContent() {
   };
 
   const handleScanAgain = () => {
-    if (lastImageData) handleImageSelected(lastImageData, true);
-    else handleReset(false);
+    hookHandleScanAgain();
   };
 
   const handleReset = (confirm = true) => {
@@ -291,28 +199,13 @@ function AppContent() {
       setConfirmDialog({
         title: t('err_confirm'),
         onConfirm: () => {
-          executeReset();
+          hookExecuteReset();
           setConfirmDialog(null);
         }
       });
       return;
     }
-    executeReset();
-  };
-
-  const executeReset = () => {
-    if (abortControllerRef.current) abortControllerRef.current.abort();
-    setAnalysisState({
-      status: 'idle',
-      data: null,
-      originalImage: null,
-      errorMessage: null,
-      showReward: false,
-      isSummaryLoaded: false,
-      isItemsLoaded: false
-    });
-    setLastImageData(null);
-    localStorage.removeItem(SESSION_KEY);
+    hookExecuteReset();
   };
 
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
@@ -386,7 +279,7 @@ function AppContent() {
 
           {analysisState.status === 'idle' && (
             <div className="animate-fade-in flex-1">
-              <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data, false)} />
+              <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data)} />
             </div>
           )}
 

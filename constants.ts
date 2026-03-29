@@ -9,12 +9,12 @@ import { WorksheetAnalysis, ItemType } from "./types";
  * fl_attachment: Forces the browser to download the file instead of opening it
  */
 export const ASSETS = {
-  // Switched back to Cloudinary URL for reliable Capacitor/WKWebView video loading
-  VIDEO_INTRO: 'https://res.cloudinary.com/dginphpy4/video/upload/chekki-intro_y7hj7c.mp4',
-  LOGO: './chekki-actual.png',
-  MASCOT_HAPPY: './chekki-actual.png',
-  MASCOT_THINKING: './chekki-actual.png',
-  MASCOT_SCAN: './chekki-actual.png',
+  // Switched back to local path for consistency with current frontend assets
+  VIDEO_INTRO: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/chekki-intro_y7hj7c.mp4`,
+  LOGO: '/chekki-actual.png',
+  MASCOT_HAPPY: '/chekki-actual.png',
+  MASCOT_THINKING: '/chekki-actual.png',
+  MASCOT_SCAN: '/chekki-actual.png',
 
   HERO_IMAGE: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto,e_background_removal/v1765770525/Chekki_Futuristic_Background_i8foqe.png`,
   HERO_SLEEPY: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1766246089/Sleepy-Chekki_xvg2n6.svg`,

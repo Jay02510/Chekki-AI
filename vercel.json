@@ -42,7 +42,7 @@
   ],
   "functions": {
     "api/analyze.ts": {
-      "maxDuration": 60
+      "maxDuration": 300
     },
     "api/subscription-status.ts": {
       "maxDuration": 10

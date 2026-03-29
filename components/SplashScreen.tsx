@@ -4,6 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
 import { Capacitor } from '@capacitor/core';
+import { APP_VERSION } from '../src/version';
 
 interface Props {
   onFinish: () => void;
@@ -16,15 +17,15 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   const { language, t } = useLanguage();
 
   const features = language === 'ko' ? [
-    "🎯 실시간 정답 오버레이",
-    "💌 다정한 티칭 스크립트",
-    "🔊 원어민 발음 & 스피킹",
-    "🪄 연습문제 무제한 생성"
+    t('feat_overlay'),
+    t('feat_script'),
+    t('feat_pronounce'),
+    t('feat_practice')
   ] : [
-    "🎯 Instant Answer Overlays",
-    "💌 Bilingual Teaching Scripts",
-    "🔊 Native Voice & Speaking",
-    "🪄 AI Practice Generator"
+    t('feat_overlay'),
+    t('feat_script'),
+    t('feat_pronounce'),
+    t('feat_practice')
   ];
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
                 className="w-full h-full object-contain z-10 scale-110"
                 onError={() => setVideoError(true)}
               >
-                {/* Use local file on web (avoids CORS/autoplay issues), Cloudinary on native */}
+                {/* Use Cloudinary on native for reliability, local on web for optimized loading */}
                 <source src={Capacitor.isNativePlatform() ? ASSETS.VIDEO_INTRO : '/chekki-intro.mp4'} type="video/mp4" />
               </video>
             ) : (
@@ -109,7 +110,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
         </div>
 
         <p className="mt-4 text-[9px] text-zinc-700 font-black uppercase tracking-widest">
-          Version 1.0.7
+          Version {APP_VERSION}
         </p>
       </div>
 

@@ -17,6 +17,10 @@ const translations = {
     logout: "Log Out",
     scans: "Magic Scans",
     pro_plan: "Premium 🚀",
+    feat_overlay: "🎯 Instant Answer Overlays",
+    feat_script: "💌 Bilingual Teaching Scripts",
+    feat_pronounce: "🔊 Native Voice & Speaking",
+    feat_practice: "🪄 AI Practice Generator",
 
     // Viral Sharing
     share_title: "Spread the Peace 🕊️",
@@ -328,6 +332,10 @@ const translations = {
     logout: "로그아웃",
     scans: "매직 스캔",
     pro_plan: "프리미엄 🚀",
+    feat_overlay: "🎯 실시간 정답 오버레이",
+    feat_script: "💌 다정한 티칭 스크립트",
+    feat_pronounce: "🔊 원어민 발음 & 스피킹",
+    feat_practice: "🪄 연습문제 무제한 생성",
 
     // Viral Sharing
     share_title: "평화를 선물하세요 🕊️",

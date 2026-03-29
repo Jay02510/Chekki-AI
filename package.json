@@ -1,13 +1,16 @@
 {
   "name": "chekki-ai",
   "private": true,
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "lint": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,css,md}\"",
     "build": "tsc --skipLibCheck && vite build",
+    "build:mobile": "npm run build && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html",
     "preview": "vite preview",
-    "mobile": "npm run build && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html && npx cap sync",
+    "mobile": "npm run build:mobile && npx cap sync",
     "quick-mobile": "vite build --sourcemap false && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html && npx cap sync ios"
   },
   "dependencies": {
@@ -29,8 +32,14 @@
   "devDependencies": {
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
     "@vercel/node": "^5.6.7",
     "@vitejs/plugin-react": "4.3.4",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.2.5",
     "typescript": "5.6.2",
     "vite": "6.0.3"
   }

@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "123535525914-4geukuldl032puboriq2pqqrv6ckn63r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chekkiai.app",
+            "certificate_hash": "a1c531ffa683dda2bf9618ad756d82ffc66373a4"
+          }
+        },
+        {
+          "client_id": "123535525914-95vi5u7pvdh4fiulhn1d6pv3pqgmbbt3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chekkiai.app",
+            "certificate_hash": "23fcb697492edb6efdc67c2e3fca6c6bc2e1ba9c"
+          }
+        },
+        {
           "client_id": "123535525914-iimsom1o5hqrm8rgpqfr8dtt6d9p239v.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -37,6 +53,13 @@
             {
               "client_id": "123535525914-q2esntlljtd0asrqcd4h2tpto9i0qfmp.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "123535525914-gonom4ucs3h2pkl3gtn2atjvc4pgpep0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.chekkiai.app"
+              }
             }
           ]
         }

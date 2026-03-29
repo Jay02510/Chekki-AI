@@ -1,0 +1,152 @@
+
+import { useState, useRef, useCallback } from 'react';
+import { AnalysisState, WorksheetAnalysis } from '../../types';
+import { analyzeWorksheet } from '../../services/geminiService';
+import { db } from '../../services/database';
+import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
+
+const SESSION_KEY = 'hw_last_session';
+const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
+
+export const useWorksheetAnalysis = () => {
+    const { user, openLoginModal, isAuthenticated, incrementScan, checkScanLimit, setShowPaywall } = useAuth();
+    const { language } = useLanguage();
+
+    const [analysisState, setAnalysisState] = useState<AnalysisState>({
+        status: 'idle',
+        data: { worksheet_summary: { title_en: "", title_ko: "", overview_ko: "" }, items: [] },
+        originalImage: null,
+        errorMessage: null,
+        showReward: false,
+        isSummaryLoaded: false,
+        isItemsLoaded: false
+    });
+
+    const [lastImageData, setLastImageData] = useState<string | null>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
+
+    const executeReset = useCallback(() => {
+        if (abortControllerRef.current) abortControllerRef.current.abort();
+        setAnalysisState({
+            status: 'idle',
+            data: null,
+            originalImage: null,
+            errorMessage: null,
+            showReward: false,
+            isSummaryLoaded: false,
+            isItemsLoaded: false
+        });
+        setLastImageData(null);
+        localStorage.removeItem(SESSION_KEY);
+    }, []);
+
+    const handleImageSelected = useCallback(async (base64Data: string) => {
+        // Abort any existing analysis
+        if (abortControllerRef.current) abortControllerRef.current.abort();
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
+        const guestUsed = localStorage.getItem(GUEST_SCAN_KEY);
+
+        if (!isAuthenticated && guestUsed) {
+            openLoginModal();
+            return;
+        }
+
+        if (isAuthenticated) {
+            const canScan = checkScanLimit();
+            if (!canScan) return;
+        }
+
+        const displayUrl = `data:image/jpeg;base64,${base64Data}`;
+        setLastImageData(base64Data);
+
+        setAnalysisState({
+            status: 'analyzing',
+            data: null,
+            originalImage: displayUrl,
+            errorMessage: null,
+            showReward: false,
+            isSummaryLoaded: false,
+            isItemsLoaded: false
+        });
+
+        try {
+            const result = await analyzeWorksheet(base64Data, controller.signal, user?.plan || 'free');
+
+            // SUCCESS: Now we increment the scan usage
+            if (isAuthenticated) {
+                await incrementScan();
+            } else {
+                localStorage.setItem(GUEST_SCAN_KEY, 'true');
+            }
+
+            const newState: AnalysisState = {
+                status: 'complete',
+                data: result,
+                originalImage: displayUrl,
+                errorMessage: null,
+                showReward: false,
+                isSummaryLoaded: true,
+                isItemsLoaded: true
+            };
+
+            setAnalysisState(newState);
+            // Only store critical data in localStorage to keep it light
+            localStorage.setItem(SESSION_KEY, JSON.stringify({ state: newState, timestamp: Date.now() }));
+
+            // --- Onboarding Trigger: Show Paywall after 1st scan ---
+            const hasTriggeredPaywall = localStorage.getItem('chekki_paywall_triggered_v1');
+            if (!hasTriggeredPaywall && user?.plan !== 'pro') {
+                localStorage.setItem('chekki_paywall_triggered_v1', 'true');
+                setTimeout(() => setShowPaywall(true), 2000); // Small delay for effect
+            }
+
+            // Log Analytics
+            db.logUserEvent("scan_completed", {
+                plan: user?.plan || 'free',
+                summary: newState.data?.worksheet_summary?.title_en || 'Start'
+            });
+
+            return true; // Success
+
+        } catch (e: any) {
+            if (e.name === 'AbortError') return;
+
+            console.error("[useWorksheetAnalysis] Analysis error:", e.message, e);
+
+            // Use specific error message if available, otherwise generic
+            const isGenericFail = !e.message || e.message === 'ANALYSIS_FAILED';
+            const errorMsg = isGenericFail
+                ? (language === 'ko' 
+                    ? "분석에 실패했어요. 밝은 곳에서 사진을 다시 찍어주세요!" 
+                    : "Analysis failed. Please try taking a clearer picture in good lighting!")
+                : e.message;
+
+            setAnalysisState({
+                status: 'error',
+                errorMessage: errorMsg,
+                data: null,
+                originalImage: displayUrl,
+                isSummaryLoaded: false,
+                isItemsLoaded: false
+            });
+            return false;
+        }
+    }, [isAuthenticated, checkScanLimit, openLoginModal, incrementScan, setShowPaywall, user?.plan, language]);
+
+    const handleScanAgain = useCallback(() => {
+        if (lastImageData) handleImageSelected(lastImageData);
+        else executeReset();
+    }, [lastImageData, handleImageSelected, executeReset]);
+
+    return {
+        analysisState,
+        setAnalysisState,
+        lastImageData,
+        handleImageSelected,
+        handleScanAgain,
+        executeReset
+    };
+};
