@@ -253,9 +253,9 @@ function AppContent() {
         )}
 
         {successDialog && (
-          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setSuccessDialog(null)}></div>
-            <div className="relative bg-zinc-900 border border-emerald-500/30 rounded-3xl p-8 max-w-sm w-full text-center animate-fade-in-up">
+          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 md:p-6">
+            <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setSuccessDialog(null)}></div>
+            <div className="relative bg-zinc-900 border border-emerald-500/30 rounded-[2.5rem] p-8 md:p-10 max-w-md w-full text-center shadow-[0_0_100px_rgba(16,185,129,0.1)] animate-fade-in-up">
               <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl">✅</span>
               </div>

@@ -316,20 +316,37 @@ const AndroidSubscriptionView: React.FC = () => {
 const WebSubscriptionView: React.FC = () => {
     const { language, t } = useLanguage();
     return (
-        <div className="flex flex-col items-center justify-center text-center py-8 space-y-6">
-            <div className="w-20 h-20 rounded-3xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-4xl">
+        <div className="flex flex-col items-center justify-center text-center py-6 space-y-6">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-3xl md:text-4xl shadow-lg shadow-orange-500/10">
                 📱
             </div>
-            <div>
-                <h3 className="text-xl font-black text-white mb-2">{t('sub_webHeadline')}</h3>
-                <p className="text-sm text-zinc-400 max-w-xs leading-relaxed">{t('sub_webSubtext')}</p>
+            <div className="px-4">
+                <h3 className="text-lg md:text-xl font-black text-white mb-2 leading-tight">
+                    {t('sub_webHeadline')}
+                </h3>
+                <p className="text-[11px] md:text-xs text-zinc-400 max-w-[280px] mx-auto leading-relaxed">
+                    {t('sub_webSubtext')}
+                </p>
             </div>
-            <a
-                href="/subscribe"
-                className="w-full max-w-xs py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base shadow-xl shadow-orange-500/20 active:scale-95 transition-all text-center block"
-            >
-                {t('sub_webCta')}
-            </a>
+            
+            <div className="w-full max-w-xs space-y-3 px-4">
+                <a
+                    href="/subscribe"
+                    className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-400 text-white font-black text-base shadow-xl shadow-orange-500/20 active:scale-95 transition-all text-center block"
+                >
+                    {t('sub_webCta')}
+                </a>
+                
+                <div className="flex items-center justify-center gap-3 py-2 border-t border-white/5 mt-4 opacity-50">
+                    <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+                        <AppleLogo className="w-2 h-2" /> iOS
+                    </span>
+                    <span className="text-zinc-700">|</span>
+                    <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+                        🤖 Android ({language === 'ko' ? '준비 중' : 'Soon'})
+                    </span>
+                </div>
+            </div>
         </div>
     );
 };
@@ -363,7 +380,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ onClose }) => {
             {/* Platform-specific content */}
             {platform === 'ios' && <AppleSubscriptionView onClose={onClose} />}
             {platform === 'android' && <AndroidSubscriptionView />}
-            {platform === 'web' && <AppleSubscriptionView onClose={onClose} />}
+            {platform === 'web' && <WebSubscriptionView />}
         </div>
     );
 };
