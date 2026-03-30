@@ -15,6 +15,7 @@ import {
 } from 'firebase/auth';
 import { subscriptionService, AppleProducts } from '../services/subscriptionService';
 import { revenueCatService } from '../services/revenueCatService';
+import { PUBLIC_APP_URL } from '../config';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -271,7 +272,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendResetEmail = async (email: string) => {
-    await sendPasswordResetEmail(auth, email.toLowerCase().trim());
+    // ActionCodeSettings ensures the recovery email contains a trusted redirect URL.
+    // This helps prevent emails from being marked as spam and redirects the user back to the app.
+    const actionCodeSettings = {
+      url: `${PUBLIC_APP_URL}/?auth_action=reset`,
+      handleCodeInApp: false,
+    };
+    await sendPasswordResetEmail(auth, email.toLowerCase().trim(), actionCodeSettings);
   };
 
   const logout = () => {

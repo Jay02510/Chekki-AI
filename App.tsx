@@ -108,6 +108,7 @@ function AppContent() {
 
   // Global Confirmation State
   const [confirmDialog, setConfirmDialog] = useState<{ title: string, onConfirm: () => void } | null>(null);
+  const [successDialog, setSuccessDialog] = useState<string | null>(null);
 
   useEffect(() => {
     const path = window.location.pathname.replace('/', '') as LegalType;
@@ -127,7 +128,16 @@ function AppContent() {
       setShowSplash(false);
       setShowAdminPage(true);
     }
-  }, []);
+
+    // Handle return from password reset
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth_action') === 'reset') {
+      // Clear the query parameter from the URL to prevent message appearing on refresh
+      window.history.replaceState({}, '', window.location.pathname);
+      setSuccessDialog(language === 'ko' ? "비밀번호가 성공적으로 변경되었습니다. 이제 로그인해주세요!" : "Password successfully updated. You can now log in!");
+      setTimeout(openLoginModal, 1500);
+    }
+  }, [language, openLoginModal]);
 
   useEffect(() => {
     // Initialize RevenueCat
@@ -238,6 +248,19 @@ function AppContent() {
                 <button onClick={() => setConfirmDialog(null)} className="flex-1 bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-xs">No</button>
                 <button onClick={confirmDialog.onConfirm} className="flex-1 bg-white text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl">Yes</button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {successDialog && (
+          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setSuccessDialog(null)}></div>
+            <div className="relative bg-zinc-900 border border-emerald-500/30 rounded-3xl p-8 max-w-sm w-full text-center animate-fade-in-up">
+              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span className="text-2xl">✅</span>
+              </div>
+              <p className="text-white font-bold text-lg mb-8 font-korean leading-relaxed">{successDialog}</p>
+              <button onClick={() => setSuccessDialog(null)} className="w-full bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-xl shadow-emerald-500/20">Close</button>
             </div>
           </div>
         )}
