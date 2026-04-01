@@ -49,6 +49,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
           <div
             className="flex items-center cursor-pointer group h-full flex-shrink min-w-0"
             onClick={onReset}
+            title={t('tt_home')}
           >
             {!logoError ? (
               <div className="relative w-10 h-10 md:w-14 md:h-14 lg:w-20 lg:h-20 flex-shrink-0">
@@ -81,7 +82,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                 <button
                   onClick={() => setShowCommunity(true)}
                   className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
-                  title="Mom's Lounge"
+                  title={t('tt_moms_lounge')}
                 >
                   <span>☕</span>
                 </button>
@@ -89,7 +90,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                 <button
                   onClick={() => setShowMistakeModal(true)}
                   className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
-                  title="Review Note"
+                  title={t('tt_review_note')}
                 >
                   <span>📝</span>
                   {mistakes.length > 0 && (
@@ -104,6 +105,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
             <button
               onClick={toggleLanguage}
               className="flex items-center gap-1 px-2 py-1.5 md:px-2.5 md:py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group flex-shrink-0"
+              title={t('tt_lang_toggle')}
             >
               <span className={`text-[9px] md:text-xs font-bold font-display transition-colors ${language === 'en' ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>EN</span>
               <div className="w-px h-2.5 bg-white/20"></div>
@@ -115,6 +117,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                 <div
                   className="h-8 w-8 md:h-10 md:w-10 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer hover:ring-2 hover:ring-orange-500/50 transition-all uppercase select-none text-xs md:text-base"
                   onClick={() => setShowUserMenu(!showUserMenu)}
+                  title={user.name}
                 >
                   {user.name.charAt(0)}
                 </div>

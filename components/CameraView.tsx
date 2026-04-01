@@ -198,11 +198,11 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const ClarityGuide = () => (
     <div className="flex flex-wrap justify-center gap-2 mt-6 md:mt-12 mb-4 px-2">
       {[
-        { icon: '☀️', text: t('lbl_lighting') },
-        { icon: '📏', text: t('lbl_flat') },
-        { icon: '🔍', text: t('lbl_sharp') }
+        { icon: '☀️', text: t('lbl_lighting'), tooltip: t('tt_lighting') },
+        { icon: '📏', text: t('lbl_flat'), tooltip: t('tt_flat') },
+        { icon: '🔍', text: t('lbl_sharp'), tooltip: t('tt_sharp') }
       ].map((tip, i) => (
-        <div key={i} className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 md:px-5 md:py-2.5 rounded-xl backdrop-blur-md">
+        <div key={i} className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 md:px-5 md:py-2.5 rounded-xl backdrop-blur-md" title={tip.tooltip}>
           <span className="text-sm">{tip.icon}</span>
           <span className="text-[9px] md:text-xs font-black text-zinc-400 whitespace-nowrap uppercase tracking-[0.1em]">{tip.text}</span>
         </div>
@@ -291,7 +291,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
                 <ClarityGuide />
 
-                <div className="mt-6 md:mt-16 flex flex-col items-center gap-2 group/btn">
+                <div className="mt-6 md:mt-16 flex flex-col items-center gap-2 group/btn" title={t('btn_upload')}>
                   <div className={`w-14 h-14 md:w-24 md:h-24 rounded-full ${isNight ? 'bg-indigo-600' : 'bg-orange-500'} flex items-center justify-center shadow-[0_15px_40px_rgba(249,115,22,0.3)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/60 border-2 border-white/20 active:scale-90`}>
                     <svg className="w-7 h-7 md:w-12 md:h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -315,6 +315,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         id: 'feedback',
         label: t('lbl_feedback'),
         title: t('lbl_share_ideas'),
+        tooltip: t('tt_feedback'),
         emoji: '✨',
         onClick: () => setShowFeedbackModal(true),
         color: isNight ? 'text-indigo-400' : 'text-orange-400'
@@ -323,6 +324,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         id: 'guide',
         label: t('lbl_quick_guide'),
         title: t('btn_walkthrough'),
+        tooltip: t('tt_guide'),
         emoji: '▶️',
         onClick: () => setShowVideoModal(true),
         color: 'text-indigo-400'
@@ -331,6 +333,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         id: 'resource',
         label: t('lbl_resource'),
         title: t('res_title'),
+        tooltip: t('tt_resource'),
         emoji: '📢',
         onClick: () => setShowFlyerModal(true),
         color: 'text-orange-400'
@@ -343,6 +346,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           <button
             key={banner.id}
             onClick={banner.onClick}
+            title={banner.tooltip}
             className="group bg-white/5 hover:bg-white/10 border border-white/10 p-5 md:p-8 rounded-[2rem] flex items-center gap-4 md:gap-6 transition-all text-left w-full h-full backdrop-blur-sm"
           >
             <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex-shrink-0 bg-white/5 border border-white/10 flex items-center justify-center text-xl md:text-3xl shadow-xl group-hover:scale-110 transition-all duration-300">

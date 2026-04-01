@@ -613,55 +613,67 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                         {item.question_text.replace(/^\d+[\.\)\s]+/, '')}
                       </h4>
                       
-                      {/* Dynamic Visual Feedback for Speech Recognition */}
-                      <div className={`relative rounded-2xl px-4 py-1.5 border w-fit shadow-inner transition-all duration-500 ease-in-out transform-gpu ${speechResult?.id === item.id ? (speechResult.success ? 'border-green-400 bg-green-500/20 shadow-[0_0_25px_rgba(34,197,94,0.3)] scale-110 z-10' : 'border-red-400 bg-red-500/20 translate-x-1 shadow-[0_0_15px_rgba(239,68,68,0.2)]') : 'bg-white/5 border-white/5'}`}>
-                        <span className={`font-hand text-2xl md:text-3xl font-bold transition-colors duration-500 ${speechResult?.id === item.id ? (speechResult.success ? 'text-green-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' : 'text-red-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]') : 'text-emerald-400'}`}>
-                          {answerText}
-                        </span>
-                        
-                        {/* Success/Fail Achievement Stamps */}
-                        {speechResult?.id === item.id && speechResult.success && (
-                          <div className="absolute -top-4 -right-4 text-3xl animate-[bounce_1s_ease-in-out_infinite] drop-shadow-lg z-20">🌟</div>
-                        )}
-                        {speechResult?.id === item.id && !speechResult.success && (
-                          <div className="absolute -top-3 -right-3 text-2xl animate-pulse drop-shadow-lg z-20">🤔</div>
-                        )}
+                      <div className="flex flex-col gap-4">
+                        {/* Dynamic Visual Feedback for Speech Recognition */}
+                        <div className={`relative rounded-2xl px-4 py-1.5 border w-fit shadow-inner transition-all duration-500 ease-in-out transform-gpu ${speechResult?.id === item.id ? (speechResult.success ? 'border-green-400 bg-green-500/20 shadow-[0_0_25px_rgba(34,197,94,0.3)] scale-110 z-10' : 'border-red-400 bg-red-500/20 translate-x-1 shadow-[0_0_15px_rgba(239,68,68,0.2)]') : 'bg-white/5 border-white/5'}`}>
+                          <span className={`font-hand text-2xl md:text-3xl font-bold transition-colors duration-500 ${speechResult?.id === item.id ? (speechResult.success ? 'text-green-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' : 'text-red-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]') : 'text-emerald-400'}`}>
+                            {answerText}
+                          </span>
+                          
+                          {/* Success/Fail Achievement Stamps */}
+                          {speechResult?.id === item.id && speechResult.success && (
+                            <div className="absolute -top-4 -right-4 text-3xl animate-[bounce_1s_ease-in-out_infinite] drop-shadow-lg z-20">🌟</div>
+                          )}
+                          {speechResult?.id === item.id && !speechResult.success && (
+                            <div className="absolute -top-3 -right-3 text-2xl animate-pulse drop-shadow-lg z-20">🤔</div>
+                          )}
+                        </div>
+
+                        {/* Action Buttons Toolbar */}
+                        <div className="flex flex-row items-center gap-1.5 bg-zinc-900/50 backdrop-blur-md p-1 rounded-full border border-white/5 w-fit shadow-xl group-hover:border-white/10 transition-all" onClick={(e) => e.stopPropagation()}>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} 
+                            className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-95 min-w-[36px] min-h-[36px]`}
+                            title={t('tt_audio')}
+                          >
+                            <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z" /></svg>
+                          </button>
+                          
+                          <button 
+                            onClick={(e) => handleActionClick(e, () => toggleMistake(item))} 
+                            className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-95 min-w-[36px] min-h-[36px]`}
+                            title={t('tt_bookmark')}
+                          >
+                            <svg className="w-4 h-4 md:w-5 md:h-5" fill={flagged ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                          </button>
+
+                          {isActive && (
+                            <button 
+                              onClick={(e) => handleActionClick(e, () => {
+                                if (user?.plan !== 'pro') {
+                                  setShowPaywall(true);
+                                } else {
+                                  setRefiningItemId(item.id);
+                                }
+                              })} 
+                              className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all bg-white/5 text-orange-400 hover:bg-orange-500 hover:text-white shadow-lg focus:outline-none hover:scale-110 active:scale-95 min-w-[36px] min-h-[36px]"
+                              title={t('tt_refine')}
+                            >
+                              <span className="text-lg md:text-xl">🪄</span>
+                            </button>
+                          )}
+
+                          {isActive && (
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setActiveItemId(null); }}
+                              className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white ring-1 ring-white/5 shadow-lg hover:scale-110 active:scale-95 min-w-[36px] min-h-[36px]"
+                              title={t('tt_close')}
+                            >
+                              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                      {isActive && (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setActiveItemId(null); }}
-                          className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white ring-1 ring-white/5 shadow-lg hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                      )}
-                      
-                      <button onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]`}>
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z" /></svg>
-                      </button>
-                      
-                      <button onClick={(e) => handleActionClick(e, () => toggleMistake(item))} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]`}>
-                        <svg className="w-5 h-5" fill={flagged ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-                      </button>
-
-                      {isActive && (
-                        <button 
-                          onClick={(e) => handleActionClick(e, () => {
-                            if (user?.plan !== 'pro') {
-                              setShowPaywall(true);
-                            } else {
-                              setRefiningItemId(item.id);
-                            }
-                          })} 
-                          className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all bg-white/5 text-orange-400 hover:bg-orange-500 hover:text-white shadow-lg focus:outline-none hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]"
-                          title={language === 'ko' ? "설명 다듬기" : "Refine Explanation"}
-                        >
-                          <span className="text-xl">🪄</span>
-                        </button>
-                      )}
                     </div>
                   </div>
 

@@ -322,6 +322,22 @@ const translations = {
     subs_errorMessage: "An error occurred during subscription processing. Please try again.",
     subs_cancelledMessage: "Subscription cancelled",
 
+    // Tooltips
+    tt_close: "Deselect",
+    tt_audio: "Listen to Pronunciation",
+    tt_bookmark: "Save for Review",
+    tt_refine: "Refine Explanation",
+    tt_home: "Return to Home",
+    tt_lang_toggle: "Switch Language",
+    tt_moms_lounge: "Mom's Lounge",
+    tt_review_note: "Review Note",
+    tt_feedback: "Share Feedback",
+    tt_guide: "Watch Guide",
+    tt_resource: "Parent Resources",
+    tt_lighting: "Ensure bright lighting for better accuracy",
+    tt_flat: "Keep the paper flat",
+    tt_sharp: "Make sure the text is in focus",
+
     // Misc
     footer_text: "Chekki AI - Supporting every English Kindergarten family with love."
   },
@@ -636,6 +652,22 @@ const translations = {
     subs_errorTitle: "구독 실패",
     subs_errorMessage: "구독 처리 중 오류가 발생했습니다. 다시 시도해 주세요.",
     subs_cancelledMessage: "구독이 취소되었습니다",
+
+    // Tooltips
+    tt_close: "선택 취소",
+    tt_audio: "원어민 발음 듣기",
+    tt_bookmark: "오답 노트에 저장",
+    tt_refine: "설명 다듬기",
+    tt_home: "처음으로 돌아가기",
+    tt_lang_toggle: "언어 변경",
+    tt_moms_lounge: "엄마들의 쉼터",
+    tt_review_note: "오답 노트",
+    tt_feedback: "의견 보내기",
+    tt_guide: "가이드 보기",
+    tt_resource: "학부모 자료",
+    tt_lighting: "정확한 분석을 위해 밝은 곳에서 찍어주세요",
+    tt_flat: "종이를 평평하게 펴주세요",
+    tt_sharp: "글자가 선명하게 보이도록 해주세요",
 
     // Misc
     footer_text: "대한민국 모든 영유 부모님들을 진심으로 응원합니다."
