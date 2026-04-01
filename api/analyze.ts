@@ -1,6 +1,7 @@
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 export const config = {
   maxDuration: 300,
@@ -145,7 +146,29 @@ export default async function handler(req: any, res: any) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { task, image, originalItems, userPlan } = body;
+    const { task, image, originalItems, userPlan: clientPlan } = body;
+
+    // --- SECURITY: Fetch Real User Data ---
+    const db = getFirestore(app);
+    const userRef = db.collection('users').doc(decodedToken.uid);
+    const userSnap = await userRef.get();
+    
+    // We treat missing users as 'free' tier guests just in case
+    const userData = userSnap.exists ? userSnap.data() : { plan: 'free', scansUsedToday: 0, maxScansPerDay: 3 };
+    const realUserPlan = userData?.plan || 'free';
+    
+    // Check Scan Limits
+    const today = new Date().toISOString().split('T')[0];
+    const isNewDay = userData?.lastScanDate !== today;
+    const currentScans = isNewDay ? 0 : (userData?.scansUsedToday || 0);
+    const maxScans = userData?.maxScansPerDay || 3;
+
+    // Reject if they over the limit
+    if (realUserPlan !== 'pro' && currentScans >= maxScans) {
+      if (!['generate', 'refine'].includes(task)) {
+         return res.status(403).json({ error: "SCAN_LIMIT_REACHED" });
+      }
+    }
 
     // Input Validation: Prevent Payload Bloat
     if (image && image.length > 10 * 1024 * 1024) { // 10MB Limit
@@ -180,6 +203,38 @@ export default async function handler(req: any, res: any) {
       }
     }
 
+    if (task === 'refine') {
+      const { itemToRefine, reason } = body;
+      if (!itemToRefine) return res.status(400).json({ error: "INVALID_INPUT" });
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{
+          role: 'user', parts: [{
+            text: `System: You are an expert bilingual tutor for parents.
+Original Question: ${itemToRefine.question_text}
+Original Answer: ${itemToRefine.correct_answer}
+Original Korean Guide: ${itemToRefine.korean_guide}
+Original English Guide: ${itemToRefine.english_guide}
+
+The user requested a refinement because: "${reason}"
+
+Task: Regenerate ONLY the teaching guides and scripts to address the user's specific reason. Do NOT change the answer or question.
+Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_guide", "teaching_script_ko", "teaching_script_en".`
+          }]
+        }],
+        config: { responseMimeType: "application/json", temperature: 0.7 }
+      });
+
+      const text = response.text;
+      try {
+        return res.status(200).json(JSON.parse(text || "{}"));
+      } catch (e) {
+        console.error("[Backend] Failed to parse refined content:", text);
+        return res.status(500).json({ error: "PARSING_FAILED" });
+      }
+    }
+
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
     const performAnalysis = async (useThinking: boolean) => {
@@ -195,10 +250,10 @@ export default async function handler(req: any, res: any) {
         ]
       };
 
-      // Determine model based on the pass tier
+      // Determine model based on the SECURE pass tier
       let currentModel = 'gemini-2.5-flash'; // Always default to lightning-fast Flash for the initial pass
       
-      if (useThinking && userPlan === 'pro') {
+      if (useThinking && realUserPlan === 'pro') {
         currentModel = 'gemini-2.5-pro'; // Upgrade to Pro model for the heavy fallback
         configOpts.thinkingConfig = { thinkingBudget: 8000 };
       }
@@ -225,11 +280,11 @@ export default async function handler(req: any, res: any) {
       result = JSON.parse(resultText);
 
       // If the fast pass mysteriously finds 0 questions on a Pro plan, treat it as a false-negative and trigger fallback.
-      if (userPlan === 'pro' && (!result.items || result.items.length === 0)) {
+      if (realUserPlan === 'pro' && (!result.items || result.items.length === 0)) {
         throw new Error("TriggerFallback");
       }
     } catch (e: any) {
-      if (userPlan === 'pro') {
+      if (realUserPlan === 'pro') {
         console.log("[Backend] Fast pass failed or found 0 questions. Falling back to deep thinking (8000 tokens)...");
         const fallbackResponse = await performAnalysis(true);
         let resultText = fallbackResponse.text || "{}";
@@ -238,6 +293,14 @@ export default async function handler(req: any, res: any) {
       } else {
         throw e;
       }
+    }
+
+    // Update the database securely on success (only for the main analysis task)
+    if (userSnap.exists && realUserPlan !== 'pro' && !['generate', 'refine'].includes(task)) {
+      await userRef.update({
+        scansUsedToday: isNewDay ? 1 : FieldValue.increment(1),
+        lastScanDate: today
+      });
     }
 
     return res.status(200).json({

@@ -171,3 +171,43 @@ export const generateSimilarWorksheet = async (originalItems: WorksheetItem[], s
     return originalItems;
   }
 };
+
+export const refineWorksheetItem = async (item: WorksheetItem, reason: string): Promise<Partial<WorksheetItem>> => {
+  if (MOCK_MODE) {
+    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
+    return {
+      korean_guide: `[다듬어짐] ${item.korean_guide} (이유: ${reason})`,
+      english_guide: `[Refined] ${item.english_guide} (Reason: ${reason})`,
+      teaching_script_ko: `[다듬어짐] ${item.teaching_script_ko}`,
+      teaching_script_en: `[Refined] ${item.teaching_script_en}`
+    };
+  }
+
+  try {
+    const idToken = await getValidIdToken();
+    const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': idToken ? `Bearer ${idToken}` : ''
+      },
+      body: JSON.stringify({
+        task: 'refine',
+        itemToRefine: item,
+        reason: reason
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("[geminiService] Refine failed:", errText);
+      throw new Error("REFINE_FAILED");
+    }
+
+    const refinedData = await response.json();
+    return refinedData;
+  } catch (e: any) {
+    console.error("[geminiService] Refine API error:", e);
+    throw e;
+  }
+};

@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { CloneWorksheetModal } from './CloneWorksheetModal';
 import { PremiumUpsellModal } from './PremiumUpsellModal';
 import { FeedbackModal } from './FeedbackModal';
+import { RefineModal } from './RefineModal';
 import { WorksheetOverlay } from './WorksheetOverlay';
 import { InlineFeedback } from './InlineFeedback';
 import { ASSETS } from '../constants';
@@ -17,6 +18,7 @@ import { PUBLIC_APP_URL } from '../config';
 import { toJpeg } from 'html-to-image';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 import { normalizeText, compareSpeech } from '../utils/speechUtils';
+import { refineWorksheetItem } from '../services/geminiService';
 
 const generateCompositeImage = async (imgUrl: string, items: WorksheetItem[]): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -136,8 +138,11 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const { user, setShowPaywall, isAuthenticated, openLoginModal } = useAuth();
 
   const [activeItemId, setActiveItemId] = useState<number | null>(null);
+  const [localItems, setLocalItems] = useState<WorksheetItem[]>(items);
   const [showCloneModal, setShowCloneModal] = useState(false);
   const [reportContext, setReportContext] = useState<WorksheetItem | null>(null);
+  const [refiningItemId, setRefiningItemId] = useState<number | null>(null);
+  const [isRefining, setIsRefining] = useState(false);
   const [mascotError, setMascotError] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [copyStatus, setCopyStatus] = useState(false);
@@ -152,6 +157,10 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const lastTranscriptRef = useRef<string>("");
 
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
 
   useEffect(() => {
     if (activeItemId !== null && itemRefs.current[activeItemId]) {
@@ -489,17 +498,43 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     }
   };
 
+  const handleRefineSubmit = async (itemId: number, reason: string) => {
+    setIsRefining(true);
+    try {
+      const itemToRefine = localItems.find(i => i.id === itemId);
+      if (!itemToRefine) return;
+      
+      const refinedData = await refineWorksheetItem(itemToRefine, reason);
+      
+      setLocalItems(prev => prev.map(i => i.id === itemId ? { ...i, ...refinedData } : i));
+      setRefiningItemId(null);
+    } catch (err) {
+      alert(language === 'ko' ? "다듬기 실패했습니다. 다시 시도해주세요." : "Failed to refine. Please try again.");
+    } finally {
+      setIsRefining(false);
+    }
+  };
+
   return (
     <>
-      {showCloneModal && <CloneWorksheetModal originalItems={items} onClose={() => setShowCloneModal(false)} />}
+      {showCloneModal && <CloneWorksheetModal originalItems={localItems} onClose={() => setShowCloneModal(false)} />}
       {reportContext && <FeedbackModal context={reportContext} onClose={() => setReportContext(null)} />}
       <PremiumUpsellModal isOpen={upsellFeature !== null} onClose={() => setUpsellFeature(null)} featureName={upsellFeature || 'pronunciation'} />
+      {refiningItemId !== null && (
+        <RefineModal 
+          item={localItems.find(i => i.id === refiningItemId)!} 
+          isOpen={true} 
+          onClose={() => setRefiningItemId(null)} 
+          onSubmit={handleRefineSubmit} 
+          isSubmitting={isRefining} 
+        />
+      )}
 
       <div className="flex flex-col lg:flex-row gap-4 md:gap-8 h-[calc(100dvh-140px)] lg:h-[calc(100vh-280px)] min-h-[600px]">
         <div className="w-full lg:w-[50%] h-[40%] lg:h-full">
           <WorksheetOverlay
             imageUrl={imageUrl}
-            items={items}
+            items={localItems}
             focusedId={activeItemId}
             isLoadingItems={isLoadingItems}
           />
@@ -514,12 +549,12 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 </div>
                 <div>
                   <h3 className="font-black text-white font-display text-lg leading-none mb-0.5">{t('ws_results_title')}</h3>
-                  <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">{isLoadingItems ? t('ws_scanning_header') : `${items.length} ${t('ws_items_found')}`}</p>
+                  <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">{isLoadingItems ? t('ws_scanning_header') : `${localItems.length} ${t('ws_items_found')}`}</p>
                 </div>
               </div>
             </div>
 
-            {!isLoadingItems && items.length > 0 && !hasInteracted && (
+            {!isLoadingItems && localItems.length > 0 && !hasInteracted && (
               <div className="mt-3 animate-fade-in-up">
                 <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl px-4 py-2 flex items-center gap-3">
                   <span className="text-orange-500 text-sm animate-pulse">💡</span>
@@ -532,14 +567,25 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
           </div>
 
           <div className="overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar flex-1 overscroll-contain bg-gradient-to-b from-transparent to-zinc-950/20">
-            {isLoadingItems && items.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center space-y-4 py-20">
-                <div className="w-10 h-10 border-2 border-white/5 border-t-orange-500 rounded-full animate-spin"></div>
-                <p className="text-xs font-bold text-zinc-500 font-korean">{t('ws_scanning_detail')}</p>
+            {isLoadingItems && localItems.length === 0 && (
+              <div className="flex flex-col gap-4 pt-2 w-full">
+                <div className="flex flex-col items-center justify-center space-y-3 pb-4">
+                  <div className="w-6 h-6 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin"></div>
+                  <p className="text-[10px] md:text-xs font-bold text-zinc-500 font-korean uppercase tracking-widest">{t('ws_scanning_detail')}</p>
+                </div>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse flex items-start p-4 md:p-6 gap-4 bg-zinc-900/60 rounded-[1.8rem] border border-white/5 w-full">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 shrink-0"></div>
+                    <div className="flex-1 space-y-4 py-1">
+                      <div className="h-4 md:h-5 bg-white/5 rounded-md w-3/4"></div>
+                      <div className="h-10 md:h-12 bg-white/5 rounded-2xl w-32 mt-4"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
-            {items.map((item, idx) => {
+            {localItems.map((item, idx) => {
               const isActive = activeItemId === item.id;
               const flagged = isMistake(item.question_text, item.correct_answer);
               const scriptText = language === 'ko' ? item.teaching_script_ko : item.teaching_script_en;
@@ -600,6 +646,22 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                       <button onClick={(e) => handleActionClick(e, () => toggleMistake(item))} className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]`}>
                         <svg className="w-5 h-5" fill={flagged ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                       </button>
+
+                      {isActive && (
+                        <button 
+                          onClick={(e) => handleActionClick(e, () => {
+                            if (user?.plan !== 'pro') {
+                              setShowPaywall(true);
+                            } else {
+                              setRefiningItemId(item.id);
+                            }
+                          })} 
+                          className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all bg-white/5 text-orange-400 hover:bg-orange-500 hover:text-white shadow-lg focus:outline-none hover:scale-110 active:scale-90 min-w-[44px] min-h-[44px]"
+                          title={language === 'ko' ? "설명 다듬기" : "Refine Explanation"}
+                        >
+                          <span className="text-xl">🪄</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -666,7 +728,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
               );
             })}
 
-            {!isLoadingItems && items.length > 0 && (
+            {localItems.length > 0 && (
               <div className="space-y-6 pt-6 pb-2">
                 <div className="pt-2">
                   <button

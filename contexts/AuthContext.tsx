@@ -342,14 +342,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastScanDate !== today;
 
-    const userRef = doc(dbInstance, 'users', firebaseUser.uid);
-    const updates = {
-      scansUsedToday: isNewDay ? 1 : increment(1),
-      lastScanDate: today
-    };
-
+    // We no longer trigger `updateDoc(userRef, updates)` directly here!
+    // The backend /api/analyze handles the DB update for absolute security.
+    // We only update the local state so the UI (scan counter) updates instantly.
     try {
-      await updateDoc(userRef, updates);
       setUserProfile(prev => prev ? {
         ...prev,
         scansUsedToday: isNewDay ? 1 : prev.scansUsedToday + 1,
