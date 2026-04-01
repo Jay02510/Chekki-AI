@@ -56,8 +56,8 @@ const generateCompositeImage = async (imgUrl: string, items: WorksheetItem[]): P
         items.forEach(item => {
           const box = item.bounding_box;
           if (!box && !item.custom_coords) return;
-          const topPercent = item.custom_coords ? item.custom_coords.top : (box!.ymin / 1000) * 100;
-          const leftPercent = item.custom_coords ? item.custom_coords.left : (box!.xmin / 1000) * 100;
+          const topPercent = item.custom_coords ? item.custom_coords.top : ((box!.ymin + box!.ymax) / 2000) * 100;
+          const leftPercent = item.custom_coords ? item.custom_coords.left : ((box!.xmin + box!.xmax) / 2000) * 100;
 
           const baseFontSize = MathMax(16, 28 * scale);
           const cx = (leftPercent / 100) * canvas.width;
@@ -78,8 +78,10 @@ const generateCompositeImage = async (imgUrl: string, items: WorksheetItem[]): P
           const rectWidth = idBoxWidth + answerBoxWidth + paddingX * 0.5;
           const rectHeight = baseFontSize + paddingY * 2;
           
-          const startX = cx - rectWidth / 2;
-          const startY = cy - rectHeight / 2;
+          const rawStartX = cx - rectWidth / 2;
+          const rawStartY = cy - rectHeight / 2;
+          const startX = Math.max(8, Math.min(rawStartX, canvas.width - rectWidth - 8));
+          const startY = Math.max(8, Math.min(rawStartY, canvas.height - rectHeight - 8));
 
           ctx.save();
           ctx.shadowColor = 'rgba(0,0,0,0.5)';
@@ -261,10 +263,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       openLoginModal();
       return;
     }
-    if (user?.plan !== 'pro') {
-      setUpsellFeature('audio');
-      return;
-    }
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
@@ -393,11 +391,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       openLoginModal();
       return;
     }
-    if (user?.plan !== 'pro') {
-      setUpsellFeature('pronunciation');
-      return;
-    }
-
     const activeItem = items.find(i => i.id === activeItemId);
     if (!activeItem) return;
 

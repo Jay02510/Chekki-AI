@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -12,8 +12,15 @@ interface Props {
 
 export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, isSubmitting }) => {
   const { t, language } = useLanguage();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [customReason, setCustomReason] = useState('');
+
+  useEffect(() => {
+    if (isOpen && scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -50,12 +57,15 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm sm:p-4">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-start justify-center bg-black/80 backdrop-blur-sm sm:pt-10 md:pt-20 px-0 sm:px-4">
       <div 
-        className="bg-zinc-950 w-full sm:max-w-md md:max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col max-h-[90vh] animate-slide-up"
+        className="bg-zinc-950 w-full sm:max-w-md md:max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
+        <div 
+          ref={scrollRef}
+          className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar"
+        >
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-2xl shadow-inner">

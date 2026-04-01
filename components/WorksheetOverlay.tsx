@@ -93,7 +93,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
   };
 
   const playAudio = (text: string) => {
-    if (user?.plan !== 'pro') {
+    if (!user) {
       setShowPaywall(true);
       return;
     }
@@ -109,8 +109,10 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
   const getStyle = (item: WorksheetItem) => {
     const box = item.bounding_box;
     if (!box && !item.custom_coords) return { display: 'none' };
-    const top = item.custom_coords ? item.custom_coords.top : (box!.ymin / 1000) * 100;
-    const left = item.custom_coords ? item.custom_coords.left : (box!.xmin / 1000) * 100;
+    const rawTop = item.custom_coords ? item.custom_coords.top : ((box!.ymin + box!.ymax) / 2000) * 100;
+    const rawLeft = item.custom_coords ? item.custom_coords.left : ((box!.xmin + box!.xmax) / 2000) * 100;
+    const top = Math.min(Math.max(rawTop, 5), 95);
+    const left = Math.min(Math.max(rawLeft, 5), 95);
     const isDragging = draggingId === item.id;
 
     return {

@@ -96,13 +96,6 @@ export const useWorksheetAnalysis = () => {
             // Only store critical data in localStorage to keep it light
             localStorage.setItem(SESSION_KEY, JSON.stringify({ state: newState, timestamp: Date.now() }));
 
-            // --- Onboarding Trigger: Show Paywall after 1st scan ---
-            const hasTriggeredPaywall = localStorage.getItem('chekki_paywall_triggered_v1');
-            if (!hasTriggeredPaywall && user?.plan !== 'pro') {
-                localStorage.setItem('chekki_paywall_triggered_v1', 'true');
-                setTimeout(() => setShowPaywall(true), 2000); // Small delay for effect
-            }
-
             // Log Analytics
             db.logUserEvent("scan_completed", {
                 plan: user?.plan || 'free',
