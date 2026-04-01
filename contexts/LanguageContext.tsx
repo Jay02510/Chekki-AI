@@ -279,6 +279,7 @@ const translations = {
 
     // Benefits List
     bene_unlimited: "Unlimited AI Magic Scans",
+    bene_tutor: "Interactive AI Tutor",
     bene_pronounce: "Native English Pronunciation",
     bene_scripts: "Step-by-Step Teaching Scripts",
     bene_stamps: "Digital Stamps & Rewards",
@@ -610,6 +611,7 @@ const translations = {
 
     // Benefits List
     bene_unlimited: "무제한 AI 매직 스캔",
+    bene_tutor: "우리 아이 맞춤 AI 튜터",
     bene_pronounce: "원어민 영어 발음 듣기",
     bene_scripts: "단계별 티칭 가이드 & 스크립트",
     bene_stamps: "디지털 도장 및 보상",

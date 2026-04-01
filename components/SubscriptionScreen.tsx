@@ -96,11 +96,11 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
     }
 
     const features = [
-        { icon: '🪄', key: 'bene_unlimited' },
-        { icon: '✨', key: 'bene_overlays' },
+        { icon: '♾️', key: 'bene_unlimited' },
+        { icon: '🪄', key: 'bene_tutor' },
         { icon: '📖', key: 'bene_scripts' },
+        { icon: '✨', key: 'bene_overlays' },
         { icon: '🔊', key: 'bene_pronounce' },
-        { icon: '⭐', key: 'bene_stamps' },
         { icon: '🛡️', key: 'bene_anytime' },
     ];
 

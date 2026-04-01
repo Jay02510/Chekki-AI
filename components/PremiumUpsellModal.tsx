@@ -78,8 +78,8 @@ export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureNa
                             <h4 className="text-white font-bold text-xs uppercase tracking-wide">Premium</h4>
                             <p className="text-[10px] text-zinc-400 font-medium">
                                 {language === 'ko'
-                                    ? '발음 연습, 원어민 음성, 티칭 가이드 등 모든 프리미엄 기능'
-                                    : 'Pronunciation coach, native audio, teaching guides & more'}
+                                    ? '무제한 스캔, AI 튜터, 티칭 가이드 등 모든 프리미엄 기능'
+                                    : 'Unlimited magic scans, AI Tutor, teaching guides & more'}
                             </p>
                         </div>
                     </div>
