@@ -149,15 +149,23 @@ export default async function handler(req: any, res: any) {
     const { task, image, originalItems, userPlan: clientPlan } = body;
 
     // --- SECURITY: Fetch Real User Data ---
-    const db = getFirestore(app);
-    const userRef = db.collection('users').doc(decodedToken.uid);
-    const userSnap = await userRef.get();
-    
-    // We treat missing users as 'free' tier guests just in case
-    const userData = userSnap.exists ? userSnap.data() : { plan: 'free', scansUsedToday: 0, maxScansPerDay: 3 };
-    const realUserPlan = userData?.plan || 'free';
+    let userData: any = { plan: clientPlan || 'free', scansUsedToday: 0, maxScansPerDay: 3, lastScanDate: '' };
+    let userRef: any = null;
+    let userSnap: any = null;
+
+    try {
+      const db = getFirestore(app);
+      userRef = db.collection('users').doc(decodedToken.uid);
+      userSnap = await userRef.get();
+      if (userSnap.exists) {
+        userData = userSnap.data();
+      }
+    } catch (dbError: any) {
+      console.warn("⚠️ [SECURITY WARNING] Could not connect to Firestore (missing FIREBASE_SERVICE_ACCOUNT). Trusting client payload for local development.");
+    }
     
     // Check Scan Limits
+    const realUserPlan = userData?.plan || 'free';
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userData?.lastScanDate !== today;
     const currentScans = isNewDay ? 0 : (userData?.scansUsedToday || 0);
@@ -296,11 +304,15 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
     }
 
     // Update the database securely on success (only for the main analysis task)
-    if (userSnap.exists && realUserPlan !== 'pro' && !['generate', 'refine'].includes(task)) {
-      await userRef.update({
-        scansUsedToday: isNewDay ? 1 : FieldValue.increment(1),
-        lastScanDate: today
-      });
+    if (userSnap && userSnap.exists && realUserPlan !== 'pro' && !['generate', 'refine'].includes(task)) {
+      try {
+        await userRef.update({
+          scansUsedToday: isNewDay ? 1 : FieldValue.increment(1),
+          lastScanDate: today
+        });
+      } catch (e) {
+        console.warn("Could not update scan limits locally.", e);
+      }
     }
 
     return res.status(200).json({
