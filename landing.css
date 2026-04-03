@@ -48,7 +48,6 @@ body::after{
   display:flex;align-items:center;gap:10px;
 }
 .nav-logo span{color:var(--accent)}
-.nav-logo img{width:32px;height:32px;border-radius:8px}
 .nav-links{display:flex;align-items:center;gap:24px;list-style:none}
 .nav-links a{
   font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;
@@ -75,23 +74,25 @@ body::after{
 .hero-text{flex:1;min-width:0;text-align:left}
 .hero-visual{
   position:relative;flex-shrink:0;
-  width:clamp(280px,38vw,520px);height:clamp(280px,38vw,520px);
+  width:clamp(280px,38vw,520px);height:auto;
   display:flex;align-items:center;justify-content:center;
 }
 /* Glowing orb behind mascot */
 .hero-visual::before{
   content:'';position:absolute;inset:-20%;
   border-radius:50%;
-  background:radial-gradient(circle,rgba(232,130,12,0.25) 0%,rgba(232,130,12,0.08) 40%,transparent 70%);
+  background:radial-gradient(circle,rgba(255,157,0,0.3) 0%,rgba(232,130,12,0.1) 40%,transparent 70%);
   filter:blur(40px);
   animation:orbPulse 5s ease-in-out infinite;
+  z-index:-1;
 }
 .hero-visual::after{
   content:'';position:absolute;inset:5%;
   border-radius:50%;
-  background:radial-gradient(circle,rgba(45,106,79,0.15) 0%,transparent 60%);
+  background:radial-gradient(circle,rgba(255,200,50,0.2) 0%,transparent 60%);
   filter:blur(30px);
   animation:orbPulse 5s ease-in-out 2.5s infinite;
+  z-index:-1;
 }
 @keyframes orbPulse{
   0%,100%{transform:scale(1);opacity:0.8}
@@ -99,9 +100,10 @@ body::after{
 }
 .hero-mascot{
   position:relative;z-index:2;
-  width:100%;height:100%;object-fit:contain;
-  filter:drop-shadow(0 24px 64px rgba(0,0,0,0.5));
-  animation:gentleFloat 6s ease-in-out infinite;
+  width:100%;height:auto;object-fit:cover;
+  display:block;
+  border-radius:24px;
+  box-shadow:0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(253,250,245,0.1);
 }
 @keyframes gentleFloat{
   0%,100%{transform:translateY(0)}
@@ -185,8 +187,22 @@ body::after{
 
 /* ── PRODUCT GRID ──────────────────────────────────────── */
 .product-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+  display:grid;
+  /* 4 columns by default on desktop */
+  grid-template-columns:repeat(4, 1fr);
   gap:16px;margin-bottom:48px;
+}
+
+@media(max-width:1100px){
+  .product-grid{
+    grid-template-columns:repeat(2, 1fr); /* 2x2 on tablet */
+  }
+}
+
+@media(max-width:600px){
+  .product-grid{
+    grid-template-columns:1fr; /* 1x4 on mobile */
+  }
 }
 .product-card{
   background:var(--card-bg);border:1px solid var(--card-border);
