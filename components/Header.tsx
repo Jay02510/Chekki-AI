@@ -7,6 +7,7 @@ import { ChekkiMascot } from './Icons';
 import { CommunityModal } from './CommunityModal';
 import { SettingsModal } from './SettingsModal';
 import { BillingModal } from './BillingModal';
+import { OnboardingTour } from './OnboardingTour';
 import { ASSETS } from '../constants';
 import { SCREENSHOT_MODE } from '../config';
 
@@ -24,6 +25,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showBilling, setShowBilling] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'ko' : 'en');
@@ -40,6 +42,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
       {showCommunity && <CommunityModal onClose={() => setShowCommunity(false)} />}
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showBilling && <BillingModal onClose={() => setShowBilling(false)} />}
+      {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
 
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top)]">
         <div className="absolute inset-0 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5"></div>
@@ -85,6 +88,14 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                   title={t('tt_moms_lounge')}
                 >
                   <span>☕</span>
+                </button>
+
+                <button
+                  onClick={() => setShowOnboarding(true)}
+                  className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+                  title={t('tt_guide')}
+                >
+                  <span>💡</span>
                 </button>
 
                 <button

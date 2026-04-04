@@ -5,7 +5,6 @@ import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
 import { SplitView } from './components/SplitView';
 import { PaywallModal } from './components/PaywallModal';
-import { OnboardingTour } from './components/OnboardingTour';
 import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
 import { DebugConsole } from './components/DebugConsole';
@@ -28,7 +27,6 @@ import { useWorksheetAnalysis } from './src/hooks/useWorksheetAnalysis';
 import { APP_VERSION } from './src/version';
 
 const SESSION_KEY = 'hw_last_session';
-const ONBOARDED_KEY = 'chekki_onboarded_v1';
 const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
 // Root Error Boundary Component - Fixed property issues by using property initializers and explicit typing
@@ -101,7 +99,6 @@ function AppContent() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showChildProfileModal, setShowChildProfileModal] = useState(false);
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
   const [showSubscribePage, setShowSubscribePage] = useState(false);
@@ -160,16 +157,6 @@ function AppContent() {
       setIsNight(isNightModeKST());
     }, 60000);
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const hasOnboarded = localStorage.getItem(ONBOARDED_KEY);
-    if (!hasOnboarded) setShowOnboarding(true);
-  }, []);
-
-  const handleOnboardingComplete = React.useCallback(() => {
-    localStorage.setItem(ONBOARDED_KEY, 'true');
-    setShowOnboarding(false);
   }, []);
 
   const handleSplashFinish = React.useCallback(() => {
@@ -250,7 +237,6 @@ function AppContent() {
         <OdapNoteModal />
         <LoginModal />
 
-        {showOnboarding && <OnboardingTour onComplete={handleOnboardingComplete} />}
         {showChildProfileModal && (
           <ProgressiveOnboardingModal 
             onComplete={() => setShowChildProfileModal(false)}
