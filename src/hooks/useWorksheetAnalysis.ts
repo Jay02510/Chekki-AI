@@ -73,7 +73,14 @@ export const useWorksheetAnalysis = () => {
         });
 
         try {
-            const result = await analyzeWorksheet(base64Data, controller.signal, user?.plan || 'free');
+            const result = await analyzeWorksheet(
+                base64Data, 
+                controller.signal, 
+                user?.plan || 'free',
+                user?.childAge,
+                user?.childEnglishLevel,
+                user?.parentEnglishLevel
+            );
 
             // SUCCESS: Now we increment the scan usage
             if (isAuthenticated) {

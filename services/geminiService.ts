@@ -31,7 +31,10 @@ const getValidIdToken = async (maxRetries = 3): Promise<string | null> => {
 export const analyzeWorksheet = async (
   base64Image: string,
   signal?: AbortSignal,
-  userPlan: string = 'free'
+  userPlan: string = 'free',
+  childAge?: string,
+  childEnglishLevel?: string,
+  parentEnglishLevel?: string
 ): Promise<WorksheetAnalysis> => {
   if (MOCK_MODE) {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
@@ -95,7 +98,10 @@ export const analyzeWorksheet = async (
       body: JSON.stringify({
         task: 'analyze',
         image: base64Image,
-        userPlan
+        userPlan,
+        childAge,
+        childEnglishLevel,
+        parentEnglishLevel
       })
     });
 

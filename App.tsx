@@ -12,6 +12,7 @@ import { DebugConsole } from './components/DebugConsole';
 import { SplashScreen } from './components/SplashScreen';
 import { LegalModal } from './components/LegalModal';
 import { MobileAppBanner } from './components/MobileAppBanner';
+import { ProgressiveOnboardingModal } from './components/ProgressiveOnboardingModal';
 import SubscribePage from './src/pages/SubscribePage';
 import AdminPage from './src/pages/AdminPage';
 import { AnalysisState, LegalType } from './types';
@@ -101,6 +102,7 @@ function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showChildProfileModal, setShowChildProfileModal] = useState(false);
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
   const [showSubscribePage, setShowSubscribePage] = useState(false);
   const [showAdminPage, setShowAdminPage] = useState(false);
@@ -138,6 +140,17 @@ function AppContent() {
       setTimeout(openLoginModal, 1500);
     }
   }, [language, openLoginModal]);
+
+  // Trigger child profile modal after successful scan
+  useEffect(() => {
+    if (analysisState.status === 'complete' && isAuthenticated && user) {
+      if (!user.childAge && !sessionStorage.getItem('skipped_child_profile') && user.scansUsedToday >= 1) {
+        // slight delay to let them see the analysis first
+        const timer = setTimeout(() => setShowChildProfileModal(true), 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [analysisState.status, isAuthenticated, user]);
 
   useEffect(() => {
     // Initialize RevenueCat
@@ -238,6 +251,15 @@ function AppContent() {
         <LoginModal />
 
         {showOnboarding && <OnboardingTour onComplete={handleOnboardingComplete} />}
+        {showChildProfileModal && (
+          <ProgressiveOnboardingModal 
+            onComplete={() => setShowChildProfileModal(false)}
+            onSkip={() => {
+              sessionStorage.setItem('skipped_child_profile', 'true');
+              setShowChildProfileModal(false);
+            }}
+          />
+        )}
 
         {confirmDialog && (
           <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">

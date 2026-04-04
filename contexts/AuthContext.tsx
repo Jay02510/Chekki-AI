@@ -42,6 +42,7 @@ interface AuthContextType {
   showLoginModal: boolean;
   openLoginModal: () => void;
   closeLoginModal: () => void;
+  updateChildProfile: (childAge: string, childEnglishLevel: string, parentEnglishLevel: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -300,6 +301,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await db.updateUser(firebaseUser.uid, { name });
   };
 
+  const updateChildProfile = async (childAge: string, childEnglishLevel: string, parentEnglishLevel: string) => {
+    if (userProfile?.email === 'test@example.com' || userProfile?.email === 'expired@example.com') {
+      setUserProfile({ ...userProfile, childAge, childEnglishLevel, parentEnglishLevel });
+      return;
+    }
+    if (!firebaseUser || !userProfile) return;
+    const updates = { childAge, childEnglishLevel, parentEnglishLevel };
+    setUserProfile({ ...userProfile, ...updates });
+    await db.updateUser(firebaseUser.uid, updates);
+  };
+
   const deleteAccount = async () => {
     if (!firebaseUser) return;
     try {
@@ -493,7 +505,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setShowPaywall,
       showLoginModal,
       openLoginModal,
-      closeLoginModal
+      closeLoginModal,
+      updateChildProfile
     }}>
       {children}
     </AuthContext.Provider>

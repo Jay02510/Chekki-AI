@@ -608,8 +608,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                       
                       <div className="flex flex-col gap-4">
                         {/* Dynamic Visual Feedback for Speech Recognition */}
-                        <div className={`relative rounded-2xl px-4 py-1.5 border w-fit shadow-inner transition-all duration-500 ease-in-out transform-gpu ${speechResult?.id === item.id ? (speechResult.success ? 'border-green-400 bg-green-500/20 shadow-[0_0_25px_rgba(34,197,94,0.3)] scale-110 z-10' : 'border-red-400 bg-red-500/20 translate-x-1 shadow-[0_0_15px_rgba(239,68,68,0.2)]') : 'bg-white/5 border-white/5'}`}>
-                          <span className={`font-hand text-2xl md:text-3xl font-bold transition-colors duration-500 ${speechResult?.id === item.id ? (speechResult.success ? 'text-green-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' : 'text-red-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]') : 'text-emerald-400'}`}>
+                        <div className={`relative rounded-2xl px-4 py-1.5 border min-w-[50%] w-max max-w-full shadow-inner transition-all duration-500 ease-in-out transform-gpu ${speechResult?.id === item.id ? (speechResult.success ? 'border-green-400 bg-green-500/20 shadow-[0_0_25px_rgba(34,197,94,0.3)] scale-110 z-10' : 'border-red-400 bg-red-500/20 translate-x-1 shadow-[0_0_15px_rgba(239,68,68,0.2)]') : 'bg-white/5 border-white/5'}`}>
+                          <span className={`font-hand text-2xl md:text-3xl font-bold transition-colors duration-500 block break-words whitespace-normal break-keep ${speechResult?.id === item.id ? (speechResult.success ? 'text-green-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' : 'text-red-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]') : 'text-emerald-400'}`}>
                             {answerText}
                           </span>
                           

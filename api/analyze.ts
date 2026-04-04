@@ -146,7 +146,7 @@ export default async function handler(req: any, res: any) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { task, image, originalItems, userPlan: clientPlan } = body;
+    const { task, image, originalItems, userPlan: clientPlan, childAge, childEnglishLevel, parentEnglishLevel } = body;
 
     // --- SECURITY: Fetch Real User Data ---
     let userData: any = { plan: clientPlan || 'free', scansUsedToday: 0, maxScansPerDay: 3, lastScanDate: '' };
@@ -246,8 +246,16 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });
 
     const performAnalysis = async (useThinking: boolean) => {
+      let currentSystemPrompt = SYSTEM_PROMPT;
+      if (childAge && childEnglishLevel) {
+        currentSystemPrompt += `\n\nCRITICAL CONTEXT: The student is ${childAge} years old and has an English experience level of "${childEnglishLevel}". Strictly tailor your teaching scripts, vocabulary, and pedagogy to match this child's development stage. Use simpler terms and explanations for younger or beginner students.`;
+      }
+      if (parentEnglishLevel) {
+        currentSystemPrompt += `\nAdditionally, the PARENT's English level is "${parentEnglishLevel}". Tailor the complexity of the korean_guide and english_guide to suit the parent's understanding.`;
+      }
+
       const configOpts: any = {
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: currentSystemPrompt,
         responseMimeType: "application/json",
         responseSchema: CONSOLIDATED_SCHEMA as any,
         safetySettings: [

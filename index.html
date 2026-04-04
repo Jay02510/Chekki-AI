@@ -29,7 +29,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="#products">Products</a></li>
-      <li><a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+      <li><a href="https://www.youtube.com/@chekkienglish" target="_blank" rel="noopener noreferrer">YouTube</a></li>
       <li><a href="https://open.spotify.com/show/2onH0XU5yky37cBxdqKaY8" target="_blank" rel="noopener noreferrer">Podcast</a></li>
     </ul>
     <a class="nav-cta" href="https://apps.apple.com/us/app/chekkiai/id6759361725" target="_blank" rel="noopener noreferrer">
@@ -53,8 +53,8 @@
       </div>
     </div>
     <div class="hero-visual">
-      <video class="hero-mascot" autoplay muted loop playsinline>
-        <source src="https://res.cloudinary.com/dginphpy4/video/upload/q_auto/f_auto/v1775221110/Image_for_website_202604032153_omnzqm.mp4" type="video/mp4">
+      <video id="heroVideo" class="hero-mascot" autoplay muted loop playsinline>
+        <source src="https://res.cloudinary.com/dginphpy4/video/upload/q_auto/v1775221110/Image_for_website_202604032153_omnzqm.mp4" type="video/mp4">
       </video>
     </div>
   </section>
@@ -141,7 +141,7 @@
           <span class="card-desc">Complete classroom-ready packs: comprehension, vocabulary, grammar, and answer keys. A2–B1 CEFR level.</span>
           <span class="card-action tch">Browse on TPT <span>→</span></span>
         </a>
-        <a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" target="_blank" rel="noopener noreferrer" class="product-card accent-tch">
+        <a href="https://www.youtube.com/@chekkienglish" target="_blank" rel="noopener noreferrer" class="product-card accent-tch">
           <span class="card-emoji">🎧</span>
           <span class="card-meta tch">YouTube</span>
           <span class="card-title">EFL Classroom Stories</span>
@@ -175,7 +175,7 @@
       <a href="https://www.instagram.com/chekki__ai" class="soc-btn" target="_blank" rel="noopener noreferrer">📸 Instagram</a>
       <a href="https://open.spotify.com/show/2onH0XU5yky37cBxdqKaY8" class="soc-btn" target="_blank" rel="noopener noreferrer">🎙️ Spotify</a>
       <a href="https://x.com/ChekkiAI" class="soc-btn" target="_blank" rel="noopener noreferrer">𝕏 X / Twitter</a>
-      <a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" class="soc-btn" target="_blank" rel="noopener noreferrer">▶ YouTube</a>
+      <a href="https://www.youtube.com/@chekkienglish" class="soc-btn" target="_blank" rel="noopener noreferrer">▶ YouTube</a>
       <a href="https://www.facebook.com/people/Chekki-AI/61587594414020/" class="soc-btn" target="_blank" rel="noopener noreferrer">📘 Facebook</a>
       <a href="https://www.etsy.com/shop/ChekkiAI?dd_referrer=" class="soc-btn" target="_blank" rel="noopener noreferrer">🧡 Etsy</a>
       <a href="https://www.teacherspayteachers.com/store/chekki-ai" class="soc-btn" target="_blank" rel="noopener noreferrer">🛍️ TPT</a>
@@ -252,6 +252,19 @@
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'&&document.getElementById('waitlistModal').classList.contains('active')){
         closeWaitlistModal();
+      }
+    });
+
+    // Hero video playback fix (mobile/web)
+    window.addEventListener('load', () => {
+      const v = document.getElementById('heroVideo');
+      if(v){
+        const p = v.play();
+        if(p!==undefined) p.catch(() => {
+          // Autoplay blocked: retry on first interaction
+          document.body.addEventListener('click', () => v.play(), { once: true });
+          document.body.addEventListener('touchstart', () => v.play(), { once: true });
+        });
       }
     });
   </script>

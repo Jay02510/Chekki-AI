@@ -47,6 +47,9 @@ export interface UserProfile {
   schoolId?: string | null;
   schoolName?: string | null;
   subscriptionPlatform?: SubscriptionPlatform;
+  childAge?: string;
+  childEnglishLevel?: string;
+  parentEnglishLevel?: string;
 }
 
 // --- Subscription System ---

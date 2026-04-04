@@ -177,15 +177,15 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
               onClick={(e) => { e.stopPropagation(); if(!isDragging) playAudio(displayValue); }}
           >
               <div className={`
-                  rounded-[1.2rem] shadow-[0_15px_40px_rgba(0,0,0,0.6)] border-2 flex items-center gap-2 transform transition-all active:scale-95 group cursor-grab min-w-fit ring-offset-black ring-offset-2
+                  rounded-[1.2rem] shadow-[0_15px_40px_rgba(0,0,0,0.6)] border-2 flex items-center gap-2 transform transition-all active:scale-95 group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
                   ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-[0_20px_60px_rgba(249,115,22,0.5)] ring-4 ring-orange-500/40' : ''}
                   ${isFocused ? 'bg-orange-600 border-white/30' : 'bg-zinc-800 border-white/10'}
                   px-2.5 py-1.5 md:px-4 md:py-3
               `}>
-                  <div className="w-5 h-5 md:w-8 md:h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
+                  <div className="w-5 h-5 md:w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
                       <span className="font-black text-[9px] md:text-sm text-white">{item.id}</span>
                   </div>
-                  <span className={`font-hand font-black leading-tight tracking-tight text-white whitespace-nowrap text-left drop-shadow-md text-sm md:text-xl`}>
+                  <span className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md text-sm md:text-xl`}>
                     {displayValue}
                   </span>
                   <div className="w-px h-5 bg-white/10 shrink-0 mx-1"></div>
