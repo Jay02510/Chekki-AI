@@ -4,14 +4,16 @@ import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
 import { SplitView } from './components/SplitView';
-import { PaywallModal } from './components/PaywallModal';
-import { OdapNoteModal } from './components/OdapNoteModal';
-import { LoginModal } from './components/LoginModal';
 import { DebugConsole } from './components/DebugConsole';
 import { SplashScreen } from './components/SplashScreen';
-import { LegalModal } from './components/LegalModal';
 import { MobileAppBanner } from './components/MobileAppBanner';
-import { ProgressiveOnboardingModal } from './components/ProgressiveOnboardingModal';
+
+// Lazy loaded modals for performance
+const PaywallModal = React.lazy(() => import('./components/PaywallModal').then(module => ({ default: module.PaywallModal })));
+const OdapNoteModal = React.lazy(() => import('./components/OdapNoteModal').then(module => ({ default: module.OdapNoteModal })));
+const LoginModal = React.lazy(() => import('./components/LoginModal').then(module => ({ default: module.LoginModal })));
+const LegalModal = React.lazy(() => import('./components/LegalModal').then(module => ({ default: module.LegalModal })));
+const ProgressiveOnboardingModal = React.lazy(() => import('./components/ProgressiveOnboardingModal').then(module => ({ default: module.ProgressiveOnboardingModal })));
 import SubscribePage from './src/pages/SubscribePage';
 import AdminPage from './src/pages/AdminPage';
 import { AnalysisState, LegalType } from './types';
@@ -27,7 +29,7 @@ import { useWorksheetAnalysis } from './src/hooks/useWorksheetAnalysis';
 import { APP_VERSION } from './src/version';
 
 const SESSION_KEY = 'hw_last_session';
-const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
+
 
 // Root Error Boundary Component - Fixed property issues by using property initializers and explicit typing
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -60,15 +62,11 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const isNightModeKST = () => {
-  const now = new Date();
-  const kstTime = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Seoul',
-    hour: 'numeric',
-    hour12: false,
-  }).format(now);
-  const hour = parseInt(kstTime, 10);
-  return hour >= 22 || hour < 6;
+const getSystemDarkMode = () => {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  return true; // Default to dark mode
 };
 
 const useInAppBrowser = () => {
@@ -94,7 +92,7 @@ function AppContent() {
     executeReset: hookExecuteReset
   } = useWorksheetAnalysis();
 
-  const [isNight, setIsNight] = useState(isNightModeKST());
+  const [isNight, setIsNight] = useState(getSystemDarkMode());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
@@ -153,10 +151,13 @@ function AppContent() {
     // Initialize RevenueCat
     revenueCatService.initialize();
 
-    const timer = setInterval(() => {
-      setIsNight(isNightModeKST());
-    }, 60000);
-    return () => clearInterval(timer);
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => setIsNight(e.matches);
+    
+    // Add listener for OS theme changes
+    mediaQuery.addEventListener('change', handleChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
   const handleSplashFinish = React.useCallback(() => {
@@ -183,12 +184,17 @@ function AppContent() {
     }
   }, [analysisState.status, setAnalysisState]);
 
-  const handleImageSelected = async (base64Data: string) => {
-    const success = await baseHandleImageSelected(base64Data);
-    if (success) {
+  // Confetti fires only when analysis genuinely completes — not on upload
+  useEffect(() => {
+    if (analysisState.status === 'complete') {
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
+      const timer = setTimeout(() => setShowConfetti(false), 3000);
+      return () => clearTimeout(timer);
     }
+  }, [analysisState.status]);
+
+  const handleImageSelected = async (base64Data: string) => {
+    await baseHandleImageSelected(base64Data);
   };
 
   const translateError = (msg: string) => {
@@ -225,27 +231,35 @@ function AppContent() {
   return (
     <ErrorBoundary>
       <div className={`min-h-[100dvh] ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} text-zinc-100 font-sans overflow-x-hidden transition-colors duration-1000 flex flex-col`}>
-        {standaloneLegal && (
-          <div className="fixed inset-0 z-[200]">
-            <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={true} />
-          </div>
-        )}
+        <React.Suspense fallback={null}>
+          {standaloneLegal && (
+            <div className="fixed inset-0 z-[200]">
+              <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={true} />
+            </div>
+          )}
+        </React.Suspense>
         <Header onReset={() => handleReset(false)} />
         {/* Web-only mobile download banner */}
-        {platform === 'web' && <MobileAppBanner />}
-        <PaywallModal />
-        <OdapNoteModal />
-        <LoginModal />
-
-        {showChildProfileModal && (
-          <ProgressiveOnboardingModal 
-            onComplete={() => setShowChildProfileModal(false)}
-            onSkip={() => {
-              sessionStorage.setItem('skipped_child_profile', 'true');
-              setShowChildProfileModal(false);
-            }}
-          />
+        {platform === 'web' && (
+          <React.Suspense fallback={null}>
+            <MobileAppBanner />
+          </React.Suspense>
         )}
+        <React.Suspense fallback={null}>
+          <PaywallModal />
+          <OdapNoteModal />
+          <LoginModal />
+
+          {showChildProfileModal && (
+            <ProgressiveOnboardingModal 
+              onComplete={() => setShowChildProfileModal(false)}
+              onSkip={() => {
+                sessionStorage.setItem('skipped_child_profile', 'true');
+                setShowChildProfileModal(false);
+              }}
+            />
+          )}
+        </React.Suspense>
 
         {confirmDialog && (
           <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
@@ -292,7 +306,7 @@ function AppContent() {
           </div>
         )}
 
-        <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col ${analysisState.status === 'idle' ? 'pt-24 md:pt-40' : 'pt-4 md:pt-8'} pt-[calc(env(safe-area-inset-top)+1rem)]`}>
+        <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col ${analysisState.status === 'idle' ? 'pt-24 md:pt-40' : 'pt-4 md:pt-8'}`}>
 
           {analysisState.status === 'idle' && isInApp && showInAppNotice && (
             <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
@@ -394,27 +408,27 @@ function AppContent() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{language === 'ko' ? '사업자 정보' : 'Business Info'}</h4>
-                <div className="space-y-1.5 text-[9px] md:text-[10px] text-zinc-500 font-medium">
+                <h4 className="text-xs font-black text-white uppercase tracking-[0.2em]">{language === 'ko' ? '사업자 정보' : 'Business Info'}</h4>
+                <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-500 font-medium">
                   <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '상호:' : 'Biz:'}</span> 채키 AI (Chekki AI)</p>
                   <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '사업자번호:' : 'Reg No:'}</span> 814-14-03096</p>
                 </div>
               </div>
               <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-white opacity-40 uppercase tracking-[0.2em]">{language === 'ko' ? '고객 센터' : 'Contact Us'}</h4>
-                <div className="space-y-1.5 text-[9px] md:text-[10px] text-zinc-500 font-medium font-korean">
+                <h4 className="text-xs font-black text-white opacity-40 uppercase tracking-[0.2em]">{language === 'ko' ? '고객 센터' : 'Contact Us'}</h4>
+                <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-500 font-medium font-korean">
                   <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '이메일:' : 'Email:'}</span> chekkihelp@gmail.com</p>
                 </div>
               </div>
             </div>
           </div>
           <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">© 2026 CHEKKI AI. ALL RIGHTS RESERVED.</p>
-            <div className="flex gap-6">
-              <button onClick={() => setStandaloneLegal('privacy')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Privacy</button>
-              <button onClick={() => setStandaloneLegal('terms')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Terms</button>
-              <button onClick={() => setStandaloneLegal('support')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Support</button>
-              <button onClick={() => setStandaloneLegal('refund')} className="text-[9px] text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Refund</button>
+            <p className="text-[10px] md:text-xs text-zinc-600 font-bold uppercase tracking-widest">© 2026 CHEKKI AI. ALL RIGHTS RESERVED.</p>
+            <div className="flex gap-4 md:gap-6">
+              <button onClick={() => setStandaloneLegal('privacy')} className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Privacy</button>
+              <button onClick={() => setStandaloneLegal('terms')} className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Terms</button>
+              <button onClick={() => setStandaloneLegal('support')} className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Support</button>
+              <button onClick={() => setStandaloneLegal('refund')} className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Refund</button>
             </div>
           </div>
         </footer>

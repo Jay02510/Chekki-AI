@@ -67,25 +67,23 @@ export const LoginModal: React.FC = () => {
   return (
     <>
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={closeLoginModal}></div>
+      <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-10 overflow-y-auto">
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { if (!email && !password && !name) closeLoginModal(); }}></div>
 
-        <div className="relative bg-zinc-900 rounded-[2.5rem] w-full max-w-sm shadow-2xl border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+        <div className="relative bg-zinc-900 rounded-[2.5rem] w-full max-w-sm shadow-2xl border border-white/10 overflow-hidden animate-fade-in-up flex flex-col">
 
-          <div className="relative h-36 md:h-44 bg-zinc-950 flex items-center justify-center shrink-0">
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/30 to-purple-500/20 opacity-60"></div>
-            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-500/20 rounded-full blur-3xl"></div>
-
-            <img
-              src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-logo_q5xeux.png"
-              alt="Chekki Mascot"
-              className="relative z-10 w-28 h-28 md:w-36 md:h-36 object-contain animate-float drop-shadow-[0_20px_50px_rgba(249,115,22,0.4)]"
-            />
-
-            <button onClick={closeLoginModal} className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors bg-black/60 w-8 h-8 rounded-full flex items-center justify-center border border-white/10 z-20 text-sm shadow-xl">✕</button>
+          {/* Clean header — no image */}
+          <div className="relative flex items-center justify-between px-6 pt-6 pb-2 shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-brand-orange flex items-center justify-center shadow-md shadow-orange-500/30">
+                <span className="text-white text-xs font-black">C</span>
+              </div>
+              <span className="text-white/80 text-sm font-bold tracking-tight">Chekki</span>
+            </div>
+            <button onClick={closeLoginModal} className="text-white/40 hover:text-white transition-colors bg-black/40 w-8 h-8 rounded-full flex items-center justify-center border border-white/10 text-sm shadow-xl">✕</button>
           </div>
 
-          <div className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
+          <div className="p-6 md:p-8 pt-4 flex-1 overflow-y-auto custom-scrollbar">
             <div className="text-center mb-8">
               <h2 className="text-2xl md:text-3xl font-black text-white font-display mb-1.5 tracking-tight">
                 {getTitle()}

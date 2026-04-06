@@ -18,7 +18,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
   const [name, setName] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | 'refund' | 'youth' | null>(null);
+  const [showLegal, setShowLegal] = useState<'privacy' | 'terms' | 'refund' | 'youth' | 'support' | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 

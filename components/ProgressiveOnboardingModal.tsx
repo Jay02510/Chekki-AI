@@ -45,7 +45,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({ onComplete, onSkip
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onSkip}></div>
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
       <div className="relative bg-zinc-900 border border-white/10 p-6 md:p-8 rounded-[2rem] w-full max-w-sm shadow-[0_20px_60px_rgba(0,0,0,0.8)] animate-fade-in-up">
         
         <div className="text-center mb-6">

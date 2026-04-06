@@ -150,6 +150,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const [copyStatus, setCopyStatus] = useState(false);
   const [upsellFeature, setUpsellFeature] = useState<'pronunciation' | 'audio' | 'guide' | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [shareWebNotice, setShareWebNotice] = useState(false);
 
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
@@ -360,6 +361,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         }
       } else {
         handleCopyToCafe();
+        setShareWebNotice(true);
+        setTimeout(() => setShareWebNotice(false), 3000);
       }
     } catch (err) {
       console.error('Error sharing:', err);
@@ -551,7 +554,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
               <div className="mt-3 animate-fade-in-up">
                 <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl px-4 py-2 flex items-center gap-3">
                   <span className="text-orange-500 text-sm animate-pulse">💡</span>
-                  <p className="text-[9px] md:text-xs font-black text-orange-400 uppercase tracking-widest leading-tight">
+                  <p className="text-[10px] md:text-xs font-black text-orange-400 uppercase tracking-widest leading-tight">
                     {t('tip_click_guide')}
                   </p>
                 </div>
@@ -591,7 +594,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                   className={`group relative rounded-[1.8rem] border transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in-up transform-gpu ${isActive ? 'bg-zinc-800/95 border-orange-500/50 shadow-[0_20px_60px_rgba(0,0,0,0.5)] scale-[1.01]' : 'bg-zinc-900/60 border-white/5 hover:border-white/20'}`}>
 
                   {isFirstItem && !hasInteracted && !isActive && (
-                    <div className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500 text-[8px] font-black text-white uppercase tracking-widest animate-bounce z-10 shadow-lg ring-2 ring-white/10">
+                    <div className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500 text-[10px] font-black text-white uppercase tracking-widest animate-bounce z-10 shadow-lg ring-2 ring-white/10">
                       <span>Tap here</span> 👆
                     </div>
                   )}
@@ -626,18 +629,20 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                         <div className="flex flex-row items-center gap-1.5 bg-zinc-900/50 backdrop-blur-md p-1 rounded-full border border-white/5 w-fit shadow-xl group-hover:border-white/10 transition-all" onClick={(e) => e.stopPropagation()}>
                           <button 
                             onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} 
-                            className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-95 min-w-[36px] min-h-[36px]`}
+                            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-95 min-w-[44px] min-h-[44px]`}
                             title={t('tt_audio')}
+                            aria-label={language === 'ko' ? '오디오 듣기' : 'Play audio'}
                           >
-                            <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z" /></svg>
+                            <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z" /></svg>
                           </button>
                           
                           <button 
                             onClick={(e) => handleActionClick(e, () => toggleMistake(item))} 
-                            className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-95 min-w-[36px] min-h-[36px]`}
+                            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${flagged ? 'bg-red-500 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-zinc-700'} hover:scale-110 active:scale-95 min-w-[44px] min-h-[44px]`}
                             title={t('tt_bookmark')}
+                            aria-label={language === 'ko' ? '즐겨찾기' : 'Bookmark'}
                           >
-                            <svg className="w-4 h-4 md:w-5 md:h-5" fill={flagged ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                            <svg className="w-5 h-5 flex-shrink-0" fill={flagged ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                           </button>
 
                           {isActive && (
@@ -649,20 +654,22 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                                   setRefiningItemId(item.id);
                                 }
                               })} 
-                              className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all bg-white/5 text-orange-400 hover:bg-orange-500 hover:text-white shadow-lg focus:outline-none hover:scale-110 active:scale-95 min-w-[36px] min-h-[36px]"
+                              className="w-11 h-11 rounded-full flex items-center justify-center transition-all bg-white/5 text-orange-400 hover:bg-orange-500 hover:text-white shadow-lg focus:outline-none hover:scale-110 active:scale-95 min-w-[44px] min-h-[44px]"
                               title={t('tt_refine')}
+                              aria-label={language === 'ko' ? '정답 다듬기' : 'Refine answer'}
                             >
-                              <span className="text-lg md:text-xl">🪄</span>
+                              <span className="text-xl flex-shrink-0">🪄</span>
                             </button>
                           )}
 
                           {isActive && (
                             <button 
                               onClick={(e) => { e.stopPropagation(); setActiveItemId(null); }}
-                              className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white ring-1 ring-white/5 shadow-lg hover:scale-110 active:scale-95 min-w-[36px] min-h-[36px]"
+                              className="w-11 h-11 rounded-full flex items-center justify-center transition-all bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white ring-1 ring-white/5 shadow-lg hover:scale-110 active:scale-95 min-w-[44px] min-h-[44px]"
                               title={t('tt_close')}
+                              aria-label={language === 'ko' ? '닫기' : 'Close'}
                             >
-                              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
+                              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                           )}
                         </div>
@@ -710,11 +717,11 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                           {user?.plan === 'pro' ? (
                             <>
                               <div className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-5 shadow-inner">
-                                <p className="text-[10px] font-black uppercase text-orange-500 mb-2 tracking-widest">{t('lbl_mom_tip')}</p>
+                                <p className="text-[11px] font-black uppercase text-orange-500 mb-2 tracking-widest">{t('lbl_mom_tip')}</p>
                                 <p className="text-sm md:text-base text-zinc-200 font-korean leading-relaxed font-bold italic">"{scriptText}"</p>
                               </div>
                               <div className="bg-zinc-950/40 border border-white/5 rounded-3xl p-5 shadow-inner">
-                                <p className="text-[10px] font-black uppercase text-zinc-500 mb-2 tracking-widest">Learning Guide</p>
+                                <p className="text-[11px] font-black uppercase text-zinc-500 mb-2 tracking-widest">Learning Guide</p>
                                 <p className="text-xs md:text-sm text-zinc-400 font-korean leading-relaxed break-keep">{guideText}</p>
                               </div>
                             </>
@@ -747,6 +754,11 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                       <><span>📤</span> {language === 'ko' ? '공유 & 저장하기' : 'Share & Save'}</>
                     )}
                   </button>
+                  {shareWebNotice && (
+                    <p className="text-emerald-400 text-[10px] font-black text-center animate-fade-in uppercase tracking-widest mt-1">
+                      ✓ {language === 'ko' ? '클립보드에 복사되었어요!' : 'Copied to clipboard!'}
+                    </p>
+                  )}
                 </div>
 
                 <div className="bg-[#03C75A]/10 border border-[#03C75A]/20 rounded-[2.5rem] p-6 md:p-8 animate-fade-in-up flex flex-col items-center text-center group">
