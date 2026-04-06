@@ -526,8 +526,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         />
       )}
 
-      <div className="flex flex-col lg:flex-row gap-4 md:gap-8 h-[calc(100dvh-140px)] lg:h-[calc(100vh-280px)] min-h-[600px]">
-        <div className="w-full lg:w-[50%] h-[40%] lg:h-full">
+      <div className="flex flex-col lg:flex-row gap-4 md:gap-8 h-[calc(100dvh-120px)] lg:h-[calc(100vh-280px)] min-h-[600px]">
+        <div className="w-full lg:w-[50%] h-[35%] lg:h-full">
           <WorksheetOverlay
             imageUrl={imageUrl}
             items={localItems}
@@ -536,7 +536,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
           />
         </div>
 
-        <div className="w-full lg:w-[45%] h-[65%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-inner" onClick={() => setActiveItemId(null)}>
+        <div className="w-full lg:w-[45%] h-[70%] lg:h-full flex flex-col bg-zinc-950/40 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-inner" onClick={() => setActiveItemId(null)}>
           <div className="px-5 py-4 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl flex flex-col shrink-0">
             <div className="flex justify-between items-center w-full">
               <div className="flex items-center gap-3">
@@ -741,7 +741,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             })}
 
             {localItems.length > 0 && (
-              <div className="pt-6 pb-4">
+              <div className="pt-6 pb-2">
                 <button
                   onClick={() => { if (!isAuthenticated) openLoginModal(); else if (user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }}
                   disabled={isLoadingItems}
@@ -752,43 +752,47 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 </button>
               </div>
             )}
-          </div>
 
-          <div className="p-4 md:p-6 bg-zinc-900/95 backdrop-blur-3xl border-t border-white/5 shrink-0 z-10 shadow-[0_-20px_40px_rgba(0,0,0,0.4)] space-y-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex gap-3">
-              <button
-                onClick={handleShare}
-                disabled={isSharing}
-                className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-2xl py-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-xl disabled:opacity-50 min-h-[56px] text-white"
-              >
-                {isSharing ? (
-                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <><span>📤</span> {language === 'ko' ? '공유 & 저장' : 'Share/Save'}</>
+            {localItems.length > 0 && (
+              <div className="pt-4 pb-8 space-y-6" onClick={(e) => e.stopPropagation()}>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleShare}
+                    disabled={isSharing}
+                    className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-2xl py-4 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-xl disabled:opacity-50 min-h-[56px] text-white"
+                  >
+                    {isSharing ? (
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <><span>📤</span> {language === 'ko' ? '공유 & 저장' : 'Share/Save'}</>
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={handleCopyToCafe}
+                    className={`flex-1 py-4 rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all transform active:scale-95 flex items-center justify-center gap-2 shadow-xl min-h-[56px] ${copyStatus ? 'bg-emerald-600 text-white' : 'bg-[#03C75A] text-white'}`}
+                  >
+                    {copyStatus ? (
+                      <span className="animate-fade-in">✓ {language === 'ko' ? '복사됨!' : 'Copied!'}</span>
+                    ) : (
+                      <>
+                        <span className="text-lg">🕊️</span> {language === 'ko' ? '카페 대본' : 'Cafe Template'}
+                      </>
+                    )}
+                  </button>
+                </div>
+                
+                {shareWebNotice && (
+                  <p className="text-emerald-400 text-[9px] font-black text-center animate-fade-in uppercase tracking-wider">
+                    ✓ {language === 'ko' ? '클립보드에 복사되었어요!' : 'Copied to clipboard!'}
+                  </p>
                 )}
-              </button>
-              
-              <button
-                onClick={handleCopyToCafe}
-                className={`flex-1 py-4 rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all transform active:scale-95 flex items-center justify-center gap-2 shadow-xl min-h-[56px] ${copyStatus ? 'bg-emerald-600 text-white' : 'bg-[#03C75A] text-white'}`}
-              >
-                {copyStatus ? (
-                  <span className="animate-fade-in">✓ {language === 'ko' ? '복사됨!' : 'Copied!'}</span>
-                ) : (
-                  <>
-                    <span className="text-lg">🕊️</span> {language === 'ko' ? '카페 대본' : 'Cafe Template'}
-                  </>
-                )}
-              </button>
-            </div>
-            
-            {shareWebNotice && (
-              <p className="text-emerald-400 text-[9px] font-black text-center animate-fade-in uppercase tracking-wider">
-                ✓ {language === 'ko' ? '클립보드에 복사되었어요!' : 'Copied to clipboard!'}
-              </p>
+
+                <div className="pt-4 border-t border-white/5">
+                   <InlineFeedback />
+                </div>
+              </div>
             )}
-
-            <InlineFeedback />
           </div>
         </div>
       </div>
