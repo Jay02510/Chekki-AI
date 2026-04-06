@@ -741,62 +741,54 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             })}
 
             {localItems.length > 0 && (
-              <div className="space-y-6 pt-6 pb-2">
-                <div className="pt-2">
-                  <button
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    className="w-full bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-xl disabled:opacity-50"
-                  >
-                    {isSharing ? (
-                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <><span>📤</span> {language === 'ko' ? '공유 & 저장하기' : 'Share & Save'}</>
-                    )}
-                  </button>
-                  {shareWebNotice && (
-                    <p className="text-emerald-400 text-[10px] font-black text-center animate-fade-in uppercase tracking-widest mt-1">
-                      ✓ {language === 'ko' ? '클립보드에 복사되었어요!' : 'Copied to clipboard!'}
-                    </p>
-                  )}
-                </div>
-
-                <div className="bg-[#03C75A]/10 border border-[#03C75A]/20 rounded-[2.5rem] p-6 md:p-8 animate-fade-in-up flex flex-col items-center text-center group">
-                  <div className="w-14 h-14 rounded-full bg-[#03C75A] flex items-center justify-center text-2xl mb-4 shadow-[0_10px_30px_rgba(3,199,90,0.3)] animate-float">
-                    🕊️
-                  </div>
-                  <h4 className="text-white font-black text-lg md:text-xl font-display mb-2">{t('share_title')}</h4>
-                  <p className="text-zinc-400 text-xs md:text-sm font-korean mb-6 leading-relaxed opacity-80 break-keep">
-                    {t('share_desc')}
-                  </p>
-                  <button
-                    onClick={handleCopyToCafe}
-                    className={`w-full py-4 rounded-2xl font-black text-sm transition-all transform active:scale-95 flex items-center justify-center gap-3 shadow-xl min-h-[48px] ${copyStatus ? 'bg-emerald-500 text-white' : 'bg-[#03C75A] hover:bg-[#02A64B] text-white'}`}
-                  >
-                    {copyStatus ? (
-                      <span className="animate-fade-in">✓ {t('share_toast')}</span>
-                    ) : (
-                      <>
-                        <span>📋</span> {t('share_btn')}
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                <InlineFeedback />
+              <div className="pt-6 pb-4">
+                <button
+                  onClick={() => { if (!isAuthenticated) openLoginModal(); else if (user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }}
+                  disabled={isLoadingItems}
+                  className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-base shadow-[0_15px_40px_rgba(249,115,22,0.4)] flex items-center justify-center gap-3 transform transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 ring-2 ring-white/10 min-h-[56px]"
+                >
+                  <span className="text-2xl">🪄</span>
+                  {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
+                </button>
               </div>
             )}
           </div>
 
-          <div className="p-5 md:p-6 bg-zinc-900/90 backdrop-blur-3xl border-t border-white/5 shrink-0 z-10 shadow-[0_-20px_40px_rgba(0,0,0,0.4)]" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => { if (!isAuthenticated) openLoginModal(); else if (user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }}
-              disabled={isLoadingItems}
-              className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-base shadow-[0_15px_40px_rgba(249,115,22,0.4)] flex items-center justify-center gap-3 transform transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 ring-2 ring-white/10 min-h-[56px]"
-            >
-              <span className="text-2xl">🪄</span>
-              {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
-            </button>
+          <div className="p-4 md:p-6 bg-zinc-900/95 backdrop-blur-3xl border-t border-white/5 shrink-0 z-10 shadow-[0_-20px_40px_rgba(0,0,0,0.4)] space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex gap-3">
+              <button
+                onClick={handleShare}
+                disabled={isSharing}
+                className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-2xl py-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-xl disabled:opacity-50 min-h-[56px] text-white"
+              >
+                {isSharing ? (
+                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <><span>📤</span> {language === 'ko' ? '공유 & 저장' : 'Share/Save'}</>
+                )}
+              </button>
+              
+              <button
+                onClick={handleCopyToCafe}
+                className={`flex-1 py-4 rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all transform active:scale-95 flex items-center justify-center gap-2 shadow-xl min-h-[56px] ${copyStatus ? 'bg-emerald-600 text-white' : 'bg-[#03C75A] text-white'}`}
+              >
+                {copyStatus ? (
+                  <span className="animate-fade-in">✓ {language === 'ko' ? '복사됨!' : 'Copied!'}</span>
+                ) : (
+                  <>
+                    <span className="text-lg">🕊️</span> {language === 'ko' ? '카페 대본' : 'Cafe Template'}
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {shareWebNotice && (
+              <p className="text-emerald-400 text-[9px] font-black text-center animate-fade-in uppercase tracking-wider">
+                ✓ {language === 'ko' ? '클립보드에 복사되었어요!' : 'Copied to clipboard!'}
+              </p>
+            )}
+
+            <InlineFeedback />
           </div>
         </div>
       </div>

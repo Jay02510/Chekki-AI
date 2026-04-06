@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useMistakes } from '../contexts/MistakeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
+import { toJpeg } from 'html-to-image';
 
 interface Particle {
   id: number;
@@ -15,6 +19,8 @@ export const OdapNoteModal: React.FC = () => {
   
   // Confetti State
   const [particles, setParticles] = useState<Particle[]>([]);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
 
   if (!showMistakeModal) return null;
 
@@ -50,82 +56,114 @@ export const OdapNoteModal: React.FC = () => {
       }, 300);
   };
 
-  const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Chekki - Review Sheet</title>
-            <style>
-              body { font-family: 'Helvetica', 'Apple SD Gothic Neo', sans-serif; padding: 40px; color: #333; }
-              .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #f97316; padding-bottom: 20px; }
-              .logo { font-size: 24px; font-weight: bold; color: #f97316; }
-              .title { font-size: 32px; font-weight: 900; margin: 10px 0; }
-              .subtitle { color: #666; font-style: italic; }
-              .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-              .item { border: 1px solid #ddd; padding: 20px; border-radius: 12px; background: #fafafa; page-break-inside: avoid; }
-              .question-label { font-size: 12px; font-weight: bold; color: #999; text-transform: uppercase; letter-spacing: 1px; }
-              .question { font-size: 20px; font-weight: bold; margin: 5px 0 15px 0; }
-              
-              /* Writing Box */
-              .answer-box { background: white; border: 2px dashed #cbd5e1; padding: 20px; border-radius: 8px; margin-top: 10px; min-height: 80px; position: relative; }
-              .answer-label { font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: 500; }
-              
-              /* Repositioned Answer: Outside box, right aligned, upside down */
-              .answer-footer { display: flex; justify-content: flex-end; margin-top: 8px; }
-              .answer { 
-                  color: #f97316; 
-                  font-weight: bold; 
-                  font-size: 11px; 
-                  font-family: 'Comic Sans MS', cursive, sans-serif; 
-                  transform: rotate(180deg); 
-                  display: inline-block; 
-                  opacity: 0.6; 
-              }
+  const handlePrint = async () => {
+    if (mistakes.length === 0) return;
+    setIsPrinting(true);
 
-              .tip { margin-top: 15px; font-size: 14px; color: #666; font-style: italic; border-left: 3px solid #f97316; padding-left: 10px; line-height: 1.5; }
-              .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #aaa; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <div class="logo">Chekki AI</div>
-              <div class="title">${t('review_title')}</div>
-              <div class="subtitle">${language === 'ko' ? "오늘도 한 걸음 더 성장했어요!" : "Growing every day!"}</div>
-            </div>
-            
-            <div class="grid">
-              ${mistakes.map(m => `
-                <div class="item">
-                  <div class="question-label">${t('lbl_question')}</div>
-                  <div class="question">${m.question_text}</div>
-                  
-                  <div class="answer-box">
-                    <div class="answer-label">${t('lbl_write_answer')}</div>
-                  </div>
+    // Give a small timeout to ensure any state changes (like showing the printable div) have rendered
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-                  <div class="answer-footer">
-                     <div class="answer">(${t('lbl_correct_answer')} ${m.correct_answer})</div>
-                  </div>
+    try {
+      if (Capacitor.isNativePlatform()) {
+        if (!printRef.current) return;
+        
+        // Capture as Image
+        const dataUrl = await toJpeg(printRef.current, { 
+          quality: 0.95,
+          backgroundColor: '#ffffff',
+          pixelRatio: 2 // Higher resolution for printing
+        });
+        
+        const base64Data = dataUrl.split('base64,')[1];
+        const fileName = `chekki-review-${Date.now()}.jpg`;
 
-                  <div class="tip">
-                    <strong>${t('lbl_mom_tip')}</strong> ${language === 'ko' ? m.teaching_script_ko : (m.teaching_script_en || m.teaching_script_ko)}
-                  </div>
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Cache,
+        });
+
+        await Share.share({
+          title: t('review_title'),
+          text: t('print_footer'),
+          files: [savedFile.uri],
+        });
+      } else {
+        // Web: Use Iframe method to bypass popup blockers
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentWindow?.document;
+        if (doc) {
+          doc.write(`
+            <html>
+              <head>
+                <title>Chekki - Review Sheet</title>
+                <style>
+                  body { font-family: 'Helvetica', 'Apple SD Gothic Neo', sans-serif; padding: 40px; color: #333; }
+                  .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #f97316; padding-bottom: 20px; }
+                  .logo { font-size: 24px; font-weight: bold; color: #f97316; }
+                  .title { font-size: 32px; font-weight: 900; margin: 10px 0; }
+                  .subtitle { color: #666; font-style: italic; }
+                  .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+                  .item { border: 1px solid #ddd; padding: 20px; border-radius: 12px; background: #fafafa; page-break-inside: avoid; }
+                  .question-label { font-size: 12px; font-weight: bold; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+                  .question { font-size: 20px; font-weight: bold; margin: 5px 0 15px 0; }
+                  .answer-box { background: white; border: 2px dashed #cbd5e1; padding: 20px; border-radius: 8px; margin-top: 10px; min-height: 80px; position: relative; }
+                  .answer-label { font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: 500; }
+                  .answer-footer { display: flex; justify-content: flex-end; margin-top: 8px; }
+                  .answer { color: #f97316; font-weight: bold; font-size: 11px; transform: rotate(180deg); display: inline-block; opacity: 0.6; }
+                  .tip { margin-top: 15px; font-size: 14px; color: #666; font-style: italic; border-left: 3px solid #f97316; padding-left: 10px; line-height: 1.5; }
+                  .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #aaa; }
+                  @media print {
+                    body { padding: 0; }
+                    .item { border: 1px solid #eee; }
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="header">
+                  <div class="logo">Chekki AI</div>
+                  <div class="title">${t('review_title')}</div>
+                  <div class="subtitle">${language === 'ko' ? "오늘도 한 걸음 더 성장했어요!" : "Growing every day!"}</div>
                 </div>
-              `).join('')}
-            </div>
-
-            <div class="footer">
-              ${t('print_footer')}
-            </div>
-            <script>
-              window.onload = () => { window.print(); }
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
+                <div class="grid">
+                  ${mistakes.map(m => `
+                    <div class="item">
+                      <div class="question-label">${t('lbl_question')}</div>
+                      <div class="question">${m.question_text}</div>
+                      <div class="answer-box"><div class="answer-label">${t('lbl_write_answer')}</div></div>
+                      <div class="answer-footer"><div class="answer">(${t('lbl_correct_answer')} ${m.correct_answer})</div></div>
+                      <div class="tip"><strong>${t('lbl_mom_tip')}</strong> ${language === 'ko' ? m.teaching_script_ko : (m.teaching_script_en || m.teaching_script_ko)}</div>
+                    </div>
+                  `).join('')}
+                </div>
+                <div class="footer">${t('print_footer')}</div>
+              </body>
+            </html>
+          `);
+          doc.close();
+          
+          // Wait for content resources if any, then print
+          iframe.contentWindow?.focus();
+          setTimeout(() => {
+            iframe.contentWindow?.print();
+            // Cleanup iframe after print dialog is closed
+            setTimeout(() => document.body.removeChild(iframe), 1000);
+          }, 500);
+        }
+      }
+    } catch (err) {
+      console.error('Print failed:', err);
+      alert(language === 'ko' ? "인쇄에 실패했습니다. 다시 시도해 주세요." : "Print failed. Please try again.");
+    } finally {
+      setIsPrinting(false);
     }
   };
 
@@ -217,16 +255,66 @@ export const OdapNoteModal: React.FC = () => {
             <div className="p-6 border-t border-zinc-800 bg-zinc-900">
             <button 
                 onClick={handlePrint}
-                disabled={mistakes.length === 0}
+                disabled={mistakes.length === 0 || isPrinting}
                 className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all font-korean shadow-lg shadow-orange-500/20"
             >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                {t('review_print_btn')}
+                {isPrinting ? (
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                ) : (
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                )}
+                {isPrinting ? (language === 'ko' ? '준비 중...' : 'Preparing...') : t('review_print_btn')}
             </button>
             </div>
 
+        </div>
+
+        {/* Hidden Printable Container for Native Share */}
+        <div 
+            style={{ 
+                position: 'absolute', 
+                left: '-9999px', 
+                top: 0, 
+                width: '800px', 
+                background: 'white',
+                padding: '40px',
+                color: '#333',
+                fontFamily: 'Helvetica, sans-serif'
+            }}
+            ref={printRef}
+        >
+            <div style={{ textAlign: 'center', marginBottom: '40px', borderBottom: '3px solid #f97316', paddingBottom: '20px' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f97316' }}>Chekki AI</div>
+                <div style={{ fontSize: '32px', fontWeight: '900', margin: '10px 0' }}>{t('review_title')}</div>
+                <div style={{ color: '#666', fontStyle: 'italic' }}>{language === 'ko' ? "오늘도 한 걸음 더 성장했어요!" : "Growing every day!"}</div>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+                {mistakes.map((m, idx) => (
+                    <div key={idx} style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '12px', background: '#fafafa' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#999', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('lbl_question')}</div>
+                        <div style={{ fontSize: '20px', fontWeight: 'bold', margin: '5px 0 15px 0' }}>{m.question_text}</div>
+                        
+                        <div style={{ background: 'white', border: '2px dashed #cbd5e1', padding: '20px', borderRadius: '8px', marginTop: '10px', minHeight: '80px' }}>
+                            <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '5px', fontWeight: '500' }}>{t('lbl_write_answer')}</div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                            <div style={{ color: '#f97316', fontWeight: 'bold', fontSize: '11px', transform: 'rotate(180deg)', display: 'inline-block' }}>({t('lbl_correct_answer')} {m.correct_answer})</div>
+                        </div>
+
+                        <div style={{ marginTop: '15px', fontSize: '14px', color: '#666', fontStyle: 'italic', borderLeft: '3px solid #f97316', paddingLeft: '10px', lineHeight: '1.5' }}>
+                            <strong>{t('lbl_mom_tip')}</strong> {language === 'ko' ? m.teaching_script_ko : (m.teaching_script_en || m.teaching_script_ko)}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div style={{ marginTop: '50px', textAlign: 'center', fontSize: '12px', color: '#aaa' }}>
+                {t('print_footer')}
+            </div>
         </div>
         </div>
     </>
