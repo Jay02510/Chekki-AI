@@ -158,7 +158,7 @@ export default function AdminPage() {
         ) : (
           <form onSubmit={handleCreateProUser} className="space-y-4 relative z-10 animate-fade-in">
             <div>
-              <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">User's Name</label>
+              <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">User&apos;s Name</label>
             <input 
               type="text" 
               required

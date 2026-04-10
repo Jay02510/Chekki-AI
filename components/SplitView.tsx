@@ -220,7 +220,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
-        } catch (e) { }
+        } catch (e) { console.error(e); }
         recognitionRef.current = null;
       }
       if (nativeListenerRef.current) {
@@ -254,7 +254,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     } else if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
-      } catch (err) { }
+      } catch (err) { console.error(err); }
       setIsListening(false);
     }
   };
@@ -606,7 +606,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
 
                     <div className="flex-1 min-w-0">
                       <h4 className={`text-sm md:text-lg font-bold leading-relaxed mb-3 transition-colors break-keep ${isActive ? 'text-white' : 'text-zinc-400'}`}>
-                        {item.question_text.replace(/^\d+[\.\)\s]+/, '')}
+                        {item.question_text.replace(/^\d+[.)\s]+/, '')}
                       </h4>
                       
                       <div className="flex flex-col gap-4">
@@ -718,7 +718,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                             <>
                               <div className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-5 shadow-inner">
                                 <p className="text-[11px] font-black uppercase text-orange-500 mb-2 tracking-widest">{t('lbl_mom_tip')}</p>
-                                <p className="text-sm md:text-base text-zinc-200 font-korean leading-relaxed font-bold italic">"{scriptText}"</p>
+                                <p className="text-sm md:text-base text-zinc-200 font-korean leading-relaxed font-bold italic">&quot;{scriptText}&quot;</p>
                               </div>
                               <div className="bg-zinc-950/40 border border-white/5 rounded-3xl p-5 shadow-inner">
                                 <p className="text-[11px] font-black uppercase text-zinc-500 mb-2 tracking-widest">Learning Guide</p>

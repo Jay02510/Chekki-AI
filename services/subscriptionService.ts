@@ -16,7 +16,7 @@ const BACKEND_BASE = API_BASE_URL; // Uses centralized config
 function cacheRecord(record: SubscriptionRecord) {
     try {
         localStorage.setItem(CACHE_KEY, JSON.stringify(record));
-    } catch { }
+    } catch (e) { console.error("Cache write error", e); }
 }
 
 function getCachedRecord(): SubscriptionRecord | null {
@@ -29,7 +29,7 @@ function getCachedRecord(): SubscriptionRecord | null {
 }
 
 function clearCache() {
-    try { localStorage.removeItem(CACHE_KEY); } catch { }
+    try { localStorage.removeItem(CACHE_KEY); } catch (e) { console.error(e); }
 }
 
 // ─── Subscription Service ────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ export const subscriptionService = {
                     cacheRecord(localRecord);
                     return localRecord;
                 }
-            } catch {
+            } catch (e) { console.error("StoreKit err", e);
                 // StoreKit unavailable (simulator, etc.) — fall through to backend
             }
         }
@@ -77,7 +77,7 @@ export const subscriptionService = {
                 cacheRecord(record);
                 return record;
             }
-        } catch {
+        } catch (e) { console.error("Net err", e);
             // Network failure — fall back to cache
         }
 

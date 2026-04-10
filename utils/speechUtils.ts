@@ -36,7 +36,7 @@ export const normalizeText = (text: string): string => {
 
   // 3. Remove common prefixes like "A.", "1.", "a)", "1)"
   // We only remove if it's followed by a punctuation mark AND space to avoid removing words like "I"
-  normalized = normalized.replace(/^[a-z0-9][\.\)]\s+/, "");
+  normalized = normalized.replace(/^[a-z0-9][.)]\s+/, "");
 
   // 4. Convert written numbers to digits (1-10) for consistency
   const numbers: { [key: string]: string } = {

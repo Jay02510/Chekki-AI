@@ -94,7 +94,7 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
 
           <div className="bg-zinc-900/50 rounded-2xl p-4 border border-white/5 mb-6">
             <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-2">{language === 'ko' ? "질문" : "Question"}</p>
-            <p className="text-white text-sm break-keep leading-relaxed font-bold">"{item.question_text}"</p>
+            <p className="text-white text-sm break-keep leading-relaxed font-bold">&quot;{item.question_text}&quot;</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

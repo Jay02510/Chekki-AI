@@ -70,7 +70,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p>
                                             <strong>제3조 (청약철회 및 서비스 해지)</strong><br />
                                             1. 이용자는 결제 후 7일 이내에 서비스를 이용하지 않은 경우 청약철회(환불)를 요청할 수 있습니다.<br />
-                                            2. 서비스 해지(자동 결제 중단)는 설정 메뉴 내 '구독 관리'를 통해 언제든지 가능하며, 해지 시 다음 결제 예정일부터 과금이 중단됩니다.
+                                            2. 서비스 해지(자동 결제 중단)는 설정 메뉴 내 &apos;구독 관리&apos;를 통해 언제든지 가능하며, 해지 시 다음 결제 예정일부터 과금이 중단됩니다.
                                         </p>
                                     </div>
                                 </div>
@@ -78,10 +78,10 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                     <h3 className="text-white font-black text-sm mb-4 border-b border-white/10 pb-2">[EN] Terms of Service</h3>
                                     <div className="text-zinc-300 text-[10px] leading-relaxed space-y-4">
                                         <p><strong>This service complies with the Korean Act on Consumer Protection in Electronic Commerce.</strong></p>
-                                        <p>These terms govern your use of the Chekki ("Service") online learning assistance tool. By using the Service, you agree to these terms.</p>
+                                        <p>These terms govern your use of the Chekki (&quot;Service&quot;) online learning assistance tool. By using the Service, you agree to these terms.</p>
                                         <p>
                                             <strong>1. Service Purpose & Content</strong><br />
-                                            Chekki is a tool designed to help parents guide their children's English learning at home, including AI-powered worksheet analysis and review notes.
+                                            Chekki is a tool designed to help parents guide their children&apos;s English learning at home, including AI-powered worksheet analysis and review notes.
                                         </p>
                                         <p>
                                             <strong>2. Subscriptions & Service Period</strong><br />
@@ -91,7 +91,7 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         <p>
                                             <strong>3. Cancellation & Refunds</strong><br />
                                             1. Users may request a full refund within 7 days of purchase if the service has not been used.<br />
-                                            2. Subscription cancellation can be performed at any time through the "Settings" menu. Cancellation prevents future recurring charges.
+                                            2. Subscription cancellation can be performed at any time through the &quot;Settings&quot; menu. Cancellation prevents future recurring charges.
                                         </p>
                                     </div>
                                 </div>

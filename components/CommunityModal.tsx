@@ -69,7 +69,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
                 <div className="bg-zinc-950 p-4 border-b border-zinc-800 flex justify-between items-center shrink-0">
                     <div className="flex items-center gap-2">
                         <span className="text-xl">☕</span>
-                        <h2 className="text-lg font-bold text-white font-display">Parent's Lounge</h2>
+                        <h2 className="text-lg font-bold text-white font-display">Parent&apos;s Lounge</h2>
                     </div>
                     <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">✕</button>
                 </div>
@@ -84,7 +84,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
                             </div>
                             <div>
                                 <h3 className="text-white font-bold text-sm">Create Study Log</h3>
-                                <p className="text-zinc-400 text-xs">Share your child's progress easily!</p>
+                                <p className="text-zinc-400 text-xs">Share your child&apos;s progress easily!</p>
                             </div>
                         </div>
 

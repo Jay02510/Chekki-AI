@@ -258,8 +258,23 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
                         type="range" min="0.3" max="2" step="0.1" 
                         value={bubbleScale} 
                         onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
-                        className="w-24 md:w-64 accent-orange-500 h-1.5 bg-zinc-800 rounded-lg appearance-none"
+                        className="w-24 md:w-64 accent-orange-500 h-1.5 bg-zinc-800 rounded-lg appearance-none hidden md:block"
                     />
+                    <div className="w-px h-6 bg-white/10 mx-2 hidden md:block"></div>
+                    <button 
+                        onClick={resetPositions}
+                        className="w-10 h-10 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-all flex items-center justify-center text-lg active:scale-90"
+                        title={language === 'ko' ? "위치 초기화" : "Reset Positions"}
+                    >
+                        🔄
+                    </button>
+                    <button 
+                        onClick={() => setViewMode(viewMode === 'fit' ? 'fill' : 'fit')}
+                        className="w-10 h-10 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-all flex items-center justify-center text-lg active:scale-90"
+                        title={language === 'ko' ? "화면 줌" : "Zoom Image"}
+                    >
+                        {viewMode === 'fit' ? '🔍' : '🖼️'}
+                    </button>
                 </div>
 
                 <button 

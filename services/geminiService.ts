@@ -21,7 +21,7 @@ const getValidIdToken = async (maxRetries = 3): Promise<string | null> => {
       try {
         const token = await activeUser.getIdToken();
         if (token) return token;
-      } catch (e) { }
+      } catch (e) { console.error("Token retry error:", e); }
     }
     await new Promise(resolve => setTimeout(resolve, 800));
   }

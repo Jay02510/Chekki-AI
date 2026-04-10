@@ -52,7 +52,7 @@ try {
   if (!isNative) {
     analyticsInstance = getAnalytics(app);
   }
-} catch (e) { }
+  } catch (e) { console.error(e); }
 export const analytics = analyticsInstance;
 
 const getLocalKey = (uid: string) => `chekki_mistakes_${uid}`;
@@ -79,18 +79,14 @@ export const db = {
   },
 
   async createUser(uid: string, profile: UserProfile): Promise<void> {
-    try {
-      await setDoc(doc(dbInstance, "users", uid), { ...profile, uid });
-    } catch (e: any) {
-      throw e;
-    }
+    await setDoc(doc(dbInstance, "users", uid), { ...profile, uid });
   },
 
   async updateUser(uid: string, updates: Partial<UserProfile>): Promise<void> {
     try {
       const userRef = doc(dbInstance, "users", uid);
       await updateDoc(userRef, updates);
-    } catch (e) { }
+    } catch (e) { console.error("Update fallback", e); }
   },
 
   async getMistakes(uid: string): Promise<any[]> {
@@ -114,7 +110,7 @@ export const db = {
     localStorage.setItem(localKey, JSON.stringify([mistake, ...currentLocal]));
     try {
       await setDoc(doc(dbInstance, "mistakes", mistake.uniqueId), { ...mistake, userId: uid });
-    } catch (e: any) { }
+    } catch (e: any) { console.error(e); }
   },
 
   async removeMistake(uniqueId: string, uid?: string): Promise<void> {
@@ -125,7 +121,7 @@ export const db = {
     }
     try {
       await deleteDoc(doc(dbInstance, "mistakes", uniqueId));
-    } catch (e: any) { }
+    } catch (e: any) { console.error(e); }
   },
 
   async sendFeedback(uid: string, feedback: {
@@ -141,7 +137,7 @@ export const db = {
         userId: uid,
         timestamp: new Date().toISOString()
       });
-    } catch (e: any) { }
+    } catch (e: any) { console.error(e); }
   },
 
   logUserEvent(eventName: string, params?: any) {
@@ -149,6 +145,6 @@ export const db = {
       if (analytics) {
         logEvent(analytics, eventName, params);
       }
-    } catch (e) { }
+    } catch (e) { console.error(e); }
   }
 };

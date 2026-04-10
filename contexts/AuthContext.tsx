@@ -197,8 +197,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let maxScans = FREE_DAILY_LIMIT;
       let schoolId: string | null = null;
       let schoolName: string | null = null;
-      let subscriptionStartedAt: string | null = null;
-      let nextBillingDate: string | null = null;
+      const subscriptionStartedAt: string | null = null;
+      const nextBillingDate: string | null = null;
 
       if (code) {
         const sanitized = code.toUpperCase().trim();
