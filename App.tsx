@@ -238,7 +238,10 @@ function AppContent() {
             </div>
           )}
         </React.Suspense>
-        <Header onReset={() => handleReset(false)} />
+        <Header 
+          onReset={() => handleReset(false)} 
+          showScanButton={analysisState.status === 'complete'} 
+        />
         {/* Web-only mobile download banner */}
         {platform === 'web' && (
           <React.Suspense fallback={null}>
@@ -369,12 +372,7 @@ function AppContent() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => handleReset(true)} className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-xl border border-zinc-700 transition-all shadow-xl flex items-center gap-2 group active:scale-95 min-h-[44px]">
-                    <span className="text-lg">📸</span>
-                    <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">{t('ws_scan_again')}</span>
-                  </button>
-                </div>
+                {/* Duplicate Scan button removed here as it's now in the header for better visibility */}
               </div>
 
               <div className="flex-1 min-h-0">

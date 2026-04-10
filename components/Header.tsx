@@ -13,9 +13,10 @@ import { SCREENSHOT_MODE } from '../config';
 
 interface Props {
   onReset: () => void;
+  showScanButton?: boolean;
 }
 
-export const Header: React.FC<Props> = ({ onReset }) => {
+export const Header: React.FC<Props> = ({ onReset, showScanButton }) => {
   const { user, openLoginModal, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const { setShowMistakeModal, mistakes } = useMistakes();
@@ -80,6 +81,17 @@ export const Header: React.FC<Props> = ({ onReset }) => {
           </div>
 
           <div className="flex items-center gap-1.5 md:gap-4 h-full flex-shrink-0">
+            {showScanButton && (
+              <button
+                onClick={onReset}
+                className="flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white transition-all shadow-lg shadow-orange-600/20 active:scale-95 animate-pulse-subtle"
+                title={t('ws_scan_again')}
+              >
+                <span className="text-sm md:text-lg">📸</span>
+                <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest whitespace-nowrap">{t('ws_scan_again')}</span>
+              </button>
+            )}
+
             {user && (
               <div className="flex items-center gap-1.5 md:gap-2">
                 <button

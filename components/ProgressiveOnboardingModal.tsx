@@ -147,12 +147,20 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({ onComplete, onSkip
               ? (language === 'ko' ? '저장 중...' : 'Saving...') 
               : (language === 'ko' ? '설정 완료 (맞춤형 시작)' : 'Save & Tailor Guides')}
           </button>
-          <button
-            onClick={onSkip}
-            className="w-full bg-transparent text-zinc-500 py-3 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:text-white transition-colors"
-          >
-            {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => { setSelectedAge(null); setSelectedLevel(null); setParentLevel(null); }}
+              className="flex-1 bg-zinc-800 text-zinc-400 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-zinc-700 hover:text-white transition-all"
+            >
+              {language === 'ko' ? '초기화' : 'Reset'}
+            </button>
+            <button
+              onClick={onSkip}
+              className="flex-1 bg-transparent text-zinc-500 py-3 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:text-white transition-colors"
+            >
+              {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
+            </button>
+          </div>
         </div>
 
       </div>
