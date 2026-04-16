@@ -26,7 +26,7 @@ export const ASSETS = {
   STAMP_SOUND: `https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3`,
 
   // NEW WALKTHROUGH VIDEO (Optimized to mp4)
-  VIDEO_WALKTHROUGH: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/v1769504113/Chekki_AI_V0_fkdlyx.mp4`,
+  VIDEO_WALKTHROUGH: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/v1769504113/Chekki_AI_V1_1_3.mp4`,
 
   // MARKETING ASSETS (Updated with single combined flyer)
   FLYER_THUMB: `https://res.cloudinary.com/dginphpy4/image/upload/w_800,h_1100,c_fill,pg_1,f_auto,q_auto/Chekki_Flyer_nvsnta.jpg`,

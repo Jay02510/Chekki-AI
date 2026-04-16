@@ -1,8 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { SubscriptionScreen } from './SubscriptionScreen';
-import { LegalModal } from './LegalModal';
+import { Capacitor } from '@capacitor/core';
+const SubscriptionScreen = React.lazy(() => import('./SubscriptionScreen').then(module => ({ default: module.SubscriptionScreen })));
+const LegalModal = React.lazy(() => import('./LegalModal').then(module => ({ default: module.LegalModal })));
 import { LegalType } from '../types';
 
 export const PaywallModal: React.FC = () => {
@@ -42,13 +42,17 @@ export const PaywallModal: React.FC = () => {
                 </button>
 
                 <div className="p-6 md:p-8 overflow-y-auto max-h-[85vh] custom-scrollbar">
-                    <SubscriptionScreen onClose={() => setShowPaywall(false)} />
+                    <Suspense fallback={<div className="h-40 flex items-center justify-center"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+                      <SubscriptionScreen onClose={() => setShowPaywall(false)} />
+                    </Suspense>
                 </div>
             </div>
 
             {standaloneLegal && (
                 <div className="fixed inset-0 z-[200]">
-                    <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={false} />
+                    <Suspense fallback={null}>
+                      <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={false} />
+                    </Suspense>
                 </div>
             )}
         </div>

@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ASSETS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
-import { LegalModal } from './LegalModal';
 import { LegalType } from '../types';
+const LegalModal = React.lazy(() => import('./LegalModal').then(module => ({ default: module.LegalModal })));
 
 export const LoginModal: React.FC = () => {
   const { showLoginModal, closeLoginModal, signIn, signUp, sendResetEmail } = useAuth();
@@ -66,7 +66,9 @@ export const LoginModal: React.FC = () => {
 
   return (
     <>
-      {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
+      <React.Suspense fallback={null}>
+        {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
+      </React.Suspense>
       <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-10 overflow-y-auto">
         <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { if (!email && !password && !name) closeLoginModal(); }}></div>
 

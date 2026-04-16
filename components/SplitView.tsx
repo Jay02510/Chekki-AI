@@ -19,7 +19,6 @@ import { toJpeg } from 'html-to-image';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 import { normalizeText, compareSpeech } from '../utils/speechUtils';
 import { refineWorksheetItem } from '../services/geminiService';
-import { generateCompositeImage } from '../utils/exportUtils';
 
 
 interface Props {
@@ -195,6 +194,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       let finalBase64Data = imageUrl.includes('base64,') ? imageUrl.split('base64,')[1] : null;
 
       try {
+        const { generateCompositeImage } = await import('../utils/exportUtils');
         const compositeDataUrl = await generateCompositeImage(imageUrl, items);
         finalBase64Data = compositeDataUrl.split('base64,')[1];
       } catch (canvasErr) {

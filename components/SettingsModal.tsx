@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { LegalModal } from './LegalModal';
-import { FeedbackModal } from './FeedbackModal';
+const LegalModal = React.lazy(() => import('./LegalModal').then(module => ({ default: module.LegalModal })));
+const FeedbackModal = React.lazy(() => import('./FeedbackModal').then(module => ({ default: module.FeedbackModal })));
 import { db } from '../services/database';
 
 interface Props {
@@ -66,7 +65,9 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
 
   return (
     <>
-      {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
+      <React.Suspense fallback={null}>
+        {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
+      </React.Suspense>
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
 
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">

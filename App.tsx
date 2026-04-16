@@ -468,8 +468,20 @@ function AppContent() {
 
         <style>{`
             @keyframes confetti {
-            0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
-            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.5) rotate(360deg); }
+              0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+              100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.5) rotate(360deg); }
+            }
+            .prose-answer strong {
+              color: #f97316; /* orange-500 */
+              font-weight: 800;
+            }
+            .prose-answer p {
+              margin-bottom: 0.75rem;
+            }
+            .prose-answer em {
+              color: #fb923c; /* orange-400 */
+              font-style: italic;
+              font-weight: 600;
             }
         `}</style>
       </div>

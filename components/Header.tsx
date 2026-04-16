@@ -4,10 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useMistakes } from '../contexts/MistakeContext';
 import { ChekkiMascot } from './Icons';
-import { CommunityModal } from './CommunityModal';
-import { SettingsModal } from './SettingsModal';
-import { BillingModal } from './BillingModal';
-import { ProgressiveOnboardingModal } from './ProgressiveOnboardingModal';
+const CommunityModal = React.lazy(() => import('./CommunityModal').then(module => ({ default: module.CommunityModal })));
+const SettingsModal = React.lazy(() => import('./SettingsModal').then(module => ({ default: module.SettingsModal })));
+const BillingModal = React.lazy(() => import('./BillingModal').then(module => ({ default: module.BillingModal })));
+const ProgressiveOnboardingModal = React.lazy(() => import('./ProgressiveOnboardingModal').then(module => ({ default: module.ProgressiveOnboardingModal })));
 import { ASSETS } from '../constants';
 import { SCREENSHOT_MODE } from '../config';
 
@@ -40,10 +40,12 @@ export const Header: React.FC<Props> = ({ onReset, showScanButton }) => {
 
   return (
     <>
-      {showCommunity && <CommunityModal onClose={() => setShowCommunity(false)} />}
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
-      {showBilling && <BillingModal onClose={() => setShowBilling(false)} />}
-      {showOnboarding && <ProgressiveOnboardingModal onComplete={() => setShowOnboarding(false)} onSkip={() => setShowOnboarding(false)} />}
+      <React.Suspense fallback={null}>
+        {showCommunity && <CommunityModal onClose={() => setShowCommunity(false)} />}
+        {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+        {showBilling && <BillingModal onClose={() => setShowBilling(false)} />}
+        {showOnboarding && <ProgressiveOnboardingModal onComplete={() => setShowOnboarding(false)} onSkip={() => setShowOnboarding(false)} />}
+      </React.Suspense>
 
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top)]">
         <div className="absolute inset-0 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5"></div>

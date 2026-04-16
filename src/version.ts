@@ -6,4 +6,4 @@
  * 2. Run 'npx cap sync' to propagate to iOS/Android (via build scripts)
  * 3. Tag your commit with 'vX.X.X'
  */
-export const APP_VERSION = '1.1.2';
+export const APP_VERSION = '1.1.3';

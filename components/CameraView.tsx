@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { compressImage } from '../utils/imageUtils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,11 +7,144 @@ import { ChekkiMascot } from './Icons';
 import { ASSETS } from '../constants';
 import { SCREENSHOT_MODE } from '../config';
 import { FeedbackModal } from './FeedbackModal';
-import { LegalModal } from './LegalModal';
 import { LegalType } from '../types';
+const LegalModal = React.lazy(() => import('./LegalModal').then(module => ({ default: module.LegalModal })));
 import { FlyerModal } from './FlyerModal';
 import { ScreenshotCarousel } from './ScreenshotCarousel';
 import { askChekkiQuestion } from '../services/geminiService';
+
+/** Converts basic markdown (**bold**, *italic*, numbered/bullet lists) to safe HTML. */
+function renderMarkdown(text: string): string {
+  return text
+    // Numbered list items: "1. text" → paragraph with bold number
+    .replace(/^(\d+\.\s+)(.+)$/gm, '<p class="mb-2"><strong>$1</strong>$2</p>')
+    // Bullet list items: "  * text" or "* text"
+    .replace(/^\s*[*•-]\s+(.+)$/gm, '<p class="ml-4 mb-1 before:content-[\'·\'] before:mr-2 before:text-orange-400">$1</p>')
+    // Bold+italic: ***text***
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    // Bold: **text**
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Italic: *text*
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Remaining plain lines (not already wrapped)
+    .replace(/^(?!<)(.+)$/gm, '<p class="mb-2">$1</p>')
+    // Collapse multiple blank lines
+    .replace(/(<\/p>\s*){2,}/g, '</p>');
+}
+
+// --- SUB-COMPONENTS (Defined outside to prevent unmounting/focus loss on re-render) ---
+
+interface AskChekkiBarProps {
+  query: string;
+  setQuery: (q: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  isAsking: boolean;
+  language: string;
+}
+
+const AskChekkiBar: React.FC<AskChekkiBarProps> = ({ query, setQuery, onSubmit, isAsking, language }) => (
+  <form
+    onSubmit={onSubmit}
+    className="relative flex items-center bg-zinc-900 border border-white/10 hover:border-orange-500/30 focus-within:border-orange-500 rounded-[1.5rem] md:rounded-[2rem] px-4 py-2.5 md:px-7 md:py-4 shadow-2xl transition-all w-full"
+  >
+    <div className="shrink-0 mr-3 text-zinc-500">
+      <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+    </div>
+    <input
+      type="text"
+      value={query}
+      onChange={e => setQuery(e.target.value)}
+      placeholder={language === 'ko' ? "채키 공식 질문 (예: A와 An의 차이)..." : "Ask about grammar, rules, or homework..."}
+      className="flex-1 bg-transparent text-white text-xs md:text-base font-korean placeholder:text-zinc-600 focus:outline-none"
+      enterKeyHint="send"
+    />
+    <button
+      type="submit"
+      disabled={!query.trim() || isAsking}
+      className="ml-3 shrink-0 w-8 h-8 md:w-11 md:h-11 bg-orange-500 rounded-full flex items-center justify-center text-white disabled:opacity-30 hover:bg-orange-600 transition-all active:scale-95 shadow-lg"
+    >
+      {isAsking
+        ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+      }
+    </button>
+  </form>
+);
+
+interface AskChekkiAnswerModalProps {
+  answer: string | null;
+  isAsking: boolean;
+  question: string;
+  isAuthenticated: boolean;
+  language: string;
+  onClose: () => void;
+  openLoginModal: () => void;
+}
+
+const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({ 
+  answer, isAsking, question, isAuthenticated, language, onClose, openLoginModal 
+}) => {
+  if (!answer && !isAsking) return null;
+  return (
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-zinc-950 border border-white/10 rounded-[2.5rem] w-full max-w-lg max-h-[80dvh] flex flex-col shadow-2xl animate-fade-in-up overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🙋‍♂️</span>
+            <div>
+              <p className="text-[10px] text-orange-400 font-black uppercase tracking-widest">{language === 'ko' ? '채키의 답변' : 'Chekki says'}</p>
+              <p className="text-white text-sm font-semibold font-korean line-clamp-1 mt-0.5 italic opacity-70">&ldquo;{question}&rdquo;</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-colors shrink-0 ml-3"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="overflow-y-auto px-6 py-5 flex-1">
+          {isAsking ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-4">
+              <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+              <p className="text-orange-400 text-xs font-black uppercase tracking-widest animate-pulse">
+                {language === 'ko' ? '답변을 생각하는 중...' : 'Thinking...'}
+              </p>
+            </div>
+          ) : (
+            <div
+              className="text-zinc-100 text-sm md:text-base font-korean leading-relaxed prose-answer"
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(answer ?? '') }}
+            />
+          )}
+        </div>
+
+        {/* Footer upsell for guests */}
+        {!isAsking && !isAuthenticated && answer && (
+          <div className="px-6 pb-6 pt-3 border-t border-white/5">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-xs text-zinc-400 font-korean">
+                {language === 'ko' ? '더 자세한 예문이 필요하신가요?' : 'Need examples and a deeper explanation?'}
+              </p>
+              <button
+                onClick={() => { onClose(); openLoginModal(); }}
+                className="text-xs bg-orange-500 text-white px-4 py-2 rounded-xl font-black uppercase tracking-wider whitespace-nowrap hover:bg-orange-600 transition-colors"
+              >
+                {language === 'ko' ? '무료 로그인' : 'Unlock More'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 
 interface Props {
@@ -197,68 +330,28 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     </section>
   );
 
-  const AskChekkiBar = () => {
-    const [query, setQuery] = useState('');
-    const [answer, setAnswer] = useState<string | null>(null);
-    const [isAsking, setIsAsking] = useState(false);
-    const inputRef = React.useRef<HTMLInputElement>(null);
+  // State for the inline Ask Chekki answer modal
+  const [askQuery, setAskQuery] = useState('');
+  const [askAnswer, setAskAnswer] = useState<string | null>(null);
+  const [askAnsweredQuestion, setAskAnsweredQuestion] = useState('');
+  const [isAskAsking, setIsAskAsking] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!query.trim() || isAsking) return;
-      setIsAsking(true);
-      setAnswer(null);
-      try {
-        const result = await askChekkiQuestion(query, !isAuthenticated);
-        setAnswer(result);
-      } catch {
-        setAnswer(language === 'ko' ? '오류가 발생했습니다. 다시 시도해주세요.' : 'Something went wrong. Please try again.');
-      } finally {
-        setIsAsking(false);
-      }
-    };
-
-    return (
-      <div className="w-full max-w-4xl mx-auto flex flex-col gap-0">
-        <form onSubmit={handleSubmit} className="relative flex items-center bg-zinc-900 border border-white/10 hover:border-orange-500/30 focus-within:border-orange-500 rounded-[2rem] px-5 py-3 md:px-7 md:py-4 shadow-2xl transition-all group">
-          <span className="text-xl md:text-2xl shrink-0 mr-3">🙋‍♂️</span>
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder={language === 'ko' ? "채키에게 문법이나 학교 숙제에 대해 질문해보세요..." : "Ask me a grammar question, e.g. A vs An..."}
-            className="flex-1 bg-transparent text-white text-sm md:text-base font-korean placeholder:text-zinc-500 focus:outline-none"
-            enterKeyHint="send"
-          />
-          <button
-            type="submit"
-            disabled={!query.trim() || isAsking}
-            className="ml-3 shrink-0 w-9 h-9 md:w-11 md:h-11 bg-orange-500 rounded-full flex items-center justify-center text-white disabled:opacity-30 hover:bg-orange-600 transition-all active:scale-95 shadow-lg"
-          >
-            {isAsking
-              ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-            }
-          </button>
-        </form>
-
-        {answer && (
-          <div className="bg-zinc-900/80 border border-white/5 border-t-0 rounded-b-[2rem] p-5 md:p-7 animate-fade-in-up">
-            <p className="text-white text-sm md:text-base font-korean leading-relaxed whitespace-pre-wrap">{answer}</p>
-            {!isAuthenticated && (
-              <div className="mt-4 flex items-center justify-between gap-4 border-t border-white/5 pt-4">
-                <p className="text-xs text-zinc-400 font-korean">{language === 'ko' ? '더 자세한 예문이 필요하신가요?' : 'Need examples and a deeper explanation?'}</p>
-                <button onClick={() => { openLoginModal(); }} className="text-xs bg-orange-500 text-white px-4 py-2 rounded-xl font-black uppercase tracking-wider whitespace-nowrap hover:bg-orange-600 transition-colors">
-                  {language === 'ko' ? '무료 로그인' : 'Unlock Full Answer'}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const handleAskSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!askQuery.trim() || isAskAsking) return;
+    const questionSnapshot = askQuery.trim();
+    setIsAskAsking(true);
+    setAskAnswer(' '); // Trigger modal immediately with loading state
+    setAskAnsweredQuestion(questionSnapshot);
+    try {
+      const result = await askChekkiQuestion(questionSnapshot, !isAuthenticated);
+      setAskAnswer(result);
+    } catch {
+      setAskAnswer(language === 'ko' ? '오류가 발생했습니다. 다시 시도해주세요.' : 'Something went wrong. Please try again.');
+    } finally {
+      setIsAskAsking(false);
+    }
+  }, [askQuery, isAskAsking, isAuthenticated, language]);
 
   const ClarityGuide = () => (
     <div className="flex flex-wrap justify-center gap-2 mt-6 md:mt-12 mb-4 px-2">
@@ -440,8 +533,17 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         {showVideoModal && <VideoWalkthroughModal />}
         {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
+        <AskChekkiAnswerModal 
+          answer={askAnswer} 
+          isAsking={isAskAsking} 
+          question={askAnsweredQuestion}
+          isAuthenticated={isAuthenticated}
+          language={language}
+          onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); }}
+          openLoginModal={openLoginModal}
+        />
 
-        <div className="w-full max-w-5xl flex flex-col items-center text-center mb-8 md:mb-24 gap-4 md:gap-14">
+        <div className="w-full max-w-5xl flex flex-col items-center text-center mb-8 md:mb-24 gap-4 md:gap-14 px-4">
           <div className="space-y-2 md:space-y-8">
             {user.schoolName && (
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-1 shadow-xl backdrop-blur-sm">
@@ -464,8 +566,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           </div>
         </div>
 
-        <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 md:gap-10">
-          <AskChekkiBar />
+        <div className="w-full max-w-4xl mx-auto flex flex-col gap-4 md:gap-10 px-4">
+          <AskChekkiBar 
+            query={askQuery} 
+            setQuery={setAskQuery} 
+            onSubmit={handleAskSubmit} 
+            isAsking={isAskAsking} 
+            language={language}
+          />
           <DropZone size="large" />
           <FeatureBanner />
         </div>
@@ -477,9 +585,20 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   return (
     <div className="min-h-full flex flex-col pt-6 md:pt-36 pb-20 overflow-x-hidden scroll-smooth">
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
-      {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
+      <React.Suspense fallback={null}>
+        {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
+      </React.Suspense>
       {showVideoModal && <VideoWalkthroughModal />}
       {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
+      <AskChekkiAnswerModal 
+        answer={askAnswer} 
+        isAsking={isAskAsking} 
+        question={askAnsweredQuestion}
+        isAuthenticated={isAuthenticated}
+        language={language}
+        onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); }}
+        openLoginModal={openLoginModal}
+      />
 
       <div className="relative max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-24 items-center mb-12 md:mb-40">
         <div className={`absolute top-0 left-1/4 -translate-x-1/2 w-full md:w-[1000px] h-[700px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[60px] md:blur-[180px] -z-10 pointer-events-none opacity-20 mix-blend-screen`}></div>
@@ -537,7 +656,15 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       </div>
 
       <div id="magic-drop-zone" className="max-w-6xl mx-auto px-4 md:px-6 mb-16 md:mb-56 w-full relative pt-8 md:pt-32 flex flex-col gap-4 md:gap-10">
-        <AskChekkiBar />
+        <div className="w-full max-w-4xl mx-auto px-4">
+          <AskChekkiBar 
+            query={askQuery} 
+            setQuery={setAskQuery} 
+            onSubmit={handleAskSubmit} 
+            isAsking={isAskAsking} 
+            language={language}
+          />
+        </div>
         <DropZone size="large" />
         <p className="mt-8 text-zinc-600 text-[9px] md:text-sm font-black uppercase tracking-[0.2em] text-center opacity-40">{t('supported_formats')}</p>
       </div>

@@ -1,10 +1,28 @@
 import React, { useState, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { askChekkiQuestion } from '../services/geminiService';
-import { saveImageToDevice } from '../utils/exportUtils';
 import { toJpeg } from 'html-to-image';
 import { ChekkiMascot } from './Icons';
 import { useAuth } from '../contexts/AuthContext';
+
+/** Converts basic markdown (**bold**, *italic*, numbered/bullet lists) to safe HTML. */
+function renderMarkdown(text: string): string {
+  return text
+    // Numbered list items: "1. text" → paragraph with bold number
+    .replace(/^(\d+\.\s+)(.+)$/gm, '<p class="mb-2"><strong>$1</strong>$2</p>')
+    // Bullet list items: "  * text" or "* text"
+    .replace(/^\s*[*•-]\s+(.+)$/gm, '<p class="ml-4 mb-1 before:content-[\'·\'] before:mr-2 before:text-orange-400">$1</p>')
+    // Bold+italic: ***text***
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    // Bold: **text**
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Italic: *text*
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Remaining plain lines (not already wrapped)
+    .replace(/^(?!<)(.+)$/gm, '<p class="mb-2">$1</p>')
+    // Collapse multiple blank lines
+    .replace(/(<\/p>\s*){2,}/g, '</p>');
+}
 
 interface Props {
   onClose: () => void;
@@ -50,7 +68,8 @@ export const AskChekkiModal: React.FC<Props> = ({ onClose }) => {
     setIsSaving(true);
     try {
       const dataUrl = await toJpeg(contentRef.current, { quality: 1, backgroundColor: '#18181b', pixelRatio: 2 });
-      await saveImageToDevice(
+      const { saveImageToDevice } = await import('../utils/exportUtils');
+      await saveImageToDevice( 
         dataUrl, 
         'Chekki AI Tutor', 
         language === 'ko' ? '채키가 제 질문에 답변해줬어요!' : 'Chekki answered my question!', 
@@ -142,7 +161,10 @@ export const AskChekkiModal: React.FC<Props> = ({ onClose }) => {
                 </div>
               </div>
               <div className="relative z-10 pl-2">
-                <p className="text-white md:text-lg font-korean leading-loose whitespace-pre-wrap">{answer}</p>
+                <div
+                  className="text-white md:text-lg font-korean leading-loose prose-answer"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(answer) }}
+                />
                 
                 {!isAuthenticated && (
                    <div className="mt-8 border border-orange-500/30 bg-orange-500/10 p-5 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 w-full">

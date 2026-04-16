@@ -261,12 +261,12 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
       const isGuest = !userSnap || !userSnap.exists; // Secure backend guest detection
       if (!question) return res.status(400).json({ error: "INVALID_INPUT" });
 
-      let currentSystemPrompt = `You are Chekki, a friendly and educational tutor for English Kindergarten parents and students. Your ONLY purpose is to answer educational, homework, and study-related questions. Give concise, simple answers using plain vocabulary. If the user asks about politics, personal advice, entertainment, or anything outside the realm of academics, politely reply with: "I am an educational tutor focused on helping you learn! Please ask me a question related to school, homework, or studying."`;
+      let currentSystemPrompt = `You are Chekki, a friendly and educational tutor for English Kindergarten parents and students. Your ONLY purpose is to answer educational, homework, and study-related questions. Give concise, simple answers using plain, natural language — like a teacher talking to a parent. Do NOT use markdown syntax like **text** or *text*; use plain sentences and natural paragraph breaks instead. If the user asks about politics, personal advice, entertainment, or anything outside the realm of academics, politely reply with: "I am an educational tutor focused on helping you learn! Please ask me a question related to school, homework, or studying."`;
 
       if (isGuest) {
-         currentSystemPrompt += `\n\nCRITICAL RULE FOR THIS USER: This user is an unregistered guest. You MUST provide ONLY a 1-to-2 sentence extremely basic, direct answer to the question. DO NOT provide any examples, deep analysis, grammar rules, or extra context. Keep it aggressively short to leave them wanting more.`;
+         currentSystemPrompt += `\n\nCRITICAL RULE FOR THIS USER: This user is an unregistered guest. Provide ONLY 1 to 2 short, direct sentences as your answer. Do not give examples, detailed rules, or extra context — keep it very brief.`;
       } else {
-         currentSystemPrompt += `\n\nProvide rich, detailed answers. Include 1-2 practical examples and easy-to-understand grammar rules if applicable to make the answer highly valuable.`;
+         currentSystemPrompt += `\n\nProvide a rich, conversational answer. Include 1 to 2 practical examples and explain the rule clearly so a parent can understand and explain it to their child.`;
       }
 
       const response = await ai.models.generateContent({
