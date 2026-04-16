@@ -130,39 +130,52 @@ export default async function handler(req: any, res: any) {
 
   // --- SECURITY: Verify Firebase ID Token ---
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'UNAUTHORIZED: Missing authorization header' });
-  }
-  const idToken = authHeader.split('Bearer ')[1].trim();
-  
-  let decodedToken;
-  try {
-      decodedToken = await adminAuth.verifyIdToken(idToken);
-  } catch (err: any) {
-      console.error('[analyze.ts] Token Verification Failed:', err.message);
-      return res.status(401).json({ error: 'UNAUTHORIZED: Invalid or expired token' });
+  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  const task = body?.task;
+
+  // ask_question allows anonymous/no-auth access (guest detection is done via Firestore lookup below)
+  const requiresAuth = task !== 'ask_question';
+
+  let decodedToken: any = null;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const idToken = authHeader.split('Bearer ')[1].trim();
+    if (idToken) {
+      try {
+        decodedToken = await adminAuth.verifyIdToken(idToken);
+      } catch (err: any) {
+        console.error('[analyze.ts] Token Verification Failed:', err.message);
+        if (requiresAuth) {
+          return res.status(401).json({ error: 'UNAUTHORIZED: Invalid or expired token' });
+        }
+        // For ask_question, continue without a verified token (will be treated as guest)
+      }
+    }
+  } else if (requiresAuth) {
+    return res.status(401).json({ error: 'UNAUTHORIZED: Missing authorization header' });
   }
   // --- END SECURITY CHECK ---
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { task, image, originalItems, userPlan: clientPlan, childAge, childEnglishLevel, parentEnglishLevel } = body;
+    const { task: _task, image, originalItems, userPlan: clientPlan, childAge, childEnglishLevel, parentEnglishLevel } = body;
 
     // --- SECURITY: Fetch Real User Data ---
     let userData: any = { plan: clientPlan || 'free', scansUsedToday: 0, maxScansPerDay: 3, lastScanDate: '' };
     let userRef: any = null;
     let userSnap: any = null;
 
-    try {
-      const db = getFirestore(app);
-      userRef = db.collection('users').doc(decodedToken.uid);
-      userSnap = await userRef.get();
-      if (userSnap.exists) {
-        userData = userSnap.data();
+    if (decodedToken) {
+      try {
+        const db = getFirestore(app);
+        userRef = db.collection('users').doc(decodedToken.uid);
+        userSnap = await userRef.get();
+        if (userSnap.exists) {
+          userData = userSnap.data();
+        }
+      } catch (dbError: any) {
+        console.warn("⚠️ [SECURITY WARNING] Could not connect to Firestore (missing FIREBASE_SERVICE_ACCOUNT). Trusting client payload for local development.");
       }
-    } catch (dbError: any) {
-      console.warn("⚠️ [SECURITY WARNING] Could not connect to Firestore (missing FIREBASE_SERVICE_ACCOUNT). Trusting client payload for local development.");
     }
+
     
     // Check Scan Limits
     const realUserPlan = userData?.plan || 'free';
@@ -173,7 +186,7 @@ export default async function handler(req: any, res: any) {
 
     // Reject if they over the limit
     if (realUserPlan !== 'pro' && currentScans >= maxScans) {
-      if (!['generate', 'refine'].includes(task)) {
+      if (!['generate', 'refine', 'ask_question'].includes(task)) {
          return res.status(403).json({ error: "SCAN_LIMIT_REACHED" });
       }
     }
@@ -241,6 +254,30 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
         console.error("[Backend] Failed to parse refined content:", text);
         return res.status(500).json({ error: "PARSING_FAILED" });
       }
+    }
+
+    if (task === 'ask_question') {
+      const { question } = body;
+      const isGuest = !userSnap || !userSnap.exists; // Secure backend guest detection
+      if (!question) return res.status(400).json({ error: "INVALID_INPUT" });
+
+      let currentSystemPrompt = `You are Chekki, a friendly and educational tutor for English Kindergarten parents and students. Your ONLY purpose is to answer educational, homework, and study-related questions. Give concise, simple answers using plain vocabulary. If the user asks about politics, personal advice, entertainment, or anything outside the realm of academics, politely reply with: "I am an educational tutor focused on helping you learn! Please ask me a question related to school, homework, or studying."`;
+
+      if (isGuest) {
+         currentSystemPrompt += `\n\nCRITICAL RULE FOR THIS USER: This user is an unregistered guest. You MUST provide ONLY a 1-to-2 sentence extremely basic, direct answer to the question. DO NOT provide any examples, deep analysis, grammar rules, or extra context. Keep it aggressively short to leave them wanting more.`;
+      } else {
+         currentSystemPrompt += `\n\nProvide rich, detailed answers. Include 1-2 practical examples and easy-to-understand grammar rules if applicable to make the answer highly valuable.`;
+      }
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{
+          role: 'user', parts: [{ text: question }]
+        }],
+        config: { systemInstruction: currentSystemPrompt, temperature: 0.7 }
+      });
+
+      return res.status(200).json({ answer: response.text });
     }
 
     if (!image || typeof image !== 'string') return res.status(400).json({ error: "INVALID_IMAGE_DATA" });

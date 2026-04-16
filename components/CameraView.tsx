@@ -11,6 +11,7 @@ import { LegalModal } from './LegalModal';
 import { LegalType } from '../types';
 import { FlyerModal } from './FlyerModal';
 import { ScreenshotCarousel } from './ScreenshotCarousel';
+import { askChekkiQuestion } from '../services/geminiService';
 
 
 interface Props {
@@ -33,6 +34,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [showFlyerModal, setShowFlyerModal] = useState(false);
 
   const { t, language } = useLanguage();
+
 
   const [guestUsed, setGuestUsed] = useState(false);
   useEffect(() => {
@@ -194,6 +196,69 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
       </div>
     </section>
   );
+
+  const AskChekkiBar = () => {
+    const [query, setQuery] = useState('');
+    const [answer, setAnswer] = useState<string | null>(null);
+    const [isAsking, setIsAsking] = useState(false);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!query.trim() || isAsking) return;
+      setIsAsking(true);
+      setAnswer(null);
+      try {
+        const result = await askChekkiQuestion(query, !isAuthenticated);
+        setAnswer(result);
+      } catch {
+        setAnswer(language === 'ko' ? '오류가 발생했습니다. 다시 시도해주세요.' : 'Something went wrong. Please try again.');
+      } finally {
+        setIsAsking(false);
+      }
+    };
+
+    return (
+      <div className="w-full max-w-4xl mx-auto flex flex-col gap-0">
+        <form onSubmit={handleSubmit} className="relative flex items-center bg-zinc-900 border border-white/10 hover:border-orange-500/30 focus-within:border-orange-500 rounded-[2rem] px-5 py-3 md:px-7 md:py-4 shadow-2xl transition-all group">
+          <span className="text-xl md:text-2xl shrink-0 mr-3">🙋‍♂️</span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder={language === 'ko' ? "채키에게 문법이나 학교 숙제에 대해 질문해보세요..." : "Ask me a grammar question, e.g. A vs An..."}
+            className="flex-1 bg-transparent text-white text-sm md:text-base font-korean placeholder:text-zinc-500 focus:outline-none"
+            enterKeyHint="send"
+          />
+          <button
+            type="submit"
+            disabled={!query.trim() || isAsking}
+            className="ml-3 shrink-0 w-9 h-9 md:w-11 md:h-11 bg-orange-500 rounded-full flex items-center justify-center text-white disabled:opacity-30 hover:bg-orange-600 transition-all active:scale-95 shadow-lg"
+          >
+            {isAsking
+              ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            }
+          </button>
+        </form>
+
+        {answer && (
+          <div className="bg-zinc-900/80 border border-white/5 border-t-0 rounded-b-[2rem] p-5 md:p-7 animate-fade-in-up">
+            <p className="text-white text-sm md:text-base font-korean leading-relaxed whitespace-pre-wrap">{answer}</p>
+            {!isAuthenticated && (
+              <div className="mt-4 flex items-center justify-between gap-4 border-t border-white/5 pt-4">
+                <p className="text-xs text-zinc-400 font-korean">{language === 'ko' ? '더 자세한 예문이 필요하신가요?' : 'Need examples and a deeper explanation?'}</p>
+                <button onClick={() => { openLoginModal(); }} className="text-xs bg-orange-500 text-white px-4 py-2 rounded-xl font-black uppercase tracking-wider whitespace-nowrap hover:bg-orange-600 transition-colors">
+                  {language === 'ko' ? '무료 로그인' : 'Unlock Full Answer'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const ClarityGuide = () => (
     <div className="flex flex-wrap justify-center gap-2 mt-6 md:mt-12 mb-4 px-2">
@@ -400,8 +465,9 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
 
         <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 md:gap-10">
-          <FeatureBanner />
+          <AskChekkiBar />
           <DropZone size="large" />
+          <FeatureBanner />
         </div>
         <p className="mt-8 text-zinc-600 text-[9px] md:text-sm font-black uppercase tracking-[0.2em] text-center opacity-60">{t('supported_formats')}</p>
       </div>
@@ -470,7 +536,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         </div>
       </div>
 
-      <div id="magic-drop-zone" className="max-w-6xl mx-auto px-4 md:px-6 mb-16 md:mb-56 w-full relative pt-8 md:pt-32">
+      <div id="magic-drop-zone" className="max-w-6xl mx-auto px-4 md:px-6 mb-16 md:mb-56 w-full relative pt-8 md:pt-32 flex flex-col gap-4 md:gap-10">
+        <AskChekkiBar />
         <DropZone size="large" />
         <p className="mt-8 text-zinc-600 text-[9px] md:text-sm font-black uppercase tracking-[0.2em] text-center opacity-40">{t('supported_formats')}</p>
       </div>

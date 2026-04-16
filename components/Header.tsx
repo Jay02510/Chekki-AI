@@ -83,11 +83,7 @@ export const Header: React.FC<Props> = ({ onReset, showScanButton }) => {
           <div className="flex items-center gap-1.5 md:gap-4 h-full flex-shrink-0">
             {showScanButton && (
               <button
-                onClick={() => {
-                  if (window.confirm(language === 'ko' ? '새로 촬영하시겠습니까? 현재 결과가 삭제됩니다.' : 'Scan again? Current results will be removed.')) {
-                    onReset();
-                  }
-                }}
+                onClick={() => onReset()}
                 className="flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white transition-all shadow-lg shadow-orange-600/20 active:scale-95 animate-pulse-subtle"
                 title={t('ws_scan_again')}
               >

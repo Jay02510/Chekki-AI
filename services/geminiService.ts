@@ -217,3 +217,41 @@ export const refineWorksheetItem = async (item: WorksheetItem, reason: string): 
     throw e;
   }
 };
+
+export const askChekkiQuestion = async (question: string, isGuest: boolean = false, signal?: AbortSignal): Promise<string> => {
+  if (MOCK_MODE) {
+    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
+    return isGuest 
+      ? "This is a basic answer. 'A' is used before consonants, and 'an' before vowels."
+      : "This is a detailed answer. 'A' is used before words starting with a consonant, and 'an' is used before words starting with a vowel. For example, 'A dog' vs 'An apple'.";
+  }
+
+  try {
+    const idToken = await getValidIdToken();
+    const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': idToken ? `Bearer ${idToken}` : ''
+      },
+      signal,
+      body: JSON.stringify({
+        task: 'ask_question',
+        question: question,
+        isGuest: isGuest
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("[geminiService] Ask failed:", errText);
+      throw new Error("ASK_FAILED");
+    }
+
+    const data = await response.json();
+    return data.answer || "";
+  } catch (e: any) {
+    console.error("[geminiService] Ask API error:", e);
+    throw e;
+  }
+};

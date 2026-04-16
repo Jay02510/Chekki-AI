@@ -104,7 +104,15 @@ function AppContent() {
   const platform = Capacitor.getPlatform();
 
   // Global Confirmation State
-  const [confirmDialog, setConfirmDialog] = useState<{ title: string, onConfirm: () => void } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ 
+    title: string; 
+    onConfirm: () => void; 
+    onSave?: () => void; 
+    saveText?: string; 
+    confirmText?: string; 
+    cancelText?: string; 
+    isSaving?: boolean;
+  } | null>(null);
   const [successDialog, setSuccessDialog] = useState<string | null>(null);
 
   useEffect(() => {
@@ -213,10 +221,28 @@ function AppContent() {
   const handleReset = (confirm = true) => {
     if (confirm && analysisState.status === 'complete') {
       setConfirmDialog({
-        title: t('err_confirm'),
+        title: language === 'ko' ? "현재 결과가 삭제됩니다. 기기에 저장하시겠습니까?" : "Current results will be removed. Do you want to save it?",
+        confirmText: language === 'ko' ? "저장 안 함 (삭제)" : "Discard & Scan Again",
+        cancelText: language === 'ko' ? "취소" : "Cancel",
+        saveText: language === 'ko' ? "이미지로 저장" : "Save Image",
         onConfirm: () => {
           hookExecuteReset();
           setConfirmDialog(null);
+        },
+        onSave: async () => {
+          if (!analysisState.originalImage || !analysisState.data?.items) return;
+          setConfirmDialog(prev => prev ? { ...prev, isSaving: true } : null);
+          try {
+             const { generateCompositeImage, saveImageToDevice } = await import('./utils/exportUtils');
+             const dataUrl = await generateCompositeImage(analysisState.originalImage, analysisState.data.items);
+             await saveImageToDevice(dataUrl, 'Chekki Worksheet', 'Here is the graded worksheet from Chekki AI!', 'chekki-worksheet');
+             hookExecuteReset();
+             setConfirmDialog(null);
+          } catch(e) {
+             console.error("Save image failed", e);
+             alert("Failed to save image.");
+             setConfirmDialog(prev => prev ? { ...prev, isSaving: false } : null);
+          }
         }
       });
       return;
@@ -239,7 +265,7 @@ function AppContent() {
           )}
         </React.Suspense>
         <Header 
-          onReset={() => handleReset(false)} 
+          onReset={() => handleReset(true)} 
           showScanButton={analysisState.status === 'complete'} 
         />
         {/* Web-only mobile download banner */}
@@ -268,10 +294,19 @@ function AppContent() {
           <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setConfirmDialog(null)}></div>
             <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full text-center animate-fade-in-up">
-              <p className="text-white font-bold text-lg mb-8 font-korean">{confirmDialog.title}</p>
-              <div className="flex gap-4">
-                <button onClick={() => setConfirmDialog(null)} className="flex-1 bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-xs">No</button>
-                <button onClick={confirmDialog.onConfirm} className="flex-1 bg-white text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl">Yes</button>
+              <p className="text-white font-bold text-lg mb-6 font-korean">{confirmDialog.title}</p>
+              <div className="flex flex-col gap-3">
+                {confirmDialog.onSave && (
+                   <button onClick={confirmDialog.onSave} disabled={confirmDialog.isSaving} className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-xl disabled:opacity-50">
+                     {confirmDialog.isSaving ? "Saving..." : (confirmDialog.saveText || "Save")}
+                   </button>
+                )}
+                <button onClick={confirmDialog.onConfirm} disabled={confirmDialog.isSaving} className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl disabled:opacity-50">
+                  {confirmDialog.confirmText || "Yes"}
+                </button>
+                <button onClick={() => setConfirmDialog(null)} disabled={confirmDialog.isSaving} className="w-full bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-xs hover:bg-zinc-700 disabled:opacity-50">
+                  {confirmDialog.cancelText || "No"}
+                </button>
               </div>
             </div>
           </div>
