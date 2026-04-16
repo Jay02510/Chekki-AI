@@ -89,10 +89,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (profile) {
               if (isSubActive && profile.plan !== 'pro') {
-                finalProfile = { ...profile, plan: 'pro', maxScansPerDay: 9999, subscriptionPlatform: subRecord.subscription_platform };
+                finalProfile = { ...profile, plan: 'pro', maxScansPerDay: 9999, maxQuestionsPerDay: 9999, subscriptionPlatform: subRecord.subscription_platform };
                 await updateDoc(doc(dbInstance, 'users', user.uid), {
                   plan: 'pro',
                   maxScansPerDay: 9999,
+                  maxQuestionsPerDay: 9999
                 });
               } else if (!isSubActive && profile.plan === 'pro' && subRecord.subscription_status === 'expired') {
                 // Subscription expired — show renewal prompt
@@ -223,6 +224,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         scansUsedToday: 0,
         lastScanDate: new Date().toISOString().split('T')[0],
         maxScansPerDay: maxScans,
+        questionsUsedToday: 0,
+        maxQuestionsPerDay: plan === 'pro' ? 9999 : 2,
+        lastQuestionDate: new Date().toISOString().split('T')[0],
         schoolId,
         schoolName,
         subscriptionStartedAt,
@@ -350,18 +354,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const incrementScan = async (): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return true;
-
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastScanDate !== today;
-
-    // We no longer trigger `updateDoc(userRef, updates)` directly here!
-    // The backend /api/analyze handles the DB update for absolute security.
-    // We only update the local state so the UI (scan counter) updates instantly.
     try {
       setUserProfile(prev => prev ? {
         ...prev,
         scansUsedToday: isNewDay ? 1 : prev.scansUsedToday + 1,
         lastScanDate: today
+      } : null);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const checkQuestionLimit = (): boolean => {
+    if (!userProfile || userProfile.plan === 'pro') return true;
+    const today = new Date().toISOString().split('T')[0];
+    const isNewDay = userProfile.lastQuestionDate !== today;
+    const currentQuestions = isNewDay ? 0 : userProfile.questionsUsedToday;
+    const limit = userProfile.maxQuestionsPerDay || 2;
+    if (currentQuestions >= limit) {
+      setShowPaywall(true);
+      return false;
+    }
+    return true;
+  };
+
+  const incrementQuestion = async (): Promise<boolean> => {
+    if (!firebaseUser || !userProfile) return true;
+    const today = new Date().toISOString().split('T')[0];
+    const isNewDay = userProfile.lastQuestionDate !== today;
+    try {
+      setUserProfile(prev => prev ? {
+        ...prev,
+        questionsUsedToday: isNewDay ? 1 : prev.questionsUsedToday + 1,
+        lastQuestionDate: today
       } : null);
       return true;
     } catch (e) {
@@ -433,6 +461,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updates: Partial<UserProfile> = {
       plan: 'pro',
       maxScansPerDay: 9999,
+      maxQuestionsPerDay: 9999,
       subscriptionStartedAt: new Date().toISOString(),
       nextBillingDate: nextMonth.toISOString(),
       isCanceled: false
@@ -493,6 +522,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       deleteAccount,
       checkScanLimit,
       incrementScan,
+      checkQuestionLimit,
+      incrementQuestion,
       upgradeToPro,
       processPayment,
       restorePurchases,

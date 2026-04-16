@@ -200,7 +200,10 @@ interface Props {
 }
 
 export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }) => {
-  const { user, openLoginModal, isAuthenticated, setShowPaywall } = useAuth();
+  const { 
+    user, isAuthenticated, openLoginModal, checkScanLimit, incrementScan, 
+    checkQuestionLimit, incrementQuestion 
+  } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -383,22 +386,35 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [askAnsweredQuestion, setAskAnsweredQuestion] = useState('');
   const [isAskAsking, setIsAskAsking] = useState(false);
 
-  const handleAskSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!askQuery.trim() || isAskAsking) return;
-    const questionSnapshot = askQuery.trim();
+  const handleAskSubmit = useCallback(async (question: string) => {
+    if (!question.trim()) return;
+    
+    // Check limit for authenticated free users
+    if (isAuthenticated && !checkQuestionLimit()) {
+      return;
+    }
+
+    setAskAnswer(null);
+    setAskAnsweredQuestion(question);
     setIsAskAsking(true);
-    setAskAnswer(' '); // Trigger modal immediately with loading state
-    setAskAnsweredQuestion(questionSnapshot);
+    
     try {
-      const result = await askChekkiQuestion(questionSnapshot, !isAuthenticated);
-      setAskAnswer(result);
-    } catch {
+      const isGuest = !isAuthenticated;
+      const response = await askChekkiQuestion(question, isGuest);
+      setAskAnswer(response);
+      
+      // Increment only for authenticated users (backend also handles this)
+      if (isAuthenticated) {
+        await incrementQuestion();
+      } else {
+        // For guests, we can track usage in session if needed, but not required by current plan
+      }
+    } catch (error: any) {
       setAskAnswer(language === 'ko' ? '오류가 발생했습니다. 다시 시도해주세요.' : 'Something went wrong. Please try again.');
     } finally {
       setIsAskAsking(false);
     }
-  }, [askQuery, isAskAsking, isAuthenticated, language]);
+  }, [isAuthenticated, checkQuestionLimit, incrementQuestion, language]);
 
   const ClarityGuide = () => (
     <div className="flex flex-wrap justify-center gap-2 mt-6 md:mt-12 mb-4 px-2">
@@ -574,9 +590,13 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   if (isAuthenticated && user) {
     const isPro = user.plan === 'pro';
     const today = new Date().toISOString().split('T')[0];
-    const isNewDay = user.lastScanDate !== today;
+    const isNewDay = user?.lastScanDate !== today; // Correct variable name
     const remainingCount = isNewDay ? (user.maxScansPerDay || 3) : Math.max(0, (user.maxScansPerDay || 3) - user.scansUsedToday);
     const remaining = isPro ? '∞' : remainingCount.toString();
+
+    const isNewQuestionDay = user.lastQuestionDate !== today;
+    const remainingQuestionsCount = isNewQuestionDay ? (user.maxQuestionsPerDay || 2) : Math.max(0, (user.maxQuestionsPerDay || 2) - user.questionsUsedToday);
+    const remainingQuestions = isPro ? '∞' : remainingQuestionsCount.toString();
 
     return (
       <div className="min-h-full pt-20 md:pt-44 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
@@ -607,12 +627,24 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             <p className="text-zinc-400 font-bold font-korean text-sm md:text-3xl max-w-3xl mx-auto leading-relaxed break-keep opacity-80">{t('dash_subtitle')}</p>
           </div>
 
-          <div className={`border rounded-xl md:rounded-[2rem] py-2 px-4 md:py-5 md:px-12 flex items-center gap-3 md:gap-6 shadow-2xl transition-all duration-500 ${isPro ? 'bg-orange-500/10 border-orange-500/30' : 'bg-[#0F1014] border-white/10'}`}>
-            <div className={`text-[9px] md:text-sm uppercase font-black tracking-[0.1em] ${isPro ? 'text-orange-400' : 'text-zinc-500'}`}>
-              {isPro ? t('lbl_pro_active') : t('lbl_magic_left')}
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {/* Scan Tracker */}
+            <div className={`border rounded-xl md:rounded-[2rem] py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 hover:scale-105 ${isPro ? 'bg-orange-500/10 border-orange-500/30' : 'bg-[#0F1014] border-white/10'}`}>
+              <div className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] ${isPro ? 'text-orange-400' : 'text-zinc-500'}`}>
+                {isPro ? t('lbl_pro_active') : t('lbl_magic_left')}
+              </div>
+              <div className="w-px h-3 md:h-4 bg-white/10"></div>
+              <div className={`font-bold text-sm md:text-2xl font-display leading-none ${isPro ? 'text-orange-500 scale-110' : 'text-white'}`}>{remaining}</div>
             </div>
-            <div className="w-px h-4 md:h-8 bg-white/10"></div>
-            <div className={`font-bold text-lg md:text-4xl font-display leading-none ${isPro ? 'text-orange-500 scale-110' : 'text-white'}`}>{remaining}</div>
+
+            {/* Question Tracker */}
+            <div className={`border rounded-xl md:rounded-[2rem] py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 hover:scale-105 ${isPro ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-[#0F1014] border-white/10'}`}>
+              <div className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] ${isPro ? 'text-indigo-400' : 'text-zinc-500'}`}>
+                {isPro ? "Unlimited Q & A" : "Ask Chekki Left"}
+              </div>
+              <div className="w-px h-3 md:h-4 bg-white/10"></div>
+              <div className={`font-bold text-sm md:text-2xl font-display leading-none ${isPro ? 'text-indigo-400 scale-110' : 'text-white'}`}>{remainingQuestions}</div>
+            </div>
           </div>
         </div>
 

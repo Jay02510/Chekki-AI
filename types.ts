@@ -41,6 +41,9 @@ export interface UserProfile {
   scansUsedToday: number;
   lastScanDate: string;
   maxScansPerDay: number;
+  questionsUsedToday: number;
+  maxQuestionsPerDay: number;
+  lastQuestionDate: string;
   subscriptionStartedAt?: string | null;
   nextBillingDate?: string | null;
   isCanceled?: boolean;

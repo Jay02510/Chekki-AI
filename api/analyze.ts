@@ -159,7 +159,15 @@ export default async function handler(req: any, res: any) {
     const { task: _task, image, originalItems, userPlan: clientPlan, childAge, childEnglishLevel, parentEnglishLevel } = body;
 
     // --- SECURITY: Fetch Real User Data ---
-    let userData: any = { plan: clientPlan || 'free', scansUsedToday: 0, maxScansPerDay: 3, lastScanDate: '' };
+    let userData: any = { 
+      plan: clientPlan || 'free', 
+      scansUsedToday: 0, 
+      maxScansPerDay: 3, 
+      lastScanDate: '',
+      questionsUsedToday: 0,
+      maxQuestionsPerDay: 2,
+      lastQuestionDate: ''
+    };
     let userRef: any = null;
     let userSnap: any = null;
 
@@ -259,6 +267,18 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
     if (task === 'ask_question') {
       const { question } = body;
       const isGuest = !userSnap || !userSnap.exists; // Secure backend guest detection
+      
+      const realUserPlan = userData?.plan || 'free';
+      const today = new Date().toISOString().split('T')[0];
+      const isNewQuestionDay = userData?.lastQuestionDate !== today;
+      const currentQuestions = isNewQuestionDay ? 0 : (userData?.questionsUsedToday || 0);
+      const maxQuestions = userData?.maxQuestionsPerDay || 2;
+
+      // Enforcement for non-pro logged-in users
+      if (!isGuest && realUserPlan !== 'pro' && currentQuestions >= maxQuestions) {
+        return res.status(403).json({ error: "QUESTION_LIMIT_REACHED" });
+      }
+
       if (!question) return res.status(400).json({ error: "INVALID_INPUT" });
 
       let currentSystemPrompt = `You are Chekki, a friendly and educational tutor for English Kindergarten parents and students. Your ONLY purpose is to answer educational, homework, and study-related questions. Give concise, simple answers using plain, natural language — like a teacher talking to a parent. Do NOT use markdown syntax like **text** or *text*; use plain sentences and natural paragraph breaks instead. If the user asks about politics, personal advice, entertainment, or anything outside the realm of academics, politely reply with: "I am an educational tutor focused on helping you learn! Please ask me a question related to school, homework, or studying."`;
@@ -348,15 +368,22 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
       }
     }
 
-    // Update the database securely on success (only for the main analysis task)
-    if (userSnap && userSnap.exists && realUserPlan !== 'pro' && !['generate', 'refine'].includes(task)) {
+    // Update the database securely on success
+    if (userSnap && userSnap.exists && realUserPlan !== 'pro') {
       try {
-        await userRef.update({
-          scansUsedToday: isNewDay ? 1 : FieldValue.increment(1),
-          lastScanDate: today
-        });
+        if (task === 'ask_question') {
+          await userRef.update({
+            questionsUsedToday: userData?.lastQuestionDate !== today ? 1 : FieldValue.increment(1),
+            lastQuestionDate: today
+          });
+        } else if (!['generate', 'refine'].includes(task)) {
+          await userRef.update({
+            scansUsedToday: isNewDay ? 1 : FieldValue.increment(1),
+            lastScanDate: today
+          });
+        }
       } catch (e) {
-        console.warn("Could not update scan limits locally.", e);
+        console.warn("Could not update limits locally.", e);
       }
     }
 
