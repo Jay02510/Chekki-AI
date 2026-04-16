@@ -590,12 +590,16 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   if (isAuthenticated && user) {
     const isPro = user.plan === 'pro';
     const today = new Date().toISOString().split('T')[0];
-    const isNewDay = user?.lastScanDate !== today; // Correct variable name
-    const remainingCount = isNewDay ? (user.maxScansPerDay || 3) : Math.max(0, (user.maxScansPerDay || 3) - user.scansUsedToday);
+    const isNewDay = user?.lastScanDate !== today;
+    const maxScans = user?.maxScansPerDay || 3;
+    const scansUsed = isNewDay ? 0 : (user?.scansUsedToday || 0);
+    const remainingCount = Math.max(0, maxScans - scansUsed);
     const remaining = isPro ? '∞' : remainingCount.toString();
 
-    const isNewQuestionDay = user.lastQuestionDate !== today;
-    const remainingQuestionsCount = isNewQuestionDay ? (user.maxQuestionsPerDay || 2) : Math.max(0, (user.maxQuestionsPerDay || 2) - user.questionsUsedToday);
+    const isNewQuestionDay = user?.lastQuestionDate !== today;
+    const maxQuestions = user?.maxQuestionsPerDay || 2;
+    const questionsUsed = isNewQuestionDay ? 0 : (user?.questionsUsedToday || 0);
+    const remainingQuestionsCount = Math.max(0, maxQuestions - questionsUsed);
     const remainingQuestions = isPro ? '∞' : remainingQuestionsCount.toString();
 
     return (

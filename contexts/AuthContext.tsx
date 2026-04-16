@@ -60,7 +60,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log("[AuthContext] onAuthStateChanged fired.", { uid: user?.uid, email: user?.email, isAnonymous: user?.isAnonymous });
       setFirebaseUser(user);
       if (user) {
         // Identify in RevenueCat
@@ -132,6 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             name: 'Reviewer',
             plan: 'pro',
             maxScansPerDay: 9999,
+            maxQuestionsPerDay: 9999,
           };
         } else if (user.email === 'expired@example.com') {
           finalProfile = {
@@ -139,7 +139,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: 'expired@example.com',
             name: 'Reviewer (Expired)',
             plan: 'free',
-            maxScansPerDay: 3
+            maxScansPerDay: 3,
+            maxQuestionsPerDay: 2
           };
           if (!hasActiveAppStoreSub) {
             setShowPaywall(true);
