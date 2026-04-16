@@ -21,14 +21,14 @@ import { renderMarkdown } from '../utils/markdownUtils';
 interface AskChekkiBarProps {
   query: string;
   setQuery: (q: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (query: string) => void;
   isAsking: boolean;
   language: string;
 }
 
 const AskChekkiBar: React.FC<AskChekkiBarProps> = ({ query, setQuery, onSubmit, isAsking, language }) => (
   <form
-    onSubmit={onSubmit}
+    onSubmit={(e) => { e.preventDefault(); onSubmit(query); }}
     className="relative flex items-center bg-zinc-900 border border-white/10 hover:border-orange-500/30 focus-within:border-orange-500 rounded-[1.5rem] md:rounded-[2.2rem] pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-all w-full"
   >
     <button
@@ -202,7 +202,7 @@ interface Props {
 export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }) => {
   const { 
     user, isAuthenticated, openLoginModal, checkScanLimit, incrementScan, 
-    checkQuestionLimit, incrementQuestion 
+    checkQuestionLimit, incrementQuestion, setShowPaywall 
   } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);

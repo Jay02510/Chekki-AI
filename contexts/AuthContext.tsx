@@ -29,6 +29,8 @@ interface AuthContextType {
   deleteAccount: () => Promise<void>;
   incrementScan: () => Promise<boolean>;
   checkScanLimit: () => boolean;
+  checkQuestionLimit: () => boolean;
+  incrementQuestion: () => Promise<boolean>;
   upgradeToPro: (code?: string) => Promise<boolean>;
   processPayment: (product?: any) => Promise<{ success: boolean; message?: string }>;
   restorePurchases: () => Promise<{ success: boolean; message?: string }>;
