@@ -477,13 +477,13 @@ function AppContent() {
               text-shadow: 0 0 20px rgba(249, 115, 22, 0.1);
             }
             .prose-answer em {
-              color: #ec4899; /* pink-500 */
+              color: #ff2e97; /* more vibrant pink */
               font-style: italic;
               font-weight: 700;
             }
             .prose-answer mark {
-              background: linear-gradient(120deg, rgba(249, 115, 22, 0.2) 0%, rgba(249, 115, 22, 0.1) 100%);
-              color: #fdba74; /* orange-300 */
+              background: linear-gradient(120deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+              color: #22d3ee; /* cyan-400 */
               padding: 0 4px;
               border-radius: 4px;
               font-weight: 700;
