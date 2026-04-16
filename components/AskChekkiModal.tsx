@@ -4,25 +4,8 @@ import { askChekkiQuestion } from '../services/geminiService';
 import { toJpeg } from 'html-to-image';
 import { ChekkiMascot } from './Icons';
 import { useAuth } from '../contexts/AuthContext';
+import { renderMarkdown } from '../utils/markdownUtils';
 
-/** Converts basic markdown (**bold**, *italic*, numbered/bullet lists) to safe HTML. */
-function renderMarkdown(text: string): string {
-  return text
-    // Numbered list items: "1. text" → paragraph with bold number
-    .replace(/^(\d+\.\s+)(.+)$/gm, '<p class="mb-2"><strong>$1</strong>$2</p>')
-    // Bullet list items: "  * text" or "* text"
-    .replace(/^\s*[*•-]\s+(.+)$/gm, '<p class="ml-4 mb-1 before:content-[\'·\'] before:mr-2 before:text-orange-400">$1</p>')
-    // Bold+italic: ***text***
-    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-    // Bold: **text**
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    // Italic: *text*
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    // Remaining plain lines (not already wrapped)
-    .replace(/^(?!<)(.+)$/gm, '<p class="mb-2">$1</p>')
-    // Collapse multiple blank lines
-    .replace(/(<\/p>\s*){2,}/g, '</p>');
-}
 
 interface Props {
   onClose: () => void;
@@ -210,21 +193,28 @@ export const AskChekkiModal: React.FC<Props> = ({ onClose }) => {
         {/* Input Footer */}
         <div className="p-4 border-t border-white/5 bg-zinc-950">
           <form onSubmit={handleSubmit} className="relative">
+            <button 
+              type="submit" 
+              disabled={isAsking || !question.trim()}
+              className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${question.trim() ? 'text-orange-500' : 'text-zinc-600'}`}
+              title="Search"
+            >
+              {isAsking ? (
+                <div className="w-5 h-5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              )}
+            </button>
             <input 
               type="text" 
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder={language === 'ko' ? "예: 관사 a와 an의 차이는 무엇인가요?" : "e.g., What is the difference between a and an?"}
-              className="w-full bg-zinc-900 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-white focus:outline-none focus:border-orange-500 font-korean placeholder:text-zinc-600 shadow-inner"
+              className="w-full bg-zinc-900 border border-white/10 rounded-2xl py-4 pl-12 pr-5 text-white focus:outline-none focus:border-orange-500 font-korean placeholder:text-zinc-600 shadow-inner"
               disabled={isAsking}
             />
-            <button 
-              type="submit" 
-              disabled={isAsking || !question.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white disabled:opacity-50 hover:bg-orange-600 transition-colors shadow-lg"
-            >
-              <svg className="w-5 h-5 -ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-            </button>
           </form>
         </div>
 

@@ -19,6 +19,7 @@ import { toJpeg } from 'html-to-image';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 import { normalizeText, compareSpeech } from '../utils/speechUtils';
 import { refineWorksheetItem } from '../services/geminiService';
+import { renderMarkdown } from '../utils/markdownUtils';
 
 
 interface Props {
@@ -479,8 +480,8 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             {localItems.map((item, idx) => {
               const isActive = activeItemId === item.id;
               const flagged = isMistake(item.question_text, item.correct_answer);
-              const scriptText = language === 'ko' ? item.teaching_script_ko : item.teaching_script_en;
-              const guideText = language === 'ko' ? item.korean_guide : item.english_guide;
+              const scriptText = language === 'ko' ? item.teaching_script_ko : (item.teaching_script_en || "");
+              const guideText = language === 'ko' ? item.korean_guide : (item.english_guide || "");
               const answerText = item.correct_answer;
               const isFirstItem = idx === 0;
 
@@ -611,13 +612,19 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                           </div>
                           {user?.plan === 'pro' ? (
                             <>
-                              <div className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-5 shadow-inner">
+                              <div className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-5 shadow-inner prose-answer">
                                 <p className="text-[11px] font-black uppercase text-orange-500 mb-2 tracking-widest">{t('lbl_mom_tip')}</p>
-                                <p className="text-sm md:text-base text-zinc-200 font-korean leading-relaxed font-bold italic">&quot;{scriptText}&quot;</p>
+                                <div 
+                                  className="text-sm md:text-base text-zinc-200 font-korean leading-relaxed font-bold italic"
+                                  dangerouslySetInnerHTML={{ __html: renderMarkdown(`&quot;${scriptText}&quot;`) }}
+                                />
                               </div>
-                              <div className="bg-zinc-950/40 border border-white/5 rounded-3xl p-5 shadow-inner">
+                              <div className="bg-zinc-950/40 border border-white/5 rounded-3xl p-5 shadow-inner prose-answer">
                                 <p className="text-[11px] font-black uppercase text-zinc-500 mb-2 tracking-widest">Learning Guide</p>
-                                <p className="text-xs md:text-sm text-zinc-400 font-korean leading-relaxed break-keep">{guideText}</p>
+                                <div 
+                                  className="text-xs md:text-sm text-zinc-400 font-korean leading-relaxed break-keep"
+                                  dangerouslySetInnerHTML={{ __html: renderMarkdown(guideText) }}
+                                />
                               </div>
                             </>
                           ) : (

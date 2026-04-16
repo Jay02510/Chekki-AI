@@ -12,25 +12,8 @@ const LegalModal = React.lazy(() => import('./LegalModal').then(module => ({ def
 import { FlyerModal } from './FlyerModal';
 import { ScreenshotCarousel } from './ScreenshotCarousel';
 import { askChekkiQuestion } from '../services/geminiService';
+import { renderMarkdown } from '../utils/markdownUtils';
 
-/** Converts basic markdown (**bold**, *italic*, numbered/bullet lists) to safe HTML. */
-function renderMarkdown(text: string): string {
-  return text
-    // Numbered list items: "1. text" → paragraph with bold number
-    .replace(/^(\d+\.\s+)(.+)$/gm, '<p class="mb-2"><strong>$1</strong>$2</p>')
-    // Bullet list items: "  * text" or "* text"
-    .replace(/^\s*[*•-]\s+(.+)$/gm, '<p class="ml-4 mb-1 before:content-[\'·\'] before:mr-2 before:text-orange-400">$1</p>')
-    // Bold+italic: ***text***
-    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-    // Bold: **text**
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    // Italic: *text*
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    // Remaining plain lines (not already wrapped)
-    .replace(/^(?!<)(.+)$/gm, '<p class="mb-2">$1</p>')
-    // Collapse multiple blank lines
-    .replace(/(<\/p>\s*){2,}/g, '</p>');
-}
 
 // --- SUB-COMPONENTS (Defined outside to prevent unmounting/focus loss on re-render) ---
 
@@ -45,31 +28,30 @@ interface AskChekkiBarProps {
 const AskChekkiBar: React.FC<AskChekkiBarProps> = ({ query, setQuery, onSubmit, isAsking, language }) => (
   <form
     onSubmit={onSubmit}
-    className="relative flex items-center bg-zinc-900 border border-white/10 hover:border-orange-500/30 focus-within:border-orange-500 rounded-[1.5rem] md:rounded-[2rem] px-4 py-2.5 md:px-7 md:py-4 shadow-2xl transition-all w-full"
+    className="relative flex items-center bg-zinc-900 border border-white/10 hover:border-orange-500/30 focus-within:border-orange-500 rounded-[1.5rem] md:rounded-[2.2rem] pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-all w-full"
   >
-    <div className="shrink-0 mr-3 text-zinc-500">
-      <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-    </div>
+    <button
+      type="submit"
+      disabled={!query.trim() || isAsking}
+      className={`shrink-0 mr-3 md:mr-4 transition-all duration-300 active:scale-90 ${query.trim() ? 'text-orange-500' : 'text-zinc-500'}`}
+      title="Search"
+    >
+      {isAsking ? (
+        <div className="w-5 h-5 md:w-6 md:h-6 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+      ) : (
+        <svg className="w-5 h-5 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      )}
+    </button>
     <input
       type="text"
       value={query}
       onChange={e => setQuery(e.target.value)}
       placeholder={language === 'ko' ? "채키 공식 질문 (예: A와 An의 차이)..." : "Ask about grammar, rules, or homework..."}
-      className="flex-1 bg-transparent text-white text-xs md:text-base font-korean placeholder:text-zinc-600 focus:outline-none"
+      className="flex-1 bg-transparent text-white text-xs md:text-lg font-korean placeholder:text-zinc-600 focus:outline-none"
       enterKeyHint="send"
     />
-    <button
-      type="submit"
-      disabled={!query.trim() || isAsking}
-      className="ml-3 shrink-0 w-8 h-8 md:w-11 md:h-11 bg-orange-500 rounded-full flex items-center justify-center text-white disabled:opacity-30 hover:bg-orange-600 transition-all active:scale-95 shadow-lg"
-    >
-      {isAsking
-        ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-        : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-      }
-    </button>
   </form>
 );
 

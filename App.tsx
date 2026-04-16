@@ -473,15 +473,24 @@ function AppContent() {
             }
             .prose-answer strong {
               color: #f97316; /* orange-500 */
-              font-weight: 800;
-            }
-            .prose-answer p {
-              margin-bottom: 0.75rem;
+              font-weight: 900;
+              text-shadow: 0 0 20px rgba(249, 115, 22, 0.1);
             }
             .prose-answer em {
-              color: #fb923c; /* orange-400 */
+              color: #ec4899; /* pink-500 */
               font-style: italic;
-              font-weight: 600;
+              font-weight: 700;
+            }
+            .prose-answer mark {
+              background: linear-gradient(120deg, rgba(249, 115, 22, 0.2) 0%, rgba(249, 115, 22, 0.1) 100%);
+              color: #fdba74; /* orange-300 */
+              padding: 0 4px;
+              border-radius: 4px;
+              font-weight: 700;
+            }
+            .prose-answer p {
+              margin-bottom: 0.85rem;
+              line-height: 1.8;
             }
         `}</style>
       </div>
