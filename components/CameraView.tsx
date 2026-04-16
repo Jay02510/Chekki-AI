@@ -4,6 +4,7 @@ import { compressImage } from '../utils/imageUtils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ChekkiMascot } from './Icons';
+import { toJpeg } from 'html-to-image';
 import { ASSETS } from '../constants';
 import { SCREENSHOT_MODE } from '../config';
 import { FeedbackModal } from './FeedbackModal';
@@ -68,11 +69,35 @@ interface AskChekkiAnswerModalProps {
 const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({ 
   answer, isAsking, question, isAuthenticated, language, onClose, openLoginModal 
 }) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!contentRef.current) return;
+    setIsSaving(true);
+    try {
+      const dataUrl = await toJpeg(contentRef.current, { quality: 1, backgroundColor: '#09090b', pixelRatio: 2 });
+      const { saveImageToDevice } = await import('../utils/exportUtils');
+      await saveImageToDevice( 
+        dataUrl, 
+        'Chekki AI Tutor', 
+        language === 'ko' ? '채키가 제 질문에 답변해줬어요!' : 'Chekki answered my question!', 
+        'chekki-answer'
+      );
+    } catch (err) {
+      console.error("Failed to save answer image", err);
+      alert(language === 'ko' ? "저장에 실패했습니다." : "Failed to save the answer.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (!answer && !isAsking) return null;
+
   return (
     <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-zinc-950 border border-white/10 rounded-[2.5rem] w-full max-w-lg max-h-[80dvh] flex flex-col shadow-2xl animate-fade-in-up overflow-hidden">
+      <div className="relative bg-zinc-950 border border-white/10 rounded-[2.5rem] w-full max-w-lg max-h-[85dvh] flex flex-col shadow-2xl animate-fade-in-up overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/5">
           <div className="flex items-center gap-3">
@@ -91,34 +116,74 @@ const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto px-6 py-5 flex-1">
+        <div className="overflow-y-auto px-6 py-5 flex-1 custom-scrollbar">
           {isAsking ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-4">
+            <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
               <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
               <p className="text-orange-400 text-xs font-black uppercase tracking-widest animate-pulse">
                 {language === 'ko' ? '답변을 생각하는 중...' : 'Thinking...'}
               </p>
             </div>
           ) : (
-            <div
-              className="text-zinc-100 text-sm md:text-base font-korean leading-relaxed prose-answer"
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(answer ?? '') }}
-            />
+            <div className="space-y-6">
+              <div ref={contentRef} className="bg-zinc-900 border border-white/5 rounded-[2rem] p-6 md:p-8 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
+                  <span className="text-[120px]">💡</span>
+                </div>
+                
+                <div className="relative z-10 flex gap-4 mb-6">
+                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white/10 shadow-lg shrink-0 overflow-hidden">
+                    <ChekkiMascot className="w-full h-full scale-110" mood="happy" />
+                  </div>
+                  <div className="bg-zinc-800/80 p-3.5 rounded-2xl rounded-tl-none border border-white/5 w-fit max-w-[85%] self-start">
+                    <p className="text-zinc-200 text-xs italic font-korean leading-relaxed">&quot;{question}&quot;</p>
+                  </div>
+                </div>
+
+                <div className="relative z-10">
+                  <div
+                    className="text-zinc-100 text-sm md:text-base font-korean leading-relaxed prose-answer"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(answer ?? '') }}
+                  />
+                  <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between opacity-30">
+                    <p className="text-[9px] uppercase font-black tracking-[0.2em] text-white">Chekki AI Tutor</p>
+                    <span className="text-xs">⭐️</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full flex gap-3 pt-2">
+                 <button
+                   onClick={handleSave}
+                   disabled={isSaving}
+                   className="flex-1 bg-white hover:bg-zinc-200 text-black py-4 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-xl disabled:opacity-50"
+                 >
+                   {isSaving ? (
+                     <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                   ) : (
+                     <><span>📥</span> {language === 'ko' ? '이미지로 저장' : 'Save as Image'}</>
+                   )}
+                 </button>
+              </div>
+            </div>
           )}
         </div>
 
         {/* Footer upsell for guests */}
         {!isAsking && !isAuthenticated && answer && (
-          <div className="px-6 pb-6 pt-3 border-t border-white/5">
+          <div className="px-6 pb-6 pt-3 border-t border-white/5 bg-zinc-950/50">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-xs text-zinc-400 font-korean">
-                {language === 'ko' ? '더 자세한 예문이 필요하신가요?' : 'Need examples and a deeper explanation?'}
-              </p>
+              <div className="min-w-0">
+                <p className="text-[10px] text-orange-400 font-black uppercase tracking-widest mb-0.5">{language === 'ko' ? '도움이 되셨나요?' : 'Was this helpful?'}</p>
+                <p className="text-[10px] text-zinc-500 font-korean truncate">
+                  {language === 'ko' ? '무료 로그인하고 더 자세한 설명을 확인하세요!' : 'Login to unlock examples & deeper rules!'}
+                </p>
+              </div>
               <button
                 onClick={() => { onClose(); openLoginModal(); }}
-                className="text-xs bg-orange-500 text-white px-4 py-2 rounded-xl font-black uppercase tracking-wider whitespace-nowrap hover:bg-orange-600 transition-colors"
+                className="text-[10px] bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-black uppercase tracking-wider whitespace-nowrap shadow-lg shadow-orange-500/20 transition-all active:scale-95"
               >
-                {language === 'ko' ? '무료 로그인' : 'Unlock More'}
+                {language === 'ko' ? '로그인' : 'Log In'}
               </button>
             </div>
           </div>
@@ -507,8 +572,11 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   };
 
   if (isAuthenticated && user) {
-    const remaining = '∞';
     const isPro = user.plan === 'pro';
+    const today = new Date().toISOString().split('T')[0];
+    const isNewDay = user.lastScanDate !== today;
+    const remainingCount = isNewDay ? (user.maxScansPerDay || 3) : Math.max(0, (user.maxScansPerDay || 3) - user.scansUsedToday);
+    const remaining = isPro ? '∞' : remainingCount.toString();
 
     return (
       <div className="min-h-full pt-20 md:pt-44 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
@@ -541,7 +609,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
           <div className={`border rounded-xl md:rounded-[2rem] py-2 px-4 md:py-5 md:px-12 flex items-center gap-3 md:gap-6 shadow-2xl transition-all duration-500 ${isPro ? 'bg-orange-500/10 border-orange-500/30' : 'bg-[#0F1014] border-white/10'}`}>
             <div className={`text-[9px] md:text-sm uppercase font-black tracking-[0.1em] ${isPro ? 'text-orange-400' : 'text-zinc-500'}`}>
-              {isPro ? t('lbl_pro_active') : "Unlimited Magic Scans"}
+              {isPro ? t('lbl_pro_active') : t('lbl_magic_left')}
             </div>
             <div className="w-px h-4 md:h-8 bg-white/10"></div>
             <div className={`font-bold text-lg md:text-4xl font-display leading-none ${isPro ? 'text-orange-500 scale-110' : 'text-white'}`}>{remaining}</div>
