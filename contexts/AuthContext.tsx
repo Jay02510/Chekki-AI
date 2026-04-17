@@ -175,7 +175,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('chekki_last_auth');
 
         // --- GUEST AUTH: Ensure every session has a token ---
-        console.log("[AuthContext] Signing in anonymously for guest session...");
         try {
           await signInAnonymously(auth);
           // onAuthStateChanged will fire again with the new anon user — return here

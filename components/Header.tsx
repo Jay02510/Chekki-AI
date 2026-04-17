@@ -13,10 +13,9 @@ import { SCREENSHOT_MODE } from '../config';
 
 interface Props {
   onReset: () => void;
-  showScanButton?: boolean;
 }
 
-export const Header: React.FC<Props> = ({ onReset, showScanButton }) => {
+export const Header: React.FC<Props> = ({ onReset }) => {
   const { user, openLoginModal, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const { setShowMistakeModal, mistakes } = useMistakes();
@@ -83,16 +82,6 @@ export const Header: React.FC<Props> = ({ onReset, showScanButton }) => {
           </div>
 
           <div className="flex items-center gap-1.5 md:gap-4 h-full flex-shrink-0">
-            {showScanButton && (
-              <button
-                onClick={() => onReset()}
-                className="flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white transition-all shadow-lg shadow-orange-600/20 active:scale-95 animate-pulse-subtle"
-                title={t('ws_scan_again')}
-              >
-                <span className="text-sm md:text-lg">📸</span>
-                <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest whitespace-nowrap">{t('ws_scan_again')}</span>
-              </button>
-            )}
 
             {user && (
               <div className="flex items-center gap-1.5 md:gap-2">
@@ -104,13 +93,7 @@ export const Header: React.FC<Props> = ({ onReset, showScanButton }) => {
                   <span>☕</span>
                 </button>
 
-                <button
-                  onClick={() => setShowOnboarding(true)}
-                  className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
-                  title={t('tt_guide')}
-                >
-                  <span>💡</span>
-                </button>
+
 
                 <button
                   onClick={() => setShowMistakeModal(true)}
@@ -175,6 +158,12 @@ export const Header: React.FC<Props> = ({ onReset, showScanButton }) => {
                           <div className="flex items-center gap-3">
                             <span>💳</span> {t('nav_billing')}
                           </div>
+                        </button>
+                        <button
+                          onClick={() => { setShowUserMenu(false); setShowOnboarding(true); }}
+                          className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-lg transition-colors flex items-center gap-3 leading-tight"
+                        >
+                          <span>💡</span> {language === 'ko' ? '사용 가이드' : 'AI Guide'}
                         </button>
                       </div>
 

@@ -21,6 +21,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('fit');
+  const [showSettings, setShowSettings] = useState(false);
   
   const [bubbleScale, setBubbleScale] = useState(0.75); 
   const [items, setItems] = useState<WorksheetItem[]>(initialItems);
@@ -92,20 +93,6 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     }
   };
 
-  const playAudio = (text: string) => {
-    if (!user) {
-      setShowPaywall(true);
-      return;
-    }
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
   const getStyle = (item: WorksheetItem) => {
     const box = item.bounding_box;
     if (!box && !item.custom_coords) return { display: 'none' };
@@ -174,7 +161,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
               className={`absolute pointer-events-auto transform-gpu animate-fade-in ${isFocused ? 'opacity-100' : 'opacity-20 blur-[2px]'}`}
               onPointerDown={(e) => handlePointerDown(e, item)}
               onPointerUp={handlePointerUp}
-              onClick={(e) => { e.stopPropagation(); if(!isDragging) playAudio(displayValue); }}
+              onClick={(e) => e.stopPropagation()}
           >
               <div className={`
                   rounded-[1.2rem] shadow-[0_15px_40px_rgba(0,0,0,0.6)] border-2 flex items-center gap-2 transform transition-all active:scale-95 group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
@@ -188,8 +175,6 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
                   <span className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md text-sm md:text-xl`}>
                     {displayValue}
                   </span>
-                  <div className="w-px h-5 bg-white/10 shrink-0 mx-1"></div>
-                  <span className="text-xs md:text-lg shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">🔊</span>
               </div>
           </div>
           );
@@ -201,23 +186,37 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     <>
       <div className={`w-full flex flex-col bg-zinc-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full'}`}>
         
-        <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-center pointer-events-none">
-            <div className="flex gap-2 pointer-events-auto bg-black/50 backdrop-blur-2xl p-2 rounded-2xl border border-white/10 shadow-2xl items-center">
+        <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-start pointer-events-none">
+            <div className="flex flex-col gap-2 items-start pointer-events-auto relative">
                  <button 
-                  onClick={resetPositions}
-                  className="w-10 h-10 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-all flex items-center justify-center text-lg active:scale-90"
-                  title={language === 'ko' ? "위치 초기화" : "Reset Positions"}
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="w-12 h-12 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/20 text-white hover:bg-zinc-800 transition-all flex items-center justify-center text-xl shadow-2xl active:scale-90"
+                  title="Settings"
                  >
-                   🔄
+                   ⚙️
                  </button>
-                 <div className="w-px h-6 bg-white/10 mx-1"></div>
-                 <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest px-1">{language === 'ko' ? "크기" : "Size"}</span>
-                 <input 
-                    type="range" min="0.3" max="1.5" step="0.05" 
-                    value={bubbleScale} 
-                    onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
-                    className="w-20 md:w-32 accent-orange-500 cursor-pointer h-1.5 bg-zinc-700 rounded-lg appearance-none"
-                 />
+                 
+                 {showSettings && (
+                   <div className="flex flex-col gap-3 bg-black/60 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-2xl animate-fade-in-up origin-top-left absolute top-14 left-0 w-max">
+                     <div className="flex flex-col gap-1.5">
+                       <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">{language === 'ko' ? "크기 조절" : "Bubble Size"}</span>
+                       <input 
+                          type="range" min="0.3" max="1.5" step="0.05" 
+                          value={bubbleScale} 
+                          onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
+                          className="w-32 accent-orange-500 cursor-pointer h-1.5 bg-zinc-700/50 rounded-lg appearance-none"
+                       />
+                     </div>
+                     <div className="w-full h-px bg-white/10"></div>
+                     <button 
+                      onClick={resetPositions}
+                      className="w-full py-2.5 rounded-xl bg-zinc-800/80 text-white hover:bg-zinc-700 transition-all flex items-center justify-center gap-2 text-xs font-bold active:scale-95"
+                      title={language === 'ko' ? "위치 초기화" : "Reset Positions"}
+                     >
+                       🔄 {language === 'ko' ? "위치 초기화" : "Reset Roles"}
+                     </button>
+                   </div>
+                 )}
             </div>
 
             <button 

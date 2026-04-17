@@ -78,15 +78,11 @@ export const analyzeWorksheet = async (
     const idToken = await idTokenPromise;
     if (!idToken) {
       console.warn("[geminiService] ⚠️ No auth token — proceeding as guest. API will likely reject with UNAUTHORIZED.");
-    } else {
-      console.log(`[geminiService] ✅ Auth token retrieved (length: ${idToken.length})`);
     }
 
     const timeoutController = new AbortController();
     const timeoutId = setTimeout(() => timeoutController.abort(), 300000);
     const activeSignal = signal || timeoutController.signal;
-
-    console.log(`[geminiService] 📡 Fetching: ${baseUrl}/api/analyze (plan: ${userPlan})`);
 
     const response = await fetch(`${baseUrl}/api/analyze`, {
       method: 'POST',

@@ -80,7 +80,7 @@ const useInAppBrowser = () => {
 };
 
 function AppContent() {
-  const { user, openLoginModal, isAuthenticated, incrementScan, checkScanLimit, setShowPaywall } = useAuth();
+  const { user, openLoginModal, isAuthenticated, incrementScan, checkScanLimit, setShowPaywall, isLoading: isAuthLoading } = useAuth();
   const { t, language } = useLanguage();
   const isInApp = useInAppBrowser();
 
@@ -266,7 +266,6 @@ function AppContent() {
         </React.Suspense>
         <Header 
           onReset={() => handleReset(true)} 
-          showScanButton={analysisState.status === 'complete'} 
         />
         {/* Web-only mobile download banner */}
         {platform === 'web' && (
@@ -362,7 +361,13 @@ function AppContent() {
 
           {analysisState.status === 'idle' && (
             <div className="animate-fade-in flex-1">
-              <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data)} />
+              {isAuthLoading ? (
+                <div className="flex items-center justify-center min-h-[50vh]">
+                  <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                </div>
+              ) : (
+                <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data)} />
+              )}
             </div>
           )}
 
@@ -416,6 +421,7 @@ function AppContent() {
                   items={analysisState.data.items || []}
                   isLoadingItems={!analysisState.isItemsLoaded}
                   worksheetTitle={language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
+                  onScanAgain={handleScanAgain}
                 />
               </div>
             </div>

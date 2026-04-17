@@ -27,9 +27,10 @@ interface Props {
   items: WorksheetItem[];
   isLoadingItems?: boolean;
   worksheetTitle?: string;
+  onScanAgain?: () => void;
 }
 
-export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = false, worksheetTitle }) => {
+export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = false, worksheetTitle, onScanAgain }) => {
   const { t, language } = useLanguage();
   const { toggleMistake, isMistake } = useMistakes();
   const { user, setShowPaywall, isAuthenticated, openLoginModal } = useAuth();
@@ -277,8 +278,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       const audio = new Audio(ASSETS.STAMP_SOUND);
       audio.play().catch(() => { });
     } else {
-      console.log(`[Speech Match Failed] Expected: "${itemForCheck.correct_answer}", Heard: "${transcript}"`);
-      console.log(`[Normalized] Expected: "${normalizeText(itemForCheck.correct_answer)}", Heard: "${normalizeText(transcript)}"`);
       setSpeechResult({ id: itemForCheck.id, success: false });
       if ('vibrate' in navigator) navigator.vibrate([30, 30, 30]);
     }
@@ -441,7 +440,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 </div>
                 <div>
                   <h3 className="font-black text-white font-display text-lg leading-none mb-0.5">{t('ws_results_title')}</h3>
-                  <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">{isLoadingItems ? t('ws_scanning_header') : `${localItems.length} ${t('ws_items_found')}`}</p>
+                  <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest leading-none mt-1">{isLoadingItems ? t('ws_scanning_header') : `${localItems.length} ${t('ws_items_found')}`}</p>
                 </div>
               </div>
             </div>
@@ -643,59 +642,66 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
             })}
 
             {localItems.length > 0 && (
-              <div className="pt-6 pb-2">
-                <button
-                  onClick={() => { if (!isAuthenticated) openLoginModal(); else if (user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }}
-                  disabled={isLoadingItems}
-                  className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-base shadow-[0_15px_40px_rgba(249,115,22,0.4)] flex items-center justify-center gap-3 transform transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 ring-2 ring-white/10 min-h-[56px]"
-                >
-                  <span className="text-2xl">🪄</span>
-                  {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
-                </button>
-              </div>
-            )}
-
-            {localItems.length > 0 && (
-              <div className="pt-4 pb-8 space-y-6" onClick={(e) => e.stopPropagation()}>
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-2xl py-4 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-xl disabled:opacity-50 min-h-[56px] text-white"
-                  >
-                    {isSharing ? (
-                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <><span>📤</span> {language === 'ko' ? '공유 & 저장' : 'Share/Save'}</>
-                    )}
-                  </button>
-                  
-                  <button
-                    onClick={handleCopyToCafe}
-                    className={`flex-1 py-4 rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all transform active:scale-95 flex items-center justify-center gap-2 shadow-xl min-h-[56px] ${copyStatus ? 'bg-emerald-600 text-white' : 'bg-[#03C75A] text-white'}`}
-                  >
-                    {copyStatus ? (
-                      <span className="animate-fade-in">✓ {language === 'ko' ? '복사됨!' : 'Copied!'}</span>
-                    ) : (
-                      <>
-                        <span className="text-lg">🕊️</span> {language === 'ko' ? '카페 대본' : 'Cafe Template'}
-                      </>
-                    )}
-                  </button>
-                </div>
-                
-                {shareWebNotice && (
-                  <p className="text-emerald-400 text-[9px] font-black text-center animate-fade-in uppercase tracking-wider">
-                    ✓ {language === 'ko' ? '클립보드에 복사되었어요!' : 'Copied to clipboard!'}
-                  </p>
-                )}
-
-                <div className="pt-4 border-t border-white/5">
-                   <InlineFeedback />
-                </div>
+              <div className="pt-4 border-t border-white/5 mt-4">
+                 <InlineFeedback />
               </div>
             )}
           </div>
+
+          {/* Sticky Actions Footer */}
+          {localItems.length > 0 && (
+            <div className="shrink-0 bg-zinc-900/80 backdrop-blur-xl border-t border-white/5 px-4 py-4 md:px-6 md:py-5 flex flex-col gap-3 rounded-b-[2.5rem] z-10" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => { if (!isAuthenticated) openLoginModal(); else if (user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }}
+                disabled={isLoadingItems}
+                className="w-full py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-sm md:text-base shadow-[0_10px_30px_rgba(249,115,22,0.3)] flex items-center justify-center gap-2 md:gap-3 transform transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 ring-1 md:ring-2 ring-white/10"
+              >
+                <span className="text-xl md:text-2xl">🪄</span>
+                {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
+              </button>
+
+              <div className="flex gap-2 md:gap-3">
+                <button
+                  onClick={handleShare}
+                  disabled={isSharing}
+                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 flex items-center justify-center gap-1.5 md:gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg disabled:opacity-50 text-white"
+                >
+                  {isSharing ? (
+                    <div className="w-3.5 h-3.5 md:w-4 md:h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <><span>📤</span> {language === 'ko' ? '공유/저장' : 'Share/Save'}</>
+                  )}
+                </button>
+                
+                <button
+                  onClick={handleCopyToCafe}
+                  className={`flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all transform active:scale-95 flex items-center justify-center gap-1.5 md:gap-2 shadow-lg ${copyStatus ? 'bg-emerald-600 text-white' : 'bg-[#03C75A] text-white'}`}
+                >
+                  {copyStatus ? (
+                    <span className="animate-fade-in">✓ {language === 'ko' ? '복사됨!' : 'Copied!'}</span>
+                  ) : (
+                    <><span className="text-sm md:text-lg">🕊️</span> {language === 'ko' ? '카페 대본' : 'Cafe Template'}</>
+                  )}
+                </button>
+
+                {onScanAgain && (
+                  <button
+                    onClick={onScanAgain}
+                    className="bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 px-3 md:px-4 flex items-center justify-center gap-1 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg text-orange-400"
+                    title={t('ws_scan_again')}
+                  >
+                    <span className="text-sm md:text-base">📸</span>
+                  </button>
+                )}
+              </div>
+
+              {shareWebNotice && (
+                <p className="text-emerald-400 text-[8px] md:text-[9px] font-black text-center animate-fade-in uppercase tracking-wider absolute -top-6 left-1/2 -translate-x-1/2 bg-zinc-900/90 px-3 py-1 rounded-full border border-emerald-500/20 shadow-lg">
+                  ✓ {language === 'ko' ? '클립보드에 복사되었어요!' : 'Copied to clipboard!'}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>
