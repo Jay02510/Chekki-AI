@@ -266,10 +266,49 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
 
     if (task === 'ask_question') {
       const { question } = body;
-      const isGuest = !userSnap || !userSnap.exists; // Secure backend guest detection
+      const xForwardedFor = req.headers['x-forwarded-for'];
+      const clientIp = typeof xForwardedFor === 'string' ? xForwardedFor.split(',')[0].trim() : (req.headers['x-real-ip'] || req.socket.remoteAddress || 'unknown');
+      const ipKey = String(clientIp).replace(/\./g, '_').replace(/:/g, '_'); // Firestore friendly key (IPv4 & IPv6)
       
-      const realUserPlan = userData?.plan || 'free';
+      const db = getFirestore(app);
       const today = new Date().toISOString().split('T')[0];
+      const now = Date.now();
+
+      // --- 1. GLOBAL BURST PROTECTION (5 per minute per IP) ---
+      const burstRef = db.collection('ratelimits').doc(`burst_${ipKey}`);
+      const burstSnap = await burstRef.get();
+      const burstData = burstSnap.data() || { count: 0, lastReset: 0 };
+
+      if (now - burstData.lastReset < 60000) {
+        if (burstData.count >= 5) {
+          return res.status(429).json({ error: "BURST_LIMIT_REACHED" });
+        }
+        await burstRef.update({ count: FieldValue.increment(1) });
+      } else {
+        await burstRef.set({ count: 1, lastReset: now });
+      }
+
+      // --- 2. GUEST DAILY LIMITS (2 per day per IP) ---
+      // Treat as guest if no token OR if token exists but user is not in our Firestore (e.g. invalid session)
+      const isGuest = !decodedToken || !userSnap || !userSnap.exists; 
+      
+      if (isGuest) {
+        const guestRef = db.collection('ratelimits').doc(`guest_${ipKey}`);
+        const guestSnap = await guestRef.get();
+        const guestData = guestSnap.data() || { count: 0, lastDate: '' };
+
+        if (guestData.lastDate === today) {
+          if (guestData.count >= 2) {
+            return res.status(403).json({ error: "GUEST_LIMIT_REACHED" });
+          }
+          await guestRef.update({ count: FieldValue.increment(1) });
+        } else {
+          await guestRef.set({ count: 1, lastDate: today });
+        }
+      }
+
+      // --- 3. LOGGED-IN DAILY LIMITS ---
+      const realUserPlan = userData?.plan || 'free';
       const isNewQuestionDay = userData?.lastQuestionDate !== today;
       const currentQuestions = isNewQuestionDay ? 0 : (userData?.questionsUsedToday || 0);
       const maxQuestions = userData?.maxQuestionsPerDay || 2;
@@ -303,6 +342,14 @@ If the user asks about politics, personal advice, entertainment, or anything out
         }],
         config: { systemInstruction: currentSystemPrompt, temperature: 0.7 }
       });
+
+      // Securely update logged-in limits after success
+      if (!isGuest && realUserPlan !== 'pro' && userRef) {
+        await userRef.update({
+          questionsUsedToday: isNewQuestionDay ? 1 : FieldValue.increment(1),
+          lastQuestionDate: today
+        });
+      }
 
       return res.status(200).json({ answer: response.text });
     }
@@ -378,11 +425,6 @@ If the user asks about politics, personal advice, entertainment, or anything out
     // Update the database securely on success
     if (userSnap && userSnap.exists && realUserPlan !== 'pro') {
       try {
-        if (task === 'ask_question') {
-          await userRef.update({
-            questionsUsedToday: userData?.lastQuestionDate !== today ? 1 : FieldValue.increment(1),
-            lastQuestionDate: today
-          });
         } else if (!['generate', 'refine'].includes(task)) {
           await userRef.update({
             scansUsedToday: isNewDay ? 1 : FieldValue.increment(1),

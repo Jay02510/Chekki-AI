@@ -240,8 +240,15 @@ export const askChekkiQuestion = async (question: string, isGuest: boolean = fal
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("[geminiService] Ask failed:", errText);
-      throw new Error("ASK_FAILED");
+      let errorMsg = "ASK_FAILED";
+      try {
+        const errorData = JSON.parse(errText);
+        errorMsg = errorData.error || "ASK_FAILED";
+      } catch (e) {
+        errorMsg = errText || "ASK_FAILED";
+      }
+      console.error("[geminiService] Ask failed:", errorMsg);
+      throw new Error(errorMsg);
     }
 
     const data = await response.json();

@@ -107,8 +107,6 @@ function AppContent() {
   const [confirmDialog, setConfirmDialog] = useState<{ 
     title: string; 
     onConfirm: () => void; 
-    onSave?: () => void; 
-    saveText?: string; 
     confirmText?: string; 
     cancelText?: string; 
     isSaving?: boolean;
@@ -144,16 +142,6 @@ function AppContent() {
     }
   }, [language, openLoginModal]);
 
-  // Trigger child profile modal after successful scan
-  useEffect(() => {
-    if (analysisState.status === 'complete' && isAuthenticated && user) {
-      if (!user.childAge && !sessionStorage.getItem('skipped_child_profile') && user.scansUsedToday >= 1) {
-        // slight delay to let them see the analysis first
-        const timer = setTimeout(() => setShowChildProfileModal(true), 2000);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [analysisState.status, isAuthenticated, user]);
 
   useEffect(() => {
     // Initialize RevenueCat
@@ -215,40 +203,26 @@ function AppContent() {
   };
 
   const handleScanAgain = () => {
-    hookHandleScanAgain();
+    // We want the camera icon (Scan Again) to show the same warning as the back/exit button.
+    handleReset(true);
   };
 
   const handleReset = (confirm = true) => {
     if (confirm && analysisState.status === 'complete') {
       setConfirmDialog({
-        title: language === 'ko' ? "현재 결과가 삭제됩니다. 기기에 저장하시겠습니까?" : "Current results will be removed. Do you want to save it?",
-        confirmText: language === 'ko' ? "저장 안 함 (삭제)" : "Discard & Scan Again",
+        title: language === 'ko' ? "현재 결과가 삭제됩니다. 계속하시겠습니까?" : "Current results will be removed. Do you want to continue?",
+        confirmText: language === 'ko' ? "결과 삭제 (처음으로)" : "Discard Results & Exit",
         cancelText: language === 'ko' ? "취소" : "Cancel",
-        saveText: language === 'ko' ? "이미지로 저장" : "Save Image",
         onConfirm: () => {
           hookExecuteReset();
           setConfirmDialog(null);
-        },
-        onSave: async () => {
-          if (!analysisState.originalImage || !analysisState.data?.items) return;
-          setConfirmDialog(prev => prev ? { ...prev, isSaving: true } : null);
-          try {
-             const { generateCompositeImage, saveImageToDevice } = await import('./utils/exportUtils');
-             const dataUrl = await generateCompositeImage(analysisState.originalImage, analysisState.data.items);
-             await saveImageToDevice(dataUrl, 'Chekki Worksheet', 'Here is the graded worksheet from Chekki AI!', 'chekki-worksheet');
-             hookExecuteReset();
-             setConfirmDialog(null);
-          } catch(e) {
-             console.error("Save image failed", e);
-             alert("Failed to save image.");
-             setConfirmDialog(prev => prev ? { ...prev, isSaving: false } : null);
-          }
         }
       });
       return;
     }
     hookExecuteReset();
   };
+
 
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
   if (showSubscribePage && platform === 'web') return <SubscribePage />;
@@ -295,11 +269,7 @@ function AppContent() {
             <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full text-center animate-fade-in-up">
               <p className="text-white font-bold text-lg mb-6 font-korean">{confirmDialog.title}</p>
               <div className="flex flex-col gap-3">
-                {confirmDialog.onSave && (
-                   <button onClick={confirmDialog.onSave} disabled={confirmDialog.isSaving} className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-xl disabled:opacity-50">
-                     {confirmDialog.isSaving ? "Saving..." : (confirmDialog.saveText || "Save")}
-                   </button>
-                )}
+
                 <button onClick={confirmDialog.onConfirm} disabled={confirmDialog.isSaving} className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl disabled:opacity-50">
                   {confirmDialog.confirmText || "Yes"}
                 </button>

@@ -163,7 +163,7 @@ export const Header: React.FC<Props> = ({ onReset }) => {
                           onClick={() => { setShowUserMenu(false); setShowOnboarding(true); }}
                           className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-lg transition-colors flex items-center gap-3 leading-tight"
                         >
-                          <span>💡</span> {language === 'ko' ? '사용 가이드' : 'AI Guide'}
+                          <span>💡</span> {language === 'ko' ? 'AI 설정' : 'AI Settings'}
                         </button>
                       </div>
 

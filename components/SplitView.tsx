@@ -20,6 +20,8 @@ import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 import { normalizeText, compareSpeech } from '../utils/speechUtils';
 import { refineWorksheetItem } from '../services/geminiService';
 import { renderMarkdown } from '../utils/markdownUtils';
+import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
+import { askChekkiQuestion } from '../services/geminiService';
 
 
 interface Props {
@@ -43,10 +45,15 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const [isRefining, setIsRefining] = useState(false);
   const [mascotError, setMascotError] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [copyStatus, setCopyStatus] = useState(false);
   const [upsellFeature, setUpsellFeature] = useState<'pronunciation' | 'audio' | 'guide' | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [shareWebNotice, setShareWebNotice] = useState(false);
+
+  // Ask Chekki States
+  const [askQuery, setAskQuery] = useState('');
+  const [askAnswer, setAskAnswer] = useState<string | null>(null);
+  const [askAnsweredQuestion, setAskAnsweredQuestion] = useState('');
+  const [isAsking, setIsAsking] = useState(false);
 
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
@@ -169,16 +176,37 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     }
   };
 
-  const handleCopyToCafe = () => {
-    const title = worksheetTitle || (language === 'ko' ? "영어 학습지" : "English Worksheet");
-    const template = language === 'ko'
-      ? `[영유 숙제 기록] 채키 AI로 오늘 '${title}' 공부 끝냈어요! ✨\n\n아이랑 영유 숙제하다 보면 저도 가끔 헷갈릴 때가 있는데,\n채키(Chekki) 덕분에 정답 위치도 바로 확인하고\n설명도 다정하게 해줄 수 있어서 너무 편하네요.\n\n매일 밤 숙제 전쟁이었는데, 이제는 웃으면서 금방 끝내요! 영유 맘님들께 강력 추천합니다. ❤️\n\n#채키AI #영유맘 #숙제도우미 #부모표영어 #자기주도학습`
-      : `Finished '${title}' with Chekki AI tonight! 🚀\n\nHomework time is so much more peaceful now. Chekki gives me the answers and the exact words to say to encourage my child.\n\nHighly recommend to all EK parents! ❤️\n\n#ChekkiAI #HomeworkHelper #ParentingHacks`;
-
-    navigator.clipboard.writeText(template).then(() => {
-      setCopyStatus(true);
-      setTimeout(() => setCopyStatus(false), 3000);
-    });
+  const handleAskSubmit = async (question: string) => {
+    if (!question.trim() || isAsking) return;
+    
+    setAskAnswer(null);
+    setAskAnsweredQuestion(question);
+    setIsAsking(true);
+    
+    try {
+      const isGuest = !isAuthenticated;
+      const response = await askChekkiQuestion(question, isGuest);
+      setAskAnswer(response);
+    } catch (error: any) {
+      console.error("Ask Chekki error:", error.message);
+      
+      let errorMsg = language === 'ko' ? '오류가 발생했습니다. 다시 시도해주세요.' : 'Something went wrong. Please try again.';
+      
+      if (error.message === 'BURST_LIMIT_REACHED') {
+        errorMsg = language === 'ko' 
+          ? '채키가 잠시 숨을 고르고 있어요. 1분 후에 다시 질문해 주세요! 🧘‍♂️' 
+          : 'Whoa! Chekki needs a quick breather. Please wait a minute before asking again. 🧘‍♂️';
+      } else if (error.message === 'GUEST_LIMIT_REACHED' || error.message === 'QUESTION_LIMIT_REACHED') {
+        errorMsg = language === 'ko'
+          ? '오늘의 질문 횟수를 모두 사용했습니다. 내일 다시 만나요! ⭐️'
+          : "You've reached today's limit. See you again tomorrow! ⭐️";
+      }
+      
+      setAskAnswer(errorMsg);
+    } finally {
+      // Add a slight cooldown to prevent accidental double-fire on button re-enable
+      setTimeout(() => setIsAsking(false), 1500);
+    }
   };
 
   const handleShare = async () => {
@@ -257,7 +285,6 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
           await navigator.share(shareData);
         }
       } else {
-        handleCopyToCafe();
         setShareWebNotice(true);
         setTimeout(() => setShareWebNotice(false), 3000);
       }
@@ -411,6 +438,15 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       {showCloneModal && <CloneWorksheetModal originalItems={localItems} onClose={() => setShowCloneModal(false)} />}
       {reportContext && <FeedbackModal context={reportContext} onClose={() => setReportContext(null)} />}
       <PremiumUpsellModal isOpen={upsellFeature !== null} onClose={() => setUpsellFeature(null)} featureName={upsellFeature || 'pronunciation'} />
+      <AskChekkiAnswerModal 
+        answer={askAnswer} 
+        isAsking={isAsking} 
+        question={askAnsweredQuestion}
+        isAuthenticated={isAuthenticated}
+        language={language}
+        onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); }}
+        openLoginModal={openLoginModal}
+      />
       {refiningItemId !== null && (
         <RefineModal 
           item={localItems.find(i => i.id === refiningItemId)!} 
@@ -455,6 +491,16 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="px-5 py-4 shrink-0">
+            <AskChekkiBar 
+              query={askQuery} 
+              setQuery={setAskQuery} 
+              onSubmit={handleAskSubmit} 
+              isAsking={isAsking} 
+              language={language}
+            />
           </div>
 
           <div className="overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar flex-1 overscroll-contain bg-gradient-to-b from-transparent to-zinc-950/20">
@@ -664,33 +710,23 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
                 <button
                   onClick={handleShare}
                   disabled={isSharing}
-                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 flex items-center justify-center gap-1.5 md:gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg disabled:opacity-50 text-white"
+                  className="flex-[2] bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 flex items-center justify-center gap-1.5 md:gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg disabled:opacity-50 text-white"
                 >
                   {isSharing ? (
                     <div className="w-3.5 h-3.5 md:w-4 md:h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                   ) : (
-                    <><span>📤</span> {language === 'ko' ? '공유/저장' : 'Share/Save'}</>
-                  )}
-                </button>
-                
-                <button
-                  onClick={handleCopyToCafe}
-                  className={`flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all transform active:scale-95 flex items-center justify-center gap-1.5 md:gap-2 shadow-lg ${copyStatus ? 'bg-emerald-600 text-white' : 'bg-[#03C75A] text-white'}`}
-                >
-                  {copyStatus ? (
-                    <span className="animate-fade-in">✓ {language === 'ko' ? '복사됨!' : 'Copied!'}</span>
-                  ) : (
-                    <><span className="text-sm md:text-lg">🕊️</span> {language === 'ko' ? '카페 대본' : 'Cafe Template'}</>
+                    <><span className="text-sm md:text-base">📤</span> {language === 'ko' ? '결과 공유/저장' : 'Share/Save Results'}</>
                   )}
                 </button>
 
                 {onScanAgain && (
                   <button
                     onClick={onScanAgain}
-                    className="bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 px-3 md:px-4 flex items-center justify-center gap-1 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg text-orange-400"
+                    className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 px-3 md:px-4 flex items-center justify-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg text-orange-400"
                     title={t('ws_scan_again')}
                   >
                     <span className="text-sm md:text-base">📸</span>
+                    {language === 'ko' ? '재촬영' : 'Rescan'}
                   </button>
                 )}
               </div>
