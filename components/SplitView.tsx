@@ -185,7 +185,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
     
     try {
       const isGuest = !isAuthenticated;
-      const response = await askChekkiQuestion(question, isGuest);
+      const response = await askChekkiQuestion(question, language, isGuest);
       setAskAnswer(response);
     } catch (error: any) {
       console.error("Ask Chekki error:", error.message);
@@ -422,7 +422,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       const itemToRefine = localItems.find(i => i.id === itemId);
       if (!itemToRefine) return;
       
-      const refinedData = await refineWorksheetItem(itemToRefine, reason);
+      const refinedData = await refineWorksheetItem(itemToRefine, reason, language);
       
       setLocalItems(prev => prev.map(i => i.id === itemId ? { ...i, ...refinedData } : i));
       setRefiningItemId(null);

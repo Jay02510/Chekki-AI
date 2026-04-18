@@ -15,7 +15,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
     const [items, setItems] = useState<WorksheetItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [showReward, setShowReward] = useState(false);
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     const [isDigitalMode, setIsDigitalMode] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,7 +31,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({ originalItems, onClose })
 
         setLoading(true);
         try {
-            const newItems = await generateSimilarWorksheet(itemsToClone, controller.signal);
+            const newItems = await generateSimilarWorksheet(itemsToClone, language, controller.signal);
             setItems(newItems);
         } catch (e: any) {
             if (e.name === 'AbortError') return;

@@ -79,7 +79,8 @@ export const useWorksheetAnalysis = () => {
                 user?.plan || 'free',
                 user?.childAge,
                 user?.childEnglishLevel,
-                user?.parentEnglishLevel
+                user?.parentEnglishLevel,
+                language
             );
 
             // SUCCESS: Now we increment the scan usage
@@ -100,8 +101,13 @@ export const useWorksheetAnalysis = () => {
             };
 
             setAnalysisState(newState);
-            // Only store critical data in localStorage to keep it light
-            localStorage.setItem(SESSION_KEY, JSON.stringify({ state: newState, timestamp: Date.now() }));
+            // Only store critical data in localStorage to keep it light (Omit the massive Base64 image)
+            const stateToSave = { ...newState, originalImage: null };
+            try {
+                localStorage.setItem(SESSION_KEY, JSON.stringify({ state: stateToSave, timestamp: Date.now() }));
+            } catch (e) {
+                console.warn("Storage warning: Could not save session state", e);
+            }
 
             // Log Analytics
             db.logUserEvent("scan_completed", {

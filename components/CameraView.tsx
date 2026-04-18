@@ -225,7 +225,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     
     try {
       const isGuest = !isAuthenticated;
-      const response = await askChekkiQuestion(question, isGuest);
+      const response = await askChekkiQuestion(question, language, isGuest);
       setAskAnswer(response);
       
       // Increment only for authenticated users (backend also handles this)

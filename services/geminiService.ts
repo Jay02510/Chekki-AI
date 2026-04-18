@@ -34,7 +34,8 @@ export const analyzeWorksheet = async (
   userPlan: string = 'free',
   childAge?: string,
   childEnglishLevel?: string,
-  parentEnglishLevel?: string
+  parentEnglishLevel?: string,
+  language: string = 'ko'
 ): Promise<WorksheetAnalysis> => {
   if (MOCK_MODE) {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
@@ -97,7 +98,8 @@ export const analyzeWorksheet = async (
         userPlan,
         childAge,
         childEnglishLevel,
-        parentEnglishLevel
+        parentEnglishLevel,
+        language
       })
     });
 
@@ -135,7 +137,7 @@ export const analyzeWorksheet = async (
   }
 };
 
-export const generateSimilarWorksheet = async (originalItems: WorksheetItem[], signal?: AbortSignal): Promise<WorksheetItem[]> => {
+export const generateSimilarWorksheet = async (originalItems: WorksheetItem[], language: string = 'ko', signal?: AbortSignal): Promise<WorksheetItem[]> => {
   if (MOCK_MODE) {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     return originalItems.map(item => ({
@@ -157,7 +159,8 @@ export const generateSimilarWorksheet = async (originalItems: WorksheetItem[], s
       signal,
       body: JSON.stringify({
         task: 'generate',
-        originalItems: originalItems.slice(0, 5)
+        originalItems: originalItems.slice(0, 5),
+        language
       })
     });
 
@@ -174,7 +177,7 @@ export const generateSimilarWorksheet = async (originalItems: WorksheetItem[], s
   }
 };
 
-export const refineWorksheetItem = async (item: WorksheetItem, reason: string): Promise<Partial<WorksheetItem>> => {
+export const refineWorksheetItem = async (item: WorksheetItem, reason: string, language: string = 'ko'): Promise<Partial<WorksheetItem>> => {
   if (MOCK_MODE) {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     return {
@@ -196,7 +199,8 @@ export const refineWorksheetItem = async (item: WorksheetItem, reason: string): 
       body: JSON.stringify({
         task: 'refine',
         itemToRefine: item,
-        reason: reason
+        reason: reason,
+        language: language
       })
     });
 
@@ -214,7 +218,7 @@ export const refineWorksheetItem = async (item: WorksheetItem, reason: string): 
   }
 };
 
-export const askChekkiQuestion = async (question: string, isGuest: boolean = false, signal?: AbortSignal): Promise<string> => {
+export const askChekkiQuestion = async (question: string, language: string = 'ko', isGuest: boolean = false, signal?: AbortSignal): Promise<string> => {
   if (MOCK_MODE) {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     return isGuest 
@@ -234,7 +238,8 @@ export const askChekkiQuestion = async (question: string, isGuest: boolean = fal
       body: JSON.stringify({
         task: 'ask_question',
         question: question,
-        isGuest: isGuest
+        isGuest: isGuest,
+        language: language
       })
     });
 

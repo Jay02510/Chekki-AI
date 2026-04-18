@@ -156,7 +156,7 @@ export default async function handler(req: any, res: any) {
   // --- END SECURITY CHECK ---
 
   try {
-    const { task: _task, image, originalItems, userPlan: clientPlan, childAge, childEnglishLevel, parentEnglishLevel } = body;
+    const { task: _task, image, originalItems, userPlan: clientPlan, childAge, childEnglishLevel, parentEnglishLevel, language = 'ko' } = body;
 
     // --- SECURITY: Fetch Real User Data ---
     let userData: any = { 
@@ -166,7 +166,10 @@ export default async function handler(req: any, res: any) {
       lastScanDate: '',
       questionsUsedToday: 0,
       maxQuestionsPerDay: 2,
-      lastQuestionDate: ''
+      lastQuestionDate: '',
+      generatesUsedToday: 0,
+      maxGeneratesPerDay: 5,
+      lastGenerateDate: ''
     };
     let userRef: any = null;
     let userSnap: any = null;
@@ -192,10 +195,17 @@ export default async function handler(req: any, res: any) {
     const currentScans = isNewDay ? 0 : (userData?.scansUsedToday || 0);
     const maxScans = userData?.maxScansPerDay || 3;
 
-    // Reject if they over the limit
-    if (realUserPlan !== 'pro' && currentScans >= maxScans) {
-      if (!['generate', 'refine', 'ask_question'].includes(task)) {
+    const isNewGenerateDay = userData?.lastGenerateDate !== today;
+    const currentGenerates = isNewGenerateDay ? 0 : (userData?.generatesUsedToday || 0);
+    const maxGenerates = userData?.maxGeneratesPerDay || 5;
+
+    // Reject if they over the limit for respective actions
+    if (realUserPlan !== 'pro') {
+      if (!['generate', 'refine', 'ask_question'].includes(task) && currentScans >= maxScans) {
          return res.status(403).json({ error: "SCAN_LIMIT_REACHED" });
+      }
+      if (['generate', 'refine'].includes(task) && currentGenerates >= maxGenerates) {
+         return res.status(403).json({ error: "GENERATE_LIMIT_REACHED" });
       }
     }
 
@@ -213,19 +223,31 @@ export default async function handler(req: any, res: any) {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.0-flash-exp",
         contents: [{
           role: 'user', parts: [{
             text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. 
         Task: Generate 3 brand new similar questions for extra practice with bilingual guides. 
+        Language Preference: ${language === 'ko' ? 'Korean' : 'English'}.
         STRICT RULE: All "correct_answer" fields must contain the FULL answer text including question identifiers (e.g., "A. Milo wanted the ball."). Do not use abbreviations, single letters, or simple indices.` }]
         }],
         config: { responseMimeType: "application/json", temperature: 0.7 }
       });
 
-      const text = response.text;
+      const text = response.text || "[]";
+      let cleanedText = text.replace(/```json\n?|```/g, "").trim();
       try {
-        return res.status(200).json(JSON.parse(text || "[]"));
+        const parsed = JSON.parse(cleanedText);
+        
+        // Securely update generate limits after success
+        if (userRef && realUserPlan !== 'pro') {
+          await userRef.update({
+            generatesUsedToday: isNewGenerateDay ? 1 : FieldValue.increment(1),
+            lastGenerateDate: today
+          });
+        }
+        
+        return res.status(200).json(parsed);
       } catch (e) {
         console.error("[Backend] Failed to parse generated content:", text);
         return res.status(500).json({ error: "PARSING_FAILED" });
@@ -237,7 +259,7 @@ export default async function handler(req: any, res: any) {
       if (!itemToRefine) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.0-flash-exp",
         contents: [{
           role: 'user', parts: [{
             text: `System: You are an expert bilingual tutor for parents.
@@ -246,7 +268,7 @@ Original Answer: ${itemToRefine.correct_answer}
 Original Korean Guide: ${itemToRefine.korean_guide}
 Original English Guide: ${itemToRefine.english_guide}
 
-The user requested a refinement because: "${reason}"
+Language Preference: ${language === 'ko' ? 'Korean' : 'English'} (If the user explicitly requests a different language in their reason, prioritize their request).
 
 Task: Regenerate ONLY the teaching guides and scripts to address the user's specific reason. Do NOT change the answer or question.
 Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_guide", "teaching_script_ko", "teaching_script_en".`
@@ -255,9 +277,20 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
         config: { responseMimeType: "application/json", temperature: 0.7 }
       });
 
-      const text = response.text;
+      const text = response.text || "{}";
+      let cleanedText = text.replace(/```json\n?|```/g, "").trim();
       try {
-        return res.status(200).json(JSON.parse(text || "{}"));
+        const parsed = JSON.parse(cleanedText);
+        
+        // Securely update generate limits after success
+        if (userRef && realUserPlan !== 'pro') {
+          await userRef.update({
+            generatesUsedToday: isNewGenerateDay ? 1 : FieldValue.increment(1),
+            lastGenerateDate: today
+          });
+        }
+
+        return res.status(200).json(parsed);
       } catch (e) {
         console.error("[Backend] Failed to parse refined content:", text);
         return res.status(500).json({ error: "PARSING_FAILED" });
@@ -329,6 +362,12 @@ CRITICAL: Use rich markdown formatting to make your answers vibrant and easy to 
 
 If the user asks about politics, personal advice, entertainment, or anything outside the realm of academics, politely reply with: "I am an educational tutor focused on helping you learn! Please ask me a question related to school, homework, or studying."`;
 
+      if (language === 'ko') {
+        currentSystemPrompt += `\n\nPRIMARY LANGUAGE: Korean. Explain complex concepts in Korean. Always include the corresponding English term in **bold**. For example sentences, provide the English in *italics* followed by a Korean translation. (CRITICAL: If the user explicitly asks for the answer to be in English or another language, prioritize their request instead).`;
+      } else {
+        currentSystemPrompt += `\n\nPRIMARY LANGUAGE: English. Explain concepts in clear, simple English. Focus on immersion while maintaining an educational tone. (CRITICAL: If the user explicitly asks for the answer to be in Korean or another language, prioritize their request instead).`;
+      }
+
       if (isGuest) {
          currentSystemPrompt += `\n\nCRITICAL RULE FOR THIS USER: This user is an unregistered guest. Provide ONLY 1 to 2 short, direct sentences as your answer. Use at most one highlight or bold term. Do not give examples, detailed rules, or extra context — keep it very brief.`;
       } else {
@@ -336,7 +375,7 @@ If the user asks about politics, personal advice, entertainment, or anything out
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.0-flash-exp",
         contents: [{
           role: 'user', parts: [{ text: question }]
         }],
@@ -365,6 +404,12 @@ If the user asks about politics, personal advice, entertainment, or anything out
         currentSystemPrompt += `\nAdditionally, the PARENT's English level is "${parentEnglishLevel}". Tailor the complexity of the korean_guide and english_guide to suit the parent's understanding.`;
       }
 
+      if (language === 'ko') {
+        currentSystemPrompt += `\n\nPRIMARY LANGUAGE: Korean. You must focus your pedagogical explanations and overviews in Korean. Provide rich, detailed Korean guides (korean_guide, teaching_script_ko). The English fields can be brief literal translations.`;
+      } else {
+        currentSystemPrompt += `\n\nPRIMARY LANGUAGE: English. You must focus your pedagogical explanations exclusively in English. Write the 'overview_ko' field entirely in English. Provide rich, detailed English guides (english_guide, teaching_script_en), while the Korean fields can be brief literal translations.`;
+      }
+
       const configOpts: any = {
         systemInstruction: currentSystemPrompt,
         responseMimeType: "application/json",
@@ -378,10 +423,10 @@ If the user asks about politics, personal advice, entertainment, or anything out
       };
 
       // Determine model based on the SECURE pass tier
-      let currentModel = 'gemini-2.5-flash'; // Always default to lightning-fast Flash for the initial pass
+      let currentModel = 'gemini-2.0-flash-exp'; // Always default to lightning-fast Flash for the initial pass
       
       if (useThinking && realUserPlan === 'pro') {
-        currentModel = 'gemini-2.5-pro'; // Upgrade to Pro model for the heavy fallback
+        currentModel = 'gemini-1.5-pro'; // Upgrade to Pro model for the heavy fallback
         configOpts.thinkingConfig = { thinkingBudget: 8000 };
       }
 
@@ -425,7 +470,7 @@ If the user asks about politics, personal advice, entertainment, or anything out
     // Update the database securely on success
     if (userSnap && userSnap.exists && realUserPlan !== 'pro') {
       try {
-        } else if (!['generate', 'refine'].includes(task)) {
+        if (!['generate', 'refine'].includes(task)) {
           await userRef.update({
             scansUsedToday: isNewDay ? 1 : FieldValue.increment(1),
             lastScanDate: today
