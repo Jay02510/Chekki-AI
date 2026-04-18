@@ -249,7 +249,7 @@ export default async function handler(req: any, res: any) {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-001",
+        model: "gemini-2.5-flash",
         contents: [{
           role: 'user', parts: [{
             text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. 
@@ -285,7 +285,7 @@ export default async function handler(req: any, res: any) {
       if (!itemToRefine) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-001",
+        model: "gemini-2.5-flash",
         contents: [{
           role: 'user', parts: [{
             text: `System: You are an expert bilingual tutor for parents.
@@ -365,7 +365,7 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
             const guestData = guestSnap.data() || { count: 0, lastDate: '' };
 
             if (guestData.lastDate === today) {
-              if (guestData.count >= 2) {
+              if (guestData.count >= 5) { // Increased from 2 for easier testing
                 return res.status(403).json({ error: "GUEST_LIMIT_REACHED" });
               }
               await guestRef.update({ count: FieldValue.increment(1) });
@@ -411,7 +411,7 @@ If the user asks about politics, personal advice, entertainment, or anything out
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-001",
+        model: "gemini-2.5-flash",
         contents: [{
           role: 'user', parts: [{ text: question }]
         }],
@@ -459,13 +459,10 @@ If the user asks about politics, personal advice, entertainment, or anything out
       };
 
       // Determine model based on the SECURE pass tier
-      let currentModel = 'gemini-2.0-flash-001'; // Explicit stable version — generic alias 'gemini-2.0-flash' is deprecated for new API users
+      let currentModel = 'gemini-2.5-flash'; // Verified working stable model
       
       if (useThinking && realUserPlan === 'pro') {
-        // Use the same stable model for the deep fallback pass.
-        currentModel = 'gemini-2.0-flash-001';
-        // Note: thinkingConfig/thinkingBudget is only supported by explicit thinking models
-        // (e.g. gemini-2.0-flash-thinking-exp). Remove it to avoid API errors on flash.
+        currentModel = 'gemini-2.5-flash'; // Maintaining consistency 
       }
 
       return ai.models.generateContent({
