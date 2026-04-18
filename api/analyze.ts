@@ -223,7 +223,7 @@ export default async function handler(req: any, res: any) {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-2.0-flash",
         contents: [{
           role: 'user', parts: [{
             text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. 
@@ -259,7 +259,7 @@ export default async function handler(req: any, res: any) {
       if (!itemToRefine) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-2.0-flash",
         contents: [{
           role: 'user', parts: [{
             text: `System: You are an expert bilingual tutor for parents.
@@ -375,7 +375,7 @@ If the user asks about politics, personal advice, entertainment, or anything out
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-2.0-flash",
         contents: [{
           role: 'user', parts: [{ text: question }]
         }],
@@ -423,7 +423,7 @@ If the user asks about politics, personal advice, entertainment, or anything out
       };
 
       // Determine model based on the SECURE pass tier
-      let currentModel = 'gemini-2.0-flash-exp'; // Always default to lightning-fast Flash for the initial pass
+      let currentModel = 'gemini-2.0-flash'; // Always default to lightning-fast Flash for the initial pass
       
       if (useThinking && realUserPlan === 'pro') {
         currentModel = 'gemini-1.5-pro'; // Upgrade to Pro model for the heavy fallback
