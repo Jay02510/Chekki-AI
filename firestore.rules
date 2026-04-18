@@ -60,5 +60,11 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == adminId;
       allow write: if false; // Only manageable via Firebase Console
     }
+
+    // Rate Limits: Only writable by the backend Admin SDK (service account).
+    // Client-side access is explicitly denied. The Admin SDK bypasses these rules entirely.
+    match /ratelimits/{docId} {
+      allow read, write: if false;
+    }
   }
 }
