@@ -249,7 +249,7 @@ export default async function handler(req: any, res: any) {
       if (!Array.isArray(originalItems)) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.0-flash-001",
         contents: [{
           role: 'user', parts: [{
             text: `Context: ${JSON.stringify(originalItems).substring(0, 2000)}. 
@@ -285,7 +285,7 @@ export default async function handler(req: any, res: any) {
       if (!itemToRefine) return res.status(400).json({ error: "INVALID_INPUT" });
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.0-flash-001",
         contents: [{
           role: 'user', parts: [{
             text: `System: You are an expert bilingual tutor for parents.
@@ -411,7 +411,7 @@ If the user asks about politics, personal advice, entertainment, or anything out
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.0-flash-001",
         contents: [{
           role: 'user', parts: [{ text: question }]
         }],
@@ -459,12 +459,11 @@ If the user asks about politics, personal advice, entertainment, or anything out
       };
 
       // Determine model based on the SECURE pass tier
-      let currentModel = 'gemini-2.0-flash'; // Always default to lightning-fast Flash for the initial pass
+      let currentModel = 'gemini-2.0-flash-001'; // Explicit stable version — generic alias 'gemini-2.0-flash' is deprecated for new API users
       
       if (useThinking && realUserPlan === 'pro') {
-        // gemini-1.5-pro is deprecated in the v1beta API endpoint used by this SDK.
-        // Use gemini-2.0-flash for the deep fallback pass — it's faster and always available.
-        currentModel = 'gemini-2.0-flash';
+        // Use the same stable model for the deep fallback pass.
+        currentModel = 'gemini-2.0-flash-001';
         // Note: thinkingConfig/thinkingBudget is only supported by explicit thinking models
         // (e.g. gemini-2.0-flash-thinking-exp). Remove it to avoid API errors on flash.
       }
