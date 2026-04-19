@@ -218,12 +218,17 @@ export const refineWorksheetItem = async (item: WorksheetItem, reason: string, l
   }
 };
 
-export const askChekkiQuestion = async (question: string, language: string = 'ko', isGuest: boolean = false, signal?: AbortSignal): Promise<string> => {
+export interface ChatTurn {
+  role: 'user' | 'model';
+  text: string;
+}
+
+export const askChekkiQuestion = async (question: string, language: string = 'ko', isGuest: boolean = false, signal?: AbortSignal, history: ChatTurn[] = []): Promise<string> => {
   if (MOCK_MODE) {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     return isGuest 
       ? "This is a basic answer. 'A' is used before consonants, and 'an' before vowels."
-      : "This is a detailed answer. 'A' is used before words starting with a consonant, and 'an' is used before words starting with a vowel. For example, 'A dog' vs 'An apple'.";
+      : "This is a detailed answer. 'A' is used before words starting with a consonant, and 'an' is used before words starting with a vowel. For example, 'A dog' vs 'An apple'. Want to see more examples? 😊";
   }
 
   try {
@@ -239,7 +244,8 @@ export const askChekkiQuestion = async (question: string, language: string = 'ko
         task: 'ask_question',
         question: question,
         isGuest: isGuest,
-        language: language
+        language: language,
+        history: history
       })
     });
 

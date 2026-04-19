@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ChekkiMascot } from './Icons';
 import { toJpeg } from 'html-to-image';
 import { renderMarkdown } from '../utils/markdownUtils';
+import { ChatTurn } from '../services/geminiService';
 
 // --- AskChekkiBar Component ---
 
@@ -51,15 +52,34 @@ interface AskChekkiAnswerModalProps {
   question: string;
   isAuthenticated: boolean;
   language: string;
+  history: ChatTurn[];
   onClose: () => void;
   openLoginModal: () => void;
+  onFollowUp: (question: string) => void;
 }
 
 export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({ 
-  answer, isAsking, question, isAuthenticated, language, onClose, openLoginModal 
+  answer, isAsking, question, isAuthenticated, language, history, onClose, openLoginModal, onFollowUp
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [followUpText, setFollowUpText] = useState('');
+  const [showConfirmClose, setShowConfirmClose] = useState(false);
+
+  const handleCloseAttempt = () => {
+    // If there's an answer from Chekki, warn them before wiping
+    if (history.some(t => t.role === 'model')) {
+      setShowConfirmClose(true);
+    } else {
+      onClose();
+    }
+  };
+
+  // Scroll to bottom whenever history or loading state changes
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [history, isAsking]);
 
   const handleSave = async () => {
     if (!contentRef.current) return;
@@ -81,107 +101,203 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
     }
   };
 
-  if (!answer && !isAsking) return null;
+  const handleFollowUpSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!followUpText.trim() || isAsking) return;
+    onFollowUp(followUpText.trim());
+    setFollowUpText('');
+  };
+
+  // Don't render if there's no content at all and not loading
+  if (!answer && !isAsking && history.length === 0) return null;
+
+  // We show all completed turns from history, plus the last pending question if isAsking
+  const completedTurns = history;
+  // The current pending question is `question` when `isAsking` is true
 
   return (
     <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-zinc-950 border border-white/10 rounded-[2.5rem] w-full max-w-lg max-h-[85dvh] flex flex-col shadow-2xl animate-fade-in-up overflow-hidden">
+        
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/5">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/5 shrink-0">
           <div className="flex items-center gap-4">
             <span className="text-2xl shrink-0">{isAsking ? '💭' : '🙋‍♂️'}</span>
             <div className="min-w-0 flex-1">
               <p className="text-[10px] text-orange-400 font-black uppercase tracking-widest">
-                {isAsking 
-                  ? (language === 'ko' ? '생각하는 중...' : 'Thinking...') 
-                  : (language === 'ko' ? '채키의 답변' : 'Chekki says')}
+                {language === 'ko' ? '채키 AI 튜터' : 'Chekki AI Tutor'}
               </p>
-              <p className="text-white text-sm font-semibold font-korean mt-0.5 italic opacity-70 leading-snug break-words pr-4">&ldquo;{question}&rdquo;</p>
+              <p className="text-white text-xs font-semibold font-korean mt-0.5 opacity-60 leading-snug break-words pr-4">
+                {history.length > 0 
+                  ? (language === 'ko' ? `${Math.ceil(history.length / 2)}번의 대화` : `${Math.ceil(history.length / 2)} exchange${Math.ceil(history.length / 2) > 1 ? 's' : ''}`)
+                  : `"${question}"`}
+              </p>
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleCloseAttempt}
             className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-colors shrink-0 ml-3"
           >
             ✕
           </button>
         </div>
 
-        {/* Body */}
-        <div className="overflow-y-auto px-6 py-5 flex-1 custom-scrollbar">
-          {isAsking ? (
-            <div className="flex flex-col items-center justify-center py-16 px-4 gap-6 text-center">
-              <div className="w-32 h-32 md:w-36 md:h-36 relative mb-2">
-                <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-2xl animate-pulse" />
-                <ChekkiMascot className="w-full h-full relative z-10 animate-float" mood="thinking" />
+        {/* Confirmation Overlay */}
+        {showConfirmClose && (
+          <div className="absolute inset-0 z-[210] bg-zinc-950/90 backdrop-blur-md flex items-center justify-center p-8 animate-fade-in shadow-2xl">
+            <div className="text-center space-y-6 max-w-sm">
+              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
+                <span className="text-3xl">⚠️</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-black text-white font-display tracking-tight">
-                {language === 'ko' ? '흠... 흥미로운 질문이네요!' : 'Hmm... Interesting question!'}
-              </h3>
-              <p className="text-zinc-400 font-korean text-sm md:text-base leading-relaxed max-w-sm">
-                {language === 'ko' 
-                  ? '채키가 열심히 머리를 굴리며 가장 좋은 답변을 생각하고 있어요.' 
-                  : 'Chekki is thinking hard to find the best answer for you.'}
-              </p>
-              <div className="flex items-center gap-3 mt-4 text-orange-400 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] animate-pulse">
-                <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(249,115,22,0.5)]" />
-                {language === 'ko' ? '잠시만 기다려주세요' : 'Just a moment'}
+              <div>
+                <h3 className="text-xl font-black text-white font-display uppercase tracking-tight mb-2">
+                  {language === 'ko' ? '대화를 종료할까요?' : 'Close Conversation?'}
+                </h3>
+                <p className="text-zinc-400 text-sm font-korean leading-relaxed">
+                  {language === 'ko' 
+                    ? '지금 닫으면 대화 내용이 모두 사라집니다. 답변을 이미지로 저장하시겠어요?' 
+                    : 'Closing will wipe your current chat history. Would you like to save the answer as an image first?'}
+                </p>
+              </div>
+              <div className="flex flex-col gap-3 pt-2">
+                <button
+                  onClick={async () => { await handleSave(); onClose(); }}
+                  className="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all"
+                >
+                  📥 {language === 'ko' ? '이미지로 저장하고 닫기' : 'Save & Close'}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border border-red-500/20 active:scale-95 transition-all"
+                >
+                  {language === 'ko' ? '저장하지 않고 종료' : 'Close Anyway'}
+                </button>
+                <button
+                  onClick={() => setShowConfirmClose(false)}
+                  className="w-full text-zinc-500 py-2 font-bold text-xs uppercase tracking-widest hover:text-white transition-colors"
+                >
+                  {language === 'ko' ? '취소' : 'Cancel'}
+                </button>
               </div>
             </div>
-          ) : (
-            <div className="space-y-6">
-              <div ref={contentRef} className="bg-zinc-900 border border-white/5 rounded-[2rem] p-6 md:p-8 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
-                  <span className="text-[120px]">💡</span>
-                </div>
-                
-                <div className="relative z-10 flex gap-4 mb-6">
-                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white/10 shadow-lg shrink-0 overflow-hidden">
-                    <ChekkiMascot className="w-full h-full scale-110" mood="happy" />
-                  </div>
-                  <div className="bg-zinc-800/80 p-3.5 rounded-2xl rounded-tl-none border border-white/5 w-fit max-w-[85%] self-start">
-                    <p className="text-zinc-200 text-xs italic font-korean leading-relaxed">&quot;{question}&quot;</p>
-                  </div>
-                </div>
+          </div>
+        )}
 
-                <div className="relative z-10">
+        {/* Chat Body */}
+        <div className="overflow-y-auto px-5 py-4 flex-1 custom-scrollbar space-y-5">
+          
+          {/* Render conversation history */}
+          {completedTurns.map((turn, idx) => (
+            turn.role === 'user' ? (
+              /* User bubble */
+              <div key={idx} className="flex justify-end">
+                <div className="bg-orange-500/20 border border-orange-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]">
+                  <p className="text-zinc-200 text-xs italic font-korean leading-relaxed">&ldquo;{turn.text}&rdquo;</p>
+                </div>
+              </div>
+            ) : (
+              /* Chekki answer bubble */
+              <div key={idx} className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white/10 shadow-lg shrink-0 overflow-hidden mt-0.5">
+                  <ChekkiMascot className="w-full h-full scale-110" mood="happy" />
+                </div>
+                <div
+                  ref={idx === completedTurns.length - 1 ? contentRef : undefined}
+                  className="bg-zinc-900 border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 flex-1 prose-answer"
+                >
                   <div
-                    className="text-zinc-100 text-sm md:text-base font-korean leading-relaxed prose-answer"
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(answer ?? '') }}
+                    className="text-zinc-100 text-sm font-korean leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(turn.text) }}
                   />
-                  <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between opacity-30">
-                    <p className="text-[9px] uppercase font-black tracking-[0.2em] text-white">Chekki AI Tutor</p>
-                    <span className="text-xs">⭐️</span>
-                  </div>
                 </div>
               </div>
+            )
+          ))}
 
-              <div className="w-full flex gap-3 pt-2">
-                 <button
-                   onClick={handleSave}
-                   disabled={isSaving}
-                   className="flex-1 bg-white hover:bg-zinc-200 text-black py-4 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-xl disabled:opacity-50"
-                 >
-                   {isSaving ? (
-                     <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                   ) : (
-                     <><span>📥</span> {language === 'ko' ? '이미지로 저장' : 'Save as Image'}</>
-                   )}
-                 </button>
+          {/* Thinking / loading state for the current pending question */}
+          {isAsking && (
+            <>
+              {/* Show the pending user question bubble */}
+              <div className="flex justify-end">
+                <div className="bg-orange-500/20 border border-orange-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]">
+                  <p className="text-zinc-200 text-xs italic font-korean leading-relaxed">&ldquo;{question}&rdquo;</p>
+                </div>
               </div>
-            </div>
+              {/* Thinking bubble */}
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white/10 shadow-lg shrink-0 overflow-hidden mt-0.5">
+                  <ChekkiMascot className="w-full h-full scale-110 animate-float" mood="thinking" />
+                </div>
+                <div className="bg-zinc-900 border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-[bounce_1s_infinite_0ms]" />
+                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-[bounce_1s_infinite_150ms]" />
+                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-[bounce_1s_infinite_300ms]" />
+                  </div>
+                  <p className="text-zinc-400 text-xs font-korean">
+                    {language === 'ko' ? '생각하는 중...' : 'Thinking...'}
+                  </p>
+                </div>
+              </div>
+            </>
           )}
+
+          {/* Scroll anchor */}
+          <div ref={chatBottomRef} />
         </div>
 
+        {/* Follow-up Input */}
+        {!isAsking && history.length > 0 && isAuthenticated && (
+          <div className="px-4 pt-3 pb-3 border-t border-white/5 shrink-0 bg-zinc-950/80">
+            <form onSubmit={handleFollowUpSubmit} className="flex items-center gap-2 bg-zinc-900 border border-white/10 focus-within:border-orange-500/60 rounded-2xl px-4 py-2.5 transition-all">
+              <input
+                type="text"
+                value={followUpText}
+                onChange={e => setFollowUpText(e.target.value)}
+                placeholder={language === 'ko' ? "더 궁금한 게 있나요?" : "Want more examples? Ask a follow-up!"}
+                className="flex-1 bg-transparent text-white text-xs font-korean placeholder:text-zinc-500 focus:outline-none"
+                enterKeyHint="send"
+                autoFocus={false}
+              />
+              <button
+                type="submit"
+                disabled={!followUpText.trim() || isAsking}
+                className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90 ${followUpText.trim() ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-500'}`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.269 20.876L5.999 12zm0 0h7.5"/>
+                </svg>
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Save button row (only show when we have answers) */}
+        {!isAsking && history.some(t => t.role === 'model') && (
+          <div className="px-4 pb-4 shrink-0 border-t border-white/5">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="w-full mt-3 bg-white hover:bg-zinc-200 text-black py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-xl disabled:opacity-50"
+            >
+              {isSaving ? (
+                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+              ) : (
+                <><span>📥</span> {language === 'ko' ? '이미지로 저장' : 'Save as Image'}</>
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Footer upsell for guests */}
-        {!isAsking && !isAuthenticated && answer && (
-          <div className="px-6 pb-6 pt-3 border-t border-white/5 bg-zinc-950/50">
+        {!isAsking && !isAuthenticated && history.some(t => t.role === 'model') && (
+          <div className="px-6 pb-6 pt-3 border-t border-white/5 bg-zinc-950/50 shrink-0">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-[10px] text-orange-400 font-black uppercase tracking-widest mb-0.5">{language === 'ko' ? '도움이 되셨나요?' : 'Was this helpful?'}</p>
                 <p className="text-[10px] text-zinc-500 font-korean truncate">
-                  {language === 'ko' ? '무료 로그인하고 더 자세한 설명을 확인하세요!' : 'Login to unlock examples & deeper rules!'}
+                  {language === 'ko' ? '무료 로그인하고 대화를 이어가세요!' : 'Login to ask follow-ups & get deeper answers!'}
                 </p>
               </div>
               <button

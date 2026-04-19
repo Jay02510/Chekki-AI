@@ -21,7 +21,7 @@ import { normalizeText, compareSpeech } from '../utils/speechUtils';
 import { refineWorksheetItem } from '../services/geminiService';
 import { renderMarkdown } from '../utils/markdownUtils';
 import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
-import { askChekkiQuestion } from '../services/geminiService';
+import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 
 
 interface Props {
@@ -54,6 +54,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const [askAnswer, setAskAnswer] = useState<string | null>(null);
   const [askAnsweredQuestion, setAskAnsweredQuestion] = useState('');
   const [isAsking, setIsAsking] = useState(false);
+  const [askHistory, setAskHistory] = useState<ChatTurn[]>([]);
 
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
@@ -179,14 +180,30 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
   const handleAskSubmit = async (question: string) => {
     if (!question.trim() || isAsking) return;
     
-    setAskAnswer(null);
+    const isFollowUp = askHistory.length > 0;
+    
+    // Only clear history if it's a completely fresh question from the top bar.
+    // This allows the follow-up logic to keep context visible while "thinking".
+    if (!isFollowUp) {
+      setAskAnswer(null);
+      setAskHistory([]);
+    }
+    
     setAskAnsweredQuestion(question);
     setIsAsking(true);
     
     try {
       const isGuest = !isAuthenticated;
-      const response = await askChekkiQuestion(question, language, isGuest);
+      // Pass history along with the new question
+      const response = await askChekkiQuestion(question, language, isGuest, undefined, askHistory);
+      
       setAskAnswer(response);
+      // Update history: add BOTH the question and the response
+      setAskHistory(prev => [
+        ...prev, 
+        { role: 'user' as const, text: question },
+        { role: 'model' as const, text: response }
+      ]);
     } catch (error: any) {
       console.error("Ask Chekki error:", error.message);
       
@@ -205,7 +222,7 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
       setAskAnswer(errorMsg);
     } finally {
       // Add a slight cooldown to prevent accidental double-fire on button re-enable
-      setTimeout(() => setIsAsking(false), 1500);
+      setTimeout(() => setIsAsking(false), 500);
     }
   };
 
@@ -444,8 +461,10 @@ export const SplitView: React.FC<Props> = ({ imageUrl, items, isLoadingItems = f
         question={askAnsweredQuestion}
         isAuthenticated={isAuthenticated}
         language={language}
-        onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); }}
+        history={askHistory}
+        onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); setAskHistory([]); }}
         openLoginModal={openLoginModal}
+        onFollowUp={handleAskSubmit}
       />
       {refiningItemId !== null && (
         <RefineModal 

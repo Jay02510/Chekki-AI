@@ -324,7 +324,7 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
     }
 
     if (task === 'ask_question') {
-      const { question } = body;
+      const { question, history } = body;
       const xForwardedFor = req.headers['x-forwarded-for'];
       const clientIp = typeof xForwardedFor === 'string' ? xForwardedFor.split(',')[0].trim() : (req.headers['x-real-ip'] || req.socket.remoteAddress || 'unknown');
       const ipKey = String(clientIp).replace(/\./g, '_').replace(/:/g, '_'); // Firestore friendly key (IPv4 & IPv6)
@@ -376,7 +376,9 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
 
           // --- 3. LOGGED-IN DAILY LIMITS ---
           // Enforcement for non-pro logged-in users
-          if (!isGuest && realUserPlanForQuestion !== 'pro' && currentQuestions >= maxQuestions) {
+          // IMPORTANT: Allow follow-ups even if limit is reached, so conversation isn't cut off.
+          const isInitialQuestion = !history || history.length === 0;
+          if (!isGuest && realUserPlanForQuestion !== 'pro' && currentQuestions >= maxQuestions && isInitialQuestion) {
             return res.status(403).json({ error: "QUESTION_LIMIT_REACHED" });
           }
         } catch (rateLimitErr: any) {
@@ -389,37 +391,53 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
 
       if (!question) return res.status(400).json({ error: "INVALID_INPUT" });
 
-      let currentSystemPrompt = `You are Chekki, a friendly and educational tutor for English Kindergarten parents and students. Your ONLY purpose is to answer educational, homework, and study-related questions. Give concise, simple answers using plain, natural language — like a teacher talking to a parent.
+      let currentSystemPrompt = `You are Chekki, a friendly and educational tutor for English Kindergarten parents and students in Korea. Your ONLY purpose is to answer educational, homework, and study-related questions.
 
-CRITICAL: Use rich markdown formatting to make your answers vibrant and easy to read:
-1. Use **bold text** (strong) for key terms, vocabulary, or important English words.
-2. Use *italic text* (em) for emphasis, translations, or secondary explanations.
-3. Use ==highlighted text== (mark) for definitive rules, grammar formulas, or specific answers.
+RESPONSE STYLE — CRITICAL:
+- Be CONCISE. Give a clear, direct core answer in 2 to 3 sentences maximum.
+- Include ONE short, practical example only.
+- Do NOT explain every edge case or exception in the first reply. Trust the user to ask for more.
+- End EVERY answer with a short, natural follow-up offer on its own line, for example: "Want to see more examples? 😊" or "Need a deeper explanation? Just ask!"
 
-If the user asks about politics, personal advice, entertainment, or anything outside the realm of academics, politely reply with: "I am an educational tutor focused on helping you learn! Please ask me a question related to school, homework, or studying."`;
+Formatting: Use rich markdown to make answers visual:
+1. **bold** for key English terms or vocabulary words.
+2. *italic* for translations or secondary notes.
+3. ==highlighted== for the core rule or the definitive answer.
+
+If the question is off-topic (politics, entertainment, personal advice), politely say: "I'm an educational tutor — please ask me something school-related!"`;
 
       if (language === 'ko') {
-        currentSystemPrompt += `\n\nPRIMARY LANGUAGE: Korean. Explain complex concepts in Korean. Always include the corresponding English term in **bold**. For example sentences, provide the English in *italics* followed by a Korean translation. (CRITICAL: If the user explicitly asks for the answer to be in English or another language, prioritize their request instead).`;
+        currentSystemPrompt += `\n\nPRIMARY LANGUAGE: Korean. Explain in Korean; put the English term in **bold**. Example sentences: English in *italics* then Korean translation. (If user asks for English, switch to English).`;
       } else {
-        currentSystemPrompt += `\n\nPRIMARY LANGUAGE: English. Explain concepts in clear, simple English. Focus on immersion while maintaining an educational tone. (CRITICAL: If the user explicitly asks for the answer to be in Korean or another language, prioritize their request instead).`;
+        currentSystemPrompt += `\n\nPRIMARY LANGUAGE: English. Explain in simple English. (If user asks for Korean, switch to Korean).`;
       }
 
       if (isGuest) {
-         currentSystemPrompt += `\n\nCRITICAL RULE FOR THIS USER: This user is an unregistered guest. Provide ONLY 1 to 2 short, direct sentences as your answer. Use at most one highlight or bold term. Do not give examples, detailed rules, or extra context — keep it very brief.`;
-      } else {
-         currentSystemPrompt += `\n\nProvide a rich, conversational answer. Include 1 to 2 practical examples. Use a variety of bolding, italics, and highlights to distinguish between English terms, Korean explanations, and core rules. This creates a multi-colored effect for the user.`;
+        currentSystemPrompt += `\n\nCRITICAL: This is a guest user. Give ONLY 1 to 2 short sentences. No examples. No follow-up offer. Extremely brief.`;
       }
+
+      // Build multi-turn conversation contents
+      // history is an array of { role: 'user' | 'model', text: string }
+      const safeHistory = Array.isArray(history) ? history.slice(-10) : []; // Cap history at last 10 turns
+      const conversationContents: any[] = [
+        ...safeHistory.map((turn: { role: string; text: string }) => ({
+          role: turn.role === 'model' ? 'model' : 'user',
+          parts: [{ text: turn.text }]
+        })),
+        { role: 'user', parts: [{ text: question }] }
+      ];
 
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: [{
-          role: 'user', parts: [{ text: question }]
-        }],
+        contents: conversationContents,
         config: { systemInstruction: currentSystemPrompt, temperature: 0.7 }
       });
 
       // Securely update logged-in limits after success
-      if (!isGuest && realUserPlan !== 'pro' && userRef) {
+      // RULE: The first follow-up (history length 2: 1 user, 1 model) doesn't count.
+      const isFirstFollowUp = Array.isArray(history) && history.length === 2;
+      
+      if (!isGuest && realUserPlan !== 'pro' && userRef && !isFirstFollowUp) {
         await userRef.update({
           questionsUsedToday: isNewQuestionDay ? 1 : FieldValue.increment(1),
           lastQuestionDate: today
