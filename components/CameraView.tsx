@@ -12,7 +12,7 @@ import { LegalType } from '../types';
 const LegalModal = React.lazy(() => import('./LegalModal').then(module => ({ default: module.LegalModal })));
 import { FlyerModal } from './FlyerModal';
 import { ScreenshotCarousel } from './ScreenshotCarousel';
-import { askChekkiQuestion } from '../services/geminiService';
+import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 import { renderMarkdown } from '../utils/markdownUtils';
 
 
@@ -210,36 +210,46 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [askAnswer, setAskAnswer] = useState<string | null>(null);
   const [askAnsweredQuestion, setAskAnsweredQuestion] = useState('');
   const [isAskAsking, setIsAskAsking] = useState(false);
+  const [askHistory, setAskHistory] = useState<ChatTurn[]>([]);
 
   const handleAskSubmit = useCallback(async (question: string) => {
-    if (!question.trim()) return;
+    if (!question.trim() || isAskAsking) return;
     
     // Check limit for authenticated free users
     if (isAuthenticated && !checkQuestionLimit()) {
       return;
     }
 
-    setAskAnswer(null);
+    const isFollowUp = askHistory.length > 0;
+    if (!isFollowUp) {
+      setAskAnswer(null);
+      setAskHistory([]);
+    }
+
     setAskAnsweredQuestion(question);
     setIsAskAsking(true);
     
     try {
       const isGuest = !isAuthenticated;
-      const response = await askChekkiQuestion(question, language, isGuest);
+      const response = await askChekkiQuestion(question, language, isGuest, undefined, askHistory);
       setAskAnswer(response);
+
+      setAskHistory(prev => [
+        ...prev,
+        { role: 'user' as const, text: question },
+        { role: 'model' as const, text: response }
+      ]);
       
       // Increment only for authenticated users (backend also handles this)
       if (isAuthenticated) {
         await incrementQuestion();
-      } else {
-        // For guests, we can track usage in session if needed, but not required by current plan
       }
     } catch (error: any) {
       setAskAnswer(language === 'ko' ? '오류가 발생했습니다. 다시 시도해주세요.' : 'Something went wrong. Please try again.');
     } finally {
       setIsAskAsking(false);
     }
-  }, [isAuthenticated, checkQuestionLimit, incrementQuestion, language]);
+  }, [isAuthenticated, checkQuestionLimit, incrementQuestion, language, askHistory, isAskAsking]);
 
   const ClarityGuide = () => (
     <div className="flex flex-wrap justify-center gap-2 mt-6 md:mt-12 mb-4 px-2">
@@ -438,8 +448,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           question={askAnsweredQuestion}
           isAuthenticated={isAuthenticated}
           language={language}
-          onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); }}
+          history={askHistory}
+          onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); setAskHistory([]); }}
           openLoginModal={openLoginModal}
+          onFollowUp={handleAskSubmit}
         />
 
         <div className="w-full max-w-5xl flex flex-col items-center text-center mb-8 md:mb-24 gap-4 md:gap-14 px-4">
@@ -507,8 +519,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         question={askAnsweredQuestion}
         isAuthenticated={isAuthenticated}
         language={language}
-        onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); }}
+        history={askHistory}
+        onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); setAskHistory([]); }}
         openLoginModal={openLoginModal}
+        onFollowUp={handleAskSubmit}
       />
 
       <div className="relative max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-24 items-center mb-12 md:mb-40">
