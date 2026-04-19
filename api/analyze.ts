@@ -261,7 +261,7 @@ export default async function handler(req: any, res: any) {
       });
 
       const text = response.text || "[]";
-      let cleanedText = text.replace(/```json\n?|```/g, "").trim();
+      const cleanedText = text.replace(/```json\n?|```/g, "").trim();
       try {
         const parsed = JSON.parse(cleanedText);
         
@@ -304,7 +304,7 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
       });
 
       const text = response.text || "{}";
-      let cleanedText = text.replace(/```json\n?|```/g, "").trim();
+      const cleanedText = text.replace(/```json\n?|```/g, "").trim();
       try {
         const parsed = JSON.parse(cleanedText);
         
@@ -333,7 +333,7 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
       const now = Date.now();
 
       // --- Rate-limit enforcement (graceful degradation if Firestore is unavailable) ---
-      let isGuest = !decodedToken || !userSnap || !userSnap.exists;
+      const isGuest = !decodedToken || !userSnap || !userSnap.exists;
       const realUserPlanForQuestion = userData?.plan || 'free';
       const isNewQuestionDay = userData?.lastQuestionDate !== today;
       const currentQuestions = isNewQuestionDay ? 0 : (userData?.questionsUsedToday || 0);

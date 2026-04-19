@@ -18,6 +18,8 @@ export const revenueCatService = {
      * Should be called as early as possible (e.g., in App.tsx).
      */
     async initialize(userId?: string) {
+        if (Capacitor.getPlatform() === 'web') return;
+
         const platform = Capacitor.getPlatform();
         let apiKey = '';
 
@@ -28,7 +30,7 @@ export const revenueCatService = {
         }
 
         if (!apiKey || apiKey.includes('placeholder')) {
-            console.warn('[RevenueCat] Initialization skipped: Missing or placeholder API key.');
+            console.warn(`[RevenueCat] Initialization skipped for ${platform}: API key is missing or placeholder.`);
             return;
         }
 

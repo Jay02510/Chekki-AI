@@ -61,7 +61,7 @@ interface AskChekkiAnswerModalProps {
 export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({ 
   answer, isAsking, question, isAuthenticated, language, history, onClose, openLoginModal, onFollowUp
 }) => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [followUpText, setFollowUpText] = useState('');
@@ -82,10 +82,15 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
   }, [history, isAsking]);
 
   const handleSave = async () => {
-    if (!contentRef.current) return;
+    if (!chatContainerRef.current) return;
     setIsSaving(true);
     try {
-      const dataUrl = await toJpeg(contentRef.current, { quality: 1, backgroundColor: '#09090b', pixelRatio: 2 });
+      const dataUrl = await toJpeg(chatContainerRef.current, { 
+        quality: 0.95, 
+        backgroundColor: '#09090b', 
+        pixelRatio: 2,
+        skipFonts: true // Speeds up capture on mobile
+      });
       const { saveImageToDevice } = await import('../utils/exportUtils');
       await saveImageToDevice( 
         dataUrl, 
@@ -185,7 +190,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
         )}
 
         {/* Chat Body */}
-        <div className="overflow-y-auto px-5 py-4 flex-1 custom-scrollbar space-y-5">
+        <div ref={chatContainerRef} className="overflow-y-auto px-5 py-4 flex-1 custom-scrollbar space-y-5 bg-[#09090b]">
           
           {/* Render conversation history */}
           {completedTurns.map((turn, idx) => (
@@ -203,7 +208,6 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                   <ChekkiMascot className="w-full h-full scale-110" mood="happy" />
                 </div>
                 <div
-                  ref={idx === completedTurns.length - 1 ? contentRef : undefined}
                   className="bg-zinc-900 border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 flex-1 prose-answer"
                 >
                   <div

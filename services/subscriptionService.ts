@@ -41,23 +41,26 @@ export const subscriptionService = {
     async initialize(userId: string, idToken: string): Promise<SubscriptionRecord> {
         const platform = Capacitor.getPlatform();
 
-        // On iOS: also check StoreKit directly for real-time accuracy
+        // On iOS: check RevenueCat entitlements first for real-time accuracy
         if (platform === 'ios') {
             try {
-                const customerInfo = await revenueCatService.getCustomerInfo();
-                const hasActiveSub = Object.keys(customerInfo.customerInfo.entitlements.active).length > 0;
+                const info = await revenueCatService.getCustomerInfo();
+                // Depending on SDK version, info might be a wrapper or the object itself
+                const customerInfo = (info as any).customerInfo || info;
+                const hasActiveSub = customerInfo?.entitlements?.active && Object.keys(customerInfo.entitlements.active).length > 0;
+                
                 if (hasActiveSub) {
                     const localRecord: SubscriptionRecord = {
                         user_id: userId,
                         subscription_status: 'active',
                         subscription_platform: 'apple',
-                        subscription_expiry_date: null,
+                        subscription_expiry_date: customerInfo.entitlements.active[Object.keys(customerInfo.entitlements.active)[0]].expirationDate,
                     };
                     cacheRecord(localRecord);
                     return localRecord;
                 }
-            } catch (e) { console.error("StoreKit err", e);
-                // StoreKit unavailable (simulator, etc.) — fall through to backend
+            } catch (e) { 
+                console.warn("[SubscriptionService] RevenueCat check failed, falling back to backend:", e);
             }
         }
 
