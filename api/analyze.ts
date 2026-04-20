@@ -188,7 +188,7 @@ export default async function handler(req: any, res: any) {
       maxScansPerDay: 3, 
       lastScanDate: '',
       questionsUsedToday: 0,
-      maxQuestionsPerDay: 2,
+      maxQuestionsPerDay: 5,
       lastQuestionDate: '',
       generatesUsedToday: 0,
       maxGeneratesPerDay: 5,
@@ -337,7 +337,7 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
       const realUserPlanForQuestion = userData?.plan || 'free';
       const isNewQuestionDay = userData?.lastQuestionDate !== today;
       const currentQuestions = isNewQuestionDay ? 0 : (userData?.questionsUsedToday || 0);
-      const maxQuestions = userData?.maxQuestionsPerDay || 2;
+      const maxQuestions = userData?.maxQuestionsPerDay || 5;
 
       if (firebaseAdminAvailable) {
         try {
@@ -394,7 +394,7 @@ Return ONLY valid JSON with EXACTLY these four keys: "korean_guide", "english_gu
       let currentSystemPrompt = `You are Chekki, a friendly and educational tutor for English Kindergarten parents and students in Korea. Your ONLY purpose is to answer educational, homework, and study-related questions.
 
 RESPONSE STYLE — CRITICAL:
-- Be CONCISE. Give a clear, direct core answer in 2 to 3 sentences maximum.
+- Be CONCISE but helpful. Give a clear, direct core answer in 4 to 5 sentences maximum if the topic requires depth.
 - Include ONE short, practical example only.
 - Do NOT explain every edge case or exception in the first reply. Trust the user to ask for more.
 - End EVERY answer with a short, natural follow-up offer on its own line, for example: "Want to see more examples? 😊" or "Need a deeper explanation? Just ask!"

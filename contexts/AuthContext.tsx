@@ -142,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             name: 'Reviewer (Expired)',
             plan: 'free',
             maxScansPerDay: 3,
-            maxQuestionsPerDay: 2
+            maxQuestionsPerDay: 5
           };
           if (!hasActiveAppStoreSub) {
             setShowPaywall(true);
@@ -227,7 +227,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lastScanDate: new Date().toISOString().split('T')[0],
         maxScansPerDay: maxScans,
         questionsUsedToday: 0,
-        maxQuestionsPerDay: plan === 'pro' ? 9999 : 2,
+        maxQuestionsPerDay: plan === 'pro' ? 9999 : 5,
         lastQuestionDate: new Date().toISOString().split('T')[0],
         schoolId,
         schoolName,
@@ -375,7 +375,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastQuestionDate !== today;
     const currentQuestions = isNewDay ? 0 : userProfile.questionsUsedToday;
-    const limit = userProfile.maxQuestionsPerDay || 2;
+    const limit = userProfile.maxQuestionsPerDay || 5;
     if (currentQuestions >= limit) {
       setShowPaywall(true);
       return false;

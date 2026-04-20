@@ -432,7 +432,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     const remaining = isPro ? '∞' : remainingCount.toString();
 
     const isNewQuestionDay = user?.lastQuestionDate !== today;
-    const maxQuestions = user?.maxQuestionsPerDay || 2;
+    const maxQuestions = user?.maxQuestionsPerDay || 5;
     const questionsUsed = isNewQuestionDay ? 0 : (user?.questionsUsedToday || 0);
     const remainingQuestionsCount = Math.max(0, maxQuestions - questionsUsed);
     const remainingQuestions = isPro ? '∞' : remainingQuestionsCount.toString();
