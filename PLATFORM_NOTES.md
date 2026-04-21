@@ -4,6 +4,14 @@ This document captures important steps for maintaining consistency between the w
 
 ### 1. Versioning
 We have centralized the application version in `src/version.ts`. 
+
+> [!IMPORTANT]
+> **RELEASE CHECKLIST**: Before pushing a new build to the App Store:
+> 1. Increment `version` in `package.json`.
+> 2. Update `APP_VERSION` in `src/version.ts` (This controls the Splash Screen/UI version display).
+> 3. Ensure `versionName` (Android) and `MARKETING_VERSION` (iOS) match.
+> 4. Run `npm run mobile` to sync all assets.
+
 - **Action**: Always update `src/version.ts` first.
 - **Android Studio**: Ensure `versionName` in `app/build.gradle` matches `src/version.ts`.
 - **Xcode**: Ensure `MARKETING_VERSION` in your project settings matches `src/version.ts`.
