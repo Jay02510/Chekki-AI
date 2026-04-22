@@ -13,7 +13,7 @@ const MOCK_POSTSList = (ko: boolean): CommunityPost[] => [
     },
     {
         id: '2', author: ko ? '민준이네' : 'Min-jun Family', avatar: '👨🏻', timeAgo: ko ? '예시' : 'Example',
-        content: ko ? '드디어 10일 연속 출석 달성! 🏆 "Growing!" 바가 채워지는 걸 보면서 아이가 더 신나서 숙제해요.' : 'Finally hit a 10-day study streak! 🏆 My child is so motivated to see the "Growing!" bar fill up.',
+        content: ko ? '오늘도 아이랑 리추얼 레코드(Ritual Record) 한 장 남겼어요! 🏆 종이 위에 바로 뜨는 정답 덕분에 설명해주기도 편하고, 아이도 신기해하며 좋아하네요.' : 'Just saved another Ritual Record! 🏆 The instant answer overlays make it so easy to explain things, and my child loves seeing the magic happen.',
         likes: 156, comments: 12, tag: ko ? '성취' : 'Achievement'
     },
     {
@@ -25,9 +25,10 @@ const MOCK_POSTSList = (ko: boolean): CommunityPost[] => [
 
 interface Props {
     onClose: () => void;
+    isNight?: boolean;
 }
 
-export const CommunityModal: React.FC<Props> = ({ onClose }) => {
+export const CommunityModal: React.FC<Props> = ({ onClose, isNight = true }) => {
     const { user } = useAuth();
     const { t, language } = useLanguage();
     const [postContent, setPostContent] = useState('');
@@ -63,27 +64,27 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
 
-            <div className="relative bg-zinc-900 rounded-3xl w-full max-w-lg md:max-w-2xl h-[80vh] flex flex-col shadow-2xl border border-zinc-700 animate-fade-in-up">
+            <div className={`relative ${isNight ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-zinc-200'} rounded-3xl w-full max-w-lg md:max-w-2xl h-[80vh] flex flex-col shadow-2xl border animate-fade-in-up`}>
 
                 {/* Header */}
-                <div className="bg-zinc-950 p-4 border-b border-zinc-800 flex justify-between items-center shrink-0">
+                <div className={`${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-50 border-zinc-200'} p-4 border-b flex justify-between items-center shrink-0`}>
                     <div className="flex items-center gap-2">
                         <span className="text-xl">☕</span>
-                        <h2 className="text-lg font-bold text-white font-display">Parent&apos;s Lounge</h2>
+                        <h2 className={`text-lg font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}>Parent&apos;s Lounge</h2>
                     </div>
-                    <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">✕</button>
+                    <button onClick={onClose} className="text-zinc-500 hover:text-orange-500 transition-colors">✕</button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
 
                     {/* --- POST GENERATOR SECTION --- */}
-                    <div className="bg-gradient-to-b from-zinc-800 to-zinc-900 rounded-2xl p-5 border border-zinc-700 shadow-lg">
+                    <div className={`${isNight ? 'bg-gradient-to-b from-zinc-800 to-zinc-900 border-zinc-700' : 'bg-zinc-50 border-zinc-200 shadow-sm'} rounded-2xl p-5 border shadow-lg`}>
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg">
                                 {user?.name.charAt(0) || 'Me'}
                             </div>
                             <div>
-                                <h3 className="text-white font-bold text-sm">Create Study Log</h3>
+                                <h3 className={`${isNight ? 'text-white' : 'text-zinc-900'} font-bold text-sm`}>Create Study Log</h3>
                                 <p className="text-zinc-400 text-xs">Share your child&apos;s progress easily!</p>
                             </div>
                         </div>
@@ -92,7 +93,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
                             value={postContent}
                             onChange={(e) => setPostContent(e.target.value)}
                             placeholder={language === 'ko' ? "오늘 숙제는 어땠나요? (예: 민준이가 파닉스 퀴즈를 다 맞았어요!)" : "How did the homework go today?"}
-                            className="w-full bg-black/20 border border-zinc-700 rounded-xl p-3 text-zinc-200 placeholder-zinc-500 text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 outline-none resize-none h-24 mb-4 transition-all font-korean"
+                            className={`w-full ${isNight ? 'bg-black/20 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-xl p-3 placeholder-zinc-500 text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 outline-none resize-none h-24 mb-4 transition-all font-korean`}
                         />
 
                         <div className="grid grid-cols-2 gap-3">
@@ -133,20 +134,20 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
                         </h4>
                         <div className="space-y-3">
                             {MOCK_POSTSList(language === 'ko').filter(p => !reportedPosts.includes(p.id)).map(post => (
-                                <div key={post.id} className="bg-zinc-900 border border-zinc-800 p-4 rounded-xl hover:border-zinc-700 transition-colors relative group">
+                                <div key={post.id} className={`${isNight ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-700' : 'bg-white border-zinc-200 hover:border-orange-500/30 shadow-sm'} border p-4 rounded-xl transition-colors relative group`}>
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-lg">{post.avatar}</div>
+                                            <div className={`${isNight ? 'bg-zinc-800' : 'bg-zinc-100'} w-8 h-8 rounded-full flex items-center justify-center text-lg`}>{post.avatar}</div>
                                             <div>
-                                                <div className="text-sm font-bold text-zinc-200">{post.author}</div>
+                                                <div className={`text-sm font-bold ${isNight ? 'text-zinc-200' : 'text-zinc-900'}`}>{post.author}</div>
                                                 <div className="text-[10px] text-zinc-500">{post.timeAgo}</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">{post.tag}</span>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${isNight ? 'bg-zinc-800 border-zinc-700 text-zinc-400' : 'bg-zinc-50 border-zinc-200 text-zinc-500'} border`}>{post.tag}</span>
                                         </div>
                                     </div>
-                                    <p className="text-zinc-300 text-sm mb-3 font-korean leading-relaxed">
+                                    <p className={`${isNight ? 'text-zinc-300' : 'text-zinc-600'} text-sm mb-3 font-korean leading-relaxed`}>
                                         {post.content}
                                     </p>
                                     <div className="flex justify-between items-center">
@@ -157,7 +158,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose }) => {
                                         {/* Reporting Feature (Required for App Store UGC) */}
                                         <button
                                             onClick={() => handleReport(post.id)}
-                                            className="text-[10px] text-zinc-600 hover:text-red-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className={`text-[10px] ${isNight ? 'text-zinc-500' : 'text-zinc-400'} hover:text-red-500 flex items-center gap-1 transition-opacity opacity-60 md:opacity-0 md:group-hover:opacity-100`}
                                         >
                                             ⚠️ Report
                                         </button>

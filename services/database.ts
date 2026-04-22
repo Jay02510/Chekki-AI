@@ -86,42 +86,7 @@ export const db = {
     try {
       const userRef = doc(dbInstance, "users", uid);
       await updateDoc(userRef, updates);
-    } catch (e) { console.error("Update fallback", e); }
-  },
-
-  async getMistakes(uid: string): Promise<any[]> {
-    try {
-      const items: any[] = [];
-      const q = query(collection(dbInstance, "mistakes"), where("userId", "==", uid));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => items.push(doc.data()));
-      const sorted = items.sort((a, b) => (b.dateAdded || "").localeCompare(a.dateAdded || ""));
-      localStorage.setItem(getLocalKey(uid), JSON.stringify(sorted));
-      return sorted;
-    } catch (e: any) {
-      const localData = localStorage.getItem(getLocalKey(uid));
-      return localData ? JSON.parse(localData) : [];
-    }
-  },
-
-  async addMistake(uid: string, mistake: any): Promise<void> {
-    const localKey = getLocalKey(uid);
-    const currentLocal = JSON.parse(localStorage.getItem(localKey) || '[]');
-    localStorage.setItem(localKey, JSON.stringify([mistake, ...currentLocal]));
-    try {
-      await setDoc(doc(dbInstance, "mistakes", mistake.uniqueId), { ...mistake, userId: uid });
-    } catch (e: any) { console.error(e); }
-  },
-
-  async removeMistake(uniqueId: string, uid?: string): Promise<void> {
-    if (uid) {
-      const localKey = getLocalKey(uid);
-      const currentLocal = JSON.parse(localStorage.getItem(localKey) || '[]');
-      localStorage.setItem(localKey, JSON.stringify(currentLocal.filter((m: any) => m.uniqueId !== uniqueId)));
-    }
-    try {
-      await deleteDoc(doc(dbInstance, "mistakes", uniqueId));
-    } catch (e: any) { console.error(e); }
+    } catch (e: any) { console.error("Update fallback", e); }
   },
 
   async sendFeedback(uid: string, feedback: {

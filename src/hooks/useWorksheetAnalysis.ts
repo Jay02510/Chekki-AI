@@ -73,6 +73,13 @@ export const useWorksheetAnalysis = () => {
         });
 
         try {
+            // DEDUCT SCAN: Move this earlier to prevent quota bypass
+            if (isAuthenticated && user?.uid) {
+                await incrementScan();
+            } else {
+                localStorage.setItem(GUEST_SCAN_KEY, 'true');
+            }
+
             const result = await analyzeWorksheet(
                 base64Data, 
                 controller.signal, 
@@ -82,13 +89,6 @@ export const useWorksheetAnalysis = () => {
                 user?.parentEnglishLevel,
                 language
             );
-
-            // SUCCESS: Now we increment the scan usage
-            if (isAuthenticated) {
-                await incrementScan();
-            } else {
-                localStorage.setItem(GUEST_SCAN_KEY, 'true');
-            }
 
             const newState: AnalysisState = {
                 status: 'complete',

@@ -11,8 +11,13 @@ import {
   signOut,
   deleteUser,
   sendPasswordResetEmail,
+  OAuthProvider,
+  signInWithPopup,
+  signInWithCredential,
   type User
 } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
+import { SignInWithApple } from '@capacitor-community/apple-sign-in';
 import { subscriptionService, AppleProducts } from '../services/subscriptionService';
 import { revenueCatService } from '../services/revenueCatService';
 import { PUBLIC_APP_URL } from '../config';
@@ -23,6 +28,7 @@ interface AuthContextType {
   subscriptionRecord: SubscriptionRecord | null;
   signUp: (name: string, email: string, pass: string, code?: string) => Promise<void>;
   signIn: (email: string, pass: string) => Promise<void>;
+  signInWithApple: () => Promise<void>;
   sendResetEmail: (email: string) => Promise<void>;
   logout: () => void;
   updateProfile: (name: string) => Promise<void>;
@@ -277,6 +283,96 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     await Promise.race([signInFlow(), timeoutPromise]);
   };
+  const signInWithApple = async () => {
+    try {
+      isSigningUpRef.current = true;
+      const provider = new OAuthProvider('apple.com');
+      
+      if (Capacitor.getPlatform() === 'ios') {
+        // NATIVE IOS FLOW
+        const options = {
+          clientId: 'com.chekki.ai.ios',
+          redirectURI: 'https://chekki-ai.firebaseapp.com/__/auth/handler',
+          scopes: 'email name',
+          state: '12345',
+          nonce: 'nonce',
+        };
+        
+        const result = await SignInWithApple.authorize(options);
+        if (result.response && result.response.identityToken) {
+          const credential = provider.credential({
+            idToken: result.response.identityToken,
+            rawNonce: 'nonce',
+          });
+          
+          const authResult = await signInWithCredential(auth, credential);
+          
+          // Handle new user creation profile logic
+          if (authResult.user) {
+            const existingProfile = await db.getUser(authResult.user.uid);
+            if (!existingProfile) {
+              const name = result.response.givenName ? `${result.response.givenName} ${result.response.familyName || ''}`.trim() : 'User';
+              const email = result.response.email || authResult.user.email || '';
+              
+              const newProfile: UserProfile = {
+                name: name || 'User',
+                email: email,
+                plan: 'free',
+                scansUsedToday: 0,
+                lastScanDate: new Date().toISOString().split('T')[0],
+                maxScansPerDay: FREE_DAILY_LIMIT,
+                questionsUsedToday: 0,
+                maxQuestionsPerDay: 5,
+                lastQuestionDate: new Date().toISOString().split('T')[0],
+                schoolId: null,
+                schoolName: null,
+                subscriptionStartedAt: null,
+                nextBillingDate: null
+              };
+              await db.createUser(authResult.user.uid, newProfile);
+            }
+          }
+          setShowLoginModal(false);
+        } else {
+          throw new Error('Apple Sign-In failed or was cancelled.');
+        }
+      } else {
+        // WEB / ANDROID FLOW
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+            const existingProfile = await db.getUser(result.user.uid);
+            if (!existingProfile) {
+              const name = result.user.displayName || 'User';
+              const email = result.user.email || '';
+              
+              const newProfile: UserProfile = {
+                name: name,
+                email: email,
+                plan: 'free',
+                scansUsedToday: 0,
+                lastScanDate: new Date().toISOString().split('T')[0],
+                maxScansPerDay: FREE_DAILY_LIMIT,
+                questionsUsedToday: 0,
+                maxQuestionsPerDay: 5,
+                lastQuestionDate: new Date().toISOString().split('T')[0],
+                schoolId: null,
+                schoolName: null,
+                subscriptionStartedAt: null,
+                nextBillingDate: null
+              };
+              await db.createUser(result.user.uid, newProfile);
+            }
+        }
+        setShowLoginModal(false);
+      }
+    } catch (err: any) {
+      console.error('Apple Sign-In Error:', err);
+      // Let LoginModal catch and parse specific errors like cancellation
+      throw err;
+    } finally {
+      isSigningUpRef.current = false;
+    }
+  };
 
   const sendResetEmail = async (email: string) => {
     // ActionCodeSettings ensures the recovery email contains a trusted redirect URL.
@@ -518,6 +614,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscriptionRecord,
       signUp,
       signIn,
+      signInWithApple,
       sendResetEmail,
       logout,
       updateProfile,

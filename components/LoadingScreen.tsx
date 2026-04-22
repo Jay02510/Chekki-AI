@@ -41,7 +41,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
   }, [loadingTexts]);
 
   return (
-    <div className={`fixed inset-0 ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}>
+    <div className={`fixed inset-0 ${isNight ? 'bg-[#030305]' : 'bg-[#FAFAFB]'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-900/20 to-purple-900/20' : 'from-orange-500/10 to-purple-500/10'} opacity-50`}></div>
 
       <div className="absolute inset-0 pointer-events-none">
@@ -63,7 +63,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
         <div className={`absolute -inset-8 ${isNight ? 'bg-indigo-500/10' : 'bg-orange-500/20'} rounded-full blur-[100px] animate-pulse group-hover:opacity-100 transition-opacity`}></div>
         <div className={`absolute -inset-1 border-2 ${isNight ? 'border-indigo-500/20' : 'border-orange-500/30'} rounded-[3.5rem] animate-[spin_10s_linear_infinite] opacity-40`}></div>
 
-        <div className={`relative w-full h-full ${isNight ? 'bg-indigo-950/30' : 'bg-zinc-900/50'} backdrop-blur-3xl rounded-[3.5rem] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.8)] z-10 overflow-hidden ring-1 ring-white/5`}>
+        <div className={`relative w-full h-full ${isNight ? 'bg-indigo-950/30 border-white/10 ring-white/5' : 'bg-white/80 border-zinc-200 ring-black/5'} backdrop-blur-3xl rounded-[3.5rem] border shadow-[0_50px_100px_rgba(0,0,0,0.1)] ${isNight ? 'shadow-[0_50px_100px_rgba(0,0,0,0.8)]' : ''} z-10 overflow-hidden ring-1`}>
           {!videoError ? (
             <video
               autoPlay
@@ -93,7 +93,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
 
       <div className="flex flex-col items-center justify-center z-20 max-w-lg w-full">
         <div className="h-20 flex items-center justify-center mb-6">
-          <h2 className="text-2xl md:text-3xl font-black text-white text-center font-korean animate-fade-in-up tracking-tight drop-shadow-md" key={textIndex}>
+          <h2 className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-korean animate-fade-in-up tracking-tight drop-shadow-md`} key={textIndex}>
             {loadingTexts[textIndex]}
           </h2>
         </div>
@@ -111,7 +111,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
         {showCancel && onCancel && (
           <button
             onClick={onCancel}
-            className="px-8 py-3 rounded-2xl border border-white/10 bg-white/5 text-zinc-500 hover:text-white hover:border-white/30 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all animate-fade-in shadow-xl backdrop-blur-md min-h-[48px]"
+            className={`px-8 py-3 rounded-2xl border transition-all animate-fade-in shadow-xl backdrop-blur-md min-h-[48px] text-[10px] font-black uppercase tracking-widest ${isNight ? 'border-white/10 bg-white/5 text-zinc-500 hover:text-white hover:border-white/30 hover:bg-white/10' : 'border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'}`}
           >
             {t('btn_cancel_retry')}
           </button>

@@ -4,7 +4,7 @@ import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
 import { PUBLIC_APP_URL } from '../config';
 
-export const generateCompositeImage = async (imgUrl: string, items: WorksheetItem[]): Promise<string> => {
+export const generateCompositeImage = async (imgUrl: string, items: WorksheetItem[], language: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     
@@ -98,6 +98,23 @@ export const generateCompositeImage = async (imgUrl: string, items: WorksheetIte
 
           ctx.restore();
         });
+        
+        // Add "Ritual Record" Footer
+        const footerHeight = 60 * scale;
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fillRect(0, finalHeight - footerHeight, finalWidth, footerHeight);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `italic 900 ${22 * scale}px sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.fillText('✨ Chekki AI Ritual Result', 20 * scale, finalHeight - (footerHeight / 2) + (8 * scale));
+        
+        ctx.textAlign = 'right';
+        ctx.font = `bold ${16 * scale}px sans-serif`;
+        const dateStr = new Date().toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { 
+          year: 'numeric', month: 'long', day: 'numeric' 
+        });
+        ctx.fillText(dateStr, finalWidth - (20 * scale), finalHeight - (footerHeight / 2) + (6 * scale));
 
         resolve(canvas.toDataURL('image/jpeg', 0.95));
       } catch (e) {

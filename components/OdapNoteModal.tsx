@@ -13,7 +13,11 @@ interface Particle {
   color: string;
 }
 
-export const OdapNoteModal: React.FC = () => {
+interface Props {
+  isNight?: boolean;
+}
+
+export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
   const { mistakes, showMistakeModal, setShowMistakeModal, removeMistake } = useMistakes();
   const { t, language } = useLanguage();
   
@@ -196,21 +200,21 @@ export const OdapNoteModal: React.FC = () => {
             onClick={() => setShowMistakeModal(false)}
         ></div>
 
-        <div className="relative bg-zinc-900 rounded-3xl w-full max-w-2xl h-[80vh] flex flex-col overflow-hidden shadow-2xl border border-zinc-700 animate-fade-in-up">
+        <div className={`relative ${isNight ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-zinc-200'} rounded-3xl w-full max-w-2xl h-[80vh] flex flex-col overflow-hidden shadow-2xl border animate-fade-in-up`}>
             
-            <div className="bg-zinc-800 p-6 flex justify-between items-center border-b border-zinc-700">
+            <div className={`${isNight ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-50 border-zinc-200'} p-6 flex justify-between items-center border-b`}>
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center text-2xl">
+                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center text-2xl shadow-inner">
                 📝
                 </div>
                 <div>
-                <h2 className="text-xl font-bold text-white font-korean">{t('review_title')}</h2>
+                <h2 className={`text-xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-korean`}>{t('review_title')}</h2>
                 <p className="text-zinc-400 text-sm">{mistakes.length} {t('lbl_mistakes_count')}</p>
                 </div>
             </div>
             <button 
                 onClick={() => setShowMistakeModal(false)}
-                className="p-2 hover:bg-zinc-700 rounded-full transition-colors"
+                className="p-2 hover:bg-zinc-700/50 rounded-full transition-colors"
             >
                 <svg className="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -218,31 +222,32 @@ export const OdapNoteModal: React.FC = () => {
             </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+            <div className="space-y-4 pb-20">
             {mistakes.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-500 text-center px-4">
-                <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center mb-6">
+                <div className="h-full py-20 flex flex-col items-center justify-center text-zinc-500 text-center px-4">
+                <div className={`${isNight ? 'bg-zinc-800' : 'bg-zinc-100'} w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-inner`}>
                     <span className="text-4xl">🚩</span>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-korean">{t('review_empty_title')}</h3>
+                <h3 className={`text-xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}>{t('review_empty_title')}</h3>
                 <p className="font-korean text-zinc-400 max-w-xs leading-relaxed">
                     {t('review_empty_desc')}
                 </p>
                 </div>
             ) : (
                 mistakes.map((item) => (
-                <div key={item.uniqueId} className="bg-zinc-950/50 border border-zinc-800 rounded-xl p-4 flex gap-4 group hover:border-red-500/30 transition-colors relative">
+                <div key={item.uniqueId} className={`${isNight ? 'bg-zinc-950/50 border-zinc-800 hover:border-red-500/30' : 'bg-zinc-50 border-zinc-200 hover:border-orange-500/30 shadow-sm'} border rounded-xl p-4 flex gap-4 group transition-colors relative`}>
                     <div className="flex-1">
-                    <h4 className="text-zinc-200 font-bold mb-1">{item.question_text}</h4>
+                    <h4 className={`${isNight ? 'text-zinc-200' : 'text-zinc-900'} font-bold mb-1`}>{item.question_text}</h4>
                     <div className="flex items-center gap-2 mt-2">
                         <span className="text-xs text-zinc-500 uppercase">{t('lbl_correct_answer')}</span>
-                        <p className="text-emerald-400 font-hand text-lg font-bold">{item.correct_answer}</p>
+                        <p className="text-emerald-500 font-hand text-lg font-bold">{item.correct_answer}</p>
                     </div>
                     <p className="text-zinc-500 text-xs mt-2 font-korean border-t border-zinc-800 pt-2">{item.korean_guide}</p>
                     </div>
                     <button 
                         onClick={(e) => handleMastery(item.uniqueId, e)}
-                        className="self-start px-3 py-1.5 bg-green-900/30 text-green-400 hover:bg-green-500 hover:text-white rounded-lg transition-all text-xs font-bold border border-green-500/30 flex items-center gap-1 shadow-lg shadow-green-500/10 active:scale-95"
+                        className="self-start px-3 py-1.5 bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white rounded-lg transition-all text-xs font-bold border border-green-500/30 flex items-center gap-1 shadow-lg shadow-green-500/10 active:scale-95"
                         title="Mark as Mastered"
                     >
                         <span>🌟</span> Mastered!
@@ -251,12 +256,13 @@ export const OdapNoteModal: React.FC = () => {
                 ))
             )}
             </div>
+            </div>
 
-            <div className="p-6 border-t border-zinc-800 bg-zinc-900">
+            <div className={`p-6 border-t ${isNight ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-zinc-50'}`}>
             <button 
                 onClick={handlePrint}
                 disabled={mistakes.length === 0 || isPrinting}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all font-korean shadow-lg shadow-orange-500/20"
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all font-korean shadow-lg shadow-orange-500/20 active:scale-95"
             >
                 {isPrinting ? (
                     <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />

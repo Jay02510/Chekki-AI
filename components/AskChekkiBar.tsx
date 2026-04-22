@@ -1,8 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { ChekkiMascot } from './Icons';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChatTurn } from '../services/geminiService';
+import { useLanguage } from '../contexts/LanguageContext';
 import { toJpeg } from 'html-to-image';
 import { renderMarkdown } from '../utils/markdownUtils';
-import { ChatTurn } from '../services/geminiService';
+import { ChekkiMascot } from './Icons';
 
 // --- AskChekkiBar Component ---
 
@@ -14,10 +15,12 @@ interface AskChekkiBarProps {
   language: string;
 }
 
-export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({ query, setQuery, onSubmit, isAsking, language }) => (
-  <form
-    onSubmit={(e) => { e.preventDefault(); onSubmit(query); }}
-    className="relative flex items-center bg-zinc-900 border border-white/10 hover:border-orange-500/30 focus-within:border-orange-500 rounded-[1.5rem] md:rounded-[2.2rem] pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-all w-full"
+export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({ query, setQuery, onSubmit, isAsking, language }) => {
+  const { t } = useLanguage();
+  return (
+    <form
+      onSubmit={(e) => { e.preventDefault(); onSubmit(query); }}
+    className="relative flex items-center bg-zinc-900 border border-transparent hover:border-orange-500/30 focus-within:border-orange-500 rounded-[1.5rem] md:rounded-[2.2rem] pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-all w-full"
   >
     <button
       type="submit"
@@ -37,12 +40,13 @@ export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({ query, setQuery, onS
       type="text"
       value={query}
       onChange={e => setQuery(e.target.value)}
-      placeholder={language === 'ko' ? "문법이 헷갈리나요? 채키에게 질문해 보세요!" : "Confused about grammar? Ask Chekki!"}
+      placeholder={t('ask_placeholder')}
       className="flex-1 bg-transparent text-white text-[11px] sm:text-xs md:text-sm lg:text-base font-korean placeholder:text-zinc-500 focus:outline-none"
       enterKeyHint="send"
     />
   </form>
-);
+  );
+};
 
 // --- AskChekkiAnswerModal Component ---
 
@@ -121,9 +125,9 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
   // The current pending question is `question` when `isAsking` is true
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+    <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 pt-[calc(env(safe-area-inset-top)+1rem)] sm:pt-10">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-zinc-950 border border-white/10 rounded-[2.5rem] w-full max-w-lg max-h-[85dvh] flex flex-col shadow-2xl animate-fade-in-up overflow-hidden">
+      <div className="relative bg-zinc-950 border border-transparent rounded-[2.5rem] w-full max-w-lg max-h-[85dvh] flex flex-col shadow-2xl animate-fade-in-down overflow-hidden">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/5 shrink-0">
@@ -283,10 +287,10 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="w-full mt-3 bg-white hover:bg-zinc-200 text-black py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-xl disabled:opacity-50"
+              className={`w-full mt-3 py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 border ${language === 'ko' ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'} disabled:opacity-50`}
             >
               {isSaving ? (
-                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-zinc-500/20 border-t-zinc-500 rounded-full animate-spin" />
               ) : (
                 <><span>📥</span> {language === 'ko' ? '이미지로 저장' : 'Save as Image'}</>
               )}
@@ -308,7 +312,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                 onClick={() => { onClose(); openLoginModal(); }}
                 className="text-[10px] bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-black uppercase tracking-wider whitespace-nowrap shadow-lg shadow-orange-500/20 transition-all active:scale-95"
               >
-                {language === 'ko' ? '로그인' : 'Log In'}
+                {language === 'ko' ? '회원가입' : 'Sign Up'}
               </button>
             </div>
           </div>

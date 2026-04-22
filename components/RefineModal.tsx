@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -8,9 +9,10 @@ interface Props {
   onClose: () => void;
   onSubmit: (itemId: number, reason: string) => Promise<void>;
   isSubmitting: boolean;
+  isNight?: boolean;
 }
 
-export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, isSubmitting }) => {
+export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, isSubmitting, isNight = true }) => {
   const { t, language } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedReason, setSelectedReason] = useState<string>('');
@@ -56,72 +58,79 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-start justify-center bg-black/80 backdrop-blur-sm sm:pt-10 md:pt-20 px-0 sm:px-4">
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4" onClick={onClose}>
       <div 
-        className="bg-zinc-950 w-full sm:max-w-md md:max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-slide-up"
+        className={`${isNight ? 'bg-[#09090b] border-white/10' : 'bg-white border-zinc-200 shadow-2xl'} w-full sm:max-w-md md:max-w-lg rounded-[2.5rem] md:rounded-[3rem] border shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-fade-in-up relative`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Animated Glow Background */}
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-orange-500/10 blur-[100px] rounded-full animate-pulse"></div>
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 blur-[100px] rounded-full animate-pulse delay-700"></div>
+
         <div 
           ref={scrollRef}
-          className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar"
+          className="p-8 md:p-10 flex-1 overflow-y-auto custom-scrollbar relative z-10"
         >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-2xl shadow-inner">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-3xl shadow-[0_10px_30px_rgba(249,115,22,0.3)]">
                 🪄
               </div>
               <div>
-                <h3 className="text-xl md:text-2xl font-black text-white font-display leading-tight">
+                <h3 className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display leading-tight tracking-tight`}>
                   {language === 'ko' ? "설명 다듬기" : "Refine Explanation"}
                 </h3>
-                <p className="text-xs text-orange-500 font-bold uppercase tracking-widest mt-1">
-                  AI Tutor
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                  <p className="text-xs text-orange-500 font-black uppercase tracking-[0.2em]">
+                    AI TUTOR
+                  </p>
+                </div>
               </div>
             </div>
             
             {!isSubmitting && (
               <button 
                 onClick={onClose}
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all active:scale-90 border border-white/5"
                 aria-label="Close"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             )}
           </div>
 
-          <div className="bg-zinc-900/50 rounded-2xl p-4 border border-white/5 mb-6">
-            <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-2">{language === 'ko' ? "질문" : "Question"}</p>
-            <p className="text-white text-sm break-keep leading-relaxed font-bold">&quot;{item.question_text}&quot;</p>
+          <div className={`${isNight ? 'bg-zinc-900/40 border-white/5 shadow-inner' : 'bg-zinc-50 border-zinc-200'} rounded-[2rem] p-6 border mb-8 group transition-all hover:border-white/10`}>
+            <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em] mb-2">{language === 'ko' ? "질문" : "Question"}</p>
+            <p className={`${isNight ? 'text-zinc-100' : 'text-zinc-900'} text-base md:text-lg break-keep leading-relaxed font-bold italic`}>&quot;{item.question_text}&quot;</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest mb-3">
+              <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em] mb-4">
                 {language === 'ko' ? "어떤 도움이 필요하신가요?" : "How can I improve this?"}
               </p>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {quickChips.map((chip) => (
-                  <button
-                    key={chip.id}
-                    type="button"
-                    onClick={() => handleChipSelect(chip.id, chip.text)}
-                    className={`text-left px-5 py-3.5 rounded-2xl border text-sm md:text-base font-bold transition-all ${
-                      selectedReason === chip.id 
-                        ? 'bg-orange-500 text-white border-orange-400 shadow-[0_5px_20px_rgba(249,115,22,0.3)]' 
-                        : 'bg-zinc-900 border-white/10 text-zinc-300 hover:bg-zinc-800'
-                    }`}
-                  >
+                    <button
+                      key={chip.id}
+                      type="button"
+                      onClick={() => handleChipSelect(chip.id, chip.text)}
+                      className={`text-left px-6 py-4 rounded-[1.5rem] border text-sm md:text-base font-black transition-all transform active:scale-[0.98] ${
+                        selectedReason === chip.id 
+                          ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white border-transparent shadow-[0_15px_40px_rgba(249,115,22,0.4)]' 
+                          : `${isNight ? 'bg-zinc-900/60 border-white/5 text-zinc-300' : 'bg-zinc-100 border-zinc-200 text-zinc-500'} hover:bg-zinc-800 hover:border-white/10`
+                      }`}
+                    >
                     {chip.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
+            <div className="space-y-3">
+              <label className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em]">
                 {language === 'ko' ? "직접 입력 (선택)" : "Or type your reason (Optional)"}
               </label>
               <textarea
@@ -130,7 +139,7 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
                   setCustomReason(e.target.value);
                   if (e.target.value) setSelectedReason(''); // Clear chip if typing
                 }}
-                className="w-full bg-zinc-900 border border-white/10 rounded-2xl p-4 text-white text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-korean resize-none h-24"
+                className={`w-full ${isNight ? 'bg-zinc-900/40 border-white/5 text-white' : 'bg-zinc-50 border-zinc-200 text-zinc-900'} rounded-[1.8rem] p-5 text-sm focus:outline-none focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/10 transition-all font-korean resize-none h-32 shadow-inner`}
                 placeholder={language === 'ko' ? "예: 이 단어 뜻 자체를 모르겠어요. 쉬운 말로 바꿔주세요." : "e.g., I don't understand the vocabulary."}
               />
             </div>
@@ -138,28 +147,29 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
             <button
               type="submit"
               disabled={isSubmitting || (!selectedReason && !customReason.trim())}
-              className={`w-full py-4 md:py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 relative overflow-hidden ${
+              className={`w-full py-5 md:py-6 rounded-full font-black text-sm md:text-base uppercase tracking-[0.3em] transition-all transform active:scale-[0.95] flex items-center justify-center gap-4 relative overflow-hidden shadow-2xl ${
                 isSubmitting || (!selectedReason && !customReason.trim())
-                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                  : 'bg-white hover:bg-zinc-200 text-black shadow-xl shadow-white/10'
+                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'
+                  : `${isNight ? 'bg-white hover:bg-zinc-100 text-black' : 'bg-zinc-900 hover:bg-black text-white'}`
               }`}
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-zinc-500 border-t-white rounded-full animate-spin"></div>
-                  <span>{language === 'ko' ? '다시 생각하는 중...' : 'Refining...'}</span>
+                  <div className="w-6 h-6 border-3 border-zinc-400 border-t-black rounded-full animate-spin"></div>
+                  <span>{language === 'ko' ? '다듬는 중...' : 'Refining...'}</span>
                 </>
               ) : (
                 <>
-                  <span className="text-lg">✨</span>
-                  <span>{language === 'ko' ? '새로 추천받기' : 'Submit Request'}</span>
+                  <span className="text-xl">✨</span>
+                  <span>{language === 'ko' ? '새로운 추천 받기' : 'Submit Request'}</span>
                 </>
               )}
             </button>
           </form>
-
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };

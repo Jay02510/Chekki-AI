@@ -8,9 +8,10 @@ import { db } from '../services/database';
 interface Props {
   onClose: () => void;
   context?: any; // Specific question context if reporting from result card
+  isNight?: boolean;
 }
 
-export const FeedbackModal: React.FC<Props> = ({ onClose, context }) => {
+export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = true }) => {
   const { firebaseUser, user } = useAuth();
   const { t } = useLanguage();
   
@@ -44,26 +45,26 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context }) => {
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
       
-      <div className="relative bg-zinc-900 rounded-3xl w-full max-w-md shadow-2xl border border-zinc-800 overflow-hidden animate-fade-in-up">
+      <div className={`relative ${isNight ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200 shadow-2xl'} rounded-3xl w-full max-w-md shadow-2xl border overflow-hidden animate-fade-in-up`}>
         
-        <div className="bg-zinc-950 p-6 flex justify-center relative">
+        <div className={`${isNight ? 'bg-zinc-950' : 'bg-zinc-50 border-b border-zinc-100'} p-6 flex justify-center relative`}>
            <div className="w-24 h-24">
               <ChekkiMascot className="w-full h-full" mood={isSuccess ? "happy" : "thinking"} />
            </div>
-           <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors">✕</button>
+           <button onClick={onClose} className={`absolute top-4 right-4 ${isNight ? 'text-zinc-500 hover:text-white' : 'text-zinc-400 hover:text-zinc-900'} transition-colors`}>✕</button>
         </div>
 
         <div className="p-8 space-y-6 text-center">
             {isSuccess ? (
                 <div className="py-10 animate-fade-in">
-                   <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('fb_success')}</h3>
+                   <h3 className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}>{t('fb_success')}</h3>
                    <p className="text-zinc-500 text-sm">You are doing an amazing job, Mom!</p>
                 </div>
             ) : (
                 <>
                   <div>
-                    <h2 className="text-2xl font-bold text-white mb-2 font-display">{t('fb_title')}</h2>
-                    <p className="text-zinc-400 text-sm font-korean">{context ? t('fb_error_desc') : t('fb_desc')}</p>
+                    <h2 className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-display`}>{t('fb_title')}</h2>
+                    <p className={`${isNight ? 'text-zinc-400' : 'text-zinc-500'} text-sm font-korean`}>{context ? t('fb_error_desc') : t('fb_desc')}</p>
                   </div>
 
                   {!context && (
@@ -89,7 +90,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context }) => {
                           value={comment}
                           onChange={(e) => setComment(e.target.value)}
                           placeholder="..."
-                          className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-zinc-200 focus:border-orange-500 outline-none h-32 resize-none transition-colors"
+                          className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800 text-zinc-200' : 'bg-zinc-50 border-zinc-200 text-zinc-900'} rounded-xl p-4 focus:border-orange-500 outline-none h-32 resize-none transition-colors`}
                       />
                   </div>
 
@@ -110,7 +111,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context }) => {
                       <p className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-2">Or email us directly</p>
                       <a 
                         href="mailto:chekkihelp@gmail.com" 
-                        className="text-xs font-bold text-zinc-400 hover:text-white transition-colors underline underline-offset-4"
+                        className={`text-xs font-bold ${isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} transition-colors underline underline-offset-4`}
                       >
                         chekkihelp@gmail.com
                       </a>

@@ -8,9 +8,11 @@ import { db } from '../services/database';
 
 interface Props {
   onClose: () => void;
+  isNight: boolean;
+  setIsNight: (val: boolean) => void;
 }
 
-export const SettingsModal: React.FC<Props> = ({ onClose }) => {
+export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight }) => {
   const { user, updateProfile, deleteAccount, firebaseUser, setShowPaywall, subscriptionRecord } = useAuth();
   const { language, setLanguage, t } = useLanguage();
 
@@ -73,11 +75,11 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in" onClick={onClose}></div>
 
-        <div className="relative bg-zinc-900 rounded-[2.5rem] md:rounded-[3rem] w-full max-w-lg md:max-w-xl lg:max-w-2xl shadow-[0_50px_100px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+        <div className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200'} rounded-[2.5rem] md:rounded-[3rem] w-full max-w-lg md:max-w-xl lg:max-w-2xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] border overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]`}>
 
-          <div className="bg-zinc-950 px-8 py-6 border-b border-white/5 flex justify-between items-center shrink-0">
-            <h2 className="text-xl font-black text-white font-display uppercase tracking-widest">{t('settings_title')}</h2>
-            <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors text-xl">✕</button>
+          <div className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-8 py-6 border-b flex justify-between items-center shrink-0`}>
+            <h2 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase tracking-widest`}>{t('settings_title')}</h2>
+            <button onClick={onClose} className="text-zinc-500 hover:text-orange-500 transition-colors text-xl">✕</button>
           </div>
 
           <div className="p-6 md:p-8 space-y-8 overflow-y-auto custom-scrollbar flex-1 pb-24">
@@ -94,15 +96,15 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
             )}
 
             {/* --- SECURITY AUDIT SECTION --- */}
-            <div className="bg-emerald-500/5 rounded-3xl p-6 border border-emerald-500/20">
+            <div className={`${isNight ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-emerald-50 border-emerald-200'} rounded-3xl p-6 border`}>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl">🛡️</span>
-                <h3 className="text-sm font-black text-emerald-500 uppercase tracking-widest leading-none">{t('sec_audit_title')}</h3>
+                <h3 className={`text-sm font-black ${isNight ? 'text-emerald-500' : 'text-emerald-600'} uppercase tracking-widest leading-none`}>{t('sec_audit_title')}</h3>
               </div>
               <p className="text-[11px] text-zinc-400 font-medium mb-4 leading-relaxed">{t('sec_audit_desc')}</p>
               <div className="space-y-2">
                 {[1, 2, 3, 4].map(idx => (
-                  <div key={idx} className="flex items-center gap-2 text-[10px] text-zinc-300 font-bold">
+                  <div key={idx} className={`flex items-center gap-2 text-[10px] ${isNight ? 'text-zinc-300' : 'text-zinc-600'} font-bold`}>
                     <span className="text-emerald-500">✓</span>
                     {t(`sec_point_${idx}`)}
                   </div>
@@ -111,21 +113,21 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
             </div>
 
             {/* --- ADVANCED DIAGNOSTICS --- */}
-            <div className="bg-zinc-800/50 rounded-3xl p-6 border border-white/5 relative overflow-hidden group">
+            <div className={`${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-100/50 border-zinc-200'} rounded-3xl p-6 border relative overflow-hidden group`}>
               <div className="absolute top-0 right-0 p-4">
-                <div className={`w-2 h-2 rounded-full ${diagResults.auth === 'verified' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-zinc-700'} animate-pulse`}></div>
+                <div className={`w-2 h-2 rounded-full ${diagResults.auth === 'verified' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : (isNight ? 'bg-zinc-700' : 'bg-zinc-300')} animate-pulse`}></div>
               </div>
 
               <h3 className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-4">{t('settings_device_diag')}</h3>
 
               <div className="grid grid-cols-2 gap-3 mb-6">
                 {[
-                  { label: language === 'ko' ? '카메라' : 'Camera', val: diagResults.camera === 'granted' ? 'OK' : 'Check', color: diagResults.camera === 'granted' ? 'text-emerald-400' : 'text-orange-400' },
-                  { label: language === 'ko' ? '마이크' : 'Mic', val: diagResults.mic === 'granted' ? 'OK' : 'Check', color: diagResults.mic === 'granted' ? 'text-emerald-400' : 'text-orange-400' },
-                  { label: language === 'ko' ? '음성 지원' : 'Voice API', val: diagResults.speech, color: 'text-indigo-400' },
-                  { label: language === 'ko' ? '인증 상태' : 'Auth', val: diagResults.auth, color: 'text-zinc-400' }
+                  { label: language === 'ko' ? '카메라' : 'Camera', val: diagResults.camera === 'granted' ? 'OK' : 'Check', color: diagResults.camera === 'granted' ? 'text-emerald-500' : 'text-orange-500' },
+                  { label: language === 'ko' ? '마이크' : 'Mic', val: diagResults.mic === 'granted' ? 'OK' : 'Check', color: diagResults.mic === 'granted' ? 'text-emerald-500' : 'text-orange-500' },
+                  { label: language === 'ko' ? '음성 지원' : 'Voice API', val: diagResults.speech, color: 'text-indigo-500' },
+                  { label: language === 'ko' ? '인증 상태' : 'Auth', val: diagResults.auth, color: isNight ? 'text-zinc-400' : 'text-zinc-500' }
                 ].map((d, i) => (
-                  <div key={i} className="bg-black/40 p-3 rounded-2xl border border-white/5">
+                  <div key={i} className={`${isNight ? 'bg-black/40 border-white/5' : 'bg-white border-zinc-200 shadow-sm'} p-3 rounded-2xl border`}>
                     <p className="text-[8px] font-black text-zinc-500 uppercase mb-1">{d.label}</p>
                     <p className={`text-xs font-black truncate ${d.color}`}>{d.val}</p>
                   </div>
@@ -134,12 +136,12 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
             </div>
 
             {/* --- SUBSCRIPTION STATUS --- */}
-            <div className="bg-zinc-800/30 rounded-[2rem] p-6 border border-white/5">
+            <div className={`${isNight ? 'bg-zinc-800/30 border-white/5' : 'bg-zinc-100/50 border-zinc-200 shadow-sm'} rounded-[2rem] p-6 border`}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">{language === 'ko' ? '구독 정보' : 'SUBSCRIPTION'}</h3>
                 {/* Status Badge */}
                 {(!subscriptionRecord || subscriptionRecord.subscription_status === 'none') && (
-                  <span className="text-[8px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-white/5">
+                  <span className={`text-[8px] ${isNight ? 'bg-zinc-800 border-white/5' : 'bg-white border-zinc-200 shadow-sm'} text-zinc-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border`}>
                     {t('sub_no_active')}
                   </span>
                 )}
@@ -164,13 +166,13 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                 {subscriptionRecord?.subscription_status === 'active' ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-xl">
+                      <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-xl shadow-inner">
                         🚀
                       </div>
                       <div>
                         {subscriptionRecord.subscription_expiry_date && (new Date(subscriptionRecord.subscription_expiry_date).getTime() - new Date().getTime()) < 8 * 24 * 60 * 60 * 1000 ? (
                           <>
-                            <p className="text-sm font-black text-white">
+                            <p className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                               {(() => {
                                 const days = Math.ceil((new Date(subscriptionRecord.subscription_expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                                 return t('sub_trial_status').replace('{days}', days.toString());
@@ -183,7 +185,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                             )}
                           </>
                         ) : (
-                          <p className="text-sm font-black text-white">
+                          <p className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                             {user?.plan === 'pro' ? (language === 'ko' ? '프리미엄 플랜' : 'Premium Plan') : (language === 'ko' ? '기본 플랜' : 'Basic Plan')}
                           </p>
                         )}
@@ -205,12 +207,12 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                     {Capacitor.getPlatform() === 'ios' ? (
                       <a
                         href="itms-apps://apps.apple.com/account/subscriptions"
-                        className="block w-full text-center bg-white/5 hover:bg-white/10 border border-white/10 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+                        className={`block w-full text-center ${isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm'} py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border`}
                       >
                         {t('sub_manage')}
                       </a>
                     ) : (
-                      <p className="text-[9px] text-zinc-500 italic bg-black/20 p-3 rounded-xl border border-white/5">
+                      <p className={`text-[9px] text-zinc-500 italic ${isNight ? 'bg-black/20 border-white/5' : 'bg-zinc-100 border-zinc-200'} p-3 rounded-xl border`}>
                         {t('sub_web_manage')}
                       </p>
                     )}
@@ -218,11 +220,11 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
                 ) : subscriptionRecord?.subscription_status === 'expired' ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-center text-xl">
+                      <div className="w-12 h-12 rounded-2xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-center text-xl shadow-inner">
                         ⚠️
                       </div>
                       <div>
-                        <p className="text-sm font-black text-white">{t('sub_expired')}</p>
+                        <p className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>{t('sub_expired')}</p>
                         {subscriptionRecord.subscription_expiry_date && (
                           <p className="text-[10px] text-zinc-500 font-bold">
                             {new Date(subscriptionRecord.subscription_expiry_date).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -270,23 +272,37 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
             <div>
               <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4">{t('settings_profile')}</h3>
               <div className="space-y-4">
-                <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('settings_name_label')}</label>
+                <label className={`block text-[10px] font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}>{t('settings_name_label')}</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl px-5 py-4 text-white focus:border-orange-500 outline-none transition-colors"
+                  className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-2xl px-5 py-4 focus:border-orange-500 outline-none transition-colors`}
                 />
               </div>
             </div>
 
             {/* --- PREFERENCES --- */}
-            <div>
+            <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <div className="text-sm font-bold text-white">{t('settings_lang_label')}</div>
-                <div className="flex bg-zinc-950 rounded-xl p-1 border border-zinc-800">
-                  <button onClick={() => setLanguage('en')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase ${language === 'en' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500'}`}>EN</button>
-                  <button onClick={() => setLanguage('ko')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase ${language === 'ko' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500'}`}>KO</button>
+                <div className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>{t('settings_lang_label')}</div>
+                <div className={`flex ${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-100 border-zinc-200'} rounded-xl p-1 border`}>
+                  <button onClick={() => setLanguage('en')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase ${language === 'en' ? (isNight ? 'bg-zinc-800 text-white shadow-lg' : 'bg-white text-zinc-900 shadow-sm') : 'text-zinc-500'}`}>EN</button>
+                  <button onClick={() => setLanguage('ko')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase ${language === 'ko' ? (isNight ? 'bg-zinc-800 text-white shadow-lg' : 'bg-white text-zinc-900 shadow-sm') : 'text-zinc-500'}`}>KO</button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>{t('settings_theme_label')}</div>
+                <div className={`flex ${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-100 border-zinc-200'} rounded-xl p-1 border`}>
+                  <button onClick={() => setIsNight(false)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${!isNight ? (isNight ? 'bg-zinc-800 text-white shadow-lg' : 'bg-white text-zinc-900 shadow-sm') : 'text-zinc-500'}`}>
+                    <span>☀️</span>
+                    <span className="hidden xs:inline">{language === 'ko' ? '라이트' : 'Light'}</span>
+                  </button>
+                  <button onClick={() => setIsNight(true)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${isNight ? (isNight ? 'bg-zinc-800 text-white shadow-lg' : 'bg-white text-zinc-900 shadow-sm') : 'text-zinc-500'}`}>
+                    <span>🌙</span>
+                    <span className="hidden xs:inline">{language === 'ko' ? '다크' : 'Dark'}</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -319,6 +335,12 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
               >
                 {t('nav_youth')}
               </button>
+              <button
+                onClick={() => setShowLegal('support')}
+                className="text-[10px] text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-widest underline decoration-zinc-800"
+              >
+                {language === 'ko' ? '고객 지원' : 'Help & Support'}
+              </button>
             </div>
 
             {/* --- DANGER ZONE --- */}
@@ -338,11 +360,11 @@ export const SettingsModal: React.FC<Props> = ({ onClose }) => {
           </div>
 
           {/* --- FIXED FOOTER --- */}
-          <div className="bg-zinc-900/95 backdrop-blur-md px-8 py-5 flex items-center justify-between border-t border-white/5 shrink-0">
+          <div className={`${isNight ? 'bg-zinc-900/95 border-white/5' : 'bg-zinc-50/95 border-zinc-200'} backdrop-blur-md px-8 py-5 flex items-center justify-between border-t shrink-0`}>
             <span className="text-emerald-500 text-[10px] font-black uppercase tracking-widest">{successMsg}</span>
             <button
               onClick={handleSave}
-              className="bg-white text-black px-10 py-4 rounded-2xl font-black text-sm active:scale-95 shadow-2xl transition-all hover:bg-zinc-100"
+              className={`${isNight ? 'bg-white text-black hover:bg-zinc-100' : 'bg-zinc-900 text-white hover:bg-black'} px-10 py-4 rounded-2xl font-black text-sm active:scale-95 shadow-2xl transition-all`}
             >
               {t('settings_save')}
             </button>

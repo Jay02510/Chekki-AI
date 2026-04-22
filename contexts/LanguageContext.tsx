@@ -12,8 +12,8 @@ interface LanguageContextType {
 const translations = {
   en: {
     app_name: "Chekki AI",
-    tagline: "Grading by Chekki, Praise by You",
-    login: "Scan Worksheet",
+    tagline: "Your AI Homework Helper",
+    login: "Sign Up",
     logout: "Log Out",
     scans: "Magic Scans",
     pro_plan: "Premium 🚀",
@@ -29,9 +29,9 @@ const translations = {
     share_toast: "Template copied! Ready to post.",
 
     // Guest Mode CTAs
-    hero_guest_cta: "Quick Scan",
+    hero_guest_cta: "Try Magic Scan",
     login_guest_link: "Not ready? Try 1 scan as guest",
-    guest_scan_badge: "Magic Scan Available",
+    guest_scan_badge: "Magic Scan ✨",
     guest_used_title: "Magic Scan Used!",
     guest_used_desc: "You've seen the magic. Sign up now for more scans and unlock full scripts and audio!",
 
@@ -103,10 +103,11 @@ const translations = {
     biz_email: "Email: chekkihelp@gmail.com",
 
     // Settings
-    settings_title: "System Lab",
-    settings_profile: "Parent Profile",
+    settings_title: "Parent Profile",
+    settings_profile: "My Profile",
     settings_name_label: "Your Name",
     settings_lang_label: "App Language",
+    settings_theme_label: "App Theme",
     settings_delete_account: "Delete Account",
     settings_delete_confirm: "Are you sure?",
     settings_delete_yes: "Yes",
@@ -142,7 +143,7 @@ const translations = {
     nav_billing: "Billing",
 
     // Hero
-    hero_badge: "High-Accuracy Answer Key",
+    hero_badge: "Magic Scan ✨",
     hero_title: "Instant Answer Key\nRight on the Paper.",
     hero_title_night: "Long day?\nLet Chekki handle the grading.",
     hero_desc: "The homework war is over. Get instant answer overlays and 'Teaching Scripts' so you can teach with confidence and love. No more guessing.",
@@ -153,6 +154,7 @@ const translations = {
     drop_title: "Snap the Worksheet",
     drop_subtitle: "Get your digital answer key instantly",
     btn_upload: "Snap Worksheet",
+    btn_guest_scan: "Guest Scan",
     btn_walkthrough: "Watch Walkthrough",
     supported_formats: "Images are processed temporarily and NEVER stored.",
     dash_welcome: "Hi,",
@@ -161,8 +163,8 @@ const translations = {
     lbl_share_ideas: "Share Ideas",
     lbl_quick_guide: "Quick Guide",
     lbl_resource: "Resource",
-    lbl_pro_active: "Premium Active",
-    lbl_magic_left: "Magic Left",
+    lbl_pro_active: "Premium",
+    lbl_magic_left: "Scans",
     lbl_lighting: "Lighting",
     lbl_flat: "Flat",
     lbl_sharp: "Sharp",
@@ -233,15 +235,18 @@ const translations = {
     btn_cancel_retry: "Cancel",
 
     // Results
-    ws_results_title: "Your Teaching Guide",
-    ws_items_found: "answers identified",
-    ws_voice_guide: "💡 Tap an answer to hear the pronunciation!",
-    ws_gen_practice: "Extra Practice Sheet",
-    ws_scan_again: "Next Page",
+    ws_results_title: "Teaching Guide",
+    ws_items_found: "Answers Ready — Tap to teach",
+    ws_voice_guide: "💡 Tap for native pronunciation",
+    ws_gen_practice: "Practice Sheet",
+    ws_scan_again: "Rescan",
     ws_scanning_header: "Generating answers...",
     ws_scanning_detail: "Analyzing context...",
     tip_click_guide: "💡 Tap any question to see your Teaching Script!",
     lbl_mom_tip: "Teaching Script",
+    lbl_audio: "Listen",
+    lbl_bookmark: "Save",
+    lbl_refine: "Explain More",
     growing_text: "Generating...",
 
     // Feedback Form
@@ -322,6 +327,7 @@ const translations = {
     subs_errorTitle: "Subscription Failed",
     subs_errorMessage: "An error occurred during subscription processing. Please try again.",
     subs_cancelledMessage: "Subscription cancelled",
+    ask_placeholder: "Need help with homework? Ask Chekki! (e.g., Explain question 5)",
 
     // Tooltips
     tt_close: "Deselect",
@@ -340,12 +346,20 @@ const translations = {
     tt_sharp: "Make sure the text is in focus",
 
     // Misc
-    footer_text: "Chekki AI - Supporting every English Kindergarten family with love."
+    footer_text: "Chekki AI - Supporting every English Kindergarten (EK) family with love.",
+    privacy_badge: "100% Private",
+    privacy_pledge: "Privacy Pledge",
+    zero_memory_policy: "Zero-Memory Policy",
+    zero_memory_desc: "We keep zero records of your scans or child's data. This ensures 100% privacy for schools and children. You are free to screenshot and save images directly to your device.",
+    share_app: "Share Chekki AI",
+    copy_script: "Copy Script",
+    script_copied: "Copied!",
+    btn_back: "Back to Scan"
   },
   ko: {
     app_name: "채키 AI",
-    tagline: "정답은 채키가, 칭찬은 부모님이",
-    login: "스캔 시작하기",
+    tagline: "우리 아이 AI 숙제 도우미",
+    login: "회원가입",
     logout: "로그아웃",
     scans: "매직 스캔",
     pro_plan: "프리미엄 🚀",
@@ -361,9 +375,9 @@ const translations = {
     share_toast: "템플릿이 복사되었습니다! 카페에 바로 붙여넣으세요.",
 
     // Guest Mode CTAs
-    hero_guest_cta: "빠른 스캔",
+    hero_guest_cta: "무료 체험하기",
     login_guest_link: "회원가입 없이 1회 체험하기",
-    guest_scan_badge: "마법 스캔 1회 사용 가능",
+    guest_scan_badge: "마법 스캔 ✨",
     guest_used_title: "체험 완료!",
     guest_used_desc: "채키의 마법을 보셨나요? 가입하고 더 많은 스캔과 티칭 가이드를 확인하세요!",
 
@@ -435,10 +449,11 @@ const translations = {
     biz_email: "이메일: chekkihelp@gmail.com",
 
     // Settings
-    settings_title: "시스템 랩",
-    settings_profile: "학부모 프로필",
+    settings_title: "학부모 프로필",
+    settings_profile: "내 프로필",
     settings_name_label: "성함",
     settings_lang_label: "앱 언어 설정",
+    settings_theme_label: "화면 테마 설정",
     settings_delete_account: "계정 탈퇴",
     settings_delete_confirm: "정말 탈퇴하시겠습니까?",
     settings_delete_yes: "네, 탈퇴합니다",
@@ -474,7 +489,7 @@ const translations = {
     nav_billing: "구독 관리",
 
     // Hero
-    hero_badge: "정확한 디지털 답지 제공",
+    hero_badge: "마법 스캔 ✨",
     hero_title: "잃어버린 답지 찾지 말고,\n사진 한 장만 찍으세요",
     hero_title_night: "오늘도 고생 많으셨어요.",
     hero_desc: "영유 숙제, 정답 찾느라 헤매지 마세요. 마법처럼 종이 위에 나타나는 정답과 '티칭 스크립트'로 다정하게 지도하세요.",
@@ -485,6 +500,7 @@ const translations = {
     drop_title: "여기에 숙제를 보여주세요",
     drop_subtitle: "종이 위에 정답이 마법처럼 나타나요",
     btn_upload: "숙제 사진 찍기",
+    btn_guest_scan: "무료 체험 스캔",
     btn_walkthrough: "사용 가이드 보기",
     supported_formats: "이미지는 분석 후 즉시 삭제됩니다.",
     dash_welcome: "반가워요,",
@@ -493,8 +509,8 @@ const translations = {
     lbl_share_ideas: "의견 보내기",
     lbl_quick_guide: "사용 가이드",
     lbl_resource: "학부모 자료",
-    lbl_pro_active: "프리미엄 활성화됨",
-    lbl_magic_left: "남은 마법",
+    lbl_pro_active: "프리미엄",
+    lbl_magic_left: "남은 스캔",
     lbl_lighting: "밝게",
     lbl_flat: "수평",
     lbl_sharp: "선명",
@@ -565,15 +581,18 @@ const translations = {
     btn_cancel_retry: "취소",
 
     // Results
-    ws_results_title: "채키의 정답 가이드",
-    ws_items_found: "개의 정답을 확인했어요",
-    ws_voice_guide: "💡 정답을 누르면 원어민 발음을 들려드려요!",
-    ws_gen_practice: "추가 복습 문제 만들기",
-    ws_scan_again: "다음 페이지 찍기",
+    ws_results_title: "티칭 가이드",
+    ws_items_found: "개의 정답 완료 — 탭하여 티칭 시작",
+    ws_voice_guide: "💡 탭하면 원어민의 정확한 발음을 들려드려요",
+    ws_gen_practice: "복습 문제지",
+    ws_scan_again: "재촬영",
     ws_scanning_header: "정답을 찾는 중...",
     ws_scanning_detail: "맥락을 분석하고 있어요...",
-    tip_click_guide: "💡 문제를 누르면 다정한 티칭 가이드가 나타나요!",
-    lbl_mom_tip: "티칭 가이드",
+    tip_click_guide: "💡 질문을 탭하면 다정한 티칭 가이드가 나타나요!",
+    lbl_mom_tip: "티칭 스크립트",
+    lbl_audio: "듣기",
+    lbl_bookmark: "저장",
+    lbl_refine: "더 설명해줘",
     growing_text: "생성 중...",
 
     // Feedback Form
@@ -653,7 +672,8 @@ const translations = {
     subs_successMessage: "ChekkiAI 프리미엄에 오신 것을 환영합니다",
     subs_errorTitle: "구독 실패",
     subs_errorMessage: "구독 처리 중 오류가 발생했습니다. 다시 시도해 주세요.",
-    subs_cancelledMessage: "구독이 취소되었습니다",
+    subs_cancelledMessage: "구독이 취소되었습니다.",
+    ask_placeholder: "숙제 중 궁금한 게 있나요? 채키에게 물어보세요! (예: 5번 문제 설명해줘)",
 
     // Tooltips
     tt_close: "선택 취소",
@@ -672,7 +692,15 @@ const translations = {
     tt_sharp: "글자가 선명하게 보이도록 해주세요",
 
     // Misc
-    footer_text: "대한민국 모든 영유 부모님들을 진심으로 응원합니다."
+    footer_text: "채키 AI - 모든 영어 유치원(EK) 가족의 평화를 기원합니다.",
+    privacy_badge: "100% 안심 보안",
+    privacy_pledge: "프라이버시 약속",
+    zero_memory_policy: "제로-메모리 정책",
+    zero_memory_desc: "스캔 정보나 자녀 데이터를 일절 저장하지 않습니다. 이는 학교와 아이들의 개인정보를 완벽하게 보호하기 위함입니다. 필요한 경우 자유롭게 스크린샷을 찍어 기기에 저장하실 수 있습니다.",
+    share_app: "채키 AI 공유하기",
+    copy_script: "스크립트 복사",
+    script_copied: "복사됨!",
+    btn_back: "스캔으로 돌아가기"
   }
 };
 

@@ -7,6 +7,8 @@ import { SplitView } from './components/SplitView';
 import { DebugConsole } from './components/DebugConsole';
 import { SplashScreen } from './components/SplashScreen';
 import { MobileAppBanner } from './components/MobileAppBanner';
+import { BottomNav, TabID } from './components/BottomNav';
+import { HelpView } from './components/HelpView';
 
 // Lazy loaded modals for performance
 const PaywallModal = React.lazy(() => import('./components/PaywallModal').then(module => ({ default: module.PaywallModal })));
@@ -21,7 +23,6 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { MistakeProvider } from './contexts/MistakeContext';
 import { ChekkiMascot } from './components/Icons';
-import { analyzeWorksheet } from './services/geminiService';
 import { db } from './services/database';
 import { Capacitor } from '@capacitor/core';
 import { revenueCatService } from './services/revenueCatService';
@@ -62,9 +63,13 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const getSystemDarkMode = () => {
-  if (typeof window !== 'undefined' && window.matchMedia) {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+const getInitialTheme = () => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('chekki_theme');
+    if (saved) return saved === 'dark';
+    if (window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
   }
   return true; // Default to dark mode
 };
@@ -92,7 +97,7 @@ function AppContent() {
     executeReset: hookExecuteReset
   } = useWorksheetAnalysis();
 
-  const [isNight, setIsNight] = useState(getSystemDarkMode());
+  const [isNight, setIsNight] = useState(getInitialTheme());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
@@ -101,6 +106,7 @@ function AppContent() {
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
   const [showSubscribePage, setShowSubscribePage] = useState(false);
   const [showAdminPage, setShowAdminPage] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabID>('scan');
   const platform = Capacitor.getPlatform();
 
   // Global Confirmation State
@@ -148,13 +154,26 @@ function AppContent() {
     revenueCatService.initialize();
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => setIsNight(e.matches);
+    const handleChange = (e: MediaQueryListEvent) => {
+      // Only follow system theme if user hasn't set a manual preference
+      if (!localStorage.getItem('chekki_theme')) {
+        setIsNight(e.matches);
+      }
+    };
     
-    // Add listener for OS theme changes
     mediaQuery.addEventListener('change', handleChange);
-    
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
+
+  // Sync isNight state with HTML class and localStorage
+  useEffect(() => {
+    if (isNight) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('chekki_theme', isNight ? 'dark' : 'light');
+  }, [isNight]);
 
   const handleSplashFinish = React.useCallback(() => {
     setShowSplash(false);
@@ -230,7 +249,7 @@ function AppContent() {
 
   return (
     <ErrorBoundary>
-      <div className={`min-h-[100dvh] ${isNight ? 'bg-[#030305]' : 'bg-zinc-950'} text-zinc-100 font-sans overflow-x-hidden transition-colors duration-1000 flex flex-col`}>
+      <div className={`min-h-[100dvh] ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-500 flex flex-col`}>
         <React.Suspense fallback={null}>
           {standaloneLegal && (
             <div className="fixed inset-0 z-[200]">
@@ -240,6 +259,14 @@ function AppContent() {
         </React.Suspense>
         <Header 
           onReset={() => handleReset(true)} 
+          isNight={isNight}
+          setIsNight={setIsNight}
+          onOpenHelp={() => {
+            if (analysisState.status !== 'idle') {
+              handleReset(false);
+            }
+            setActiveTab('help');
+          }}
         />
         {/* Web-only mobile download banner */}
         {platform === 'web' && (
@@ -248,9 +275,9 @@ function AppContent() {
           </React.Suspense>
         )}
         <React.Suspense fallback={null}>
-          <PaywallModal />
-          <OdapNoteModal />
-          <LoginModal />
+          <PaywallModal isNight={isNight} />
+          <OdapNoteModal isNight={isNight} />
+          <LoginModal isNight={isNight} />
 
           {showChildProfileModal && (
             <ProgressiveOnboardingModal 
@@ -259,6 +286,7 @@ function AppContent() {
                 sessionStorage.setItem('skipped_child_profile', 'true');
                 setShowChildProfileModal(false);
               }}
+              isNight={isNight}
             />
           )}
         </React.Suspense>
@@ -266,14 +294,14 @@ function AppContent() {
         {confirmDialog && (
           <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setConfirmDialog(null)}></div>
-            <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full text-center animate-fade-in-up">
-              <p className="text-white font-bold text-lg mb-6 font-korean">{confirmDialog.title}</p>
+            <div className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200 shadow-2xl'} border rounded-[2.5rem] p-8 max-w-sm w-full text-center animate-fade-in-up`}>
+              <p className={`${isNight ? 'text-white' : 'text-zinc-900'} font-black text-lg mb-6 font-korean uppercase tracking-tight`}>{confirmDialog.title}</p>
               <div className="flex flex-col gap-3">
 
-                <button onClick={confirmDialog.onConfirm} disabled={confirmDialog.isSaving} className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl disabled:opacity-50">
+                <button onClick={confirmDialog.onConfirm} disabled={confirmDialog.isSaving} className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black uppercase text-xs transition-all active:scale-95 disabled:opacity-50`}>
                   {confirmDialog.confirmText || "Yes"}
                 </button>
-                <button onClick={() => setConfirmDialog(null)} disabled={confirmDialog.isSaving} className="w-full bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-black uppercase text-xs hover:bg-zinc-700 disabled:opacity-50">
+                <button onClick={() => setConfirmDialog(null)} disabled={confirmDialog.isSaving} className={`w-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'} py-4 rounded-2xl font-black uppercase text-xs transition-all active:scale-95 disabled:opacity-50`}>
                   {confirmDialog.cancelText || "No"}
                 </button>
               </div>
@@ -315,33 +343,42 @@ function AppContent() {
 
         <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col ${analysisState.status === 'idle' ? 'pt-24 md:pt-40' : 'pt-4 md:pt-8'}`}>
 
-          {analysisState.status === 'idle' && isInApp && showInAppNotice && (
-            <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
-              <div className="flex items-center gap-3">
-                <span className="text-xl">⚠️</span>
-                <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
-                  {language === 'ko'
-                    ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요."
-                    : "Open in Safari or Chrome for the best experience (Camera/Mic)."}
-                </p>
-              </div>
-              <button onClick={() => setShowInAppNotice(false)} className="text-white/60 p-1 ml-2">✕</button>
-            </div>
-          )}
-
           {analysisState.status === 'idle' && (
-            <div className="animate-fade-in flex-1">
-              {isAuthLoading ? (
-                <div className="flex items-center justify-center min-h-[50vh]">
-                  <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-                </div>
-              ) : (
-                <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data)} />
-              )}
+            <div className="animate-fade-in flex-1 h-full flex flex-col">
+              {activeTab === 'scan' ? (
+                <>
+                  {isInApp && showInAppNotice && (
+                    <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">⚠️</span>
+                        <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
+                          {language === 'ko'
+                            ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요."
+                            : "Open in Safari or Chrome for the best experience (Camera/Mic)."}
+                        </p>
+                      </div>
+                      <button onClick={() => setShowInAppNotice(false)} className="text-white/60 p-1 ml-2">✕</button>
+                    </div>
+                  )}
+                  {isAuthLoading ? (
+                    <div className="flex items-center justify-center min-h-[50vh]">
+                      <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                    </div>
+                  ) : (
+                    <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data)} minimal onOpenHelp={() => setActiveTab('help')} />
+                  )}
+                </>
+              ) : activeTab === 'help' ? (
+                <HelpView isNight={isNight} onClose={() => setActiveTab('scan')} />
+              ) : null}
             </div>
           )}
 
-          {analysisState.status === 'analyzing' && <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />}
+          {analysisState.status === 'analyzing' && (
+            <div className="animate-fade-in flex-1 h-full flex flex-col">
+              <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />
+            </div>
+          )}
 
           {analysisState.status === 'error' && (
             <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
@@ -363,7 +400,7 @@ function AppContent() {
                 <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]">
                   {t('btn_scan_again_simple')}
                 </button>
-                <button onClick={() => handleReset(false)} className="bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all font-korean shadow-lg w-full min-h-[48px]">
+                <button onClick={() => handleReset(false)} className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}>
                   {t('btn_retake')}
                 </button>
               </div>
@@ -392,6 +429,10 @@ function AppContent() {
                   isLoadingItems={!analysisState.isItemsLoaded}
                   worksheetTitle={language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
                   onScanAgain={handleScanAgain}
+                  onClose={handleScanAgain}
+                  isNight={isNight}
+                  onConfirm={(opts) => setConfirmDialog(opts)}
+                  data={analysisState.data}
                 />
               </div>
             </div>
@@ -399,14 +440,14 @@ function AppContent() {
         </main>
 
         {/* --- PROFESSIONAL BUSINESS FOOTER --- */}
-        <footer className="w-full bg-zinc-950/50 border-t border-white/5 py-12 px-6">
+        <footer className={`w-full ${isNight ? 'bg-zinc-950/50 border-white/5' : 'bg-white border-zinc-100 shadow-[0_-20px_50px_rgba(0,0,0,0.02)]'} border-t py-12 px-6`}>
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
                   <ChekkiMascot className="w-8 h-8 text-white" mood="happy" />
                 </div>
-                <h2 className="text-2xl font-black text-white font-display">Chekki<span className="text-orange-500">AI</span></h2>
+                <h2 className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}>Chekki<span className="text-orange-500">AI</span></h2>
               </div>
               <p className="text-zinc-500 text-xs font-medium leading-relaxed max-w-sm">
                 {language === 'ko'
@@ -417,14 +458,14 @@ function AppContent() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-white uppercase tracking-[0.2em]">{language === 'ko' ? '사업자 정보' : 'Business Info'}</h4>
+                <h4 className={`text-xs font-black ${isNight ? 'text-white' : 'text-zinc-900'} uppercase tracking-[0.2em]`}>{language === 'ko' ? '사업자 정보' : 'Business Info'}</h4>
                 <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-500 font-medium">
                   <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '상호:' : 'Biz:'}</span> 채키 AI (Chekki AI)</p>
                   <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '사업자번호:' : 'Reg No:'}</span> 814-14-03096</p>
                 </div>
               </div>
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-white opacity-40 uppercase tracking-[0.2em]">{language === 'ko' ? '고객 센터' : 'Contact Us'}</h4>
+                <h4 className={`text-xs font-black ${isNight ? 'text-white opacity-40' : 'text-zinc-400'} uppercase tracking-[0.2em]`}>{language === 'ko' ? '고객 센터' : 'Contact Us'}</h4>
                 <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-500 font-medium font-korean">
                   <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '이메일:' : 'Email:'}</span> chekkihelp@gmail.com</p>
                 </div>
@@ -441,6 +482,15 @@ function AppContent() {
             </div>
           </div>
         </footer>
+
+        <BottomNav 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+          isVisible={analysisState.status === 'idle'} 
+          isNight={isNight}
+          isAuthenticated={isAuthenticated}
+          openLoginModal={openLoginModal}
+        />
 
         <style>{`
             @keyframes confetti {

@@ -22,33 +22,13 @@ interface MistakeContextType {
 const MistakeContext = createContext<MistakeContextType | undefined>(undefined);
 
 export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { firebaseUser } = useAuth();
   const [mistakes, setMistakes] = useState<MistakeItem[]>([]);
   const [showMistakeModal, setShowMistakeModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const loadMistakes = async () => {
-        if (!firebaseUser) {
-            setMistakes([]);
-            return;
-        }
-        setIsLoading(true);
-        try {
-            const data = await db.getMistakes(firebaseUser.uid);
-            setMistakes(data);
-        } catch (e) {
-            console.error("Error loading mistakes:", e);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    loadMistakes();
-  }, [firebaseUser]);
-
-  const toggleMistake = async (item: WorksheetItem) => {
-    if (!firebaseUser) return;
-
+  // Initial load effect removed - no persistence
+  
+  const toggleMistake = (item: WorksheetItem) => {
     // Use Question + Answer for better identity tracking
     const exists = mistakes.find(m => 
       m.question_text === item.question_text && 
@@ -57,7 +37,6 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     if (exists) {
       setMistakes(prev => prev.filter(m => m.uniqueId !== exists.uniqueId));
-      await db.removeMistake(exists.uniqueId, firebaseUser.uid);
     } else {
       const newItem: MistakeItem = {
         ...item,
@@ -65,14 +44,11 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
         dateAdded: new Date().toISOString()
       };
       setMistakes(prev => [newItem, ...prev]);
-      await db.addMistake(firebaseUser.uid, newItem);
     }
   };
 
-  const removeMistake = async (uniqueId: string) => {
-    if (!firebaseUser) return;
+  const removeMistake = (uniqueId: string) => {
     setMistakes(prev => prev.filter(m => m.uniqueId !== uniqueId));
-    await db.removeMistake(uniqueId, firebaseUser.uid);
   };
 
   const isMistake = (questionText: string, correctAnswer: string) => {

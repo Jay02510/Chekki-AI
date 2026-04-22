@@ -7,9 +7,10 @@ import { AppleLogo } from './AppleLogo';
 
 interface Props {
     onClose: () => void;
+    isNight?: boolean;
 }
 
-export const BillingModal: React.FC<Props> = ({ onClose }) => {
+export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
     const { user, subscriptionRecord, cancelSubscription, setShowPaywall } = useAuth();
     const { language, t } = useLanguage();
     const isPro = user?.plan === 'pro';
@@ -34,7 +35,7 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
         };
 
         return (
-            <span className="text-[9px] bg-orange-500/10 border border-orange-500/20 text-orange-400 px-3 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1.5">
+            <span className={`text-[9px] ${isNight ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 'bg-orange-50 border-orange-200 text-orange-600'} px-3 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1.5 border`}>
                 {badgeContent()}
             </span>
         );
@@ -58,27 +59,27 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
-            <div className="relative bg-zinc-900 rounded-[2rem] md:rounded-[3rem] w-full max-w-2xl md:max-w-3xl shadow-2xl border border-white/5 overflow-hidden animate-fade-in-up">
+            <div className={`relative ${isNight ? 'bg-zinc-900 border-white/5' : 'bg-white border-zinc-200 shadow-2xl'} rounded-[2rem] md:rounded-[3rem] w-full max-w-2xl md:max-w-3xl border overflow-hidden animate-fade-in-up`}>
 
-                <div className="bg-zinc-950 px-8 py-6 border-b border-white/5 flex justify-between items-center">
+                <div className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-8 py-6 border-b flex justify-between items-center`}>
                     <div className="flex items-center gap-3">
                         <span className="text-2xl">💳</span>
-                        <h2 className="text-2xl font-black text-white font-display">{t('billing_title')}</h2>
+                        <h2 className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}>{t('billing_title')}</h2>
                     </div>
-                    <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">✕</button>
+                    <button onClick={onClose} className="text-zinc-500 hover:text-orange-500 transition-colors">✕</button>
                 </div>
 
                 <div className="p-10 flex flex-col items-center text-center space-y-5">
-                    <div className="w-20 h-20 rounded-full bg-orange-500/10 flex items-center justify-center text-4xl">
+                    <div className={`w-20 h-20 rounded-full ${isNight ? 'bg-orange-500/10' : 'bg-orange-50 shadow-inner'} flex items-center justify-center text-4xl`}>
                         💳
                     </div>
 
                     {subscriptionRecord?.subscription_status === 'active' ? (
                         <>
-                            <h3 className="text-2xl font-black text-white font-display uppercase">{t('billing_active')}</h3>
+                            <h3 className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase`}>{t('billing_active')}</h3>
                             {platformBadge()}
                             <div className="space-y-1.5 text-zinc-400 font-medium text-sm">
-                                <p>{t('billing_plan')}: <span className="text-orange-500">
+                                <p>{t('billing_plan')}: <span className="text-orange-500 font-black">
                                     {subscriptionRecord.apple_product_id === 'com.chekkiai.app.yearly' ? t('sub_yearly') : t('sub_monthly')}
                                 </span></p>
                                 {user?.subscriptionStartedAt && <p>{t('billing_started')}: {formatDate(user.subscriptionStartedAt)}</p>}
@@ -93,17 +94,17 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
 
                             {/* Cancel instructions — platform-specific */}
                             {cancelInstructions() && (
-                                <div className="bg-zinc-800/50 border border-white/5 rounded-2xl p-4 max-w-sm text-left">
-                                    <p className="text-[10px] text-zinc-400 leading-relaxed">{cancelInstructions()}</p>
+                                <div className={`${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-50 border-zinc-200 shadow-inner'} rounded-2xl p-4 max-w-sm text-left border`}>
+                                    <p className="text-[10px] text-zinc-400 leading-relaxed font-medium">{cancelInstructions()}</p>
                                 </div>
                             )}
                         </>
                     ) : (
                         <>
-                            <h3 className="text-2xl font-black text-white font-display uppercase">
+                            <h3 className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase`}>
                                 {t('sub_no_active')}
                             </h3>
-                            <p className="text-zinc-400 text-sm max-w-xs">
+                            <p className="text-zinc-400 text-sm font-medium max-w-xs leading-relaxed">
                                 {language === 'ko'
                                     ? '모든 AI 기능을 무제한으로 사용하세요.'
                                     : 'Unlock all AI tools with unlimited access.'}
@@ -117,32 +118,32 @@ export const BillingModal: React.FC<Props> = ({ onClose }) => {
                         </>
                     )}
 
-                    <div className="h-px w-12 bg-zinc-800" />
+                    <div className={`h-px w-12 ${isNight ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
                     <button
                         onClick={onClose}
-                        className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                        className={`${isNight ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500 shadow-sm'} px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all`}
                     >
                         {t('billing_back')}
                     </button>
                 </div>
 
                 {showCancelConfirm && (
-                    <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-md flex flex-col justify-center items-center p-8 text-center animate-fade-in z-50">
+                    <div className={`absolute inset-0 ${isNight ? 'bg-zinc-950/95' : 'bg-white/95'} backdrop-blur-md flex flex-col justify-center items-center p-8 text-center animate-fade-in z-50`}>
                         <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-3xl mb-6">⚠️</div>
-                        <h3 className="text-2xl font-black text-white font-display mb-2">{t('billing_cancel_btn')}</h3>
-                        <p className="text-zinc-400 text-sm font-medium mb-8 max-w-sm">
+                        <h3 className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2`}>{t('billing_cancel_btn')}</h3>
+                        <p className="text-zinc-400 text-sm font-medium mb-8 max-w-sm leading-relaxed">
                             {t('billing_cancel_desc')}
                         </p>
                         <div className="flex flex-col gap-3 w-full max-w-xs">
                             <button
                                 onClick={async () => { await cancelSubscription(); setShowCancelConfirm(false); }}
-                                className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black transition-all active:scale-95"
+                                className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black transition-all active:scale-95 shadow-lg shadow-red-500/20"
                             >
                                 {t('billing_cancel_yes')}
                             </button>
                             <button
                                 onClick={() => setShowCancelConfirm(false)}
-                                className="w-full bg-zinc-800 hover:bg-zinc-700 text-white py-4 rounded-xl font-black transition-all"
+                                className={`w-full ${isNight ? 'bg-zinc-800 hover:bg-zinc-700' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500'} text-white py-4 rounded-xl font-black transition-all`}
                             >
                                 {t('billing_cancel_no')}
                             </button>

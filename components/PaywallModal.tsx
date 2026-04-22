@@ -5,7 +5,11 @@ const SubscriptionScreen = React.lazy(() => import('./SubscriptionScreen').then(
 const LegalModal = React.lazy(() => import('./LegalModal').then(module => ({ default: module.LegalModal })));
 import { LegalType } from '../types';
 
-export const PaywallModal: React.FC = () => {
+interface Props {
+    isNight?: boolean;
+}
+
+export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
     const { showPaywall, setShowPaywall } = useAuth();
     const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
 
@@ -28,7 +32,7 @@ export const PaywallModal: React.FC = () => {
                 onClick={() => setShowPaywall(false)}
             />
 
-            <div className={`relative bg-zinc-900 rounded-[2.5rem] md:rounded-[3rem] w-full max-w-lg md:max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border border-white/10 animate-fade-in-up transition-opacity ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <div className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200'} rounded-[2.5rem] md:rounded-[3rem] w-full max-w-lg md:max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border animate-fade-in-up transition-opacity ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
 
                 {/* Gradient glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-40 bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none" />
@@ -43,7 +47,7 @@ export const PaywallModal: React.FC = () => {
 
                 <div className="p-6 md:p-8 overflow-y-auto max-h-[85vh] custom-scrollbar">
                     <Suspense fallback={<div className="h-40 flex items-center justify-center"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>}>
-                      <SubscriptionScreen onClose={() => setShowPaywall(false)} />
+                      <SubscriptionScreen onClose={() => setShowPaywall(false)} isNight={isNight} />
                     </Suspense>
                 </div>
             </div>

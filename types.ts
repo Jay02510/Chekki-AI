@@ -80,6 +80,7 @@ export interface WorksheetSummary {
   overview_ko: string;
   overview_en?: string;
   total_score?: number;
+  worksheet_type?: string;
 }
 
 export interface WorksheetAnalysis {

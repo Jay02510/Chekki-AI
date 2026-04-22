@@ -11,11 +11,13 @@ interface Props {
   focusedId?: number | null; 
   className?: string;
   isLoadingItems?: boolean;
+  isNight?: boolean;
+  onConfirm?: (options: { title: string; confirmText?: string; cancelText?: string; onConfirm: () => void }) => void;
 }
 
 type ViewMode = 'fit' | 'fill';
 
-export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItems, focusedId, className, isLoadingItems = false }) => {
+export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItems, focusedId, className, isLoadingItems = false, isNight = false, onConfirm }) => {
   const { user, setShowPaywall } = useAuth();
   const { t, language } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -88,7 +90,18 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
   };
 
   const resetPositions = () => {
-    if (window.confirm(language === 'ko' ? "정답 위치를 초기화할까요?" : "Reset bubble positions?")) {
+    const title = language === 'ko' ? "정답 위치를 초기화할까요?" : "Reset bubble positions?";
+    
+    if (onConfirm) {
+      onConfirm({
+        title,
+        confirmText: language === 'ko' ? "초기화" : "Reset",
+        cancelText: language === 'ko' ? "취소" : "Cancel",
+        onConfirm: () => {
+          setItems(initialItems.map(i => ({ ...i, custom_coords: undefined })));
+        }
+      });
+    } else if (window.confirm(title)) {
       setItems(initialItems.map(i => ({ ...i, custom_coords: undefined })));
     }
   };
@@ -115,27 +128,36 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     } as React.CSSProperties;
   };
 
-  const OverlayContent = () => (
+  const renderOverlayContent = (inFullscreen: boolean) => (
     <div 
-      id="worksheet-overlay-capture"
+      id={inFullscreen ? "worksheet-overlay-fullscreen" : "worksheet-overlay-capture"}
       ref={containerRef}
       onPointerMove={handlePointerMove}
       onContextMenu={(e) => e.preventDefault()}
-      className={`group relative transform-gpu transition-all duration-500 ease-in-out flex items-center justify-center select-none ${
-        isFullscreen 
-          ? viewMode === 'fit' ? 'h-full w-auto max-h-full' : 'w-full max-w-5xl mx-auto' 
-          : 'w-full min-h-[300px]'
+      onClick={() => setIsFullscreen(!inFullscreen)}
+      className={`group relative transform-gpu transition-all duration-500 ease-in-out flex items-center justify-center select-none cursor-pointer ${
+        inFullscreen 
+          ? viewMode === 'fit' ? 'h-full w-full' : 'w-full max-w-5xl mx-auto' 
+          : 'w-full min-h-[300px] h-full'
       }`}
     >
-      <div className="relative pointer-events-none">
+      {/* Blurred Background to fill "massive black space" */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
         <img 
-            ref={imgRef}
+          src={imageUrl} 
+          alt="" 
+          className="w-full h-full object-cover blur-[80px] scale-110" 
+        />
+      </div>
+
+      <div className={`relative pointer-events-none z-10 ${inFullscreen ? (viewMode === 'fit' ? 'h-full w-full flex items-center justify-center' : 'w-full') : 'h-full flex items-center justify-center'}`}>
+        <img 
             src={imageUrl} 
             alt="Worksheet" 
             className={`block transition-all duration-1000 ease-in-out transform-gpu pointer-events-none ${
-            imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'
+            (imageLoaded || inFullscreen) ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'
             } ${
-            isFullscreen && viewMode === 'fit' ? 'max-h-[calc(100vh-160px)] w-auto object-contain' : 'w-full h-auto'
+            inFullscreen ? (viewMode === 'fit' ? 'max-h-full max-w-full object-contain' : 'w-full h-auto') : 'w-full h-auto'
             }`}
             onLoad={() => setImageLoaded(true)}
             draggable={false}
@@ -163,12 +185,12 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
               onPointerUp={handlePointerUp}
               onClick={(e) => e.stopPropagation()}
           >
-              <div className={`
-                  rounded-[1.2rem] shadow-[0_15px_40px_rgba(0,0,0,0.6)] border-2 flex items-center gap-2 transform transition-all active:scale-95 group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
-                  ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-[0_20px_60px_rgba(249,115,22,0.5)] ring-4 ring-orange-500/40' : ''}
-                  ${isFocused ? 'bg-orange-600 border-white/30' : 'bg-zinc-800 border-white/10'}
-                  px-2.5 py-1.5 md:px-4 md:py-3
-              `}>
+                <div className={`
+                    rounded-[1.2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-2 flex items-center gap-2 transform transition-all active:scale-95 group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
+                    ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-[0_25px_70px_rgba(249,115,22,0.6)] ring-4 ring-orange-500/40 z-[1000]' : ''}
+                    ${isFocused ? 'bg-orange-500 border-white shadow-orange-500/20' : 'bg-transparent border-transparent'}
+                    px-2.5 py-1.5 md:px-4 md:py-3
+                `}>
                   <div className="w-5 h-5 md:w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
                       <span className="font-black text-[9px] md:text-sm text-white">{item.id}</span>
                   </div>
@@ -184,47 +206,55 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
 
   return (
     <>
-      <div className={`w-full flex flex-col bg-zinc-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full'}`}>
+      <div className={`w-full flex flex-col bg-zinc-950 border-white/5 overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full rounded-[2.5rem]'}`}>
         
         <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-start pointer-events-none">
-            <div className="flex flex-col gap-2 items-start pointer-events-auto relative">
-                 <button 
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="w-12 h-12 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/20 text-white hover:bg-zinc-800 transition-all flex items-center justify-center text-xl shadow-2xl active:scale-90"
-                  title="Settings"
-                 >
-                   ⚙️
-                 </button>
+            <div className="flex flex-col gap-3 items-start pointer-events-auto relative">
+                   <button 
+                    onClick={() => setShowSettings(!showSettings)}
+                    className={`w-14 h-14 rounded-2xl bg-black/60 backdrop-blur-xl border-2 ${showSettings ? 'border-orange-500 text-orange-500' : 'border-white/10 text-white/90'} hover:bg-zinc-800 transition-all flex items-center justify-center text-xl shadow-2xl active:scale-90 group`}
+                    title={language === 'ko' ? "정답 설정" : "Overlay Settings"}
+                   >
+                     <svg className={`w-7 h-7 ${showSettings ? 'scale-110' : 'group-hover:scale-110'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 12h7.5" />
+                     </svg>
+                   </button>
                  
                  {showSettings && (
-                   <div className="flex flex-col gap-3 bg-black/60 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-2xl animate-fade-in-up origin-top-left absolute top-14 left-0 w-max">
-                     <div className="flex flex-col gap-1.5">
-                       <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">{language === 'ko' ? "크기 조절" : "Bubble Size"}</span>
-                       <input 
-                          type="range" min="0.3" max="1.5" step="0.05" 
-                          value={bubbleScale} 
-                          onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
-                          className="w-32 accent-orange-500 cursor-pointer h-1.5 bg-zinc-700/50 rounded-lg appearance-none"
-                       />
+                   <>
+                     <div className="fixed inset-0 z-40" onClick={() => setShowSettings(false)}></div>
+                     <div className="flex flex-col gap-4 bg-black/80 backdrop-blur-2xl p-5 rounded-3xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-fade-in-up origin-top-left absolute top-16 left-0 w-max z-[100]">
+                     <div className="flex flex-col gap-2">
+                       <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] px-1">{language === 'ko' ? "정답 크기" : "Answer Size"}</span>
+                       <div className="flex items-center gap-3">
+                         <span className="text-xs opacity-50">A</span>
+                         <input 
+                            type="range" min="0.4" max="1.4" step="0.05" 
+                            value={bubbleScale} 
+                            onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
+                            className="w-32 accent-orange-500 cursor-pointer h-1.5 bg-white/10 rounded-full appearance-none"
+                         />
+                         <span className="text-lg font-black">A</span>
+                       </div>
                      </div>
                      <div className="w-full h-px bg-white/10"></div>
                      <button 
                       onClick={resetPositions}
-                      className="w-full py-2.5 rounded-xl bg-zinc-800/80 text-white hover:bg-zinc-700 transition-all flex items-center justify-center gap-2 text-xs font-bold active:scale-95"
-                      title={language === 'ko' ? "위치 초기화" : "Reset Positions"}
+                      className="w-full py-3 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-95 border border-white/10"
                      >
-                       🔄 {language === 'ko' ? "위치 초기화" : "Reset Roles"}
+                       <span className="text-base">🔄</span> {language === 'ko' ? "위치 초기화" : "Reset Positions"}
                      </button>
                    </div>
+                   </>
                  )}
             </div>
 
             <button 
               onClick={() => setIsFullscreen(true)}
-              className="pointer-events-auto w-12 h-12 rounded-2xl bg-black/60 backdrop-blur-xl border-2 border-white/30 flex items-center justify-center text-white hover:bg-orange-600 transition-all shadow-2xl group active:scale-90"
+              className="pointer-events-auto w-14 h-14 rounded-2xl bg-black/60 backdrop-blur-xl border-2 border-white/30 flex items-center justify-center text-white hover:bg-orange-600 transition-all shadow-2xl group active:scale-90"
               title="Full Screen Focus"
             >
-              <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-7 h-7 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
             </button>
@@ -238,69 +268,76 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
                  <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest animate-pulse">{language === 'ko' ? "종이 분석 중..." : "Scanning Paper..."}</p>
               </div>
             )}
-            <OverlayContent />
+            {renderOverlayContent(false)}
           </div>
         </div>
-        
-        <div className="bg-zinc-900/80 backdrop-blur-3xl px-6 py-2 border-t border-white/5 flex flex-col items-center shrink-0">
-           <p className="text-zinc-500 text-[9px] font-black font-korean tracking-[0.3em] uppercase opacity-70 mb-1">{t('ws_voice_guide')}</p>
-           <p className="text-[8px] text-orange-500/60 font-black uppercase tracking-widest">{language === 'ko' ? "정답을 직접 옮겨보세요" : "Drag answers to reposition"}</p>
-        </div>
+
+
       </div>
 
       {isFullscreen && (
-        <div className="fixed inset-0 z-[200] flex flex-col bg-black animate-fade-in overflow-hidden">
-          <div className="relative z-[220] pt-[env(safe-area-inset-top)] bg-zinc-900/95 backdrop-blur-3xl border-b border-white/10 shadow-2xl shrink-0 h-16 px-6 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{language === 'ko' ? "크기" : "Size"}</span>
-                    <input 
-                        type="range" min="0.3" max="2" step="0.1" 
-                        value={bubbleScale} 
-                        onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
-                        className="w-24 md:w-64 accent-orange-500 h-1.5 bg-zinc-800 rounded-lg appearance-none hidden md:block"
-                    />
-                    <div className="w-px h-6 bg-white/10 mx-2 hidden md:block"></div>
-                    <button 
-                        onClick={resetPositions}
-                        className="w-10 h-10 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-all flex items-center justify-center text-lg active:scale-90"
-                        title={language === 'ko' ? "위치 초기화" : "Reset Positions"}
-                    >
-                        🔄
-                    </button>
-                    <button 
-                        onClick={() => setViewMode(viewMode === 'fit' ? 'fill' : 'fit')}
-                        className="w-10 h-10 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-all flex items-center justify-center text-lg active:scale-90"
-                        title={language === 'ko' ? "화면 줌" : "Zoom Image"}
-                    >
-                        {viewMode === 'fit' ? '🔍' : '🖼️'}
-                    </button>
-                </div>
-
-                <button 
-                    onClick={() => setIsFullscreen(false)}
-                    className="flex items-center gap-2 bg-red-600 hover:bg-red-50 text-white px-5 py-2 rounded-xl shadow-xl transition-all active:scale-95 border border-white/10"
-                >
-                    <span className="text-[10px] font-black uppercase tracking-widest">{language === 'ko' ? '종료' : 'Exit'}</span>
-                    <span className="text-lg">✕</span>
-                </button>
+        <div className="fixed inset-0 z-[9999] flex flex-col bg-zinc-950 animate-fade-in overflow-hidden select-none">
+          {/* Close button - prominently placed with safe area awareness */}
+          <div className="absolute top-0 left-0 right-0 z-[10002] p-8 pt-[calc(env(safe-area-inset-top)+2.5rem)] flex justify-end pointer-events-none">
+            <button 
+              onClick={() => setIsFullscreen(false)}
+              className="w-16 h-16 rounded-full bg-orange-600 hover:bg-orange-500 backdrop-blur-3xl flex items-center justify-center text-white transition-all active:scale-90 border-2 border-white/30 pointer-events-auto shadow-[0_0_50px_rgba(249,115,22,0.6)] group"
+            >
+              <svg className="w-10 h-10 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
           </div>
 
           <div 
-            className="flex-1 overflow-auto custom-scrollbar overscroll-contain flex justify-center items-center p-4 md:p-12 relative bg-zinc-950"
+            className="flex-1 w-full h-full relative flex items-center justify-center"
             onClick={() => setIsFullscreen(false)}
           >
-             <div onClick={(e) => e.stopPropagation()} className="relative transform-gpu max-w-full">
-                <OverlayContent />
-             </div>
-          </div>
+            {/* Immersive Background to eliminate black space */}
+            <div className="absolute inset-0 z-0">
+               <img src={imageUrl} alt="" className="w-full h-full object-cover blur-[100px] opacity-40 scale-125" />
+            </div>
 
-          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] sm:hidden animate-fade-in-up">
-              <button 
-                onClick={() => setIsFullscreen(false)}
-                className="bg-white text-black px-12 py-5 rounded-full font-black text-sm uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(255,255,255,0.2)] ring-4 ring-white/10 active:scale-90 transition-all"
-              >
-                {language === 'ko' ? '포커스 종료' : 'Close Focus'}
-              </button>
+             <div onClick={(e) => e.stopPropagation()} className="relative z-10 transform-gpu w-full h-full flex items-center justify-center p-4">
+                <div className="relative inline-block shadow-[0_30px_100px_rgba(0,0,0,0.9)] rounded-lg md:rounded-3xl overflow-hidden max-w-full max-h-full">
+                  <img 
+                      src={imageUrl} 
+                      alt="Worksheet Result" 
+                      className="max-w-full max-h-full object-contain block animate-scale-in transition-all duration-700 shadow-2xl"
+                      draggable={false}
+                  />
+                  
+                  {/* Overlay items positioned exactly relative to this image container */}
+                  {items.map((item) => {
+                    const box = item.bounding_box;
+                    if (!box && !item.custom_coords) return null;
+                    const rawTop = item.custom_coords ? item.custom_coords.top : ((box!.ymin + box!.ymax) / 2000) * 100;
+                    const rawLeft = item.custom_coords ? item.custom_coords.left : ((box!.xmin + box!.xmax) / 2000) * 100;
+                    const top = Math.min(Math.max(rawTop, 5), 95);
+                    const left = Math.min(Math.max(rawLeft, 5), 95);
+
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          top: `${top}%`,
+                          left: `${left}%`,
+                          transform: `translate3d(-50%, -50%, 0) scale(${bubbleScale * 1.3})`,
+                          position: 'absolute',
+                        }}
+                        className="pointer-events-none"
+                      >
+                        <div className="bg-orange-500 border-2 border-white/60 rounded-[1.2rem] shadow-[0_15px_40px_rgba(0,0,0,0.6)] px-4 py-2 flex items-center gap-2">
+                          <div className="w-6 h-6 md:w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                            <span className="font-black text-[9px] md:text-sm text-white">{item.id}</span>
+                          </div>
+                          <span className="font-hand font-black text-white text-sm md:text-xl whitespace-nowrap drop-shadow-md">
+                            {item.correct_answer}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+             </div>
           </div>
         </div>
       )}

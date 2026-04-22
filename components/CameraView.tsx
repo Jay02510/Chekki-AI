@@ -4,7 +4,6 @@ import { compressImage } from '../utils/imageUtils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ChekkiMascot } from './Icons';
-import { toJpeg } from 'html-to-image';
 import { ASSETS } from '../constants';
 import { SCREENSHOT_MODE } from '../config';
 import { FeedbackModal } from './FeedbackModal';
@@ -22,9 +21,11 @@ import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
 interface Props {
   onImageSelected: (base64: string) => void;
   isNight?: boolean;
+  minimal?: boolean;
+  onOpenHelp?: () => void;
 }
 
-export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }) => {
+export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, minimal = false, onOpenHelp }) => {
   const { 
     user, isAuthenticated, openLoginModal, checkScanLimit, incrementScan, 
     checkQuestionLimit, incrementQuestion, setShowPaywall 
@@ -49,6 +50,21 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     const used = localStorage.getItem('chekki_guest_scan_used') === 'true';
     setGuestUsed(used);
   }, [isAuthenticated]);
+
+  // Listen for trigger-scan event from BottomNav
+  useEffect(() => {
+    const handleTriggerScan = () => {
+      if (isAuthenticated) {
+        fileInputRef.current?.click();
+      } else if (guestUsed) {
+        openLoginModal();
+      } else {
+        fileInputRef.current?.click();
+      }
+    };
+    window.addEventListener('trigger-scan', handleTriggerScan);
+    return () => window.removeEventListener('trigger-scan', handleTriggerScan);
+  }, [isAuthenticated, guestUsed, openLoginModal]);
 
   const processFile = async (file: File) => {
     setIsProcessing(true);
@@ -109,36 +125,34 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     <section className="py-12 md:py-32 px-4 max-w-7xl mx-auto w-full space-y-16 md:space-y-40">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10">
         {[
+          { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc') },
           { id: 'ocr', emoji: '🎯', title: t('diff_ocr'), desc: t('diff_ocr_desc') },
-          { id: 'script', emoji: '💌', title: t('diff_script'), desc: t('diff_script_desc') },
-          { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc') }
+          { id: 'script', emoji: '💌', title: t('diff_script'), desc: t('diff_script_desc') }
         ].map(feat => (
-          <div key={feat.id} className="p-6 md:p-10 rounded-[2rem] bg-zinc-900/40 border border-white/5 hover:border-orange-500/20 transition-all">
+          <div key={feat.id} className={`p-6 md:p-10 rounded-[2rem] ${isNight ? 'bg-zinc-900/40 border-white/5 hover:border-orange-500/20' : 'bg-white border-zinc-200 hover:border-orange-500/30 shadow-sm'} border transition-all`}>
             <span className="text-3xl md:text-5xl block mb-4 md:mb-6">{feat.emoji}</span>
-            <h3 className="text-lg md:text-2xl font-black text-white font-display mb-2 md:mb-3">{feat.title}</h3>
-            <p className="text-zinc-400 text-xs md:text-base leading-relaxed font-korean opacity-80">{feat.desc}</p>
+            <h3 className={`text-lg md:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2 md:mb-3`}>{feat.title}</h3>
+            <p className={`${isNight ? 'text-zinc-400 opacity-80' : 'text-zinc-600'} text-xs md:text-base leading-relaxed font-korean`}>{feat.desc}</p>
           </div>
         ))}
       </div>
 
       <div className="space-y-10 md:space-y-20">
-
-        <h2 className="text-2xl md:text-6xl font-black text-white text-center font-display tracking-tight">{t('how_title')}</h2>
+        <h2 className={`text-2xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-display tracking-tight`}>{t('how_title')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16">
           {[1, 2, 3].map(step => (
             <div key={step} className="flex flex-col items-center text-center group">
               <div className="w-12 h-12 md:w-20 md:h-20 rounded-[1.5rem] bg-orange-500 flex items-center justify-center text-xl md:text-3xl font-black text-white mb-4 md:mb-8 shadow-2xl shadow-orange-500/20 group-hover:scale-110 transition-transform">
-                {step}
+                 {step}
               </div>
-              <h4 className="text-lg md:text-2xl font-bold text-white mb-2 md:mb-3 tracking-tight">{t(`how_step${step}`)}</h4>
-              <p className="text-zinc-500 text-xs md:text-lg font-korean max-w-xs opacity-90 leading-relaxed">{t(`how_step${step}_desc`)}</p>
+              <h4 className={`text-lg md:text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 md:mb-3 tracking-tight`}>{t(`how_step${step}`)}</h4>
+              <p className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-xs md:text-lg font-korean max-w-xs leading-relaxed`}>{t(`how_step${step}_desc`)}</p>
             </div>
           ))}
         </div>
 
-        <div className="pt-20 md:pt-40 pb-2 md:pb-4 text-center space-y-2 md:space-y-4">
-
-          <h2 className="text-3xl md:text-8xl font-black text-white font-display tracking-tight break-keep leading-tight">
+         <div className="pt-20 md:pt-40 pb-2 md:pb-4 text-center space-y-2 md:space-y-4">
+          <h2 className={`text-3xl md:text-8xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight break-keep leading-tight`}>
             {t('magic_title')}
           </h2>
           <p className="text-[10px] md:text-base font-black text-zinc-500 uppercase tracking-[0.4em] opacity-90">
@@ -150,25 +164,25 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
         {/* Why Chekki Section */}
         <div className="pt-20 md:pt-40 space-y-12 md:space-y-24">
-          <h2 className="text-3xl md:text-6xl font-black text-white text-center font-display tracking-tight">
+          <h2 className={`text-3xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-display tracking-tight`}>
             {t('diff_title')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 max-w-6xl mx-auto px-4">
-            <div className="flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] bg-zinc-900/30 border border-white/5 backdrop-blur-xl relative overflow-hidden group hover:bg-zinc-900/50 transition-all duration-500">
+            <div className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} transition-all duration-500`}>
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                 <span className="text-8xl md:text-[12rem]">✍️</span>
               </div>
               <span className="text-4xl md:text-7xl mb-2">✍️</span>
-              <h3 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight">{t('diff_ocr')}</h3>
-              <p className="text-zinc-500 text-base md:text-2xl font-korean leading-relaxed opacity-90 max-w-md">{t('diff_ocr_desc')}</p>
+              <h3 className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight leading-tight`}>{t('diff_ocr')}</h3>
+              <p className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-md`}>{t('diff_ocr_desc')}</p>
             </div>
-            <div className="flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] bg-zinc-900/30 border border-white/5 backdrop-blur-xl relative overflow-hidden group hover:bg-zinc-900/50 transition-all duration-500">
+            <div className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} transition-all duration-500`}>
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                 <span className="text-8xl md:text-[12rem]">💌</span>
               </div>
               <span className="text-4xl md:text-7xl mb-2">💌</span>
-              <h3 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight">{t('diff_script')}</h3>
-              <p className="text-zinc-500 text-base md:text-2xl font-korean leading-relaxed opacity-90 max-w-md">{t('diff_script_desc')}</p>
+              <h3 className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight leading-tight`}>{t('diff_script')}</h3>
+              <p className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-md`}>{t('diff_script_desc')}</p>
             </div>
           </div>
         </div>
@@ -176,27 +190,27 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         {/* Privacy Section */}
         <div className="pt-24 md:pt-60 pb-24 md:pb-60 space-y-12 md:space-y-24">
           <div className="text-center space-y-4 md:space-y-8">
-            <h2 className="text-3xl md:text-6xl font-black text-white font-display tracking-tight">
+            <h2 className={`text-3xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight`}>
               {t('trust_title')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24 max-w-6xl mx-auto px-4">
             <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
-              <div className="w-20 h-20 md:w-32 md:h-32 rounded-[2.5rem] bg-zinc-900/50 border border-white/10 flex items-center justify-center text-4xl md:text-6xl shadow-2xl group-hover:scale-110 transition-all duration-500 group-hover:border-white/20">
+              <div className={`w-20 h-20 md:w-32 md:h-32 rounded-[2.5rem] ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-500 group-hover:border-orange-500/30`}>
                 🔒
               </div>
               <div className="space-y-4 md:space-y-6">
-                <h3 className="text-2xl md:text-4xl font-black text-white tracking-tight">{t('trust_privacy')}</h3>
-                <p className="text-zinc-500 text-base md:text-2xl font-korean leading-relaxed opacity-90 max-w-xl mx-auto">{t('trust_privacy_desc')}</p>
+                <h3 className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight`}>{t('trust_privacy')}</h3>
+                <p className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-xl mx-auto`}>{t('trust_privacy_desc')}</p>
               </div>
             </div>
-            <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
-              <div className="w-20 h-20 md:w-32 md:h-32 rounded-[2.5rem] bg-zinc-900/50 border border-white/10 flex items-center justify-center text-4xl md:text-6xl shadow-2xl group-hover:scale-110 transition-all duration-500 group-hover:border-white/20">
+             <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
+              <div className={`w-20 h-20 md:w-32 md:h-32 rounded-[2.5rem] ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-500 group-hover:border-orange-500/30`}>
                 👥
               </div>
               <div className="space-y-4 md:space-y-6">
-                <h3 className="text-2xl md:text-4xl font-black text-white tracking-tight">{t('trust_safety')}</h3>
-                <p className="text-zinc-500 text-base md:text-2xl font-korean leading-relaxed opacity-90 max-w-xl mx-auto">{t('trust_safety_desc')}</p>
+                <h3 className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight`}>{t('trust_safety')}</h3>
+                <p className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-xl mx-auto`}>{t('trust_safety_desc')}</p>
               </div>
             </div>
           </div>
@@ -211,6 +225,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   const [askAnsweredQuestion, setAskAnsweredQuestion] = useState('');
   const [isAskAsking, setIsAskAsking] = useState(false);
   const [askHistory, setAskHistory] = useState<ChatTurn[]>([]);
+  const [showTools, setShowTools] = useState(false);
 
   const handleAskSubmit = useCallback(async (question: string) => {
     if (!question.trim() || isAskAsking) return;
@@ -252,15 +267,16 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   }, [isAuthenticated, checkQuestionLimit, incrementQuestion, language, askHistory, isAskAsking]);
 
   const ClarityGuide = () => (
-    <div className="flex flex-wrap justify-center gap-2 mt-6 md:mt-12 mb-4 px-2">
+    <div className="grid grid-cols-3 gap-3 md:gap-8 mt-6 md:mt-12 mb-4 px-2 w-full max-w-2xl">
       {[
-        { icon: '☀️', text: t('lbl_lighting'), tooltip: t('tt_lighting') },
-        { icon: '📏', text: t('lbl_flat'), tooltip: t('tt_flat') },
-        { icon: '🔍', text: t('lbl_sharp'), tooltip: t('tt_sharp') }
+        { icon: '☀️', text: t('lbl_lighting'), tooltip: t('tt_lighting'), color: isNight ? 'from-orange-500/20 to-transparent' : 'from-orange-500/10 to-transparent' },
+        { icon: '📏', text: t('lbl_flat'), tooltip: t('tt_flat'), color: isNight ? 'from-indigo-500/20 to-transparent' : 'from-indigo-500/10 to-transparent' },
+        { icon: '🔍', text: t('lbl_sharp'), tooltip: t('tt_sharp'), color: isNight ? 'from-emerald-500/20 to-transparent' : 'from-emerald-500/10 to-transparent' }
       ].map((tip, i) => (
-        <div key={i} className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 md:px-5 md:py-2.5 rounded-xl backdrop-blur-md" title={tip.tooltip}>
-          <span className="text-sm">{tip.icon}</span>
-          <span className="text-[9px] md:text-xs font-black text-zinc-400 whitespace-nowrap uppercase tracking-[0.1em]">{tip.text}</span>
+        <div key={i} className={`flex flex-col items-center justify-center gap-2 md:gap-4 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white/80 border-zinc-200 shadow-[0_10px_30px_rgba(0,0,0,0.02)]'} border p-3 md:p-8 rounded-[1.8rem] md:rounded-[3rem] backdrop-blur-md transition-all hover:scale-105 group shadow-sm relative overflow-hidden h-full`} title={tip.tooltip}>
+          <div className={`absolute inset-0 bg-gradient-to-b ${tip.color} opacity-30`}></div>
+          <span className="text-2xl md:text-5xl relative z-10 group-hover:scale-110 transition-transform">{tip.icon}</span>
+          <span className={`text-[8px] md:text-xs font-black ${isNight ? 'text-zinc-400' : 'text-zinc-900'} relative z-10 uppercase tracking-widest text-center`}>{tip.text}</span>
         </div>
       ))}
     </div>
@@ -277,12 +293,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
 
     return (
       <div className={`relative w-full ${size === 'large' ? 'min-h-[380px] md:min-h-[600px]' : 'h-full'} flex items-center justify-center py-6 md:py-16`}>
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border border-white/5 rounded-[2.5rem] md:rounded-[4.5rem] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}></div>
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-[3rem] md:rounded-[4.5rem] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}></div>
         <div
           role="button"
           id="magic-drop-zone-inner"
-          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-indigo-950/20' : 'bg-zinc-900/40'} backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4.5rem] border transition-all duration-700 flex flex-col items-center justify-center p-6 md:p-24 group cursor-pointer
-              ${dragActive && !isLocked ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.2)] scale-[1.01]' : 'border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)] hover:border-white/20'}`}
+          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-indigo-950/20 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[3rem] md:rounded-[4.5rem] border transition-all duration-700 flex flex-col items-center justify-center p-6 md:p-24 group cursor-pointer
+              ${dragActive && !isLocked ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.2)] scale-[1.01]' : 'hover:border-orange-500/30'}`}
           onDragEnter={isLocked ? undefined : handleDrag}
           onDragLeave={isLocked ? undefined : handleDrag}
           onDragOver={isLocked ? undefined : handleDrag}
@@ -308,7 +324,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <div className="w-full h-full animate-float flex items-center justify-center">
                   {!imgError ? (
                     <img
-                      src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY}
+                      src={ASSETS.HERO_IMAGE}
                       alt="Chekki Mascot"
                       className={`w-full h-full object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] filter brightness-110 ${isNight ? 'scale-[1.3] md:scale-[1.4] lg:scale-[1.5]' : 'scale-110 md:scale-115 lg:scale-[1.2]'} transition-opacity duration-700 ${mascotLoaded ? 'opacity-100' : 'opacity-0'}`}
                       onLoad={() => setMascotLoaded(true)}
@@ -325,7 +341,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             {isLocked ? (
               <div className="animate-fade-in space-y-4 px-4">
                 <div className="space-y-1">
-                  <h3 className="text-xl md:text-5xl font-black text-white font-display tracking-tight break-keep leading-tight">
+                  <h3 className={`text-xl md:text-5xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight break-keep leading-tight`}>
                     {t('guest_used_title')}
                   </h3>
                   <p className="text-zinc-400 font-bold font-korean text-xs md:text-2xl max-w-md mx-auto leading-relaxed opacity-80">
@@ -339,22 +355,32 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             ) : (
               <>
                 <div className="space-y-1 max-w-lg px-2">
-                  <h3 className="text-xl md:text-6xl font-black text-white font-display tracking-tight break-keep leading-[1.2]">
+                  <h3 className={`text-xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight break-keep leading-[1.2]`}>
                     {isProcessing ? t('processing') : t('drop_title')}
                   </h3>
-                  <p className="text-zinc-500 font-bold font-korean text-xs md:text-2xl break-keep opacity-80 leading-relaxed">{t('drop_subtitle')}</p>
+                  <p className={`${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-bold font-korean text-xs md:text-2xl break-keep opacity-80 leading-relaxed`}>{t('drop_subtitle')}</p>
                 </div>
 
                 <ClarityGuide />
 
-                <div className="mt-6 md:mt-16 flex flex-col items-center gap-2 group/btn" title={t('btn_upload')}>
-                  <div className={`w-14 h-14 md:w-24 md:h-24 rounded-full ${isNight ? 'bg-indigo-600' : 'bg-orange-500'} flex items-center justify-center shadow-[0_15px_40px_rgba(249,115,22,0.3)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/60 border-2 border-white/20 active:scale-90`}>
-                    <svg className="w-7 h-7 md:w-12 md:h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="mt-4 md:mt-12 flex flex-col items-center gap-4 group/btn" title={t('btn_guest_scan')}>
+                  <div className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-indigo-600' : 'bg-orange-500'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.3)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/60 border-4 border-white/20 active:scale-90`}>
+                    <svg className="w-8 h-8 md:w-14 md:h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </div>
-                  <span className="text-[9px] md:text-sm font-black text-zinc-500 uppercase tracking-[0.2em] group-hover:text-white transition-colors">{t('btn_upload')}</span>
+                  <span className={`text-xs md:text-lg font-black uppercase tracking-[0.3em] transition-colors ${isNight ? 'text-zinc-500 group-hover:text-white' : 'text-zinc-400 group-hover:text-zinc-900'}`}>{isAuthenticated ? t('btn_upload') : t('btn_guest_scan')}</span>
+                </div>
+
+                <div className="mt-8 animate-fade-in-up">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onOpenHelp?.(); }}
+                    className={`px-6 py-2.5 rounded-full border ${isNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 shadow-sm'} text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 group/help`}
+                  >
+                    {language === 'ko' ? '❓ 어떻게 사용하나요?' : '❓ How does this work?'}
+                    <span className="opacity-0 group-hover/help:opacity-100 group-hover/help:translate-x-1 transition-all">→</span>
+                  </button>
                 </div>
               </>
             )}
@@ -405,14 +431,14 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             title={banner.tooltip}
             className="group bg-white/5 hover:bg-white/10 border border-white/10 p-5 md:p-8 rounded-[2rem] flex items-center gap-4 md:gap-6 transition-all text-left w-full h-full backdrop-blur-sm"
           >
-            <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex-shrink-0 bg-white/5 border border-white/10 flex items-center justify-center text-xl md:text-3xl shadow-xl group-hover:scale-110 transition-all duration-300">
+          <div className={`w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex-shrink-0 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'} flex items-center justify-center text-xl md:text-3xl shadow-xl group-hover:scale-110 transition-all duration-300`}>
               {banner.emoji}
             </div>
             <div className="flex-1 min-w-0">
               <p className={`text-[9px] md:text-xs font-black uppercase tracking-[0.2em] ${banner.color} mb-1 opacity-90`}>
                 {banner.label}
               </p>
-              <h4 className="text-sm md:text-xl font-bold text-white font-korean truncate leading-tight">
+              <h4 className={`text-sm md:text-xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-korean truncate leading-tight`}>
                 {banner.title}
               </h4>
             </div>
@@ -438,7 +464,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
     const remainingQuestions = isPro ? '∞' : remainingQuestionsCount.toString();
 
     return (
-      <div className="min-h-full pt-20 md:pt-44 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
+      <div className="min-h-full pt-12 md:pt-32 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         {showVideoModal && <VideoWalkthroughModal />}
         {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
@@ -454,7 +480,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
           onFollowUp={handleAskSubmit}
         />
 
-        <div className="w-full max-w-5xl flex flex-col items-center text-center mb-8 md:mb-24 gap-4 md:gap-14 px-4">
+        <div className="w-full max-w-5xl flex flex-col items-center text-center mb-6 md:mb-16 gap-4 md:gap-10 px-4">
           <div className="space-y-2 md:space-y-8">
             {user.schoolName && (
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-1 shadow-xl backdrop-blur-sm">
@@ -462,43 +488,55 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
                 <span className="text-[8px] md:text-xs font-black text-indigo-400 uppercase tracking-[0.1em]">{user.schoolName}</span>
               </div>
             )}
-            <h1 className="text-3xl md:text-6xl lg:text-7xl font-black text-white font-display break-keep leading-tight">
-              {t('dash_welcome')} <span className={`text-transparent bg-clip-text bg-gradient-to-r ${isNight ? 'from-indigo-400 to-purple-500' : 'from-orange-400 to-pink-500'}`}>{user.name}!</span>
+            <h1 className={`text-3xl md:text-6xl lg:text-7xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display break-keep leading-tight`}>
+              {t('dash_welcome')} <span className={`text-transparent bg-clip-text bg-gradient-to-r ${isNight ? 'from-indigo-400 to-purple-500' : 'from-orange-500 to-pink-500'}`}>{user.name}!</span>
             </h1>
-            <p className="text-zinc-400 font-bold font-korean text-sm md:text-3xl max-w-3xl mx-auto leading-relaxed break-keep opacity-80">{t('dash_subtitle')}</p>
+            <p className={`${isNight ? 'text-zinc-400' : 'text-zinc-500'} font-bold font-korean text-sm md:text-3xl max-w-3xl mx-auto leading-relaxed break-keep opacity-80`}>{t('dash_subtitle')}</p>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
-            {/* Scan Tracker */}
-            <div className={`border rounded-xl md:rounded-[2rem] py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 hover:scale-105 ${isPro ? 'bg-orange-500/10 border-orange-500/30' : 'bg-[#0F1014] border-white/10'}`}>
-              <div className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] ${isPro ? 'text-orange-400' : 'text-zinc-500'}`}>
-                {isPro ? t('lbl_pro_active') : t('lbl_magic_left')}
+            {isPro && user.schoolId && (
+              <div className={`border rounded-full py-2.5 px-6 flex items-center gap-4 shadow-2xl transition-all duration-500 bg-indigo-500/10 border-white/20 backdrop-blur-md`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs">🏫</span>
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{user.schoolName || 'School Active'}</span>
+                </div>
               </div>
-              <div className="w-px h-3 md:h-4 bg-white/10"></div>
-              <div className={`font-bold text-sm md:text-2xl font-display leading-none ${isPro ? 'text-orange-500 scale-110' : 'text-white'}`}>{remaining}</div>
-            </div>
+            )}
+            {!isPro && (
+              <>
+                {/* Scan Tracker */}
+                <div className={`border rounded-xl md:rounded-[2rem] py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 hover:scale-105 bg-[#0F1014] border-white/10`}>
+                  <div className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] text-zinc-500`}>
+                    {t('lbl_magic_left')}
+                  </div>
+                  <div className="w-px h-3 md:h-4 bg-white/10"></div>
+                  <div className={`font-bold text-sm md:text-2xl font-display leading-none text-white`}>{remaining}</div>
+                </div>
 
-            {/* Question Tracker */}
-            <div className={`border rounded-xl md:rounded-[2rem] py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 hover:scale-105 ${isPro ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-[#0F1014] border-white/10'}`}>
-              <div className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] ${isPro ? 'text-indigo-400' : 'text-zinc-500'}`}>
-                {isPro ? "Unlimited Q & A" : "Ask Chekki Left"}
-              </div>
-              <div className="w-px h-3 md:h-4 bg-white/10"></div>
-              <div className={`font-bold text-sm md:text-2xl font-display leading-none ${isPro ? 'text-indigo-400 scale-110' : 'text-white'}`}>{remainingQuestions}</div>
-            </div>
+                {/* Question Tracker */}
+                <div className={`border rounded-xl md:rounded-[2rem] py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 hover:scale-105 ${isNight ? 'bg-[#0F1014] border-white/10' : 'bg-white border-zinc-200'}`}>
+                  <div className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    Ask Chekki Left
+                  </div>
+                  <div className={`w-px h-3 md:h-4 ${isNight ? 'bg-white/10' : 'bg-zinc-200'}`}></div>
+                  <div className={`font-bold text-sm md:text-2xl font-display leading-none ${isNight ? 'text-white' : 'text-zinc-900'}`}>{remainingQuestions}</div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-4 md:gap-10 px-4">
-          <AskChekkiBar 
+          {minimal ? null : <AskChekkiBar 
             query={askQuery} 
             setQuery={setAskQuery} 
             onSubmit={handleAskSubmit} 
             isAsking={isAskAsking} 
             language={language}
-          />
+          />}
           <DropZone size="large" />
-          <FeatureBanner />
+          {minimal ? null : <FeatureBanner />}
         </div>
         <p className="mt-8 text-zinc-600 text-[9px] md:text-sm font-black uppercase tracking-[0.2em] text-center opacity-60">{t('supported_formats')}</p>
       </div>
@@ -506,7 +544,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
   }
 
   return (
-    <div className="min-h-full flex flex-col pt-6 md:pt-36 pb-20 overflow-x-hidden scroll-smooth">
+    <div className="min-h-full flex flex-col pt-12 md:pt-32 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
       <React.Suspense fallback={null}>
         {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
@@ -525,119 +563,88 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
         onFollowUp={handleAskSubmit}
       />
 
-      <div className="relative max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-24 items-center mb-12 md:mb-40">
-        <div className={`absolute top-0 left-1/4 -translate-x-1/2 w-full md:w-[1000px] h-[700px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[60px] md:blur-[180px] -z-10 pointer-events-none opacity-20 mix-blend-screen`}></div>
+      <div className="relative w-full max-w-7xl mx-auto px-4 md:px-6 flex flex-col items-center mb-6 md:mb-12 mt-8 md:mt-16">
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-full md:w-[1000px] h-[500px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[60px] md:blur-[180px] -z-10 pointer-events-none opacity-20 mix-blend-screen`}></div>
 
-        <div className="w-full flex justify-center lg:justify-end items-center animate-fade-in-up order-1 lg:order-2 px-2 md:px-0 mt-8 lg:mt-0">
-          <div className="relative w-full max-w-[180px] sm:max-w-[300px] md:max-w-[580px] lg:max-w-[720px] xl:max-w-[850px] aspect-square flex items-center justify-center lg:translate-x-10 lg:translate-y-6">
-            <div className={`absolute inset-0 bg-gradient-to-tr ${isNight ? 'from-indigo-500/20 to-purple-500/20' : 'from-brand-orange/20 to-brand-purple/20'} rounded-full blur-[40px] md:blur-[140px] animate-pulse`}></div>
-            <div className="w-full h-full relative z-10 transition-transform scale-100 md:scale-110 lg:scale-[1.2] xl:scale-[1.3]">
-              <img src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.HERO_IMAGE} alt="Chekki Hero" className="w-full h-full object-contain drop-shadow-[0_15px_40px_rgba(0,0,0,0.6)] animate-float filter brightness-110" />
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left z-10 animate-fade-in-up order-2 lg:order-1 mt-2 lg:mt-0 px-2 md:px-0">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 mb-4 md:mb-12 backdrop-blur-md shadow-2xl self-center lg:self-start">
-            <span className={`w-1.5 h-1.5 rounded-full ${isNight ? 'bg-indigo-500 shadow-[0_0_8px_#6366f1]' : 'bg-orange-500 shadow-[0_0_8px_#f97316]'} animate-pulse`}></span>
-            <span className="text-[8px] md:text-sm font-black text-zinc-200 tracking-[0.1em] uppercase">{t('hero_badge')}</span>
-          </div>
-          <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white font-display mb-4 md:mb-10 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.1] break-keep">
+        <div className="text-center w-full max-w-4xl">
+          <h1 className={`text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2 md:mb-6 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.05] break-keep`}>
             {isNight ? (
               <span className={`text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600`}>{t('hero_title_night')}</span>
             ) : (
               language === 'ko' ? (
                 <>숙제 전쟁 끝, <br /> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>웃으며 공부하세요</span></>
               ) : (
-                <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6 animate-fade-in drop-shadow-2xl">
-                  <>Peaceful <br /> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>Homework Prep.</span></>
-                </h2>
+                <>Peaceful <br /> <span className={`text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500`}>Homework Prep.</span></>
               )
             )}
           </h1>
-          <p className="text-sm md:text-3xl text-zinc-400 max-w-2xl leading-relaxed mb-8 md:mb-20 font-korean font-medium break-keep opacity-90 mx-auto lg:mx-0">
-            {isNight ? t('hero_desc_night') : t('hero_desc')}
-          </p>
-
-          <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center lg:justify-start items-center w-full max-w-md md:max-w-2xl mx-auto lg:mx-0">
-            <button onClick={openLoginModal} className="group bg-white text-black py-4 md:py-7 px-6 md:px-20 rounded-xl md:rounded-[2.5rem] font-black text-base md:text-4xl transition-all transform active:scale-95 shadow-[0_15px_40px_rgba(255,255,255,0.05)] font-display flex items-center justify-center gap-3 overflow-hidden w-full md:w-auto whitespace-nowrap min-w-fit">
-              <span className="font-korean">{t('hero_cta_btn')}</span>
-              <span className="text-xl md:text-5xl transition-transform group-hover:translate-x-2">→</span>
-            </button>
-            {!guestUsed && (
-              <button
-                onClick={() => {
-                  const dropZone = document.getElementById('magic-drop-zone');
-                  dropZone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }}
-                className="group py-4 md:py-6 px-6 md:px-16 rounded-xl md:rounded-[2rem] border border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-base md:text-2xl transition-all flex items-center justify-center gap-3 backdrop-blur-xl active:scale-95 w-full md:w-auto whitespace-nowrap min-w-fit"
-              >
-                <span className="text-orange-500 transition-transform group-hover:rotate-[360deg] duration-1000 text-lg md:text-3xl">✨</span>
-                <span className="whitespace-nowrap">{t('hero_guest_cta')}</span>
-              </button>
-            )}
+          
+          <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center w-full max-w-md md:max-w-2xl mx-auto">
           </div>
         </div>
       </div>
 
-      <div id="magic-drop-zone" className="max-w-6xl mx-auto px-4 md:px-6 mb-16 md:mb-56 w-full relative pt-8 md:pt-32 flex flex-col gap-4 md:gap-10">
-        <div className="w-full max-w-4xl mx-auto px-4">
-          <AskChekkiBar 
-            query={askQuery} 
-            setQuery={setAskQuery} 
-            onSubmit={handleAskSubmit} 
-            isAsking={isAskAsking} 
-            language={language}
-          />
-        </div>
+      <div className="w-full max-w-4xl mx-auto px-4">
         <DropZone size="large" />
-        <p className="mt-8 text-zinc-600 text-[9px] md:text-sm font-black uppercase tracking-[0.2em] text-center opacity-40">{t('supported_formats')}</p>
       </div>
 
-      <FeatureSection />
 
-      <div className="mt-12 md:mt-40 pt-12 md:pt-24 border-t border-white/5 bg-zinc-950/50 backdrop-blur-2xl">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 pb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 mb-12">
-            <div className="space-y-4 text-[9px] md:text-sm text-zinc-500 font-korean leading-relaxed">
-              <h4 className="text-white font-black text-lg md:text-2xl mb-4 font-display">Chekki (채키)</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
-                <p>상호명: {t('biz_name')}</p>
-                <p>대표자: Jason Benjamin (제이슨 벤자민)</p>
-                <p>{t('biz_reg_num')}</p>
-                <p>{t('biz_mail_order')}</p>
-                <p className="md:col-span-2">주소: 서울특별시 종로구 종로 347, 롯데캐슬, 03113</p>
-                <p className="md:col-span-2">{t('biz_hours')}</p>
-                <p className="md:col-span-2">{t('biz_email')}</p>
+      {/* Floating Tools Trigger */}
+      {!minimal && (
+        <div className="fixed bottom-24 right-6 z-40">
+          <button 
+            onClick={() => setShowTools(!showTools)}
+            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all bg-zinc-900 border border-white/10 shadow-2xl hover:scale-110 active:scale-95 ${showTools ? 'rotate-45 bg-orange-500 border-orange-400' : ''}`}
+          >
+            {showTools ? <span className="text-3xl text-white">×</span> : <span className="text-2xl">🧰</span>}
+          </button>
+        </div>
+      )}
+
+      {/* Tools Overlay (Progressive Disclosure) */}
+      {showTools && (
+        <div className="fixed inset-0 z-30 bg-black/80 backdrop-blur-3xl animate-fade-in flex flex-col p-6 md:p-12 overflow-y-auto">
+          <div className="max-w-4xl mx-auto w-full pt-12 md:pt-24 space-y-12 mb-20">
+            <div className="text-center space-y-4">
+              <h3 className="text-2xl md:text-5xl font-black text-white uppercase tracking-tighter">Chekki Toolkit</h3>
+              <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] md:text-sm">Advanced assistance for curious parents</p>
+            </div>
+            
+            <div className={`bg-zinc-900/50 border border-white/5 rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-12 space-y-8 shadow-2xl`}>
+              <div className="space-y-4">
+                <h4 className="text-lg md:text-2xl font-black text-orange-500 uppercase tracking-tight flex items-center gap-3">
+                  <span>🤔</span> Grammar Q&A
+                </h4>
+                <AskChekkiBar 
+                  query={askQuery} 
+                  setQuery={setAskQuery} 
+                  onSubmit={handleAskSubmit} 
+                  isAsking={isAskAsking} 
+                  language={language}
+                />
+              </div>
+
+              <div className="w-full h-px bg-white/5"></div>
+
+              <div className="space-y-6">
+                <h4 className="text-lg md:text-2xl font-black text-blue-500 uppercase tracking-tight flex items-center gap-3">
+                  <span>📚</span> Parent Resources
+                </h4>
+                <FeatureSection />
               </div>
             </div>
-
-            <div className="space-y-4 text-[9px] md:text-sm text-zinc-500 font-sans leading-relaxed lg:border-l lg:border-white/5 lg:pl-20">
-              <h4 className="text-white font-black text-lg md:text-2xl mb-4 font-display">{t('biz_info_title')}</h4>
-              <div className="grid grid-cols-1 gap-y-2">
-                <p>Business Name: Chekki</p>
-                <p>Representative: Jason Benjamin</p>
-                <p>Business Registration Number: 814-14-03096</p>
-                <p>Address: Jongno 347, Lotte Castle, Seoul 03113, South Korea</p>
-                <p>Email: chekkihelp@gmail.com</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 pt-8 border-t border-white/5 flex flex-col items-center gap-6">
-            <div className="flex flex-wrap justify-center gap-4 md:gap-14 text-[9px] md:text-sm text-zinc-400 font-black uppercase tracking-[0.2em]">
-              <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-white transition-colors">{t('nav_home')}</button>
-              <button onClick={() => setShowPaywall(true)} className="hover:text-white transition-colors">{t('nav_pricing')}</button>
-              <button onClick={() => setShowLegal('terms')} className="hover:text-white transition-colors">{t('nav_terms')}</button>
-              <button onClick={() => setShowLegal('privacy')} className="hover:text-white transition-colors">{t('nav_privacy')}</button>
-              <button onClick={() => setShowLegal('support')} className="hover:text-white transition-colors">Support</button>
-              <button onClick={() => setShowLegal('refund')} className="hover:text-white transition-colors">{t('nav_refund')}</button>
-              <button onClick={() => setShowFeedbackModal(true)} className="hover:text-white transition-colors">{t('nav_contact')}</button>
-            </div>
-            <p className="text-[9px] md:text-sm text-zinc-600 font-bold uppercase tracking-[0.3em] text-center">{t('footer_text')}</p>
+            
+            <button 
+              onClick={() => setShowTools(false)}
+              className="w-full py-6 rounded-3xl bg-zinc-800 text-zinc-400 font-black uppercase tracking-widest hover:bg-zinc-700 transition-colors"
+            >
+              Close Toolkit
+            </button>
           </div>
         </div>
-      </div>
+      )}
+
+
     </div>
   );
 };
