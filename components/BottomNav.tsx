@@ -82,11 +82,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           </div>
         </div>
 
-        {/* Main Trigger Handle - More subtle and retractable */}
-        <div className={`w-full max-w-[140px] md:max-w-xs mx-auto transition-transform duration-700 pointer-events-auto ${isOpen ? 'translate-y-0' : 'translate-y-[calc(100%-1.5rem)] hover:translate-y-0'} pb-[calc(env(safe-area-inset-bottom)+1rem)] px-6`}>
+        {/* Main Trigger Handle - Positioned higher to avoid conflict with iOS Home Indicator */}
+        <div className={`w-full max-w-[140px] md:max-w-xs mx-auto transition-transform duration-700 pointer-events-auto ${isOpen ? 'translate-y-0' : 'translate-y-[calc(100%-2.5rem)] hover:translate-y-0'} pb-[calc(env(safe-area-inset-bottom)+2rem)] px-6`}>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`w-full h-10 md:h-14 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl active:scale-[0.98] group relative overflow-hidden border-2 ${
+            className={`w-full h-12 md:h-16 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl active:scale-[0.98] group relative overflow-hidden border-2 ${
               isOpen 
                 ? 'bg-zinc-900 border-white/20' 
                 : `${isNight ? 'bg-zinc-900/60 border-white/10' : 'bg-white/60 border-zinc-200 shadow-sm'} backdrop-blur-xl`
