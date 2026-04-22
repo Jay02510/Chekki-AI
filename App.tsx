@@ -140,6 +140,12 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<TabID>('scan');
   const platform = Capacitor.getPlatform();
 
+  // Always scroll to the top of the page when switching tabs or going back
+  const switchTab = React.useCallback((tab: TabID) => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    setActiveTab(tab);
+  }, []);
+
   // Global Confirmation State
   const [confirmDialog, setConfirmDialog] = useState<{ 
     title: string; 
@@ -261,7 +267,8 @@ function AppContent() {
   };
 
   const handleScanAgain = () => {
-    // We want the camera icon (Scan Again) to show the same warning as the back/exit button.
+    // Scroll to top whenever the user exits back to the scan/home screen
+    window.scrollTo({ top: 0, behavior: 'instant' });
     handleReset(true);
   };
 
@@ -304,7 +311,7 @@ function AppContent() {
             if (analysisState.status !== 'idle') {
               handleReset(false);
             }
-            setActiveTab('help');
+            switchTab('help');
           }}
         />
         {/* Web-only mobile download banner */}
@@ -404,11 +411,11 @@ function AppContent() {
                       <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
                     </div>
                   ) : (
-                    <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data)} minimal onOpenHelp={() => setActiveTab('help')} />
+                    <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data)} minimal onOpenHelp={() => switchTab('help')} />
                   )}
                 </>
               ) : activeTab === 'help' ? (
-                <HelpView isNight={isNight} onClose={() => setActiveTab('scan')} />
+                <HelpView isNight={isNight} onClose={() => switchTab('scan')} />
               ) : null}
             </div>
           )}
@@ -524,7 +531,7 @@ function AppContent() {
 
         <BottomNav 
           activeTab={activeTab} 
-          onTabChange={setActiveTab} 
+          onTabChange={switchTab} 
           isVisible={analysisState.status === 'idle'} 
           isNight={isNight}
           isAuthenticated={isAuthenticated}

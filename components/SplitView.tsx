@@ -190,7 +190,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
         nativeListenerRef.current = null;
       }
     };
-  }, [items, activeItemId]); // Refresh when items or active state changes
+  }, [items]); // Only rebuild when items change, NOT on every active card tap
 
   const stopPronunciationCheck = async () => {
     if (Capacitor.isNativePlatform()) {
@@ -633,7 +633,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
           </div>
 
 
-          <div className={`overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar flex-1 overscroll-contain ${isNight ? 'bg-gradient-to-b from-transparent to-zinc-950/20' : 'bg-white'}`} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={`overflow-y-auto p-4 md:p-6 space-y-4 flex-1 overscroll-contain ${isNight ? 'bg-gradient-to-b from-transparent to-zinc-950/20' : 'bg-white'}`}
+            style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position' } as React.CSSProperties}
+            onClick={(e) => e.stopPropagation()}>
             {isLoadingItems && localItems.length === 0 && (
               <div className="flex flex-col gap-4 pt-2 w-full">
                 <div className="flex flex-col items-center justify-center space-y-3 pb-4">
@@ -668,7 +671,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                     onTouchStart={isActive ? handleTouchStart : undefined}
                     onTouchMove={isActive ? handleTouchMove : undefined}
                     onTouchEnd={isActive ? handleTouchEnd : undefined}
-                    className={`group relative rounded-[2rem] md:rounded-[2.5rem] border transition-all duration-500 cursor-pointer overflow-hidden animate-fade-in-up transform-gpu ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-2xl scale-[1.01]' : 'bg-white border-orange-500 shadow-2xl scale-[1.01]') : (isNight ? 'bg-zinc-900/60 border-transparent hover:border-white/10' : 'bg-white border-transparent hover:border-zinc-200 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-lg')}`}
+                    className={`group relative rounded-[2rem] md:rounded-[2.5rem] border cursor-pointer overflow-hidden animate-fade-in-up transform-gpu transition-[border-color,box-shadow,transform] duration-300 ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-2xl scale-[1.01]' : 'bg-white border-orange-500 shadow-2xl scale-[1.01]') : (isNight ? 'bg-zinc-900/60 border-transparent hover:border-white/10' : 'bg-white border-transparent hover:border-zinc-200 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-lg')}`}
                   >
 
                   {/* Removed 'Tap here' pill as requested */}
