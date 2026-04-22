@@ -299,7 +299,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                     <span>☀️</span>
                     <span className="hidden xs:inline">{language === 'ko' ? '라이트' : 'Light'}</span>
                   </button>
-                  <button onClick={() => setIsNight(true)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${isNight ? (isNight ? 'bg-zinc-800 text-white shadow-lg' : 'bg-white text-zinc-900 shadow-sm') : 'text-zinc-500'}`}>
+                  <button onClick={() => setIsNight(true)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${isNight ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500'}`}>
                     <span>🌙</span>
                     <span className="hidden xs:inline">{language === 'ko' ? '다크' : 'Dark'}</span>
                   </button>

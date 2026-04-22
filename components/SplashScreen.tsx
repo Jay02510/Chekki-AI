@@ -16,12 +16,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   const [featureIndex, setFeatureIndex] = useState(0);
   const { language, t } = useLanguage();
 
-  const features = language === 'ko' ? [
-    t('feat_overlay'),
-    t('feat_script'),
-    t('feat_pronounce'),
-    t('feat_practice')
-  ] : [
+  const features = [
     t('feat_overlay'),
     t('feat_script'),
     t('feat_pronounce'),

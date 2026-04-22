@@ -64,11 +64,22 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
     try {
       await signInWithApple();
     } catch (err: any) {
-      if (err.message?.includes('cancelled') || err.message?.includes('failed') || err.code === 'auth/popup-closed-by-user') {
-        // Just silently ignore cancellation
+      if (err.message?.includes('cancelled') || err.message?.includes('user canceled') || err.code === 'auth/popup-closed-by-user') {
+        // Silently ignore cancellation
         return;
       }
-      setError("Apple Sign-In encountered an error. Please try again.");
+      // Apple Sign-In is not supported on iOS Simulator
+      if (
+        err.message?.includes('simulator') ||
+        err.message?.includes('not supported') ||
+        err.message?.includes('1000') ||
+        err.message?.includes('authorization') ||
+        err.message?.includes('ASAuthorizationError')
+      ) {
+        setError("Apple Sign-In doesn't work on the iOS Simulator. Please test on a real device, or use Email/Password instead.");
+        return;
+      }
+      setError("Apple Sign-In encountered an error. Please try email login instead.");
     } finally {
       setIsLoading(false);
     }

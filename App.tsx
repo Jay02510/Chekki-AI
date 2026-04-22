@@ -63,15 +63,46 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
+// Returns true (night) if hour is between 22:00–23:59 or 00:00–06:59 local time.
+// Falls back to system dark mode if no time preference applies.
+const isNightTime = (): boolean => {
+  const hour = new Date().getHours();
+  return hour >= 22 || hour < 7;
+};
+
 const getInitialTheme = () => {
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('chekki_theme');
     if (saved) return saved === 'dark';
-    if (window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
+    // Time-based: night between 22:00 and 07:00
+    return isNightTime();
   }
   return true; // Default to dark mode
+};
+
+// Returns ms until the next theme-transition boundary (22:00 → night, 07:00 → day).
+const msUntilNextTransition = (): number => {
+  const now = new Date();
+  const hour = now.getHours();
+  const min = now.getMinutes();
+  const sec = now.getSeconds();
+  const ms = now.getMilliseconds();
+
+  const totalMs = ((hour * 60 + min) * 60 + sec) * 1000 + ms;
+  const nightStart = 22 * 60 * 60 * 1000; // 22:00 in ms
+  const dayStart  =  7 * 60 * 60 * 1000;  // 07:00 in ms
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  if (totalMs < dayStart) {
+    // Currently night (after midnight). Next transition = 07:00 today.
+    return dayStart - totalMs;
+  } else if (totalMs < nightStart) {
+    // Currently day. Next transition = 22:00 today.
+    return nightStart - totalMs;
+  } else {
+    // Currently night (after 22:00). Next transition = 07:00 tomorrow.
+    return dayMs - totalMs + dayStart;
+  }
 };
 
 const useInAppBrowser = () => {
@@ -153,16 +184,24 @@ function AppContent() {
     // Initialize RevenueCat
     revenueCatService.initialize();
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      // Only follow system theme if user hasn't set a manual preference
-      if (!localStorage.getItem('chekki_theme')) {
-        setIsNight(e.matches);
-      }
+    // --- Time-based auto night mode ---
+    // Switches to night at 22:00 and back to day at 07:00 (local time).
+    // If the user has manually set a preference in Settings it is respected,
+    // but cleared at each threshold so the schedule resumes from that point.
+    let themeTimer: ReturnType<typeof setTimeout>;
+
+    const scheduleNextTransition = () => {
+      const delay = msUntilNextTransition();
+      themeTimer = setTimeout(() => {
+        // At boundary: clear any manual override and apply time-based theme
+        localStorage.removeItem('chekki_theme');
+        setIsNight(isNightTime());
+        scheduleNextTransition(); // chain to next transition
+      }, delay);
     };
-    
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+
+    scheduleNextTransition();
+    return () => clearTimeout(themeTimer);
   }, []);
 
   // Sync isNight state with HTML class and localStorage

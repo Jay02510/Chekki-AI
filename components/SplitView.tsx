@@ -671,11 +671,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                     className={`group relative rounded-[2rem] md:rounded-[2.5rem] border transition-all duration-500 cursor-pointer overflow-hidden animate-fade-in-up transform-gpu ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-2xl scale-[1.01]' : 'bg-white border-orange-500 shadow-2xl scale-[1.01]') : (isNight ? 'bg-zinc-900/60 border-transparent hover:border-white/10' : 'bg-white border-transparent hover:border-zinc-200 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-lg')}`}
                   >
 
-                  {isFirstItem && !hasInteracted && !isActive && (
-                    <div className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500 text-[10px] font-black text-white uppercase tracking-widest animate-bounce z-10 shadow-lg ring-2 ring-white/10">
-                      <span>Tap here</span> 👆
-                    </div>
-                  )}
+                  {/* Removed 'Tap here' pill as requested */}
 
                   <div className="p-4 md:p-8 flex items-start gap-4 md:gap-8">
                     <div className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-[1.2rem] flex items-center justify-center shrink-0 transition-all duration-500 ${isActive ? 'bg-orange-500 text-white shadow-lg rotate-3' : (isNight ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-100 text-zinc-400')}`}>
@@ -714,13 +710,13 @@ export const SplitView: React.FC<SplitViewProps> = ({
                           )}
                         </div>
 
-
-                        {/* Action Icons Grid */}
-                        <div className="flex items-center gap-4 py-4 px-0 transition-all duration-300 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+                        {/* Action Icons — only show when active to keep collapsed cards clean */}
+                        {isActive && (
+                         <div className="flex items-center gap-4 py-4 px-0 transition-all duration-300 w-full max-w-sm animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                            <div className="flex flex-col items-center gap-1.5 group/btn">
                              <button 
                                onClick={(e) => { e.stopPropagation(); playAudio(answerText); }} 
-                               className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-all ${isActive ? 'text-orange-500' : 'text-zinc-500 hover:text-zinc-300'} hover:scale-110 active:scale-95 group-hover/btn:rotate-6`}
+                               className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-all text-orange-500 hover:scale-110 active:scale-95 group-hover/btn:rotate-6"
                                title={t('tt_audio')}
                              >
                                <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z" /></svg>
@@ -767,11 +763,12 @@ export const SplitView: React.FC<SplitViewProps> = ({
                                className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-all ${isNight ? 'text-orange-400 hover:text-orange-300' : 'text-orange-600 hover:text-orange-500'} group-hover/btn:scale-110`}
                                title={t('tt_refine')}
                              >
-                               <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                               <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                              </button>
                              <span className={`text-[7px] md:text-[9px] font-black uppercase ${isNight ? 'text-zinc-500' : 'text-zinc-400'} tracking-widest opacity-80 leading-none h-4 flex items-center text-center`}>{language === 'ko' ? '다듬기' : 'Refine'}</span>
                            </div>
                         </div>
+                        )}
                       </div>
                     </div>
                   </div>

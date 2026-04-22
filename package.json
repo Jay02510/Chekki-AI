@@ -11,7 +11,8 @@
     "build:mobile": "npm run build && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html",
     "preview": "vite preview",
     "mobile": "npm run build:mobile && npx cap sync",
-    "quick-mobile": "vite build --sourcemap false && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html && npx cap sync ios"
+    "quick-mobile": "vite build --sourcemap false && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html && npx cap sync ios",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^7.1.0",
@@ -40,6 +41,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "patch-package": "^8.0.1",
     "prettier": "^3.2.5",
     "typescript": "5.6.2",
     "vite": "6.0.3"

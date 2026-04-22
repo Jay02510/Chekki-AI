@@ -141,13 +141,8 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
           : 'w-full min-h-[300px] h-full'
       }`}
     >
-      {/* Blurred Background to fill "massive black space" */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-        <img 
-          src={imageUrl} 
-          alt="" 
-          className="w-full h-full object-cover blur-[80px] scale-110" 
-        />
+      {/* Simplified background to prevent 'double image' glitch from failed blurs on mobile */}
+      <div className={`absolute inset-0 overflow-hidden pointer-events-none opacity-20 ${isNight ? 'bg-zinc-800' : 'bg-zinc-200'}`}>
       </div>
 
       <div className={`relative pointer-events-none z-10 ${inFullscreen ? (viewMode === 'fit' ? 'h-full w-full flex items-center justify-center' : 'w-full') : 'h-full flex items-center justify-center'}`}>
@@ -291,17 +286,15 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
             className="flex-1 w-full h-full relative flex items-center justify-center"
             onClick={() => setIsFullscreen(false)}
           >
-            {/* Immersive Background to eliminate black space */}
-            <div className="absolute inset-0 z-0">
-               <img src={imageUrl} alt="" className="w-full h-full object-cover blur-[100px] opacity-40 scale-125" />
-            </div>
+            {/* Removed immersive blurred background to fix double image issue */}
 
              <div onClick={(e) => e.stopPropagation()} className="relative z-10 transform-gpu w-full h-full flex items-center justify-center p-4">
-                <div className="relative inline-block shadow-[0_30px_100px_rgba(0,0,0,0.9)] rounded-lg md:rounded-3xl overflow-hidden max-w-full max-h-full">
+                <div className="relative flex shadow-[0_30px_100px_rgba(0,0,0,0.9)] rounded-lg md:rounded-3xl overflow-hidden" style={{ maxHeight: '100%', maxWidth: '100%' }}>
                   <img 
                       src={imageUrl} 
                       alt="Worksheet Result" 
-                      className="max-w-full max-h-full object-contain block animate-scale-in transition-all duration-700 shadow-2xl"
+                      className="block animate-scale-in transition-all duration-700 shadow-2xl object-contain"
+                      style={{ maxHeight: 'calc(100vh - 4rem)', maxWidth: '100vw' }}
                       draggable={false}
                   />
                   

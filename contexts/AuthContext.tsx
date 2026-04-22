@@ -18,6 +18,25 @@ import {
 } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+
+// --- Nonce helpers for Apple Sign-In ---
+// Apple requires a cryptographically random nonce. The SHA-256 hash is sent
+// to Apple; the raw value is passed to Firebase for verification.
+const generateRawNonce = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => chars[byte % chars.length]).join('');
+};
+
+const sha256 = async (plain: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(plain);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+};
 import { subscriptionService, AppleProducts } from '../services/subscriptionService';
 import { revenueCatService } from '../services/revenueCatService';
 import { PUBLIC_APP_URL } from '../config';
@@ -290,19 +309,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (Capacitor.getPlatform() === 'ios') {
         // NATIVE IOS FLOW
+        const rawNonce = generateRawNonce();
+        const hashedNonce = await sha256(rawNonce);
+
         const options = {
-          clientId: 'com.chekki.ai.ios',
+          clientId: 'com.chekkiai.app',
           redirectURI: 'https://chekki-ai.firebaseapp.com/__/auth/handler',
           scopes: 'email name',
-          state: '12345',
-          nonce: 'nonce',
+          state: generateRawNonce(), // random state token
+          nonce: hashedNonce,        // SHA-256 hash sent to Apple
         };
         
         const result = await SignInWithApple.authorize(options);
         if (result.response && result.response.identityToken) {
           const credential = provider.credential({
             idToken: result.response.identityToken,
-            rawNonce: 'nonce',
+            rawNonce: rawNonce,      // Raw nonce verified by Firebase
           });
           
           const authResult = await signInWithCredential(auth, credential);
