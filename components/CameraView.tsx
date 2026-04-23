@@ -467,7 +467,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
       <div className="min-h-full pt-12 md:pt-32 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         {showVideoModal && <VideoWalkthroughModal />}
-        {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
+        {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} isNight={isNight} />}
         <AskChekkiAnswerModal 
           answer={askAnswer} 
           isAsking={isAskAsking} 
@@ -478,6 +478,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
           onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); setAskHistory([]); }}
           openLoginModal={openLoginModal}
           onFollowUp={handleAskSubmit}
+          isNight={isNight}
         />
 
         <div className="w-full max-w-5xl flex flex-col items-center text-center mb-6 md:mb-16 gap-4 md:gap-10 px-4">
@@ -534,6 +535,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
             onSubmit={handleAskSubmit} 
             isAsking={isAskAsking} 
             language={language}
+            isNight={isNight}
           />}
           <DropZone size="large" />
           {minimal ? null : <FeatureBanner />}
@@ -547,10 +549,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
     <div className="min-h-full flex flex-col pt-12 md:pt-32 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
       <React.Suspense fallback={null}>
-        {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
+        {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} isNight={isNight} />}
       </React.Suspense>
       {showVideoModal && <VideoWalkthroughModal />}
-      {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
+      {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} isNight={isNight} />}
       <AskChekkiAnswerModal 
         answer={askAnswer} 
         isAsking={isAskAsking} 
@@ -561,6 +563,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
         onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); setAskHistory([]); }}
         openLoginModal={openLoginModal}
         onFollowUp={handleAskSubmit}
+        isNight={isNight}
       />
 
       <div className="relative w-full max-w-7xl mx-auto px-4 md:px-6 flex flex-col items-center mb-6 md:mb-12 mt-8 md:mt-16">
@@ -621,6 +624,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
                   onSubmit={handleAskSubmit} 
                   isAsking={isAskAsking} 
                   language={language}
+                  isNight={isNight}
                 />
               </div>
 

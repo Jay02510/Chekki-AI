@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { WorksheetItem } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -24,6 +25,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('fit');
   const [showSettings, setShowSettings] = useState(false);
+  const [showFullscreenSettings, setShowFullscreenSettings] = useState(false);
   
   const [bubbleScale, setBubbleScale] = useState(0.75); 
   const [items, setItems] = useState<WorksheetItem[]>(initialItems);
@@ -99,10 +101,12 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
         cancelText: language === 'ko' ? "취소" : "Cancel",
         onConfirm: () => {
           setItems(initialItems.map(i => ({ ...i, custom_coords: undefined })));
+          setShowSettings(false);
         }
       });
     } else if (window.confirm(title)) {
       setItems(initialItems.map(i => ({ ...i, custom_coords: undefined })));
+      setShowSettings(false);
     }
   };
 
@@ -154,6 +158,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
             } ${
             inFullscreen ? (viewMode === 'fit' ? 'max-h-full max-w-full object-contain' : 'w-full h-auto') : 'w-full h-auto'
             }`}
+            style={inFullscreen && viewMode === 'fit' ? { maxHeight: '100vh', maxWidth: '100vw' } : {}}
             onLoad={() => setImageLoaded(true)}
             draggable={false}
             loading="eager"
@@ -201,13 +206,13 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
 
   return (
     <>
-      <div className={`w-full flex flex-col bg-zinc-950 border-white/5 overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full rounded-[2.5rem]'}`}>
+      <div className={`w-full flex flex-col ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200 shadow-xl'} overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full rounded-[2.5rem]'}`}>
         
-        <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-start pointer-events-none">
-            <div className="flex flex-col gap-3 items-start pointer-events-auto relative">
+        <div className="absolute top-8 left-8 right-8 z-50 flex justify-between items-start pointer-events-none gap-4">
+            <div className="flex flex-col gap-3 items-start pointer-events-auto relative shrink-0">
                    <button 
                     onClick={() => setShowSettings(!showSettings)}
-                    className={`w-14 h-14 rounded-2xl bg-black/60 backdrop-blur-xl border-2 ${showSettings ? 'border-orange-500 text-orange-500' : 'border-white/10 text-white/90'} hover:bg-zinc-800 transition-all flex items-center justify-center text-xl shadow-2xl active:scale-90 group`}
+                    className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/10 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-40 hover:opacity-100'} transition-all flex items-center justify-center text-xl shadow-2xl active:scale-90 group shrink-0`}
                     title={language === 'ko' ? "정답 설정" : "Overlay Settings"}
                    >
                      <svg className={`w-7 h-7 ${showSettings ? 'scale-110' : 'group-hover:scale-110'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -218,7 +223,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
                  {showSettings && (
                    <>
                      <div className="fixed inset-0 z-40" onClick={() => setShowSettings(false)}></div>
-                     <div className="flex flex-col gap-4 bg-black/80 backdrop-blur-2xl p-5 rounded-3xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-fade-in-up origin-top-left absolute top-16 left-0 w-max z-[100]">
+                     <div className={`flex flex-col gap-4 ${isNight ? 'bg-black/80 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-5 rounded-3xl border shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-fade-in-up origin-top-left absolute top-16 left-0 w-max z-[100]`}>
                      <div className="flex flex-col gap-2">
                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] px-1">{language === 'ko' ? "정답 크기" : "Answer Size"}</span>
                        <div className="flex items-center gap-3">
@@ -227,7 +232,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
                             type="range" min="0.4" max="1.4" step="0.05" 
                             value={bubbleScale} 
                             onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
-                            className="w-32 accent-orange-500 cursor-pointer h-1.5 bg-white/10 rounded-full appearance-none"
+                            className={`w-32 accent-orange-500 cursor-pointer h-1.5 ${isNight ? 'bg-white/10' : 'bg-zinc-200'} rounded-full appearance-none`}
                          />
                          <span className="text-lg font-black">A</span>
                        </div>
@@ -235,7 +240,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
                      <div className="w-full h-px bg-white/10"></div>
                      <button 
                       onClick={resetPositions}
-                      className="w-full py-3 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-95 border border-white/10"
+                      className={`w-full py-3 rounded-2xl ${isNight ? 'bg-white/5 text-white border-white/10 hover:bg-white/10' : 'bg-zinc-100 text-zinc-900 border-zinc-200 hover:bg-zinc-200'} transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-95 border`}
                      >
                        <span className="text-base">🔄</span> {language === 'ko' ? "위치 초기화" : "Reset Positions"}
                      </button>
@@ -246,7 +251,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
 
             <button 
               onClick={() => setIsFullscreen(true)}
-              className="pointer-events-auto w-14 h-14 rounded-2xl bg-black/60 backdrop-blur-xl border-2 border-white/30 flex items-center justify-center text-white hover:bg-orange-600 transition-all shadow-2xl group active:scale-90"
+              className={`pointer-events-auto w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/30 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center hover:bg-orange-600 hover:text-white opacity-40 hover:opacity-100 transition-all shadow-2xl group active:scale-90 shrink-0`}
               title="Full Screen Focus"
             >
               <svg className="w-7 h-7 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -255,10 +260,10 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
             </button>
         </div>
 
-        <div className="flex-1 relative overflow-y-auto custom-scrollbar overscroll-contain bg-zinc-900/50">
+        <div className={`flex-1 relative overflow-y-auto custom-scrollbar overscroll-contain ${isNight ? 'bg-zinc-900/50' : 'bg-zinc-50/50'}`}>
           <div className="relative w-full transform-gpu">
             {!imageLoaded && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/40 backdrop-blur-2xl min-h-[400px]">
+              <div className={`absolute inset-0 flex flex-col items-center justify-center ${isNight ? 'bg-zinc-900/40' : 'bg-white/40'} backdrop-blur-2xl min-h-[400px]`}>
                  <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin mb-6"></div>
                  <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest animate-pulse">{language === 'ko' ? "종이 분석 중..." : "Scanning Paper..."}</p>
               </div>
@@ -270,69 +275,82 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
 
       </div>
 
-      {isFullscreen && (
-        <div className="fixed inset-0 z-[9999] flex flex-col bg-zinc-950 animate-fade-in overflow-hidden select-none">
-          {/* Close button - prominently placed with safe area awareness */}
-          <div className="absolute top-0 left-0 right-0 z-[10002] p-4 pt-[calc(env(safe-area-inset-top)+1rem)] flex justify-end pointer-events-none">
+      {isFullscreen && typeof document !== 'undefined' && createPortal(
+        <div className={`fixed inset-0 z-[9999] flex flex-col ${isNight ? 'bg-zinc-950' : 'bg-white'} animate-fade-in overflow-hidden select-none`}>
+          {/* Top Control Bar with safe area awareness */}
+          <div className="absolute top-0 left-0 right-0 z-[10002] px-6 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] flex justify-between items-start pointer-events-none gap-4">
+            
+            <div className="flex gap-4 pointer-events-auto shrink-0">
+              <button 
+                onClick={() => setShowFullscreenSettings(!showFullscreenSettings)}
+                className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showFullscreenSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-40 hover:opacity-100'} transition-all flex items-center justify-center text-2xl shadow-2xl active:scale-90 group relative`}
+                title={language === 'ko' ? "정답 설정" : "Overlay Settings"}
+              >
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 12h7.5" />
+                </svg>
+
+                {showFullscreenSettings && (
+                  <div className={`absolute top-20 left-0 flex flex-col gap-4 ${isNight ? 'bg-black/90 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-6 rounded-[2rem] border shadow-[0_30px_70px_rgba(0,0,0,0.7)] animate-fade-in-up origin-top-left w-max z-[10003]`} onClick={(e) => e.stopPropagation()}>
+                    <div className="flex flex-col gap-3">
+                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] px-1">{language === 'ko' ? "정답 크기" : "Answer Size"}</span>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm opacity-50">A</span>
+                        <input 
+                          type="range" min="0.4" max="1.4" step="0.05" 
+                          value={bubbleScale} 
+                          onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
+                          className={`w-36 accent-orange-500 cursor-pointer h-2 ${isNight ? 'bg-white/10' : 'bg-zinc-200'} rounded-full appearance-none`}
+                        />
+                        <span className="text-xl font-black">A</span>
+                      </div>
+                    </div>
+                    <div className="w-full h-px bg-white/10"></div>
+                    <button 
+                      onClick={resetPositions}
+                      className="w-full py-4 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-95 border border-white/10"
+                    >
+                      <span className="text-lg">🔄</span> {language === 'ko' ? "위치 초기화" : "Reset Positions"}
+                    </button>
+                  </div>
+                )}
+              </button>
+
+              <button 
+                onClick={() => setViewMode(viewMode === 'fit' ? 'fill' : 'fit')}
+                className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center opacity-40 hover:opacity-100 transition-all shadow-2xl active:scale-90`}
+                title={viewMode === 'fit' ? (language === 'ko' ? "화면에 꽉 차게" : "Fill Screen") : (language === 'ko' ? "전체 보기" : "Fit to Screen")}
+              >
+                {viewMode === 'fit' ? (
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5l-4.5-4.5" />
+                  </svg>
+                ) : (
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 3.75H4.5A1.125 1.125 0 003.375 4.875V9.375M9 3.75L3.375 9.375M9 20.25H4.5A1.125 1.125 0 013.375 19.125V14.625M9 20.25L3.375 14.625M15 3.75H19.5A1.125 1.125 0 0120.625 4.875V9.375M15 3.75L20.625 9.375M15 20.25H19.5A1.125 1.125 0 0020.625 19.125V14.625M15 20.25L20.625 14.625" />
+                  </svg>
+                )}
+              </button>
+            </div>
+
             <button 
               onClick={() => setIsFullscreen(false)}
-              className="w-12 h-12 rounded-full bg-orange-600/80 hover:bg-orange-500 backdrop-blur-xl flex items-center justify-center text-white transition-all active:scale-90 border border-white/20 pointer-events-auto shadow-xl group"
+              className="w-14 h-14 rounded-full bg-orange-600/90 hover:bg-orange-500 backdrop-blur-xl flex items-center justify-center text-white opacity-40 hover:opacity-100 transition-all active:scale-90 border-2 border-white/30 pointer-events-auto shadow-2xl group shrink-0"
             >
-              <svg className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              <svg className="w-10 h-10 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
 
           <div 
-            className="flex-1 w-full h-full relative flex items-center justify-center"
+            className="flex-1 w-full h-full relative flex items-center justify-center overflow-auto custom-scrollbar"
             onClick={() => setIsFullscreen(false)}
           >
-            {/* Removed immersive blurred background to fix double image issue */}
-
-             <div onClick={(e) => e.stopPropagation()} className="relative z-10 transform-gpu w-full h-full flex items-center justify-center p-0">
-                <div className="relative flex shadow-[0_30px_100px_rgba(0,0,0,0.9)] rounded-lg md:rounded-3xl overflow-hidden" style={{ maxHeight: '100%', maxWidth: '100%' }}>
-                  <img 
-                      src={imageUrl} 
-                      alt="Worksheet Result" 
-                      className="block animate-scale-in transition-all duration-700 shadow-2xl object-contain"
-                      style={{ maxHeight: '100vh', maxWidth: '100vw' }}
-                      draggable={false}
-                  />
-                  
-                  {/* Overlay items positioned exactly relative to this image container */}
-                  {items.map((item) => {
-                    const box = item.bounding_box;
-                    if (!box && !item.custom_coords) return null;
-                    const rawTop = item.custom_coords ? item.custom_coords.top : ((box!.ymin + box!.ymax) / 2000) * 100;
-                    const rawLeft = item.custom_coords ? item.custom_coords.left : ((box!.xmin + box!.xmax) / 2000) * 100;
-                    const top = Math.min(Math.max(rawTop, 5), 95);
-                    const left = Math.min(Math.max(rawLeft, 5), 95);
-
-                    return (
-                      <div
-                        key={item.id}
-                        style={{
-                          top: `${top}%`,
-                          left: `${left}%`,
-                          transform: `translate3d(-50%, -50%, 0) scale(${bubbleScale * 1.3})`,
-                          position: 'absolute',
-                        }}
-                        className="pointer-events-none"
-                      >
-                        <div className="bg-orange-500 border-2 border-white/60 rounded-[1.2rem] shadow-[0_15px_40px_rgba(0,0,0,0.6)] px-4 py-2 flex items-center gap-2">
-                          <div className="w-6 h-6 md:w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
-                            <span className="font-black text-[9px] md:text-sm text-white">{item.id}</span>
-                          </div>
-                          <span className="font-hand font-black text-white text-sm md:text-xl whitespace-nowrap drop-shadow-md">
-                            {item.correct_answer}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+             <div onClick={(e) => e.stopPropagation()} className={`relative z-10 transform-gpu flex items-center justify-center p-4 md:p-12 ${viewMode === 'fill' ? 'w-full h-auto mt-24 mb-12' : 'w-full h-full'}`}>
+                {renderOverlayContent(true)}
              </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

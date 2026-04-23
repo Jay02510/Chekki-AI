@@ -236,7 +236,7 @@ const translations = {
 
     // Results
     ws_results_title: "Teaching Guide",
-    ws_items_found: "Answers Ready — Tap to teach",
+    ws_items_found: "Answers Ready",
     ws_voice_guide: "💡 Tap for native pronunciation",
     ws_gen_practice: "Practice Sheet",
     ws_scan_again: "Rescan",
@@ -584,7 +584,7 @@ const translations = {
 
     // Results
     ws_results_title: "티칭 가이드",
-    ws_items_found: "개의 정답 완료 — 탭하여 티칭 시작",
+    ws_items_found: "개의 정답 완료",
     ws_voice_guide: "💡 탭하면 원어민의 정확한 발음을 들려드려요",
     ws_gen_practice: "복습 문제지",
     ws_scan_again: "재촬영",

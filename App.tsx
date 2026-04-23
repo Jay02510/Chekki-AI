@@ -299,7 +299,7 @@ function AppContent() {
         <React.Suspense fallback={null}>
           {standaloneLegal && (
             <div className="fixed inset-0 z-[200]">
-              <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={true} />
+              <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={true} isNight={isNight} />
             </div>
           )}
         </React.Suspense>
@@ -358,12 +358,12 @@ function AppContent() {
         {successDialog && (
           <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 md:p-6">
             <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setSuccessDialog(null)}></div>
-            <div className="relative bg-zinc-900 border border-emerald-500/30 rounded-[2.5rem] p-8 md:p-10 max-w-md w-full text-center shadow-[0_0_100px_rgba(16,185,129,0.1)] animate-fade-in-up">
-              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className={`relative ${isNight ? 'bg-zinc-900 border-emerald-500/30' : 'bg-white border-emerald-200 shadow-2xl'} border rounded-[2.5rem] p-8 md:p-10 max-w-md w-full text-center shadow-[0_0_100px_rgba(16,185,129,0.1)] animate-fade-in-up`}>
+              <div className={`w-16 h-16 ${isNight ? 'bg-emerald-500/20' : 'bg-emerald-50'} rounded-full flex items-center justify-center mx-auto mb-6`}>
                 <span className="text-2xl">✅</span>
               </div>
-              <p className="text-white font-bold text-lg mb-8 font-korean leading-relaxed">{successDialog}</p>
-              <button onClick={() => setSuccessDialog(null)} className="w-full bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-xl shadow-emerald-500/20">Close</button>
+              <p className={`${isNight ? 'text-white' : 'text-zinc-900'} font-bold text-lg mb-8 font-korean leading-relaxed`}>{successDialog}</p>
+              <button onClick={() => setSuccessDialog(null)} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">Close</button>
             </div>
           </div>
         )}
@@ -387,7 +387,7 @@ function AppContent() {
           </div>
         )}
 
-        <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col ${analysisState.status === 'idle' ? 'pt-24 md:pt-40' : 'pt-4 md:pt-8'}`}>
+        <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-32 md:pt-40`}>
 
           {analysisState.status === 'idle' && (
             <div className="animate-fade-in flex-1 h-full flex flex-col">

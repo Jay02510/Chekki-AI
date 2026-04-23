@@ -65,8 +65,8 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
 
   return (
     <div className="animate-fade-in pb-32">
-      {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
-      {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} />}
+      {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} isNight={isNight} />}
+      {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} isNight={isNight} />}
       {showVideoModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl" onClick={() => setShowVideoModal(false)}></div>
@@ -87,6 +87,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
         onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); setAskHistory([]); }}
         openLoginModal={openLoginModal}
         onFollowUp={handleAskSubmit}
+        isNight={isNight}
       />
 
       <div className="max-w-5xl mx-auto px-4 pt-8 md:pt-16 mb-8 flex justify-start">
@@ -110,6 +111,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
           onSubmit={handleAskSubmit} 
           isAsking={isAskAsking} 
           language={language}
+          isNight={isNight}
         />
       </div>
 

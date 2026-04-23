@@ -6,9 +6,10 @@ interface Props {
     type: LegalType;
     onClose: () => void;
     isStandalone?: boolean;
+    isNight?: boolean;
 }
 
-export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = false }) => {
+export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = false, isNight = false }) => {
     const getHeader = () => {
         switch (type) {
             case 'privacy': return { title: "개인정보처리방침 / Privacy Policy", icon: "🔒" };
@@ -27,35 +28,35 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
         <div className={`fixed inset-0 z-[110] flex items-center justify-center ${isStandalone ? '' : 'p-4'}`}>
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={isStandalone ? undefined : onClose}></div>
 
-            <div className={`relative bg-zinc-900 ${isStandalone ? 'w-full h-full rounded-none' : 'rounded-2xl w-full max-w-2xl h-[85vh]'} flex flex-col shadow-2xl border border-zinc-800 animate-fade-in-up`}>
+            <div className={`relative ${isNight ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200 shadow-2xl'} ${isStandalone ? 'w-full h-full rounded-none' : 'rounded-2xl w-full max-w-2xl h-[85vh]'} flex flex-col shadow-2xl border animate-fade-in-up`}>
 
-                <div className="bg-zinc-950 px-6 py-4 border-b border-zinc-800 flex justify-between items-center shrink-0">
+                <div className={`${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-50 border-zinc-200'} px-6 py-4 border-b flex justify-between items-center shrink-0`}>
                     <div className="flex items-center gap-3">
                         <span className="text-xl">{icon}</span>
                         <div>
-                            <h2 className="text-sm md:text-base font-bold text-white font-display">{title}</h2>
-                            <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{date}</p>
+                            <h2 className={`text-sm md:text-base font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}>{title}</h2>
+                            <p className={`text-[10px] ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}>{date}</p>
                         </div>
                     </div>
                     {!isStandalone && (
                         <button
                             onClick={onClose}
                             aria-label="Close"
-                            className="text-zinc-500 hover:text-white transition-colors bg-zinc-900 w-8 h-8 rounded-full flex items-center justify-center border border-zinc-800"
+                            className={`${isNight ? 'text-zinc-500 hover:text-white bg-zinc-900 border-zinc-800' : 'text-zinc-400 hover:text-zinc-900 bg-zinc-100 border-zinc-200'} w-8 h-8 rounded-full flex items-center justify-center border`}
                         >
                             ✕
                         </button>
                     )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8 bg-zinc-900">
+                <div className={`flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8 ${isNight ? 'bg-zinc-900' : 'bg-white'}`}>
 
                     {type === 'terms' && (
                         <div className="space-y-8">
                             <section className="space-y-4">
-                                <div className="bg-white/5 p-5 rounded-xl border border-white/10">
-                                    <h3 className="text-white font-black text-sm mb-4 border-b border-white/10 pb-2">[KR] 이용약관</h3>
-                                    <div className="text-zinc-300 text-[10px] leading-relaxed space-y-4">
+                                <div className={`${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 rounded-xl border`}>
+                                    <h3 className={`${isNight ? 'text-white border-white/10' : 'text-zinc-900 border-zinc-100'} font-black text-sm mb-4 border-b pb-2`}>[KR] 이용약관</h3>
+                                    <div className={`${isNight ? 'text-zinc-300' : 'text-zinc-600'} text-[10px] leading-relaxed space-y-4`}>
                                         <p><strong>본 서비스는 전자상거래 등에서의 소비자보호에 관한 법률을 준수합니다.</strong></p>
                                         <p>본 약관은 Chekki (채키) (이하 “서비스”)가 제공하는 온라인 학습 보조 서비스의 이용 조건 및 절차, 이용자와 운영자 간의 권리와 의무를 규정함을 목적으로 합니다.</p>
                                         <p>
@@ -74,9 +75,9 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                                         </p>
                                     </div>
                                 </div>
-                                <div className="bg-white/5 p-5 rounded-xl border border-white/10">
-                                    <h3 className="text-white font-black text-sm mb-4 border-b border-white/10 pb-2">[EN] Terms of Service</h3>
-                                    <div className="text-zinc-300 text-[10px] leading-relaxed space-y-4">
+                                <div className={`${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 rounded-xl border`}>
+                                    <h3 className={`${isNight ? 'text-white border-white/10' : 'text-zinc-900 border-zinc-100'} font-black text-sm mb-4 border-b pb-2`}>[EN] Terms of Service</h3>
+                                    <div className={`${isNight ? 'text-zinc-300' : 'text-zinc-600'} text-[10px] leading-relaxed space-y-4`}>
                                         <p><strong>This service complies with the Korean Act on Consumer Protection in Electronic Commerce.</strong></p>
                                         <p>These terms govern your use of the Chekki (&quot;Service&quot;) online learning assistance tool. By using the Service, you agree to these terms.</p>
                                         <p>
@@ -251,10 +252,10 @@ export const LegalModal: React.FC<Props> = ({ type, onClose, isStandalone = fals
                     )}
                 </div>
 
-                <div className="bg-zinc-950 p-6 border-t border-zinc-800 flex justify-end">
+                <div className={`${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-50 border-zinc-200'} p-6 border-t flex justify-end`}>
                     <button
                         onClick={onClose}
-                        className="bg-white text-black hover:bg-zinc-200 px-10 py-3 rounded-xl font-black transition-colors text-xs active:scale-95 uppercase tracking-widest"
+                        className={`${isNight ? 'bg-white text-black hover:bg-zinc-200' : 'bg-zinc-900 text-white hover:bg-black shadow-lg shadow-zinc-900/20'} px-10 py-3 rounded-xl font-black transition-colors text-xs active:scale-95 uppercase tracking-widest`}
                     >
                         Confirm
                     </button>

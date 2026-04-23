@@ -13,14 +13,15 @@ interface AskChekkiBarProps {
   onSubmit: (query: string) => void;
   isAsking: boolean;
   language: string;
+  isNight?: boolean;
 }
 
-export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({ query, setQuery, onSubmit, isAsking, language }) => {
+export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({ query, setQuery, onSubmit, isAsking, language, isNight = false }) => {
   const { t } = useLanguage();
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); onSubmit(query); }}
-    className="relative flex items-center bg-zinc-900 border border-transparent hover:border-orange-500/30 focus-within:border-orange-500 rounded-[1.5rem] md:rounded-[2.2rem] pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-all w-full"
+    className={`relative flex items-center ${isNight ? 'bg-zinc-900' : 'bg-white shadow-xl border-zinc-200'} border border-transparent hover:border-orange-500/30 focus-within:border-orange-500 rounded-[1.5rem] md:rounded-[2.2rem] pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-all w-full`}
   >
     <button
       type="submit"
@@ -41,7 +42,7 @@ export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({ query, setQuery, onS
       value={query}
       onChange={e => setQuery(e.target.value)}
       placeholder={t('ask_placeholder')}
-      className="flex-1 bg-transparent text-white text-[11px] sm:text-xs md:text-sm lg:text-base font-korean placeholder:text-zinc-500 focus:outline-none"
+      className={`flex-1 bg-transparent ${isNight ? 'text-white' : 'text-zinc-900'} text-[11px] sm:text-xs md:text-sm lg:text-base font-korean placeholder:text-zinc-500 focus:outline-none`}
       enterKeyHint="send"
     />
   </form>
@@ -60,14 +61,16 @@ interface AskChekkiAnswerModalProps {
   onClose: () => void;
   openLoginModal: () => void;
   onFollowUp: (question: string) => void;
+  isNight?: boolean;
 }
 
 export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({ 
-  answer, isAsking, question, isAuthenticated, language, history, onClose, openLoginModal, onFollowUp
+  answer, isAsking, question, isAuthenticated, language, history, onClose, openLoginModal, onFollowUp, isNight = false
 }) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [followUpText, setFollowUpText] = useState('');
   const [showConfirmClose, setShowConfirmClose] = useState(false);
 
@@ -91,7 +94,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
     try {
       const dataUrl = await toJpeg(chatContainerRef.current, { 
         quality: 0.95, 
-        backgroundColor: '#09090b', 
+        backgroundColor: isNight ? '#09090b' : '#ffffff', 
         pixelRatio: 2,
         skipFonts: true // Speeds up capture on mobile
       });
@@ -107,6 +110,8 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
       alert(language === 'ko' ? "저장에 실패했습니다." : "Failed to save the answer.");
     } finally {
       setIsSaving(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     }
   };
 
@@ -127,7 +132,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
   return (
     <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 pt-[calc(env(safe-area-inset-top)+1rem)] sm:pt-10">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-zinc-950 border border-transparent rounded-[2.5rem] w-full max-w-lg max-h-[85dvh] flex flex-col shadow-2xl animate-fade-in-down overflow-hidden">
+      <div className={`relative ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200'} border rounded-[2.5rem] w-full max-w-lg max-h-[85dvh] flex flex-col shadow-2xl animate-fade-in-down overflow-hidden`}>
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/5 shrink-0">
@@ -137,7 +142,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
               <p className="text-[10px] text-orange-400 font-black uppercase tracking-widest">
                 {language === 'ko' ? '채키 AI 튜터' : 'Chekki AI Tutor'}
               </p>
-              <p className="text-white text-xs font-semibold font-korean mt-0.5 opacity-60 leading-snug break-words pr-4">
+              <p className={`${isNight ? 'text-white' : 'text-zinc-900'} text-xs font-semibold font-korean mt-0.5 opacity-60 leading-snug break-words pr-4`}>
                 {history.length > 0 
                   ? (language === 'ko' ? `${Math.ceil(history.length / 2)}번의 대화` : `${Math.ceil(history.length / 2)} exchange${Math.ceil(history.length / 2) > 1 ? 's' : ''}`)
                   : `"${question}"`}
@@ -146,7 +151,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
           </div>
           <button
             onClick={handleCloseAttempt}
-            className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-colors shrink-0 ml-3"
+            className={`w-9 h-9 rounded-full ${isNight ? 'bg-white/5 border-white/10 text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500'} hover:opacity-80 flex items-center justify-center transition-colors shrink-0 ml-3`}
           >
             ✕
           </button>
@@ -154,13 +159,13 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
 
         {/* Confirmation Overlay */}
         {showConfirmClose && (
-          <div className="absolute inset-0 z-[210] bg-zinc-950/90 backdrop-blur-md flex items-center justify-center p-8 animate-fade-in shadow-2xl">
+          <div className={`absolute inset-0 z-[210] ${isNight ? 'bg-zinc-950/90' : 'bg-white/95'} backdrop-blur-md flex items-center justify-center p-8 animate-fade-in shadow-2xl`}>
             <div className="text-center space-y-6 max-w-sm">
               <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
                 <span className="text-3xl">⚠️</span>
               </div>
               <div>
-                <h3 className="text-xl font-black text-white font-display uppercase tracking-tight mb-2">
+                <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase tracking-tight mb-2`}>
                   {language === 'ko' ? '대화를 종료할까요?' : 'Close Conversation?'}
                 </h3>
                 <p className="text-zinc-400 text-sm font-korean leading-relaxed">
@@ -172,7 +177,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
               <div className="flex flex-col gap-3 pt-2">
                 <button
                   onClick={async () => { await handleSave(); onClose(); }}
-                  className="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all"
+                  className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all`}
                 >
                   📥 {language === 'ko' ? '이미지로 저장하고 닫기' : 'Save & Close'}
                 </button>
@@ -194,15 +199,15 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
         )}
 
         {/* Chat Body */}
-        <div ref={chatContainerRef} className="overflow-y-auto px-5 py-4 flex-1 custom-scrollbar space-y-5 bg-[#09090b]">
+        <div ref={chatContainerRef} className={`overflow-y-auto px-5 py-4 flex-1 custom-scrollbar space-y-5 ${isNight ? 'bg-[#09090b]' : 'bg-zinc-50/50'}`}>
           
           {/* Render conversation history */}
           {completedTurns.map((turn, idx) => (
             turn.role === 'user' ? (
               /* User bubble */
               <div key={idx} className="flex justify-end">
-                <div className="bg-orange-500/20 border border-orange-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]">
-                  <p className="text-zinc-200 text-xs italic font-korean leading-relaxed">&ldquo;{turn.text}&rdquo;</p>
+                <div className={`${isNight ? 'bg-orange-500/20 border-orange-500/20' : 'bg-orange-500/10 border-orange-500/20 shadow-sm'} rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]`}>
+                  <p className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs italic font-korean leading-relaxed`}>&ldquo;{turn.text}&rdquo;</p>
                 </div>
               </div>
             ) : (
@@ -212,10 +217,10 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                   <ChekkiMascot className="w-full h-full scale-110" mood="happy" />
                 </div>
                 <div
-                  className="bg-zinc-900 border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 flex-1 prose-answer"
+                  className={`${isNight ? 'bg-zinc-900 border-white/5' : 'bg-white border-zinc-200 shadow-sm'} rounded-2xl rounded-tl-sm px-4 py-3 flex-1 prose-answer`}
                 >
                   <div
-                    className="text-zinc-100 text-sm font-korean leading-relaxed"
+                    className={`${isNight ? 'text-zinc-100' : 'text-zinc-900'} text-sm font-korean leading-relaxed`}
                     dangerouslySetInnerHTML={{ __html: renderMarkdown(turn.text) }}
                   />
                 </div>
@@ -228,8 +233,8 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
             <>
               {/* Show the pending user question bubble */}
               <div className="flex justify-end">
-                <div className="bg-orange-500/20 border border-orange-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]">
-                  <p className="text-zinc-200 text-xs italic font-korean leading-relaxed">&ldquo;{question}&rdquo;</p>
+                <div className={`${isNight ? 'bg-orange-500/20 border-orange-500/20' : 'bg-orange-500/10 border-orange-500/20 shadow-sm'} rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]`}>
+                  <p className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs italic font-korean leading-relaxed`}>&ldquo;{question}&rdquo;</p>
                 </div>
               </div>
               {/* Thinking bubble */}
@@ -237,7 +242,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                 <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white/10 shadow-lg shrink-0 overflow-hidden mt-0.5">
                   <ChekkiMascot className="w-full h-full scale-110 animate-float" mood="thinking" />
                 </div>
-                <div className="bg-zinc-900 border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
+                <div className={`${isNight ? 'bg-zinc-900 border-white/5' : 'bg-white border-zinc-200 shadow-sm'} rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2`}>
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-orange-400 rounded-full animate-[bounce_1s_infinite_0ms]" />
                     <span className="w-2 h-2 bg-orange-400 rounded-full animate-[bounce_1s_infinite_150ms]" />
@@ -257,14 +262,14 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
 
         {/* Follow-up Input */}
         {!isAsking && history.length > 0 && isAuthenticated && (
-          <div className="px-4 pt-3 pb-3 border-t border-white/5 shrink-0 bg-zinc-950/80">
-            <form onSubmit={handleFollowUpSubmit} className="flex items-center gap-2 bg-zinc-900 border border-white/10 focus-within:border-orange-500/60 rounded-2xl px-4 py-2.5 transition-all">
+          <div className={`px-4 pt-3 pb-3 border-t border-white/5 shrink-0 ${isNight ? 'bg-zinc-950/80' : 'bg-zinc-50/80'}`}>
+            <form onSubmit={handleFollowUpSubmit} className={`flex items-center gap-2 ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200 shadow-sm'} focus-within:border-orange-500/60 rounded-2xl px-4 py-2.5 transition-all`}>
               <input
                 type="text"
                 value={followUpText}
                 onChange={e => setFollowUpText(e.target.value)}
                 placeholder={language === 'ko' ? "더 궁금한 게 있나요?" : "Want more examples? Ask a follow-up!"}
-                className="flex-1 bg-transparent text-white text-xs font-korean placeholder:text-zinc-500 focus:outline-none"
+                className={`flex-1 bg-transparent ${isNight ? 'text-white' : 'text-zinc-900'} text-xs font-korean placeholder:text-zinc-500 focus:outline-none`}
                 enterKeyHint="send"
                 autoFocus={false}
               />
@@ -283,14 +288,16 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
 
         {/* Save button row (only show when we have answers) */}
         {!isAsking && history.some(t => t.role === 'model') && (
-          <div className="px-4 pb-4 shrink-0 border-t border-white/5">
+          <div className={`px-4 pb-4 shrink-0 border-t ${isNight ? 'border-white/5' : 'border-zinc-100'}`}>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className={`w-full mt-3 py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 border ${language === 'ko' ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'} disabled:opacity-50`}
+              className={`w-full mt-3 py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 border ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'} disabled:opacity-50`}
             >
               {isSaving ? (
                 <div className="w-4 h-4 border-2 border-zinc-500/20 border-t-zinc-500 rounded-full animate-spin" />
+              ) : saveSuccess ? (
+                <span className="text-emerald-500 flex items-center gap-2">✅ {language === 'ko' ? '저장 완료!' : 'Saved!'}</span>
               ) : (
                 <><span>📥</span> {language === 'ko' ? '이미지로 저장' : 'Save as Image'}</>
               )}
@@ -300,7 +307,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
 
         {/* Footer upsell for guests */}
         {!isAsking && !isAuthenticated && history.some(t => t.role === 'model') && (
-          <div className="px-6 pb-6 pt-3 border-t border-white/5 bg-zinc-950/50 shrink-0">
+          <div className={`px-6 pb-6 pt-3 border-t ${isNight ? 'border-white/5 bg-zinc-950/50' : 'border-zinc-100 bg-zinc-50/50'} shrink-0`}>
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-[10px] text-orange-400 font-black uppercase tracking-widest mb-0.5">{language === 'ko' ? '도움이 되셨나요?' : 'Was this helpful?'}</p>

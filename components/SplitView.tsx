@@ -67,6 +67,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
   const [isSharing, setIsSharing] = useState(false);
   const [shareWebNotice, setShareWebNotice] = useState(false);
   const [isShareSuccess, setIsShareSuccess] = useState(false);
+  const [copiedItemId, setCopiedItemId] = useState<number | null>(null);
 
   // Ask Chekki States
   const [askQuery, setAskQuery] = useState('');
@@ -493,7 +494,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
     <>
       {showCloneModal && <CloneWorksheetModal originalItems={localItems} onClose={() => setShowCloneModal(false)} isNight={isNight} />}
       {reportContext && <FeedbackModal context={reportContext} onClose={() => setReportContext(null)} isNight={isNight} />}
-      <PremiumUpsellModal isOpen={upsellFeature !== null} onClose={() => setUpsellFeature(null)} featureName={upsellFeature || 'pronunciation'} />
+      <PremiumUpsellModal isOpen={upsellFeature !== null} onClose={() => setUpsellFeature(null)} featureName={upsellFeature || 'pronunciation'} isNight={isNight} />
       <AskChekkiAnswerModal 
         answer={askAnswer} 
         isAsking={isAsking} 
@@ -504,6 +505,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
         onClose={() => { setAskAnswer(null); setAskAnsweredQuestion(''); setAskHistory([]); }}
         openLoginModal={openLoginModal}
         onFollowUp={handleAskSubmit}
+        isNight={isNight}
       />
       {refiningItemId !== null && (
         <RefineModal 
@@ -535,24 +537,41 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
         <div className={`w-full lg:w-[45%] h-[70%] lg:h-full flex flex-col ${isNight ? 'bg-zinc-950/40 border-white/5' : 'bg-white border-transparent'} rounded-[2.5rem] md:rounded-[3.5rem] border overflow-hidden relative`} onClick={() => setActiveItemId(null)}>
           <div 
-            className={`px-5 py-5 border-b ${isNight ? 'border-white/5 bg-zinc-900/40' : 'border-zinc-100 bg-white/80'} backdrop-blur-xl flex flex-col shrink-0 transition-all`}
+            className={`px-6 py-5 border-b ${isNight ? 'border-white/5 bg-zinc-900/40' : 'border-zinc-100 bg-white/80'} backdrop-blur-xl flex flex-col shrink-0 transition-all`}
           >
-            <div className="flex justify-between items-center w-full">
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg ${isNight ? 'bg-zinc-800' : 'bg-zinc-100'} flex items-center justify-center`}>
+            <div className="flex justify-between items-center w-full gap-4">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className={`w-8 h-8 rounded-lg ${isNight ? 'bg-zinc-800' : 'bg-zinc-100'} flex items-center justify-center shrink-0`}>
                   <span className="text-sm">✨</span>
                 </div>
-                <p className={`text-[10px] font-black uppercase tracking-widest ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                <p className={`text-[10px] font-black uppercase tracking-widest ${isNight ? 'text-zinc-400' : 'text-zinc-500'} truncate`}>
                   {isLoadingItems ? t('ws_scanning_header') : `${localItems.length} ${t('ws_items_found')}`}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={handleShare}
+                  disabled={isSharing}
+                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center transition-all active:scale-90 border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
+                  title={language === 'ko' ? '기록 저장' : 'Save Image'}
+                >
+                  {isSharing ? (
+                    <div className="w-4 h-4 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                  ) : isShareSuccess ? (
+                    <svg className="w-5 h-5 md:w-6 md:h-6 text-emerald-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  ) : (
+                    <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                  )}
+                </button>
                 <button 
                   onClick={onClose} 
-                  className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center text-lg transition-all active:scale-90 border ${isNight ? 'border-white/5' : 'border-black/5'}`}
+                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center text-lg transition-all active:scale-90 border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
+                  title={t('tt_close')}
                 >
-                  <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
             </div>
@@ -571,7 +590,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
 
           <div
-            className={`overflow-y-auto p-4 md:p-6 space-y-4 flex-1 overscroll-contain ${isNight ? 'bg-gradient-to-b from-transparent to-zinc-950/20' : 'bg-white'}`}
+            className={`overflow-y-auto p-4 md:p-6 pb-24 md:pb-32 space-y-4 flex-1 overscroll-contain ${isNight ? 'bg-gradient-to-b from-transparent to-zinc-950/20' : 'bg-white'}`}
             style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position' } as React.CSSProperties}
             onClick={(e) => e.stopPropagation()}>
             {isLoadingItems && localItems.length === 0 && (
@@ -678,17 +697,21 @@ export const SplitView: React.FC<SplitViewProps> = ({
                                  e.stopPropagation();
                                  const textToCopy = `${language === 'ko' ? '가이드' : 'Guide'}: ${guideText}\n\n${language === 'ko' ? '티칭 팁' : 'Teaching Tip'}: "${scriptText}"`;
                                  navigator.clipboard.writeText(textToCopy);
-                                 const btn = e.currentTarget;
-                                 const originalText = btn.title;
-                                 btn.title = t('script_copied');
-                                 setTimeout(() => { btn.title = originalText; }, 2000);
+                                 setCopiedItemId(item.id);
+                                 setTimeout(() => setCopiedItemId(null), 2000);
                                }} 
                                className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-all ${isNight ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-500'} group-hover/btn:-rotate-6`}
                                title={t('copy_script')}
                              >
-                               <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                               {copiedItemId === item.id ? (
+                                 <svg className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                               ) : (
+                                 <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                               )}
                              </button>
-                             <span className={`text-[7px] md:text-[9px] font-black uppercase ${isNight ? 'text-zinc-500' : 'text-zinc-400'} tracking-widest opacity-80 leading-none h-4 flex items-center text-center`}>{language === 'ko' ? '복사' : 'Copy'}</span>
+                             <span className={`text-[7px] md:text-[9px] font-black uppercase tracking-widest opacity-80 leading-none h-4 flex items-center text-center ${copiedItemId === item.id ? 'text-emerald-500' : (isNight ? 'text-zinc-500' : 'text-zinc-400')}`}>
+                               {copiedItemId === item.id ? (language === 'ko' ? '복사됨!' : 'Copied!') : (language === 'ko' ? '복사' : 'Copy')}
+                             </span>
                            </div>
 
                            <div className="flex flex-col items-center gap-1.5 group/btn">
