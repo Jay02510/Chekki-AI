@@ -92,16 +92,27 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
             {/* Removed Notebook and Theme icons from here to reduce cognitive load */}
 
             <div className="flex items-center gap-2 md:gap-4">
-              <div className={`flex items-center gap-1 md:gap-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-200'} p-1 rounded-full border`}>
+              <div className={`relative flex items-center ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-200'} p-1 rounded-full border overflow-hidden`}>
+                {/* Sliding indicator */}
+                <div 
+                  className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-out shadow-sm ${
+                    language === 'ko' ? 'translate-x-[calc(100%)]' : 'translate-x-0'
+                  } ${isNight ? 'bg-white' : 'bg-zinc-900'}`}
+                ></div>
+                
                 <button
                   onClick={() => setLanguage('en')}
-                  className={`px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-all ${language === 'en' ? (isNight ? 'bg-white text-black shadow-lg' : 'bg-zinc-900 text-white shadow-md') : (isNight ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-400 hover:text-zinc-600')} uppercase tracking-widest`}
+                  className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-colors duration-300 ${
+                    language === 'en' ? (isNight ? 'text-black' : 'text-white') : (isNight ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-400 hover:text-zinc-600')
+                  } uppercase tracking-widest`}
                 >
                   EN
                 </button>
                 <button
                   onClick={() => setLanguage('ko')}
-                  className={`px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-all ${language === 'ko' ? (isNight ? 'bg-white text-black shadow-lg' : 'bg-zinc-900 text-white shadow-md') : (isNight ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-400 hover:text-zinc-600')} uppercase tracking-widest`}
+                  className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-colors duration-300 ${
+                    language === 'ko' ? (isNight ? 'text-black' : 'text-white') : (isNight ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-400 hover:text-zinc-600')
+                  } uppercase tracking-widest`}
                 >
                   KO
                 </button>

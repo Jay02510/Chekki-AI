@@ -76,10 +76,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
   const [askHistory, setAskHistory] = useState<ChatTurn[]>([]);
   const [scriptLanguages, setScriptLanguages] = useState<Record<number, 'en' | 'ko'>>({});
 
-  // Swipe States
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const minSwipeDistance = 50;
 
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
@@ -100,12 +96,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
   useEffect(() => {
     if (activeItemId !== null) {
-      if (itemRefs.current[activeItemId]) {
-        itemRefs.current[activeItemId]?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }
       setHasInteracted(true);
     }
 
@@ -118,32 +108,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
     setSpeechResult(null);
   }, [activeItemId]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe || isRightSwipe) {
-      const currentIndex = localItems.findIndex(i => i.id === activeItemId);
-      if (currentIndex === -1) return;
-
-      const nextIndex = isLeftSwipe ? currentIndex + 1 : currentIndex - 1;
-      if (nextIndex >= 0 && nextIndex < localItems.length) {
-        setActiveItemId(localItems[nextIndex].id);
-        if ('vibrate' in navigator) navigator.vibrate(5);
-      }
-    }
-  };
 
   // Handle Speech Recognition Setup & Cleanup (Web Speech API fallback for browsers only)
   useEffect(() => {
@@ -574,57 +538,30 @@ export const SplitView: React.FC<SplitViewProps> = ({
             className={`px-5 py-5 border-b ${isNight ? 'border-white/5 bg-zinc-900/40' : 'border-zinc-100 bg-white/80'} backdrop-blur-xl flex flex-col shrink-0 transition-all`}
           >
             <div className="flex justify-between items-center w-full">
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className={`w-11 h-11 md:w-14 md:h-14 rounded-2xl ${isNight ? 'bg-zinc-800' : 'bg-zinc-100'} border ${isNight ? 'border-white/5' : 'border-black/5'} flex items-center justify-center overflow-hidden shadow-xl transition-transform`}>
-                  <span className="text-xl">✨</span>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg ${isNight ? 'bg-zinc-800' : 'bg-zinc-100'} flex items-center justify-center`}>
+                  <span className="text-sm">✨</span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <h3 className={`font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display text-lg md:text-xl leading-none`}>{t('ws_results_title')}</h3>
-                    {(data?.worksheet_summary as any)?.worksheet_type && (
-                      <span className="px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-500 text-[8px] font-black uppercase tracking-widest border border-orange-500/30">
-                        {(data?.worksheet_summary as any).worksheet_type}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-                    <p className={`text-[9px] md:text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-500'} font-black uppercase tracking-widest leading-none mt-1`}>{isLoadingItems ? t('ws_scanning_header') : `${localItems.length} ${t('ws_items_found')}`}</p>
-                  </div>
-                </div>
+                <p className={`text-[10px] font-black uppercase tracking-widest ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  {isLoadingItems ? t('ws_scanning_header') : `${localItems.length} ${t('ws_items_found')}`}
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
-                {!isLoadingItems && (
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const text = `I just used Chekki AI to analyze my child's homework! Found ${localItems.length} questions ✨\n\n#ChekkiAI #Education #MomLife`;
-                      if (navigator.share) {
-                        navigator.share({ title: 'Chekki AI Result', text, url: window.location.href }).catch(() => {});
-                      } else {
-                        navigator.clipboard.writeText(text);
-                        alert("Copied to clipboard!");
-                      }
-                    }}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${isNight ? 'bg-orange-500/10 border-orange-500/20 text-orange-500 hover:bg-orange-500/20' : 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100'} transition-all active:scale-95 text-[9px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/10`}
-                  >
-                    <span>✨</span> {language === 'ko' ? '공유' : 'Share'}
-                  </button>
-                )}
-
                 <button 
                   onClick={onClose} 
                   className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center text-lg transition-all active:scale-90 border ${isNight ? 'border-white/5' : 'border-black/5'}`}
-                >✕</button>
+                >
+                  <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
               </div>
             </div>
 
             {!isLoadingItems && localItems.length > 0 && !hasInteracted && (
               <div className="mt-3 animate-fade-in-up">
-                <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl px-4 py-2 flex items-center gap-3">
-                  <span className="text-orange-500 text-sm animate-pulse">💡</span>
-                  <p className="text-xs md:text-sm font-black text-orange-400 uppercase tracking-widest leading-tight">
+                <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl px-4 py-2.5 flex items-center gap-3">
+                  <span className="text-orange-500 text-sm animate-pulse shrink-0">💡</span>
+                  <p className="text-xs md:text-sm font-black text-orange-400 uppercase tracking-widest leading-none pt-0.5">
                     {t('tip_click_guide')}
                   </p>
                 </div>
@@ -668,9 +605,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
                     key={item.id} 
                     ref={(el) => { itemRefs.current[item.id] = el; }} 
                     onClick={(e) => { e.stopPropagation(); setActiveItemId(isActive ? null : item.id); }}
-                    onTouchStart={isActive ? handleTouchStart : undefined}
-                    onTouchMove={isActive ? handleTouchMove : undefined}
-                    onTouchEnd={isActive ? handleTouchEnd : undefined}
                     className={`group relative rounded-[2rem] md:rounded-[2.5rem] border cursor-pointer overflow-hidden animate-fade-in-up transform-gpu transition-[border-color,box-shadow,transform] duration-300 ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-2xl scale-[1.01]' : 'bg-white border-orange-500 shadow-2xl scale-[1.01]') : (isNight ? 'bg-zinc-900/60 border-transparent hover:border-white/10' : 'bg-white border-transparent hover:border-zinc-200 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-lg')}`}
                   >
 
@@ -887,13 +821,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
                     </button>
                   </div>
 
-                  <button
-                    onClick={handleShareApp}
-                    className={`w-full h-14 rounded-full border flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${isNight ? 'bg-zinc-800 border-white/5 text-zinc-400 hover:text-white' : 'bg-zinc-50 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
-                  >
-                    <span className="text-lg">📢</span>
-                    {t('share_app')}
-                  </button>
                 </div>
 
                 {isShareSuccess && (

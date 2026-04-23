@@ -77,8 +77,8 @@ const getInitialTheme = () => {
     // Time-based: night between 22:00 and 07:00
     return isNightTime();
   }
-  return true; // Default to dark mode
-};
+  return false; // Default to light mode
+}
 
 // Returns ms until the next theme-transition boundary (22:00 → night, 07:00 → day).
 const msUntilNextTransition = (): number => {
@@ -454,7 +454,7 @@ function AppContent() {
           )}
 
           {analysisState.status === 'complete' && analysisState.data && (
-            <div className="animate-fade-in-up flex flex-col flex-1 pt-16 md:pt-28 pb-4 overflow-hidden">
+            <div className="animate-fade-in-up flex flex-col flex-1 pt-24 md:pt-32 pb-4 overflow-hidden">
               <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
