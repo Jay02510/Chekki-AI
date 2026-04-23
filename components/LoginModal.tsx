@@ -68,17 +68,6 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         // Silently ignore cancellation
         return;
       }
-      // Apple Sign-In is not supported on iOS Simulator
-      if (
-        err.message?.includes('simulator') ||
-        err.message?.includes('not supported') ||
-        err.message?.includes('1000') ||
-        err.message?.includes('authorization') ||
-        err.message?.includes('ASAuthorizationError')
-      ) {
-        setError("Apple Sign-In doesn't work on the iOS Simulator. Please test on a real device, or use Email/Password instead.");
-        return;
-      }
       setError("Apple Sign-In encountered an error. Please try email login instead.");
     } finally {
       setIsLoading(false);

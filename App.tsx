@@ -454,7 +454,7 @@ function AppContent() {
           )}
 
           {analysisState.status === 'complete' && analysisState.data && (
-            <div className="animate-fade-in-up flex flex-col flex-1 pt-24 md:pt-32 pb-4 overflow-hidden">
+            <div className="animate-fade-in-up flex flex-col flex-1 pt-4 pb-4 overflow-hidden">
               <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">

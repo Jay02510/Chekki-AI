@@ -94,7 +94,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           >
             <div className="flex flex-col items-center gap-0.5">
               <svg 
-                className={`w-5 h-5 md:w-6 md:h-6 text-orange-500 transition-all duration-700 ${isOpen ? 'rotate-180 opacity-40' : 'animate-bounce'}`} 
+                className={`w-7 h-7 md:w-8 md:h-8 text-orange-500 transition-all duration-700 ${isOpen ? 'rotate-180 opacity-40' : 'animate-bounce'}`} 
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor" 

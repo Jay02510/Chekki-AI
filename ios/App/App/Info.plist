@@ -33,16 +33,13 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Chekki needs access to your camera to scan worksheets and analyze them.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Chekki needs access to your microphone for pronunciation practice.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Chekki needs speech recognition to help your child practice pronunciation.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Chekki needs access to your photos to let you select worksheets to analyze.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Chekki needs access to your photos to save scanned results and practice sheets.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Chekki needs access to your photos to let you select worksheets to analyze.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Chekki needs speech recognition to help your child practice pronunciation.</string>
 	<key>UILaunchStoryboardName</key>
-
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>

@@ -314,7 +314,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const options = {
           clientId: 'com.chekkiai.app',
-          redirectURI: 'https://chekki-ai.firebaseapp.com/__/auth/handler',
+          redirectURI: 'https://homework-assistant-c00b9.firebaseapp.com/__/auth/handler',
           scopes: 'email name',
           state: generateRawNonce(), // random state token
           nonce: hashedNonce,        // SHA-256 hash sent to Apple

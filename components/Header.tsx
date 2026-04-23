@@ -198,7 +198,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                           onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsNight(!isNight); setShowUserMenu(false); }}
                           className={`w-full text-left px-3 py-2 text-xs ${isNight ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'} rounded-lg transition-colors flex items-center gap-3 leading-tight`}
                         >
-                          <span>{isNight ? '☀️' : '🌙'}</span> {isNight ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                          <span>{isNight ? '☀️' : '🌙'}</span> {isNight ? t('theme_light') : t('theme_dark')}
                         </button>
                       </div>
 

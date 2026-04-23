@@ -354,7 +354,9 @@ const translations = {
     share_app: "Share Chekki AI",
     copy_script: "Copy Script",
     script_copied: "Copied!",
-    btn_back: "Back to Scan"
+    btn_back: "Back to Scan",
+    theme_light: "Switch to Light Mode",
+    theme_dark: "Switch to Dark Mode"
   },
   ko: {
     app_name: "채키 AI",
@@ -700,7 +702,9 @@ const translations = {
     share_app: "채키 AI 공유하기",
     copy_script: "스크립트 복사",
     script_copied: "복사됨!",
-    btn_back: "스캔으로 돌아가기"
+    btn_back: "스캔으로 돌아가기",
+    theme_light: "라이트 모드로 전환",
+    theme_dark: "다크 모드로 전환"
   }
 };
 

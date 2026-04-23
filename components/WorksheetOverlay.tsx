@@ -273,12 +273,12 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
       {isFullscreen && (
         <div className="fixed inset-0 z-[9999] flex flex-col bg-zinc-950 animate-fade-in overflow-hidden select-none">
           {/* Close button - prominently placed with safe area awareness */}
-          <div className="absolute top-0 left-0 right-0 z-[10002] p-8 pt-[calc(env(safe-area-inset-top)+2.5rem)] flex justify-end pointer-events-none">
+          <div className="absolute top-0 left-0 right-0 z-[10002] p-4 pt-[calc(env(safe-area-inset-top)+1rem)] flex justify-end pointer-events-none">
             <button 
               onClick={() => setIsFullscreen(false)}
-              className="w-16 h-16 rounded-full bg-orange-600 hover:bg-orange-500 backdrop-blur-3xl flex items-center justify-center text-white transition-all active:scale-90 border-2 border-white/30 pointer-events-auto shadow-[0_0_50px_rgba(249,115,22,0.6)] group"
+              className="w-12 h-12 rounded-full bg-orange-600/80 hover:bg-orange-500 backdrop-blur-xl flex items-center justify-center text-white transition-all active:scale-90 border border-white/20 pointer-events-auto shadow-xl group"
             >
-              <svg className="w-10 h-10 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              <svg className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
 
@@ -288,13 +288,13 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
           >
             {/* Removed immersive blurred background to fix double image issue */}
 
-             <div onClick={(e) => e.stopPropagation()} className="relative z-10 transform-gpu w-full h-full flex items-center justify-center p-4">
+             <div onClick={(e) => e.stopPropagation()} className="relative z-10 transform-gpu w-full h-full flex items-center justify-center p-0">
                 <div className="relative flex shadow-[0_30px_100px_rgba(0,0,0,0.9)] rounded-lg md:rounded-3xl overflow-hidden" style={{ maxHeight: '100%', maxWidth: '100%' }}>
                   <img 
                       src={imageUrl} 
                       alt="Worksheet Result" 
                       className="block animate-scale-in transition-all duration-700 shadow-2xl object-contain"
-                      style={{ maxHeight: 'calc(100vh - 4rem)', maxWidth: '100vw' }}
+                      style={{ maxHeight: '100vh', maxWidth: '100vw' }}
                       draggable={false}
                   />
                   
