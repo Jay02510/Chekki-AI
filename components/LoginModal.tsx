@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
-  const { showLoginModal, closeLoginModal, signIn, signInWithApple, signUp, sendResetEmail } = useAuth();
+  const { showLoginModal, closeLoginModal, signIn, signInWithApple, signInWithGoogle, signUp, sendResetEmail } = useAuth();
   const { t } = useLanguage();
   const [viewMode, setViewMode] = useState<'login' | 'signup' | 'forgot'>('login');
   const [name, setName] = useState('');
@@ -64,15 +64,52 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
     try {
       await signInWithApple();
     } catch (err: any) {
-      if (err.message?.includes('cancelled') || err.message?.includes('user canceled') || err.code === 'auth/popup-closed-by-user') {
-        // Silently ignore cancellation
+      const errorMsg = err.message || "";
+      // Silently ignore if the user cancels (Apple Error 1001 or standard cancel strings)
+      if (
+        errorMsg.includes('1001') || 
+        errorMsg.toLowerCase().includes('cancelled') || 
+        errorMsg.toLowerCase().includes('user canceled') || 
+        err.code === 'auth/popup-closed-by-user'
+      ) {
         return;
       }
-      setError("Apple Sign-In encountered an error. Please try email login instead.");
+      
+      console.error("[LoginModal] Apple Sign-In Error:", err);
+      
+      // Friendly messages for common actual failures
+      if (errorMsg.includes('network')) {
+        setError("Network error. Please check your internet connection.");
+      } else {
+        setError("Sign-in failed. Please try again or use your email.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      const errorMsg = err.message || "";
+      if (
+        errorMsg.toLowerCase().includes('cancelled') || 
+        errorMsg.toLowerCase().includes('user canceled') || 
+        err.code === 'auth/popup-closed-by-user'
+      ) {
+        return;
+      }
+      console.error("[LoginModal] Google Sign-In Error:", err);
+      setError("Google Sign-In failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getTitle = () => {
     if (viewMode === 'login') return 'Welcome Back!';
     if (viewMode === 'signup') return 'Create Account';
@@ -186,6 +223,21 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                   <path d="M17.062 10.97c.03-2.52 2.06-3.73 2.15-3.79-1.17-1.71-2.99-1.94-3.64-1.97-1.54-.16-3.01.91-3.79.91-.78 0-1.99-.89-3.29-.86-1.71.03-3.29.99-4.17 2.54-1.79 3.11-.46 7.71 1.28 10.22.85 1.23 1.86 2.61 3.19 2.56 1.28-.05 1.76-.83 3.31-.83 1.54 0 1.99.83 3.34.8 1.36-.03 2.23-1.25 3.07-2.48 1.05-1.51 1.39-2.98 1.42-3.05-.03-.01-2.73-1.04-2.76-4.15zm-2.82-7.14c.7-1.02 1.15-2.07.91-3.61-1.14.05-2.52.76-3.34 1.71-.73.85-1.37 1.94-1.17 3.04 1.26.1 2.52-.77 3.6-1.14z" />
                 </svg>
                 Continue with Apple
+              </button>
+
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                className={`w-full flex items-center justify-center gap-3 ${isNight ? 'bg-white text-black hover:bg-zinc-200' : 'bg-white border border-zinc-200 text-zinc-900 hover:bg-zinc-50'} font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-50`}
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                </svg>
+                Continue with Google
               </button>
             </div>
 

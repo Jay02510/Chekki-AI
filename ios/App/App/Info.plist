@@ -20,6 +20,17 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.123535525914-gonom4ucs3h2pkl3gtn2atjvc4pgpep0</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -33,6 +44,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Chekki needs access to your camera to scan worksheets and analyze them.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Chekki needs access to your microphone to help you practice pronunciation and record answers.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Chekki needs access to your photos to save scanned results and practice sheets.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

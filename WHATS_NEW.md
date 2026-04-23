@@ -20,6 +20,9 @@ Every button, header, and icon has been refined for a polished, native feel. We'
 Optimized Scanning Experience
 We've cleaned up instructional text and improved scanning animations to make the worksheet analysis process faster and smoother than ever.
 
+Privacy Improvements
+Added a clear explanation for microphone access to ensure transparency and security during the learning process.
+
 ---
 
 채키 AI 업데이트 소식
@@ -43,3 +46,6 @@ We've cleaned up instructional text and improved scanning animations to make the
 
 더 빨라진 스캔 경험
 안내 텍스트를 간결하게 정리하고 스캔 애니메이션을 개선하여 학습지 분석 과정이 그 어느 때보다 빠르고 매끄러워졌습니다.
+
+개인정보 보호 강화
+학습 과정에서 보안과 투명성을 보장하기 위해 마이크 사용 권한에 대한 명확한 설명을 추가했습니다.

@@ -12,12 +12,14 @@ import {
   deleteUser,
   sendPasswordResetEmail,
   OAuthProvider,
+  GoogleAuthProvider,
   signInWithPopup,
   signInWithCredential,
   type User
 } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 // --- Nonce helpers for Apple Sign-In ---
 // Apple requires a cryptographically random nonce. The SHA-256 hash is sent
@@ -48,6 +50,7 @@ interface AuthContextType {
   signUp: (name: string, email: string, pass: string, code?: string) => Promise<void>;
   signIn: (email: string, pass: string) => Promise<void>;
   signInWithApple: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   sendResetEmail: (email: string) => Promise<void>;
   logout: () => void;
   updateProfile: (name: string) => Promise<void>;
@@ -316,47 +319,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           clientId: 'com.chekkiai.app',
           redirectURI: 'https://homework-assistant-c00b9.firebaseapp.com/__/auth/handler',
           scopes: 'email name',
-          state: generateRawNonce(), // random state token
-          nonce: hashedNonce,        // SHA-256 hash sent to Apple
+          state: generateRawNonce(), 
+          nonce: hashedNonce,        
         };
         
         const result = await SignInWithApple.authorize(options);
+        
         if (result.response && result.response.identityToken) {
           const credential = provider.credential({
             idToken: result.response.identityToken,
-            rawNonce: rawNonce,      // Raw nonce verified by Firebase
+            rawNonce: rawNonce,      
           });
           
-          const authResult = await signInWithCredential(auth, credential);
-          
-          // Handle new user creation profile logic
-          if (authResult.user) {
-            const existingProfile = await db.getUser(authResult.user.uid);
-            if (!existingProfile) {
-              const name = result.response.givenName ? `${result.response.givenName} ${result.response.familyName || ''}`.trim() : 'User';
-              const email = result.response.email || authResult.user.email || '';
-              
-              const newProfile: UserProfile = {
-                name: name || 'User',
-                email: email,
-                plan: 'free',
-                scansUsedToday: 0,
-                lastScanDate: new Date().toISOString().split('T')[0],
-                maxScansPerDay: FREE_DAILY_LIMIT,
-                questionsUsedToday: 0,
-                maxQuestionsPerDay: 5,
-                lastQuestionDate: new Date().toISOString().split('T')[0],
-                schoolId: null,
-                schoolName: null,
-                subscriptionStartedAt: null,
-                nextBillingDate: null
-              };
-              await db.createUser(authResult.user.uid, newProfile);
+          try {
+            const authResult = await signInWithCredential(auth, credential);
+            
+            if (authResult.user) {
+              const existingProfile = await db.getUser(authResult.user.uid);
+              if (!existingProfile) {
+                const name = result.response.givenName ? `${result.response.givenName} ${result.response.familyName || ''}`.trim() : 'User';
+                const email = result.response.email || authResult.user.email || '';
+                
+                const newProfile: UserProfile = {
+                  name: name || 'User',
+                  email: email,
+                  plan: 'free',
+                  scansUsedToday: 0,
+                  lastScanDate: new Date().toISOString().split('T')[0],
+                  maxScansPerDay: FREE_DAILY_LIMIT,
+                  questionsUsedToday: 0,
+                  maxQuestionsPerDay: 5,
+                  lastQuestionDate: new Date().toISOString().split('T')[0],
+                  schoolId: null,
+                  schoolName: null,
+                  subscriptionStartedAt: null,
+                  nextBillingDate: null
+                };
+                await db.createUser(authResult.user.uid, newProfile);
+              }
             }
+          } catch (firebaseErr: any) {
+            console.error('[AuthContext] Firebase Apple Sign-In Credential Error:', firebaseErr);
+            throw new Error(`Firebase Auth Error: ${firebaseErr.code || firebaseErr.message}`);
           }
           setShowLoginModal(false);
         } else {
-          throw new Error('Apple Sign-In failed or was cancelled.');
+          throw new Error('Apple Sign-In returned no identity token.');
         }
       } else {
         // WEB / ANDROID FLOW
@@ -389,7 +397,76 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err: any) {
       console.error('Apple Sign-In Error:', err);
-      // Let LoginModal catch and parse specific errors like cancellation
+      // Ensure we pass the original error code if it's a Firebase error
+      throw err;
+    } finally {
+      isSigningUpRef.current = false;
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      isSigningUpRef.current = true;
+      
+      if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') {
+        const result = await GoogleAuth.signIn();
+        if (result.authentication && result.authentication.idToken) {
+          const credential = GoogleAuthProvider.credential(result.authentication.idToken);
+          const authResult = await signInWithCredential(auth, credential);
+          
+          if (authResult.user) {
+            const existingProfile = await db.getUser(authResult.user.uid);
+            if (!existingProfile) {
+              const newProfile: UserProfile = {
+                name: authResult.user.displayName || 'User',
+                email: authResult.user.email || '',
+                plan: 'free',
+                scansUsedToday: 0,
+                lastScanDate: new Date().toISOString().split('T')[0],
+                maxScansPerDay: FREE_DAILY_LIMIT,
+                questionsUsedToday: 0,
+                maxQuestionsPerDay: 5,
+                lastQuestionDate: new Date().toISOString().split('T')[0],
+                schoolId: null,
+                schoolName: null,
+                subscriptionStartedAt: null,
+                nextBillingDate: null
+              };
+              await db.createUser(authResult.user.uid, newProfile);
+            }
+          }
+          setShowLoginModal(false);
+        } else {
+          throw new Error('Google Sign-In failed or was cancelled.');
+        }
+      } else {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+          const existingProfile = await db.getUser(result.user.uid);
+          if (!existingProfile) {
+            const newProfile: UserProfile = {
+              name: result.user.displayName || 'User',
+              email: result.user.email || '',
+              plan: 'free',
+              scansUsedToday: 0,
+              lastScanDate: new Date().toISOString().split('T')[0],
+              maxScansPerDay: FREE_DAILY_LIMIT,
+              questionsUsedToday: 0,
+              maxQuestionsPerDay: 5,
+              lastQuestionDate: new Date().toISOString().split('T')[0],
+              schoolId: null,
+              schoolName: null,
+              subscriptionStartedAt: null,
+              nextBillingDate: null
+            };
+            await db.createUser(result.user.uid, newProfile);
+          }
+        }
+        setShowLoginModal(false);
+      }
+    } catch (err: any) {
+      console.error('Google Sign-In Error:', err);
       throw err;
     } finally {
       isSigningUpRef.current = false;
@@ -637,6 +714,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signUp,
       signIn,
       signInWithApple,
+      signInWithGoogle,
       sendResetEmail,
       logout,
       updateProfile,
