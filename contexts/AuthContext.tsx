@@ -19,7 +19,6 @@ import {
 } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { SignInWithApple } from '@capacitor-community/apple-sign-in';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 // --- Nonce helpers for Apple Sign-In ---
 // Apple requires a cryptographically random nonce. The SHA-256 hash is sent
@@ -407,66 +406,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       isSigningUpRef.current = true;
+      const provider = new GoogleAuthProvider();
       
-      if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') {
-        const result = await GoogleAuth.signIn();
-        if (result.authentication && result.authentication.idToken) {
-          const credential = GoogleAuthProvider.credential(result.authentication.idToken);
-          const authResult = await signInWithCredential(auth, credential);
-          
-          if (authResult.user) {
-            const existingProfile = await db.getUser(authResult.user.uid);
-            if (!existingProfile) {
-              const newProfile: UserProfile = {
-                name: authResult.user.displayName || 'User',
-                email: authResult.user.email || '',
-                plan: 'free',
-                scansUsedToday: 0,
-                lastScanDate: new Date().toISOString().split('T')[0],
-                maxScansPerDay: FREE_DAILY_LIMIT,
-                questionsUsedToday: 0,
-                maxQuestionsPerDay: 5,
-                lastQuestionDate: new Date().toISOString().split('T')[0],
-                schoolId: null,
-                schoolName: null,
-                subscriptionStartedAt: null,
-                nextBillingDate: null
-              };
-              await db.createUser(authResult.user.uid, newProfile);
-            }
-          }
-          setShowLoginModal(false);
-        } else {
-          throw new Error('Google Sign-In failed or was cancelled.');
+      // Add custom parameters to ensure a fresh login experience
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
+      // On mobile, popups can be blocked or cause argument-errors.
+      // We use the standard popup but with extra error handling.
+      const result = await signInWithPopup(auth, provider);
+      
+      if (result.user) {
+        const existingProfile = await db.getUser(result.user.uid);
+        if (!existingProfile) {
+          const newProfile: UserProfile = {
+            name: result.user.displayName || 'User',
+            email: result.user.email || '',
+            plan: 'free',
+            scansUsedToday: 0,
+            lastScanDate: new Date().toISOString().split('T')[0],
+            maxScansPerDay: FREE_DAILY_LIMIT,
+            questionsUsedToday: 0,
+            maxQuestionsPerDay: 5,
+            lastQuestionDate: new Date().toISOString().split('T')[0],
+            schoolId: null,
+            schoolName: null,
+            subscriptionStartedAt: null,
+            nextBillingDate: null
+          };
+          await db.createUser(result.user.uid, newProfile);
         }
-      } else {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        if (result.user) {
-          const existingProfile = await db.getUser(result.user.uid);
-          if (!existingProfile) {
-            const newProfile: UserProfile = {
-              name: result.user.displayName || 'User',
-              email: result.user.email || '',
-              plan: 'free',
-              scansUsedToday: 0,
-              lastScanDate: new Date().toISOString().split('T')[0],
-              maxScansPerDay: FREE_DAILY_LIMIT,
-              questionsUsedToday: 0,
-              maxQuestionsPerDay: 5,
-              lastQuestionDate: new Date().toISOString().split('T')[0],
-              schoolId: null,
-              schoolName: null,
-              subscriptionStartedAt: null,
-              nextBillingDate: null
-            };
-            await db.createUser(result.user.uid, newProfile);
-          }
-        }
-        setShowLoginModal(false);
       }
+      setShowLoginModal(false);
     } catch (err: any) {
-      console.error('Google Sign-In Error:', err);
+      console.error('Google Sign-In Technical Error:', err);
+      // If it's the specific mobile popup error, give a clear instruction
+      if (err.code === 'auth/argument-error' || err.code === 'auth/internal-error') {
+        throw new Error("Login interrupted. Please try again or use email login.");
+      }
       throw err;
     } finally {
       isSigningUpRef.current = false;

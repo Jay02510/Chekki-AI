@@ -104,7 +104,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         return;
       }
       console.error("[LoginModal] Google Sign-In Error:", err);
-      setError("Google Sign-In failed. Please try again.");
+      setError(`Google Error: ${err.message || JSON.stringify(err)}`);
     } finally {
       setIsLoading(false);
     }
@@ -225,6 +225,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 Continue with Apple
               </button>
 
+              {/* TODO: Implement Native Google Sign-In with @capacitor-firebase/authentication for a more robust flow later */}
+              {/* 
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
@@ -239,6 +241,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 </svg>
                 Continue with Google
               </button>
+              */}
             </div>
 
             <div className="mt-8 flex flex-col items-center gap-4">
