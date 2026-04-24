@@ -89,7 +89,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
   }, [history, isAsking]);
 
   const handleSave = async () => {
-    if (!chatContainerRef.current) return;
+    if (!chatContainerRef.current) return false;
     setIsSaving(true);
     try {
       const dataUrl = await toJpeg(chatContainerRef.current, { 
@@ -105,13 +105,15 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
         language === 'ko' ? '채키가 제 질문에 답변해줬어요!' : 'Chekki answered my question!', 
         'chekki-answer'
       );
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+      return true;
     } catch (err) {
       console.error("Failed to save answer image", err);
       alert(language === 'ko' ? "저장에 실패했습니다." : "Failed to save the answer.");
+      return false;
     } finally {
       setIsSaving(false);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
     }
   };
 
@@ -131,7 +133,13 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 pt-[calc(env(safe-area-inset-top)+1rem)] sm:pt-10">
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
+      <div 
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm" 
+        onClick={() => {
+          if (showConfirmClose) setShowConfirmClose(false);
+          else handleCloseAttempt();
+        }} 
+      />
       <div className={`relative ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200'} border rounded-[2.5rem] w-full max-w-lg max-h-[85dvh] flex flex-col shadow-2xl animate-fade-in-down overflow-hidden`}>
         
         {/* Header */}
@@ -176,20 +184,31 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
               </div>
               <div className="flex flex-col gap-3 pt-2">
                 <button
-                  onClick={async () => { await handleSave(); onClose(); }}
-                  className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all`}
+                  onClick={async () => { 
+                    if (isSaving) return;
+                    const success = await handleSave(); 
+                    if (success) onClose(); 
+                  }}
+                  disabled={isSaving}
+                  className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center`}
                 >
-                  📥 {language === 'ko' ? '이미지로 저장하고 닫기' : 'Save & Close'}
+                  {isSaving ? (
+                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>📥 {language === 'ko' ? '이미지로 저장하고 닫기' : 'Save & Close'}</>
+                  )}
                 </button>
                 <button
                   onClick={onClose}
-                  className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border border-red-500/20 active:scale-95 transition-all"
+                  disabled={isSaving}
+                  className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border border-red-500/20 active:scale-95 transition-all disabled:opacity-50"
                 >
                   {language === 'ko' ? '저장하지 않고 종료' : 'Close Anyway'}
                 </button>
                 <button
                   onClick={() => setShowConfirmClose(false)}
-                  className="w-full text-zinc-500 py-2 font-bold text-xs uppercase tracking-widest hover:text-white transition-colors"
+                  disabled={isSaving}
+                  className="w-full text-zinc-500 py-2 font-bold text-xs uppercase tracking-widest hover:text-white transition-colors disabled:opacity-50"
                 >
                   {language === 'ko' ? '취소' : 'Cancel'}
                 </button>
