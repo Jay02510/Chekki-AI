@@ -1,0 +1,312 @@
+diff --git a/node_modules/@capacitor-community/in-app-review/.swiftpm/xcode/xcuserdata/jasonbenjamin.xcuserdatad/xcschemes/xcschememanagement.plist b/node_modules/@capacitor-community/in-app-review/.swiftpm/xcode/xcuserdata/jasonbenjamin.xcuserdatad/xcschemes/xcschememanagement.plist
+new file mode 100644
+index 0000000..6cd8adf
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/.swiftpm/xcode/xcuserdata/jasonbenjamin.xcuserdatad/xcschemes/xcschememanagement.plist
+@@ -0,0 +1,14 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
++<plist version="1.0">
++<dict>
++	<key>SchemeUserState</key>
++	<dict>
++		<key>CapacitorCommunityInAppReview.xcscheme_^#shared#^_</key>
++		<dict>
++			<key>orderHint</key>
++			<integer>3</integer>
++		</dict>
++	</dict>
++</dict>
++</plist>
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build.gradle b/node_modules/@capacitor-community/in-app-review/android/build.gradle
+index 5858af7..7e90472 100644
+--- a/node_modules/@capacitor-community/in-app-review/android/build.gradle
++++ b/node_modules/@capacitor-community/in-app-review/android/build.gradle
+@@ -31,7 +31,7 @@ android {
+     buildTypes {
+         release {
+             minifyEnabled false
+-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
++            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+         }
+     }
+     lintOptions {
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/419de5ea4d7971aae550602f0177303d/results.bin b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/419de5ea4d7971aae550602f0177303d/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/419de5ea4d7971aae550602f0177303d/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/419de5ea4d7971aae550602f0177303d/transformed/classes/classes_dex/classes.dex b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/419de5ea4d7971aae550602f0177303d/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..9de2b6c
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/419de5ea4d7971aae550602f0177303d/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/419de5ea4d7971aae550602f0177303d/transformed/classes/classes_global-synthetics/global.globals b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/419de5ea4d7971aae550602f0177303d/transformed/classes/classes_global-synthetics/global.globals
+new file mode 100644
+index 0000000..e87b511
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/419de5ea4d7971aae550602f0177303d/transformed/classes/classes_global-synthetics/global.globals differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/results.bin b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/results.bin
+new file mode 100644
+index 0000000..7ed749e
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/results.bin
+@@ -0,0 +1 @@
++o/bundleLibRuntimeToDirDebug
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/inappreview/InAppReview.dex b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/inappreview/InAppReview.dex
+new file mode 100644
+index 0000000..5a6a10b
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/inappreview/InAppReview.dex differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/inappreview/InAppReviewPlugin.dex b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/inappreview/InAppReviewPlugin.dex
+new file mode 100644
+index 0000000..f056f56
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/inappreview/InAppReviewPlugin.dex differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$4859322de388172ed7e07bffd460db1e70e64c83114c0c09734441e595938e46$0.globals b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$4859322de388172ed7e07bffd460db1e70e64c83114c0c09734441e595938e46$0.globals
+new file mode 100644
+index 0000000..e87b511
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$4859322de388172ed7e07bffd460db1e70e64c83114c0c09734441e595938e46$0.globals differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$4859322de388172ed7e07bffd460db1e70e64c83114c0c09734441e595938e46$1.globals b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$4859322de388172ed7e07bffd460db1e70e64c83114c0c09734441e595938e46$1.globals
+new file mode 100644
+index 0000000..e87b511
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$4859322de388172ed7e07bffd460db1e70e64c83114c0c09734441e595938e46$1.globals differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$c049eb2f960bf76535dcb9ef4b8cd6332a3dc47f6f2508adca798b93e5e82c5c$0.globals b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$c049eb2f960bf76535dcb9ef4b8cd6332a3dc47f6f2508adca798b93e5e82c5c$0.globals
+new file mode 100644
+index 0000000..e87b511
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$c049eb2f960bf76535dcb9ef4b8cd6332a3dc47f6f2508adca798b93e5e82c5c$0.globals differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$c049eb2f960bf76535dcb9ef4b8cd6332a3dc47f6f2508adca798b93e5e82c5c$1.globals b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$c049eb2f960bf76535dcb9ef4b8cd6332a3dc47f6f2508adca798b93e5e82c5c$1.globals
+new file mode 100644
+index 0000000..e87b511
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$c049eb2f960bf76535dcb9ef4b8cd6332a3dc47f6f2508adca798b93e5e82c5c$1.globals differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$c049eb2f960bf76535dcb9ef4b8cd6332a3dc47f6f2508adca798b93e5e82c5c$2.globals b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$c049eb2f960bf76535dcb9ef4b8cd6332a3dc47f6f2508adca798b93e5e82c5c$2.globals
+new file mode 100644
+index 0000000..e87b511
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/getcapacitor/community/inappreview/InAppReview$$InternalSyntheticLambda$2$c049eb2f960bf76535dcb9ef4b8cd6332a3dc47f6f2508adca798b93e5e82c5c$2.globals differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin
+new file mode 100644
+index 0000000..601f245
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/.transforms/716fa97f801e0d92ceadcbfb669710e2/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+new file mode 100644
+index 0000000..b33e3d4
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.getcapacitor.community.inappreview" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+new file mode 100644
+index 0000000..022c174
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+@@ -0,0 +1,18 @@
++{
++  "version": 3,
++  "artifactType": {
++    "type": "AAPT_FRIENDLY_MERGED_MANIFESTS",
++    "kind": "Directory"
++  },
++  "applicationId": "com.getcapacitor.community.inappreview",
++  "variantName": "debug",
++  "elements": [
++    {
++      "type": "SINGLE",
++      "filters": [],
++      "attributes": [],
++      "outputFile": "AndroidManifest.xml"
++    }
++  ],
++  "elementType": "File"
++}
+\ No newline at end of file
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+new file mode 100644
+index 0000000..5c6f284
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+@@ -0,0 +1,6 @@
++aarFormatVersion=1.0
++aarMetadataVersion=1.0
++minCompileSdk=35
++minCompileSdkExtension=0
++minAndroidGradlePluginVersion=1.0.0
++coreLibraryDesugaringEnabled=false
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/android_res_source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/android_res_source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt
+new file mode 100644
+index 0000000..acd1eb6
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/android_res_source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt
+@@ -0,0 +1,9 @@
++com.getcapacitor.community.inappreview.capacitor-community-in-app-review-pngs-0 /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/build/generated/res/pngs/debug
++com.getcapacitor.community.inappreview.capacitor-community-in-app-review-resValues-1 /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/build/generated/res/resValues/debug
++com.getcapacitor.community.inappreview.capacitor-community-in-app-review-updated_navigation_xml-2 /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/build/generated/updated_navigation_xml/debug
++com.getcapacitor.community.inappreview.capacitor-community-in-app-review-mergeDebugResources-3 /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/debug/mergeDebugResources/merged.dir
++com.getcapacitor.community.inappreview.capacitor-community-in-app-review-mergeDebugResources-4 /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/debug/mergeDebugResources/stripped.dir
++com.getcapacitor.community.inappreview.capacitor-community-in-app-review-debug-5 /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/build/intermediates/merged_res/debug/mergeDebugResources
++com.getcapacitor.community.inappreview.capacitor-community-in-app-review-debug-6 /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/build/intermediates/packaged_res/debug/packageDebugResources
++com.getcapacitor.community.inappreview.capacitor-community-in-app-review-debug-7 /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/debug/res
++com.getcapacitor.community.inappreview.capacitor-community-in-app-review-main-8 /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/res
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+new file mode 100644
+index 0000000..9e26dfe
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+@@ -0,0 +1 @@
++{}
+\ No newline at end of file
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
+new file mode 100644
+index 0000000..dfe7d23
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
+new file mode 100644
+index 0000000..fd6e658
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+new file mode 100644
+index 0000000..6a7ebf3
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+@@ -0,0 +1 @@
++#Mon May 18 20:04:04 KST 2026
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+new file mode 100644
+index 0000000..ced9603
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:!&lt;dir>navigation"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug" generated-set="debug$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:!&lt;dir>navigation"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/build/generated/res/resValues/debug"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:!&lt;dir>navigation"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/build/generated/res/resValues/debug"/></dataSet><mergedItems/></merger>
+\ No newline at end of file
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/mergeDebugAssets/merger.xml b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+new file mode 100644
+index 0000000..af46b56
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/assets"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/debug/assets"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+new file mode 100644
+index 0000000..7423a5d
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/jniLibs"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/debug/jniLibs"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/inappreview/InAppReview.class b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/inappreview/InAppReview.class
+new file mode 100644
+index 0000000..9c3a99d
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/inappreview/InAppReview.class differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/inappreview/InAppReviewPlugin.class b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/inappreview/InAppReviewPlugin.class
+new file mode 100644
+index 0000000..1cbf3ee
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/inappreview/InAppReviewPlugin.class differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+new file mode 100644
+index 0000000..78ac5b8
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+@@ -0,0 +1,2 @@
++R_DEF: Internal format may change without notice
++local
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+new file mode 100644
+index 0000000..087c9a3
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+@@ -0,0 +1,9 @@
++1<?xml version="1.0" encoding="utf-8"?>
++2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++3    package="com.getcapacitor.community.inappreview" >
++4
++5    <uses-sdk android:minSdkVersion="24" />
++5-->INJECTED
++5-->INJECTED
++6
++7</manifest>
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+new file mode 100644
+index 0000000..b33e3d4
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.getcapacitor.community.inappreview" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+new file mode 100644
+index 0000000..0637a08
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+@@ -0,0 +1 @@
++[]
+\ No newline at end of file
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+new file mode 100644
+index 0000000..08f4ebe
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+@@ -0,0 +1 @@
++0 Warning/Error
+\ No newline at end of file
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/inappreview/InAppReview.class b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/inappreview/InAppReview.class
+new file mode 100644
+index 0000000..9c3a99d
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/inappreview/InAppReview.class differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/inappreview/InAppReviewPlugin.class b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/inappreview/InAppReviewPlugin.class
+new file mode 100644
+index 0000000..1cbf3ee
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/inappreview/InAppReviewPlugin.class differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
+new file mode 100644
+index 0000000..4dbcf11
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+new file mode 100644
+index 0000000..c7dbd8e
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+@@ -0,0 +1 @@
++com.getcapacitor.community.inappreview
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/@capacitor-community/in-app-review/android/build/outputs/logs/manifest-merger-debug-report.txt
+new file mode 100644
+index 0000000..8381c5d
+--- /dev/null
++++ b/node_modules/@capacitor-community/in-app-review/android/build/outputs/logs/manifest-merger-debug-report.txt
+@@ -0,0 +1,16 @@
++-- Merging decision tree log ---
++manifest
++ADDED from /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/AndroidManifest.xml:1:1-2:12
++INJECTED from /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/AndroidManifest.xml:1:1-2:12
++	package
++		INJECTED from /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/AndroidManifest.xml
++	xmlns:android
++		ADDED from /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/AndroidManifest.xml:1:11-69
++uses-sdk
++INJECTED from /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/AndroidManifest.xml
++INJECTED from /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/AndroidManifest.xml
++	android:targetSdkVersion
++		INJECTED from /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/AndroidManifest.xml
++	android:minSdkVersion
++		INJECTED from /Users/jasonbenjamin/Projects/Chekki-AI-main/node_modules/@capacitor-community/in-app-review/android/src/main/AndroidManifest.xml
+diff --git a/node_modules/@capacitor-community/in-app-review/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/@capacitor-community/in-app-review/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..922d5c6
+Binary files /dev/null and b/node_modules/@capacitor-community/in-app-review/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ

@@ -17,7 +17,10 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
           req.url = '/app.html';
         }
 
-        if (req.url?.startsWith('/api/analyze')) {
+        const apiPath = req.url?.split('?')[0];
+        if (apiPath && apiPath.startsWith('/api/')) {
+          const endpointName = apiPath.replace('/api/', '');
+
           // Parse body if method is POST
           if (req.method === 'POST') {
             const buffers = [];
@@ -33,7 +36,6 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
           }
 
           // Mock Vercel response object properties needed by the handler
-
           const vercelRes = {
             setHeader: (key: string, value: string) => {
               res.setHeader(key, value);
@@ -62,10 +64,10 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
           // Dynamic import to avoid loading this during build
           try {
             console.log(`[Vite Dev API] Handling ${req.method} ${req.url}`);
-            const { default: analyzeHandler } = await import('./api/analyze');
-            await analyzeHandler(req, vercelRes);
+            const { default: handler } = await import(`./api/${endpointName}`);
+            await handler(req as any, vercelRes as any);
           } catch (e: any) {
-            console.error(`[Vite Dev API Error]:`, e);
+            console.error(`[Vite Dev API Error] for ${endpointName}:`, e);
             res.statusCode = 500;
             res.end(JSON.stringify({ error: "INTERNAL_DEV_ERROR", details: e.message }));
           }

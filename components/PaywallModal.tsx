@@ -1,8 +1,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Capacitor } from '@capacitor/core';
-const SubscriptionScreen = React.lazy(() => import('./SubscriptionScreen').then(module => ({ default: module.SubscriptionScreen })));
-const LegalModal = React.lazy(() => import('./LegalModal').then(module => ({ default: module.LegalModal })));
+import { SubscriptionScreen } from './SubscriptionScreen';
+import { LegalModal } from './LegalModal';
 import { LegalType } from '../types';
 
 interface Props {
@@ -46,17 +46,13 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
                 </button>
 
                 <div className="p-6 md:p-8 overflow-y-auto max-h-[85vh] custom-scrollbar">
-                    <Suspense fallback={<div className="h-40 flex items-center justify-center"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>}>
                       <SubscriptionScreen onClose={() => setShowPaywall(false)} isNight={isNight} />
-                    </Suspense>
                 </div>
             </div>
 
             {standaloneLegal && (
                 <div className="fixed inset-0 z-[200]">
-                    <Suspense fallback={null}>
                       <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={false} />
-                    </Suspense>
                 </div>
             )}
         </div>

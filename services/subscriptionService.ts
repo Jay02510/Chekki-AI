@@ -41,8 +41,8 @@ export const subscriptionService = {
     async initialize(userId: string, idToken: string): Promise<SubscriptionRecord> {
         const platform = Capacitor.getPlatform();
 
-        // On iOS: check RevenueCat entitlements first for real-time accuracy
-        if (platform === 'ios') {
+        // On iOS or Android: check RevenueCat entitlements first for real-time accuracy
+        if (platform === 'ios' || platform === 'android') {
             try {
                 const info = await revenueCatService.getCustomerInfo();
                 // Depending on SDK version, info might be a wrapper or the object itself
@@ -53,7 +53,7 @@ export const subscriptionService = {
                     const localRecord: SubscriptionRecord = {
                         user_id: userId,
                         subscription_status: 'active',
-                        subscription_platform: 'apple',
+                        subscription_platform: platform === 'ios' ? 'apple' : 'android',
                         subscription_expiry_date: customerInfo.entitlements.active[Object.keys(customerInfo.entitlements.active)[0]].expirationDate,
                     };
                     cacheRecord(localRecord);
@@ -162,6 +162,11 @@ export const subscriptionService = {
                 });
             }
 
+            // Trigger manual backend sync in the background to align DB immediately
+            fetch(`${BACKEND_BASE}/api/subscription-status`, {
+                headers: { Authorization: `Bearer ${idToken}` },
+            }).catch(err => console.error('[subscriptionService] Backend status sync error:', err));
+
             return { success: true, transaction };
         } catch (error: any) {
             console.error('[subscriptionService] Apple purchase error:', error);
@@ -199,6 +204,19 @@ export const subscriptionService = {
     async _purchaseAndroid(product: any, userId: string, idToken: string): Promise<{ success: boolean; transaction?: any; error?: any }> {
         try {
             const result = await revenueCatService.purchaseProduct(product);
+
+            cacheRecord({
+                user_id: userId,
+                subscription_status: 'active',
+                subscription_platform: 'android',
+                subscription_expiry_date: null,
+            });
+
+            // Trigger manual backend sync in the background to align DB immediately
+            fetch(`${BACKEND_BASE}/api/subscription-status`, {
+                headers: { Authorization: `Bearer ${idToken}` },
+            }).catch(err => console.error('[subscriptionService] Backend status sync error:', err));
+
             return { success: true, transaction: result.transaction };
         } catch (error: any) {
             console.error('[subscriptionService] Android purchase error:', error);

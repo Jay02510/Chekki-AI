@@ -9,13 +9,16 @@ import { SplashScreen } from './components/SplashScreen';
 import { MobileAppBanner } from './components/MobileAppBanner';
 import { BottomNav, TabID } from './components/BottomNav';
 import { HelpView } from './components/HelpView';
+import { Footer } from './components/Footer';
+import { ConfirmDialog } from './components/ConfirmDialog';
+import { SuccessDialog } from './components/SuccessDialog';
+import { Confetti } from './components/Confetti';
 
-// Lazy loaded modals for performance
-const PaywallModal = React.lazy(() => import('./components/PaywallModal').then(module => ({ default: module.PaywallModal })));
-const OdapNoteModal = React.lazy(() => import('./components/OdapNoteModal').then(module => ({ default: module.OdapNoteModal })));
-const LoginModal = React.lazy(() => import('./components/LoginModal').then(module => ({ default: module.LoginModal })));
-const LegalModal = React.lazy(() => import('./components/LegalModal').then(module => ({ default: module.LegalModal })));
-const ProgressiveOnboardingModal = React.lazy(() => import('./components/ProgressiveOnboardingModal').then(module => ({ default: module.ProgressiveOnboardingModal })));
+import { PaywallModal } from './components/PaywallModal';
+import { OdapNoteModal } from './components/OdapNoteModal';
+import { LoginModal } from './components/LoginModal';
+import { LegalModal } from './components/LegalModal';
+import { ProgressiveOnboardingModal } from './components/ProgressiveOnboardingModal';
 import SubscribePage from './src/pages/SubscribePage';
 import AdminPage from './src/pages/AdminPage';
 import { AnalysisState, LegalType } from './types';
@@ -289,110 +292,91 @@ function AppContent() {
   };
 
 
+  const isLocked = activeTab !== 'help' && (analysisState.status === 'analyzing');
+
+  useEffect(() => {
+    if (isLocked) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isLocked]);
+
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
   if (showSubscribePage && platform === 'web') return <SubscribePage />;
   if (showAdminPage && platform === 'web') return <AdminPage />;
 
+
   return (
     <ErrorBoundary>
       <div className={`min-h-[100dvh] ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-500 flex flex-col`}>
-        <React.Suspense fallback={null}>
           {standaloneLegal && (
             <div className="fixed inset-0 z-[200]">
               <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={true} isNight={isNight} />
             </div>
           )}
-        </React.Suspense>
         <Header 
           onReset={() => handleReset(true)} 
           isNight={isNight}
           setIsNight={setIsNight}
           onOpenHelp={() => {
-            if (analysisState.status !== 'idle') {
-              handleReset(false);
-            }
             switchTab('help');
           }}
         />
         {/* Web-only mobile download banner */}
         {platform === 'web' && (
-          <React.Suspense fallback={null}>
-            <MobileAppBanner />
-          </React.Suspense>
+          <MobileAppBanner />
         )}
-        <React.Suspense fallback={null}>
-          <PaywallModal isNight={isNight} />
-          <OdapNoteModal isNight={isNight} />
-          <LoginModal isNight={isNight} />
+        <PaywallModal isNight={isNight} />
+        <OdapNoteModal isNight={isNight} />
+        <LoginModal isNight={isNight} />
 
-          {showChildProfileModal && (
-            <ProgressiveOnboardingModal 
-              onComplete={() => setShowChildProfileModal(false)}
-              onSkip={() => {
-                sessionStorage.setItem('skipped_child_profile', 'true');
-                setShowChildProfileModal(false);
-              }}
-              isNight={isNight}
-            />
-          )}
-        </React.Suspense>
+        {showChildProfileModal && (
+          <ProgressiveOnboardingModal 
+            onComplete={() => setShowChildProfileModal(false)}
+            onSkip={() => {
+              sessionStorage.setItem('skipped_child_profile', 'true');
+              setShowChildProfileModal(false);
+            }}
+            isNight={isNight}
+          />
+        )}
 
         {confirmDialog && (
-          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setConfirmDialog(null)}></div>
-            <div className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200 shadow-2xl'} border rounded-[2.5rem] p-8 max-w-sm w-full text-center animate-fade-in-up`}>
-              <p className={`${isNight ? 'text-white' : 'text-zinc-900'} font-black text-lg mb-6 font-korean uppercase tracking-tight`}>{confirmDialog.title}</p>
-              <div className="flex flex-col gap-3">
-
-                <button onClick={confirmDialog.onConfirm} disabled={confirmDialog.isSaving} className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black uppercase text-xs transition-all active:scale-95 disabled:opacity-50`}>
-                  {confirmDialog.confirmText || "Yes"}
-                </button>
-                <button onClick={() => setConfirmDialog(null)} disabled={confirmDialog.isSaving} className={`w-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'} py-4 rounded-2xl font-black uppercase text-xs transition-all active:scale-95 disabled:opacity-50`}>
-                  {confirmDialog.cancelText || "No"}
-                </button>
-              </div>
-            </div>
-          </div>
+          <ConfirmDialog
+            title={confirmDialog.title}
+            confirmText={confirmDialog.confirmText}
+            cancelText={confirmDialog.cancelText}
+            isSaving={confirmDialog.isSaving}
+            isNight={isNight}
+            onConfirm={confirmDialog.onConfirm}
+            onCancel={() => setConfirmDialog(null)}
+          />
         )}
 
         {successDialog && (
-          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 md:p-6">
-            <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setSuccessDialog(null)}></div>
-            <div className={`relative ${isNight ? 'bg-zinc-900 border-emerald-500/30' : 'bg-white border-emerald-200 shadow-2xl'} border rounded-[2.5rem] p-8 md:p-10 max-w-md w-full text-center shadow-[0_0_100px_rgba(16,185,129,0.1)] animate-fade-in-up`}>
-              <div className={`w-16 h-16 ${isNight ? 'bg-emerald-500/20' : 'bg-emerald-50'} rounded-full flex items-center justify-center mx-auto mb-6`}>
-                <span className="text-2xl">✅</span>
-              </div>
-              <p className={`${isNight ? 'text-white' : 'text-zinc-900'} font-bold text-lg mb-8 font-korean leading-relaxed`}>{successDialog}</p>
-              <button onClick={() => setSuccessDialog(null)} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">Close</button>
+          <SuccessDialog
+            message={successDialog}
+            isNight={isNight}
+            onClose={() => setSuccessDialog(null)}
+          />
+        )}
+
+        {showConfetti && <Confetti />}
+
+        <main className="flex-1 min-h-0 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-32 md:pt-40">
+
+          {activeTab === 'help' ? (
+            <div className="animate-fade-in">
+              <HelpView isNight={isNight} onClose={() => switchTab('scan')} />
             </div>
-          </div>
-        )}
-
-        {showConfetti && (
-          <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center">
-            {[...Array(40)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-2 h-2 rounded-full animate-[confetti_3s_ease-out_forwards]"
-                style={{
-                  backgroundColor: ['#F97316', '#EC4899', '#8B5CF6', '#FCD34D'][i % 4],
-                  left: '50%',
-                  top: '50%',
-                  '--tx': `${(Math.random() - 0.5) * 600}px`,
-                  '--ty': `${(Math.random() - 0.7) * 400}px`,
-                  animationDelay: `${Math.random() * 0.5}s`
-                } as any}
-              ></div>
-            ))}
-          </div>
-        )}
-
-        <main className={`flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-32 md:pt-40`}>
-
-          {analysisState.status === 'idle' && (
-            <div className="animate-fade-in flex-1 h-full flex flex-col">
-              {activeTab === 'scan' ? (
-                <>
+          ) : (
+            <>
+              {analysisState.status === 'idle' && (
+                <div className="animate-fade-in flex-1 h-full flex flex-col">
                   {isInApp && showInAppNotice && (
                     <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
                       <div className="flex items-center gap-3">
@@ -413,121 +397,78 @@ function AppContent() {
                   ) : (
                     <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data)} minimal onOpenHelp={() => switchTab('help')} />
                   )}
-                </>
-              ) : activeTab === 'help' ? (
-                <HelpView isNight={isNight} onClose={() => switchTab('scan')} />
-              ) : null}
-            </div>
-          )}
-
-          {analysisState.status === 'analyzing' && (
-            <div className="animate-fade-in flex-1 h-full flex flex-col">
-              <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />
-            </div>
-          )}
-
-          {analysisState.status === 'error' && (
-            <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
-              <div className="w-40 h-40 md:w-52 md:h-52 bg-red-950/20 rounded-full flex items-center justify-center mb-10 border border-red-500/30 relative overflow-hidden">
-                <img src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png" alt="Chekki" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('error_title')}</h3>
-              <div className="space-y-2 mb-8 max-w-md mx-auto">
-                <p className="text-zinc-400 font-korean leading-relaxed">
-                  {translateError(analysisState.errorMessage || "")}
-                </p>
-                {analysisState.errorMessage && (analysisState.errorMessage.includes('NETWORK_ERROR') || analysisState.errorMessage.includes('ANALYSIS_FAILED') || analysisState.errorMessage.includes('UNAUTHORIZED')) && (
-                  <p className="text-[10px] text-zinc-600 font-mono break-all opacity-50">
-                    {analysisState.errorMessage}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
-                <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]">
-                  {t('btn_scan_again_simple')}
-                </button>
-                <button onClick={() => handleReset(false)} className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}>
-                  {t('btn_retake')}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {analysisState.status === 'complete' && analysisState.data && (
-            <div className="animate-fade-in-up flex flex-col flex-1 pt-4 pb-4 overflow-hidden">
-              <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
-                <div className="flex items-center gap-3 min-w-0">
-                  <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
-                    {language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "제목 없음") : (analysisState.data.worksheet_summary?.title_en || "Untitled")}
-                  </h2>
-                  {user?.plan === 'pro' && (
-                    <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest">PRO</span>
-                  )}
                 </div>
+              )}
 
-                {/* Duplicate Scan button removed here as it's now in the header for better visibility */}
-              </div>
+              {analysisState.status === 'analyzing' && (
+                <div className="animate-fade-in flex-1 h-full flex flex-col">
+                  <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />
+                </div>
+              )}
 
-              <div className="flex-1 min-h-0">
-                <SplitView
-                  imageUrl={analysisState.originalImage!}
-                  items={analysisState.data.items || []}
-                  isLoadingItems={!analysisState.isItemsLoaded}
-                  worksheetTitle={language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
-                  onScanAgain={handleScanAgain}
-                  onClose={handleScanAgain}
-                  isNight={isNight}
-                  onConfirm={(opts) => setConfirmDialog(opts)}
-                  data={analysisState.data}
-                />
-              </div>
-            </div>
+              {analysisState.status === 'error' && (
+                <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
+                  <div className="w-40 h-40 md:w-52 md:h-52 bg-red-950/20 rounded-full flex items-center justify-center mb-10 border border-red-500/30 relative overflow-hidden">
+                    <img src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png" alt="Chekki" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('error_title')}</h3>
+                  <div className="space-y-2 mb-8 max-w-md mx-auto">
+                    <p className="text-zinc-400 font-korean leading-relaxed">
+                      {translateError(analysisState.errorMessage || "")}
+                    </p>
+                    {analysisState.errorMessage && (analysisState.errorMessage.includes('NETWORK_ERROR') || analysisState.errorMessage.includes('ANALYSIS_FAILED') || analysisState.errorMessage.includes('UNAUTHORIZED')) && (
+                      <p className="text-[10px] text-zinc-600 font-mono break-all opacity-50">
+                        {analysisState.errorMessage}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
+                    <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]">
+                      {t('btn_scan_again_simple')}
+                    </button>
+                    <button onClick={() => handleReset(false)} className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}>
+                      {t('btn_retake')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {analysisState.status === 'complete' && analysisState.data && (
+                <div className="animate-fade-in-up flex flex-col pt-4 pb-4">
+                  <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
+                        {language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "제목 없음") : (analysisState.data.worksheet_summary?.title_en || "Untitled")}
+                      </h2>
+                      {user?.plan === 'pro' && (
+                        <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest">PRO</span>
+                      )}
+                    </div>
+
+                    {/* Duplicate Scan button removed here as it's now in the header for better visibility */}
+                  </div>
+
+                  <div className="w-full">
+                    <SplitView
+                      imageUrl={analysisState.originalImage!}
+                      items={analysisState.data.items || []}
+                      isLoadingItems={!analysisState.isItemsLoaded}
+                      worksheetTitle={language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
+                      onScanAgain={handleScanAgain}
+                      onClose={handleScanAgain}
+                      isNight={isNight}
+                      onConfirm={(opts) => setConfirmDialog(opts)}
+                      data={analysisState.data}
+                    />
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </main>
 
         {/* --- PROFESSIONAL BUSINESS FOOTER --- */}
-        <footer className={`w-full ${isNight ? 'bg-zinc-950/50 border-white/5' : 'bg-white border-zinc-100 shadow-[0_-20px_50px_rgba(0,0,0,0.02)]'} border-t py-12 px-6`}>
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
-                  <ChekkiMascot className="w-8 h-8 text-white" mood="happy" />
-                </div>
-                <h2 className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}>Chekki<span className="text-orange-500">AI</span></h2>
-              </div>
-              <p className="text-zinc-500 text-xs font-medium leading-relaxed max-w-sm">
-                {language === 'ko'
-                  ? "채키 AI는 부모님과 아이들의 즐거운 학습 경험을 위해 최선을 다합니다. 혁신적인 AI 기술로 숙제와 공부가 더 즐거워지는 세상을 만듭니다."
-                  : "Chekki AI is dedicated to creating joyful learning experiences for parents and children through innovative AI technology."}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <h4 className={`text-xs font-black ${isNight ? 'text-white' : 'text-zinc-900'} uppercase tracking-[0.2em]`}>{language === 'ko' ? '사업자 정보' : 'Business Info'}</h4>
-                <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-500 font-medium">
-                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '상호:' : 'Biz:'}</span> 채키 AI (Chekki AI)</p>
-                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '사업자번호:' : 'Reg No:'}</span> 814-14-03096</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <h4 className={`text-xs font-black ${isNight ? 'text-white opacity-40' : 'text-zinc-400'} uppercase tracking-[0.2em]`}>{language === 'ko' ? '고객 센터' : 'Contact Us'}</h4>
-                <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-500 font-medium font-korean">
-                  <p><span className="text-zinc-600 font-bold">{language === 'ko' ? '이메일:' : 'Email:'}</span> chekkihelp@gmail.com</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-[10px] md:text-xs text-zinc-600 font-bold uppercase tracking-widest">© 2026 CHEKKI AI. ALL RIGHTS RESERVED.</p>
-            <div className="flex gap-4 md:gap-6">
-              <button onClick={() => setStandaloneLegal('privacy')} className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Privacy</button>
-              <button onClick={() => setStandaloneLegal('terms')} className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Terms</button>
-              <button onClick={() => setStandaloneLegal('support')} className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Support</button>
-              <button onClick={() => setStandaloneLegal('refund')} className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Refund</button>
-            </div>
-          </div>
-        </footer>
+        {!isLocked && <Footer isNight={isNight} language={language} onLegalClick={(type) => setStandaloneLegal(type)} />}
 
         <BottomNav 
           activeTab={activeTab} 

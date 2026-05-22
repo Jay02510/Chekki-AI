@@ -1,0 +1,90 @@
+diff --git a/node_modules/@chuseok22/capacitor-kakao-login/.swiftpm/xcode/xcuserdata/jasonbenjamin.xcuserdatad/xcschemes/xcschememanagement.plist b/node_modules/@chuseok22/capacitor-kakao-login/.swiftpm/xcode/xcuserdata/jasonbenjamin.xcuserdatad/xcschemes/xcschememanagement.plist
+new file mode 100644
+index 0000000..504a4f9
+--- /dev/null
++++ b/node_modules/@chuseok22/capacitor-kakao-login/.swiftpm/xcode/xcuserdata/jasonbenjamin.xcuserdatad/xcschemes/xcschememanagement.plist
+@@ -0,0 +1,14 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
++<plist version="1.0">
++<dict>
++	<key>SchemeUserState</key>
++	<dict>
++		<key>Chuseok22CapacitorKakaoLogin.xcscheme_^#shared#^_</key>
++		<dict>
++			<key>orderHint</key>
++			<integer>10</integer>
++		</dict>
++	</dict>
++</dict>
++</plist>
+diff --git a/node_modules/@chuseok22/capacitor-kakao-login/android/build.gradle b/node_modules/@chuseok22/capacitor-kakao-login/android/build.gradle
+index 0281fb1..f4031c2 100644
+--- a/node_modules/@chuseok22/capacitor-kakao-login/android/build.gradle
++++ b/node_modules/@chuseok22/capacitor-kakao-login/android/build.gradle
+@@ -14,7 +14,7 @@ android {
+     buildTypes {
+         release {
+             minifyEnabled false
+-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
++            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+         }
+     }
+     lint {
+diff --git a/node_modules/@chuseok22/capacitor-kakao-login/android/src/main/java/com/capacitorkakaologin/KakaoLoginPlugin.kt b/node_modules/@chuseok22/capacitor-kakao-login/android/src/main/java/com/capacitorkakaologin/KakaoLoginPlugin.kt
+index d4569a8..c79228d 100644
+--- a/node_modules/@chuseok22/capacitor-kakao-login/android/src/main/java/com/capacitorkakaologin/KakaoLoginPlugin.kt
++++ b/node_modules/@chuseok22/capacitor-kakao-login/android/src/main/java/com/capacitorkakaologin/KakaoLoginPlugin.kt
+@@ -38,7 +38,7 @@ class KakaoLoginPlugin : Plugin() {
+         }
+ 
+         // OAuthToken 콜백 — 앱/계정 로그인 공통 처리
+-        val callback: (OAuthToken?, Throwable?) -> Unit = callback@{ _, error ->
++        val callback: (OAuthToken?, Throwable?) -> Unit = callback@{ token, error ->
+             if (error != null) {
+                 call.reject("카카오 로그인 실패: ${error.message}")
+                 return@callback
+@@ -61,6 +61,7 @@ class KakaoLoginPlugin : Plugin() {
+ 
+                 val result = JSObject()
+                 result.put("socialId", userId.toString())
++                token?.accessToken?.let          { result.put("accessToken", it) }
+                 profile?.nickname?.let           { result.put("nickname", it) }
+                 profile?.profileImageUrl?.let    { result.put("profileImageUrl", it) }
+                 profile?.thumbnailImageUrl?.let  { result.put("thumbnailImageUrl", it) }
+diff --git a/node_modules/@chuseok22/capacitor-kakao-login/dist/esm/definitions.d.ts b/node_modules/@chuseok22/capacitor-kakao-login/dist/esm/definitions.d.ts
+index 64c8c8e..51cad66 100644
+--- a/node_modules/@chuseok22/capacitor-kakao-login/dist/esm/definitions.d.ts
++++ b/node_modules/@chuseok22/capacitor-kakao-login/dist/esm/definitions.d.ts
+@@ -10,6 +10,8 @@ export interface KakaoLoginPlugin {
+ export interface KakaoLoginResult {
+     /** 카카오 회원 고유 ID. 서버에 전달하여 사용자 식별에 사용한다. */
+     socialId: string;
++    /** 카카오 Access Token. 서버에서 검증 시 사용 가능. */
++    accessToken?: string;
+     /** 닉네임. 카카오 개발자 콘솔에서 profile 동의 항목 활성화 필요. */
+     nickname?: string;
+     /** 프로필 이미지 URL. profile 동의 항목 활성화 필요. */
+diff --git a/node_modules/@chuseok22/capacitor-kakao-login/ios/Sources/Chuseok22CapacitorKakaoLogin/KakaoLoginPlugin.swift b/node_modules/@chuseok22/capacitor-kakao-login/ios/Sources/Chuseok22CapacitorKakaoLogin/KakaoLoginPlugin.swift
+index 9a29737..609812c 100644
+--- a/node_modules/@chuseok22/capacitor-kakao-login/ios/Sources/Chuseok22CapacitorKakaoLogin/KakaoLoginPlugin.swift
++++ b/node_modules/@chuseok22/capacitor-kakao-login/ios/Sources/Chuseok22CapacitorKakaoLogin/KakaoLoginPlugin.swift
+@@ -59,7 +59,7 @@ public class KakaoLoginPlugin: CAPPlugin, CAPBridgedPlugin {
+         }
+     }
+ 
+-    private func handleLoginResult(call: CAPPluginCall, oauthToken _: OAuthToken?, error: Error?) {
++    private func handleLoginResult(call: CAPPluginCall, oauthToken: OAuthToken?, error: Error?) {
+         if let error = error {
+             DispatchQueue.main.async {
+                 call.reject("카카오 로그인 실패", nil, error)
+@@ -82,6 +82,9 @@ public class KakaoLoginPlugin: CAPPlugin, CAPBridgedPlugin {
+                 let profile = account?.profile
+ 
+                 var result: [String: Any] = ["socialId": String(userId)]
++                if let token = oauthToken?.accessToken {
++                    result["accessToken"] = token
++                }
+                 if let v = profile?.nickname           { result["nickname"] = v }
+                 if let v = profile?.profileImageUrl    { result["profileImageUrl"] = v.absoluteString }
+                 if let v = profile?.thumbnailImageUrl  { result["thumbnailImageUrl"] = v.absoluteString }

@@ -11,9 +11,9 @@ import { WorksheetAnalysis, ItemType } from "./types";
 export const ASSETS = {
   // Switched back to local path for consistency with current frontend assets
   VIDEO_INTRO: `https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/chekki-intro_y7hj7c.mp4`,
-  LOGO: '/chekki-actual.png',
-  MASCOT_HAPPY: '/chekki-actual.png',
-  MASCOT_THINKING: '/chekki-actual.png',
+  LOGO: '/chekki-logo.png',
+  MASCOT_HAPPY: '/chekki-happy.png',
+  MASCOT_THINKING: '/chekki-thinking.png',
   MASCOT_SCAN: '/chekki-actual.png',
 
   HERO_IMAGE: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto,e_background_removal/v1765770525/Chekki_Futuristic_Background_i8foqe.png`,

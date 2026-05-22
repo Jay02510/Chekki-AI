@@ -8,7 +8,7 @@ import { ASSETS } from '../constants';
 import { SCREENSHOT_MODE } from '../config';
 import { FeedbackModal } from './FeedbackModal';
 import { LegalType } from '../types';
-const LegalModal = React.lazy(() => import('./LegalModal').then(module => ({ default: module.LegalModal })));
+import { LegalModal } from './LegalModal';
 import { FlyerModal } from './FlyerModal';
 import { ScreenshotCarousel } from './ScreenshotCarousel';
 import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
@@ -111,7 +111,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
   };
 
-  const VideoWalkthroughModal = () => (
+  const renderVideoWalkthroughModal = () => (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl" onClick={() => setShowVideoModal(false)}></div>
       <div className="relative w-full max-w-5xl aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up">
@@ -121,7 +121,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
     </div>
   );
 
-  const FeatureSection = () => (
+  const renderFeatureSection = () => (
     <section className="py-12 md:py-32 px-4 max-w-7xl mx-auto w-full space-y-16 md:space-y-40">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10">
         {[
@@ -266,7 +266,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
     }
   }, [isAuthenticated, checkQuestionLimit, incrementQuestion, language, askHistory, isAskAsking]);
 
-  const ClarityGuide = () => (
+  const renderClarityGuide = () => (
     <div className="grid grid-cols-3 gap-3 md:gap-8 mt-6 md:mt-12 mb-4 px-2 w-full max-w-2xl">
       {[
         { icon: '☀️', text: t('lbl_lighting'), tooltip: t('tt_lighting'), color: isNight ? 'from-orange-500/20 to-transparent' : 'from-orange-500/10 to-transparent' },
@@ -282,7 +282,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
     </div>
   );
 
-  const DropZone = ({ size = "large" }: { size?: "large" | "compact" }) => {
+  const renderDropZone = (size: "large" | "compact" = "large") => {
     const isGuestLocked = !isAuthenticated && guestUsed;
     const isLocked = isGuestLocked;
 
@@ -361,7 +361,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
                   <p className={`${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-bold font-korean text-xs md:text-2xl break-keep opacity-80 leading-relaxed`}>{t('drop_subtitle')}</p>
                 </div>
 
-                <ClarityGuide />
+                {renderClarityGuide()}
 
                 <div className="mt-4 md:mt-12 flex flex-col items-center gap-4 group/btn" title={t('btn_guest_scan')}>
                   <div className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-indigo-600' : 'bg-orange-500'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.3)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/60 border-4 border-white/20 active:scale-90`}>
@@ -391,7 +391,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
     );
   };
 
-  const FeatureBanner = () => {
+  const renderFeatureBanner = () => {
     const banners = [
       {
         id: 'feedback',
@@ -466,7 +466,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
     return (
       <div className="min-h-full pt-12 md:pt-32 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
-        {showVideoModal && <VideoWalkthroughModal />}
+        {showVideoModal && renderVideoWalkthroughModal()}
         {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} isNight={isNight} />}
         <AskChekkiAnswerModal 
           answer={askAnswer} 
@@ -526,6 +526,31 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
               </>
             )}
           </div>
+
+          {!isPro && (
+            <div 
+              onClick={() => setShowPaywall(true)}
+              className="w-full max-w-xl mx-auto mt-6 px-5 py-4 rounded-3xl bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-red-500/10 border border-orange-500/30 hover:border-orange-500/50 shadow-lg cursor-pointer transform hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-between gap-4 animate-fade-in-up"
+            >
+              <div className="flex items-center gap-3 text-left">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-pink-500 flex items-center justify-center text-xl shadow-md shadow-orange-500/20 flex-shrink-0 animate-bounce">
+                  ✨
+                </div>
+                <div>
+                  <h4 className="text-xs md:text-sm font-black text-white leading-tight font-display">
+                    {language === 'ko' ? 'Chekki PRO 7일 무료 체험' : 'Chekki PRO 7-Day Free Trial'}
+                  </h4>
+                  <p className="text-[10px] md:text-xs text-zinc-400 font-medium font-korean leading-snug mt-0.5">
+                    {language === 'ko' ? '무제한 문제 스캔 및 질문하기 기능 제공' : 'Unlock unlimited scans, questions, and all premium features.'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-[10px] md:text-xs font-black text-white shadow-md shadow-orange-500/10 transition-colors whitespace-nowrap">
+                <span>{language === 'ko' ? '무료 체험 시작' : 'Start Trial'}</span>
+                <span>→</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-4 md:gap-10 px-4">
@@ -537,8 +562,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
             language={language}
             isNight={isNight}
           />}
-          <DropZone size="large" />
-          {minimal ? null : <FeatureBanner />}
+          {renderDropZone("large")}
+          {minimal ? null : renderFeatureBanner()}
         </div>
         <p className="mt-8 text-zinc-600 text-[9px] md:text-sm font-black uppercase tracking-[0.2em] text-center opacity-60">{t('supported_formats')}</p>
       </div>
@@ -548,10 +573,8 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
   return (
     <div className="min-h-full flex flex-col pt-12 md:pt-32 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
-      <React.Suspense fallback={null}>
-        {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} isNight={isNight} />}
-      </React.Suspense>
-      {showVideoModal && <VideoWalkthroughModal />}
+      {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} isNight={isNight} />}
+      {showVideoModal && renderVideoWalkthroughModal()}
       {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} isNight={isNight} />}
       <AskChekkiAnswerModal 
         answer={askAnswer} 
@@ -567,9 +590,28 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
       />
 
       <div className="relative w-full max-w-7xl mx-auto px-4 md:px-6 flex flex-col items-center mb-6 md:mb-12 mt-8 md:mt-16">
-        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-full md:w-[1000px] h-[500px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[60px] md:blur-[180px] -z-10 pointer-events-none opacity-20 mix-blend-screen`}></div>
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[500px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[60px] md:blur-[180px] -z-10 pointer-events-none opacity-20 mix-blend-screen`}></div>
 
         <div className="text-center w-full max-w-4xl">
+          {/* Premium 7-Day Free Trial Banner */}
+          <div 
+            onClick={openLoginModal}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full mb-6 cursor-pointer transform hover:scale-[1.02] active:scale-95 transition-all duration-300 border ${
+              isNight 
+                ? 'bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-red-500/10 border-orange-500/20 hover:border-orange-500/40 shadow-lg shadow-orange-500/5' 
+                : 'bg-gradient-to-r from-orange-500/5 via-pink-500/5 to-red-500/5 border-orange-500/15 hover:border-orange-500/35 shadow-sm'
+            }`}
+          >
+            <span className="text-[10px] md:text-xs animate-pulse">🎁</span>
+            <span className={`text-[9px] md:text-xs font-black uppercase tracking-wider ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
+              {language === 'ko' ? '7일 무료 체험 지금 시작하세요' : 'Start your 7-Day Free Trial now'}
+            </span>
+            <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-[8px] md:text-[9px] font-black text-white shadow-md shadow-orange-500/10">
+              <span>{language === 'ko' ? '자세히 보기' : 'Try Free'}</span>
+              <span>→</span>
+            </div>
+          </div>
+
           <h1 className={`text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2 md:mb-6 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.05] break-keep`}>
             {isNight ? (
               <span className={`text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600`}>{t('hero_title_night')}</span>
@@ -588,7 +630,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
       </div>
 
       <div className="w-full max-w-4xl mx-auto px-4">
-        <DropZone size="large" />
+        {renderDropZone("large")}
       </div>
 
 
@@ -634,7 +676,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
                 <h4 className="text-lg md:text-2xl font-black text-blue-500 uppercase tracking-tight flex items-center gap-3">
                   <span>📚</span> Parent Resources
                 </h4>
-                <FeatureSection />
+                {renderFeatureSection()}
               </div>
             </div>
             

@@ -9,7 +9,7 @@ import { Capacitor } from '@capacitor/core';
  */
 const RC_CONFIG = {
     apple: 'appl_RujbhRRnyckJEVHpaebeBxtSoTw', // Official Public SDK Key
-    google: 'goog_placeholder_key', 
+    google: 'goog_wMcgsVNAtqtCDqtEQqzkFxlcofv', // Official Public SDK Key (Play Store)
 };
 
 export const revenueCatService = {

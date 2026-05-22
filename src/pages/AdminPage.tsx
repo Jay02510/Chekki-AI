@@ -18,8 +18,31 @@ export default function AdminPage() {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('1_month');
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'create' | 'upgrade'>('create');
+  const [mode, setMode] = useState<'create' | 'upgrade' | 'view_members'>('create');
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [users, setUsers] = useState<any[]>([]);
+
+  const handleFetchUsers = async () => {
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch users');
+      }
+      setUsers(data.users || []);
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error fetching users', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,39 +78,39 @@ export default function AdminPage() {
         throw authErr;
       }
 
-      // 2. Provision Pro Profile directly
-      let nextBillingDateStr: string | null = null;
-      if (duration === '1_month') {
-        const d = new Date();
-        d.setMonth(d.getMonth() + 1);
-        nextBillingDateStr = d.toISOString();
-      } else if (duration === '1_year') {
-        const d = new Date();
-        d.setFullYear(d.getFullYear() + 1);
-        nextBillingDateStr = d.toISOString();
-      } else if (duration === 'lifetime') {
-        const d = new Date();
-        d.setFullYear(d.getFullYear() + 100); // 100 years for lifetime
-        nextBillingDateStr = d.toISOString();
-      }
-
+      // 2. Provision Free Profile first to satisfy Firestore rules
       const profile: any = {
         name,
         email: cleanEmail,
-        plan: 'pro',
+        plan: 'free',
         scansUsedToday: 0,
         lastScanDate: new Date().toISOString().split('T')[0],
-        maxScansPerDay: 9999,
-        subscriptionStartedAt: new Date().toISOString(),
-        nextBillingDate: nextBillingDateStr,
-        subscriptionPlatform: 'web', // Explicitly set for admin-created users
+        maxScansPerDay: 3,
+        maxQuestionsPerDay: 5,
         uid,
       };
 
       await setDoc(doc(dbInstance, "users", uid), profile);
 
-      // 3. Immediately log out so admin session isn't replaced by the new user
-      // We do this after the setDoc to ensure the token is still valid if needed
+      // 3. Immediately call the serverless admin-upgrade endpoint to elevate to Pro
+      const response = await fetch('/api/admin-upgrade', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          passcode,
+          email: cleanEmail,
+          duration
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'User created as FREE, but failed to elevate to PRO. Please use the Upgrade tab.');
+      }
+
+      // 4. Immediately log out so admin session isn't replaced by the new user
       await signOut(auth);
 
       setMessage({ text: '✅ Pro User Created Successfully!', type: 'success' });
@@ -110,38 +133,23 @@ export default function AdminPage() {
     try {
       const cleanEmail = email.toLowerCase().trim();
       
-      const q = query(collection(dbInstance, 'users'), where('email', '==', cleanEmail));
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        throw new Error('User not found. Please check the email address.');
-      }
-      
-      const userDoc = querySnapshot.docs[0];
-      const uid = userDoc.id;
-
-      let nextBillingDateStr: string | null = null;
-      if (duration === '1_month') {
-        const d = new Date();
-        d.setMonth(d.getMonth() + 1);
-        nextBillingDateStr = d.toISOString();
-      } else if (duration === '1_year') {
-        const d = new Date();
-        d.setFullYear(d.getFullYear() + 1);
-        nextBillingDateStr = d.toISOString();
-      } else if (duration === 'lifetime') {
-        const d = new Date();
-        d.setFullYear(d.getFullYear() + 100);
-        nextBillingDateStr = d.toISOString();
-      }
-
-      await updateDoc(doc(dbInstance, 'users', uid), {
-        plan: 'pro',
-        maxScansPerDay: 9999,
-        subscriptionStartedAt: new Date().toISOString(),
-        nextBillingDate: nextBillingDateStr,
-        subscriptionPlatform: 'admin_upgrade'
+      const response = await fetch('/api/admin-upgrade', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          passcode,
+          email: cleanEmail,
+          duration
+        })
       });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upgrade user');
+      }
 
       setMessage({ text: '✅ User Upgraded Successfully!', type: 'success' });
       setEmail('');
@@ -155,7 +163,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-white font-sans">
-      <div className="w-full max-w-md bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+      <div className={`w-full bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-300 ${mode === 'view_members' && isAuthorized ? 'max-w-4xl' : 'max-w-md'}`}>
         {/* Glow effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
         
@@ -224,8 +232,53 @@ export default function AdminPage() {
               >
                 Upgrade Existing
               </button>
+              <button
+                type="button"
+                onClick={() => { setMode('view_members'); setMessage({ text: '', type: '' }); handleFetchUsers(); }}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'view_members' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+              >
+                View Members
+              </button>
             </div>
 
+            {mode === 'view_members' ? (
+              <div className="w-full overflow-x-auto mt-4">
+                {loading ? (
+                  <div className="flex justify-center p-8 text-zinc-500 font-bold tracking-widest animate-pulse">LOADING MEMBERS...</div>
+                ) : (
+                  <table className="w-full text-left text-sm whitespace-nowrap">
+                    <thead>
+                      <tr className="border-b border-zinc-800 text-zinc-400">
+                        <th className="py-3 px-4 font-bold">Name</th>
+                        <th className="py-3 px-4 font-bold">Email</th>
+                        <th className="py-3 px-4 font-bold">Plan</th>
+                        <th className="py-3 px-4 font-bold">Started At</th>
+                        <th className="py-3 px-4 font-bold">Billing Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800/50">
+                      {users.length === 0 ? (
+                        <tr><td colSpan={5} className="py-8 text-center text-zinc-500">No members found.</td></tr>
+                      ) : (
+                        users.map((user) => (
+                          <tr key={user.uid} className="hover:bg-zinc-800/30 transition-colors">
+                            <td className="py-3 px-4 text-white font-medium">{user.name}</td>
+                            <td className="py-3 px-4 text-zinc-400">{user.email}</td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${user.plan === 'pro' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-zinc-800 text-zinc-400'}`}>
+                                {user.plan || 'FREE'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-zinc-500">{user.subscriptionStartedAt ? new Date(user.subscriptionStartedAt).toLocaleDateString() : '-'}</td>
+                            <td className="py-3 px-4 text-zinc-500">{user.nextBillingDate ? new Date(user.nextBillingDate).toLocaleDateString() : '-'}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            ) : (
             <form onSubmit={mode === 'create' ? handleCreateProUser : handleUpgradeUser} className="space-y-4">
               {mode === 'create' && (
                 <div>
@@ -306,6 +359,7 @@ export default function AdminPage() {
                 {loading ? 'Processing...' : (mode === 'create' ? 'Create Pro Account' : 'Upgrade Existing Account')}
               </button>
             </form>
+            )}
           </div>
         )}
       </div>

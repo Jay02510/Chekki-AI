@@ -128,9 +128,17 @@ async function handleNotification(type: string, subtype: string, data: any) {
         });
 
         if (status === 'active') {
-            await adminDb.collection('users').doc(finalUserId).update({ plan: 'pro', maxScansPerDay: 9999 });
+            await adminDb.collection('users').doc(finalUserId).update({
+                plan: 'pro',
+                maxScansPerDay: 9999,
+                maxQuestionsPerDay: 9999,
+            });
         } else if (status === 'expired' || status === 'cancelled') {
-            await adminDb.collection('users').doc(finalUserId).update({ plan: 'free', maxScansPerDay: 3 });
+            await adminDb.collection('users').doc(finalUserId).update({
+                plan: 'free',
+                maxScansPerDay: 3,
+                maxQuestionsPerDay: 5,
+            });
         }
     }
 }

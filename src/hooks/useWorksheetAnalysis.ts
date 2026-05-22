@@ -140,7 +140,7 @@ export const useWorksheetAnalysis = () => {
             });
             return false;
         }
-    }, [isAuthenticated, checkScanLimit, openLoginModal, incrementScan, setShowPaywall, user?.plan, language]);
+    }, [isAuthenticated, checkScanLimit, openLoginModal, incrementScan, setShowPaywall, user?.uid, user?.plan, user?.childAge, user?.childEnglishLevel, user?.parentEnglishLevel, language]);
 
     const handleScanAgain = useCallback(() => {
         if (lastImageData) handleImageSelected(lastImageData);

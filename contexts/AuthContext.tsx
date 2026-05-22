@@ -15,10 +15,14 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithCredential,
+  signInWithCustomToken,
   type User
 } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { KakaoLogin } from '@chuseok22/capacitor-kakao-login';
+import { InAppReview } from '@capacitor-community/in-app-review';
 
 // --- Nonce helpers for Apple Sign-In ---
 // Apple requires a cryptographically random nonce. The SHA-256 hash is sent
@@ -40,7 +44,14 @@ const sha256 = async (plain: string): Promise<string> => {
 };
 import { subscriptionService, AppleProducts } from '../services/subscriptionService';
 import { revenueCatService } from '../services/revenueCatService';
-import { PUBLIC_APP_URL } from '../config';
+import { PUBLIC_APP_URL, API_BASE_URL } from '../config';
+
+const withTimeout = <T,>(promise: Promise<T>, ms: number, timeoutMsg: string): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(timeoutMsg)), ms))
+  ]);
+};
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -50,6 +61,7 @@ interface AuthContextType {
   signIn: (email: string, pass: string) => Promise<void>;
   signInWithApple: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithKakao: () => Promise<void>;
   sendResetEmail: (email: string) => Promise<void>;
   logout: () => void;
   updateProfile: (name: string) => Promise<void>;
@@ -86,6 +98,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [showLoginModal, setShowLoginModal] = useState(false);
   // Flag to prevent onAuthStateChanged from wiping the profile during signup
   const isSigningUpRef = React.useRef(false);
+  const googleAuthInitializedRef = React.useRef(false);
+
+  useEffect(() => {
+    if (Capacitor.isNativePlatform() && !googleAuthInitializedRef.current) {
+      GoogleAuth.initialize()
+        .then(() => {
+          googleAuthInitializedRef.current = true;
+        })
+        .catch((err) => {
+          console.error("[AuthContext] Google Auth Initialization Error:", err);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -94,13 +119,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Identify in RevenueCat
         revenueCatService.identify(user.uid);
 
-        const profile = await db.getUser(user.uid);
+        let profile: UserProfile | null = null;
+        try {
+          profile = await db.getUser(user.uid);
+        } catch (e) {
+          console.error("[AuthContext] Failed to load user profile:", e);
+          setIsLoading(false);
+          return;
+        }
+
         let finalProfile = profile;
         let hasActiveAppStoreSub = false;
 
         // --- Unified subscription check via backend ---
         try {
-          const idToken = await user.getIdToken();
+          const idToken = await withTimeout(user.getIdToken(), 5000, 'getIdToken timeout');
 
           // Race the subscription check against a 10s timeout to prevent hangs on simulator
           const subCheckTimeout = new Promise<SubscriptionRecord | null>((resolve) => setTimeout(() => resolve(null), 10000));
@@ -118,13 +151,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (profile) {
               if (isSubActive && profile.plan !== 'pro') {
                 finalProfile = { ...profile, plan: 'pro', maxScansPerDay: 9999, maxQuestionsPerDay: 9999, subscriptionPlatform: subRecord.subscription_platform };
-                await updateDoc(doc(dbInstance, 'users', user.uid), {
-                  plan: 'pro',
-                  maxScansPerDay: 9999,
-                  maxQuestionsPerDay: 9999
-                });
               } else if (!isSubActive && profile.plan === 'pro' && subRecord.subscription_status === 'expired') {
-                // Subscription expired — show renewal prompt
+                finalProfile = { ...profile, plan: 'free', maxScansPerDay: FREE_DAILY_LIMIT, maxQuestionsPerDay: 5, subscriptionPlatform: subRecord.subscription_platform };
                 setShowPaywall(true);
               }
               if (subRecord.subscription_platform !== 'none') {
@@ -135,21 +163,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // If subRecord is null (timeout), we continue with the existing profile — no crash
         } catch {
           // Subscription check failed — fallback to existing profile state
-        }
-
-        // --- Manual Expiration Check (Admin Provisioned) ---
-        if (finalProfile?.plan === 'pro' && finalProfile.nextBillingDate) {
-          const expirationMs = new Date(finalProfile.nextBillingDate).getTime();
-          const nowMs = Date.now();
-
-          if (nowMs > expirationMs && !hasActiveAppStoreSub) {
-            finalProfile = { ...finalProfile, plan: 'free', maxScansPerDay: FREE_DAILY_LIMIT };
-            await updateDoc(doc(dbInstance, 'users', user.uid), {
-              plan: 'free',
-              maxScansPerDay: FREE_DAILY_LIMIT
-            });
-            setShowPaywall(true);
-          }
         }
 
         // --- Demo Account Override ---
@@ -203,12 +216,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // --- GUEST AUTH: Ensure every session has a token ---
         try {
-          await signInAnonymously(auth);
+          await withTimeout(signInAnonymously(auth), 5000, 'signInAnonymously timeout');
           // onAuthStateChanged will fire again with the new anon user — return here
           // so we don't call setIsLoading(false) twice.
           return;
         } catch (err) {
-          console.error("[AuthContext] Anonymous sign-in failed:", err);
+          console.error("[AuthContext] Anonymous sign-in failed or timed out:", err);
         }
       }
       setIsLoading(false);
@@ -223,47 +236,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const cleanPass = pass.trim();
       const res = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPass);
 
-      let plan: 'free' | 'pro' = 'free';
-      let maxScans = FREE_DAILY_LIMIT;
-      let schoolId: string | null = null;
-      let schoolName: string | null = null;
-      const subscriptionStartedAt: string | null = null;
-      const nextBillingDate: string | null = null;
-
-      if (code) {
-        const sanitized = code.toUpperCase().trim();
-        const schools: Record<string, string> = {
-          'POLY10': 'Poly Academy Seocho',
-          'GATE05': 'GATE Academy Bundang',
-          'ECC99': 'YBM ECC Gangnam'
-        };
-
-        if (schools[sanitized]) {
-          plan = 'pro';
-          maxScans = 9999;
-          schoolId = sanitized;
-          schoolName = schools[sanitized];
-        }
-      }
-
       const newProfile: UserProfile = {
         name,
         email: email.toLowerCase().trim(),
-        plan,
+        plan: 'free',
         scansUsedToday: 0,
         lastScanDate: new Date().toISOString().split('T')[0],
-        maxScansPerDay: maxScans,
+        maxScansPerDay: FREE_DAILY_LIMIT,
         questionsUsedToday: 0,
-        maxQuestionsPerDay: plan === 'pro' ? 9999 : 5,
+        maxQuestionsPerDay: 5,
         lastQuestionDate: new Date().toISOString().split('T')[0],
-        schoolId,
-        schoolName,
-        subscriptionStartedAt,
-        nextBillingDate
+        schoolId: null,
+        schoolName: null,
+        subscriptionStartedAt: null,
+        nextBillingDate: null
       };
 
       await db.createUser(res.user.uid, newProfile);
       setUserProfile(newProfile);
+
+      if (code) {
+        try {
+          const idToken = await res.user.getIdToken();
+          const redeemRes = await fetch(`${API_BASE_URL}/api/redeem-school-code`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify({ schoolCode: code })
+          });
+          if (redeemRes.ok) {
+            const data = await redeemRes.json();
+            if (data.success) {
+              const updatedProfile: UserProfile = {
+                ...newProfile,
+                plan: 'pro',
+                maxScansPerDay: 9999,
+                maxQuestionsPerDay: 9999,
+                schoolId: code.toUpperCase().trim(),
+                schoolName: data.schoolName,
+                subscriptionPlatform: 'school_code'
+              };
+              setUserProfile(updatedProfile);
+            }
+          } else {
+            console.error('Failed to redeem school code during signup');
+          }
+        } catch (redeemErr) {
+          console.error('Error redeeming school code during signup:', redeemErr);
+        }
+      }
+
       setShowLoginModal(false);
     } catch (err: any) {
       console.error('Signup error details:', err);
@@ -408,6 +432,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isSigningUpRef.current = true;
       const provider = new GoogleAuthProvider();
       
+      if (Capacitor.isNativePlatform()) {
+        try {
+          if (!googleAuthInitializedRef.current) {
+            await GoogleAuth.initialize();
+            googleAuthInitializedRef.current = true;
+          }
+          const googleUser = await GoogleAuth.signIn();
+          if (googleUser && googleUser.authentication && googleUser.authentication.idToken) {
+            const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+            const result = await signInWithCredential(auth, credential);
+            
+            if (result.user) {
+              const existingProfile = await db.getUser(result.user.uid);
+              if (!existingProfile) {
+                const newProfile: UserProfile = {
+                  name: googleUser.name || result.user.displayName || 'User',
+                  email: googleUser.email || result.user.email || '',
+                  plan: 'free',
+                  scansUsedToday: 0,
+                  lastScanDate: new Date().toISOString().split('T')[0],
+                  maxScansPerDay: FREE_DAILY_LIMIT,
+                  questionsUsedToday: 0,
+                  maxQuestionsPerDay: 5,
+                  lastQuestionDate: new Date().toISOString().split('T')[0],
+                  schoolId: null,
+                  schoolName: null,
+                  subscriptionStartedAt: null,
+                  nextBillingDate: null
+                };
+                await db.createUser(result.user.uid, newProfile);
+              }
+            }
+            setShowLoginModal(false);
+            return;
+          }
+        } catch (e: any) {
+          console.error('Native Google Auth Error:', e);
+          const errorMsg = e.message || (typeof e === 'string' ? e : JSON.stringify(e));
+          if (errorMsg && (errorMsg.toLowerCase().includes('cancel') || errorMsg.includes('12501') || errorMsg.includes('cancelsignin'))) return;
+          throw new Error(`Native Google Sign-In failed: ${errorMsg}`);
+        }
+      }
+
       // Add custom parameters to ensure a fresh login experience
       provider.setCustomParameters({
         prompt: 'select_account'
@@ -446,6 +513,95 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Login interrupted. Please try again or use email login.");
       }
       throw err;
+    } finally {
+      isSigningUpRef.current = false;
+    }
+  };
+
+  const signInWithKakao = async () => {
+    try {
+      isSigningUpRef.current = true;
+      
+      if (!Capacitor.isNativePlatform()) {
+        throw new Error("Kakao login is only supported on Android and iOS devices.");
+      }
+
+      const kakaoUser = await KakaoLogin.login();
+      if (!kakaoUser.accessToken) {
+        throw new Error("Failed to retrieve access token from Kakao login.");
+      }
+
+      // Exchange Kakao Access Token for Firebase Custom Token
+      const response = await fetch(`${API_BASE_URL}/api/kakao-auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken: kakaoUser.accessToken }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to authenticate with Kakao on the server.");
+      }
+
+      const { customToken } = await response.json();
+
+      // Sign in to Firebase with the Custom Token
+      const result = await signInWithCustomToken(auth, customToken);
+
+      if (result.user) {
+        const existingProfile = await db.getUser(result.user.uid);
+        if (!existingProfile) {
+          const newProfile: UserProfile = {
+            name: kakaoUser.nickname || result.user.displayName || 'Kakao User',
+            email: kakaoUser.email || result.user.email || '',
+            plan: 'free',
+            scansUsedToday: 0,
+            lastScanDate: new Date().toISOString().split('T')[0],
+            maxScansPerDay: FREE_DAILY_LIMIT,
+            questionsUsedToday: 0,
+            maxQuestionsPerDay: 5,
+            lastQuestionDate: new Date().toISOString().split('T')[0],
+            schoolId: null,
+            schoolName: null,
+            subscriptionStartedAt: null,
+            nextBillingDate: null
+          };
+          await db.createUser(result.user.uid, newProfile);
+        }
+      }
+
+      setShowLoginModal(false);
+    } catch (err: any) {
+      // Capacitor plugin rejects with message="카카오 로그인 실패" and the real
+      // native SDK error in err.data or err.errorMessage. Surface the real cause.
+      const nativeDetail =
+        err?.data?.localizedDescription ||
+        err?.data?.debugDescription ||
+        err?.errorMessage ||
+        err?.data?.message ||
+        err?.data ||
+        '';
+
+      const wrapperMsg = err?.message || (typeof err === 'string' ? err : '');
+      const fullMsg = nativeDetail
+        ? `${wrapperMsg} (${typeof nativeDetail === 'string' ? nativeDetail : JSON.stringify(nativeDetail)})`
+        : wrapperMsg;
+
+      console.error('[Kakao Sign-In] Error:', err);
+      console.error('[Kakao Sign-In] Native detail:', nativeDetail);
+      console.error('[Kakao Sign-In] Full message:', fullMsg);
+
+      // Silently swallow user-cancellations
+      if (fullMsg.toLowerCase().includes('cancel') ||
+          fullMsg.includes('12501') ||
+          fullMsg.toLowerCase().includes('cancelsignin') ||
+          fullMsg.toLowerCase().includes('user cancelled')) {
+        return;
+      }
+
+      throw new Error(`Kakao Sign-In failed: ${fullMsg}`);
     } finally {
       isSigningUpRef.current = false;
     }
@@ -537,6 +693,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         scansUsedToday: isNewDay ? 1 : prev.scansUsedToday + 1,
         lastScanDate: today
       } : null);
+      
+      try {
+        const scansCount = parseInt(localStorage.getItem('chekki_total_scans') || '0') + 1;
+        localStorage.setItem('chekki_total_scans', scansCount.toString());
+        if (scansCount === 3 || scansCount === 10) {
+          if (Capacitor.isNativePlatform()) {
+            await InAppReview.requestReview();
+          }
+        }
+      } catch (reviewErr) {
+        console.error('InAppReview error:', reviewErr);
+      }
+      
       return true;
     } catch (e) {
       return false;
@@ -600,25 +769,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const joinSchool = async (schoolCode: string): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return false;
 
-    const sanitized = schoolCode.toUpperCase().trim();
-    const schools: Record<string, string> = {
-      'POLY10': 'Poly Academy Seocho',
-      'GATE05': 'GATE Academy Bundang',
-      'ECC99': 'YBM ECC Gangnam'
-    };
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      const response = await fetch(`${PUBLIC_APP_URL}/api/redeem-school-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ schoolCode })
+      });
 
-    if (schools[sanitized]) {
-      const updates: Partial<UserProfile> = {
-        schoolId: sanitized,
-        schoolName: schools[sanitized],
-        plan: 'pro',
-        maxScansPerDay: 9999
-      };
-      setUserProfile({ ...userProfile, ...updates });
-      await db.updateUser(firebaseUser.uid, updates);
-      return true;
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const updates: Partial<UserProfile> = {
+            schoolId: schoolCode.toUpperCase().trim(),
+            schoolName: data.schoolName,
+            plan: 'pro',
+            maxScansPerDay: 9999,
+            maxQuestionsPerDay: 9999,
+            subscriptionPlatform: 'school_code'
+          };
+          setUserProfile({ ...userProfile, ...updates });
+          return true;
+        }
+      }
+      return false;
+    } catch (err) {
+      console.error('joinSchool error:', err);
+      return false;
     }
-    return false;
   };
 
   const upgradeToPro = async (code?: string): Promise<boolean> => {
@@ -643,7 +824,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUserProfile({ ...userProfile, ...updates });
-    await db.updateUser(firebaseUser.uid, updates);
     setShowPaywall(false);
     return true;
   };
@@ -693,6 +873,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signIn,
       signInWithApple,
       signInWithGoogle,
+      signInWithKakao,
       sendResetEmail,
       logout,
       updateProfile,

@@ -481,7 +481,8 @@ If the question is off-topic (politics, entertainment, personal advice), politel
       let currentModel = 'gemini-2.5-flash'; // Verified working stable model
       
       if (useThinking && realUserPlan === 'pro') {
-        currentModel = 'gemini-2.5-flash'; // Maintaining consistency 
+        currentModel = 'gemini-2.5-pro';
+        configOpts.thinkingConfig = { thinkingBudget: 20000 };
       }
 
       return ai.models.generateContent({

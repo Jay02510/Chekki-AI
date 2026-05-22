@@ -138,6 +138,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             await adminDb.collection('users').doc(user_id).update({
                 plan: 'pro',
                 maxScansPerDay: 9999,
+                maxQuestionsPerDay: 9999,
             });
         }
 

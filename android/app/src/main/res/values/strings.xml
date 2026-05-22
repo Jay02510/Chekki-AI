@@ -4,4 +4,5 @@
     <string name="title_activity_main">Chekki AI</string>
     <string name="package_name">com.chekkiai.app</string>
     <string name="custom_url_scheme">com.chekkiai.app</string>
+    <string name="server_client_id">123535525914-q2esntlljtd0asrqcd4h2tpto9i0qfmp.apps.googleusercontent.com</string>
 </resources>

@@ -57,7 +57,7 @@ export interface UserProfile {
 
 // --- Subscription System ---
 export type SubscriptionStatus = 'active' | 'expired' | 'none' | 'cancelled';
-export type SubscriptionPlatform = 'apple' | 'google' | 'web' | 'none';
+export type SubscriptionPlatform = 'apple' | 'google' | 'android' | 'web' | 'school_code' | 'admin_upgrade' | 'none';
 
 export interface SubscriptionRecord {
   user_id: string;

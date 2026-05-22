@@ -88,6 +88,13 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history, isAsking]);
 
+  // Reset confirmation state when a new question starts
+  useEffect(() => {
+    if (isAsking) {
+      setShowConfirmClose(false);
+    }
+  }, [isAsking]);
+
   const handleSave = async () => {
     if (!chatContainerRef.current) return false;
     setIsSaving(true);
@@ -147,7 +154,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
           <div className="flex items-center gap-4">
             <span className="text-2xl shrink-0">{isAsking ? '💭' : '🙋‍♂️'}</span>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] text-orange-400 font-black uppercase tracking-widest">
+              <p className="text-[10px] text-orange-400 font-black uppercase tracking-wide leading-normal">
                 {language === 'ko' ? '채키 AI 튜터' : 'Chekki AI Tutor'}
               </p>
               <p className={`${isNight ? 'text-white' : 'text-zinc-900'} text-xs font-semibold font-korean mt-0.5 opacity-60 leading-snug break-words pr-4`}>
@@ -190,7 +197,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                     if (success) onClose(); 
                   }}
                   disabled={isSaving}
-                  className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center`}
+                  className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black text-xs uppercase tracking-wide shadow-xl active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center`}
                 >
                   {isSaving ? (
                     <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -201,14 +208,14 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                 <button
                   onClick={onClose}
                   disabled={isSaving}
-                  className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border border-red-500/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-2xl font-black text-xs uppercase tracking-wide border border-red-500/20 active:scale-95 transition-all disabled:opacity-50"
                 >
                   {language === 'ko' ? '저장하지 않고 종료' : 'Close Anyway'}
                 </button>
                 <button
                   onClick={() => setShowConfirmClose(false)}
                   disabled={isSaving}
-                  className="w-full text-zinc-500 py-2 font-bold text-xs uppercase tracking-widest hover:text-white transition-colors disabled:opacity-50"
+                  className="w-full text-zinc-500 py-2 font-bold text-xs uppercase tracking-wide hover:text-white transition-colors disabled:opacity-50"
                 >
                   {language === 'ko' ? '취소' : 'Cancel'}
                 </button>
@@ -311,7 +318,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className={`w-full mt-3 py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all active:scale-95 border ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'} disabled:opacity-50`}
+              className={`w-full mt-3 py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wide transition-all active:scale-95 border ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'} disabled:opacity-50`}
             >
               {isSaving ? (
                 <div className="w-4 h-4 border-2 border-zinc-500/20 border-t-zinc-500 rounded-full animate-spin" />
@@ -329,7 +336,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
           <div className={`px-6 pb-6 pt-3 border-t ${isNight ? 'border-white/5 bg-zinc-950/50' : 'border-zinc-100 bg-zinc-50/50'} shrink-0`}>
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-[10px] text-orange-400 font-black uppercase tracking-widest mb-0.5">{language === 'ko' ? '도움이 되셨나요?' : 'Was this helpful?'}</p>
+                <p className="text-[10px] text-orange-400 font-black uppercase tracking-wide mb-0.5">{language === 'ko' ? '도움이 되셨나요?' : 'Was this helpful?'}</p>
                 <p className="text-[10px] text-zinc-500 font-korean truncate">
                   {language === 'ko' ? '무료 로그인하고 대화를 이어가세요!' : 'Login to ask follow-ups & get deeper answers!'}
                 </p>

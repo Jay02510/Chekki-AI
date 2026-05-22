@@ -9,8 +9,45 @@
     <title>Chekki AI - Your Homework Helper</title>
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_dropshadow:azimuth_220;elevation_60;spread_20/f_png,e_improve,e_sharpen/v1765769939/chekki-logo_q5xeux.png" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nunito:wght@400;600;700;800&family=Patrick+Hand&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" as="video" href="https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/chekki-intro_y7hj7c.mp4" type="video/mp4" />
   </head>
   <body class="bg-[#050505] text-zinc-100 antialiased selection:bg-brand-orange selection:text-white overscroll-none">
+    <script>
+      window.onerror = function(message, source, lineno, colno, error) {
+        var errDiv = document.createElement('div');
+        errDiv.style.position = 'fixed';
+        errDiv.style.top = '0';
+        errDiv.style.left = '0';
+        errDiv.style.width = '100vw';
+        errDiv.style.height = '100vh';
+        errDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
+        errDiv.style.color = 'white';
+        errDiv.style.zIndex = '999999';
+        errDiv.style.padding = '20px';
+        errDiv.style.overflow = 'auto';
+        errDiv.style.fontFamily = 'monospace';
+        errDiv.style.fontSize = '12px';
+        errDiv.innerHTML = '<h3>Global Error Caught</h3><p><b>Message:</b> ' + message + '</p><p><b>Source:</b> ' + source + ':' + lineno + ':' + colno + '</p><pre>' + (error && error.stack ? error.stack : '') + '</pre>';
+        document.body.appendChild(errDiv);
+      };
+      window.onunhandledrejection = function(event) {
+        var errDiv = document.createElement('div');
+        errDiv.style.position = 'fixed';
+        errDiv.style.top = '0';
+        errDiv.style.left = '0';
+        errDiv.style.width = '100vw';
+        errDiv.style.height = '100vh';
+        errDiv.style.backgroundColor = 'rgba(150, 0, 0, 0.9)';
+        errDiv.style.color = 'white';
+        errDiv.style.zIndex = '999999';
+        errDiv.style.padding = '20px';
+        errDiv.style.overflow = 'auto';
+        errDiv.style.fontFamily = 'monospace';
+        errDiv.style.fontSize = '12px';
+        errDiv.innerHTML = '<h3>Unhandled Promise Rejection</h3><p><b>Reason:</b> ' + (event.reason && event.reason.message ? event.reason.message : event.reason) + '</p><pre>' + (event.reason && event.reason.stack ? event.reason.stack : '') + '</pre>';
+        document.body.appendChild(errDiv);
+      };
+    </script>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

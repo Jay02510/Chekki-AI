@@ -37,7 +37,7 @@ export const InlineFeedback: React.FC = () => {
       <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] p-8 text-center animate-fade-in">
         <span className="text-4xl block mb-2">💖</span>
         <h4 className="text-white font-black text-lg font-korean">{t('fb_success')}</h4>
-        <p className="text-emerald-400/60 text-[10px] font-bold uppercase tracking-widest mt-1">Benjamin has been notified!</p>
+        <p className="text-emerald-400/60 text-[10px] font-bold uppercase tracking-wide mt-1">Benjamin has been notified!</p>
       </div>
     );
   }

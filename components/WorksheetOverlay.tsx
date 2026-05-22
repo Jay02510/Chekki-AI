@@ -49,11 +49,17 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     if (!containerRef.current) return;
     e.stopPropagation();
     
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    // Use currentTarget to ensure we capture on the bubble container even if a child is touched
+    const target = e.currentTarget as HTMLElement;
+    target.setPointerCapture(e.pointerId);
+
     const rect = containerRef.current.getBoundingClientRect();
     const box = item.bounding_box;
-    const currentTop = item.custom_coords ? item.custom_coords.top : (box!.ymin / 1000) * 100;
-    const currentLeft = item.custom_coords ? item.custom_coords.left : (box!.xmin / 1000) * 100;
+
+    // Use the same coordinate logic as getStyle to prevent jumping on grab
+    const currentTop = item.custom_coords ? item.custom_coords.top : ((box!.ymin + box!.ymax) / 2000) * 100;
+    const currentLeft = item.custom_coords ? item.custom_coords.left : ((box!.xmin + box!.xmax) / 2000) * 100;
+
     const bubblePxX = (currentLeft / 100) * rect.width;
     const bubblePxY = (currentTop / 100) * rect.height;
     
@@ -85,7 +91,11 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (draggingId !== null) {
-        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+        try {
+          (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+        } catch (err) {
+          // Ignore if pointer capture was already lost
+        }
         setDraggingId(null);
         if ('vibrate' in navigator) navigator.vibrate(10);
     }
@@ -138,12 +148,12 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
       ref={containerRef}
       onPointerMove={handlePointerMove}
       onContextMenu={(e) => e.preventDefault()}
-      onClick={() => setIsFullscreen(!inFullscreen)}
-      className={`group relative transform-gpu transition-all duration-500 ease-in-out flex items-center justify-center select-none cursor-pointer ${
+      className={`group relative transform-gpu transition-all duration-500 ease-in-out flex items-center justify-center select-none ${
         inFullscreen 
           ? viewMode === 'fit' ? 'h-full w-full' : 'w-full max-w-5xl mx-auto' 
-          : 'w-full min-h-[300px] h-full'
+          : 'w-full min-h-[300px] h-auto'
       }`}
+      style={{ touchAction: (inFullscreen || draggingId !== null) ? 'none' : 'pan-y' }}
     >
       {/* Simplified background to prevent 'double image' glitch from failed blurs on mobile */}
       <div className={`absolute inset-0 overflow-hidden pointer-events-none opacity-20 ${isNight ? 'bg-zinc-800' : 'bg-zinc-200'}`}>
@@ -183,6 +193,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
               className={`absolute pointer-events-auto transform-gpu animate-fade-in ${isFocused ? 'opacity-100' : 'opacity-20 blur-[2px]'}`}
               onPointerDown={(e) => handlePointerDown(e, item)}
               onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
               onClick={(e) => e.stopPropagation()}
           >
                 <div className={`
@@ -206,7 +217,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
 
   return (
     <>
-      <div className={`w-full flex flex-col ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200 shadow-xl'} overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full rounded-[2.5rem]'}`}>
+      <div className={`w-full flex flex-col ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200 shadow-xl'} lg:overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full rounded-[2.5rem]'}`}>
         
         <div className="absolute top-8 left-8 right-8 z-50 flex justify-between items-start pointer-events-none gap-4">
             <div className="flex flex-col gap-3 items-start pointer-events-auto relative shrink-0">
@@ -260,12 +271,12 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
             </button>
         </div>
 
-        <div className={`flex-1 relative overflow-y-auto custom-scrollbar overscroll-contain ${isNight ? 'bg-zinc-900/50' : 'bg-zinc-50/50'}`}>
+        <div className={`lg:flex-1 relative lg:overflow-y-auto custom-scrollbar overscroll-y-auto ${isNight ? 'bg-zinc-900/50' : 'bg-zinc-50/50'}`}>
           <div className="relative w-full transform-gpu">
             {!imageLoaded && (
               <div className={`absolute inset-0 flex flex-col items-center justify-center ${isNight ? 'bg-zinc-900/40' : 'bg-white/40'} backdrop-blur-2xl min-h-[400px]`}>
                  <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin mb-6"></div>
-                 <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest animate-pulse">{language === 'ko' ? "종이 분석 중..." : "Scanning Paper..."}</p>
+                 <p className="text-zinc-500 text-[10px] font-black uppercase tracking-wide leading-normal animate-pulse break-keep">{language === 'ko' ? "종이 분석 중..." : "Scanning Paper..."}</p>
               </div>
             )}
             {renderOverlayContent(false)}

@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getFirestore,
+  initializeFirestore,
   doc,
   getDoc,
   setDoc,
@@ -16,6 +17,7 @@ import {
 import { getAuth, initializeAuth, browserLocalPersistence, indexedDBLocalPersistence } from 'firebase/auth';
 import { getAnalytics, logEvent } from 'firebase/analytics';
 import { UserProfile } from '../types';
+import { Capacitor } from '@capacitor/core';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k",
@@ -29,26 +31,40 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Use localStorage persistence on native (Capacitor) to avoid IndexedDB hang
-const isNativePlatform = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.();
+const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
+
 export const auth = (() => {
-  try {
-    if (isNativePlatform) {
+  if (isNativePlatform) {
+    try {
       return initializeAuth(app, {
-        persistence: indexedDBLocalPersistence
+        persistence: browserLocalPersistence
       });
+    } catch (e: any) {
+      if (e.code === 'auth/already-initialized') {
+        return getAuth(app);
+      }
+      console.error("Firebase auth initialization error:", e);
     }
-  } catch (e) {
-    console.error("Firebase auth initialization error:", e);
   }
   return getAuth(app);
 })();
-export const dbInstance = getFirestore(app);
+
+export const dbInstance = (() => {
+  if (isNativePlatform) {
+    try {
+      return initializeFirestore(app, { experimentalForceLongPolling: true });
+    } catch (e: any) {
+      return getFirestore(app);
+    }
+  }
+  return getFirestore(app);
+})();
 
 // Analytics may not work in Capacitor native WebView — init safely
 let analyticsInstance: ReturnType<typeof getAnalytics> | null = null;
 try {
   // Only init analytics in browser (or Android if permitted)
-  const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.();
+  const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform();
   if (!isNative) {
     analyticsInstance = getAnalytics(app);
   }
@@ -59,12 +75,17 @@ const getLocalKey = (uid: string) => `chekki_mistakes_${uid}`;
 
 export const db = {
   async getUser(uid: string): Promise<UserProfile | null> {
+    const docRef = doc(dbInstance, "users", uid);
     try {
-      const docRef = doc(dbInstance, "users", uid);
-      const docSnap = await getDoc(docRef);
+      // 5-second timeout to prevent indefinite simulator hangs
+      const docSnap = await Promise.race([
+        getDoc(docRef),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+      ]);
       return docSnap.exists() ? (docSnap.data() as UserProfile) : null;
-    } catch (e: any) {
-      return null;
+    } catch (e) {
+      console.warn("[getUser] failed or timed out:", e);
+      throw e;
     }
   },
 

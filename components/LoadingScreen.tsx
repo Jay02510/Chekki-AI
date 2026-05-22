@@ -111,7 +111,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
         {showCancel && onCancel && (
           <button
             onClick={onCancel}
-            className={`px-8 py-3 rounded-2xl border transition-all animate-fade-in shadow-xl backdrop-blur-md min-h-[48px] text-[10px] font-black uppercase tracking-widest ${isNight ? 'border-white/10 bg-white/5 text-zinc-500 hover:text-white hover:border-white/30 hover:bg-white/10' : 'border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'}`}
+            className={`px-8 py-3 rounded-2xl border transition-all animate-fade-in shadow-xl backdrop-blur-md min-h-[48px] text-[10px] font-black uppercase tracking-wide ${isNight ? 'border-white/10 bg-white/5 text-zinc-500 hover:text-white hover:border-white/30 hover:bg-white/10' : 'border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'}`}
           >
             {t('btn_cancel_retry')}
           </button>
