@@ -112,13 +112,78 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const fetchAndSetUserProfile = async (user: User, baseProfile: UserProfile | null) => {
+    // Identify in RevenueCat
+    revenueCatService.identify(user.uid);
+
+    let finalProfile = baseProfile;
+    let hasActiveAppStoreSub = false;
+
+    // --- Unified subscription check via backend ---
+    try {
+      const idToken = await withTimeout(user.getIdToken(), 5000, 'getIdToken timeout');
+
+      // Race the subscription check against a 10s timeout to prevent hangs on simulator
+      const subCheckTimeout = new Promise<SubscriptionRecord | null>((resolve) => setTimeout(() => resolve(null), 10000));
+      const subRecord = await Promise.race([
+        subscriptionService.initialize(user.uid, idToken) as Promise<SubscriptionRecord | null>,
+        subCheckTimeout
+      ]);
+
+      if (subRecord) {
+        setSubscriptionRecord(subRecord);
+
+        const isSubActive = subRecord.subscription_status === 'active';
+        hasActiveAppStoreSub = isSubActive;
+
+        if (baseProfile) {
+          if (isSubActive && baseProfile.plan !== 'pro') {
+            finalProfile = { ...baseProfile, plan: 'pro', maxScansPerDay: 9999, maxQuestionsPerDay: 9999, subscriptionPlatform: subRecord.subscription_platform };
+          } else if (!isSubActive && baseProfile.plan === 'pro' && subRecord.subscription_status === 'expired') {
+            finalProfile = { ...baseProfile, plan: 'free', maxScansPerDay: FREE_DAILY_LIMIT, maxQuestionsPerDay: 5, subscriptionPlatform: subRecord.subscription_platform };
+            setShowPaywall(true);
+          }
+          if (subRecord.subscription_platform !== 'none') {
+            finalProfile = { ...(finalProfile || baseProfile!), subscriptionPlatform: subRecord.subscription_platform };
+          }
+        }
+      }
+    } catch (e) {
+      console.error("[AuthContext] Subscription check failed:", e);
+    }
+
+    // --- Demo Account Override ---
+    if (user.email === 'test@example.com') {
+      finalProfile = {
+        ...(finalProfile || {} as UserProfile),
+        email: 'test@example.com',
+        name: 'Reviewer',
+        plan: 'pro',
+        maxScansPerDay: 9999,
+        maxQuestionsPerDay: 9999,
+      };
+    } else if (user.email === 'expired@example.com') {
+      finalProfile = {
+        ...(finalProfile || {} as UserProfile),
+        email: 'expired@example.com',
+        name: 'Reviewer (Expired)',
+        plan: 'free',
+        maxScansPerDay: 3,
+        maxQuestionsPerDay: 5
+      };
+      if (!hasActiveAppStoreSub) {
+        setShowPaywall(true);
+      }
+    }
+
+    setUserProfile(finalProfile);
+    return finalProfile;
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
-        // Identify in RevenueCat
-        revenueCatService.identify(user.uid);
-
         let profile: UserProfile | null = null;
         try {
           profile = await db.getUser(user.uid);
@@ -128,68 +193,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        let finalProfile = profile;
-        let hasActiveAppStoreSub = false;
-
-        // --- Unified subscription check via backend ---
-        try {
-          const idToken = await withTimeout(user.getIdToken(), 5000, 'getIdToken timeout');
-
-          // Race the subscription check against a 10s timeout to prevent hangs on simulator
-          const subCheckTimeout = new Promise<SubscriptionRecord | null>((resolve) => setTimeout(() => resolve(null), 10000));
-          const subRecord = await Promise.race([
-            subscriptionService.initialize(user.uid, idToken) as Promise<SubscriptionRecord | null>,
-            subCheckTimeout
-          ]);
-
-          if (subRecord) {
-            setSubscriptionRecord(subRecord);
-
-            const isSubActive = subRecord.subscription_status === 'active';
-            hasActiveAppStoreSub = isSubActive;
-
-            if (profile) {
-              if (isSubActive && profile.plan !== 'pro') {
-                finalProfile = { ...profile, plan: 'pro', maxScansPerDay: 9999, maxQuestionsPerDay: 9999, subscriptionPlatform: subRecord.subscription_platform };
-              } else if (!isSubActive && profile.plan === 'pro' && subRecord.subscription_status === 'expired') {
-                finalProfile = { ...profile, plan: 'free', maxScansPerDay: FREE_DAILY_LIMIT, maxQuestionsPerDay: 5, subscriptionPlatform: subRecord.subscription_platform };
-                setShowPaywall(true);
-              }
-              if (subRecord.subscription_platform !== 'none') {
-                finalProfile = { ...(finalProfile || profile!), subscriptionPlatform: subRecord.subscription_platform };
-              }
-            }
-          }
-          // If subRecord is null (timeout), we continue with the existing profile — no crash
-        } catch {
-          // Subscription check failed — fallback to existing profile state
-        }
-
-        // --- Demo Account Override ---
-        if (user.email === 'test@example.com') {
-          finalProfile = {
-            ...(finalProfile || {} as UserProfile),
-            email: 'test@example.com',
-            name: 'Reviewer',
-            plan: 'pro',
-            maxScansPerDay: 9999,
-            maxQuestionsPerDay: 9999,
-          };
-        } else if (user.email === 'expired@example.com') {
-          finalProfile = {
-            ...(finalProfile || {} as UserProfile),
-            email: 'expired@example.com',
-            name: 'Reviewer (Expired)',
-            plan: 'free',
-            maxScansPerDay: 3,
-            maxQuestionsPerDay: 5
-          };
-          if (!hasActiveAppStoreSub) {
-            setShowPaywall(true);
+        if (profile) {
+          await fetchAndSetUserProfile(user, profile);
+        } else {
+          // If the profile is null and we are not in the middle of a signup, set to null.
+          // Otherwise, the signup/social sign-in helper will create the profile and set it.
+          if (!isSigningUpRef.current) {
+            setUserProfile(null);
           }
         }
-
-        setUserProfile(finalProfile);
 
         // Session Expiration Check
         const lastLogin = localStorage.getItem('chekki_last_auth');
@@ -253,7 +265,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       await db.createUser(res.user.uid, newProfile);
-      setUserProfile(newProfile);
+      let activeProfile = newProfile;
 
       if (code) {
         try {
@@ -269,7 +281,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (redeemRes.ok) {
             const data = await redeemRes.json();
             if (data.success) {
-              const updatedProfile: UserProfile = {
+              activeProfile = {
                 ...newProfile,
                 plan: 'pro',
                 maxScansPerDay: 9999,
@@ -278,7 +290,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 schoolName: data.schoolName,
                 subscriptionPlatform: 'school_code'
               };
-              setUserProfile(updatedProfile);
             }
           } else {
             console.error('Failed to redeem school code during signup');
@@ -288,6 +299,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
+      await fetchAndSetUserProfile(res.user, activeProfile);
       setShowLoginModal(false);
     } catch (err: any) {
       console.error('Signup error details:', err);
@@ -379,6 +391,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   nextBillingDate: null
                 };
                 await db.createUser(authResult.user.uid, newProfile);
+                await fetchAndSetUserProfile(authResult.user, newProfile);
+              } else {
+                await fetchAndSetUserProfile(authResult.user, existingProfile);
               }
             }
           } catch (firebaseErr: any) {
@@ -414,6 +429,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 nextBillingDate: null
               };
               await db.createUser(result.user.uid, newProfile);
+              await fetchAndSetUserProfile(result.user, newProfile);
+            } else {
+              await fetchAndSetUserProfile(result.user, existingProfile);
             }
         }
         setShowLoginModal(false);
@@ -462,6 +480,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   nextBillingDate: null
                 };
                 await db.createUser(result.user.uid, newProfile);
+                await fetchAndSetUserProfile(result.user, newProfile);
+              } else {
+                await fetchAndSetUserProfile(result.user, existingProfile);
               }
             }
             setShowLoginModal(false);
@@ -503,6 +524,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             nextBillingDate: null
           };
           await db.createUser(result.user.uid, newProfile);
+          await fetchAndSetUserProfile(result.user, newProfile);
+        } else {
+          await fetchAndSetUserProfile(result.user, existingProfile);
         }
       }
       setShowLoginModal(false);
@@ -569,6 +593,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             nextBillingDate: null
           };
           await db.createUser(result.user.uid, newProfile);
+          await fetchAndSetUserProfile(result.user, newProfile);
+        } else {
+          await fetchAndSetUserProfile(result.user, existingProfile);
         }
       }
 
