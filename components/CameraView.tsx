@@ -122,7 +122,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
   );
 
   const renderFeatureSection = () => (
-    <section className="py-12 md:py-32 px-4 max-w-7xl mx-auto w-full space-y-16 md:space-y-40">
+    <section className="py-12 md:py-32 px-4 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto w-full space-y-16 md:space-y-40">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10">
         {[
           { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc') },
@@ -267,7 +267,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
   }, [isAuthenticated, checkQuestionLimit, incrementQuestion, language, askHistory, isAskAsking]);
 
   const renderClarityGuide = () => (
-    <div className="grid grid-cols-3 gap-3 md:gap-8 mt-6 md:mt-12 mb-4 px-2 w-full max-w-2xl">
+    <div className="grid grid-cols-3 gap-3 md:gap-8 mt-4 md:mt-6 mb-3 px-2 w-full max-w-2xl">
       {[
         { icon: '☀️', text: t('lbl_lighting'), tooltip: t('tt_lighting'), color: isNight ? 'from-orange-500/20 to-transparent' : 'from-orange-500/10 to-transparent' },
         { icon: '📏', text: t('lbl_flat'), tooltip: t('tt_flat'), color: isNight ? 'from-indigo-500/20 to-transparent' : 'from-indigo-500/10 to-transparent' },
@@ -292,12 +292,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
     };
 
     return (
-      <div className={`relative w-full ${size === 'large' ? 'min-h-[380px] md:min-h-[600px]' : 'h-full'} flex items-center justify-center py-6 md:py-16`}>
+      <div className={`relative w-full ${size === 'large' ? 'min-h-[350px] md:min-h-[500px]' : 'h-full'} flex items-center justify-center py-4 md:py-8`}>
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-[3rem] md:rounded-[4.5rem] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}></div>
         <div
           role="button"
           id="magic-drop-zone-inner"
-          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-indigo-950/20 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[3rem] md:rounded-[4.5rem] border transition-all duration-700 flex flex-col items-center justify-center p-6 md:p-24 group cursor-pointer
+          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-indigo-950/20 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[3rem] md:rounded-[4.5rem] border transition-all duration-700 flex flex-col items-center justify-center p-5 md:p-12 group cursor-pointer
               ${dragActive && !isLocked ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.2)] scale-[1.01]' : 'hover:border-orange-500/30'}`}
           onDragEnter={isLocked ? undefined : handleDrag}
           onDragLeave={isLocked ? undefined : handleDrag}
@@ -315,7 +315,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
           )}
 
           <div className="relative z-10 flex flex-col items-center text-center w-full pt-4">
-            <div className={`${size === 'large' ? 'w-36 h-36 md:w-80 md:h-80' : 'w-40 h-40'} mb-4 md:mb-12 relative transition-all duration-700 ${isLocked ? 'blur-md opacity-40 grayscale scale-90' : 'group-hover:scale-105'}`}>
+            <div className={`${size === 'large' ? 'w-32 h-32 md:w-60 md:h-60' : 'w-36 h-36'} mb-3 md:mb-6 relative transition-all duration-700 ${isLocked ? 'blur-md opacity-40 grayscale scale-90' : 'group-hover:scale-105'}`}>
               {isProcessing ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className={`w-10 h-10 md:w-24 md:h-24 border-[3px] md:border-[4px] ${isNight ? 'border-indigo-500' : 'border-orange-500'} border-t-transparent rounded-full animate-spin shadow-2xl`}></div>
@@ -363,7 +363,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
 
                 {renderClarityGuide()}
 
-                <div className="mt-4 md:mt-12 flex flex-col items-center gap-4 group/btn" title={t('btn_guest_scan')}>
+                <div className="mt-4 md:mt-6 flex flex-col items-center gap-3 group/btn" title={t('btn_guest_scan')}>
                   <div className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-indigo-600' : 'bg-orange-500'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.3)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/60 border-4 border-white/20 active:scale-90`}>
                     <svg className="w-8 h-8 md:w-14 md:h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -371,9 +371,13 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
                     </svg>
                   </div>
                   <span className={`text-xs md:text-lg font-black uppercase tracking-[0.3em] transition-colors ${isNight ? 'text-zinc-500 group-hover:text-white' : 'text-zinc-400 group-hover:text-zinc-900'}`}>{isAuthenticated ? t('btn_upload') : t('btn_guest_scan')}</span>
+                  <div className={`mt-2 flex items-center justify-center gap-1.5 text-[10px] md:text-xs font-semibold ${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-korean opacity-85`}>
+                    <span>🔒</span>
+                    <span>{t('supported_formats')}</span>
+                  </div>
                 </div>
 
-                <div className="mt-8 animate-fade-in-up">
+                <div className="mt-4 animate-fade-in-up">
                   <button 
                     onClick={(e) => { e.stopPropagation(); onOpenHelp?.(); }}
                     className={`px-6 py-2.5 rounded-full border ${isNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 shadow-sm'} text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 group/help`}
@@ -464,7 +468,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
     const remainingQuestions = isPro ? '∞' : remainingQuestionsCount.toString();
 
     return (
-      <div className="min-h-full pt-12 md:pt-32 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
+      <div className="min-h-full pt-4 md:pt-8 pb-10 px-4 md:px-10 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto flex flex-col items-center animate-fade-in relative">
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         {showVideoModal && renderVideoWalkthroughModal()}
         {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} isNight={isNight} />}
@@ -489,10 +493,10 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
                 <span className="text-[8px] md:text-xs font-black text-indigo-400 uppercase tracking-[0.1em]">{user.schoolName}</span>
               </div>
             )}
-            <h1 className={`text-3xl md:text-6xl lg:text-7xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display break-keep leading-tight`}>
+            <h1 className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display break-keep leading-tight`}>
               {t('dash_welcome')} <span className={`text-transparent bg-clip-text bg-gradient-to-r ${isNight ? 'from-indigo-400 to-purple-500' : 'from-orange-500 to-pink-500'}`}>{user.name}!</span>
             </h1>
-            <p className={`${isNight ? 'text-zinc-400' : 'text-zinc-500'} font-bold font-korean text-sm md:text-3xl max-w-3xl mx-auto leading-relaxed break-keep opacity-80`}>{t('dash_subtitle')}</p>
+            <p className={`${isNight ? 'text-zinc-400' : 'text-zinc-500'} font-bold font-korean text-xs sm:text-sm md:text-lg lg:text-xl max-w-3xl mx-auto leading-relaxed break-keep opacity-80`}>{t('dash_subtitle')}</p>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
@@ -565,13 +569,12 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
           {renderDropZone("large")}
           {minimal ? null : renderFeatureBanner()}
         </div>
-        <p className="mt-8 text-zinc-600 text-[9px] md:text-sm font-black uppercase tracking-[0.2em] text-center opacity-60">{t('supported_formats')}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-full flex flex-col pt-12 md:pt-32 pb-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col items-center animate-fade-in relative">
+    <div className="min-h-full flex flex-col pt-4 md:pt-8 pb-10 px-4 md:px-10 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto flex flex-col items-center animate-fade-in relative">
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} isNight={isNight} />}
       {showVideoModal && renderVideoWalkthroughModal()}
@@ -589,7 +592,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
         isNight={isNight}
       />
 
-      <div className="relative w-full max-w-7xl mx-auto px-4 md:px-6 flex flex-col items-center mb-6 md:mb-12 mt-8 md:mt-16">
+      <div className="relative w-full max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 md:px-6 flex flex-col items-center mb-6 md:mb-12 mt-8 md:mt-16">
         <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[500px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[60px] md:blur-[180px] -z-10 pointer-events-none opacity-20 mix-blend-screen`}></div>
 
         <div className="text-center w-full max-w-4xl">

@@ -256,6 +256,13 @@ function AppContent() {
     }
   }, [analysisState.status]);
 
+  // Ensure scroll is reset to top when returning to idle/camera home view
+  useEffect(() => {
+    if (analysisState.status === 'idle') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [analysisState.status]);
+
   const handleImageSelected = async (base64Data: string) => {
     await baseHandleImageSelected(base64Data);
   };
@@ -367,7 +374,7 @@ function AppContent() {
 
         {showConfetti && <Confetti />}
 
-        <main className="flex-1 min-h-0 max-w-7xl mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-32 md:pt-40">
+        <main className="flex-1 min-h-0 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-[calc(env(safe-area-inset-top)+6rem)] md:pt-32">
 
           {activeTab === 'help' ? (
             <div className="animate-fade-in">

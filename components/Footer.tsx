@@ -12,7 +12,7 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick }) => {
   return (
     <footer className={`w-full ${isNight ? 'bg-zinc-950/50 border-white/5' : 'bg-white border-zinc-100 shadow-[0_-20px_50px_rgba(0,0,0,0.02)]'} border-t py-12 px-6`}>
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
@@ -43,7 +43,7 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
           </div>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
         <p className="text-[10px] md:text-xs text-zinc-600 font-bold uppercase tracking-widest">© 2026 CHEKKI AI. ALL RIGHTS RESERVED.</p>
         <div className="flex gap-4 md:gap-6">
           <button onClick={() => onLegalClick('privacy')} className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors">Privacy</button>

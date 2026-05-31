@@ -53,7 +53,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top)]">
         <div className={`absolute inset-0 ${isNight ? 'bg-[#050505]/80 backdrop-blur-xl' : 'bg-white/95 backdrop-blur-md'} border-b ${isNight ? 'border-white/5' : 'border-zinc-200/80 shadow-sm'}`}></div>
 
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-24 flex items-center justify-between gap-2">
+        <div className="relative max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 md:px-6 h-16 md:h-24 flex items-center justify-between gap-2">
 
           <div
             className="flex items-center cursor-pointer group h-full flex-shrink min-w-0"
