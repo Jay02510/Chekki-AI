@@ -40,19 +40,28 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
     };
   }, [loadingTexts]);
 
+  // Memoized once — particle positions never re-randomise on re-render
+  const particles = useMemo(() =>
+    Array.from({ length: 12 }, () => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+    })),
+  []);
+
   return (
     <div className={`fixed inset-0 ${isNight ? 'bg-[#030305]' : 'bg-[#FAFAFB]'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-900/20 to-purple-900/20' : 'from-orange-500/10 to-purple-500/10'} opacity-50`}></div>
 
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(12)].map((_, i) => (
+        {particles.map((p, i) => (
           <div
             key={i}
             className={`absolute w-1 h-1 rounded-full ${isNight ? 'bg-indigo-400' : 'bg-orange-400'} animate-pulse`}
             style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
+              top: `${p.top}%`,
+              left: `${p.left}%`,
+              animationDelay: `${p.delay}s`,
               opacity: 0.3
             }}
           ></div>

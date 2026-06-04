@@ -42,6 +42,26 @@ export const useWorksheetAnalysis = () => {
     }, []);
 
     const handleImageSelected = useCallback(async (base64Data: string) => {
+        // Prevent concurrent analysis submissions
+        if (analysisState.status === 'analyzing') {
+            console.warn("[useWorksheetAnalysis] Analysis already in progress. Ignoring double submission.");
+            return;
+        }
+
+        // Offline check
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            const displayUrl = `data:image/jpeg;base64,${base64Data}`;
+            setAnalysisState({
+                status: 'error',
+                errorMessage: 'OFFLINE_ERROR',
+                data: null,
+                originalImage: displayUrl,
+                isSummaryLoaded: false,
+                isItemsLoaded: false
+            });
+            return false;
+        }
+
         // Abort any existing analysis
         if (abortControllerRef.current) abortControllerRef.current.abort();
         const controller = new AbortController();
@@ -140,7 +160,7 @@ export const useWorksheetAnalysis = () => {
             });
             return false;
         }
-    }, [isAuthenticated, checkScanLimit, openLoginModal, incrementScan, setShowPaywall, user?.uid, user?.plan, user?.childAge, user?.childEnglishLevel, user?.parentEnglishLevel, language]);
+    }, [isAuthenticated, checkScanLimit, openLoginModal, incrementScan, setShowPaywall, user?.uid, user?.plan, user?.childAge, user?.childEnglishLevel, user?.parentEnglishLevel, language, analysisState.status]);
 
     const handleScanAgain = useCallback(() => {
         if (lastImageData) handleImageSelected(lastImageData);

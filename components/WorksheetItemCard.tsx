@@ -88,7 +88,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(({
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className={`group relative rounded-[2rem] md:rounded-[2.5rem] border overflow-hidden animate-fade-in-up transition-[border-color,box-shadow,transform] duration-300 ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-2xl scale-[1.01]' : 'bg-white border-orange-500 shadow-2xl scale-[1.01]') : (isNight ? 'bg-zinc-900/60 border-transparent hover:border-white/10' : 'bg-white border-transparent hover:border-zinc-200 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-lg')}`}
+      className={`group relative rounded-[2rem] md:rounded-[2.5rem] border overflow-hidden transition-[border-color,box-shadow,transform] duration-300 ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-2xl scale-[1.01]' : 'bg-white border-orange-500 shadow-2xl scale-[1.01]') : (isNight ? 'bg-zinc-900/60 border-transparent hover:border-white/10' : 'bg-white border-transparent hover:border-zinc-200 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-lg')}`}
       style={style}
     >
       <div 

@@ -42,7 +42,11 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
                 onClick={() => setShowPaywall(false)}
             />
 
-            <div className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200'} rounded-[2.5rem] md:rounded-[3rem] w-full max-w-lg md:max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border animate-fade-in-up transition-opacity ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-label="Premium subscription"
+                className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200'} rounded-[2.5rem] md:rounded-[3rem] w-full max-w-lg md:max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border animate-fade-in-up transition-opacity ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
 
                 {/* Gradient glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-40 bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none" />
@@ -53,6 +57,7 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
                 {/* Close */}
                 <button
                     onClick={() => setShowPaywall(false)}
+                    aria-label="Close"
                     className="absolute top-4 right-5 text-zinc-500 hover:text-white transition-colors text-xl z-30 p-1"
                 >
                     ✕

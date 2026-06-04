@@ -56,8 +56,12 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
         <div className="relative max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 md:px-6 h-16 md:h-24 flex items-center justify-between gap-2">
 
           <div
+            role="button"
+            aria-label="Return to home"
+            tabIndex={0}
             className="flex items-center cursor-pointer group h-full flex-shrink min-w-0"
             onClick={onReset}
+            onKeyDown={(e) => e.key === 'Enter' && onReset()}
             title={t('tt_home')}
           >
             {!logoError ? (
@@ -121,7 +125,10 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
 
             {user ? (
               <div className="flex items-center gap-4 pl-1 relative flex-shrink-0">
-                <div
+                <button
+                  aria-label="Open account menu"
+                  aria-haspopup="true"
+                  aria-expanded={showUserMenu}
                   className="h-8 w-8 md:h-10 md:w-10 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer hover:ring-2 hover:ring-orange-500/50 transition-all uppercase select-none text-xs md:text-base"
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   title={user.name}
@@ -165,7 +172,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                   ) : (
                     user.name.charAt(0)
                   )}
-                </div>
+                </button>
 
                 {showUserMenu && (
                   <>
@@ -188,7 +195,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                               setShowUserMenu(false);
                               setShowPaywall(true);
                             }}
-                            className="w-full py-2 px-3 rounded-lg text-[10px] md:text-xs font-black text-white bg-gradient-to-r from-orange-500 via-pink-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-md shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center gap-1.5 animate-pulse"
+                            className="w-full py-2 px-3 rounded-lg text-[10px] md:text-xs font-black text-white bg-gradient-to-r from-orange-500 via-pink-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-md shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center gap-1.5 animate-glow-pulse"
                           >
                             <span>🚀</span>
                             <span>{language === 'ko' ? '7일 무료 체험 시작' : 'Start 7-Day Free Trial'}</span>

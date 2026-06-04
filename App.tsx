@@ -126,6 +126,7 @@ function AppContent() {
   const {
     analysisState,
     setAnalysisState,
+    lastImageData,
     handleImageSelected: baseHandleImageSelected,
     handleScanAgain: hookHandleScanAgain,
     executeReset: hookExecuteReset
@@ -135,6 +136,20 @@ function AppContent() {
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const [showChildProfileModal, setShowChildProfileModal] = useState(false);
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
@@ -341,6 +356,17 @@ function AppContent() {
         <OdapNoteModal isNight={isNight} />
         <LoginModal isNight={isNight} />
 
+        {isOffline && (
+          <div className="fixed top-24 left-4 right-4 z-[99] bg-red-600 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-down border border-white/20 backdrop-blur-md">
+            <span className="text-xl">🔌</span>
+            <p className="text-xs font-bold leading-tight font-korean">
+              {language === 'ko'
+                ? "네트워크가 연결되어 있지 않습니다. 연결 상태를 확인해주세요."
+                : "You are offline. Please check your internet connection."}
+            </p>
+          </div>
+        )}
+
         {showChildProfileModal && (
           <ProgressiveOnboardingModal 
             onComplete={() => setShowChildProfileModal(false)}
@@ -415,8 +441,13 @@ function AppContent() {
 
               {analysisState.status === 'error' && (
                 <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
-                  <div className="w-40 h-40 md:w-52 md:h-52 bg-red-950/20 rounded-full flex items-center justify-center mb-10 border border-red-500/30 relative overflow-hidden">
-                    <img src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png" alt="Chekki" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
+                  <div className="relative w-40 h-40 md:w-52 md:h-52 mb-10">
+                    {/* Empathy ring — expands outward to convey "something happened" */}
+                    <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ring-pulse" />
+                    <div className="absolute inset-0 rounded-full bg-red-500/10 animate-ring-pulse" style={{ animationDelay: '0.4s' }} />
+                    <div className="relative w-full h-full bg-red-950/20 rounded-full flex items-center justify-center border border-red-500/30 overflow-hidden">
+                      <img src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png" alt="Chekki" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
+                    </div>
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('error_title')}</h3>
                   <div className="space-y-2 mb-8 max-w-md mx-auto">
@@ -430,7 +461,7 @@ function AppContent() {
                     )}
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
-                    <button onClick={handleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]">
+                    <button onClick={hookHandleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]">
                       {t('btn_scan_again_simple')}
                     </button>
                     <button onClick={() => handleReset(false)} className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}>

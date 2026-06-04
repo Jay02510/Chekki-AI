@@ -543,7 +543,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
         
 
 
-        <div className={`w-full lg:w-1/2 flex flex-col ${isNight ? 'bg-zinc-950/40 border-white/5' : 'bg-white border-transparent'} rounded-[2.5rem] md:rounded-[3.5rem] border lg:overflow-hidden relative`} onClick={() => setActiveItemId(null)}>
+        <div className={`w-full lg:w-1/2 min-w-0 flex flex-col ${isNight ? 'bg-zinc-950/40 border-white/5' : 'bg-white border-transparent'} rounded-[2.5rem] md:rounded-[3.5rem] border lg:overflow-hidden relative`} onClick={() => setActiveItemId(null)}>
           <div 
             className={`px-6 py-5 border-b ${isNight ? 'border-white/5 bg-zinc-900/40' : 'border-zinc-100 bg-white/80'} flex flex-col shrink-0 transition-all`}
           >
@@ -622,7 +622,8 @@ export const SplitView: React.FC<SplitViewProps> = ({
               <div 
                 key={item.id} 
                 ref={el => { itemRefs.current[item.id] = el; }}
-                className="w-full"
+                className="w-full animate-item-appear"
+                style={{ '--i': idx } as React.CSSProperties}
               >
                 <WorksheetItemCard
                   item={item}
@@ -702,7 +703,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 </div>
 
                 {isShareSuccess && (
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-3xl flex items-center gap-4 animate-bounce">
+                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-3xl flex items-center gap-4 animate-pulse">
                     <span className="text-2xl">🎉</span>
                     <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-relaxed">
                       {language === 'ko' ? '기록이 성공적으로 저장되었습니다! ✨' : 'Ritual Success! Image saved to gallery. ✨'}

@@ -32,11 +32,36 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-20px); }
   }
+  /* Banner entrance: slides down from above the viewport */
+  @keyframes slide-down {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* Staggered card reveal: fade + slight lift */
+  @keyframes item-appear {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* Empathy ring: expands + fades for error/loading states */
+  @keyframes ring-pulse {
+    0%   { transform: scale(1);    opacity: 0.6; }
+    70%  { transform: scale(1.4);  opacity: 0; }
+    100% { transform: scale(1.4);  opacity: 0; }
+  }
+  /* Breathing glow for the primary CTA */
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 20px 50px rgba(249, 115, 22, 0.25); }
+    50%       { box-shadow: 0 20px 60px rgba(249, 115, 22, 0.50); }
+  }
 
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-fade-in-up: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-slide-up: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-float: float 6s ease-in-out infinite;
+  --animate-slide-down: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-item-appear: item-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-ring-pulse: ring-pulse 1.6s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  --animate-glow-pulse: glow-pulse 2.5s ease-in-out infinite;
 }
 
 @layer base {
@@ -57,5 +82,29 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
+  }
+
+  /* Staggered card reveal — apply to each item wrapper with style="--i: N" */
+  .animate-item-appear {
+    animation: item-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+  .animate-slide-down {
+    animation: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-ring-pulse {
+    animation: ring-pulse 1.6s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  }
+  .animate-glow-pulse {
+    animation: glow-pulse 2.5s ease-in-out infinite;
+  }
+}
+
+/* Accessibility: disable all motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

@@ -1,0 +1,19 @@
+What's New in Chekki AI (v1.1.6)
+
+English:
+- Kakao Account Login: Added full support for Kakao login! You can now sign in instantly using your Kakao account on iOS, Android, and web platforms.
+- Google Account Login: Integrated official Google Sign-In, letting you log in securely with your Google account in just one tap.
+- Optimized Apple Sign-In: Refined Apple Sign-In support on iOS physical devices using secure authentication nonces.
+- Instant Login State Update: Resolved a race condition where the application UI state wouldn't update immediately after a successful social login (preventing the app from getting stuck showing the "Sign In" button when already authenticated).
+- Improved Trial and Subscription Layout: Redesigned the 7-day free trial banner and subscription plan selectors to look cleaner and offer a more premium visual experience.
+
+--------------------------------------------------------------------------------
+
+채키 AI 업데이트 소식 (v1.1.6)
+
+한국어:
+- 카카오 간편 로그인 지원: 이제 iOS, Android 및 웹 환경에서 카카오 계정을 사용하여 간편하고 안전하게 로그인할 수 있습니다.
+- 구글 로그인 도입: 구글 계정 연동을 추가하여 한 번의 터치로 간편하게 가입하고 로그인할 수 있습니다.
+- 애플 로그인 최적화: iOS 실기기에서 보안 인증 방식을 강화하여 더욱 안전하고 부드러운 애플 로그인을 제공합니다.
+- 로그인 상태 실시간 동기화: 소셜 로그인(카카오, 구글, 애플) 성공 시 화면의 상태가 즉각적으로 갱신되지 않아 "로그인" 버튼에 멈춰 있는 현상을 완벽히 해결했습니다.
+- 구독 및 체험 배너 레이아웃 개편: 7일 무료 체험 및 연간/월간 구독 정보 화면을 한눈에 보기 편하도록 프리미엄 UI로 개선했습니다.

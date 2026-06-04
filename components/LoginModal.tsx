@@ -151,7 +151,12 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
       <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 md:pt-28 overflow-y-auto">
         <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => { if (!email && !password && !name) closeLoginModal(); }}></div>
 
-        <div className={`relative ${isNight ? 'bg-zinc-900 border-white/5 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-2xl'} rounded-[2rem] w-full max-w-sm border overflow-hidden animate-fade-in-up flex flex-col transition-colors duration-300`}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="login-modal-title"
+          className={`relative ${isNight ? 'bg-zinc-900 border-white/5 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-2xl'} rounded-[2rem] w-full max-w-sm border overflow-hidden animate-fade-in-up flex flex-col transition-colors duration-300`}
+        >
 
           {/* Clean header — no image */}
           <div className="relative flex items-center justify-between px-6 pt-6 pb-2 shrink-0">
@@ -161,12 +166,16 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
               </div>
               <span className={`${isNight ? 'text-white/80' : 'text-zinc-900/80'} text-sm font-black tracking-tight`}>Chekki</span>
             </div>
-            <button onClick={closeLoginModal} className={`text-zinc-500 hover:text-brand-orange transition-colors ${isNight ? 'bg-black/30 border-white/5' : 'bg-zinc-100 border-zinc-200'} w-8 h-8 rounded-full flex items-center justify-center border text-[10px] shadow-sm`}>✕</button>
+            <button
+              onClick={closeLoginModal}
+              aria-label="Close sign-in dialog"
+              className={`text-zinc-500 hover:text-brand-orange transition-colors ${isNight ? 'bg-black/30 border-white/5' : 'bg-zinc-100 border-zinc-200'} w-8 h-8 rounded-full flex items-center justify-center border text-[10px] shadow-sm`}
+            >✕</button>
           </div>
 
           <div className="p-6 md:p-8 pt-4 flex-1">
             <div className="text-center mb-6">
-              <h2 className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-1.5 tracking-tight`}>
+              <h2 id="login-modal-title" className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-1.5 tracking-tight`}>
                 {getTitle()}
               </h2>
               <p className="text-zinc-500 text-[11px] md:text-xs font-semibold leading-relaxed max-w-[240px] mx-auto">
@@ -197,7 +206,15 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                   <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-500 group-focus-within:text-brand-orange transition-colors duration-250" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                   </svg>
-                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Parent's Name" className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-all text-xs font-semibold placeholder:text-zinc-500`} required />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Parent's Name"
+                    aria-label="Your name"
+                    className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-all text-xs font-semibold placeholder:text-zinc-500`}
+                    required
+                  />
                 </div>
               )}
 
@@ -205,7 +222,15 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-500 group-focus-within:text-brand-orange transition-colors duration-250" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                 </svg>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address" className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-all text-xs font-semibold placeholder:text-zinc-500`} required />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email Address"
+                  aria-label="Email address"
+                  className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-all text-xs font-semibold placeholder:text-zinc-500`}
+                  required
+                />
               </div>
 
               {viewMode !== 'forgot' && (
@@ -219,6 +244,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                       value={password} 
                       onChange={(e) => setPassword(e.target.value)} 
                       placeholder="Password" 
+                      aria-label="Password"
                       className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-12 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-all text-xs font-semibold placeholder:text-zinc-500`} 
                       required 
                     />
@@ -249,7 +275,9 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
               )}
 
               <button type="submit" disabled={isLoading} className="w-full bg-brand-orange hover:bg-orange-600 text-white font-black py-3.5 rounded-2xl shadow-xl shadow-orange-500/30 transform active:scale-[0.98] disabled:opacity-50 transition-all duration-250 text-sm font-display tracking-wide mt-2">
-                {isLoading ? 'Processing...' : (viewMode === 'login' ? 'Log In' : viewMode === 'signup' ? 'Sign Up' : 'Send Reset Link')}
+                {isLoading
+                  ? (viewMode === 'login' ? 'Signing in...' : viewMode === 'signup' ? 'Creating account...' : 'Sending link...')
+                  : (viewMode === 'login' ? 'Log In' : viewMode === 'signup' ? 'Sign Up' : 'Send Reset Link')}
               </button>
             </form>
  
@@ -325,7 +353,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
 
               <button
                 onClick={closeLoginModal}
-                className="text-zinc-500 text-[10px] hover:text-brand-orange font-black uppercase tracking-widest transition-all duration-250 animate-pulse"
+                className="text-zinc-500 text-[10px] hover:text-brand-orange font-black uppercase tracking-widest transition-all duration-250 underline underline-offset-2"
               >
                 {t('login_guest_link')}
               </button>
