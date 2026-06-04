@@ -45,16 +45,16 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
       
-      <div className={`relative ${isNight ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200 shadow-2xl'} rounded-3xl w-full max-w-md shadow-2xl border overflow-hidden animate-fade-in-up`}>
+      <div className={`relative ${isNight ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200 shadow-2xl'} rounded-3xl w-full max-w-md shadow-2xl border overflow-hidden animate-fade-in-up flex flex-col max-h-[95vh]`}>
         
-        <div className={`${isNight ? 'bg-zinc-950' : 'bg-zinc-50 border-b border-zinc-100'} p-6 flex justify-center relative`}>
+        <div className={`${isNight ? 'bg-zinc-950' : 'bg-zinc-50 border-b border-zinc-100'} p-6 flex justify-center relative shrink-0`}>
            <div className="w-24 h-24">
               <ChekkiMascot className="w-full h-full" mood={isSuccess ? "happy" : "thinking"} />
            </div>
            <button onClick={onClose} className={`absolute top-4 right-4 ${isNight ? 'text-zinc-500 hover:text-white' : 'text-zinc-400 hover:text-zinc-900'} transition-colors`}>✕</button>
         </div>
 
-        <div className="p-8 space-y-6 text-center">
+        <div className="p-8 space-y-6 text-center overflow-y-auto custom-scrollbar flex-1 pb-10">
             {isSuccess ? (
                 <div className="py-10 animate-fade-in">
                    <h3 className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}>{t('fb_success')}</h3>

@@ -93,9 +93,9 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
-            <div className={`relative ${isNight ? 'bg-zinc-900 border-white/5' : 'bg-white border-zinc-200 shadow-2xl'} rounded-[2rem] md:rounded-[3rem] w-full max-w-2xl md:max-w-3xl border overflow-hidden animate-fade-in-up`}>
+            <div className={`relative ${isNight ? 'bg-zinc-900 border-white/5' : 'bg-white border-zinc-200 shadow-2xl'} rounded-[2rem] md:rounded-[3rem] w-full max-w-2xl md:max-w-3xl border overflow-hidden animate-fade-in-up max-h-[90vh] flex flex-col`}>
 
-                <div className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-8 py-6 border-b flex justify-between items-center`}>
+                <div className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-8 py-6 border-b flex justify-between items-center shrink-0`}>
                     <div className="flex items-center gap-3">
                         <svg className={`w-6 h-6 ${isNight ? 'text-orange-400' : 'text-orange-500'}`} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" /></svg>
                         <h2 className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}>{t('billing_title')}</h2>
@@ -103,7 +103,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
                     <button onClick={onClose} className="text-zinc-500 hover:text-orange-500 transition-colors">✕</button>
                 </div>
 
-                <div className="p-10 flex flex-col items-center text-center space-y-5">
+                <div className="p-10 flex flex-col items-center text-center space-y-5 overflow-y-auto custom-scrollbar flex-1">
                     <div className={`w-20 h-20 rounded-full ${isNight ? 'bg-orange-500/10' : 'bg-orange-50 shadow-inner'} flex items-center justify-center`}>
                         <svg className={`w-10 h-10 ${isNight ? 'text-orange-400' : 'text-orange-500'}`} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" /></svg>
                     </div>

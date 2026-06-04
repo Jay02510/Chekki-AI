@@ -18,6 +18,14 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [customReason, setCustomReason] = useState('');
 
+  const handleClose = () => {
+    if (customReason.trim()) {
+      const confirmDiscard = window.confirm(language === 'ko' ? "작성 중인 내용이 있습니다. 정말 닫으시겠습니까?" : "You have unsaved text. Are you sure you want to close?");
+      if (!confirmDiscard) return;
+    }
+    onClose();
+  };
+
   useEffect(() => {
     if (isOpen && scrollRef.current) {
       scrollRef.current.scrollTop = 0;
@@ -59,7 +67,7 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4" onClick={handleClose}>
       <div 
         className={`${isNight ? 'bg-[#09090b] border-white/10' : 'bg-white border-zinc-200 shadow-2xl'} w-full sm:max-w-md md:max-w-lg rounded-[2.5rem] md:rounded-[3rem] border shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-fade-in-up relative`}
         onClick={(e) => e.stopPropagation()}
@@ -68,9 +76,12 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-orange-500/10 blur-[100px] rounded-full animate-pulse"></div>
         <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 blur-[100px] rounded-full animate-pulse delay-700"></div>
 
+        {/* Fade-out overlay at the top to prevent content from cutting off when scrolled */}
+        <div className={`absolute top-0 left-0 right-0 h-10 bg-gradient-to-b ${isNight ? 'from-[#09090b] via-[#09090b]/95' : 'from-white via-white/95'} to-transparent pointer-events-none z-20 rounded-t-[2.5rem] md:rounded-t-[3rem]`} />
+
         <div 
           ref={scrollRef}
-          className="p-8 md:p-10 flex-1 overflow-y-auto custom-scrollbar relative z-10"
+          className="p-8 md:p-10 pt-10 md:pt-12 flex-1 overflow-y-auto custom-scrollbar relative z-10"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-5">
@@ -79,7 +90,7 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
               </div>
               <div>
                 <h3 className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display leading-tight tracking-tight`}>
-                  {language === 'ko' ? "설명 다듬기" : "Refine Explanation"}
+                  {language === 'ko' ? "상세 설명 요청" : "Explain More"}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
@@ -92,8 +103,8 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
             
             {!isSubmitting && (
               <button 
-                onClick={onClose}
-                className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all active:scale-90 border border-white/5"
+                onClick={handleClose}
+                className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all active:scale-90 border border-white/5 relative z-30"
                 aria-label="Close"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -109,7 +120,7 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
           <form onSubmit={handleSubmit} className="space-y-8">
             <div>
               <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em] mb-4">
-                {language === 'ko' ? "어떤 도움이 필요하신가요?" : "How can I improve this?"}
+                {language === 'ko' ? "어떤 부분이 궁금하신가요?" : "What would you like explained?"}
               </p>
               <div className="flex flex-col gap-3">
                 {quickChips.map((chip) => (
@@ -117,7 +128,7 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
                       key={chip.id}
                       type="button"
                       onClick={() => handleChipSelect(chip.id, chip.text)}
-                      className={`text-left px-6 py-4 rounded-[1.5rem] border text-sm md:text-base font-black transition-all transform active:scale-[0.98] ${
+                      className={`text-left px-6 py-4 rounded-[1.5rem] border text-sm md:text-base font-black transition-all transform active:scale-[0.98] break-keep ${
                         selectedReason === chip.id 
                           ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white border-transparent shadow-[0_15px_40px_rgba(249,115,22,0.4)]' 
                           : `${isNight ? 'bg-zinc-900/60 border-white/5 text-zinc-300' : 'bg-zinc-100 border-zinc-200 text-zinc-500'} hover:bg-zinc-800 hover:border-white/10`
@@ -140,7 +151,7 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
                   if (e.target.value) setSelectedReason(''); // Clear chip if typing
                 }}
                 className={`w-full ${isNight ? 'bg-zinc-900/40 border-white/5 text-white' : 'bg-zinc-50 border-zinc-200 text-zinc-900'} rounded-[1.8rem] p-5 text-sm focus:outline-none focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/10 transition-all font-korean resize-none h-32 shadow-inner`}
-                placeholder={language === 'ko' ? "예: 이 단어 뜻 자체를 모르겠어요. 쉬운 말로 바꿔주세요." : "e.g., I don't understand the vocabulary."}
+                placeholder={language === 'ko' ? "예: 이 문제의 문법 규칙이나 단어 쓰임새를 더 자세히 설명해주세요." : "e.g., Explain the grammar rules or word usage for this question in more detail."}
               />
             </div>
 
@@ -156,7 +167,7 @@ export const RefineModal: React.FC<Props> = ({ item, isOpen, onClose, onSubmit, 
               {isSubmitting ? (
                 <>
                   <div className="w-6 h-6 border-3 border-zinc-400 border-t-black rounded-full animate-spin"></div>
-                  <span>{language === 'ko' ? '다듬는 중...' : 'Refining...'}</span>
+                  <span>{language === 'ko' ? '설명 준비 중...' : 'Explaining...'}</span>
                 </>
               ) : (
                 <>

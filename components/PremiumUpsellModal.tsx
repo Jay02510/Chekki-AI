@@ -63,10 +63,10 @@ export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureNa
                     <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-4xl mx-auto mb-4 shadow-2xl shadow-orange-500/30">
                         {info.icon}
                     </div>
-                    <h2 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-display`}>
+                    <h2 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-display break-keep`}>
                         {language === 'ko' ? info.title_ko : info.title_en}
                     </h2>
-                    <p className={`text-sm ${isNight ? 'text-zinc-400' : 'text-zinc-500'} font-korean leading-relaxed max-w-sm mx-auto`}>
+                    <p className={`text-sm ${isNight ? 'text-zinc-400' : 'text-zinc-500'} font-korean leading-relaxed max-w-sm mx-auto break-keep`}>
                         {language === 'ko' ? info.desc_ko : info.desc_en}
                     </p>
                 </div>
@@ -77,7 +77,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureNa
                         <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white text-lg shrink-0 shadow-lg">⭐</div>
                         <div className="flex-1">
                             <h4 className={`${isNight ? 'text-white' : 'text-orange-600'} font-bold text-xs uppercase tracking-wide`}>Premium</h4>
-                            <p className={`text-[10px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'} font-medium`}>
+                            <p className={`text-[10px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'} font-medium break-keep`}>
                                 {language === 'ko'
                                     ? '무제한 스캔, AI 튜터, 티칭 가이드 등 모든 프리미엄 기능'
                                     : 'Unlimited magic scans, AI Tutor, teaching guides & more'}
@@ -92,7 +92,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({ isOpen, onClose, featureNa
                     <button
                         onClick={() => {
                             onClose();
-                            setTimeout(() => setShowPaywall(true), 300);
+                            setTimeout(() => setShowPaywall(true, featureName === 'guide' ? 'moms_scripts' : featureName), 300);
                         }}
                         className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base shadow-xl active:scale-95 transition-all ring-2 ring-white/10 min-h-[52px] flex items-center justify-center gap-2"
                     >

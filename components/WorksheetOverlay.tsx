@@ -14,11 +14,12 @@ interface Props {
   isLoadingItems?: boolean;
   isNight?: boolean;
   onConfirm?: (options: { title: string; confirmText?: string; cancelText?: string; onConfirm: () => void }) => void;
+  onSelect?: (id: number) => void;
 }
 
 type ViewMode = 'fit' | 'fill';
 
-export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItems, focusedId, className, isLoadingItems = false, isNight = false, onConfirm }) => {
+export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItems, focusedId, className, isLoadingItems = false, isNight = false, onConfirm, onSelect }) => {
   const { user, setShowPaywall } = useAuth();
   const { t, language } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -32,6 +33,8 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
   
   const [draggingId, setDraggingId] = useState<number | null>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  const pointerDownItemId = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -68,6 +71,8 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
       y: (e.clientY - rect.top) - bubblePxY
     };
 
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    pointerDownItemId.current = item.id;
     setDraggingId(item.id);
     if ('vibrate' in navigator) navigator.vibrate(5);
   };
@@ -96,7 +101,14 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
         } catch (err) {
           // Ignore if pointer capture was already lost
         }
+        
+        const dist = Math.hypot(e.clientX - dragStartPos.current.x, e.clientY - dragStartPos.current.y);
+        if (dist < 6 && pointerDownItemId.current !== null && onSelect) {
+          onSelect(pointerDownItemId.current);
+        }
+
         setDraggingId(null);
+        pointerDownItemId.current = null;
         if ('vibrate' in navigator) navigator.vibrate(10);
     }
   };
@@ -120,7 +132,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     }
   };
 
-  const getStyle = (item: WorksheetItem) => {
+  const getStyle = (item: WorksheetItem, index: number = 0) => {
     const box = item.bounding_box;
     if (!box && !item.custom_coords) return { display: 'none' };
     const rawTop = item.custom_coords ? item.custom_coords.top : ((box!.ymin + box!.ymax) / 2000) * 100;
@@ -139,6 +151,8 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
       touchAction: 'none', 
       WebkitUserSelect: 'none',
       userSelect: 'none',
+      animationDelay: `${index * 120}ms`,
+      animationFillMode: 'both',
     } as React.CSSProperties;
   };
 
@@ -159,7 +173,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
       <div className={`absolute inset-0 overflow-hidden pointer-events-none opacity-20 ${isNight ? 'bg-zinc-800' : 'bg-zinc-200'}`}>
       </div>
 
-      <div className={`relative pointer-events-none z-10 ${inFullscreen ? (viewMode === 'fit' ? 'h-full w-full flex items-center justify-center' : 'w-full') : 'h-full flex items-center justify-center'}`}>
+      <div className={`relative pointer-events-none z-10 w-full ${inFullscreen ? (viewMode === 'fit' ? 'h-full flex items-center justify-center' : '') : 'h-full flex items-center justify-center'}`}>
         <img 
             src={imageUrl} 
             alt="Worksheet" 
@@ -181,7 +195,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
         )}
       </div>
 
-      {imageLoaded && items && items.map((item) => {
+      {imageLoaded && items && items.map((item, idx) => {
           const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
           const displayValue = item.correct_answer;
           const isDragging = draggingId === item.id;
@@ -189,7 +203,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
           return (
           <div
               key={item.id}
-              style={getStyle(item)}
+              style={getStyle(item, idx)}
               className={`absolute pointer-events-auto transform-gpu animate-fade-in ${isFocused ? 'opacity-100' : 'opacity-20 blur-[2px]'}`}
               onPointerDown={(e) => handlePointerDown(e, item)}
               onPointerUp={handlePointerUp}
@@ -200,6 +214,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
                     rounded-[1.2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-2 flex items-center gap-2 transform transition-all active:scale-95 group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
                     ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-[0_25px_70px_rgba(249,115,22,0.6)] ring-4 ring-orange-500/40 z-[1000]' : ''}
                     ${isFocused ? 'bg-orange-500 border-white shadow-orange-500/20' : 'bg-transparent border-transparent'}
+                    ${(focusedId !== null && focusedId !== undefined && focusedId === item.id) ? 'ring-4 ring-orange-500/70 scale-[1.04] shadow-[0_0_30px_rgba(249,115,22,0.4)]' : ''}
                     px-2.5 py-1.5 md:px-4 md:py-3
                 `}>
                   <div className="w-5 h-5 md:w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
@@ -219,11 +234,11 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
     <>
       <div className={`w-full flex flex-col ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200 shadow-xl'} lg:overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full rounded-[2.5rem]'}`}>
         
-        <div className="absolute top-8 left-8 right-8 z-50 flex justify-between items-start pointer-events-none gap-4">
+        <div className="absolute top-4 left-4 right-4 md:top-8 md:left-8 md:right-8 z-50 flex justify-between items-start pointer-events-none gap-4">
             <div className="flex flex-col gap-3 items-start pointer-events-auto relative shrink-0">
                    <button 
                     onClick={() => setShowSettings(!showSettings)}
-                    className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/10 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-40 hover:opacity-100'} transition-all flex items-center justify-center text-xl shadow-2xl active:scale-90 group shrink-0`}
+                    className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/10 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-70 md:opacity-40 md:hover:opacity-100'} transition-all flex items-center justify-center text-xl shadow-2xl active:scale-90 group shrink-0`}
                     title={language === 'ko' ? "정답 설정" : "Overlay Settings"}
                    >
                      <svg className={`w-7 h-7 ${showSettings ? 'scale-110' : 'group-hover:scale-110'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -262,7 +277,7 @@ export const WorksheetOverlay: React.FC<Props> = ({ imageUrl, items: initialItem
 
             <button 
               onClick={() => setIsFullscreen(true)}
-              className={`pointer-events-auto w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/30 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center hover:bg-orange-600 hover:text-white opacity-40 hover:opacity-100 transition-all shadow-2xl group active:scale-90 shrink-0`}
+              className={`pointer-events-auto w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/30 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center hover:bg-orange-600 hover:text-white opacity-70 md:opacity-40 md:hover:opacity-100 transition-all shadow-2xl group active:scale-90 shrink-0`}
               title="Full Screen Focus"
             >
               <svg className="w-7 h-7 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

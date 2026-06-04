@@ -52,7 +52,7 @@ export const FlyerModal: React.FC<Props> = ({ onClose, isNight = false }) => {
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in" onClick={onClose}></div>
-      <div className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200 shadow-2xl'} rounded-[2.5rem] w-full max-w-lg shadow-2xl border overflow-hidden animate-fade-in-up flex flex-col`}>
+      <div className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200 shadow-2xl'} rounded-[2.5rem] w-full max-w-lg shadow-2xl border overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]`}>
         
         <div className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-100'} px-8 py-6 border-b flex justify-between items-center shrink-0`}>
            <div>

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { subscriptionService, AppleProducts } from '../services/subscriptionService';
+import { subscriptionService, AppleProducts, GoogleProducts } from '../services/subscriptionService';
 import { revenueCatService } from '../services/revenueCatService';
 import { LegalModal } from './LegalModal';
 import { AppleLogo } from './AppleLogo';
@@ -11,11 +11,78 @@ import { SCREENSHOT_MODE } from '../config';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean }> = ({ onClose, isNight = true }) => {
-    const { processPayment, restorePurchases } = useAuth();
+const getContextualCopy = (paywallContext: string | null, language: 'en' | 'ko', t: (key: string) => string) => {
+    if (paywallContext === 'moms_scripts') {
+        return {
+            headline: language === 'ko' ? "엄마표 티칭 스크립트 잠금 해제 💌" : "Unlock Mom's Teaching Scripts 💌",
+            subtext: language === 'ko'
+                ? "눈물 없이도 이 핵심 문법을 설명할 수 있는 단계별 이중언어 스크립트를 만나보세요."
+                : "Get step-by-step, bilingual scripts to explain this exact grammar point without the tears."
+        };
+    }
+    if (paywallContext === 'guide') {
+        return {
+            headline: language === 'ko' ? "티칭 가이드 잠금 해제 💡" : "Unlock the Teaching Guide 💡",
+            subtext: language === 'ko'
+                ? "정확하고 완벽한 해설과 가이드라인을 제공하여 아이를 안심하고 지도할 수 있습니다."
+                : "Access complete guidelines, explanations, and key concepts to guide your child with absolute confidence."
+        };
+    }
+    if (paywallContext === 'speaking_coach' || paywallContext === 'pronunciation' || paywallContext === 'audio') {
+        return {
+            headline: language === 'ko' ? "원어민 발음 & 스피킹 코치 잠금 해제 🎤" : "Unlock Speaking Coach & Audio 🎤",
+            subtext: language === 'ko'
+                ? "원어민의 생생한 음성을 듣고, 아이가 직접 말하며 실시간 발음 피드백을 받을 수 있습니다."
+                : "Hear native pronunciations and let your child practice speaking with real-time feedback and rewards."
+        };
+    }
+    if (paywallContext === 'refinement') {
+        return {
+            headline: language === 'ko' ? "AI 상세 설명 기능 잠금 해제 ⚡" : "Unlock AI Explanations ⚡",
+            subtext: language === 'ko'
+                ? "추가 질문을 통해 어떤 문제든 단계별로 깊이 있게 설명해주는 AI 튜터를 만나보세요."
+                : "Ask follow-up questions and get detailed, customized explanations for any homework problem."
+        };
+    }
+    if (paywallContext === 'practice_sheet') {
+        return {
+            headline: language === 'ko' ? "복습 문제지 무제한 생성 🪄" : "Unlock Practice Sheets 🪄",
+            subtext: language === 'ko'
+                ? "아이의 오답 패턴을 분석하여 맞춤형 복습 문제지를 즉시 생성하고 확인하세요."
+                : "Analyze your child's mistake patterns to instantly generate and print customized practice sheets."
+        };
+    }
+    return {
+        headline: t('sub_trial_headline'),
+        subtext: t('sub_trial_subtext')
+    };
+};
+
+const getWebContextualCopy = (paywallContext: string | null, language: 'en' | 'ko', t: (key: string) => string) => {
+    const defaultCopy = {
+        headline: t('sub_webHeadline'),
+        subtext: t('sub_webSubtext')
+    };
+    if (!paywallContext) return defaultCopy;
+    const details = getContextualCopy(paywallContext, language, t);
+    return {
+        headline: details.headline,
+        subtext: `${details.subtext} ${language === 'ko' ? '모바일 앱에서 구독 후 즉시 이용하실 수 있습니다.' : 'Subscribe via our mobile app to unlock it instantly.'}`
+    };
+};
+
+const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean }> = ({ onClose, isNight = true }) => {
+    const { processPayment, restorePurchases, paywallContext } = useAuth();
     const { language, t } = useLanguage();
     const [products, setProducts] = useState<any[]>([]);
-    const [selectedProduct, setSelectedProduct] = useState<string>(AppleProducts.YEARLY);
+    
+    const platform = Capacitor.getPlatform();
+    const isIOS = platform === 'ios';
+    const defaultProduct = isIOS ? AppleProducts.YEARLY : GoogleProducts.YEARLY;
+    const monthlyProductIdentifier = isIOS ? AppleProducts.MONTHLY : GoogleProducts.MONTHLY;
+    const yearlyProductIdentifier = isIOS ? AppleProducts.YEARLY : GoogleProducts.YEARLY;
+
+    const [selectedProduct, setSelectedProduct] = useState<string>(defaultProduct);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -24,7 +91,9 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
         setIsLoading(true);
         setError('');
         try {
-            const p = await subscriptionService.fetchAppleProducts();
+            const p = isIOS 
+                ? await subscriptionService.fetchAppleProducts()
+                : await subscriptionService.fetchAndroidProducts();
             if (p.length === 0) {
                 setError(t('sub_load_error'));
             } else {
@@ -34,6 +103,13 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
             setError(t('sub_load_error'));
         } finally {
             setIsLoading(false);
+            // Reset parent scrollable container scrollTop to 0 after loading completes
+            setTimeout(() => {
+                const scrollContainer = document.querySelector('.custom-scrollbar');
+                if (scrollContainer) {
+                    scrollContainer.scrollTop = 0;
+                }
+            }, 50);
         }
     };
 
@@ -41,19 +117,22 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
         fetchProducts();
     }, []);
 
-    const monthlyProduct = products.find(p => p.identifier === AppleProducts.MONTHLY);
-    const yearlyProduct = products.find(p => p.identifier === AppleProducts.YEARLY);
+    const monthlyProduct = products.find(p => (p.product?.identifier || p.identifier) === monthlyProductIdentifier);
+    const yearlyProduct = products.find(p => (p.product?.identifier || p.identifier) === yearlyProductIdentifier);
 
     const handleSubscribe = async () => {
         setIsProcessing(true);
         setError('');
         
-        // Find the full product object better trial/introductory offer detection
-        const productObj = products.find(p => p.identifier === selectedProduct) || selectedProduct;
+        // Find the full object (Package or StoreProduct) based on the selected identifier
+        const productObj = products.find(p => (p.product?.identifier || p.identifier) === selectedProduct);
 
-        const result = await processPayment(productObj);
+        const result = await processPayment(productObj || selectedProduct);
         if (!result.success) {
-            setError(result.message || t('sub_error'));
+            // If the user cancelled, we don't show an error message.
+            if (!result.userCancelled) {
+                setError(result.message || t('sub_error'));
+            }
         } else {
             onClose?.();
         }
@@ -104,25 +183,32 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
         { icon: '🛡️', key: 'bene_anytime' },
     ];
 
+    const getDisclosureText = (text: string) => {
+        if (!isIOS) {
+            return text
+                .replace(/Apple ID/g, 'Google Play')
+                .replace(/App Store/g, 'Google Play')
+                .replace(/iTunes/g, 'Google Play');
+        }
+        return text;
+    };
+
     return (
         <div className="space-y-5">
-
-            {/* ── Hero Headline ── */}
             <div className="text-center space-y-2 pb-2">
                 <div className="inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 rounded-full px-4 py-1.5 mb-1">
                     <span className="text-orange-500 text-[10px] font-black uppercase tracking-[0.2em]">
                         {language === 'ko' ? '🎉 7일 무료 체험' : '🎉 7-Day Free Trial'}
                     </span>
                 </div>
-                <h2 className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} leading-tight`}>
-                    {t('sub_trial_headline')}
+                <h2 className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} leading-tight break-keep`}>
+                    {getContextualCopy(paywallContext, language, t).headline}
                 </h2>
-                <p className="text-zinc-400 text-sm font-medium leading-relaxed max-w-sm mx-auto">
-                    {t('sub_trial_subtext')}
+                <p className="text-zinc-400 text-sm font-medium leading-relaxed max-w-sm mx-auto break-keep">
+                    {getContextualCopy(paywallContext, language, t).subtext}
                 </p>
             </div>
 
-            {/* ── Features List ── */}
             <div className={`${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200 shadow-sm'} rounded-[2rem] p-5 md:p-6 border`}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 sm:gap-x-6">
                     {features.map((item) => (
@@ -130,7 +216,7 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                             <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-orange-500/10 flex items-center justify-center text-base flex-shrink-0 group-hover:scale-110 transition-transform shadow-inner">
                                 {item.icon}
                             </div>
-                            <span className={`text-xs md:text-sm font-bold ${isNight ? 'text-zinc-200' : 'text-zinc-700'} leading-tight`}>
+                            <span className={`text-xs md:text-sm font-bold ${isNight ? 'text-zinc-200' : 'text-zinc-700'} leading-tight break-keep`}>
                                 {t(item.key as any)}
                             </span>
                         </div>
@@ -138,17 +224,13 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                 </div>
             </div>
 
-            {/* ── Plan Cards ── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
-
-                {/* Yearly (featured first, larger) */}
                 <button
-                    onClick={() => setSelectedProduct(AppleProducts.YEARLY)}
-                    className={`text-left rounded-[2rem] p-5 md:p-7 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 lg:order-first ${selectedProduct === AppleProducts.YEARLY
-                        ? `bg-gradient-to-br ${isNight ? 'from-orange-500/15 to-orange-500/5 border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.2)]' : 'from-orange-50/50 to-white border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.1)]'}`
+                    onClick={() => setSelectedProduct(yearlyProductIdentifier)}
+                    className={`text-left rounded-[2rem] p-5 md:p-7 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 lg:order-first ${selectedProduct === yearlyProductIdentifier
+                        ? `bg-gradient-to-br ${isNight ? 'from-orange-50/15 to-orange-500/5 border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.2)]' : 'from-orange-50/50 to-white border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.1)]'}`
                         : `${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-sm'} hover:border-orange-500/30`}`}
                 >
-                    {/* Badges row */}
                     <div className="flex items-center gap-2 mb-1">
                         <span className="text-[9px] md:text-[10px] bg-emerald-500 text-white px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
                             {t('sub_bestValue')}
@@ -159,12 +241,12 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                     </div>
 
                     <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em]">
-                        {SCREENSHOT_MODE ? t('sub_yearly') : t('sub_yearly')}
+                        {t('sub_yearly')}
                     </p>
 
                     <div className="flex items-baseline gap-1.5">
                         <p className={`font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-3xl md:text-4xl`}>
-                            {SCREENSHOT_MODE ? t('sub_yearly') : (yearlyProduct?.priceString || '$69.99')}
+                            {SCREENSHOT_MODE ? t('sub_yearly') : (yearlyProduct?.product?.priceString || yearlyProduct?.priceString || (language === 'ko' ? '₩99,000' : '$69.99'))}
                         </p>
                         {!SCREENSHOT_MODE && (
                             <p className="text-sm font-bold text-zinc-500">{t('sub_perYear')}</p>
@@ -177,18 +259,16 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                         </p>
                     )}
 
-                    {/* Selected indicator */}
-                    {selectedProduct === AppleProducts.YEARLY && (
+                    {selectedProduct === yearlyProductIdentifier && (
                         <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
                             <span className="text-white text-[10px]">✓</span>
                         </div>
                     )}
                 </button>
 
-                {/* Monthly */}
                 <button
-                    onClick={() => setSelectedProduct(AppleProducts.MONTHLY)}
-                    className={`text-left rounded-[1.5rem] p-4 md:p-5 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 ${selectedProduct === AppleProducts.MONTHLY
+                    onClick={() => setSelectedProduct(monthlyProductIdentifier)}
+                    className={`text-left rounded-[1.5rem] p-4 md:p-5 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 ${selectedProduct === monthlyProductIdentifier
                         ? `bg-orange-500/10 border-orange-500 ${isNight ? 'shadow-[0_20px_40px_rgba(249,115,22,0.1)]' : 'shadow-[0_20px_40px_rgba(249,115,22,0.05)]'}`
                         : `${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-sm'} hover:border-orange-500/30`}`}
                 >
@@ -202,14 +282,14 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                     </p>
                     <div className="flex items-baseline gap-1">
                         <p className={`font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-2xl md:text-3xl`}>
-                            {SCREENSHOT_MODE ? t('sub_monthly') : (monthlyProduct?.priceString || '$6.99')}
+                            {SCREENSHOT_MODE ? t('sub_monthly') : (monthlyProduct?.product?.priceString || monthlyProduct?.priceString || (language === 'ko' ? '₩9,900' : '$6.99'))}
                         </p>
                         {!SCREENSHOT_MODE && (
                             <p className="text-xs font-bold text-zinc-500">{t('sub_perMonth')}</p>
                         )}
                     </div>
 
-                    {selectedProduct === AppleProducts.MONTHLY && (
+                    {selectedProduct === monthlyProductIdentifier && (
                         <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
                             <span className="text-white text-[10px]">✓</span>
                         </div>
@@ -217,7 +297,6 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                 </button>
             </div>
 
-            {/* ── CTA Button ── */}
             <div className="space-y-3">
                 <button
                     onClick={handleSubscribe}
@@ -230,7 +309,7 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                         <>
                             <span>{t('sub_cta_trial')}</span>
                             <span className="text-orange-200 text-sm font-bold">
-                                — {selectedProduct === AppleProducts.YEARLY
+                                — {selectedProduct === yearlyProductIdentifier
                                     ? (language === 'ko' ? '연간' : 'Yearly')
                                     : (language === 'ko' ? '월간' : 'Monthly')}
                             </span>
@@ -244,7 +323,6 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                     </p>
                 )}
 
-                {/* Trust signals */}
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-y-1.5 gap-x-4 pt-1">
                     {[
                         { icon: '🔒', key: 'sub_trial_no_charge' },
@@ -253,13 +331,12 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                     ].map((item) => (
                         <span key={item.key} className="text-[9px] md:text-[10px] text-zinc-500 font-bold flex items-center gap-1">
                             <span>{item.icon}</span>
-                            {t(item.key as any)}
+                            {getDisclosureText(t(item.key as any))}
                         </span>
                     ))}
                 </div>
             </div>
 
-            {/* ── Restore + Legal ── */}
             <div className="flex flex-col items-center gap-5">
                 <button
                     onClick={handleRestore}
@@ -270,8 +347,8 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                 </button>
 
                 <div className={`${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-100 border-zinc-200 shadow-inner'} rounded-3xl p-5 border space-y-4 w-full`}>
-                    <p className="text-[10px] text-zinc-500 leading-relaxed text-center font-medium">
-                        {t('sub_disclosure_trial')}
+                    <p className="text-[10px] text-zinc-500 leading-relaxed text-center font-medium break-keep">
+                        {getDisclosureText(t('sub_disclosure_trial'))}
                     </p>
 
                     <div className="flex justify-center gap-4 text-[10px] font-black uppercase tracking-widest">
@@ -290,7 +367,7 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
                         </button>
                     </div>
                     <p className="text-[9px] text-zinc-600 text-center uppercase tracking-tight">
-                        Subscription follows Apple Standard EULA
+                        Subscription follows {isIOS ? 'Apple Standard EULA' : 'Google Play Terms of Service'}
                     </p>
                 </div>
             </div>
@@ -298,34 +375,31 @@ const AppleSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean 
     );
 };
 
-const AndroidSubscriptionView: React.FC<{ isNight?: boolean }> = ({ isNight = true }) => {
-    const { t } = useLanguage();
-    return (
-        <div className="flex flex-col items-center justify-center text-center py-12 space-y-4">
-            <div className={`w-20 h-20 rounded-3xl ${isNight ? 'bg-green-500/10 border-green-500/20' : 'bg-green-50 border-green-200'} border flex items-center justify-center text-4xl shadow-inner`}>
-                🤖
-            </div>
-            <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>{t('sub_androidSoon')}</h3>
-            <p className="text-sm text-zinc-500 max-w-xs leading-relaxed">
-                {t('sub_androidSoonDesc')}
-            </p>
-        </div>
-    );
-};
-
 const WebSubscriptionView: React.FC<{ isNight?: boolean }> = ({ isNight = true }) => {
     const { language, t } = useLanguage();
+    const { paywallContext } = useAuth();
+    const copy = getWebContextualCopy(paywallContext, language, t);
+
+    const getContextIcon = () => {
+        if (paywallContext === 'moms_scripts') return '💌';
+        if (paywallContext === 'guide') return '💡';
+        if (paywallContext === 'speaking_coach' || paywallContext === 'pronunciation' || paywallContext === 'audio') return '🎤';
+        if (paywallContext === 'refinement') return '⚡';
+        if (paywallContext === 'practice_sheet') return '🪄';
+        return '📱';
+    };
+
     return (
         <div className="flex flex-col items-center justify-center text-center py-6 space-y-6">
             <div className={`w-16 h-16 md:w-20 md:h-20 rounded-3xl ${isNight ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50 border-orange-200 shadow-sm'} border flex items-center justify-center text-3xl md:text-4xl shadow-lg shadow-orange-500/10`}>
-                📱
+                {getContextIcon()}
             </div>
             <div className="px-4">
                 <h3 className={`text-lg md:text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 leading-tight`}>
-                    {t('sub_webHeadline')}
+                    {copy.headline}
                 </h3>
                 <p className="text-[11px] md:text-xs text-zinc-500 max-w-[280px] mx-auto leading-relaxed">
-                    {t('sub_webSubtext')}
+                    {copy.subtext}
                 </p>
             </div>
             
@@ -366,10 +440,10 @@ export const SubscriptionScreen: React.FC<Props> = ({ onClose, isNight = true })
         <div>
             {/* Header */}
             <div className="text-center mb-6">
-                <h2 className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} mb-1 font-display`}>
+                <h2 className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} mb-1 font-display break-keep`}>
                     {t('sub_title')}
                 </h2>
-                <p className="text-zinc-500 text-sm font-medium">{t('sub_subtitle')}</p>
+                <p className="text-zinc-500 text-sm font-medium break-keep">{t('sub_subtitle')}</p>
 
                 <div className="mt-3 flex justify-center">
                     <span className={`text-[9px] ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-200 shadow-sm'} text-zinc-500 px-3 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1.5 border`}>
@@ -379,8 +453,8 @@ export const SubscriptionScreen: React.FC<Props> = ({ onClose, isNight = true })
             </div>
 
             {/* Platform-specific content */}
-            {platform === 'ios' && <AppleSubscriptionView onClose={onClose} isNight={isNight} />}
-            {platform === 'android' && <AndroidSubscriptionView isNight={isNight} />}
+            {platform === 'ios' && <NativeSubscriptionView onClose={onClose} isNight={isNight} />}
+            {platform === 'android' && <NativeSubscriptionView onClose={onClose} isNight={isNight} />}
             {platform === 'web' && <WebSubscriptionView isNight={isNight} />}
         </div>
     );

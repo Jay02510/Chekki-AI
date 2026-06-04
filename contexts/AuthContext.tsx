@@ -71,7 +71,7 @@ interface AuthContextType {
   checkQuestionLimit: () => boolean;
   incrementQuestion: () => Promise<boolean>;
   upgradeToPro: (code?: string) => Promise<boolean>;
-  processPayment: (product?: any) => Promise<{ success: boolean; message?: string }>;
+  processPayment: (product?: any) => Promise<{ success: boolean; message?: string; userCancelled?: boolean }>;
   restorePurchases: () => Promise<{ success: boolean; message?: string }>;
   joinSchool: (schoolCode: string) => Promise<boolean>;
   cancelSubscription: () => Promise<void>;
@@ -79,7 +79,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   showPaywall: boolean;
-  setShowPaywall: (show: boolean) => void;
+  setShowPaywall: (show: boolean, context?: string | null) => void;
+  paywallContext: string | null;
   showLoginModal: boolean;
   openLoginModal: () => void;
   closeLoginModal: () => void;
@@ -94,8 +95,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [subscriptionRecord, setSubscriptionRecord] = useState<SubscriptionRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showPaywall, setShowPaywall] = useState(false);
+  const [showPaywall, setShowPaywallState] = useState(false);
+  const [paywallContext, setPaywallContext] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const setShowPaywall = (show: boolean, context: string | null = null) => {
+    setShowPaywallState(show);
+    if (show) {
+      setPaywallContext(context);
+    } else {
+      setPaywallContext(null);
+    }
+  };
   // Flag to prevent onAuthStateChanged from wiping the profile during signup
   const isSigningUpRef = React.useRef(false);
   const googleAuthInitializedRef = React.useRef(false);
@@ -856,7 +867,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Platform-aware payment: delegates to subscriptionService
-  const processPayment = async (product: any = AppleProducts.MONTHLY): Promise<{ success: boolean; message?: string }> => {
+  const processPayment = async (product: any = AppleProducts.MONTHLY): Promise<{ success: boolean; message?: string; userCancelled?: boolean }> => {
     const isDemo = ['test@example.com', 'expired@example.com'].includes(userProfile?.email || '');
     if (!isDemo && (!firebaseUser || !userProfile)) {
       return { success: false, message: 'Please log in to subscribe.' };
@@ -873,7 +884,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, message: 'Payment succeeded but profile update failed. Please contact support.' };
     }
 
-    return { success: false, message: response.error?.message || 'An error occurred during payment.' };
+    return {
+      success: false,
+      message: response.error?.message || 'An error occurred during payment.',
+      userCancelled: response.userCancelled
+    };
   };
 
   const restorePurchases = async (): Promise<{ success: boolean; message?: string }> => {
@@ -919,6 +934,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isLoading,
       showPaywall,
       setShowPaywall,
+      paywallContext,
       showLoginModal,
       openLoginModal,
       closeLoginModal,

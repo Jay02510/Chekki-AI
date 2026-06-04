@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Capacitor } from '@capacitor/core';
 import { SubscriptionScreen } from './SubscriptionScreen';
@@ -12,6 +12,7 @@ interface Props {
 export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
     const { showPaywall, setShowPaywall } = useAuth();
     const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleShowLegal = (e: Event) => {
@@ -22,6 +23,15 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
         window.addEventListener('show-legal', handleShowLegal);
         return () => window.removeEventListener('show-legal', handleShowLegal);
     }, []);
+
+    useEffect(() => {
+        if (showPaywall) {
+            // Reset scroll position to top when modal is opened
+            if (scrollContainerRef.current) {
+                scrollContainerRef.current.scrollTop = 0;
+            }
+        }
+    }, [showPaywall]);
 
     if (!showPaywall) return null;
 
@@ -37,15 +47,21 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
                 {/* Gradient glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-40 bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none" />
 
+                {/* Fade-out overlay at the top to prevent text from cutting off when scrolled */}
+                <div className={`absolute top-0 left-0 right-0 h-10 bg-gradient-to-b ${isNight ? 'from-zinc-900 via-zinc-900/95' : 'from-white via-white/95'} to-transparent pointer-events-none z-20 rounded-t-[2.5rem] md:rounded-t-[3rem]`} />
+
                 {/* Close */}
                 <button
                     onClick={() => setShowPaywall(false)}
-                    className="absolute top-4 right-5 text-zinc-500 hover:text-white transition-colors text-xl z-10 p-1"
+                    className="absolute top-4 right-5 text-zinc-500 hover:text-white transition-colors text-xl z-30 p-1"
                 >
                     ✕
                 </button>
 
-                <div className="p-6 md:p-8 overflow-y-auto max-h-[85vh] custom-scrollbar">
+                <div 
+                    ref={scrollContainerRef}
+                    className="p-6 md:p-8 pt-10 md:pt-12 overflow-y-auto max-h-[85vh] custom-scrollbar"
+                >
                       <SubscriptionScreen onClose={() => setShowPaywall(false)} isNight={isNight} />
                 </div>
             </div>

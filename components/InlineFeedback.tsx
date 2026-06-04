@@ -43,8 +43,8 @@ export const InlineFeedback: React.FC = () => {
   }
 
   return (
-    <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[2.5rem] p-6 md:p-8 animate-fade-in-up">
-      <div className="text-center mb-6">
+    <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[2rem] p-5 md:p-6 animate-fade-in-up">
+      <div className="text-center mb-3">
         <h4 className="text-white font-black text-lg md:text-xl font-display mb-1">
           {language === 'ko' ? "채키가 도움이 되었나요? 🎓" : "Is Chekki helping tonight?"}
         </h4>
@@ -53,7 +53,7 @@ export const InlineFeedback: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex justify-center gap-3 md:gap-4 mb-6">
+      <div className="flex justify-center gap-3 md:gap-4 mb-2">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}

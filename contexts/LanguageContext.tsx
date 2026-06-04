@@ -246,7 +246,7 @@ const translations = {
     lbl_mom_tip: "Teaching Script",
     lbl_audio: "Listen",
     lbl_bookmark: "Save",
-    lbl_refine: "Explain More",
+    lbl_refine: "Explain",
     growing_text: "Generating...",
 
     // Feedback Form
@@ -333,7 +333,7 @@ const translations = {
     tt_close: "Deselect",
     tt_audio: "Listen to Pronunciation",
     tt_bookmark: "Save for Review",
-    tt_refine: "Refine Explanation",
+    tt_refine: "Explain More",
     tt_home: "Return to Home",
     tt_lang_toggle: "Switch Language",
     tt_moms_lounge: "Mom's Lounge",
@@ -594,7 +594,7 @@ const translations = {
     lbl_mom_tip: "티칭 스크립트",
     lbl_audio: "듣기",
     lbl_bookmark: "저장",
-    lbl_refine: "더 설명해줘",
+    lbl_refine: "설명",
     growing_text: "생성 중...",
 
     // Feedback Form
@@ -681,7 +681,7 @@ const translations = {
     tt_close: "선택 취소",
     tt_audio: "원어민 발음 듣기",
     tt_bookmark: "오답 노트에 저장",
-    tt_refine: "설명 다듬기",
+    tt_refine: "상세 설명 보기",
     tt_home: "처음으로 돌아가기",
     tt_lang_toggle: "언어 변경",
     tt_moms_lounge: "엄마들의 쉼터",

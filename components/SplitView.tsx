@@ -67,7 +67,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
   const [isSharing, setIsSharing] = useState(false);
   const [shareWebNotice, setShareWebNotice] = useState(false);
   const [isShareSuccess, setIsShareSuccess] = useState(false);
-  const [copiedItemId, setCopiedItemId] = useState<number | null>(null);
 
   // Ask Chekki States
   const [askQuery, setAskQuery] = useState('');
@@ -98,6 +97,14 @@ export const SplitView: React.FC<SplitViewProps> = ({
   useEffect(() => {
     if (activeItemId !== null) {
       setHasInteracted(true);
+      
+      // Smooth scroll the selected card container into view
+      setTimeout(() => {
+        itemRefs.current[activeItemId]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }, 100);
     }
 
     // Stop any active recognition when selection changes
@@ -529,6 +536,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
             isLoadingItems={isLoadingItems}
             isNight={isNight}
             onConfirm={onConfirm}
+            onSelect={(id) => setActiveItemId(id)}
             className="h-auto lg:h-full rounded-none"
           />
         </div>
@@ -588,9 +596,8 @@ export const SplitView: React.FC<SplitViewProps> = ({
             )}
           </div>
 
-
           <div
-            className={`p-4 md:p-6 pb-24 md:pb-32 space-y-4 w-full lg:flex-1 lg:min-h-0 lg:overflow-y-auto ${isNight ? 'bg-gradient-to-b from-transparent to-zinc-950/20' : 'bg-white'}`}
+            className={`p-4 md:p-6 pb-8 md:pb-12 space-y-4 w-full lg:flex-1 lg:min-h-0 lg:overflow-y-auto ${isNight ? 'bg-gradient-to-b from-transparent to-zinc-950/20' : 'bg-white'}`}
             style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' } as React.CSSProperties}
             onClick={(e) => e.stopPropagation()}>
             {isLoadingItems && localItems.length === 0 && (
@@ -612,42 +619,41 @@ export const SplitView: React.FC<SplitViewProps> = ({
             )}
 
             {localItems.map((item, idx) => (
-              <WorksheetItemCard
-                key={item.id}
-                item={item}
-                isActive={activeItemId === item.id}
-                isNight={isNight}
-                language={language}
-                t={t}
-                flagged={isMistake(item.question_text, item.correct_answer)}
-                speechResult={speechResult}
-                scriptLanguages={scriptLanguages}
-                isAuthenticated={isAuthenticated}
-                userPlan={user?.plan}
-                copiedItemId={copiedItemId}
-                isListening={isListening && activeItemId === item.id}
-                onToggleActive={() => setActiveItemId(activeItemId === item.id ? null : item.id)}
-                onPlayAudio={playAudio}
-                onToggleMistake={toggleMistake}
-                onCopyScript={(item, guide, script) => {
-                  const textToCopy = `${language === 'ko' ? '가이드' : 'Guide'}: ${guide}\n\n${language === 'ko' ? '티칭 팁' : 'Teaching Tip'}: "${script}"`;
-                  navigator.clipboard.writeText(textToCopy);
-                  setCopiedItemId(item.id);
-                  setTimeout(() => setCopiedItemId(null), 2000);
-                }}
-                onRefine={(item) => setRefiningItemId(item.id)}
-                onStartPronunciation={startPronunciationCheck}
-                onSetScriptLanguage={(id, lang) => setScriptLanguages(prev => ({ ...prev, [id]: lang }))}
-                openLoginModal={openLoginModal}
-                setShowPaywall={setShowPaywall}
-                setUpsellFeature={setUpsellFeature}
-              />
+              <div 
+                key={item.id} 
+                ref={el => { itemRefs.current[item.id] = el; }}
+                className="w-full"
+              >
+                <WorksheetItemCard
+                  item={item}
+                  isActive={activeItemId === item.id}
+                  isNight={isNight}
+                  language={language}
+                  t={t}
+                  flagged={isMistake(item.question_text, item.correct_answer)}
+                  speechResult={speechResult}
+                  scriptLanguages={scriptLanguages}
+                  isAuthenticated={isAuthenticated}
+                  userPlan={user?.plan}
+                  isListening={isListening && activeItemId === item.id}
+                  onToggleActive={() => setActiveItemId(activeItemId === item.id ? null : item.id)}
+                  onPlayAudio={playAudio}
+                  onToggleMistake={toggleMistake}
+                  onRefine={(item) => setRefiningItemId(item.id)}
+                  onStartPronunciation={startPronunciationCheck}
+                  onSetScriptLanguage={(id, lang) => setScriptLanguages(prev => ({ ...prev, [id]: lang }))}
+                  openLoginModal={openLoginModal}
+                  setShowPaywall={setShowPaywall}
+                  setUpsellFeature={setUpsellFeature}
+                  style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
+                />
+              </div>
             ))}
 
             {localItems.length > 0 && (
-              <div className="pt-12 pb-10 border-t border-white/5 mt-8 space-y-8 animate-fade-in">
-                <div className="text-center space-y-3">
-                  <div className="flex justify-center mb-4">
+              <div className="pt-6 pb-6 border-t border-white/5 mt-4 space-y-4 animate-fade-in">
+                <div className="text-center">
+                  <div className="flex justify-center">
                     <div 
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm cursor-help group relative"
                       title={t('zero_memory_desc')}
@@ -666,9 +672,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3">
                   <button
-                    onClick={() => { if (!isAuthenticated) openLoginModal(); else if (user?.plan !== 'pro') setShowPaywall(true); else setShowCloneModal(true); }}
+                    onClick={() => { if (!isAuthenticated) openLoginModal(); else if (user?.plan !== 'pro') setShowPaywall(true, 'practice_sheet'); else setShowCloneModal(true); }}
                     disabled={isLoadingItems}
                     className="w-full h-16 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-lg shadow-[0_20px_50px_rgba(249,115,22,0.3)] flex items-center justify-center gap-3 active:scale-95 transition-all"
                   >
@@ -676,7 +682,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                     {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
                   </button>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={onScanAgain}
                       className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'}`}
@@ -687,7 +693,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                     <button
                       onClick={handleShare}
                       disabled={isSharing}
-                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${isNight ? 'bg-zinc-800 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
+                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${isNight ? 'bg-zinc-800 border-white/10 text-zinc-300 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
                     >
                       {isSharing ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <><span className="text-xl">✨</span> {language === 'ko' ? '기록 저장' : 'Save Image'}</>}
                     </button>
@@ -704,7 +710,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   </div>
                 )}
                 
-                <div className="pt-8 opacity-40">
+                <div className="pt-4 opacity-40">
                   <InlineFeedback />
                 </div>
               </div>

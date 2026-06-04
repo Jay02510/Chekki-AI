@@ -85,8 +85,8 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
             </div>
           )}
 
-          <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden opacity-30">
-            <div className={`w-full h-1 bg-gradient-to-r from-transparent ${isNight ? 'via-indigo-400' : 'via-orange-400'} to-transparent absolute top-0 animate-[scan_4s_linear_infinite]`}></div>
+          <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden opacity-40">
+            <div className={`w-full h-1.5 bg-gradient-to-r from-transparent ${isNight ? 'via-indigo-400/85 shadow-[0_0_15px_#6366f1]' : 'via-orange-500/85 shadow-[0_0_15px_#f97316]'} to-transparent absolute top-0 animate-[scan_4s_linear_infinite]`}></div>
           </div>
         </div>
       </div>

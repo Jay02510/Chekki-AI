@@ -444,7 +444,7 @@ function AppContent() {
                 <div className="animate-fade-in-up flex flex-col pt-4 pb-4">
                   <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
                     <div className="flex items-center gap-3 min-w-0">
-                      <h2 className="text-sm md:text-2xl font-black text-white font-korean tracking-tight truncate">
+                      <h2 className={`text-sm md:text-2xl font-black font-korean tracking-tight truncate ${isNight ? 'text-white' : 'text-zinc-850'}`}>
                         {language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "제목 없음") : (analysisState.data.worksheet_summary?.title_en || "Untitled")}
                       </h2>
                       {user?.plan === 'pro' && (
@@ -485,6 +485,8 @@ function AppContent() {
           isAuthenticated={isAuthenticated}
           openLoginModal={openLoginModal}
         />
+        <DebugConsole />
+
 
         <style>{`
             @keyframes confetti {
