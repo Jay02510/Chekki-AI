@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-05T03:39:00Z",
+  "title": "Design System: Chekki AI",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Brand Orange", "canonical": "oklch(67% 0.22 38)", "tonalRamp": ["#431407", "#7c2d12", "#9a3412", "#c2410c", "#ea580c", "#f97316", "#fdba74", "#ffedd5"] },
+      "brand-dark": { "role": "neutral", "displayName": "Brand Dark", "canonical": "oklch(8% 0.005 240)", "tonalRamp": ["#000000", "#050505", "#09090b", "#121214", "#1c1c1f", "#27272a", "#3f3f46", "#52525b"] },
+      "brand-card": { "role": "neutral", "displayName": "Brand Card Background", "canonical": "oklch(12% 0.01 240)", "tonalRamp": ["#050505", "#0F1014", "#16171b", "#222328", "#2e3037", "#3b3d45", "#484b55", "#565a65"] },
+      "accent-purple": { "role": "secondary", "displayName": "Accent Purple", "canonical": "oklch(53% 0.24 290)", "tonalRamp": ["#2e1065", "#4c1d95", "#5b21b6", "#6d28d9", "#7c3aed", "#8b5cf6", "#a78bfa", "#c4b5fd"] },
+      "accent-pink": { "role": "secondary", "displayName": "Accent Pink", "canonical": "oklch(59% 0.23 350)", "tonalRamp": ["#500724", "#831843", "#9d174d", "#be185d", "#db2777", "#ec4899", "#f472b6", "#fbcfe8"] },
+      "neutral-text": { "role": "neutral", "displayName": "Neutral Text", "canonical": "oklch(97% 0.01 70)", "tonalRamp": ["#1a1917", "#3a3835", "#5c5954", "#807c76", "#a6a29b", "#ccc8c1", "#ede9e1", "#fdfaf5"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Font", "purpose": "Large display headers, brand titles." },
+      "body": { "displayName": "Body Font", "purpose": "General reading text, bilingual instructions, feedback scripts." },
+      "handwritten": { "displayName": "Handwritten Annotations", "purpose": "Skeuomorphic corrections, student notes, emphasis." }
+    },
+    "shadows": [
+      { "name": "interactive-glow", "value": "0 8px 32px rgba(249, 115, 22, 0.15)", "purpose": "Focus states for interactive items." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Warm, natural transition curve." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "640px" },
+      { "name": "tablet", "value": "768px" },
+      { "name": "desktop", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action button, styled in bold brand orange.",
+      "html": "<button class=\"ds-btn-primary\">GET STARTED →</button>",
+      "css": ".ds-btn-primary { background-color: #F97316; color: #FFFFFF; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; border: none; border-radius: 24px; padding: 14px 28px; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background-color: #EA580C; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249, 115, 22, 0.25); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary outline/dark button for passive actions.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { background-color: #0F1014; color: #FDFAF5; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 500; border: 1px solid rgba(253, 250, 245, 0.08); border-radius: 24px; padding: 14px 28px; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover { background-color: rgba(253, 250, 245, 0.05); border-color: rgba(253, 250, 245, 0.15); }"
+    },
+    {
+      "name": "Product Container Card",
+      "kind": "card",
+      "refersTo": "card-container",
+      "description": "Standard container card for housing layout segments.",
+      "html": "<div class=\"ds-card-container\"><h3>Card Title</h3><p>This is a standard card text content inside Chekki.</p></div>",
+      "css": ".ds-card-container { background-color: #0F1014; border: 1px solid rgba(253, 250, 245, 0.08); border-radius: 16px; padding: 24px; color: #FDFAF5; font-family: 'Nunito', sans-serif; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); } .ds-card-container h3 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; margin-bottom: 8px; } .ds-card-container p { color: rgba(253, 250, 245, 0.55); font-size: 14px; line-height: 1.6; } .ds-card-container:hover { border-color: rgba(253, 250, 245, 0.15); transform: translateY(-3px); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Playful Homework Helper",
+    "overview": "Chekki AI features a warm, tactile notebook feel set against high-contrast dark surfaces. It combines professional, precise AI scanning capabilities with hand-drawn visual cues (circles, stars, highlights) that mimic pencil-and-paper learning. The interface is split into two primary environments: a pitch-dark, highly functional web/mobile application (product register) and a rich, deep-navy marketing homepage (brand register). This system rejects corporate SaaS uniformity in favor of rounded shapes, friendly display fonts, and emotional visual feedback.",
+    "keyCharacteristics": [
+      "Tactile Comfort: Rounded buttons, prominent borders, and soft cards.",
+      "Skeuomorphic Overlays: Highlights and correct/incorrect marks appear to be hand-drawn directly on scanned sheets.",
+      "Cognitive Clarity: Low-stress information hierarchy built to be navigated easily by tired parents and young kids."
+    ],
+    "rules": [
+      { "name": "The 10% Pop Rule", "body": "Bold, primary colors (Orange, Purple, Pink) should only cover <=10% of any screen. The dark background handles the structural weight; colors are reserved for interactive and feedback actions.", "section": "colors" },
+      { "name": "The Handwriting Offset Rule", "body": "Any text written in the handwritten font (Patrick Hand) should be slightly rotated (-1deg to 2deg) to feel authentically drawn on the paper.", "section": "typography" },
+      { "name": "The Tonal Depth Rule", "body": "Depth is established by color value shifts (Background at #050505 -> Cards/Modals at #0F1014 -> Buttons at #1F2937). Do not drop heavy black shadows onto dark cards.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do wrap bilingual copy in containers that prevent alignment breakage between Korean and English line heights.",
+      "Do use native browser zoom configurations by keeping the viewport tag free of user-scalable=no.",
+      "Do tilt hand-drawn annotations to preserve the 'Playful Homework Helper' feel."
+    ],
+    "donts": [
+      "Don't use generic stark blue-to-purple CSS gradient text.",
+      "Don't hide critical audience-specific entry points behind generic tab filters; stack them with clear anchors.",
+      "Don't animate image cards on hover; use border/glow highlights on the parent container instead."
+    ]
+  }
+}

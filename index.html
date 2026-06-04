@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="google-site-verification" content="googlec1811764640ede22">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="description" content="Chekki AI – AI homework help for Korean parents, and ESL lesson planning tools for teachers.">
@@ -14,7 +14,7 @@
   <title>ChekkiAI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Patrick+Hand&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="landing.css">
   <link rel="preload" as="video" href="https://res.cloudinary.com/dginphpy4/video/upload/f_auto,q_auto/chekki-intro_y7hj7c.mp4" type="video/mp4" />
 </head>
@@ -33,23 +33,23 @@
       <li><a href="https://www.youtube.com/@chekkienglish" target="_blank" rel="noopener noreferrer">YouTube</a></li>
       <li><a href="https://open.spotify.com/show/2onH0XU5yky37cBxdqKaY8" target="_blank" rel="noopener noreferrer">Podcast</a></li>
     </ul>
-    <a class="nav-cta" href="https://apps.apple.com/us/app/chekkiai/id6759361725" target="_blank" rel="noopener noreferrer">
-      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="15" viewBox="0 0 814 1000" style="fill:#FDFAF5;flex-shrink:0"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-43.4-150.3-112.7C172.5 728 116 560 116 403.1c0-250 155.5-386.3 308.5-386.3 82.7 0 151.5 54.9 198.1 54.9 44.6 0 121.9-58.3 217.9-58.3 35.5 0 137.4 3.2 208.3 99.2zm-430.8-8.9c-5.3-26.1-9-48.9-9-73.5 0-21.1 3.8-43.5 9-63.8C380 228 302 299.8 267.2 365.2c-28.6 54.3-44 107.2-44 161.1 0 96.8 38.8 176.4 92.7 231.8 26.4 27.9 59.8 46.9 97.8 46.9 9.7 0 19.9-2.2 29.8-6 14.7-5.5 28.4-11.8 43.5-11.8 16.5 0 30.8 6.7 46.2 12.5 9.2 3.4 18.9 5.3 28.9 5.3 36.7 0 68.4-18.4 93.8-44.4 17.7-17.8 31.9-40.4 41.3-65.3-26.2-10.5-73.4-34.6-102.5-78.4-18.9-28.5-29.1-62.6-29.1-99.3 0-73 37.1-138.2 96.9-165.1l-3.3-1.9z"/></svg>
-      Get the App
+    <a class="nav-cta" href="/app">
+      Launch Web App
     </a>
   </nav>
 
   <!-- ═══════════ HERO ═══════════ -->
   <section class="hero" id="hero">
     <div class="hero-text">
+      <div class="hero-eyebrow-ko">영어 숙제 채점 & 티칭 — 채키가 할게요</div>
       <h1>English made easy.<br><em>Chekki does the rest.</em></h1>
       <p class="hero-sub">AI-powered English tools for Korean families and ESL teachers. Snap a worksheet, get instant feedback, and plan lessons in seconds.</p>
       <div class="hero-actions">
-        <a class="btn-primary" href="https://apps.apple.com/us/app/chekkiai/id6759361725" target="_blank" rel="noopener noreferrer">
-          Download on App Store →
-        </a>
-        <a class="btn-secondary" href="https://chekki-ai.vercel.app/app">
+        <a class="btn-primary" href="/app">
           Try the Web App →
+        </a>
+        <a class="btn-secondary" href="https://apps.apple.com/us/app/chekkiai/id6759361725" target="_blank" rel="noopener noreferrer">
+          Download on App Store
         </a>
       </div>
     </div>
@@ -60,17 +60,29 @@
     </div>
   </section>
 
-  <!-- ═══════════ TAB BAR ═══════════ -->
-  <div class="tab-bar" id="tabBar">
-    <button class="tab-btn active" data-tab="families" onclick="switchTab('families')">🏠 For Families</button>
-    <button class="tab-btn" data-tab="teachers" onclick="switchTab('teachers')">📚 For Teachers</button>
-  </div>
+  <!-- ═══════════ AUDIENCE ROUTER ═══════════ -->
+  <section class="audience-routing" id="audienceRouting">
+    <div class="routing-container">
+      <a href="#families" class="routing-card accent-fam">
+        <span class="routing-emoji">🏠</span>
+        <h3>For Korean Families</h3>
+        <p>영어 숙제? 채키가 할게요. You don't need to speak English to help your child. Speak with confidence and guide them in Korean.</p>
+        <span class="routing-action fam">Explore Families Section <span>↓</span></span>
+      </a>
+      <a href="#teachers" class="routing-card accent-tch">
+        <span class="routing-emoji">📚</span>
+        <h3>For ESL / EFL Teachers</h3>
+        <p>Lesson planning? Chekki does the prep work. Save hours of prep with 300+ AI lesson frameworks built by a veteran EFL teacher in Korea.</p>
+        <span class="routing-action tch">Explore Teachers Section <span>↓</span></span>
+      </a>
+    </div>
+  </section>
 
-  <!-- ═══════════ TAB CONTENT ═══════════ -->
-  <div class="tab-content" id="products">
+  <!-- ═══════════ PRODUCT SECTIONS ═══════════ -->
+  <div class="sections-container" id="products">
 
-    <!-- ── FAMILIES PANE ── -->
-    <div class="tab-pane active" id="pane-families">
+    <!-- ── FAMILIES SECTION ── -->
+    <section class="content-section" id="families">
       <div class="section-header">
         <div class="section-label fam">🇰🇷 For Korean Families</div>
         <h2>영어 숙제?<br><em class="fam">채키가 할게요.</em></h2>
@@ -78,7 +90,8 @@
       </div>
 
       <div class="product-grid">
-        <a href="https://chekki-ai.vercel.app/app" class="product-card accent-fam">
+        <a href="/app" class="product-card accent-fam featured">
+          <span class="featured-badge fam">★ Featured Web App</span>
           <span class="card-emoji">📱</span>
           <span class="card-meta fam">Web App</span>
           <span class="card-title">AI Homework Helper</span>
@@ -117,18 +130,22 @@
           <a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" class="yt-btn" target="_blank" rel="noopener noreferrer">▶ Watch on YouTube</a>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- ── TEACHERS PANE ── -->
-    <div class="tab-pane" id="pane-teachers">
+    <!-- ── DIVIDER ── -->
+    <hr class="section-divider">
+
+    <!-- ── TEACHERS SECTION ── -->
+    <section class="content-section" id="teachers">
       <div class="section-header">
         <div class="section-label tch">📚 For ESL / EFL Teachers</div>
-        <h2>Plan less.<br><em class="tch">Teach more.</em></h2>
-        <p>300+ AI lesson planning frameworks across 12 teaching modules. Built by an EFL teacher with 10+ years in Korea.</p>
+        <h2>Lesson planning?<br><em class="tch">Chekki does the prep work.</em></h2>
+        <p>You don't need to spend your weekends writing lesson plans. Chekki handles the heavy lifting with 300+ AI frameworks across 12 modules, built by a veteran EFL teacher in Korea.</p>
       </div>
 
       <div class="product-grid">
-        <a href="https://www.etsy.com/shop/ChekkiAI?dd_referrer=" target="_blank" rel="noopener noreferrer" class="product-card accent-tch">
+        <a href="https://www.etsy.com/shop/ChekkiAI?dd_referrer=" target="_blank" rel="noopener noreferrer" class="product-card accent-tch featured">
+          <span class="featured-badge tch">★ Featured Workspace</span>
           <span class="card-emoji">🗂️</span>
           <span class="card-meta tch">Etsy Shop</span>
           <span class="card-title">ESL AI Planning Workspace</span>
@@ -167,8 +184,45 @@
           <a href="https://www.youtube.com/watch?v=VxGeduYi9Zw" class="yt-btn" target="_blank" rel="noopener noreferrer">▶ Watch on YouTube</a>
         </div>
       </div>
-    </div>
+    </section>
   </div>
+
+  <!-- ═══════════ FAQ SECTION ═══════════ -->
+  <section class="faq-section" id="faq">
+    <div class="section-header">
+      <div class="section-label">❔ FAQ</div>
+      <h2>자주 묻는 질문<br><em>Frequently Asked Questions</em></h2>
+    </div>
+    <div class="faq-container">
+      <div class="faq-item">
+        <button class="faq-trigger" onclick="toggleFaq(this)">
+          <span>어떤 워크시트를 스캔할 수 있나요?</span>
+          <span class="faq-icon">＋</span>
+        </button>
+        <div class="faq-content">
+          <p>영어 유치원, 초등 영어 학원 등에서 제공하는 거의 모든 영어 학습지(인쇄물)를 스캔할 수 있습니다. 이미 손으로 직접 필기한 답안도 AI가 지능적으로 인식하여 정확하게 채점해 줍니다.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-trigger" onclick="toggleFaq(this)">
+          <span>서비스 이용 요금은 얼마인가요?</span>
+          <span class="faq-icon">＋</span>
+        </button>
+        <div class="faq-content">
+          <p>모든 회원은 매일 3회의 스캔 및 채점 기능을 무료로 이용하실 수 있습니다. 무제한 스캔, 딥러닝 기반 심층 분석, 그리고 원어민 발음 피드백(TTS/STT) 코칭을 무제한으로 사용하고 싶으시다면 Chekki Pro 구독 서비스를 이용해 보세요.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-trigger" onclick="toggleFaq(this)">
+          <span>모바일 앱과 웹 버전 모두 사용 가능한가요?</span>
+          <span class="faq-icon">＋</span>
+        </button>
+        <div class="faq-content">
+          <p>네, 모바일 브라우저나 PC에서 웹 버전으로 별도 다운로드 없이 바로 스캔 기능을 이용하실 수 있습니다. 또한 모바일 카메라 촬영을 더 빠르고 안정적으로 사용하기 위해 App Store에서 Chekki AI 공식 iOS 앱을 무료로 설치하실 수도 있습니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ═══════════ FOOTER ═══════════ -->
   <footer class="site-footer">
@@ -212,20 +266,60 @@
       window.location.replace('/app.html');
     }
 
-    // Tab switching
-    function switchTab(tab){
-      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
-      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-      document.getElementById(`pane-${tab}`).classList.add('active');
-      history.replaceState(null,'',`#${tab}`);
+    // FAQ toggling
+    function toggleFaq(btn) {
+      const item = btn.parentElement;
+      const isActive = item.classList.contains('active');
+      
+      // Close all other FAQ items
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('active');
+        i.querySelector('.faq-icon').textContent = '＋';
+      });
+      
+      if (!isActive) {
+        item.classList.add('active');
+        btn.querySelector('.faq-icon').textContent = '－';
+      }
     }
 
-    // Hash-based tab routing
-    window.addEventListener('load',()=>{
-      const h=location.hash.replace('#','');
-      if(h==='teachers')switchTab('teachers');
-      else if(h==='families')switchTab('families');
+    // Smooth scroll for anchors
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetEl = document.querySelector(targetId);
+        if (targetEl) {
+          const navOffset = 64; // Sticky nav height
+          const elementPosition = targetEl.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+          history.replaceState(null, '', targetId);
+        }
+      });
+    });
+
+    // Hash-based smooth scroll on load
+    window.addEventListener('load', () => {
+      const h = location.hash;
+      if (h) {
+        setTimeout(() => {
+          const targetEl = document.querySelector(h);
+          if (targetEl) {
+            const navOffset = 64;
+            const elementPosition = targetEl.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      }
     });
 
     // Waitlist modal
