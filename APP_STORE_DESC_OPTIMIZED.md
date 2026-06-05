@@ -26,6 +26,7 @@ Try Chekki PRO free for 7 days. No charge until your trial ends.
 • **Cancel Anytime:** No commitment, no risk.
 
 **📱 HOW IT WORKS**
+
 1. Snap a photo of your child's English worksheet.
 2. Answers appear instantly on the screen in the exact right spots.
 3. Use the Teaching Script to explain kindly in English or Korean.
@@ -70,6 +71,7 @@ Empower your child's learning journey with ChekkiAI today.
 • **언제든지 해지 가능:** 약정이나 위약금이 전혀 없습니다.
 
 **📱 사용 방법**
+
 1. 자녀의 워크시트(숙제) 페이지를 찰칵 찍어주세요.
 2. 마법처럼 화면 속 문제 위치에 정확히 정답이 표시됩니다.
 3. 티칭 스크립트를 보며 친절하게 설명해주세요.

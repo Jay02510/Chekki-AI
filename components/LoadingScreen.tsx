@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ChekkiMascot } from './Icons';
@@ -13,45 +12,51 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
   const { t } = useLanguage();
   const [textIndex, setTextIndex] = useState(0);
   const [videoError, setVideoError] = useState(false);
-  const [showCancel, setShowCancel] = useState(false);
+  const [showCancel, setShowCancel] = useState(true);
 
   // Stable memoized dependency
-  const loadingTexts = useMemo(() => [
-    t('loading_step0'),
-    t('loading_step1'),
-    t('loading_step2'),
-    t('loading_step3'),
-    t('loading_thorough'),
-    t('loading_step4'),
-    t('loading_tip'),
-    t('loading_almost')
-  ], [t]);
+  const loadingTexts = useMemo(
+    () => [
+      t('loading_step0'),
+      t('loading_step1'),
+      t('loading_step2'),
+      t('loading_step3'),
+      t('loading_thorough'),
+      t('loading_step4'),
+      t('loading_tip'),
+      t('loading_almost'),
+    ],
+    [t]
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % loadingTexts.length);
     }, 2000);
 
-    const cancelTimer = setTimeout(() => setShowCancel(true), 15000);
-
     return () => {
       clearInterval(interval);
-      clearTimeout(cancelTimer);
     };
   }, [loadingTexts]);
 
   // Memoized once — particle positions never re-randomise on re-render
-  const particles = useMemo(() =>
-    Array.from({ length: 12 }, () => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      delay: Math.random() * 5,
-    })),
-  []);
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 12 }, () => ({
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        delay: Math.random() * 5,
+      })),
+    []
+  );
 
   return (
-    <div className={`fixed inset-0 ${isNight ? 'bg-[#030305]' : 'bg-[#FAFAFB]'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}>
-      <div className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-900/20 to-purple-900/20' : 'from-orange-500/10 to-purple-500/10'} opacity-50`}></div>
+    <div
+      className={`fixed inset-0 ${isNight ? 'bg-[#030305]' : 'bg-[#FAFAFB]'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}
+    >
+      <div
+        className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-900/20 to-purple-900/20' : 'from-orange-500/10 to-purple-500/10'} opacity-50`}
+      ></div>
 
       <div className="absolute inset-0 pointer-events-none">
         {particles.map((p, i) => (
@@ -62,17 +67,23 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
               top: `${p.top}%`,
               left: `${p.left}%`,
               animationDelay: `${p.delay}s`,
-              opacity: 0.3
+              opacity: 0.3,
             }}
           ></div>
         ))}
       </div>
 
       <div className="relative w-72 h-72 md:w-[480px] md:h-[480px] mb-12 shrink-0 group">
-        <div className={`absolute -inset-8 ${isNight ? 'bg-indigo-500/10' : 'bg-orange-500/20'} rounded-full blur-[100px] animate-pulse group-hover:opacity-100 transition-opacity`}></div>
-        <div className={`absolute -inset-1 border-2 ${isNight ? 'border-indigo-500/20' : 'border-orange-500/30'} rounded-[3.5rem] animate-[spin_10s_linear_infinite] opacity-40`}></div>
+        <div
+          className={`absolute -inset-8 ${isNight ? 'bg-indigo-500/10' : 'bg-orange-500/20'} rounded-full blur-[100px] animate-pulse group-hover:opacity-100 transition-opacity`}
+        ></div>
+        <div
+          className={`absolute -inset-1 border-2 ${isNight ? 'border-indigo-500/20' : 'border-orange-500/30'} rounded-3xl animate-[spin_10s_linear_infinite] opacity-40`}
+        ></div>
 
-        <div className={`relative w-full h-full ${isNight ? 'bg-indigo-950/30 border-white/10 ring-white/5' : 'bg-white/80 border-zinc-200 ring-black/5'} backdrop-blur-3xl rounded-[3.5rem] border shadow-[0_50px_100px_rgba(0,0,0,0.1)] ${isNight ? 'shadow-[0_50px_100px_rgba(0,0,0,0.8)]' : ''} z-10 overflow-hidden ring-1`}>
+        <div
+          className={`relative w-full h-full ${isNight ? 'bg-indigo-950/30 border-white/10 ring-white/5' : 'bg-white/80 border-zinc-200 ring-black/5'} backdrop-blur-3xl rounded-3xl border shadow-[0_50px_100px_rgba(0,0,0,0.1)] ${isNight ? 'shadow-[0_50px_100px_rgba(0,0,0,0.8)]' : ''} z-10 overflow-hidden ring-1`}
+        >
           {!videoError ? (
             <video
               autoPlay
@@ -82,7 +93,10 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
               className="absolute inset-0 w-full h-full object-cover scale-105"
               onError={() => setVideoError(true)}
             >
-              <source src={isNight ? ASSETS.VIDEO_SLEEPY : ASSETS.VIDEO_ANALYZING} type="video/mp4" />
+              <source
+                src={isNight ? ASSETS.VIDEO_SLEEPY : ASSETS.VIDEO_ANALYZING}
+                type="video/mp4"
+              />
             </video>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -95,20 +109,33 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
           )}
 
           <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden opacity-40">
-            <div className={`w-full h-1.5 bg-gradient-to-r from-transparent ${isNight ? 'via-indigo-400/85 shadow-[0_0_15px_#6366f1]' : 'via-orange-500/85 shadow-[0_0_15px_#f97316]'} to-transparent absolute top-0 animate-[scan_4s_linear_infinite]`}></div>
+            <div
+              className={`w-full h-1.5 bg-gradient-to-r from-transparent ${isNight ? 'via-indigo-400/85 shadow-[0_0_15px_#6366f1]' : 'via-orange-500/85 shadow-[0_0_15px_#f97316]'} to-transparent absolute top-0 animate-[scan_4s_linear_infinite]`}
+            ></div>
           </div>
         </div>
       </div>
 
       <div className="flex flex-col items-center justify-center z-20 max-w-lg w-full">
         <div className="h-20 flex items-center justify-center mb-6">
-          <h2 className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-korean animate-fade-in-up tracking-tight drop-shadow-md`} key={textIndex}>
+          <h2
+            className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-korean animate-fade-in-up tracking-tight drop-shadow-md`}
+            key={textIndex}
+          >
             {loadingTexts[textIndex]}
           </h2>
         </div>
 
+        {/* Progress Bar */}
+        <div className="w-64 bg-zinc-200/20 dark:bg-zinc-800/40 h-2 rounded-full overflow-hidden mb-6 relative z-20 border border-white/5 shadow-inner">
+          <div
+            className={`h-full ${isNight ? 'bg-brand-purple shadow-[0_0_10px_#7F77DD]' : 'bg-orange-500 shadow-[0_0_10px_#f97316]'} transition-all duration-1000 ease-out`}
+            style={{ width: `${Math.min(100, ((textIndex + 1) / loadingTexts.length) * 100)}%` }}
+          />
+        </div>
+
         <div className="flex gap-3 mb-12">
-          {[0, 1, 2].map(i => (
+          {[0, 1, 2].map((i) => (
             <div
               key={i}
               className={`w-2.5 h-2.5 ${isNight ? 'bg-indigo-500 shadow-[0_0_10px_#6366f1]' : 'bg-orange-500 shadow-[0_0_10px_#f97316]'} rounded-full animate-bounce`}

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,7 +6,7 @@ import { db } from '../services/database';
 export const InlineFeedback: React.FC = () => {
   const { t, language } = useLanguage();
   const { user, firebaseUser } = useAuth();
-  
+
   const [rating, setRating] = useState<number | null>(null);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -16,17 +15,17 @@ export const InlineFeedback: React.FC = () => {
   const handleSubmit = async () => {
     if (!firebaseUser) return;
     setIsSubmitting(true);
-    
+
     try {
       await db.sendFeedback(firebaseUser.uid, {
         rating: rating || 0,
-        comment: comment || "No comment provided",
+        comment: comment || 'No comment provided',
         userName: user?.name,
-        userEmail: user?.email
+        userEmail: user?.email,
       });
       setIsSuccess(true);
     } catch (e) {
-      console.error("Feedback failed", e);
+      console.error('Feedback failed', e);
     } finally {
       setIsSubmitting(false);
     }
@@ -34,22 +33,26 @@ export const InlineFeedback: React.FC = () => {
 
   if (isSuccess) {
     return (
-      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] p-8 text-center animate-fade-in">
+      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-8 text-center animate-fade-in">
         <span className="text-4xl block mb-2">💖</span>
         <h4 className="text-white font-black text-lg font-korean">{t('fb_success')}</h4>
-        <p className="text-emerald-400/60 text-[10px] font-bold uppercase tracking-wide mt-1">Benjamin has been notified!</p>
+        <p className="text-emerald-400/60 text-[10px] font-bold uppercase tracking-wide mt-1">
+          Benjamin has been notified!
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[2rem] p-5 md:p-6 animate-fade-in-up">
+    <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-3xl p-5 md:p-6 animate-fade-in-up">
       <div className="text-center mb-3">
         <h4 className="text-white font-black text-lg md:text-xl font-display mb-1">
-          {language === 'ko' ? "채키가 도움이 되었나요? 🎓" : "Is Chekki helping tonight?"}
+          {language === 'ko' ? '채키가 도움이 되었나요? 🎓' : 'Is Chekki helping tonight?'}
         </h4>
         <p className="text-zinc-500 text-xs font-korean">
-          {language === 'ko' ? "더 나은 서비스를 위해 의견을 남겨주세요." : "Help us make homework time even better."}
+          {language === 'ko'
+            ? '더 나은 서비스를 위해 의견을 남겨주세요.'
+            : 'Help us make homework time even better.'}
         </p>
       </div>
 
@@ -70,7 +73,11 @@ export const InlineFeedback: React.FC = () => {
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder={language === 'ko' ? "더 하고 싶은 말씀이 있으신가요?" : "Tell Benjamin what we could do better..."}
+            placeholder={
+              language === 'ko'
+                ? '더 하고 싶은 말씀이 있으신가요?'
+                : 'Tell Benjamin what we could do better...'
+            }
             className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-zinc-200 text-sm focus:border-indigo-500 outline-none h-24 resize-none transition-all placeholder:text-zinc-700"
           />
           <button

@@ -6,76 +6,82 @@ import { LegalModal } from './LegalModal';
 import { LegalType } from '../types';
 
 interface Props {
-    isNight?: boolean;
+  isNight?: boolean;
 }
 
 export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
-    const { showPaywall, setShowPaywall } = useAuth();
-    const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { showPaywall, setShowPaywall } = useAuth();
+  const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const handleShowLegal = (e: Event) => {
-            const customEvent = e as CustomEvent<LegalType>;
-            setStandaloneLegal(customEvent.detail);
-        };
+  useEffect(() => {
+    const handleShowLegal = (e: Event) => {
+      const customEvent = e as CustomEvent<LegalType>;
+      setStandaloneLegal(customEvent.detail);
+    };
 
-        window.addEventListener('show-legal', handleShowLegal);
-        return () => window.removeEventListener('show-legal', handleShowLegal);
-    }, []);
+    window.addEventListener('show-legal', handleShowLegal);
+    return () => window.removeEventListener('show-legal', handleShowLegal);
+  }, []);
 
-    useEffect(() => {
-        if (showPaywall) {
-            // Reset scroll position to top when modal is opened
-            if (scrollContainerRef.current) {
-                scrollContainerRef.current.scrollTop = 0;
-            }
-        }
-    }, [showPaywall]);
+  useEffect(() => {
+    if (showPaywall) {
+      // Reset scroll position to top when modal is opened
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
+    }
+  }, [showPaywall]);
 
-    if (!showPaywall) return null;
+  if (!showPaywall) return null;
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-4">
-            <div
-                className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in"
-                onClick={() => setShowPaywall(false)}
-            />
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-4">
+      <div
+        className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in"
+        onClick={() => setShowPaywall(false)}
+      />
 
-            <div
-                role="dialog"
-                aria-modal="true"
-                aria-label="Premium subscription"
-                className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200'} rounded-[2.5rem] md:rounded-[3rem] w-full max-w-lg md:max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border animate-fade-in-up transition-opacity ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Premium subscription"
+        className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200'} rounded-3xl w-full max-w-lg md:max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.2)] border animate-fade-in-up transition-opacity ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+      >
+        {/* Gradient glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-40 bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none" />
 
-                {/* Gradient glow */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-40 bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none" />
+        {/* Fade-out overlay at the top to prevent text from cutting off when scrolled */}
+        <div
+          className={`absolute top-0 left-0 right-0 h-10 bg-gradient-to-b ${isNight ? 'from-zinc-900 via-zinc-900/95' : 'from-white via-white/95'} to-transparent pointer-events-none z-20 rounded-t-3xl`}
+        />
 
-                {/* Fade-out overlay at the top to prevent text from cutting off when scrolled */}
-                <div className={`absolute top-0 left-0 right-0 h-10 bg-gradient-to-b ${isNight ? 'from-zinc-900 via-zinc-900/95' : 'from-white via-white/95'} to-transparent pointer-events-none z-20 rounded-t-[2.5rem] md:rounded-t-[3rem]`} />
+        {/* Close */}
+        <button
+          onClick={() => setShowPaywall(false)}
+          aria-label="Close"
+          className="absolute top-4 right-5 text-zinc-500 hover:text-white transition-colors text-xl z-30 p-1"
+        >
+          ✕
+        </button>
 
-                {/* Close */}
-                <button
-                    onClick={() => setShowPaywall(false)}
-                    aria-label="Close"
-                    className="absolute top-4 right-5 text-zinc-500 hover:text-white transition-colors text-xl z-30 p-1"
-                >
-                    ✕
-                </button>
-
-                <div 
-                    ref={scrollContainerRef}
-                    className="p-6 md:p-8 pt-10 md:pt-12 overflow-y-auto max-h-[85vh] custom-scrollbar"
-                >
-                      <SubscriptionScreen onClose={() => setShowPaywall(false)} isNight={isNight} />
-                </div>
-            </div>
-
-            {standaloneLegal && (
-                <div className="fixed inset-0 z-[200]">
-                      <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={false} />
-                </div>
-            )}
+        <div
+          ref={scrollContainerRef}
+          className="p-6 md:p-8 pt-10 md:pt-12 overflow-y-auto max-h-[85vh] custom-scrollbar"
+        >
+          <SubscriptionScreen onClose={() => setShowPaywall(false)} isNight={isNight} />
         </div>
-    );
+      </div>
+
+      {standaloneLegal && (
+        <div className="fixed inset-0 z-[200]">
+          <LegalModal
+            type={standaloneLegal}
+            onClose={() => setStandaloneLegal(null)}
+            isStandalone={false}
+          />
+        </div>
+      )}
+    </div>
+  );
 };

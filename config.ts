@@ -17,20 +17,19 @@ export const MOCK_DELAY = 1500;
 export const SCREENSHOT_MODE = false;
 
 const getApiBaseUrl = () => {
-    const platform = Capacitor.getPlatform();
+  const platform = Capacitor.getPlatform();
 
-    if (platform === 'web') {
-        return ''; // Relative URLs work fine on web (Vercel/Localhost)
-    }
+  if (platform === 'web') {
+    return ''; // Relative URLs work fine on web (Vercel/Localhost)
+  }
 
-    if (USE_LOCAL_BACKEND) {
-        return `http://${DEVELOPER_LOCAL_IP}:3000`;
-    }
+  if (USE_LOCAL_BACKEND) {
+    return `http://${DEVELOPER_LOCAL_IP}:3000`;
+  }
 
-    // Default production URL for native platforms
-    return 'https://chekki-ai.vercel.app';
+  // Default production URL for native platforms
+  return 'https://chekki-ai.vercel.app';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
 export const PUBLIC_APP_URL = 'https://chekki-ai.vercel.app';
-

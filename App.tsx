@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
@@ -34,7 +33,6 @@ import { APP_VERSION } from './src/version';
 
 const SESSION_KEY = 'hw_last_session';
 
-
 // Root Error Boundary Component - Fixed property issues by using property initializers and explicit typing
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   // Explicitly declare props and state properties to fix "Property 'state/props' does not exist" errors
@@ -52,7 +50,9 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
           <div className="w-32 h-32 mb-8">
             <ChekkiMascot className="w-full h-full" mood="thinking" />
           </div>
-          <h1 className="text-2xl font-black text-white mb-4 font-display">Something went wrong.</h1>
+          <h1 className="text-2xl font-black text-white mb-4 font-display">
+            Something went wrong.
+          </h1>
           <button
             onClick={() => window.location.reload()}
             className="bg-orange-500 text-white px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-orange-600 transition-all active:scale-95"
@@ -81,7 +81,7 @@ const getInitialTheme = () => {
     return isNightTime();
   }
   return false; // Default to light mode
-}
+};
 
 // Returns ms until the next theme-transition boundary (22:00 → night, 07:00 → day).
 const msUntilNextTransition = (): number => {
@@ -93,7 +93,7 @@ const msUntilNextTransition = (): number => {
 
   const totalMs = ((hour * 60 + min) * 60 + sec) * 1000 + ms;
   const nightStart = 22 * 60 * 60 * 1000; // 22:00 in ms
-  const dayStart  =  7 * 60 * 60 * 1000;  // 07:00 in ms
+  const dayStart = 7 * 60 * 60 * 1000; // 07:00 in ms
   const dayMs = 24 * 60 * 60 * 1000;
 
   if (totalMs < dayStart) {
@@ -119,7 +119,15 @@ const useInAppBrowser = () => {
 };
 
 function AppContent() {
-  const { user, openLoginModal, isAuthenticated, incrementScan, checkScanLimit, setShowPaywall, isLoading: isAuthLoading } = useAuth();
+  const {
+    user,
+    openLoginModal,
+    isAuthenticated,
+    incrementScan,
+    checkScanLimit,
+    setShowPaywall,
+    isLoading: isAuthLoading,
+  } = useAuth();
   const { t, language } = useLanguage();
   const isInApp = useInAppBrowser();
 
@@ -129,14 +137,18 @@ function AppContent() {
     lastImageData,
     handleImageSelected: baseHandleImageSelected,
     handleScanAgain: hookHandleScanAgain,
-    executeReset: hookExecuteReset
+    executeReset: hookExecuteReset,
   } = useWorksheetAnalysis();
 
   const [isNight, setIsNight] = useState(getInitialTheme());
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
-  const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator !== 'undefined' ? !navigator.onLine : false
+  );
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -165,11 +177,11 @@ function AppContent() {
   }, []);
 
   // Global Confirmation State
-  const [confirmDialog, setConfirmDialog] = useState<{ 
-    title: string; 
-    onConfirm: () => void; 
-    confirmText?: string; 
-    cancelText?: string; 
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
     isSaving?: boolean;
   } | null>(null);
   const [successDialog, setSuccessDialog] = useState<string | null>(null);
@@ -198,11 +210,14 @@ function AppContent() {
     if (params.get('auth_action') === 'reset') {
       // Clear the query parameter from the URL to prevent message appearing on refresh
       window.history.replaceState({}, '', window.location.pathname);
-      setSuccessDialog(language === 'ko' ? "비밀번호가 성공적으로 변경되었습니다. 이제 로그인해주세요!" : "Password successfully updated. You can now log in!");
+      setSuccessDialog(
+        language === 'ko'
+          ? '비밀번호가 성공적으로 변경되었습니다. 이제 로그인해주세요!'
+          : 'Password successfully updated. You can now log in!'
+      );
       setTimeout(openLoginModal, 1500);
     }
   }, [language, openLoginModal]);
-
 
   useEffect(() => {
     // Initialize RevenueCat
@@ -244,14 +259,14 @@ function AppContent() {
 
   useEffect(() => {
     // Log app open
-    db.logUserEvent("app_open");
+    db.logUserEvent('app_open');
 
     if (analysisState.status === 'idle') {
       const saved = localStorage.getItem(SESSION_KEY);
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          const isFresh = parsed.timestamp && (Date.now() - parsed.timestamp < 10 * 60 * 1000);
+          const isFresh = parsed.timestamp && Date.now() - parsed.timestamp < 10 * 60 * 1000;
           if (isFresh && parsed.state && parsed.state.status === 'complete') {
             setAnalysisState(parsed.state);
           }
@@ -262,12 +277,17 @@ function AppContent() {
     }
   }, [analysisState.status, setAnalysisState]);
 
-  // Confetti fires only when analysis genuinely completes — not on upload
+  // Confetti and success toast fire only when analysis genuinely completes
   useEffect(() => {
     if (analysisState.status === 'complete') {
       setShowConfetti(true);
-      const timer = setTimeout(() => setShowConfetti(false), 3000);
-      return () => clearTimeout(timer);
+      setShowSuccessToast(true);
+      const confettiTimer = setTimeout(() => setShowConfetti(false), 3000);
+      const toastTimer = setTimeout(() => setShowSuccessToast(false), 4000);
+      return () => {
+        clearTimeout(confettiTimer);
+        clearTimeout(toastTimer);
+      };
     }
   }, [analysisState.status]);
 
@@ -279,16 +299,70 @@ function AppContent() {
   }, [analysisState.status]);
 
   const handleImageSelected = async (base64Data: string) => {
+    setShowErrorDetails(false);
     await baseHandleImageSelected(base64Data);
   };
 
   const translateError = (msg: string) => {
-    if (msg.includes('OFFLINE_ERROR')) return language === 'ko' ? "인터넷 연결을 확인해주세요." : "Please check your internet connection.";
-    if (msg.includes('NETWORK_ERROR')) return language === 'ko' ? "서버에 연결할 수 없습니다. 시뮬레이터 설정을 확인해주세요." : "Cannot connect to server. Check simulator setup.";
-    if (msg.includes('UNAUTHORIZED')) return language === 'ko' ? "로그인이 필요합니다. 다시 로그인해주세요." : "Authorization failed. Please log out and log back in.";
-    if (msg.includes('API_KEY_MISSING')) return language === 'ko' ? "서버 설정 오류입니다. 관리자에게 문의하세요." : "Server configuration error. Please contact support.";
-    if (msg.includes('ANALYSIS_FAILED') && msg.length > 'ANALYSIS_FAILED'.length) return msg; // show details
-    return msg;
+    const isKo = language === 'ko';
+
+    // Check for resource exhaustion / 429 errors first (billing, prepayment, etc)
+    if (
+      msg.includes('RESOURCE_EXHAUSTED') ||
+      msg.includes('429') ||
+      msg.includes('Too Many Requests') ||
+      msg.includes('prepayment') ||
+      msg.includes('credits are depleted')
+    ) {
+      return isKo
+        ? '일시적으로 서비스 요청이 많아 연결이 지연되고 있습니다. 잠시 후 다시 시도해 주세요!'
+        : 'The service is temporarily busy due to high demand. Please try again in a little while!';
+    }
+
+    if (msg.includes('OFFLINE_ERROR')) {
+      return isKo ? '인터넷 연결을 확인해주세요.' : 'Please check your internet connection.';
+    }
+
+    if (msg.includes('NETWORK_ERROR')) {
+      return isKo
+        ? '서버에 연결할 수 없습니다. 인터넷 연결을 확인하고 잠시 후 다시 시도해 주세요.'
+        : 'Unable to connect to the server. Please check your internet connection and try again.';
+    }
+
+    if (msg.includes('UNAUTHORIZED')) {
+      return isKo
+        ? '로그인이 필요합니다. 다시 로그인해주세요.'
+        : 'Authorization failed. Please log out and log back in.';
+    }
+
+    if (msg.includes('API_KEY_MISSING')) {
+      return isKo
+        ? '서버 설정 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+        : 'Server configuration error. Please try again later.';
+    }
+
+    if (msg.includes('PAYLOAD_TOO_LARGE')) {
+      return isKo
+        ? '이미지 용량이 너무 큽니다. 10MB 이하의 사진을 업로드해 주세요.'
+        : 'The image is too large. Please upload an image under 10MB.';
+    }
+
+    if (msg.includes('LIMIT_REACHED') || msg.includes('limit_reached')) {
+      return isKo
+        ? '오늘 이용 가능한 한도를 모두 사용하셨습니다. 매일 자정에 다시 충전됩니다!'
+        : 'You have exceeded your limit for today. It will refill at midnight!';
+    }
+
+    if (msg.includes('INVALID_IMAGE_DATA') || msg.includes('INVALID_INPUT')) {
+      return isKo
+        ? '올바르지 않은 이미지 형식입니다. 학습지를 다시 선명하게 촬영해 주세요.'
+        : 'Invalid image format. Please capture a clear photo of the worksheet.';
+    }
+
+    // Default analysis fallback
+    return isKo
+      ? '분석에 실패했어요. 밝은 곳에서 사진을 다시 찍어주세요!'
+      : 'Analysis failed. Please try taking a clearer picture in good lighting!';
   };
 
   const handleScanAgain = () => {
@@ -300,21 +374,25 @@ function AppContent() {
   const handleReset = (confirm = true) => {
     if (confirm && analysisState.status === 'complete') {
       setConfirmDialog({
-        title: language === 'ko' ? "현재 결과가 삭제됩니다. 계속하시겠습니까?" : "Current results will be removed. Do you want to continue?",
-        confirmText: language === 'ko' ? "결과 삭제 (처음으로)" : "Discard Results & Exit",
-        cancelText: language === 'ko' ? "취소" : "Cancel",
+        title:
+          language === 'ko'
+            ? '현재 결과가 삭제됩니다. 계속하시겠습니까?'
+            : 'Current results will be removed. Do you want to continue?',
+        confirmText: language === 'ko' ? '결과 삭제 (처음으로)' : 'Discard Results & Exit',
+        cancelText: language === 'ko' ? '취소' : 'Cancel',
         onConfirm: () => {
           hookExecuteReset();
           setConfirmDialog(null);
-        }
+          setShowErrorDetails(false);
+        },
       });
       return;
     }
     hookExecuteReset();
+    setShowErrorDetails(false);
   };
 
-
-  const isLocked = activeTab !== 'help' && (analysisState.status === 'analyzing');
+  const isLocked = activeTab !== 'help' && analysisState.status === 'analyzing';
 
   useEffect(() => {
     if (isLocked) {
@@ -331,17 +409,23 @@ function AppContent() {
   if (showSubscribePage && platform === 'web') return <SubscribePage />;
   if (showAdminPage && platform === 'web') return <AdminPage />;
 
-
   return (
     <ErrorBoundary>
-      <div className={`min-h-[100dvh] ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-500 flex flex-col`}>
-          {standaloneLegal && (
-            <div className="fixed inset-0 z-[200]">
-              <LegalModal type={standaloneLegal} onClose={() => setStandaloneLegal(null)} isStandalone={true} isNight={isNight} />
-            </div>
-          )}
-        <Header 
-          onReset={() => handleReset(true)} 
+      <div
+        className={`min-h-[100dvh] ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-500 flex flex-col`}
+      >
+        {standaloneLegal && (
+          <div className="fixed inset-0 z-[200]">
+            <LegalModal
+              type={standaloneLegal}
+              onClose={() => setStandaloneLegal(null)}
+              isStandalone={true}
+              isNight={isNight}
+            />
+          </div>
+        )}
+        <Header
+          onReset={() => handleReset(true)}
           isNight={isNight}
           setIsNight={setIsNight}
           onOpenHelp={() => {
@@ -349,26 +433,35 @@ function AppContent() {
           }}
         />
         {/* Web-only mobile download banner */}
-        {platform === 'web' && (
-          <MobileAppBanner />
-        )}
+        {platform === 'web' && <MobileAppBanner />}
         <PaywallModal isNight={isNight} />
         <OdapNoteModal isNight={isNight} />
         <LoginModal isNight={isNight} />
+
+        {showSuccessToast && (
+          <div className="fixed top-24 left-4 right-4 z-[99] bg-emerald-600 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-down border border-white/20 backdrop-blur-md">
+            <span className="text-xl">✅</span>
+            <p className="text-xs font-bold leading-tight font-korean">
+              {language === 'ko'
+                ? '분석 완료! 종이 위에 정답과 다정한 티칭 가이드가 표시됩니다.'
+                : 'Analysis complete! Answer overlays and teaching guides are ready.'}
+            </p>
+          </div>
+        )}
 
         {isOffline && (
           <div className="fixed top-24 left-4 right-4 z-[99] bg-red-600 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-down border border-white/20 backdrop-blur-md">
             <span className="text-xl">🔌</span>
             <p className="text-xs font-bold leading-tight font-korean">
               {language === 'ko'
-                ? "네트워크가 연결되어 있지 않습니다. 연결 상태를 확인해주세요."
-                : "You are offline. Please check your internet connection."}
+                ? '네트워크가 연결되어 있지 않습니다. 연결 상태를 확인해주세요.'
+                : 'You are offline. Please check your internet connection.'}
             </p>
           </div>
         )}
 
         {showChildProfileModal && (
-          <ProgressiveOnboardingModal 
+          <ProgressiveOnboardingModal
             onComplete={() => setShowChildProfileModal(false)}
             onSkip={() => {
               sessionStorage.setItem('skipped_child_profile', 'true');
@@ -401,7 +494,6 @@ function AppContent() {
         {showConfetti && <Confetti />}
 
         <main className="flex-1 min-h-0 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-[calc(env(safe-area-inset-top)+6rem)] md:pt-32">
-
           {activeTab === 'help' ? (
             <div className="animate-fade-in">
               <HelpView isNight={isNight} onClose={() => switchTab('scan')} />
@@ -417,10 +509,15 @@ function AppContent() {
                         <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
                           {language === 'ko'
                             ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요."
-                            : "Open in Safari or Chrome for the best experience (Camera/Mic)."}
+                            : 'Open in Safari or Chrome for the best experience (Camera/Mic).'}
                         </p>
                       </div>
-                      <button onClick={() => setShowInAppNotice(false)} className="text-white/60 p-1 ml-2">✕</button>
+                      <button
+                        onClick={() => setShowInAppNotice(false)}
+                        className="text-white/60 p-1 ml-2"
+                      >
+                        ✕
+                      </button>
                     </div>
                   )}
                   {isAuthLoading ? (
@@ -428,7 +525,12 @@ function AppContent() {
                       <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
                     </div>
                   ) : (
-                    <CameraView isNight={isNight} onImageSelected={(data) => handleImageSelected(data)} minimal onOpenHelp={() => switchTab('help')} />
+                    <CameraView
+                      isNight={isNight}
+                      onImageSelected={(data) => handleImageSelected(data)}
+                      minimal
+                      onOpenHelp={() => switchTab('help')}
+                    />
                   )}
                 </div>
               )}
@@ -444,27 +546,75 @@ function AppContent() {
                   <div className="relative w-40 h-40 md:w-52 md:h-52 mb-10">
                     {/* Empathy ring — expands outward to convey "something happened" */}
                     <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ring-pulse" />
-                    <div className="absolute inset-0 rounded-full bg-red-500/10 animate-ring-pulse" style={{ animationDelay: '0.4s' }} />
+                    <div
+                      className="absolute inset-0 rounded-full bg-red-500/10 animate-ring-pulse"
+                      style={{ animationDelay: '0.4s' }}
+                    />
                     <div className="relative w-full h-full bg-red-950/20 rounded-full flex items-center justify-center border border-red-500/30 overflow-hidden">
-                      <img src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png" alt="Chekki" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
+                      <img
+                        src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png"
+                        alt="Chekki"
+                        className="w-36 h-36 md:w-48 md:h-48 object-contain"
+                      />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2 font-korean">{t('error_title')}</h3>
+                  <h3
+                    className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}
+                  >
+                    {t('error_title')}
+                  </h3>
                   <div className="space-y-2 mb-8 max-w-md mx-auto">
-                    <p className="text-zinc-400 font-korean leading-relaxed">
-                      {translateError(analysisState.errorMessage || "")}
+                    <p
+                      className={`${isNight ? 'text-zinc-400' : 'text-zinc-650'} font-korean leading-relaxed`}
+                    >
+                      {translateError(analysisState.errorMessage || '')}
                     </p>
-                    {analysisState.errorMessage && (analysisState.errorMessage.includes('NETWORK_ERROR') || analysisState.errorMessage.includes('ANALYSIS_FAILED') || analysisState.errorMessage.includes('UNAUTHORIZED')) && (
-                      <p className="text-[10px] text-zinc-600 font-mono break-all opacity-50">
-                        {analysisState.errorMessage}
-                      </p>
+                    <p
+                      className={`text-xs md:text-sm font-semibold mt-4 ${isNight ? 'text-zinc-500' : 'text-zinc-450'} font-korean leading-snug`}
+                    >
+                      {language === 'ko'
+                        ? '💡 팁: 학습지를 평평하게 펴고, 밝은 곳에서 글자가 선명하게 보이도록 다시 촬영해 보세요.'
+                        : '💡 Tip: Flatten the paper, ensure bright lighting, and make sure the text is in focus.'}
+                    </p>
+                    {analysisState.errorMessage && (
+                      <div className="mt-6">
+                        <button
+                          type="button"
+                          onClick={() => setShowErrorDetails(!showErrorDetails)}
+                          className={`text-[10px] uppercase font-bold tracking-wider opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1 mx-auto ${
+                            isNight ? 'text-zinc-400' : 'text-zinc-500'
+                          }`}
+                        >
+                          <span>{showErrorDetails ? '▼' : '▶'}</span>
+                          <span>
+                            {language === 'ko' ? '상세 에러 정보 보기' : 'View Technical Details'}
+                          </span>
+                        </button>
+                        {showErrorDetails && (
+                          <div
+                            className={`mt-3 p-4 rounded-2xl border text-left text-[10px] font-mono break-all max-w-sm mx-auto overflow-y-auto max-h-32 transition-all duration-300 ${
+                              isNight
+                                ? 'bg-zinc-950/80 border-white/5 text-zinc-500'
+                                : 'bg-zinc-100 border-zinc-200 text-zinc-600'
+                            }`}
+                          >
+                            {analysisState.errorMessage}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
-                    <button onClick={hookHandleScanAgain} className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]">
+                    <button
+                      onClick={hookHandleScanAgain}
+                      className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]"
+                    >
                       {t('btn_scan_again_simple')}
                     </button>
-                    <button onClick={() => handleReset(false)} className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}>
+                    <button
+                      onClick={() => handleReset(false)}
+                      className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
+                    >
                       {t('btn_retake')}
                     </button>
                   </div>
@@ -475,11 +625,17 @@ function AppContent() {
                 <div className="animate-fade-in-up flex flex-col pt-4 pb-4">
                   <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
                     <div className="flex items-center gap-3 min-w-0">
-                      <h2 className={`text-sm md:text-2xl font-black font-korean tracking-tight truncate ${isNight ? 'text-white' : 'text-zinc-850'}`}>
-                        {language === 'ko' ? (analysisState.data.worksheet_summary?.title_ko || "제목 없음") : (analysisState.data.worksheet_summary?.title_en || "Untitled")}
+                      <h2
+                        className={`text-sm md:text-2xl font-black font-korean tracking-tight truncate ${isNight ? 'text-white' : 'text-zinc-850'}`}
+                      >
+                        {language === 'ko'
+                          ? analysisState.data.worksheet_summary?.title_ko || '제목 없음'
+                          : analysisState.data.worksheet_summary?.title_en || 'Untitled'}
                       </h2>
                       {user?.plan === 'pro' && (
-                        <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest">PRO</span>
+                        <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest">
+                          PRO
+                        </span>
                       )}
                     </div>
 
@@ -491,7 +647,11 @@ function AppContent() {
                       imageUrl={analysisState.originalImage!}
                       items={analysisState.data.items || []}
                       isLoadingItems={!analysisState.isItemsLoaded}
-                      worksheetTitle={language === 'ko' ? analysisState.data.worksheet_summary?.title_ko : analysisState.data.worksheet_summary?.title_en}
+                      worksheetTitle={
+                        language === 'ko'
+                          ? analysisState.data.worksheet_summary?.title_ko
+                          : analysisState.data.worksheet_summary?.title_en
+                      }
                       onScanAgain={handleScanAgain}
                       onClose={handleScanAgain}
                       isNight={isNight}
@@ -506,18 +666,23 @@ function AppContent() {
         </main>
 
         {/* --- PROFESSIONAL BUSINESS FOOTER --- */}
-        {!isLocked && <Footer isNight={isNight} language={language} onLegalClick={(type) => setStandaloneLegal(type)} />}
+        {!isLocked && (
+          <Footer
+            isNight={isNight}
+            language={language}
+            onLegalClick={(type) => setStandaloneLegal(type)}
+          />
+        )}
 
-        <BottomNav 
-          activeTab={activeTab} 
-          onTabChange={switchTab} 
-          isVisible={analysisState.status === 'idle'} 
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={switchTab}
+          isVisible={analysisState.status === 'idle'}
           isNight={isNight}
           isAuthenticated={isAuthenticated}
           openLoginModal={openLoginModal}
         />
         <DebugConsole />
-
 
         <style>{`
             @keyframes confetti {

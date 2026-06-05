@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile, SubscriptionRecord, SubscriptionPlatform } from '../types';
 import { auth, db, dbInstance } from '../services/database';
@@ -16,7 +15,7 @@ import {
   signInWithPopup,
   signInWithCredential,
   signInWithCustomToken,
-  type User
+  type User,
 } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { SignInWithApple } from '@capacitor-community/apple-sign-in';
@@ -49,7 +48,7 @@ import { PUBLIC_APP_URL, API_BASE_URL } from '../config';
 const withTimeout = <T,>(promise: Promise<T>, ms: number, timeoutMsg: string): Promise<T> => {
   return Promise.race([
     promise,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(timeoutMsg)), ms))
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(timeoutMsg)), ms)),
   ]);
 };
 
@@ -71,7 +70,9 @@ interface AuthContextType {
   checkQuestionLimit: () => boolean;
   incrementQuestion: () => Promise<boolean>;
   upgradeToPro: (code?: string) => Promise<boolean>;
-  processPayment: (product?: any) => Promise<{ success: boolean; message?: string; userCancelled?: boolean }>;
+  processPayment: (
+    product?: any
+  ) => Promise<{ success: boolean; message?: string; userCancelled?: boolean }>;
   restorePurchases: () => Promise<{ success: boolean; message?: string }>;
   joinSchool: (schoolCode: string) => Promise<boolean>;
   cancelSubscription: () => Promise<void>;
@@ -84,7 +85,11 @@ interface AuthContextType {
   showLoginModal: boolean;
   openLoginModal: () => void;
   closeLoginModal: () => void;
-  updateChildProfile: (childAge: string, childEnglishLevel: string, parentEnglishLevel: string) => Promise<void>;
+  updateChildProfile: (
+    childAge: string,
+    childEnglishLevel: string,
+    parentEnglishLevel: string
+  ) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -118,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           googleAuthInitializedRef.current = true;
         })
         .catch((err) => {
-          console.error("[AuthContext] Google Auth Initialization Error:", err);
+          console.error('[AuthContext] Google Auth Initialization Error:', err);
         });
     }
   }, []);
@@ -135,10 +140,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const idToken = await withTimeout(user.getIdToken(), 5000, 'getIdToken timeout');
 
       // Race the subscription check against a 10s timeout to prevent hangs on simulator
-      const subCheckTimeout = new Promise<SubscriptionRecord | null>((resolve) => setTimeout(() => resolve(null), 10000));
+      const subCheckTimeout = new Promise<SubscriptionRecord | null>((resolve) =>
+        setTimeout(() => resolve(null), 10000)
+      );
       const subRecord = await Promise.race([
         subscriptionService.initialize(user.uid, idToken) as Promise<SubscriptionRecord | null>,
-        subCheckTimeout
+        subCheckTimeout,
       ]);
 
       if (subRecord) {
@@ -149,24 +156,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (baseProfile) {
           if (isSubActive && baseProfile.plan !== 'pro') {
-            finalProfile = { ...baseProfile, plan: 'pro', maxScansPerDay: 9999, maxQuestionsPerDay: 9999, subscriptionPlatform: subRecord.subscription_platform };
-          } else if (!isSubActive && baseProfile.plan === 'pro' && subRecord.subscription_status === 'expired') {
-            finalProfile = { ...baseProfile, plan: 'free', maxScansPerDay: FREE_DAILY_LIMIT, maxQuestionsPerDay: 5, subscriptionPlatform: subRecord.subscription_platform };
+            finalProfile = {
+              ...baseProfile,
+              plan: 'pro',
+              maxScansPerDay: 9999,
+              maxQuestionsPerDay: 9999,
+              subscriptionPlatform: subRecord.subscription_platform,
+            };
+          } else if (
+            !isSubActive &&
+            baseProfile.plan === 'pro' &&
+            subRecord.subscription_status === 'expired'
+          ) {
+            finalProfile = {
+              ...baseProfile,
+              plan: 'free',
+              maxScansPerDay: FREE_DAILY_LIMIT,
+              maxQuestionsPerDay: 5,
+              subscriptionPlatform: subRecord.subscription_platform,
+            };
             setShowPaywall(true);
           }
           if (subRecord.subscription_platform !== 'none') {
-            finalProfile = { ...(finalProfile || baseProfile!), subscriptionPlatform: subRecord.subscription_platform };
+            finalProfile = {
+              ...(finalProfile || baseProfile!),
+              subscriptionPlatform: subRecord.subscription_platform,
+            };
           }
         }
       }
     } catch (e) {
-      console.error("[AuthContext] Subscription check failed:", e);
+      console.error('[AuthContext] Subscription check failed:', e);
     }
 
     // --- Demo Account Override ---
     if (user.email === 'test@example.com') {
       finalProfile = {
-        ...(finalProfile || {} as UserProfile),
+        ...(finalProfile || ({} as UserProfile)),
         email: 'test@example.com',
         name: 'Reviewer',
         plan: 'pro',
@@ -175,12 +201,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
     } else if (user.email === 'expired@example.com') {
       finalProfile = {
-        ...(finalProfile || {} as UserProfile),
+        ...(finalProfile || ({} as UserProfile)),
         email: 'expired@example.com',
         name: 'Reviewer (Expired)',
         plan: 'free',
         maxScansPerDay: 3,
-        maxQuestionsPerDay: 5
+        maxQuestionsPerDay: 5,
       };
       if (!hasActiveAppStoreSub) {
         setShowPaywall(true);
@@ -199,7 +225,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           profile = await db.getUser(user.uid);
         } catch (e) {
-          console.error("[AuthContext] Failed to load user profile:", e);
+          console.error('[AuthContext] Failed to load user profile:', e);
           setIsLoading(false);
           return;
         }
@@ -244,7 +270,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // so we don't call setIsLoading(false) twice.
           return;
         } catch (err) {
-          console.error("[AuthContext] Anonymous sign-in failed or timed out:", err);
+          console.error('[AuthContext] Anonymous sign-in failed or timed out:', err);
         }
       }
       setIsLoading(false);
@@ -272,7 +298,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         schoolId: null,
         schoolName: null,
         subscriptionStartedAt: null,
-        nextBillingDate: null
+        nextBillingDate: null,
       };
 
       await db.createUser(res.user.uid, newProfile);
@@ -285,9 +311,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${idToken}`
+              Authorization: `Bearer ${idToken}`,
             },
-            body: JSON.stringify({ schoolCode: code })
+            body: JSON.stringify({ schoolCode: code }),
           });
           if (redeemRes.ok) {
             const data = await redeemRes.json();
@@ -299,7 +325,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 maxQuestionsPerDay: 9999,
                 schoolId: code.toUpperCase().trim(),
                 schoolName: data.schoolName,
-                subscriptionPlatform: 'school_code'
+                subscriptionPlatform: 'school_code',
               };
             }
           } else {
@@ -333,14 +359,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user_id: 'demo-expired-uid', // This will be replaced by actual UID in onAuthStateChanged
         subscription_status: 'expired',
         subscription_platform: 'apple',
-        subscription_expiry_date: new Date().toISOString()
+        subscription_expiry_date: new Date().toISOString(),
       };
       setSubscriptionRecord(expiredRecord);
       setShowPaywall(true); // Force paywall for expired account
     }
 
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Login timed out. Please check your internet connection and try again.')), 15000);
+      setTimeout(
+        () =>
+          reject(
+            new Error('Login timed out. Please check your internet connection and try again.')
+          ),
+        15000
+      );
     });
 
     const signInFlow = async () => {
@@ -355,7 +387,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       isSigningUpRef.current = true;
       const provider = new OAuthProvider('apple.com');
-      
+
       if (Capacitor.getPlatform() === 'ios') {
         // NATIVE IOS FLOW
         const rawNonce = generateRawNonce();
@@ -365,27 +397,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           clientId: 'com.chekkiai.app',
           redirectURI: 'https://homework-assistant-c00b9.firebaseapp.com/__/auth/handler',
           scopes: 'email name',
-          state: generateRawNonce(), 
-          nonce: hashedNonce,        
+          state: generateRawNonce(),
+          nonce: hashedNonce,
         };
-        
+
         const result = await SignInWithApple.authorize(options);
-        
+
         if (result.response && result.response.identityToken) {
           const credential = provider.credential({
             idToken: result.response.identityToken,
-            rawNonce: rawNonce,      
+            rawNonce: rawNonce,
           });
-          
+
           try {
             const authResult = await signInWithCredential(auth, credential);
-            
+
             if (authResult.user) {
               const existingProfile = await db.getUser(authResult.user.uid);
               if (!existingProfile) {
-                const name = result.response.givenName ? `${result.response.givenName} ${result.response.familyName || ''}`.trim() : 'User';
+                const name = result.response.givenName
+                  ? `${result.response.givenName} ${result.response.familyName || ''}`.trim()
+                  : 'User';
                 const email = result.response.email || authResult.user.email || '';
-                
+
                 const newProfile: UserProfile = {
                   name: name || 'User',
                   email: email,
@@ -399,7 +433,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   schoolId: null,
                   schoolName: null,
                   subscriptionStartedAt: null,
-                  nextBillingDate: null
+                  nextBillingDate: null,
                 };
                 await db.createUser(authResult.user.uid, newProfile);
                 await fetchAndSetUserProfile(authResult.user, newProfile);
@@ -419,31 +453,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // WEB / ANDROID FLOW
         const result = await signInWithPopup(auth, provider);
         if (result.user) {
-            const existingProfile = await db.getUser(result.user.uid);
-            if (!existingProfile) {
-              const name = result.user.displayName || 'User';
-              const email = result.user.email || '';
-              
-              const newProfile: UserProfile = {
-                name: name,
-                email: email,
-                plan: 'free',
-                scansUsedToday: 0,
-                lastScanDate: new Date().toISOString().split('T')[0],
-                maxScansPerDay: FREE_DAILY_LIMIT,
-                questionsUsedToday: 0,
-                maxQuestionsPerDay: 5,
-                lastQuestionDate: new Date().toISOString().split('T')[0],
-                schoolId: null,
-                schoolName: null,
-                subscriptionStartedAt: null,
-                nextBillingDate: null
-              };
-              await db.createUser(result.user.uid, newProfile);
-              await fetchAndSetUserProfile(result.user, newProfile);
-            } else {
-              await fetchAndSetUserProfile(result.user, existingProfile);
-            }
+          const existingProfile = await db.getUser(result.user.uid);
+          if (!existingProfile) {
+            const name = result.user.displayName || 'User';
+            const email = result.user.email || '';
+
+            const newProfile: UserProfile = {
+              name: name,
+              email: email,
+              plan: 'free',
+              scansUsedToday: 0,
+              lastScanDate: new Date().toISOString().split('T')[0],
+              maxScansPerDay: FREE_DAILY_LIMIT,
+              questionsUsedToday: 0,
+              maxQuestionsPerDay: 5,
+              lastQuestionDate: new Date().toISOString().split('T')[0],
+              schoolId: null,
+              schoolName: null,
+              subscriptionStartedAt: null,
+              nextBillingDate: null,
+            };
+            await db.createUser(result.user.uid, newProfile);
+            await fetchAndSetUserProfile(result.user, newProfile);
+          } else {
+            await fetchAndSetUserProfile(result.user, existingProfile);
+          }
         }
         setShowLoginModal(false);
       }
@@ -460,7 +494,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       isSigningUpRef.current = true;
       const provider = new GoogleAuthProvider();
-      
+
       if (Capacitor.isNativePlatform()) {
         try {
           if (!googleAuthInitializedRef.current) {
@@ -471,7 +505,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (googleUser && googleUser.authentication && googleUser.authentication.idToken) {
             const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
             const result = await signInWithCredential(auth, credential);
-            
+
             if (result.user) {
               const existingProfile = await db.getUser(result.user.uid);
               if (!existingProfile) {
@@ -488,7 +522,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   schoolId: null,
                   schoolName: null,
                   subscriptionStartedAt: null,
-                  nextBillingDate: null
+                  nextBillingDate: null,
                 };
                 await db.createUser(result.user.uid, newProfile);
                 await fetchAndSetUserProfile(result.user, newProfile);
@@ -502,20 +536,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (e: any) {
           console.error('Native Google Auth Error:', e);
           const errorMsg = e.message || (typeof e === 'string' ? e : JSON.stringify(e));
-          if (errorMsg && (errorMsg.toLowerCase().includes('cancel') || errorMsg.includes('12501') || errorMsg.includes('cancelsignin'))) return;
+          if (
+            errorMsg &&
+            (errorMsg.toLowerCase().includes('cancel') ||
+              errorMsg.includes('12501') ||
+              errorMsg.includes('cancelsignin'))
+          )
+            return;
           throw new Error(`Native Google Sign-In failed: ${errorMsg}`);
         }
       }
 
       // Add custom parameters to ensure a fresh login experience
       provider.setCustomParameters({
-        prompt: 'select_account'
+        prompt: 'select_account',
       });
-      
+
       // On mobile, popups can be blocked or cause argument-errors.
       // We use the standard popup but with extra error handling.
       const result = await signInWithPopup(auth, provider);
-      
+
       if (result.user) {
         const existingProfile = await db.getUser(result.user.uid);
         if (!existingProfile) {
@@ -532,7 +572,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             schoolId: null,
             schoolName: null,
             subscriptionStartedAt: null,
-            nextBillingDate: null
+            nextBillingDate: null,
           };
           await db.createUser(result.user.uid, newProfile);
           await fetchAndSetUserProfile(result.user, newProfile);
@@ -545,7 +585,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Google Sign-In Technical Error:', err);
       // If it's the specific mobile popup error, give a clear instruction
       if (err.code === 'auth/argument-error' || err.code === 'auth/internal-error') {
-        throw new Error("Login interrupted. Please try again or use email login.");
+        throw new Error('Login interrupted. Please try again or use email login.');
       }
       throw err;
     } finally {
@@ -556,14 +596,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithKakao = async () => {
     try {
       isSigningUpRef.current = true;
-      
+
       if (!Capacitor.isNativePlatform()) {
-        throw new Error("Kakao login is only supported on Android and iOS devices.");
+        throw new Error('Kakao login is only supported on Android and iOS devices.');
       }
 
       const kakaoUser = await KakaoLogin.login();
       if (!kakaoUser.accessToken) {
-        throw new Error("Failed to retrieve access token from Kakao login.");
+        throw new Error('Failed to retrieve access token from Kakao login.');
       }
 
       // Exchange Kakao Access Token for Firebase Custom Token
@@ -577,7 +617,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to authenticate with Kakao on the server.");
+        throw new Error(errorData.error || 'Failed to authenticate with Kakao on the server.');
       }
 
       const { customToken } = await response.json();
@@ -601,7 +641,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             schoolId: null,
             schoolName: null,
             subscriptionStartedAt: null,
-            nextBillingDate: null
+            nextBillingDate: null,
           };
           await db.createUser(result.user.uid, newProfile);
           await fetchAndSetUserProfile(result.user, newProfile);
@@ -632,10 +672,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('[Kakao Sign-In] Full message:', fullMsg);
 
       // Silently swallow user-cancellations
-      if (fullMsg.toLowerCase().includes('cancel') ||
-          fullMsg.includes('12501') ||
-          fullMsg.toLowerCase().includes('cancelsignin') ||
-          fullMsg.toLowerCase().includes('user cancelled')) {
+      if (
+        fullMsg.toLowerCase().includes('cancel') ||
+        fullMsg.includes('12501') ||
+        fullMsg.toLowerCase().includes('cancelsignin') ||
+        fullMsg.toLowerCase().includes('user cancelled')
+      ) {
         return;
       }
 
@@ -674,7 +716,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await db.updateUser(firebaseUser.uid, { name });
   };
 
-  const updateChildProfile = async (childAge: string, childEnglishLevel: string, parentEnglishLevel: string) => {
+  const updateChildProfile = async (
+    childAge: string,
+    childEnglishLevel: string,
+    parentEnglishLevel: string
+  ) => {
     if (userProfile?.email === 'test@example.com' || userProfile?.email === 'expired@example.com') {
       setUserProfile({ ...userProfile, childAge, childEnglishLevel, parentEnglishLevel });
       return;
@@ -694,7 +740,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Account deletion error:', e);
       // If re-authentication is needed, Firebase will throw 'auth/requires-recent-login'
       if (e.code === 'auth/requires-recent-login') {
-        throw new Error("Sensitive operation. Please log out and log back in before deleting your account.");
+        throw new Error(
+          'Sensitive operation. Please log out and log back in before deleting your account.'
+        );
       }
       throw e;
     } finally {
@@ -726,12 +774,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastScanDate !== today;
     try {
-      setUserProfile(prev => prev ? {
-        ...prev,
-        scansUsedToday: isNewDay ? 1 : prev.scansUsedToday + 1,
-        lastScanDate: today
-      } : null);
-      
+      setUserProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              scansUsedToday: isNewDay ? 1 : prev.scansUsedToday + 1,
+              lastScanDate: today,
+            }
+          : null
+      );
+
       try {
         const scansCount = parseInt(localStorage.getItem('chekki_total_scans') || '0') + 1;
         localStorage.setItem('chekki_total_scans', scansCount.toString());
@@ -743,7 +795,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (reviewErr) {
         console.error('InAppReview error:', reviewErr);
       }
-      
+
       return true;
     } catch (e) {
       return false;
@@ -768,11 +820,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastQuestionDate !== today;
     try {
-      setUserProfile(prev => prev ? {
-        ...prev,
-        questionsUsedToday: isNewDay ? 1 : prev.questionsUsedToday + 1,
-        lastQuestionDate: today
-      } : null);
+      setUserProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              questionsUsedToday: isNewDay ? 1 : prev.questionsUsedToday + 1,
+              lastQuestionDate: today,
+            }
+          : null
+      );
       return true;
     } catch (e) {
       return false;
@@ -796,7 +852,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await db.sendFeedback(firebaseUser.uid, {
         comment: `[RESET_REQUEST] ${reason}`,
         userEmail: firebaseUser.email || '',
-        userName: userProfile?.name || 'User'
+        userName: userProfile?.name || 'User',
       });
       return true;
     } catch (e) {
@@ -813,9 +869,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
+          Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ schoolCode })
+        body: JSON.stringify({ schoolCode }),
       });
 
       if (response.ok) {
@@ -827,7 +883,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             plan: 'pro',
             maxScansPerDay: 9999,
             maxQuestionsPerDay: 9999,
-            subscriptionPlatform: 'school_code'
+            subscriptionPlatform: 'school_code',
           };
           setUserProfile({ ...userProfile, ...updates });
           return true;
@@ -858,7 +914,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       maxQuestionsPerDay: 9999,
       subscriptionStartedAt: new Date().toISOString(),
       nextBillingDate: nextMonth.toISOString(),
-      isCanceled: false
+      isCanceled: false,
     };
 
     setUserProfile({ ...userProfile, ...updates });
@@ -867,27 +923,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Platform-aware payment: delegates to subscriptionService
-  const processPayment = async (product: any = AppleProducts.MONTHLY): Promise<{ success: boolean; message?: string; userCancelled?: boolean }> => {
+  const processPayment = async (
+    product: any = AppleProducts.MONTHLY
+  ): Promise<{ success: boolean; message?: string; userCancelled?: boolean }> => {
     const isDemo = ['test@example.com', 'expired@example.com'].includes(userProfile?.email || '');
     if (!isDemo && (!firebaseUser || !userProfile)) {
       return { success: false, message: 'Please log in to subscribe.' };
     }
 
     const idToken = isDemo ? 'demo-token' : await firebaseUser!.getIdToken();
-    const response = await subscriptionService.purchase(product, firebaseUser?.uid || 'demo-uid', idToken);
+    const response = await subscriptionService.purchase(
+      product,
+      firebaseUser?.uid || 'demo-uid',
+      idToken
+    );
 
     if (response.success) {
       const upgraded = await upgradeToPro();
       const newSubRecord = subscriptionService.getStatus();
       if (newSubRecord) setSubscriptionRecord(newSubRecord);
       if (upgraded) return { success: true };
-      return { success: false, message: 'Payment succeeded but profile update failed. Please contact support.' };
+      return {
+        success: false,
+        message: 'Payment succeeded but profile update failed. Please contact support.',
+      };
     }
 
     return {
       success: false,
       message: response.error?.message || 'An error occurred during payment.',
-      userCancelled: response.userCancelled
+      userCancelled: response.userCancelled,
     };
   };
 
@@ -907,39 +972,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const closeLoginModal = () => setShowLoginModal(false);
 
   return (
-    <AuthContext.Provider value={{
-      user: userProfile,
-      firebaseUser,
-      subscriptionRecord,
-      signUp,
-      signIn,
-      signInWithApple,
-      signInWithGoogle,
-      signInWithKakao,
-      sendResetEmail,
-      logout,
-      updateProfile,
-      deleteAccount,
-      checkScanLimit,
-      incrementScan,
-      checkQuestionLimit,
-      incrementQuestion,
-      upgradeToPro,
-      processPayment,
-      restorePurchases,
-      joinSchool,
-      cancelSubscription,
-      requestLimitReset,
-      isAuthenticated: !!userProfile,
-      isLoading,
-      showPaywall,
-      setShowPaywall,
-      paywallContext,
-      showLoginModal,
-      openLoginModal,
-      closeLoginModal,
-      updateChildProfile
-    }}>
+    <AuthContext.Provider
+      value={{
+        user: userProfile,
+        firebaseUser,
+        subscriptionRecord,
+        signUp,
+        signIn,
+        signInWithApple,
+        signInWithGoogle,
+        signInWithKakao,
+        sendResetEmail,
+        logout,
+        updateProfile,
+        deleteAccount,
+        checkScanLimit,
+        incrementScan,
+        checkQuestionLimit,
+        incrementQuestion,
+        upgradeToPro,
+        processPayment,
+        restorePurchases,
+        joinSchool,
+        cancelSubscription,
+        requestLimitReset,
+        isAuthenticated: !!userProfile,
+        isLoading,
+        showPaywall,
+        setShowPaywall,
+        paywallContext,
+        showLoginModal,
+        openLoginModal,
+        closeLoginModal,
+        updateChildProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

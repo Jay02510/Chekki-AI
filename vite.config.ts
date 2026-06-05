@@ -49,7 +49,7 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
                 },
                 end: () => {
                   res.end();
-                }
+                },
               };
             },
             json: (data: any) => {
@@ -58,7 +58,7 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
             },
             end: () => {
               res.end();
-            }
+            },
           };
 
           // Dynamic import to avoid loading this during build
@@ -69,7 +69,7 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
           } catch (e: any) {
             console.error(`[Vite Dev API Error] for ${endpointName}:`, e);
             res.statusCode = 500;
-            res.end(JSON.stringify({ error: "INTERNAL_DEV_ERROR", details: e.message }));
+            res.end(JSON.stringify({ error: 'INTERNAL_DEV_ERROR', details: e.message }));
           }
           return;
         }
@@ -93,16 +93,15 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        app: resolve(__dirname, 'app.html')
+        app: resolve(__dirname, 'app.html'),
       },
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
             return 'vendor';
           }
-        }
-      }
-
-    }
-  }
+        },
+      },
+    },
+  },
 }));

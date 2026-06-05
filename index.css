@@ -1,57 +1,102 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --font-sans: "Nunito", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
-  --font-hand: "Patrick Hand", cursive;
-  --font-korean: "Noto Sans KR", sans-serif;
+  --font-sans: 'Nunito', 'Noto Sans KR', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-hand: 'Patrick Hand', cursive;
+  --font-korean: 'Noto Sans KR', sans-serif;
 
   --color-zinc-850: #1f2937;
   --color-zinc-900: #18181b;
   --color-zinc-950: #09090b;
 
   --color-brand-dark: #050505;
-  --color-brand-card: #0F1014;
-  --color-brand-orange: #F97316;
-  --color-brand-purple: #8B5CF6;
-  --color-brand-pink: #EC4899;
+  --color-brand-card: #0f1014;
+  --color-brand-orange: #f97316;
+  --color-brand-purple: #7f77dd;
+  --color-brand-pink: #ec4899;
 
   @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
   @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   @keyframes slide-up {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
   }
   /* Banner entrance: slides down from above the viewport */
   @keyframes slide-down {
-    from { opacity: 0; transform: translateY(-16px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   /* Staggered card reveal: fade + slight lift */
   @keyframes item-appear {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   /* Empathy ring: expands + fades for error/loading states */
   @keyframes ring-pulse {
-    0%   { transform: scale(1);    opacity: 0.6; }
-    70%  { transform: scale(1.4);  opacity: 0; }
-    100% { transform: scale(1.4);  opacity: 0; }
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    70% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
   }
   /* Breathing glow for the primary CTA */
   @keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 20px 50px rgba(249, 115, 22, 0.25); }
-    50%       { box-shadow: 0 20px 60px rgba(249, 115, 22, 0.50); }
+    0%,
+    100% {
+      box-shadow: 0 20px 50px rgba(249, 115, 22, 0.25);
+    }
+    50% {
+      box-shadow: 0 20px 60px rgba(249, 115, 22, 0.5);
+    }
   }
 
   --animate-fade-in: fade-in 0.5s ease-out;

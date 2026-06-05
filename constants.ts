@@ -1,5 +1,4 @@
-
-import { WorksheetAnalysis, ItemType } from "./types";
+import { WorksheetAnalysis, ItemType } from './types';
 
 /**
  * Optimized Cloudinary URLs:
@@ -31,5 +30,5 @@ export const ASSETS = {
   // MARKETING ASSETS (Updated with single combined flyer)
   FLYER_THUMB: `https://res.cloudinary.com/dginphpy4/image/upload/w_800,h_1100,c_fill,pg_1,f_auto,q_auto/Chekki_Flyer_nvsnta.jpg`,
   PDF_SHARE: `https://res.cloudinary.com/dginphpy4/image/upload/Chekki_Flyer_nvsnta.pdf`,
-  PDF_DOWNLOAD: `https://res.cloudinary.com/dginphpy4/image/upload/fl_attachment/Chekki_Flyer_nvsnta.pdf`
+  PDF_DOWNLOAD: `https://res.cloudinary.com/dginphpy4/image/upload/fl_attachment/Chekki_Flyer_nvsnta.pdf`,
 };

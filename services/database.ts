@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getFirestore,
   initializeFirestore,
@@ -12,20 +12,25 @@ import {
   getDocs,
   deleteDoc,
   addDoc,
-  runTransaction
+  runTransaction,
 } from 'firebase/firestore';
-import { getAuth, initializeAuth, browserLocalPersistence, indexedDBLocalPersistence } from 'firebase/auth';
+import {
+  getAuth,
+  initializeAuth,
+  browserLocalPersistence,
+  indexedDBLocalPersistence,
+} from 'firebase/auth';
 import { getAnalytics, logEvent } from 'firebase/analytics';
 import { UserProfile } from '../types';
 import { Capacitor } from '@capacitor/core';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k",
-  authDomain: "homework-assistant-c00b9.firebaseapp.com",
-  projectId: "homework-assistant-c00b9",
-  storageBucket: "homework-assistant-c00b9.firebasestorage.app",
-  messagingSenderId: "123535525914",
-  appId: "1:123535525914:web:decc3f5b3e3ffee4a0a9a3"
+  apiKey: 'AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k',
+  authDomain: 'homework-assistant-c00b9.firebaseapp.com',
+  projectId: 'homework-assistant-c00b9',
+  storageBucket: 'homework-assistant-c00b9.firebasestorage.app',
+  messagingSenderId: '123535525914',
+  appId: '1:123535525914:web:decc3f5b3e3ffee4a0a9a3',
 };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
@@ -37,13 +42,13 @@ export const auth = (() => {
   if (isNativePlatform) {
     try {
       return initializeAuth(app, {
-        persistence: browserLocalPersistence
+        persistence: browserLocalPersistence,
       });
     } catch (e: any) {
       if (e.code === 'auth/already-initialized') {
         return getAuth(app);
       }
-      console.error("Firebase auth initialization error:", e);
+      console.error('Firebase auth initialization error:', e);
     }
   }
   return getAuth(app);
@@ -68,30 +73,32 @@ try {
   if (!isNative) {
     analyticsInstance = getAnalytics(app);
   }
-  } catch (e) { console.error(e); }
+} catch (e) {
+  console.error(e);
+}
 export const analytics = analyticsInstance;
 
 const getLocalKey = (uid: string) => `chekki_mistakes_${uid}`;
 
 export const db = {
   async getUser(uid: string): Promise<UserProfile | null> {
-    const docRef = doc(dbInstance, "users", uid);
+    const docRef = doc(dbInstance, 'users', uid);
     try {
       // 5-second timeout to prevent indefinite simulator hangs
       const docSnap = await Promise.race([
         getDoc(docRef),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)),
       ]);
       return docSnap.exists() ? (docSnap.data() as UserProfile) : null;
     } catch (e) {
-      console.warn("[getUser] failed or timed out:", e);
+      console.warn('[getUser] failed or timed out:', e);
       throw e;
     }
   },
 
   async isAdmin(uid: string): Promise<boolean> {
     try {
-      const adminRef = doc(dbInstance, "admins", uid);
+      const adminRef = doc(dbInstance, 'admins', uid);
       const adminSnap = await getDoc(adminRef);
       return adminSnap.exists();
     } catch (e) {
@@ -100,30 +107,37 @@ export const db = {
   },
 
   async createUser(uid: string, profile: UserProfile): Promise<void> {
-    await setDoc(doc(dbInstance, "users", uid), { ...profile, uid });
+    await setDoc(doc(dbInstance, 'users', uid), { ...profile, uid });
   },
 
   async updateUser(uid: string, updates: Partial<UserProfile>): Promise<void> {
     try {
-      const userRef = doc(dbInstance, "users", uid);
+      const userRef = doc(dbInstance, 'users', uid);
       await updateDoc(userRef, updates);
-    } catch (e: any) { console.error("Update fallback", e); }
+    } catch (e: any) {
+      console.error('Update fallback', e);
+    }
   },
 
-  async sendFeedback(uid: string, feedback: {
-    rating?: number;
-    comment: string;
-    context?: any;
-    userEmail?: string;
-    userName?: string;
-  }): Promise<void> {
+  async sendFeedback(
+    uid: string,
+    feedback: {
+      rating?: number;
+      comment: string;
+      context?: any;
+      userEmail?: string;
+      userName?: string;
+    }
+  ): Promise<void> {
     try {
-      await addDoc(collection(dbInstance, "feedback"), {
+      await addDoc(collection(dbInstance, 'feedback'), {
         ...feedback,
         userId: uid,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-    } catch (e: any) { console.error(e); }
+    } catch (e: any) {
+      console.error(e);
+    }
   },
 
   logUserEvent(eventName: string, params?: any) {
@@ -131,6 +145,8 @@ export const db = {
       if (analytics) {
         logEvent(analytics, eventName, params);
       }
-    } catch (e) { console.error(e); }
-  }
+    } catch (e) {
+      console.error(e);
+    }
+  },
 };

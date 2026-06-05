@@ -1,4 +1,3 @@
-
 export const compressImage = (file: File, maxWidth = 1600, quality = 0.7): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -38,9 +37,9 @@ export const compressImage = (file: File, maxWidth = 1600, quality = 0.7): Promi
         resolve(dataUrl);
       };
 
-      img.onerror = () => reject(new Error("Image load failed"));
+      img.onerror = () => reject(new Error('Image load failed'));
     };
 
-    reader.onerror = () => reject(new Error("File read failed"));
+    reader.onerror = () => reject(new Error('File read failed'));
   });
 };

@@ -1,8 +1,7 @@
-
-import { WorksheetAnalysis, WorksheetItem } from "../types";
+import { WorksheetAnalysis, WorksheetItem } from '../types';
 import { Capacitor } from '@capacitor/core';
-import { auth } from "./database";
-import { API_BASE_URL, MOCK_MODE, MOCK_DELAY } from "../config";
+import { auth } from './database';
+import { API_BASE_URL, MOCK_MODE, MOCK_DELAY } from '../config';
 
 const getValidIdToken = async (maxRetries = 3): Promise<string | null> => {
   const user = auth.currentUser;
@@ -10,7 +9,7 @@ const getValidIdToken = async (maxRetries = 3): Promise<string | null> => {
     try {
       return await user.getIdToken();
     } catch (e) {
-      console.warn("[geminiService] Direct token retrieval failed:", e);
+      console.warn('[geminiService] Direct token retrieval failed:', e);
     }
   }
 
@@ -21,9 +20,11 @@ const getValidIdToken = async (maxRetries = 3): Promise<string | null> => {
       try {
         const token = await activeUser.getIdToken();
         if (token) return token;
-      } catch (e) { console.error("Token retry error:", e); }
+      } catch (e) {
+        console.error('Token retry error:', e);
+      }
     }
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
   }
   return null;
 };
@@ -38,35 +39,35 @@ export const analyzeWorksheet = async (
   language: string = 'ko'
 ): Promise<WorksheetAnalysis> => {
   if (MOCK_MODE) {
-    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
     return {
       worksheet_summary: {
-        title_en: "Practice Worksheet: Multiplication",
-        title_ko: "연습 학습지: 곱셈",
-        overview_ko: "이 학습지는 기본적인 곱셈 개념을 복습하기 위한 것입니다."
+        title_en: 'Practice Worksheet: Multiplication',
+        title_ko: '연습 학습지: 곱셈',
+        overview_ko: '이 학습지는 기본적인 곱셈 개념을 복습하기 위한 것입니다.',
       },
       items: [
         {
           id: 1,
           type: 'text',
-          question_text: "What is 7 x 8?",
-          correct_answer: "56",
-          korean_guide: "7 x 8은 얼마인가요? 7에 8을 곱하면 56이 됩니다.",
-          teaching_script_ko: "7 곱하기 8은 56입니다.",
-          student_response: "56",
-          is_correct: true
+          question_text: 'What is 7 x 8?',
+          correct_answer: '56',
+          korean_guide: '7 x 8은 얼마인가요? 7에 8을 곱하면 56이 됩니다.',
+          teaching_script_ko: '7 곱하기 8은 56입니다.',
+          student_response: '56',
+          is_correct: true,
         },
         {
           id: 2,
           type: 'text',
-          question_text: "What is 6 x 9?",
-          correct_answer: "54",
-          korean_guide: "6 x 9는 얼마인가요? 6에 9를 곱하면 54가 됩니다.",
-          teaching_script_ko: "6 곱하기 9는 54입니다.",
-          student_response: "52",
-          is_correct: false
-        }
-      ]
+          question_text: 'What is 6 x 9?',
+          correct_answer: '54',
+          korean_guide: '6 x 9는 얼마인가요? 6에 9를 곱하면 54가 됩니다.',
+          teaching_script_ko: '6 곱하기 9는 54입니다.',
+          student_response: '52',
+          is_correct: false,
+        },
+      ],
     };
   }
 
@@ -78,7 +79,9 @@ export const analyzeWorksheet = async (
 
     const idToken = await idTokenPromise;
     if (!idToken) {
-      console.warn("[geminiService] ⚠️ No auth token — proceeding as guest. API will likely reject with UNAUTHORIZED.");
+      console.warn(
+        '[geminiService] ⚠️ No auth token — proceeding as guest. API will likely reject with UNAUTHORIZED.'
+      );
     }
 
     const timeoutController = new AbortController();
@@ -89,7 +92,7 @@ export const analyzeWorksheet = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': idToken ? `Bearer ${idToken}` : ''
+        Authorization: idToken ? `Bearer ${idToken}` : '',
       },
       signal: activeSignal,
       body: JSON.stringify({
@@ -99,8 +102,8 @@ export const analyzeWorksheet = async (
         childAge,
         childEnglishLevel,
         parentEnglishLevel,
-        language
-      })
+        language,
+      }),
     });
 
     clearTimeout(timeoutId);
@@ -114,19 +117,19 @@ export const analyzeWorksheet = async (
         errorData = { error: `HTTP_${response.status}: ${text.substring(0, 100)}` };
       }
       const detailedMsg = errorData.details
-        ? `${errorData.error || "BACKEND_FAILED"}: ${errorData.details}`
-        : (errorData.error || "BACKEND_FAILED");
-      console.error("[geminiService] Backend error response:", errorData);
+        ? `${errorData.error || 'BACKEND_FAILED'}: ${errorData.details}`
+        : errorData.error || 'BACKEND_FAILED';
+      console.error('[geminiService] Backend error response:', errorData);
       throw new Error(detailedMsg);
     }
     return await response.json();
   } catch (error: any) {
     if (error.name === 'AbortError') throw error;
 
-    console.error("[geminiService] API Call Failed:", error.message);
+    console.error('[geminiService] API Call Failed:', error.message);
 
     if (!navigator.onLine) {
-      throw new Error("OFFLINE_ERROR");
+      throw new Error('OFFLINE_ERROR');
     }
 
     if (error.message === 'Failed to fetch' || error.message.includes('Load failed')) {
@@ -137,15 +140,19 @@ export const analyzeWorksheet = async (
   }
 };
 
-export const generateSimilarWorksheet = async (originalItems: WorksheetItem[], language: string = 'ko', signal?: AbortSignal): Promise<WorksheetItem[]> => {
+export const generateSimilarWorksheet = async (
+  originalItems: WorksheetItem[],
+  language: string = 'ko',
+  signal?: AbortSignal
+): Promise<WorksheetItem[]> => {
   if (MOCK_MODE) {
-    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
-    return originalItems.map(item => ({
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
+    return originalItems.map((item) => ({
       ...item,
       question_text: `[New Version] ${item.question_text}`,
       korean_guide: `[새 버전] ${item.korean_guide}`,
       student_response: undefined,
-      is_correct: undefined
+      is_correct: undefined,
     }));
   }
   try {
@@ -154,22 +161,22 @@ export const generateSimilarWorksheet = async (originalItems: WorksheetItem[], l
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': idToken ? `Bearer ${idToken}` : ''
+        Authorization: idToken ? `Bearer ${idToken}` : '',
       },
       signal,
       body: JSON.stringify({
         task: 'generate',
         originalItems: originalItems.slice(0, 5),
-        language
-      })
+        language,
+      }),
     });
 
-    if (!response.ok) throw new Error("GEN_FAILED");
+    if (!response.ok) throw new Error('GEN_FAILED');
     const newItems = await response.json();
 
     return newItems.map((item: any, idx: number) => ({
       ...item,
-      id: idx + 1
+      id: idx + 1,
     }));
   } catch (e: any) {
     if (e.name === 'AbortError') throw e;
@@ -177,14 +184,18 @@ export const generateSimilarWorksheet = async (originalItems: WorksheetItem[], l
   }
 };
 
-export const refineWorksheetItem = async (item: WorksheetItem, reason: string, language: string = 'ko'): Promise<Partial<WorksheetItem>> => {
+export const refineWorksheetItem = async (
+  item: WorksheetItem,
+  reason: string,
+  language: string = 'ko'
+): Promise<Partial<WorksheetItem>> => {
   if (MOCK_MODE) {
-    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
     return {
       korean_guide: `[다듬어짐] ${item.korean_guide} (이유: ${reason})`,
       english_guide: `[Refined] ${item.english_guide} (Reason: ${reason})`,
       teaching_script_ko: `[다듬어짐] ${item.teaching_script_ko}`,
-      teaching_script_en: `[Refined] ${item.teaching_script_en}`
+      teaching_script_en: `[Refined] ${item.teaching_script_en}`,
     };
   }
 
@@ -194,26 +205,26 @@ export const refineWorksheetItem = async (item: WorksheetItem, reason: string, l
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': idToken ? `Bearer ${idToken}` : ''
+        Authorization: idToken ? `Bearer ${idToken}` : '',
       },
       body: JSON.stringify({
         task: 'refine',
         itemToRefine: item,
         reason: reason,
-        language: language
-      })
+        language: language,
+      }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("[geminiService] Refine failed:", errText);
-      throw new Error("REFINE_FAILED");
+      console.error('[geminiService] Refine failed:', errText);
+      throw new Error('REFINE_FAILED');
     }
 
     const refinedData = await response.json();
     return refinedData;
   } catch (e: any) {
-    console.error("[geminiService] Refine API error:", e);
+    console.error('[geminiService] Refine API error:', e);
     throw e;
   }
 };
@@ -223,10 +234,16 @@ export interface ChatTurn {
   text: string;
 }
 
-export const askChekkiQuestion = async (question: string, language: string = 'ko', isGuest: boolean = false, signal?: AbortSignal, history: ChatTurn[] = []): Promise<string> => {
+export const askChekkiQuestion = async (
+  question: string,
+  language: string = 'ko',
+  isGuest: boolean = false,
+  signal?: AbortSignal,
+  history: ChatTurn[] = []
+): Promise<string> => {
   if (MOCK_MODE) {
-    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
-    return isGuest 
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
+    return isGuest
       ? "This is a basic answer. 'A' is used before consonants, and 'an' before vowels."
       : "This is a detailed answer. 'A' is used before words starting with a consonant, and 'an' is used before words starting with a vowel. For example, 'A dog' vs 'An apple'. Want to see more examples? 😊";
   }
@@ -237,7 +254,7 @@ export const askChekkiQuestion = async (question: string, language: string = 'ko
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': idToken ? `Bearer ${idToken}` : ''
+        Authorization: idToken ? `Bearer ${idToken}` : '',
       },
       signal,
       body: JSON.stringify({
@@ -245,27 +262,27 @@ export const askChekkiQuestion = async (question: string, language: string = 'ko
         question: question,
         isGuest: isGuest,
         language: language,
-        history: history
-      })
+        history: history,
+      }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      let errorMsg = "ASK_FAILED";
+      let errorMsg = 'ASK_FAILED';
       try {
         const errorData = JSON.parse(errText);
-        errorMsg = errorData.error || "ASK_FAILED";
+        errorMsg = errorData.error || 'ASK_FAILED';
       } catch (e) {
-        errorMsg = errText || "ASK_FAILED";
+        errorMsg = errText || 'ASK_FAILED';
       }
-      console.error("[geminiService] Ask failed:", errorMsg);
+      console.error('[geminiService] Ask failed:', errorMsg);
       throw new Error(errorMsg);
     }
 
     const data = await response.json();
-    return data.answer || "";
+    return data.answer || '';
   } catch (e: any) {
-    console.error("[geminiService] Ask API error:", e);
+    console.error('[geminiService] Ask API error:', e);
     throw e;
   }
 };
