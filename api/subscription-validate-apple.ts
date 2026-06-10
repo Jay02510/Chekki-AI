@@ -131,17 +131,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       created_at: now,
     };
 
-    // Upsert into Firestore subscriptions collection
-    await adminDb.collection('subscriptions').doc(user_id).set(subData, { merge: true });
+    // Use an atomic batch write to ensure database integrity
+    const batch = adminDb.batch();
+    const subRef = adminDb.collection('subscriptions').doc(user_id);
+    const userRef = adminDb.collection('users').doc(user_id);
 
-    // Also update the user's plan in the users collection
+    batch.set(subRef, subData, { merge: true });
+
     if (isActive) {
-      await adminDb.collection('users').doc(user_id).update({
+      batch.update(userRef, {
         plan: 'pro',
         maxScansPerDay: 9999,
         maxQuestionsPerDay: 9999,
       });
     }
+
+    await batch.commit();
 
     return res.status(200).json({
       success: true,

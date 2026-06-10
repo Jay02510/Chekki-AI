@@ -13,6 +13,7 @@ import {
   deleteDoc,
   addDoc,
   runTransaction,
+  enableIndexedDbPersistence,
 } from 'firebase/firestore';
 import {
   getAuth,
@@ -55,14 +56,25 @@ export const auth = (() => {
 })();
 
 export const dbInstance = (() => {
+  let db;
   if (isNativePlatform) {
     try {
-      return initializeFirestore(app, { experimentalForceLongPolling: true });
+      db = initializeFirestore(app, { experimentalForceLongPolling: true });
     } catch (e: any) {
-      return getFirestore(app);
+      db = getFirestore(app);
     }
+  } else {
+    db = getFirestore(app);
   }
-  return getFirestore(app);
+
+  // Enable offline persistence in web/WebView environments
+  if (typeof window !== 'undefined') {
+    enableIndexedDbPersistence(db).catch((err) => {
+      console.warn('[Firestore Offline Persistence Error]:', err.message);
+    });
+  }
+
+  return db;
 })();
 
 // Analytics may not work in Capacitor native WebView — init safely

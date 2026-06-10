@@ -36,7 +36,8 @@ export const analyzeWorksheet = async (
   childAge?: string,
   childEnglishLevel?: string,
   parentEnglishLevel?: string,
-  language: string = 'ko'
+  language: string = 'ko',
+  idempotencyKey?: string
 ): Promise<WorksheetAnalysis> => {
   if (MOCK_MODE) {
     await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
@@ -88,12 +89,17 @@ export const analyzeWorksheet = async (
     const timeoutId = setTimeout(() => timeoutController.abort(), 300000);
     const activeSignal = signal || timeoutController.signal;
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: idToken ? `Bearer ${idToken}` : '',
+    };
+    if (idempotencyKey) {
+      headers['X-Idempotency-Key'] = idempotencyKey;
+    }
+
     const response = await fetch(`${baseUrl}/api/analyze`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: idToken ? `Bearer ${idToken}` : '',
-      },
+      headers,
       signal: activeSignal,
       body: JSON.stringify({
         task: 'analyze',
@@ -143,7 +149,8 @@ export const analyzeWorksheet = async (
 export const generateSimilarWorksheet = async (
   originalItems: WorksheetItem[],
   language: string = 'ko',
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  idempotencyKey?: string
 ): Promise<WorksheetItem[]> => {
   if (MOCK_MODE) {
     await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
@@ -157,12 +164,17 @@ export const generateSimilarWorksheet = async (
   }
   try {
     const idToken = await getValidIdToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: idToken ? `Bearer ${idToken}` : '',
+    };
+    if (idempotencyKey) {
+      headers['X-Idempotency-Key'] = idempotencyKey;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/analyze`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: idToken ? `Bearer ${idToken}` : '',
-      },
+      headers,
       signal,
       body: JSON.stringify({
         task: 'generate',
@@ -187,7 +199,8 @@ export const generateSimilarWorksheet = async (
 export const refineWorksheetItem = async (
   item: WorksheetItem,
   reason: string,
-  language: string = 'ko'
+  language: string = 'ko',
+  idempotencyKey?: string
 ): Promise<Partial<WorksheetItem>> => {
   if (MOCK_MODE) {
     await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
@@ -201,12 +214,17 @@ export const refineWorksheetItem = async (
 
   try {
     const idToken = await getValidIdToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: idToken ? `Bearer ${idToken}` : '',
+    };
+    if (idempotencyKey) {
+      headers['X-Idempotency-Key'] = idempotencyKey;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/analyze`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: idToken ? `Bearer ${idToken}` : '',
-      },
+      headers,
       body: JSON.stringify({
         task: 'refine',
         itemToRefine: item,
@@ -239,7 +257,8 @@ export const askChekkiQuestion = async (
   language: string = 'ko',
   isGuest: boolean = false,
   signal?: AbortSignal,
-  history: ChatTurn[] = []
+  history: ChatTurn[] = [],
+  idempotencyKey?: string
 ): Promise<string> => {
   if (MOCK_MODE) {
     await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
@@ -250,12 +269,17 @@ export const askChekkiQuestion = async (
 
   try {
     const idToken = await getValidIdToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: idToken ? `Bearer ${idToken}` : '',
+    };
+    if (idempotencyKey) {
+      headers['X-Idempotency-Key'] = idempotencyKey;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/analyze`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: idToken ? `Bearer ${idToken}` : '',
-      },
+      headers,
       signal,
       body: JSON.stringify({
         task: 'ask_question',

@@ -122,25 +122,30 @@ async function handleNotification(type: string, subtype: string, data: any) {
 
   if (userRef) {
     const finalUserId = userRef.id;
-    await userRef.update({
+    const batch = adminDb.batch();
+    const userProfileRef = adminDb.collection('users').doc(finalUserId);
+
+    batch.update(userRef, {
       subscription_status: status,
       subscription_expiry_date: expiresDate ? expiresDate.toISOString() : null,
       updated_at: now,
     });
 
     if (status === 'active') {
-      await adminDb.collection('users').doc(finalUserId).update({
+      batch.update(userProfileRef, {
         plan: 'pro',
         maxScansPerDay: 9999,
         maxQuestionsPerDay: 9999,
       });
     } else if (status === 'expired' || status === 'cancelled') {
-      await adminDb.collection('users').doc(finalUserId).update({
+      batch.update(userProfileRef, {
         plan: 'free',
         maxScansPerDay: 3,
         maxQuestionsPerDay: 5,
       });
     }
+
+    await batch.commit();
   }
 }
 

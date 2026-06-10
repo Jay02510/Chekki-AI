@@ -4,6 +4,7 @@ import { analyzeWorksheet } from '../../services/geminiService';
 import { db } from '../../services/database';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { generateUUID } from '../../utils/uuid';
 
 const SESSION_KEY = 'hw_last_session';
 const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
@@ -25,6 +26,7 @@ export const useWorksheetAnalysis = () => {
 
   const [lastImageData, setLastImageData] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   const executeReset = useCallback(() => {
     if (abortControllerRef.current) abortControllerRef.current.abort();
@@ -38,6 +40,7 @@ export const useWorksheetAnalysis = () => {
       isItemsLoaded: false,
     });
     setLastImageData(null);
+    idempotencyKeyRef.current = null;
     localStorage.removeItem(SESSION_KEY);
   }, []);
 
@@ -83,6 +86,10 @@ export const useWorksheetAnalysis = () => {
       }
 
       const displayUrl = `data:image/jpeg;base64,${base64Data}`;
+      const isRetry = lastImageData === base64Data;
+      if (!isRetry || !idempotencyKeyRef.current) {
+        idempotencyKeyRef.current = generateUUID();
+      }
       setLastImageData(base64Data);
 
       setAnalysisState({
@@ -110,7 +117,8 @@ export const useWorksheetAnalysis = () => {
           user?.childAge,
           user?.childEnglishLevel,
           user?.parentEnglishLevel,
-          language
+          language,
+          idempotencyKeyRef.current
         );
 
         const newState: AnalysisState = {
@@ -179,6 +187,7 @@ export const useWorksheetAnalysis = () => {
       user?.parentEnglishLevel,
       language,
       analysisState.status,
+      lastImageData,
     ]
   );
 

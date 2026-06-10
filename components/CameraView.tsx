@@ -392,7 +392,7 @@ export const CameraView: React.FC<Props> = ({
         {tips.map((tip, idx) => (
           <div
             key={idx}
-            className={`p-2.5 rounded-2xl border flex flex-col items-center text-center gap-1 transition-all ${
+            className={`relative group p-2.5 rounded-2xl border flex flex-col items-center text-center gap-1 transition-all ${
               isNight
                 ? 'bg-zinc-900/30 border-white/5 hover:bg-zinc-900/50'
                 : 'bg-orange-50/20 border-orange-100/30 shadow-[0_4px_12px_rgba(0,0,0,0.015)] hover:border-orange-500/30'
@@ -404,11 +404,14 @@ export const CameraView: React.FC<Props> = ({
             >
               {tip.label}
             </span>
-            <span
-              className={`text-[7px] md:text-[9px] leading-tight text-zinc-500 font-korean font-medium break-keep`}
-            >
-              {tip.desc}
-            </span>
+
+            {/* Hover Tooltip */}
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 hidden group-hover:flex flex-col items-center pointer-events-none z-50 animate-fade-in w-max">
+              <div className="text-[10px] md:text-xs leading-snug font-korean font-semibold py-2 px-3 rounded-xl bg-zinc-950 text-white shadow-xl border border-white/10 break-keep max-w-[150px] md:max-w-[200px] text-center">
+                {tip.desc}
+              </div>
+              <div className="w-2.5 h-2.5 rotate-45 -mt-1.5 bg-zinc-950 border-r border-b border-white/10"></div>
+            </div>
           </div>
         ))}
       </div>
@@ -500,15 +503,13 @@ export const CameraView: React.FC<Props> = ({
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-3xl animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}
         ></div>
         <div
-          role="button"
           id="magic-drop-zone-inner"
-          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-indigo-950/20 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-3xl border transition-all duration-700 flex flex-col items-center justify-center p-5 md:p-12 group cursor-pointer
+          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-indigo-950/20 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-3xl border transition-all duration-700 flex flex-col items-center justify-center p-5 md:p-12 group
               ${dragActive && !isLocked ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.2)] scale-[1.01]' : 'hover:border-orange-500/30'}`}
           onDragEnter={isLocked ? undefined : handleDrag}
           onDragLeave={isLocked ? undefined : handleDrag}
           onDragOver={isLocked ? undefined : handleDrag}
           onDrop={isLocked ? undefined : handleDrop}
-          onClick={handleAction}
         >
           {!isAuthenticated && !guestUsed && (
             <div className="absolute top-4 md:top-10 z-40 animate-[bounce_4s_ease-in-out_infinite] pointer-events-none">
@@ -590,7 +591,9 @@ export const CameraView: React.FC<Props> = ({
                 {renderClarityGuide()}
 
                 <div
-                  className="mt-4 md:mt-6 flex flex-col items-center gap-3 group/btn"
+                  role="button"
+                  onClick={handleAction}
+                  className="mt-4 md:mt-6 flex flex-col items-center gap-3 group/btn cursor-pointer"
                   title={t('btn_guest_scan')}
                 >
                   <div

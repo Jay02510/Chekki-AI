@@ -141,7 +141,7 @@ export default async function handler(req: any, res: any) {
   // CORS headers for Capacitor WebView (origin: capacitor://localhost)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Idempotency-Key');
 
   // Handle preflight
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -196,6 +196,104 @@ export default async function handler(req: any, res: any) {
     return res.status(401).json({ error: 'UNAUTHORIZED: Missing authorization header' });
   }
   // --- END SECURITY CHECK ---
+
+  // --- IDEMPOTENCY KEY CHECK ---
+  const rawIdempotencyKey = req.headers['x-idempotency-key'] || req.headers['X-Idempotency-Key'];
+  const idempotencyKey = typeof rawIdempotencyKey === 'string' ? rawIdempotencyKey.trim() : null;
+
+  if (idempotencyKey && firebaseAdminAvailable && decodedToken) {
+    try {
+      const db = getFirestore(app);
+      const idempotencyRef = db.collection('idempotency_keys').doc(idempotencyKey);
+
+      let attempts = 0;
+      let isProcessing = true;
+      let idempotencyDoc = null;
+
+      while (attempts < 10 && isProcessing) {
+        idempotencyDoc = await idempotencyRef.get();
+        if (idempotencyDoc.exists) {
+          const data = idempotencyDoc.data();
+          if (data?.status === 'completed') {
+            return res.status(200).json(data.response);
+          } else if (data?.status === 'processing') {
+            // Check if the request is stuck (e.g. older than 5 minutes)
+            const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt || Date.now());
+            const ageInSeconds = (Date.now() - createdAt.getTime()) / 1000;
+            if (ageInSeconds > 300) {
+              // Over 5 minutes old - original request timed out or crashed, proceed to run again
+              isProcessing = false;
+            } else {
+              // Wait 1.5 seconds and poll again
+              await new Promise((resolve) => setTimeout(resolve, 1500));
+              attempts++;
+            }
+          } else {
+            // "failed" or other unknown status: treat as not exists, proceed to run again
+            isProcessing = false;
+          }
+        } else {
+          isProcessing = false;
+        }
+      }
+
+      // If still processing after 15 seconds, return a 202 retry response
+      if (idempotencyDoc && idempotencyDoc.exists && idempotencyDoc.data()?.status === 'processing') {
+        res.setHeader('Retry-After', '2');
+        return res.status(202).json({
+          retry_after: 2,
+          message: 'Analysis is in progress, please retry shortly.'
+        });
+      }
+
+      // Claim the key by setting it to 'processing'
+      // expiresAt is set to 24 hours from now for automated TTL cleanup
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      await idempotencyRef.set({
+        status: 'processing',
+        userId: decodedToken.uid,
+        createdAt: FieldValue.serverTimestamp(),
+        expiresAt,
+        task,
+      });
+
+      // Monkey-patch res.status and res.json to automatically resolve/update/delete the idempotency cache on completion/failure
+      const originalJson = res.json.bind(res);
+      const originalStatus = res.status.bind(res);
+      let responseStatus = 200;
+
+      res.status = (code: number) => {
+        responseStatus = code;
+        originalStatus(code);
+        return res;
+      };
+
+      res.json = (bodyData: any) => {
+        // Run asynchronously in the background so we don't delay the API response
+        (async () => {
+          try {
+            if (responseStatus >= 200 && responseStatus < 300) {
+              await idempotencyRef.update({
+                status: 'completed',
+                response: bodyData,
+                completedAt: FieldValue.serverTimestamp(),
+              });
+            } else {
+              // On error, delete so the client can retry
+              await idempotencyRef.delete();
+            }
+          } catch (updateErr) {
+            console.error('[idempotency] Failed to update key status:', updateErr);
+          }
+        })();
+
+        return originalJson(bodyData);
+      };
+
+    } catch (idempotencyErr) {
+      console.warn('⚠️ [idempotency] Failed to perform initial idempotency checks. Degrading gracefully:', idempotencyErr);
+    }
+  }
 
   try {
     const {

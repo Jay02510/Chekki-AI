@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProfile, SubscriptionRecord, SubscriptionPlatform } from '../types';
 import { auth, db, dbInstance } from '../services/database';
 import { doc, updateDoc, increment } from 'firebase/firestore';
@@ -97,7 +97,32 @@ const FREE_DAILY_LIMIT = 3;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, _setUserProfile] = useState<UserProfile | null>(null);
+
+  const setUserProfile = useCallback((profileOrUpdater: UserProfile | null | ((prev: UserProfile | null) => UserProfile | null)) => {
+    _setUserProfile((prev) => {
+      let next: UserProfile | null;
+      if (typeof profileOrUpdater === 'function') {
+        next = profileOrUpdater(prev);
+      } else {
+        next = profileOrUpdater;
+      }
+      
+      const uid = auth.currentUser?.uid || firebaseUser?.uid;
+      if (uid) {
+        if (next) {
+          try {
+            localStorage.setItem(`chekki_user_profile_${uid}`, JSON.stringify(next));
+          } catch (e) {
+            console.warn('[AuthContext] Cache set error:', e);
+          }
+        } else {
+          localStorage.removeItem(`chekki_user_profile_${uid}`);
+        }
+      }
+      return next;
+    });
+  }, [firebaseUser]);
   const [subscriptionRecord, setSubscriptionRecord] = useState<SubscriptionRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPaywall, setShowPaywallState] = useState(false);
@@ -221,12 +246,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
+        // 1. Try to read from local cache first for instant load
+        let cachedProfile: UserProfile | null = null;
+        const cacheKey = `chekki_user_profile_${user.uid}`;
+        try {
+          const cachedStr = localStorage.getItem(cacheKey);
+          if (cachedStr) {
+            cachedProfile = JSON.parse(cachedStr);
+            _setUserProfile(cachedProfile); // Set state directly to bypass auth/firebaseUser uid checks during init
+            setIsLoading(false); // Instantly unlock screen
+          }
+        } catch (e) {
+          console.warn('[AuthContext] Failed to read cached profile:', e);
+        }
+
+        // 2. Fetch fresh user profile in the background (SWR)
         let profile: UserProfile | null = null;
         try {
           profile = await db.getUser(user.uid);
         } catch (e) {
-          console.error('[AuthContext] Failed to load user profile:', e);
-          setIsLoading(false);
+          console.error('[AuthContext] Failed to load user profile from network:', e);
+          // If we had no cache, we must stop loading now
+          if (!cachedProfile) {
+            setIsLoading(false);
+          }
           return;
         }
 
