@@ -1,8 +1,11 @@
 let firebaseAdmin: any = null;
-
 async function getFirebaseAdmin() {
   if (firebaseAdmin) return firebaseAdmin;
-  if (!process.env.FIREBASE_PROJECT_ID) return null;
+
+  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+
+  if (!serviceAccount && !projectId) return null;
 
   try {
     const adminModule = await import('firebase-admin');
@@ -11,13 +14,21 @@ async function getFirebaseAdmin() {
 
     const apps = admin.apps || [];
     if (!apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-      });
+      if (serviceAccount) {
+        const cleaned = serviceAccount.trim().replace(/\n/g, '').replace(/\r/g, '');
+        const parsed = JSON.parse(cleaned);
+        admin.initializeApp({
+          credential: admin.credential.cert(parsed),
+        });
+      } else {
+        admin.initializeApp({
+          credential: admin.credential.cert({
+            projectId: projectId,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+          }),
+        });
+      }
     }
     firebaseAdmin = admin;
     return firebaseAdmin;

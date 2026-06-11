@@ -9,7 +9,8 @@ function initAdmin() {
   const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (serviceAccount) {
     try {
-      const parsed = JSON.parse(serviceAccount);
+      const cleaned = serviceAccount.trim().replace(/\n/g, '').replace(/\r/g, '');
+      const parsed = JSON.parse(cleaned);
       initializeApp({ credential: cert(parsed) });
     } catch (e) {
       console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', e);

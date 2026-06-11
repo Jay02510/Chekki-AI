@@ -1,7 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getFirestore,
-  initializeFirestore,
   doc,
   getDoc,
   setDoc,
@@ -55,27 +54,7 @@ export const auth = (() => {
   return getAuth(app);
 })();
 
-export const dbInstance = (() => {
-  let db;
-  if (isNativePlatform) {
-    try {
-      db = initializeFirestore(app, { experimentalForceLongPolling: true });
-    } catch (e: any) {
-      db = getFirestore(app);
-    }
-  } else {
-    db = getFirestore(app);
-  }
-
-  // Enable offline persistence in web/WebView environments
-  if (typeof window !== 'undefined') {
-    enableIndexedDbPersistence(db).catch((err) => {
-      console.warn('[Firestore Offline Persistence Error]:', err.message);
-    });
-  }
-
-  return db;
-})();
+export const dbInstance = getFirestore(app);
 
 // Analytics may not work in Capacitor native WebView — init safely
 let analyticsInstance: ReturnType<typeof getAnalytics> | null = null;

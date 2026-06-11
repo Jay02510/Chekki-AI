@@ -90,6 +90,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
   const [speechResult, setSpeechResult] = useState<{ id: number; success: boolean } | null>(null);
   const recognitionRef = useRef<any>(null);
   const nativeListenerRef = useRef<any>(null);
+  const endListenerRef = useRef<any>(null);
   const lastTranscriptRef = useRef<string>('');
 
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
@@ -171,6 +172,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
         nativeListenerRef.current.remove().catch(() => {});
         nativeListenerRef.current = null;
       }
+      if (endListenerRef.current) {
+        endListenerRef.current.remove().catch(() => {});
+        endListenerRef.current = null;
+      }
     };
   }, [items]); // Only rebuild when items change, NOT on every active card tap
 
@@ -181,6 +186,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
         if (nativeListenerRef.current) {
           await nativeListenerRef.current.remove();
           nativeListenerRef.current = null;
+        }
+        if (endListenerRef.current) {
+          await endListenerRef.current.remove();
+          endListenerRef.current = null;
         }
 
         const activeItem = items.find((i) => i.id === activeItemId);
@@ -454,10 +463,14 @@ export const SplitView: React.FC<SplitViewProps> = ({
         );
 
         // Add listener for automatic stop (silence detection)
-        const endListener = await SpeechRecognition.addListener('listeningState', (event) => {
+        if (endListenerRef.current) await endListenerRef.current.remove();
+        endListenerRef.current = await SpeechRecognition.addListener('listeningState', (event) => {
           if (event.status === 'stopped') {
             setIsListening(false);
-            endListener.remove();
+            if (endListenerRef.current) {
+              endListenerRef.current.remove();
+              endListenerRef.current = null;
+            }
             if (nativeListenerRef.current) {
               nativeListenerRef.current.remove();
               nativeListenerRef.current = null;
@@ -481,6 +494,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
         if (nativeListenerRef.current) {
           await nativeListenerRef.current.remove();
           nativeListenerRef.current = null;
+        }
+        if (endListenerRef.current) {
+          await endListenerRef.current.remove();
+          endListenerRef.current = null;
         }
         if (err?.message?.includes('denied') || err?.message?.includes('permission')) {
           alert(
