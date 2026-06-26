@@ -29,6 +29,7 @@
     "dist",
     "ios",
     "android",
-    "public"
+    "public",
+    "web"
   ]
 }
