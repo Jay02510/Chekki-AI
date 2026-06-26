@@ -8,19 +8,26 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nunito:wght@400;600;700;800&family=Patrick+Hand&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="landing.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23E8820C%22/></svg>">
 </head>
 <body>
+  <canvas id="canvas3d"></canvas>
 
   <nav class="site-nav">
     <a class="nav-logo" href="/">ChekkiAI</a>
     <div class="nav-actions">
-      <a href="https://chekki-ai.vercel.app/" class="btn-primary">Try Chekki free</a>
+      <a href="/app" class="btn-primary">Try Chekki free</a>
     </div>
   </nav>
+
+  <div style="text-align: center; background: var(--bg-fam); padding: 20px 0;">
+    <video id="heroVideo" autoplay muted loop playsinline style="width: 240px; height: 240px; border-radius: 24px; box-shadow: var(--shadow-cta-fam);">
+      <source src="chekki-hero.mp4" type="video/mp4">
+    </video>
+  </div>
 
   <header class="split-hero">
     <a href="#families" class="door door-fam animate-entry" style="animation-delay: 0ms;">
@@ -54,7 +61,7 @@
           <div class="card">
             <h3>Snap and Grade</h3>
             <p>Snap any English worksheet. Chekki highlights correct answers and generates a Korean teaching script in seconds.</p>
-            <a href="https://chekki-ai.vercel.app/" class="btn-secondary">Try Chekki free</a>
+            <a href="/app" class="btn-secondary">Try Chekki free</a>
           </div>
           <div class="card">
             <h3>Native Pronunciation</h3>
@@ -75,7 +82,7 @@
             <li>Digital stamps and rewards</li>
             <li>Cancel anytime</li>
           </ul>
-          <a href="https://chekki-ai.vercel.app/" class="btn-primary">Try Chekki free</a>
+          <a href="/app" class="btn-primary">Try Chekki free</a>
         </div>
 
         <div class="trust-panel">
@@ -97,12 +104,12 @@
           <div class="card card-tch">
             <h3>ESL AI Planning Workspace</h3>
             <p>300+ frameworks across 12 modules. Works with your favorite AI tools.</p>
-            <a href="https://chekki-ai.vercel.app/" class="btn-primary-tch">See how it works</a>
+            <a href="/app" class="btn-primary-tch">See how it works</a>
           </div>
           <div class="card card-tch">
             <h3>Story Pack Classroom Sets</h3>
             <p>Complete classroom-ready packs: comprehension, vocabulary, grammar, and answer keys.</p>
-            <a href="https://chekki-ai.vercel.app/" class="btn-secondary-tch">Try Chekki free</a>
+            <a href="/app" class="btn-secondary-tch">Try Chekki free</a>
           </div>
         </div>
       </div>
@@ -112,7 +119,7 @@
   <footer class="site-footer">
     <div class="container footer-content">
       <div class="footer-links">
-        <a href="https://chekki-ai.vercel.app/">Web app</a>
+        <a href="/app">Web app</a>
         <a href="https://apps.apple.com/us/app/chekkiai/id6759361725?itscg=30200&itsct=apps_box_link&mttnsubad=6759361725">App Store</a>
         <a href="https://www.instagram.com/chekki__ai">Instagram @chekki__ai</a>
         <a href="mailto:chekkihelp@gmail.com">Support chekkihelp@gmail.com</a>
@@ -121,5 +128,20 @@
     </div>
   </footer>
 
+  <script>
+    // Hero video playback fix (mobile/web)
+    window.addEventListener('load', () => {
+      const v = document.getElementById('heroVideo');
+      if(v){
+        const p = v.play();
+        if(p!==undefined) p.catch(() => {
+          // Autoplay blocked: retry on first interaction
+          document.body.addEventListener('click', () => v.play(), { once: true });
+          document.body.addEventListener('touchstart', () => v.play(), { once: true });
+        });
+      }
+    });
+  </script>
+  <script type="module" src="/3d-background.js"></script>
 </body>
 </html>
