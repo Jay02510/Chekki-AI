@@ -7,7 +7,7 @@ android {
         applicationId "com.chekkiai.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 58
+        versionCode 59
         versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [kakaoAppKey: "f06bc75426bf2b41940620d3ee942f06", kakaoNativeAppKey: "f06bc75426bf2b41940620d3ee942f06"]

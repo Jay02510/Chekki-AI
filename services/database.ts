@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getFirestore,
+  initializeFirestore,
   doc,
   getDoc,
   setDoc,
@@ -54,7 +55,18 @@ export const auth = (() => {
   return getAuth(app);
 })();
 
-export const dbInstance = getFirestore(app);
+export const dbInstance = (() => {
+  try {
+    if (isNativePlatform) {
+      return initializeFirestore(app, {
+        experimentalForceLongPolling: true
+      });
+    }
+    return getFirestore(app);
+  } catch (e: any) {
+    return getFirestore(app);
+  }
+})();
 
 // Analytics may not work in Capacitor native WebView — init safely
 let analyticsInstance: ReturnType<typeof getAnalytics> | null = null;
