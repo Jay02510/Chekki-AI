@@ -405,13 +405,6 @@ export const CameraView: React.FC<Props> = ({
               {tip.label}
             </span>
 
-            {/* Hover Tooltip */}
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 hidden group-hover:flex flex-col items-center pointer-events-none z-50 animate-fade-in w-max">
-              <div className="text-[10px] md:text-xs leading-snug font-korean font-semibold py-2 px-3 rounded-xl bg-zinc-950 text-white shadow-xl border border-white/10 break-keep max-w-[150px] md:max-w-[200px] text-center">
-                {tip.desc}
-              </div>
-              <div className="w-2.5 h-2.5 rotate-45 -mt-1.5 bg-zinc-950 border-r border-b border-white/10"></div>
-            </div>
           </div>
         ))}
       </div>
@@ -500,12 +493,12 @@ export const CameraView: React.FC<Props> = ({
         className={`relative w-full ${size === 'large' ? 'min-h-[350px] md:min-h-[500px]' : 'h-full'} flex items-center justify-center py-4 md:py-8`}
       >
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-3xl animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-[2.5rem] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}
         ></div>
         <div
           id="magic-drop-zone-inner"
-          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-indigo-950/20 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-3xl border transition-all duration-700 flex flex-col items-center justify-center p-5 md:p-12 group
-              ${dragActive && !isLocked ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.2)] scale-[1.01]' : 'hover:border-orange-500/30'}`}
+          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-[#050505]/40 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[2.5rem] border transition-all duration-500 ease-[var(--ease-premium)] flex flex-col items-center justify-center p-5 md:p-12 group
+              ${dragActive && !isLocked ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.2)] scale-[1.02]' : 'hover:border-orange-500/30'}`}
           onDragEnter={isLocked ? undefined : handleDrag}
           onDragLeave={isLocked ? undefined : handleDrag}
           onDragOver={isLocked ? undefined : handleDrag}
@@ -597,7 +590,7 @@ export const CameraView: React.FC<Props> = ({
                   title={t('btn_guest_scan')}
                 >
                   <div
-                    className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-indigo-600' : 'bg-orange-500'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.3)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/60 border-4 border-white/20 active:scale-90 animate-glow-pulse`}
+                    className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-[#1a1a1a] border-white/10' : 'bg-orange-500 border-white/20'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.3)] transition-all duration-500 ease-[var(--ease-premium)] group-hover:scale-110 group-hover:shadow-[0_20px_60px_rgba(249,115,22,0.5)] border-4 active:scale-90 animate-glow-pulse`}
                   >
                     <svg
                       className="w-8 h-8 md:w-14 md:h-14 text-white"
@@ -775,10 +768,10 @@ export const CameraView: React.FC<Props> = ({
               </div>
             )}
             <h1
-              className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display break-keep leading-tight`}
+              className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display break-keep leading-tight tracking-tight`}
             >
               {t('dash_welcome')}{' '}
-              <span className={isNight ? 'text-brand-purple' : 'text-brand-orange'}>
+              <span className={isNight ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500' : 'text-brand-orange'}>
                 {user.name}!
               </span>
             </h1>

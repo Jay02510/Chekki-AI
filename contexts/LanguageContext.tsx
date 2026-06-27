@@ -12,7 +12,7 @@ const translations = {
   en: {
     app_name: 'Chekki AI',
     tagline: 'Your AI Homework Helper',
-    login: 'Sign Up',
+    login: 'Log In',
     logout: 'Log Out',
     scans: 'Magic Scans',
     pro_plan: 'Premium 🚀',
@@ -375,7 +375,7 @@ const translations = {
   ko: {
     app_name: '채키 AI',
     tagline: '우리 아이 AI 숙제 도우미',
-    login: '회원가입',
+    login: '로그인',
     logout: '로그아웃',
     scans: '매직 스캔',
     pro_plan: '프리미엄 🚀',

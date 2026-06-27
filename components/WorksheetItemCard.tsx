@@ -92,16 +92,17 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     return (
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`group relative rounded-3xl border overflow-hidden transition-[border-color,box-shadow,transform] duration-300 ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-2xl scale-[1.01]' : 'bg-white border-orange-500 shadow-2xl scale-[1.01]') : isNight ? 'bg-zinc-900/60 border-transparent hover:border-white/10' : 'bg-white border-transparent hover:border-zinc-200 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-lg'}`}
+        className={`group relative rounded-[2.5rem] border overflow-hidden transition-all duration-500 ease-[var(--ease-premium)] p-1.5 ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]' : 'bg-white border-orange-500 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]') : isNight ? 'bg-[#111111]/80 border-white/5 hover:border-white/10' : 'bg-white/80 border-zinc-200 hover:border-zinc-300 shadow-sm hover:shadow-lg'}`}
         style={style}
       >
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleActive();
-          }}
-          className="p-4 md:p-8 flex items-start gap-4 md:gap-8 cursor-pointer"
-        >
+        <div className={`w-full h-full rounded-[calc(2.5rem-0.375rem)] ${isNight ? 'bg-[#0A0A0A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)]'} transition-all duration-500 ease-[var(--ease-premium)]`}>
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleActive();
+            }}
+            className="p-4 md:p-8 flex items-start gap-4 md:gap-8 cursor-pointer"
+          >
           <div
             className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 ${isActive ? 'bg-orange-500 text-white shadow-lg rotate-3' : isNight ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-100 text-zinc-400'}`}
           >
@@ -161,7 +162,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                         e.stopPropagation();
                         onPlayAudio(answerText);
                       }}
-                      className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-all text-orange-500 hover:scale-110 active:scale-95 hover:rotate-12 duration-200"
+                      className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-orange-500/10 text-orange-500 btn-press hover:scale-105 hover:-translate-y-0.5 shadow-sm"
                       title={t('tt_audio')}
                     >
                       <svg
@@ -180,7 +181,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                   <div className="flex flex-col items-center gap-1.5 group/btn">
                     <button
                       onClick={(e) => handleActionClick(e, () => onToggleMistake(item))}
-                      className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-all ${flagged ? 'text-red-500' : isNight ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-400 hover:text-zinc-600'} hover:scale-115 active:scale-90 duration-200`}
+                      className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-105 hover:-translate-y-0.5 shadow-sm ${flagged ? 'bg-red-500/10 text-red-500' : isNight ? 'bg-white/5 text-zinc-500 hover:text-zinc-300' : 'bg-black/5 text-zinc-400 hover:text-zinc-600'}`}
                       title={t('tt_bookmark')}
                     >
                       <svg
@@ -212,7 +213,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                           else onRefine(item);
                         })
                       }
-                      className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-all ${isNight ? 'text-orange-400 hover:text-orange-300' : 'text-orange-600 hover:text-orange-500'} hover:scale-115 hover:-translate-y-0.5 active:scale-90 duration-200`}
+                      className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-105 hover:-translate-y-0.5 shadow-sm ${isNight ? 'bg-orange-400/10 text-orange-400 hover:text-orange-300' : 'bg-orange-600/10 text-orange-600 hover:text-orange-500'}`}
                       title={t('tt_refine')}
                     >
                       <svg
@@ -248,7 +249,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }
                       }}
-                      className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-all text-orange-500 hover:scale-110 active:scale-95 group-hover/btn:-translate-y-1`}
+                      className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-orange-500/10 text-orange-500 btn-press hover:scale-105 hover:-translate-y-0.5 shadow-sm`}
                       title={language === 'ko' ? '학습지 보기' : 'Show Worksheet'}
                     >
                       <svg
@@ -294,7 +295,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                 <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-3xl p-5 flex items-center gap-5">
                   <button
                     onClick={onStartPronunciation}
-                    className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600'} text-white shadow-lg`}
+                    className={`w-14 h-14 md:w-16 md:h-16 rounded-[2rem] flex items-center justify-center btn-press hover:scale-[1.02] ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600'} text-white shadow-lg`}
                   >
                     {isListening ? (
                       <div className="flex items-center gap-1.5">
@@ -540,6 +541,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
             )}
           </div>
         )}
+        </div>
       </div>
     );
   }

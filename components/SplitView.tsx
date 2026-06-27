@@ -632,7 +632,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
         </div>
 
         <div
-          className={`w-full lg:w-1/2 min-w-0 flex flex-col ${isNight ? 'bg-zinc-950/40 border-white/5' : 'bg-white border-transparent'} rounded-3xl border lg:overflow-hidden relative`}
+          className={`w-full lg:w-1/2 min-w-0 flex flex-col ${isNight ? 'bg-[#111111]/80 border-white/10 shadow-black/80' : 'bg-white/80 border-zinc-200 shadow-zinc-300/50'} backdrop-blur-2xl rounded-[2.5rem] border lg:overflow-hidden relative`}
           onClick={() => setActiveItemId(null)}
         >
           <div

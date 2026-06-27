@@ -63,53 +63,47 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
       )}
       {showSupport && <LegalModal type="support" onClose={() => setShowSupport(false)} />}
 
-      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top)]">
-        <div
-          className={`absolute inset-0 ${isNight ? 'bg-[#050505]/80 backdrop-blur-xl' : 'bg-white/95 backdrop-blur-md'} border-b ${isNight ? 'border-white/5' : 'border-zinc-200/80 shadow-sm'}`}
-        ></div>
-
-        <div className="relative max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 md:px-6 h-16 md:h-24 flex items-center justify-between gap-2">
+      <header className="fixed top-4 md:top-6 left-0 right-0 z-50 transition-all duration-500 ease-[var(--ease-premium)] px-4 flex justify-center pt-[env(safe-area-inset-top)] pointer-events-none">
+        <div className={`p-1.5 md:p-2 rounded-full pointer-events-auto backdrop-blur-3xl shadow-2xl transition-all duration-500 ease-[var(--ease-premium)] ${isNight ? 'bg-black/20 ring-1 ring-white/10 shadow-black/80' : 'bg-black/5 ring-1 ring-black/5 shadow-zinc-300/50'}`}>
+          <div className={`relative w-full max-w-3xl h-12 md:h-14 flex items-center justify-between gap-2 px-3 md:px-5 rounded-full border transition-all duration-500 ease-[var(--ease-premium)] ${isNight ? 'bg-[#111111]/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]' : 'bg-white/90 border-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]'}`}>
           <div
             role="button"
             aria-label="Return to home"
             tabIndex={0}
-            className="flex items-center cursor-pointer group h-full flex-shrink min-w-0"
+            className="flex items-center cursor-pointer group h-full flex-shrink-0 min-w-0"
             onClick={onReset}
             onKeyDown={(e) => e.key === 'Enter' && onReset()}
             title={t('tt_home')}
           >
             {!logoError ? (
-              <div className="relative w-10 h-10 md:w-14 md:h-14 lg:w-20 lg:h-20 flex-shrink-0">
+              <div className="relative w-8 h-8 md:w-10 md:h-10 flex-shrink-0">
                 <img
                   src={ASSETS.LOGO}
                   alt="Chekki AI"
-                  className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-full object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-2xl filter brightness-110 scale-[1.15] md:scale-[1.25] origin-left"
+                  className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 ease-[var(--ease-premium)] filter brightness-110 scale-[1.15] origin-left"
                   onError={() => setLogoError(true)}
                 />
               </div>
             ) : (
               <div
-                className={`w-10 h-10 md:w-14 md:h-14 lg:w-20 lg:h-20 ${isNight ? 'bg-gradient-to-br from-orange-500 to-pink-500' : 'bg-orange-500'} rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0`}
+                className={`w-8 h-8 md:w-10 md:h-10 ${isNight ? 'bg-gradient-to-br from-orange-500 to-pink-500' : 'bg-orange-500'} rounded-full flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform duration-500 ease-[var(--ease-premium)] flex-shrink-0`}
               >
                 <ChekkiMascot
-                  className="w-8 h-8 lg:w-14 lg:h-14 text-white drop-shadow-md"
+                  className="w-5 h-5 text-white drop-shadow-md"
                   mood="happy"
                 />
               </div>
             )}
 
-            <div className="flex flex-col justify-center relative z-10 pt-1 min-w-0 ml-2">
+            <div className="flex flex-col justify-center relative z-10 pt-0.5 min-w-0 ml-2 hidden sm:flex">
               <h1
-                className={`text-lg md:text-3xl lg:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-300 truncate`}
+                className={`text-lg md:text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-500 ease-[var(--ease-premium)] truncate`}
               >
                 Chekki
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">
                   AI
                 </span>
               </h1>
-              <span className="text-[7px] md:text-[11px] lg:text-[13px] text-zinc-500 font-black tracking-normal md:tracking-wide uppercase mt-0.5 opacity-80 leading-tight truncate">
-                {t('tagline')}
-              </span>
             </div>
           </div>
 
@@ -166,7 +160,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                   aria-label="Open account menu"
                   aria-haspopup="true"
                   aria-expanded={showUserMenu}
-                  className="h-8 w-8 md:h-10 md:w-10 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer hover:ring-2 hover:ring-orange-500/50 transition-all uppercase select-none text-xs md:text-base"
+                  className="h-8 w-8 md:h-10 md:w-10 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer btn-press group-hover:scale-[1.02] uppercase select-none text-xs md:text-sm"
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   title={user.name}
                 >
@@ -248,12 +242,14 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                               setShowUserMenu(false);
                               setShowPaywall(true);
                             }}
-                            className="w-full py-2 px-3 rounded-lg text-[10px] md:text-xs font-black text-white bg-gradient-to-r from-orange-500 via-pink-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-md shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center gap-1.5 animate-glow-pulse"
+                            className="w-full py-1.5 pl-4 pr-1.5 rounded-full text-[10px] md:text-xs font-black text-white bg-gradient-to-r from-orange-500 via-pink-500 to-red-500 shadow-md shadow-orange-500/20 btn-press flex items-center justify-between gap-1.5 animate-glow-pulse group"
                           >
-                            <span>🚀</span>
                             <span>
                               {language === 'ko' ? '7일 무료 체험 시작' : 'Start 7-Day Free Trial'}
                             </span>
+                            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
+                              🚀
+                            </div>
                           </button>
                         </div>
                       )}
@@ -458,13 +454,14 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
               <div className="flex items-center gap-2">
                 <button
                   onClick={openLoginModal}
-                  className={`flex-shrink-0 ${isNight ? 'bg-white text-black hover:bg-zinc-200' : 'bg-zinc-900 text-white hover:bg-black'} px-3.5 py-2 md:px-6 md:py-2.5 rounded-full text-[10px] md:text-sm font-black font-display transition-all transform active:scale-95 shadow-lg whitespace-nowrap min-w-fit`}
+                  className={`flex-shrink-0 ${isNight ? 'bg-white text-black hover:bg-zinc-200' : 'bg-zinc-900 text-white hover:bg-black'} px-4 py-1.5 md:px-5 md:py-2 rounded-full text-[10px] md:text-xs font-bold font-display btn-press shadow-lg whitespace-nowrap min-w-fit`}
                 >
                   {t('login')}
                 </button>
               </div>
             )}
           </div>
+        </div>
         </div>
       </header>
     </>

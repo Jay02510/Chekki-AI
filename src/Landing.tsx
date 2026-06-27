@@ -220,18 +220,8 @@ export default function Landing() {
           {/* 1. YouTube (col-span-2, row-span-2) - DOUBLE BEZEL */}
           <a href="https://www.youtube.com/@ChekkiAI" target="_blank" rel="noopener noreferrer" className="md:col-span-2 md:row-span-2 rounded-[2.5rem] bg-white/[0.02] border border-white/5 p-2 shadow-2xl group block outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 focus-visible:ring-offset-[#050505]">
             <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#0A0A0A] relative h-full flex flex-col justify-end p-8 md:p-12 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent z-10 pointer-events-none" />
-              <div className="absolute top-0 right-0 w-full h-full group-hover:scale-105 transition-transform duration-[1200ms] ease-[var(--ease-premium)]">
-                <video 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline 
-                  className="w-full h-full object-cover opacity-60 transition-opacity duration-700 group-hover:opacity-80"
-                >
-                  <source src="https://res.cloudinary.com/dginphpy4/video/upload/v1775221110/Image_for_website_202604032153_omnzqm.mp4" type="video/mp4" />
-                </video>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-[#050505]/20 z-10 pointer-events-none" />
+              <div className="absolute inset-0 opacity-30 mix-blend-screen group-hover:scale-110 group-hover:opacity-50 transition-all duration-[1200ms] ease-[var(--ease-premium)] bg-[url('/assets/youtube_bg.png')] bg-cover bg-center" />
               <div className="relative z-20">
                 <PlayCircle weight="fill" className="text-6xl text-brand mb-6 drop-shadow-xl" />
                 <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">YouTube Channel</h3>
@@ -272,7 +262,9 @@ export default function Landing() {
           {/* 3. Spotify (col-span-1, row-span-1) - DOUBLE BEZEL */}
           <a href="https://open.spotify.com/show/2onH0XU5yky37cBxdqKaY8" target="_blank" rel="noopener noreferrer" className="md:col-span-1 md:row-span-1 rounded-[2.5rem] bg-green-500/10 border border-green-500/20 p-2 shadow-xl group block outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-4 focus-visible:ring-offset-[#050505]">
             <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#0A0A0A] relative h-full flex flex-col justify-between p-6 md:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 rounded-full blur-[50px] group-hover:bg-green-500/30 transition-colors duration-700" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 rounded-full blur-[50px] group-hover:bg-green-500/30 transition-colors duration-700 z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-[#050505]/20 z-10 pointer-events-none" />
+              <div className="absolute inset-0 opacity-30 mix-blend-screen group-hover:scale-110 group-hover:opacity-50 transition-all duration-[1200ms] ease-[var(--ease-premium)] bg-[url('/assets/spotify_bg.png')] bg-cover bg-center" />
               <div className="relative z-20">
                 <SpotifyLogo weight="fill" className="text-4xl text-green-500 mb-4" />
                 <h3 className="text-xl font-bold text-white">Podcast</h3>
@@ -286,7 +278,9 @@ export default function Landing() {
           {/* 4. Etsy (col-span-1, row-span-1) - DOUBLE BEZEL */}
           <a href="https://www.etsy.com/shop/ChekkiAI?dd_referrer=" target="_blank" rel="noopener noreferrer" className="md:col-span-1 md:row-span-1 rounded-[2.5rem] bg-brand/10 border border-brand/20 p-2 shadow-xl group block outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 focus-visible:ring-offset-[#050505]">
             <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#0A0A0A] relative h-full flex flex-col justify-between p-6 md:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/20 rounded-full blur-[50px] group-hover:bg-brand/30 transition-colors duration-700" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/20 rounded-full blur-[50px] group-hover:bg-brand/30 transition-colors duration-700 z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-[#050505]/20 z-10 pointer-events-none" />
+              <div className="absolute inset-0 opacity-30 mix-blend-screen group-hover:scale-110 group-hover:opacity-50 transition-all duration-[1200ms] ease-[var(--ease-premium)] bg-[url('/assets/etsy_bg.png')] bg-cover bg-center" />
               <div className="relative z-20">
                 <Storefront weight="fill" className="text-4xl text-brand mb-4" />
                 <h3 className="text-xl font-bold text-white">Etsy Shop</h3>
@@ -297,7 +291,7 @@ export default function Landing() {
             </div>
           </a>
 
-          {/* 5. Chekki PDF (col-span-2, row-span-1) - DOUBLE BEZEL */}
+          {/* 5. Free Grammar PPT (col-span-2, row-span-1) - DOUBLE BEZEL */}
           <a href="https://chekkiai.netlify.app/" target="_blank" rel="noopener noreferrer" className="md:col-span-2 md:row-span-1 rounded-[2.5rem] bg-white/[0.02] border border-white/5 p-2 shadow-xl group block outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#050505]">
             <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#0A0A0A] relative h-full flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
               <div className="relative z-20 flex items-center gap-6">
@@ -305,8 +299,8 @@ export default function Landing() {
                   <FilePdf weight="fill" className="text-3xl text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Chekki PDF Reader</h3>
-                  <p className="text-white/50 text-sm">Convert and translate documents instantly.</p>
+                  <h3 className="text-2xl font-bold text-white mb-1">Top Grammar Mistakes</h3>
+                  <p className="text-white/50 text-sm">A free PPT explaining the top grammar mistakes Korean students struggle with.</p>
                 </div>
               </div>
               <div className="relative z-20 mt-6 md:mt-0 w-12 h-12 rounded-full bg-white/5 flex items-center justify-center transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-110 group-hover:bg-white/10">

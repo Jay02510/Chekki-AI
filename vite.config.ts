@@ -64,7 +64,7 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
           // Dynamic import to avoid loading this during build
           try {
             console.log(`[Vite Dev API] Handling ${req.method} ${req.url}`);
-            const { default: handler } = await import(`./api/${endpointName}`);
+            const { default: handler } = await import(`./api/${endpointName}.ts`);
             await handler(req as any, vercelRes as any);
           } catch (e: any) {
             console.error(`[Vite Dev API Error] for ${endpointName}:`, e);
