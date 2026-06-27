@@ -90,7 +90,7 @@ export default function Landing() {
       <div className="fixed top-6 left-0 w-full z-50 flex justify-center px-4">
         <header className="flex h-14 items-center justify-between px-6 max-w-4xl w-full mx-auto bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl">
           <div className="flex items-center gap-2">
-            <span className="font-bold tracking-tight text-white">Chekki</span>
+            <img src="/chekki-logo.png" alt="ChekkiAI" className="h-6 w-auto object-contain" />
           </div>
           
           {/* Desktop Nav */}
