@@ -190,8 +190,12 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Audio should read the AI Explanation if available, fallback to answer text
-                        onPlayAudio(displayScript || answerText);
+                        if (userPlan !== 'pro' && index !== 0) {
+                          setUpsellFeature('audio');
+                          setShowPaywall(true);
+                        } else {
+                          onPlayAudio(displayScript || answerText);
+                        }
                       }}
                       className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-orange-500/10 text-orange-500 btn-press hover:scale-105 hover:-translate-y-0.5 shadow-sm"
                       title={t('tt_audio')}
@@ -325,7 +329,15 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
               <>
                 <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-3xl p-5 flex items-center gap-5">
                   <button
-                    onClick={onStartPronunciation}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (userPlan !== 'pro' && index !== 0) {
+                        setUpsellFeature('pronunciation');
+                        setShowPaywall(true);
+                      } else {
+                        onStartPronunciation(e);
+                      }
+                    }}
                     className={`w-14 h-14 md:w-16 md:h-16 rounded-[2rem] flex items-center justify-center btn-press hover:scale-[1.02] ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600'} text-white shadow-lg`}
                   >
                     {isListening ? (
@@ -362,7 +374,6 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                     </p>
                   </div>
                 </div>
-                {userPlan === 'pro' || index === 0 ? (
                   <>
                     {/* Collapsible Teaching Script (Mom's Tip) */}
                     <div
@@ -465,117 +476,13 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                       </div>
                     </div>
                   </>
-                ) : (
-                  <div
-                    className="relative group/paywall cursor-pointer overflow-hidden rounded-3xl border border-transparent hover:border-amber-500/20 hover:shadow-[0_0_30px_rgba(245,158,11,0.05)] transition-all duration-300"
-                    onClick={() => setUpsellFeature('guide')}
-                  >
-                    <div className="space-y-4 pointer-events-none opacity-30 transition-opacity duration-300 group-hover/paywall:opacity-40">
-                      {/* Collapsible Teaching Script Preview */}
-                      <div
-                        className={`${isNight ? 'bg-orange-500/5 border-orange-500/10 shadow-inner' : 'bg-orange-50/50 border-orange-100 shadow-sm'} border rounded-3xl p-4 md:p-5 text-left`}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm">🤖</span>
-                          <p className="text-xs font-black uppercase text-orange-500 tracking-wider font-display">
-                            {t('lbl_mom_tip')}
-                          </p>
-                        </div>
-                        <div
-                          className={`text-sm md:text-base ${isNight ? 'text-zinc-400' : 'text-zinc-600'} font-korean leading-relaxed font-bold italic border-l-4 border-orange-500 pl-4`}
-                        >
-                          &quot;{getFirstSentence(displayScript || '')}&quot;
-                        </div>
-                        <div className="mt-2 space-y-1.5 opacity-20 filter blur-[2px]">
-                          <div
-                            className={`h-2.5 w-11/12 ${isNight ? 'bg-white' : 'bg-zinc-800'} rounded`}
-                          />
-                          <div
-                            className={`h-2.5 w-8/12 ${isNight ? 'bg-white' : 'bg-zinc-800'} rounded`}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Collapsible Guide Box Preview */}
-                      <div
-                        className={`${isNight ? 'bg-zinc-950/20 border-white/5' : 'bg-zinc-50/80 border-zinc-200'} border rounded-3xl p-4 md:p-5 text-left`}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm">💡</span>
-                          <p className="text-xs font-black uppercase text-zinc-400 tracking-wider font-display">
-                            {language === 'ko' ? '티칭 가이드' : 'Teaching Guide'}
-                          </p>
-                        </div>
-                        <div
-                          className={`text-xs md:text-sm ${isNight ? 'text-zinc-400' : 'text-zinc-600'} font-korean leading-relaxed break-keep font-medium`}
-                        >
-                          {getFirstSentence(simplifyGuideText(displayGuide || ''))}
-                        </div>
-                        <div className="mt-2 space-y-1.5 opacity-20 filter blur-[2px]">
-                          <div
-                            className={`h-2.5 w-11/12 ${isNight ? 'bg-white' : 'bg-zinc-800'} rounded`}
-                          />
-                          <div
-                            className={`h-2.5 w-9/12 ${isNight ? 'bg-white' : 'bg-zinc-800'} rounded`}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Soft Premium Blurred Gradient Overlay */}
-                    <div
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4 transition-all duration-300 group-hover/paywall:backdrop-blur-[1px]"
-                      style={{
-                        background: isNight
-                          ? 'linear-gradient(to bottom, rgba(24,24,27,0.2) 0%, rgba(24,24,27,0.7) 40%, rgba(24,24,27,0.95) 90%)'
-                          : 'linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.7) 40%, rgba(255,255,255,0.95) 90%)',
-                      }}
-                    >
-                      {/* Custom Soft Lock Icon with gold gradient */}
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 flex items-center justify-center shadow-lg shadow-amber-500/20 transform group-hover/paywall:scale-110 transition-transform duration-300">
-                        <svg
-                          className="w-5 h-5 md:w-6 md:h-6 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          strokeWidth="2.5"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                          />
-                        </svg>
-                      </div>
-
-                      <div className="text-center px-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-wider mb-1 shadow-sm">
-                          👑 PREMIUM PREVIEW
-                        </span>
-                        <p
-                          className={`text-xs md:text-sm font-black font-korean ${isNight ? 'text-white' : 'text-zinc-900'} leading-snug`}
-                        >
-                          {language === 'ko'
-                            ? '해설 및 가이드 전문 보기'
-                            : 'Unlock full explanation'}
-                        </p>
-                        <p className="text-[9px] text-zinc-500 font-bold mt-0.5">
-                          {language === 'ko'
-                            ? '탭하여 7일 무료 체험을 시작하세요'
-                            : 'Tap to start your 7-day free trial'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </div>
         )}
-        </div>
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 WorksheetItemCard.displayName = 'WorksheetItemCard';
