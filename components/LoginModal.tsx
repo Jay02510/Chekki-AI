@@ -83,6 +83,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         errorMsg.toLowerCase().includes('user canceled') ||
         err.code === 'auth/popup-closed-by-user'
       ) {
+        setIsLoading(false);
         return;
       }
 
@@ -112,6 +113,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         errorMsg.toLowerCase().includes('user canceled') ||
         err.code === 'auth/popup-closed-by-user'
       ) {
+        setIsLoading(false);
         return;
       }
       console.error('[LoginModal] Google Sign-In Error:', err);
@@ -134,6 +136,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         errorMsg.toLowerCase().includes('user canceled') ||
         errorMsg.toLowerCase().includes('cancel')
       ) {
+        setIsLoading(false);
         return;
       }
       console.error('[LoginModal] Kakao Sign-In Error:', err);

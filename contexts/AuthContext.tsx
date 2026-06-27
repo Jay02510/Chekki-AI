@@ -565,7 +565,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (popupErr: any) {
           if (
             popupErr.code === 'auth/popup-blocked' ||
-            popupErr.code === 'auth/popup-closed-by-user' ||
             popupErr.code === 'auth/argument-error' ||
             popupErr.code === 'auth/internal-error'
           ) {
@@ -680,7 +679,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (popupErr: any) {
         if (
           popupErr.code === 'auth/popup-blocked' ||
-          popupErr.code === 'auth/popup-closed-by-user' ||
           popupErr.code === 'auth/argument-error' ||
           popupErr.code === 'auth/internal-error'
         ) {
