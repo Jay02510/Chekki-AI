@@ -314,10 +314,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (profile) {
           await fetchAndSetUserProfile(user, profile);
         } else {
-          // If the profile is null and we are not in the middle of a signup, set to null.
-          // Otherwise, the signup/social sign-in helper will create the profile and set it.
+          // If the profile is null and we are not in the middle of a signup, 
+          // the user is authenticated in Firebase but has no Firestore profile.
+          // This happens if the page reloads during sign in (e.g. signInWithRedirect or Safari unloading).
           if (!isSigningUpRef.current) {
-            setUserProfile(null);
+            console.log('[AuthContext] Creating missing profile for authenticated user');
+            const newProfile: UserProfile = {
+              name: user.displayName || 'User',
+              email: user.email || '',
+              plan: 'free',
+              scansUsedToday: 0,
+              lastScanDate: new Date().toISOString().split('T')[0],
+              maxScansPerDay: FREE_DAILY_LIMIT,
+              questionsUsedToday: 0,
+              maxQuestionsPerDay: 5,
+              lastQuestionDate: new Date().toISOString().split('T')[0],
+              schoolId: null,
+              schoolName: null,
+              subscriptionStartedAt: null,
+              nextBillingDate: null,
+            };
+            try {
+              await db.createUser(user.uid, newProfile);
+              await fetchAndSetUserProfile(user, newProfile);
+            } catch (err) {
+              console.error('[AuthContext] Failed to create fallback profile', err);
+              setUserProfile(null);
+            }
           }
         }
 
@@ -710,8 +733,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         // Web flow using Kakao JS SDK
         if (!(window as any).Kakao) {
-          throw new Error('Kakao SDK not loaded');
+          console.log('[AuthContext] Kakao SDK missing, attempting to inject dynamically...');
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js';
+            script.onload = () => {
+              if ((window as any).Kakao && !(window as any).Kakao.isInitialized()) {
+                (window as any).Kakao.init('f06bc75426bf2b41940620d3ee942f06');
+              }
+              resolve();
+            };
+            script.onerror = () => reject(new Error('Failed to load Kakao SDK. Please disable your adblocker.'));
+            document.head.appendChild(script);
+          });
         }
+        
+        if (!(window as any).Kakao) {
+          throw new Error('Kakao SDK not loaded. Please disable adblockers and try again.');
+        }
+
         const Kakao = (window as any).Kakao;
         
         accessToken = await new Promise<string>((resolve, reject) => {
