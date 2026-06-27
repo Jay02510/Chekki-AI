@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { House } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useMistakes } from '../contexts/MistakeContext';
@@ -17,9 +18,12 @@ interface Props {
   setIsNight: (val: boolean) => void;
   onOpenHelp?: () => void;
   onOpenDashboard?: () => void;
+  isSpeedMode: boolean;
+  setIsSpeedMode: (val: boolean) => void;
+  showSpeedToggle?: boolean;
 }
 
-export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHelp, onOpenDashboard }) => {
+export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedMode, setIsSpeedMode, showSpeedToggle, onOpenHelp, onOpenDashboard }) => {
   const { user, openLoginModal, logout, setShowPaywall } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const { setShowMistakeModal, mistakes } = useMistakes();
@@ -64,9 +68,9 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
       )}
       {showSupport && <LegalModal type="support" onClose={() => setShowSupport(false)} />}
 
-      <header className="fixed top-4 md:top-6 left-0 right-0 z-50 transition-all duration-500 ease-[var(--ease-premium)] px-4 flex justify-center pt-[env(safe-area-inset-top)] pointer-events-none">
-        <div className={`p-1.5 md:p-2 rounded-full pointer-events-auto backdrop-blur-3xl shadow-2xl transition-all duration-500 ease-[var(--ease-premium)] ${isNight ? 'bg-black/20 ring-1 ring-white/10 shadow-black/80' : 'bg-black/5 ring-1 ring-black/5 shadow-zinc-300/50'}`}>
-          <div className={`relative w-full max-w-3xl h-12 md:h-14 flex items-center justify-between gap-2 px-3 md:px-5 rounded-full border transition-all duration-500 ease-[var(--ease-premium)] ${isNight ? 'bg-[#111111]/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]' : 'bg-white/90 border-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]'}`}>
+      <header className="fixed top-4 md:top-6 left-0 right-0 z-50 transition-all duration-200 ease-[var(--ease-premium)] px-4 flex justify-center pt-[env(safe-area-inset-top)] pointer-events-none">
+        <div className={`p-1.5 md:p-2 rounded-full pointer-events-auto backdrop-blur-3xl shadow-2xl transition-all duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-black/20 ring-1 ring-white/10 shadow-black/80' : 'bg-black/5 ring-1 ring-black/5 shadow-zinc-300/50'}`}>
+          <div className={`relative w-full max-w-3xl h-12 md:h-14 flex items-center justify-between gap-2 px-3 md:px-5 rounded-full border transition-all duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-[#111111]/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]' : 'bg-white/90 border-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]'}`}>
           <div
             role="button"
             aria-label="Return to home"
@@ -80,13 +84,13 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                 <img
                   src={ASSETS.LOGO}
                   alt="Chekki AI"
-                  className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 ease-[var(--ease-premium)] filter brightness-110 scale-[1.15] origin-left"
+                  className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-full object-contain group-hover:scale-110 transition-transform duration-200 ease-[var(--ease-premium)] filter brightness-110 scale-[1.15] origin-left"
                   onError={() => setLogoError(true)}
                 />
               </div>
             ) : (
               <div
-                className={`w-8 h-8 md:w-10 md:h-10 ${isNight ? 'bg-gradient-to-br from-orange-500 to-pink-500' : 'bg-orange-500'} rounded-full flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform duration-500 ease-[var(--ease-premium)] flex-shrink-0`}
+                className={`w-8 h-8 md:w-10 md:h-10 ${isNight ? 'bg-gradient-to-br from-orange-500 to-pink-500' : 'bg-orange-500'} rounded-full flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-[1.02] transition-transform duration-200 ease-[var(--ease-premium)] flex-shrink-0`}
               >
                 <ChekkiMascot
                   className="w-5 h-5 text-white drop-shadow-md"
@@ -97,7 +101,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
 
             <div className="flex flex-col justify-center relative z-10 pt-0.5 min-w-0 ml-2 hidden sm:flex">
               <h1
-                className={`text-lg md:text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-500 ease-[var(--ease-premium)] truncate`}
+                className={`text-lg md:text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-200 ease-[var(--ease-premium)] truncate`}
               >
                 Chekki
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">
@@ -115,12 +119,9 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
             {/* Back to Home Button */}
             <button
               onClick={onReset}
-              className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-[10px] md:text-xs font-bold transition-all duration-300 ${isNight ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' : 'bg-black/5 hover:bg-black/10 text-zinc-900 border border-black/5'}`}
+              className={`flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full transition-all duration-200 ${isNight ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' : 'bg-black/5 hover:bg-black/10 text-zinc-900 border border-black/5'}`}
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-              </svg>
-              <span className="hidden sm:inline">{language === 'ko' ? '홈으로' : 'Home'}</span>
+              <House weight="bold" className="text-sm md:text-base" />
             </button>
 
             <div className="flex items-center gap-2 md:gap-4">
@@ -129,14 +130,14 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
               >
                 {/* Sliding indicator */}
                 <div
-                  className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-out shadow-sm ${
+                  className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-200 ease-out shadow-sm ${
                     language === 'ko' ? 'translate-x-[calc(100%)]' : 'translate-x-0'
                   } ${isNight ? 'bg-white' : 'bg-zinc-900'}`}
                 ></div>
 
                 <button
                   onClick={() => setLanguage('en')}
-                  className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-colors duration-300 ${
+                  className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-colors duration-200 ${
                     language === 'en'
                       ? isNight
                         ? 'text-black'
@@ -150,7 +151,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                 </button>
                 <button
                   onClick={() => setLanguage('ko')}
-                  className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-colors duration-300 ${
+                  className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-colors duration-200 ${
                     language === 'ko'
                       ? isNight
                         ? 'text-black'
@@ -164,7 +165,45 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                 </button>
               </div>
 
-              {/* Removed Theme toggle from here */}
+              {/* Speed Mode Toggle */}
+              {showSpeedToggle && (
+                <div
+                  className={`relative flex items-center ${isNight ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50/80 border-orange-200'} p-1 rounded-full border overflow-hidden`}
+                >
+                  <div
+                    className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-sm ${
+                      isSpeedMode ? 'translate-x-[calc(100%)]' : 'translate-x-0'
+                    } ${isNight ? 'bg-orange-500' : 'bg-orange-500'}`}
+                  ></div>
+
+                  <button
+                    onClick={() => setIsSpeedMode(false)}
+                    className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                      !isSpeedMode
+                        ? 'text-white drop-shadow-md'
+                        : isNight
+                          ? 'text-orange-400 hover:text-orange-300'
+                          : 'text-orange-600 hover:text-orange-500'
+                    } uppercase tracking-widest flex items-center gap-1`}
+                  >
+                    <span className="text-sm hidden sm:inline">🤖</span>
+                    {language === 'ko' ? '튜터' : 'TUTOR'}
+                  </button>
+                  <button
+                    onClick={() => setIsSpeedMode(true)}
+                    className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                      isSpeedMode
+                        ? 'text-white drop-shadow-md'
+                        : isNight
+                          ? 'text-orange-400 hover:text-orange-300'
+                          : 'text-orange-600 hover:text-orange-500'
+                    } uppercase tracking-widest flex items-center gap-1`}
+                  >
+                    <span className="text-sm hidden sm:inline">⚡</span>
+                    {language === 'ko' ? '스피드' : 'SPEED'}
+                  </button>
+                </div>
+              )}
             </div>
 
             {user ? (

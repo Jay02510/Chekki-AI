@@ -486,7 +486,7 @@ const WebSubscriptionView: React.FC<{ isNight?: boolean }> = ({ isNight = true }
       <div className="w-full max-w-xs space-y-3 px-4">
         <a
           href="/subscribe"
-          className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base shadow-xl shadow-orange-500/20 active:scale-95 transition-all text-center block"
+          className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base shadow-xl shadow-orange-500/20 active:scale-[0.97] transition-all text-center block"
         >
           {t('sub_webCta')}
         </a>

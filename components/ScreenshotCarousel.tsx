@@ -60,7 +60,7 @@ export const ScreenshotCarousel: React.FC = () => {
       <div className="relative aspect-[9/16] md:aspect-video w-full overflow-hidden rounded-3xl bg-zinc-900/50 border border-white/10 shadow-2xl">
         {/* Images */}
         <div
-          className="flex transition-transform duration-700 ease-in-out h-full"
+          className="flex transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] h-full"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {screenshots.map((s, i) => (
@@ -72,7 +72,7 @@ export const ScreenshotCarousel: React.FC = () => {
               <img
                 src={s.url}
                 alt={s.title}
-                className="w-full h-full object-contain drop-shadow-2xl rounded-xl md:rounded-2xl transition-transform duration-300 group-hover/img:scale-[1.02]"
+                className="w-full h-full object-contain drop-shadow-2xl rounded-xl md:rounded-2xl transition-transform duration-200 group-hover/img:scale-[1.02]"
               />
             </div>
           ))}
@@ -91,7 +91,7 @@ export const ScreenshotCarousel: React.FC = () => {
             e.stopPropagation();
             prevSlide();
           }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-16 md:h-16 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md flex items-center justify-center text-white transition-all active:scale-95 group"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-16 md:h-16 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md flex items-center justify-center text-white transition-all active:scale-[0.97] group"
         >
           <span className="text-xl md:text-3xl group-hover:-translate-x-1 transition-transform">
             ←
@@ -102,7 +102,7 @@ export const ScreenshotCarousel: React.FC = () => {
             e.stopPropagation();
             nextSlide();
           }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-16 md:h-16 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md flex items-center justify-center text-white transition-all active:scale-95 group"
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-16 md:h-16 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md flex items-center justify-center text-white transition-all active:scale-[0.97] group"
         >
           <span className="text-xl md:text-3xl group-hover:translate-x-1 transition-transform">
             →
@@ -116,7 +116,7 @@ export const ScreenshotCarousel: React.FC = () => {
           <button
             key={i}
             onClick={() => setCurrentIndex(i)}
-            className={`transition-all duration-300 rounded-full ${
+            className={`transition-all duration-200 rounded-full ${
               i === currentIndex
                 ? 'w-8 md:w-12 h-2 md:h-3 bg-orange-500'
                 : 'w-2 md:w-3 h-2 md:h-3 bg-white/20 hover:bg-white/40'
@@ -128,7 +128,7 @@ export const ScreenshotCarousel: React.FC = () => {
       {/* Lightbox / Enlarged View */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4 md:p-12 animate-in fade-in duration-300"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4 md:p-12 animate-in fade-in duration-200"
           onClick={() => setSelectedImage(null)}
         >
           <button
@@ -144,7 +144,7 @@ export const ScreenshotCarousel: React.FC = () => {
             <img
               src={selectedImage}
               alt="Enlarged view"
-              className="max-w-full max-h-full object-contain drop-shadow-2xl animate-in zoom-in-95 duration-300"
+              className="max-w-full max-h-full object-contain drop-shadow-2xl animate-in zoom-in-95 duration-200"
             />
           </div>
         </div>

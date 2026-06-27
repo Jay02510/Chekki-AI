@@ -83,7 +83,7 @@ export const InlineFeedback: React.FC = () => {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-50 text-white hover:text-indigo-900 font-black text-sm transition-all transform active:scale-95 flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-50 text-white hover:text-indigo-900 font-black text-sm transition-all transform active:scale-[0.97] flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
               <div className="w-4 h-4 border-2 border-indigo-900/30 border-t-indigo-900 rounded-full animate-spin"></div>

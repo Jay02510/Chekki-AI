@@ -87,7 +87,7 @@ export const FlyerModal: React.FC<Props> = ({ onClose, isNight = false }) => {
                 <img
                   src={ASSETS.FLYER_THUMB}
                   alt="Chekki Flyer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 bg-zinc-900"
+                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200 bg-zinc-900"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 px-4 backdrop-blur-sm">
                   <a

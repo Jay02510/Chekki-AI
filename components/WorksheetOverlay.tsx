@@ -196,7 +196,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
       <div
         id={inFullscreen ? 'worksheet-overlay-fullscreen' : 'worksheet-overlay-capture'}
         onContextMenu={(e) => e.preventDefault()}
-        className={`group relative transform-gpu transition-all duration-500 ease-in-out flex items-center justify-center select-none ${
+        className={`group relative transform-gpu transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] flex items-center justify-center select-none ${
           inFullscreen
             ? viewMode === 'fit'
               ? 'h-full w-full'
@@ -219,7 +219,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
           <img
             src={imageUrl}
             alt="Worksheet"
-            className={`block transition-all duration-1000 ease-in-out transform-gpu pointer-events-none ${
+            className={`block transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform-gpu pointer-events-none ${
               imageLoaded || inFullscreen ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'
             }`}
             style={{ maxWidth: '100%', maxHeight: inFullscreen && viewMode === 'fit' ? '100vh' : '100%', width: 'auto', height: 'auto', display: 'block' }}
@@ -254,7 +254,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 >
                   <div
                     className={`
-                        rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-2 flex items-center gap-2 transform transition-all active:scale-95 group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
+                        rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-2 flex items-center gap-2 transform transition-all active:scale-[0.97] group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
                         ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-[0_25px_70px_rgba(0,0,0,0.6)] ring-4 z-[1000]' : ''}
                         ${isFocused 
                           ? (isBlankKeyMode 
@@ -346,7 +346,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                   <div className="w-full h-px bg-white/10"></div>
                   <button
                     onClick={resetPositions}
-                    className={`w-full py-3 rounded-2xl ${isNight ? 'bg-white/5 text-white border-white/10 hover:bg-white/10' : 'bg-zinc-100 text-zinc-900 border-zinc-200 hover:bg-zinc-200'} transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-95 border`}
+                    className={`w-full py-3 rounded-2xl ${isNight ? 'bg-white/5 text-white border-white/10 hover:bg-white/10' : 'bg-zinc-100 text-zinc-900 border-zinc-200 hover:bg-zinc-200'} transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border`}
                   >
                     <span className="text-base">🔄</span>{' '}
                     {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
@@ -401,7 +401,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
               <div className="sticky bottom-4 md:bottom-8 left-0 right-0 z-50 flex justify-center pointer-events-none pb-4">
                 <button
                   onClick={() => setShowBlankAnswers(!showBlankAnswers)}
-                  className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-95 border-2 ${
+                  className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
                     showBlankAnswers 
                       ? 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' 
                       : isNight ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
@@ -464,7 +464,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                       <div className="w-full h-px bg-white/10"></div>
                       <button
                         onClick={resetPositions}
-                        className="w-full py-4 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-95 border border-white/10"
+                        className="w-full py-4 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border border-white/10"
                       >
                         <span className="text-lg">🔄</span>{' '}
                         {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
@@ -523,7 +523,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 className="w-14 h-14 rounded-full bg-orange-600/90 hover:bg-orange-500 backdrop-blur-xl flex items-center justify-center text-white opacity-40 hover:opacity-100 transition-all active:scale-90 border-2 border-white/30 pointer-events-auto shadow-2xl group shrink-0"
               >
                 <svg
-                  className="w-10 h-10 group-hover:rotate-90 transition-transform duration-300"
+                  className="w-10 h-10 group-hover:rotate-90 transition-transform duration-200"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -549,7 +549,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                   <div className="fixed bottom-4 md:bottom-8 left-0 right-0 z-[10003] flex justify-center pointer-events-none pb-4">
                     <button
                       onClick={() => setShowBlankAnswers(!showBlankAnswers)}
-                      className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-95 border-2 ${
+                      className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
                         showBlankAnswers 
                           ? 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' 
                           : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-blue-500/50 hover:text-blue-400'

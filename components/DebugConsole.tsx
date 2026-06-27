@@ -118,7 +118,7 @@ export const DebugConsole: React.FC = () => {
     return (
       <button
         onClick={() => setIsVisible(true)}
-        className="fixed bottom-4 left-4 z-[9999] bg-red-500 text-white text-xs px-2.5 py-1.5 rounded-lg opacity-40 hover:opacity-100 shadow-lg font-black tracking-wider uppercase transition-all duration-300 hover:scale-105 active:scale-95"
+        className="fixed bottom-4 left-4 z-[9999] bg-red-500 text-white text-xs px-2.5 py-1.5 rounded-lg opacity-40 hover:opacity-100 shadow-lg font-black tracking-wider uppercase transition-all duration-200 hover:scale-[1.02] active:scale-[0.97]"
       >
         Debug
       </button>

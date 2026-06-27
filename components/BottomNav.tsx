@@ -76,7 +76,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[env(safe-area-inset-bottom)]">
-      <div className={`pointer-events-auto flex items-center gap-2 p-2 rounded-full backdrop-blur-2xl border shadow-2xl transition-all duration-500 ease-[var(--ease-premium)] ${isNight ? 'bg-[#111111]/80 border-white/10 shadow-black/80' : 'bg-white/80 border-zinc-200 shadow-zinc-300/50'}`}>
+      <div className={`pointer-events-auto flex items-center gap-2 p-2 rounded-full backdrop-blur-2xl border shadow-2xl transition-all duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-[#111111]/80 border-white/10 shadow-black/80' : 'bg-white/80 border-zinc-200 shadow-zinc-300/50'}`}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (

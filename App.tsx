@@ -56,7 +56,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
           </h1>
           <button
             onClick={() => window.location.reload()}
-            className="bg-orange-500 text-white px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-orange-600 transition-all active:scale-95"
+            className="bg-orange-500 text-white px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-orange-600 transition-all active:scale-[0.97]"
           >
             Reload App
           </button>
@@ -71,7 +71,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 // Falls back to system dark mode if no time preference applies.
 const isNightTime = (): boolean => {
   const hour = new Date().getHours();
-  return hour >= 22 || hour < 7;
+  return hour >= 19 || hour < 7;
 };
 
 const getInitialTheme = () => {
@@ -93,7 +93,7 @@ const msUntilNextTransition = (): number => {
   const ms = now.getMilliseconds();
 
   const totalMs = ((hour * 60 + min) * 60 + sec) * 1000 + ms;
-  const nightStart = 22 * 60 * 60 * 1000; // 22:00 in ms
+  const nightStart = 19 * 60 * 60 * 1000; // 19:00 in ms
   const dayStart = 7 * 60 * 60 * 1000; // 07:00 in ms
   const dayMs = 24 * 60 * 60 * 1000;
 
@@ -101,10 +101,10 @@ const msUntilNextTransition = (): number => {
     // Currently night (after midnight). Next transition = 07:00 today.
     return dayStart - totalMs;
   } else if (totalMs < nightStart) {
-    // Currently day. Next transition = 22:00 today.
+    // Currently day. Next transition = 19:00 today.
     return nightStart - totalMs;
   } else {
-    // Currently night (after 22:00). Next transition = 07:00 tomorrow.
+    // Currently night (after 19:00). Next transition = 07:00 tomorrow.
     return dayMs - totalMs + dayStart;
   }
 };
@@ -142,6 +142,7 @@ function AppContent() {
   } = useWorksheetAnalysis();
 
   const [isNight, setIsNight] = useState(getInitialTheme());
+  const [isSpeedMode, setIsSpeedMode] = useState(false);
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -226,7 +227,7 @@ function AppContent() {
     revenueCatService.initialize();
 
     // --- Time-based auto night mode ---
-    // Switches to night at 22:00 and back to day at 07:00 (local time).
+    // Switches to night at 19:00 and back to day at 07:00 (local time).
     // If the user has manually set a preference in Settings it is respected,
     // but cleared at each threshold so the schedule resumes from that point.
     let themeTimer: ReturnType<typeof setTimeout>;
@@ -414,7 +415,7 @@ function AppContent() {
   return (
     <ErrorBoundary>
       <div
-        className={`min-h-[100dvh] ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-500 flex flex-col`}
+        className={`min-h-[100dvh] ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-300 flex flex-col`}
       >
         {standaloneLegal && (
           <div className="fixed inset-0 z-[200]">
@@ -430,6 +431,9 @@ function AppContent() {
           onReset={() => handleReset(true)}
           isNight={isNight}
           setIsNight={setIsNight}
+          isSpeedMode={isSpeedMode}
+          setIsSpeedMode={setIsSpeedMode}
+          showSpeedToggle={analysisState.status === 'complete'}
           onOpenHelp={() => {
             switchTab('help');
           }}
@@ -452,8 +456,8 @@ function AppContent() {
             <span className="text-xl">✅</span>
             <p className="text-xs font-bold leading-tight font-korean">
               {language === 'ko'
-                ? '분석 완료! 종이 위에 정답과 다정한 티칭 가이드가 표시됩니다.'
-                : 'Analysis complete! Answer overlays and teaching guides are ready.'}
+                ? '분석 완료! 오늘도 아이와 함께 숙제하느라 고생 많으셨어요. 정답과 다정한 티칭 가이드가 준비되었습니다.'
+                : 'Analysis complete! Great job surviving another homework session. Your answer overlays and teaching guides are ready.'}
             </p>
           </div>
         )}
@@ -607,7 +611,7 @@ function AppContent() {
                         </button>
                         {showErrorDetails && (
                           <div
-                            className={`mt-3 p-4 rounded-2xl border text-left text-[10px] font-mono break-all max-w-sm mx-auto overflow-y-auto max-h-32 transition-all duration-300 ${
+                            className={`mt-3 p-4 rounded-2xl border text-left text-[10px] font-mono break-all max-w-sm mx-auto overflow-y-auto max-h-32 transition-all duration-200 ${
                               isNight
                                 ? 'bg-zinc-950/80 border-white/5 text-zinc-500'
                                 : 'bg-zinc-100 border-zinc-200 text-zinc-600'
@@ -661,6 +665,7 @@ function AppContent() {
                     <SplitView
                       imageUrl={analysisState.originalImage!}
                       items={analysisState.data.items || []}
+                      isSpeedMode={isSpeedMode}
                       isLoadingItems={!analysisState.isItemsLoaded}
                       worksheetTitle={
                         language === 'ko'

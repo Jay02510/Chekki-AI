@@ -349,7 +349,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         </h1>
         <button 
           onClick={onClose}
-          className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors active:scale-95"
+          className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors active:scale-[0.97]"
         >
           <X size={20} weight="bold" />
         </button>
@@ -361,18 +361,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           <button className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors font-bold">{language === 'ko' ? '전체 보기' : 'View All'}</button>
         </div>
         <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="min-w-[140px] md:min-w-[180px] aspect-[3/4] rounded-2xl bg-white/5 border border-white/10 shrink-0 overflow-hidden relative group cursor-pointer snap-start hover:border-white/20 transition-all hover:scale-[1.02]">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10" />
-              <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center opacity-50 group-hover:opacity-40 transition-opacity">
-                <FilePdf size={32} className="text-white/20" />
-              </div>
-              <div className="absolute bottom-3 left-3 z-20">
-                <div className="text-xs font-bold text-white mb-0.5">{language === 'ko' ? `학습지 ${i}` : `Worksheet ${i}`}</div>
-                <div className="text-[10px] text-white/60">{i} {language === 'ko' ? '일 전' : 'days ago'}</div>
-              </div>
-            </div>
-          ))}
+          <div className="w-full min-h-[140px] md:min-h-[180px] rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-6 text-center text-white/50 border-dashed">
+            <FilePdf size={32} className="mb-2 opacity-50" />
+            <p className="text-sm font-bold">{language === 'ko' ? '스캔한 학습지가 없습니다.' : 'No recent worksheets.'}</p>
+            <p className="text-xs opacity-70 mt-1">{language === 'ko' ? '학습지를 촬영하여 정답을 확인하세요.' : 'Snap a photo to get started.'}</p>
+          </div>
         </div>
       </div>
 
@@ -430,7 +423,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               <div className="mt-6 flex justify-end relative z-10">
                 <button 
                   onClick={handleStartPractice}
-                  className={`group relative overflow-hidden px-8 py-3 bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-center gap-4 transition-all duration-300 active:scale-[0.96] shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-600 font-korean`}
+                  className={`group relative overflow-hidden px-8 py-3 bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-center gap-4 transition-all duration-200 active:scale-[0.96] shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-600 font-korean`}
                 >
                   <MicrophoneStage size={18} weight="bold" />
                   <span className="relative z-10">
@@ -516,7 +509,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     </span>
                     <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-orange-500 transition-all duration-300"
+                        className="h-full bg-orange-500 transition-all duration-200"
                         style={{ width: `${((practiceIndex + 1) / mistakes.length) * 100}%` }}
                       />
                     </div>
@@ -545,8 +538,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                         onClick={handleMicPress}
                         className={`group relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none ${
                           isListening 
-                            ? 'active:scale-95 shadow-[0_0_40px_rgba(239,68,68,0.4)]' 
-                            : 'hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]'
+                            ? 'active:scale-[0.97] shadow-[0_0_40px_rgba(239,68,68,0.4)]' 
+                            : 'hover:scale-[1.02] active:scale-[0.97] shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]'
                         }`}
                       >
                         <div className={`absolute inset-0 rounded-full transition-colors duration-700 ${isListening ? 'bg-red-500/20' : 'bg-emerald-500/20'}`} />
@@ -578,7 +571,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                             ? (language === 'ko' ? '결과 보기' : 'See Results')
                             : (language === 'ko' ? '다음 문장' : 'Next Sentence')}
                         </span>
-                        <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105 group-hover:translate-x-1 group-hover:-translate-y-[1px]">
+                        <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
                           <CaretRight size={20} weight="bold" />
                         </div>
                       </button>
@@ -601,7 +594,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                         <span className="relative z-10 font-korean">
                           {language === 'ko' ? '다시 말하기' : 'Try Again'}
                         </span>
-                        <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105 group-hover:-rotate-90">
+                        <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:-rotate-90">
                           <ArrowsClockwise size={20} weight="bold" />
                         </div>
                       </button>

@@ -151,7 +151,7 @@ export const CameraView: React.FC<Props> = ({
         ].map((feat) => (
           <div
             key={feat.id}
-            className={`p-6 md:p-10 rounded-3xl ${isNight ? 'bg-zinc-900/40 border-white/5 hover:border-orange-500/20' : 'bg-white border-zinc-200 hover:border-orange-500/30 shadow-sm'} border hover:-translate-y-1 hover:shadow-lg transition-all duration-300`}
+            className={`p-6 md:p-10 rounded-3xl ${isNight ? 'bg-zinc-900/40 border-white/5 hover:border-orange-500/20' : 'bg-white border-zinc-200 hover:border-orange-500/30 shadow-sm'} border hover:-translate-y-1 hover:shadow-lg transition-all duration-200`}
           >
             <span className="text-3xl md:text-5xl block mb-4 md:mb-6">{feat.emoji}</span>
             <h3
@@ -216,9 +216,9 @@ export const CameraView: React.FC<Props> = ({
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 max-w-6xl mx-auto px-4">
             <div
-              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-300`}
+              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-200`}
             >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-200">
                 <span className="text-8xl md:text-[12rem]">✍️</span>
               </div>
               <span className="text-4xl md:text-7xl mb-2">✍️</span>
@@ -234,9 +234,9 @@ export const CameraView: React.FC<Props> = ({
               </p>
             </div>
             <div
-              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-300`}
+              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-200`}
             >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-200">
                 <span className="text-8xl md:text-[12rem]">💌</span>
               </div>
               <span className="text-4xl md:text-7xl mb-2">💌</span>
@@ -266,7 +266,7 @@ export const CameraView: React.FC<Props> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24 max-w-6xl mx-auto px-4">
             <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
               <div
-                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-500 group-hover:border-orange-500/30`}
+                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-200 group-hover:border-orange-500/30`}
               >
                 🔒
               </div>
@@ -285,7 +285,7 @@ export const CameraView: React.FC<Props> = ({
             </div>
             <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
               <div
-                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-500 group-hover:border-orange-500/30`}
+                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-200 group-hover:border-orange-500/30`}
               >
                 👥
               </div>
@@ -464,18 +464,6 @@ export const CameraView: React.FC<Props> = ({
           </div>
         ))}
       </div>
-
-      {/* Trust Signal / Social Proof */}
-      <div className="flex items-center justify-center gap-1.5 text-center opacity-85">
-        <span className="text-xs">🛡️</span>
-        <span
-          className={`text-[9px] md:text-xs font-black tracking-widest uppercase ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}
-        >
-          {language === 'ko'
-            ? '12,000명 이상의 대한민국 학부모님이 신뢰하는 채키 AI'
-            : 'Trusted by 12,000+ Korean families'}
-        </span>
-      </div>
     </div>
   );
 
@@ -493,11 +481,11 @@ export const CameraView: React.FC<Props> = ({
         className={`relative w-full ${size === 'large' ? 'min-h-[350px] md:min-h-[500px]' : 'h-full'} flex items-center justify-center py-4 md:py-8`}
       >
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-[2.5rem] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none`}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-[2.5rem] animate-[pulse_5s_ease-[cubic-bezier(0.23,1,0.32,1)]_infinite] pointer-events-none`}
         ></div>
         <div
           id="magic-drop-zone-inner"
-          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-[#050505]/40 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[2.5rem] border transition-all duration-500 ease-[var(--ease-premium)] flex flex-col items-center justify-center p-5 md:p-12 group
+          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-[#050505]/40 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[2.5rem] border transition-all duration-200 ease-[var(--ease-premium)] flex flex-col items-center justify-center p-5 md:p-12 group
               ${dragActive && !isLocked ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.2)] scale-[1.02]' : 'hover:border-orange-500/30'}`}
           onDragEnter={isLocked ? undefined : handleDrag}
           onDragLeave={isLocked ? undefined : handleDrag}
@@ -505,7 +493,7 @@ export const CameraView: React.FC<Props> = ({
           onDrop={isLocked ? undefined : handleDrop}
         >
           {!isAuthenticated && !guestUsed && (
-            <div className="absolute top-4 md:top-10 z-40 animate-[bounce_4s_ease-in-out_infinite] pointer-events-none">
+            <div className="absolute top-4 md:top-10 z-40 animate-[bounce_4s_ease-[cubic-bezier(0.23,1,0.32,1)]_infinite] pointer-events-none">
               <div className="bg-orange-500 text-white text-[8px] md:text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-[0_15px_40px_rgba(249,115,22,0.4)] flex items-center gap-2 border border-white/20 whitespace-nowrap">
                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
                 {t('guest_scan_badge')}
@@ -515,7 +503,7 @@ export const CameraView: React.FC<Props> = ({
 
           <div className="relative z-10 flex flex-col items-center text-center w-full pt-4">
             <div
-              className={`${size === 'large' ? 'w-24 h-24 md:w-44 md:h-44' : 'w-24 h-24'} mb-3 md:mb-6 relative transition-all duration-700 ${isLocked ? 'blur-md opacity-40 grayscale scale-90' : 'group-hover:scale-105'}`}
+              className={`${size === 'large' ? 'w-24 h-24 md:w-44 md:h-44' : 'w-24 h-24'} mb-3 md:mb-6 relative transition-all duration-700 ${isLocked ? 'blur-md opacity-40 grayscale scale-90' : 'group-hover:scale-[1.02]'}`}
             >
               {isProcessing ? (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -561,7 +549,7 @@ export const CameraView: React.FC<Props> = ({
                     e.stopPropagation();
                     openLoginModal();
                   }}
-                  className={`bg-white text-black px-8 py-3 md:px-16 md:py-6 rounded-xl md:rounded-2xl font-black text-sm md:text-2xl transition-all active:scale-95 uppercase tracking-wider w-full md:w-auto shadow-xl`}
+                  className={`bg-white text-black px-8 py-3 md:px-16 md:py-6 rounded-xl md:rounded-2xl font-black text-sm md:text-2xl transition-all active:scale-[0.97] uppercase tracking-wider w-full md:w-auto shadow-xl`}
                 >
                   {t('login')}
                 </button>
@@ -590,7 +578,7 @@ export const CameraView: React.FC<Props> = ({
                   title={t('btn_guest_scan')}
                 >
                   <div
-                    className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-[#1a1a1a] border-white/10' : 'bg-orange-500 border-white/20'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.3)] transition-all duration-500 ease-[var(--ease-premium)] group-hover:scale-110 group-hover:shadow-[0_20px_60px_rgba(249,115,22,0.5)] border-4 active:scale-90 animate-glow-pulse`}
+                    className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-[#1a1a1a] border-white/10' : 'bg-orange-500 border-white/20'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.3)] transition-all duration-200 ease-[var(--ease-premium)] group-hover:scale-110 group-hover:shadow-[0_20px_60px_rgba(249,115,22,0.5)] border-4 active:scale-90 animate-glow-pulse`}
                   >
                     <svg
                       className="w-8 h-8 md:w-14 md:h-14 text-white"
@@ -631,7 +619,7 @@ export const CameraView: React.FC<Props> = ({
                       e.stopPropagation();
                       onOpenHelp?.();
                     }}
-                    className={`px-6 py-2.5 rounded-full border ${isNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 shadow-sm'} text-[10px] md:text-xs font-black tracking-wider transition-all duration-300 flex items-center gap-2 group/help`}
+                    className={`px-6 py-2.5 rounded-full border ${isNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 shadow-sm'} text-[10px] md:text-xs font-black tracking-wider transition-all duration-200 flex items-center gap-2 group/help`}
                   >
                     {language === 'ko' ? '❓ 3단계 사용 가이드 보기' : '❓ View 3-Step Scan Guide'}
                     <span className="opacity-0 group-hover/help:opacity-100 group-hover/help:translate-x-1 transition-all">
@@ -696,7 +684,7 @@ export const CameraView: React.FC<Props> = ({
             className="group bg-white/5 hover:bg-white/10 border border-white/10 p-5 md:p-8 rounded-3xl flex items-center gap-4 md:gap-6 transition-all text-left w-full h-full backdrop-blur-sm"
           >
             <div
-              className={`w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex-shrink-0 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'} flex items-center justify-center text-xl md:text-3xl shadow-xl group-hover:scale-110 transition-all duration-300`}
+              className={`w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex-shrink-0 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'} flex items-center justify-center text-xl md:text-3xl shadow-xl group-hover:scale-110 transition-all duration-200`}
             >
               {banner.emoji}
             </div>
@@ -785,7 +773,7 @@ export const CameraView: React.FC<Props> = ({
           <div className="flex flex-wrap items-center justify-center gap-4">
             {isPro && user.schoolId && (
               <div
-                className={`border rounded-full py-2.5 px-6 flex items-center gap-4 shadow-2xl transition-all duration-500 bg-indigo-500/10 border-white/20 backdrop-blur-md`}
+                className={`border rounded-full py-2.5 px-6 flex items-center gap-4 shadow-2xl transition-all duration-200 bg-indigo-500/10 border-white/20 backdrop-blur-md`}
               >
                 <div className="flex items-center gap-2">
                   <span className="text-xs">🏫</span>
@@ -799,7 +787,7 @@ export const CameraView: React.FC<Props> = ({
               <>
                 {/* Scan Tracker */}
                 <div
-                  className={`border rounded-xl md:rounded-2xl py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 hover:scale-105 bg-[#0F1014] border-white/10`}
+                  className={`border rounded-xl md:rounded-2xl py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-200 hover:scale-[1.02] bg-[#0F1014] border-white/10`}
                 >
                   <div
                     className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] text-zinc-500`}
@@ -816,7 +804,7 @@ export const CameraView: React.FC<Props> = ({
 
                 {/* Question Tracker */}
                 <div
-                  className={`border rounded-xl md:rounded-2xl py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-500 hover:scale-105 ${isNight ? 'bg-[#0F1014] border-white/10' : 'bg-white border-zinc-200'}`}
+                  className={`border rounded-xl md:rounded-2xl py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-200 hover:scale-[1.02] ${isNight ? 'bg-[#0F1014] border-white/10' : 'bg-white border-zinc-200'}`}
                 >
                   <div
                     className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}
@@ -839,7 +827,7 @@ export const CameraView: React.FC<Props> = ({
           {!isPro && (
             <div
               onClick={() => setShowPaywall(true)}
-              className="w-full max-w-xl mx-auto mt-6 px-5 py-4 rounded-3xl bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-red-500/10 border border-orange-500/30 hover:border-orange-500/50 shadow-lg cursor-pointer transform hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-between gap-4 animate-fade-in-up"
+              className="w-full max-w-xl mx-auto mt-6 px-5 py-4 rounded-3xl bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-red-500/10 border border-orange-500/30 hover:border-orange-500/50 shadow-lg cursor-pointer transform hover:scale-[1.02] active:scale-[0.97] transition-all duration-200 flex items-center justify-between gap-4 animate-fade-in-up"
             >
               <div className="flex items-center gap-3 text-left">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-pink-500 flex items-center justify-center text-xl shadow-md shadow-orange-500/20 flex-shrink-0 animate-bounce">
@@ -917,7 +905,7 @@ export const CameraView: React.FC<Props> = ({
           {/* Premium 7-Day Free Trial Banner */}
           <div
             onClick={openLoginModal}
-            className={`inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full mb-6 cursor-pointer transform hover:scale-[1.02] active:scale-95 transition-all duration-300 border ${
+            className={`inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full mb-6 cursor-pointer transform hover:scale-[1.02] active:scale-[0.97] transition-all duration-200 border ${
               isNight
                 ? 'bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-red-500/10 border-orange-500/20 hover:border-orange-500/40 shadow-lg shadow-orange-500/5'
                 : 'bg-gradient-to-r from-orange-500/5 via-pink-500/5 to-red-500/5 border-orange-500/15 hover:border-orange-500/35 shadow-sm'
@@ -961,7 +949,7 @@ export const CameraView: React.FC<Props> = ({
         <div className="fixed bottom-24 right-6 z-40">
           <button
             onClick={() => setShowTools(!showTools)}
-            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all bg-zinc-900 border border-white/10 shadow-2xl hover:scale-110 active:scale-95 ${showTools ? 'rotate-45 bg-orange-500 border-orange-400' : ''}`}
+            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all bg-zinc-900 border border-white/10 shadow-2xl hover:scale-110 active:scale-[0.97] ${showTools ? 'rotate-45 bg-orange-500 border-orange-400' : ''}`}
           >
             {showTools ? (
               <span className="text-3xl text-white">×</span>

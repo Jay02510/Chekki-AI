@@ -109,13 +109,13 @@ export default function Landing() {
   }, [reduce]);
 
   return (
-    <main className="overflow-x-hidden w-full max-w-full bg-[#FAFAFA] dark:bg-[#050505] min-h-screen text-slate-900 dark:text-slate-50 transition-colors duration-500 selection:bg-brand selection:text-white">
+    <main className="overflow-x-hidden w-full max-w-full bg-[#FAFAFA] dark:bg-[#050505] min-h-screen text-slate-900 dark:text-slate-50 transition-colors duration-300 selection:bg-brand selection:text-white">
       {/* Global Noise */}
       <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.03] bg-noise mix-blend-overlay" />
 
       {/* Navigation */}
       <div className="fixed top-6 left-0 w-full z-50 flex justify-center px-4">
-        <header className="flex h-14 items-center justify-between px-6 max-w-4xl w-full mx-auto bg-white/80 dark:bg-white/5 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-2xl transition-colors duration-500">
+        <header className="flex h-14 items-center justify-between px-6 max-w-4xl w-full mx-auto bg-white/80 dark:bg-white/5 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-2xl transition-colors duration-300">
           <div className="flex items-center gap-[2px] text-2xl tracking-tighter cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <span className="font-bold text-slate-900 dark:text-white leading-none">Chekki</span>
             <span className="font-extrabold text-brand leading-none">ai</span>
@@ -179,7 +179,7 @@ export default function Landing() {
             {/* Primary Magnetic CTA */}
             <a href="/app" className="group relative w-full sm:w-auto overflow-hidden pl-8 pr-2 py-2 bg-brand text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 ease-[var(--ease-premium)] active:scale-[0.98] shadow-2xl shadow-brand/20 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#050505]">
               <span className="relative z-10">{lang === 'en' ? 'Open Web App' : '웹 앱 열기'}</span>
-              <div className="w-12 h-12 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-105 group-hover:translate-x-1 group-hover:-translate-y-[1px]">
+              <div className="w-12 h-12 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
                 <ArrowRight weight="bold" />
               </div>
             </a>
@@ -187,7 +187,7 @@ export default function Landing() {
             {/* Secondary Magnetic CTA */}
             <a href="https://urlgeni.us/chekki" target="_blank" rel="noopener noreferrer" className="group relative w-full sm:w-auto overflow-hidden pl-8 pr-2 py-2 bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 border border-black/10 dark:border-white/10 transition-transform duration-700 ease-[var(--ease-premium)] active:scale-[0.98] hover:bg-black/10 dark:hover:bg-white/10 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#050505]">
               <span className="relative z-10">{lang === 'en' ? 'Download App' : '앱 다운로드'}</span>
-              <div className="w-12 h-12 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-105 group-hover:-translate-y-[2px]">
+              <div className="w-12 h-12 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-[1.02] group-hover:-translate-y-[2px]">
                 <DownloadSimple weight="bold" />
               </div>
             </a>
@@ -249,34 +249,34 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-[380px] gap-4">
           {/* Card 1: Setup */}
           <div 
-            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-500 cursor-pointer overflow-hidden relative"
+            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-300 cursor-pointer overflow-hidden relative"
             onClick={() => setFlippedCard(flippedCard === 1 ? null : 1)}
           >
             {/* Front Content */}
-            <div className={`flex flex-col h-full transition-all duration-500 ${flippedCard === 1 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+            <div className={`flex flex-col h-full transition-all duration-300 ${flippedCard === 1 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
               <div className="flex-1 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
-                <img src="/assets/onboarding_icon_setup_1782545212856.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]" />
+                <img src="/assets/bento_reveal_only.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-white" />
                 </div>
               </div>
               <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between">
-                  {lang === 'en' ? 'Worried about your English?' : '"내 영어 실력으로 가르칠 수 있을까?" 걱정되시나요?'}
+                  {lang === 'en' ? 'Exhausted after work?' : '퇴근 후 피곤하신가요?'}
                 </h3>
               </div>
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-brand/5 dark:bg-brand/10 backdrop-blur-2xl transition-all duration-500 ${flippedCard === 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-brand/5 dark:bg-brand/10 backdrop-blur-2xl transition-all duration-300 ${flippedCard === 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
               <div className="w-12 h-12 rounded-full bg-brand/20 text-brand flex items-center justify-center mb-6">
                 <GraduationCap weight="fill" className="text-2xl" />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                {lang === 'en' ? 'Overcome the Language Barrier' : '언어 장벽 극복'}
+                {lang === 'en' ? 'Zero Clutter UX' : '깔끔한 화면 구성'}
               </h3>
               <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed">
-                {lang === 'en' ? 'Don\'t let complex phonics instructions stress you out. Get instant, step-by-step bilingual scripts so you can confidently guide your child without tears.' : '복잡한 파닉스 설명에 스트레스 받지 마세요. 한국어와 영어로 된 단계별 티칭 스크립트로 아이를 다정하게 지도할 수 있습니다.'}
+                {lang === 'en' ? 'No typing. No prompting. No endless scrolling. Our Reveal-Only interface hides all complex teaching instructions until you need them, saving your tired eyes and brain.' : '타이핑, 프롬프트, 끊임없는 스크롤은 이제 그만. 정답만 확인하세요. 복잡한 설명은 숨겨져 있어 피곤한 눈과 뇌를 보호해 줍니다.'}
               </p>
               <div className="absolute top-6 right-6 text-brand">
                 <X weight="bold" className="text-xl" />
@@ -286,29 +286,29 @@ export default function Landing() {
 
           {/* Card 2: Assistant */}
           <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-500 cursor-pointer overflow-hidden relative"
+            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-300 cursor-pointer overflow-hidden relative"
             onClick={() => setFlippedCard(flippedCard === 2 ? null : 2)}
           >
             {/* Front Content */}
-            <div className={`flex flex-col md:flex-row h-full w-full transition-all duration-500 ${flippedCard === 2 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+            <div className={`flex flex-col md:flex-row h-full w-full transition-all duration-300 ${flippedCard === 2 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
               <div className="md:w-1/2 min-h-[140px] h-full px-5 py-6 md:py-10 flex flex-col justify-center order-2 md:order-1">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2">
-                  {lang === 'en' ? 'Exhausted after work?' : '퇴근 후 피곤하신가요?'}
+                  {lang === 'en' ? 'Only have a few minutes?' : '시간이 몇 분밖에 없나요?'}
                   <ArrowRight className="text-brand animate-pulse" />
                 </h3>
               </div>
               <div className="md:w-1/2 h-48 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
-                <img src="/assets/onboarding_icon_grader_1782545224150.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
+                <img src="/assets/bento_speed_mode.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-blue-500/5 dark:bg-blue-500/10 backdrop-blur-2xl transition-all duration-500 ${flippedCard === 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-blue-500/5 dark:bg-blue-500/10 backdrop-blur-2xl transition-all duration-300 ${flippedCard === 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                {lang === 'en' ? 'Instant AI Grading' : '1초 AI 자동 채점'}
+                {lang === 'en' ? 'Speed vs. Tutor Mode' : '빠른 채점 vs 튜터 모드'}
               </h3>
               <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed max-w-lg">
-                {lang === 'en' ? 'Skip the 20-minute hunt for answer keys. Zero typing. Zero prompting. Just snap a photo, and get accurate digital answers overlaid directly on tonight\'s worksheet in seconds.' : '20분씩 답지를 찾는 수고는 이제 그만. 타이핑도, 프롬프트 입력도 필요 없습니다. 사진 한 장만 찍으면 오늘 밤 숙제 위에 정확한 정답이 몇 초 만에 마법처럼 나타납니다.'}
+                {lang === 'en' ? 'Toggle "Speed Mode" to rapidly visually grade a 20-question worksheet with zero taps. Switch to "Tutor Mode" when your child is stuck, and let the native AI audio explain the concept for you.' : '"빠른 채점 모드"로 터치 없이 20문제를 눈으로 빠르게 채점하세요. 아이가 어려워할 땐 "튜터 모드"로 전환하여 원어민 AI가 직접 설명하게 할 수 있습니다.'}
               </p>
               <div className="absolute top-6 right-6 text-blue-500">
                 <X weight="bold" className="text-xl" />
@@ -318,13 +318,13 @@ export default function Landing() {
 
           {/* Card 3: Dashboard */}
           <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-500 cursor-pointer overflow-hidden relative"
+            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-300 cursor-pointer overflow-hidden relative"
             onClick={() => setFlippedCard(flippedCard === 3 ? null : 3)}
           >
             {/* Front Content */}
-            <div className={`flex flex-col md:flex-row h-full w-full transition-all duration-500 ${flippedCard === 3 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+            <div className={`flex flex-col md:flex-row h-full w-full transition-all duration-300 ${flippedCard === 3 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
               <div className="md:w-1/2 h-48 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
-                <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
+                <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
               <div className="md:w-1/2 min-h-[140px] h-full px-5 py-6 md:py-10 flex flex-col justify-center">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2">
@@ -335,7 +335,7 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-500 ${flippedCard === 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-300 ${flippedCard === 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
                 {lang === 'en' ? 'Mistake Tracking Dashboard' : '오답 추적 대시보드'}
               </h3>
@@ -350,11 +350,11 @@ export default function Landing() {
 
           {/* Card 4: Audio Practice Room */}
           <div 
-            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-500 cursor-pointer overflow-hidden relative"
+            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-300 cursor-pointer overflow-hidden relative"
             onClick={() => setFlippedCard(flippedCard === 4 ? null : 4)}
           >
             {/* Front Content */}
-            <div className={`flex flex-col h-full transition-all duration-500 ${flippedCard === 4 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+            <div className={`flex flex-col h-full transition-all duration-300 ${flippedCard === 4 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
               <div className="flex-1 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
                 {/* Animated voice mock UI */}
                 <div className="w-full max-w-[220px] flex flex-col items-center gap-4">
@@ -379,7 +379,7 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-500 ${flippedCard === 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-300 ${flippedCard === 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
               <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-6">
                 <MicrophoneStage weight="fill" className="text-2xl" />
               </div>
@@ -399,7 +399,7 @@ export default function Landing() {
 
           {/* Card 5: Pronunciation Check — Full Width */}
           <div 
-            className="bento-card col-span-1 md:col-span-3 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-emerald-500/30 transition-colors duration-500 overflow-hidden relative min-h-[320px]"
+            className="bento-card col-span-1 md:col-span-3 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-emerald-500/30 transition-colors duration-300 overflow-hidden relative min-h-[320px]"
           >
             {/* Left: Text */}
             <div className="flex-1 px-8 py-10 md:py-12 flex flex-col justify-center z-10 relative">
@@ -420,7 +420,7 @@ export default function Landing() {
               <div className="flex flex-wrap items-center gap-3">
                 <a href="/app" className="group relative overflow-hidden pl-8 pr-2 py-2 w-max bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-between gap-6 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-2xl shadow-emerald-500/20 outline-none">
                   <span className="relative z-10">{lang === 'en' ? 'Try the Practice Room' : '오디오 연습실 체험하기'}</span>
-                  <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105 group-hover:translate-x-1 group-hover:-translate-y-[1px]">
+                  <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
                     <MicrophoneStage weight="bold" />
                   </div>
                 </a>

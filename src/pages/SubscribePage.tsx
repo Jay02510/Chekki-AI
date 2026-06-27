@@ -42,7 +42,7 @@ const SubscribePage: React.FC = () => {
       </div>
 
       {/* Main card */}
-      <div className="bg-zinc-900 border border-white/10 rounded-3xl max-w-lg w-full p-8 md:p-12 text-center shadow-[0_0_80px_rgba(249,115,22,0.1)] relative hover:border-orange-500/20 hover:-translate-y-1 transition-all duration-300 group">
+      <div className="bg-zinc-900 border border-white/10 rounded-3xl max-w-lg w-full p-8 md:p-12 text-center shadow-[0_0_80px_rgba(249,115,22,0.1)] relative hover:border-orange-500/20 hover:-translate-y-1 transition-all duration-200 group">
         <div className="w-20 h-20 rounded-3xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-4xl mx-auto mb-6">
           📱
         </div>
@@ -67,7 +67,7 @@ const SubscribePage: React.FC = () => {
             href={APP_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 bg-white text-black px-6 py-4 rounded-2xl font-black hover:bg-zinc-100 transition-all active:scale-95 shadow-lg"
+            className="flex items-center gap-3 bg-white text-black px-6 py-4 rounded-2xl font-black hover:bg-zinc-100 transition-all active:scale-[0.97] shadow-lg"
           >
             <span className="text-3xl">🍎</span>
             <div className="text-left">

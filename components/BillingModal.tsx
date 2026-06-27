@@ -101,7 +101,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
           </p>
           <a
             href="itms-apps://apps.apple.com/account/subscriptions"
-            className={`block w-full text-center ${isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm'} py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 border`}
+            className={`block w-full text-center ${isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm'} py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-[0.97] border`}
           >
             {t('sub_manage')}
           </a>
@@ -118,7 +118,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
           </p>
           <a
             href="https://play.google.com/store/account/subscriptions?package=com.chekkiai.app"
-            className={`block w-full text-center ${isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm'} py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 border`}
+            className={`block w-full text-center ${isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm'} py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-[0.97] border`}
           >
             {t('sub_manage')}
           </a>
@@ -251,7 +251,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
                   onClose();
                   setShowPaywall(true);
                 }}
-                className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
+                className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-[0.97] transition-all"
               >
                 {t('sub_subscribe_now')}
               </button>
@@ -300,7 +300,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
                   await cancelSubscription();
                   setShowCancelConfirm(false);
                 }}
-                className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black transition-all active:scale-95 shadow-lg shadow-red-500/20"
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black transition-all active:scale-[0.97] shadow-lg shadow-red-500/20"
               >
                 {t('billing_cancel_yes')}
               </button>

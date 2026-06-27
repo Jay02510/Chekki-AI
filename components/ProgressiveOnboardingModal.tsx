@@ -76,17 +76,17 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <motion.div 
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-32 h-32 rounded-[2.5rem] mx-auto mb-6 shadow-[0_20px_40px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden"
+          className="w-32 h-32 rounded-[2.5rem] mx-auto mb-6 shadow-[0_20px_40px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-[#050505]"
         >
-          <img src="/assets/onboarding_icon_setup_1782545212856.png" alt="Setup" className="w-full h-full object-cover" />
+          <img src="/assets/bento_speed_mode.png" alt="Setup" className="w-full h-full object-cover" />
         </motion.div>
         <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight">
-          {language === 'ko' ? '아이에게 딱 맞는 설명서' : 'Tailored Explanations'}
+          {language === 'ko' ? '빠른 채점 & AI 튜터' : 'Speed Grading & AI Tutor'}
         </h3>
         <p className="text-sm text-zinc-400 mt-4 font-korean leading-relaxed max-w-[280px] mx-auto">
-          {language === 'ko'
-            ? '아이의 연령과 수준을 알려주시면, AI가 그에 맞춰 가장 이해하기 쉬운 단어와 문장으로 티칭 가이드를 만들어 드립니다.'
-            : 'Tell us about your child, and our AI will tailor its vocabulary and teaching guides perfectly to their level.'}
+          {language === 'ko' 
+            ? '빠른 채점 모드로 아이의 손글씨를 즉시 채점하거나, 튜터 모드로 전환해 AI가 단어와 해설을 제공하는 맞춤형 개인 과외 선생님이 되게 하세요.' 
+            : 'Choose "Speed Mode" to instantly grade handwriting. Or let the AI tailor its vocabulary and be your child\'s personal tutor in "Tutor Mode".'}
         </p>
       </div>
 
@@ -103,7 +103,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 whileTap={{ scale: 0.97 }}
                 key={opt.id}
                 onClick={() => setSelectedAge(opt.id)}
-                className={`relative overflow-hidden py-4 px-3 rounded-2xl text-sm font-bold transition-all duration-300 \${
+                className={`relative overflow-hidden py-4 px-3 rounded-2xl text-sm font-bold transition-all duration-200 \${
                   selectedAge === opt.id
                     ? 'text-white ring-2 ring-orange-500 bg-orange-500/10'
                     : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
@@ -133,7 +133,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 whileTap={{ scale: 0.97 }}
                 key={opt.id}
                 onClick={() => setSelectedLevel(opt.id)}
-                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-300 text-left flex justify-between items-center \${
+                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-200 text-left flex justify-between items-center \${
                   selectedLevel === opt.id
                     ? 'text-white ring-2 ring-orange-500 bg-orange-500/10'
                     : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
@@ -178,7 +178,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 whileTap={{ scale: 0.97 }}
                 key={opt.id}
                 onClick={() => setParentLevel(opt.id)}
-                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-300 text-left flex justify-between items-center \${
+                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-200 text-left flex justify-between items-center \${
                   parentLevel === opt.id
                     ? 'text-white ring-2 ring-orange-500 bg-orange-500/10'
                     : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
@@ -220,7 +220,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           <span className="relative z-10">
             {isSubmitting ? (language === 'ko' ? '저장 중...' : 'Saving...') : (language === 'ko' ? '저장 후 계속하기' : 'Save & Continue')}
           </span>
-          <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+          <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-200" />
         </motion.button>
         
         <div className="flex justify-center">
@@ -277,7 +277,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           <span className="relative z-10">
             {isLast ? (language === 'ko' ? '시작하기!' : 'Get Started!') : (language === 'ko' ? '다음' : 'Next')}
           </span>
-          <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+          <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-200" />
         </motion.button>
         
         <div className="flex justify-center gap-3 mt-8">

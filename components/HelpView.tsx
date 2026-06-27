@@ -120,7 +120,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
       <div className="max-w-5xl mx-auto px-4 pt-8 md:pt-16 mb-8 flex justify-start">
         <button
           onClick={onClose}
-          className={`group flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all active:scale-95 ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 shadow-sm'}`}
+          className={`group flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all active:scale-[0.97] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 shadow-sm'}`}
         >
           <span className="text-xl transition-transform group-hover:-translate-x-1">←</span>
           <span className="text-xs font-black uppercase tracking-widest">
@@ -159,7 +159,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
           >
             {t('how_title')}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mt-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mt-12">
             {[
               {
                 step: 1,
@@ -171,6 +171,14 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               },
               {
                 step: 2,
+                img: '/assets/bento_speed_mode.png',
+                ko: '스피드 채점 & 튜터',
+                en: 'Speed & Tutor Modes',
+                koDesc: '빠른 채점 모드로 터치 없이 정답만 보거나, 튜터 모드로 전환해 AI 원어민 오디오 설명을 들어보세요.',
+                enDesc: 'Toggle Speed Mode for instant grading of handwriting, or use Tutor Mode to let the AI explain the grammar with native audio.'
+              },
+              {
+                step: 3,
                 img: '/assets/onboarding_icon_dashboard_1782545238800.png',
                 ko: '자동 오답 노트',
                 en: 'Learning Dashboard',
@@ -178,7 +186,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
                 enDesc: 'Wrong answers are automatically saved to your Dashboard. No need to manually keep track.'
               },
               {
-                step: 3,
+                step: 4,
                 img: '/assets/onboarding_icon_loop_1782545249835.png',
                 ko: '무한 복습 루프',
                 en: 'The Infinite Loop',
@@ -187,8 +195,8 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               }
             ].map((item) => (
               <div key={item.step} className="flex flex-col items-center text-center group">
-                <div className={`w-32 h-32 md:w-48 md:h-48 rounded-[2rem] md:rounded-[3rem] flex items-center justify-center mb-6 md:mb-10 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ${isNight ? 'ring-white/10 bg-black/20' : 'ring-black/5 bg-zinc-50'} overflow-hidden group-hover:-translate-y-2 transition-transform duration-500`}>
-                  <img src={item.img} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className={`w-32 h-32 md:w-48 md:h-48 rounded-[2rem] md:rounded-[3rem] flex items-center justify-center mb-6 md:mb-10 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ${isNight ? 'ring-white/10 bg-black/20' : 'ring-black/5 bg-zinc-50'} overflow-hidden group-hover:-translate-y-2 transition-transform duration-200`}>
+                  <img src={item.img} alt="" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200" />
                 </div>
                 <h4 className={`text-xl md:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight leading-tight mb-3`}>
                   {language === 'ko' ? item.ko : item.en}
@@ -276,7 +284,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
             ].map((feat) => (
               <div
                 key={feat.id}
-                className={`p-6 md:p-10 rounded-3xl ${isNight ? 'bg-zinc-900/40 border-white/5 hover:border-orange-500/20' : 'bg-white border-zinc-200 hover:border-orange-500/30 shadow-sm'} border hover:-translate-y-1 hover:shadow-lg transition-all duration-300`}
+                className={`p-6 md:p-10 rounded-3xl ${isNight ? 'bg-zinc-900/40 border-white/5 hover:border-orange-500/20' : 'bg-white border-zinc-200 hover:border-orange-500/30 shadow-sm'} border hover:-translate-y-1 hover:shadow-lg transition-all duration-200`}
               >
                 <span className="text-3xl md:text-5xl block mb-4 md:mb-6">{feat.emoji}</span>
                 <h3
@@ -303,9 +311,9 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 max-w-6xl mx-auto px-4">
             <div
-              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-300`}
+              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-200`}
             >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-200">
                 <span className="text-8xl md:text-[12rem]">✨</span>
               </div>
               <span className="text-4xl md:text-7xl mb-2">✨</span>
@@ -321,9 +329,9 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               </p>
             </div>
             <div
-              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-300`}
+              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-200`}
             >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-200">
                 <span className="text-8xl md:text-[12rem]">💌</span>
               </div>
               <span className="text-4xl md:text-7xl mb-2">💌</span>
@@ -353,7 +361,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24 max-w-6xl mx-auto px-4">
             <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
               <div
-                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-300 group-hover:border-orange-500/30`}
+                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-200 group-hover:border-orange-500/30`}
               >
                 🔒
               </div>
@@ -372,7 +380,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
             </div>
             <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
               <div
-                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-300 group-hover:border-orange-500/30`}
+                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-200 group-hover:border-orange-500/30`}
               >
                 👥
               </div>

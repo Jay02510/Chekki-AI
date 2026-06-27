@@ -243,6 +243,7 @@ const translations = {
     loading_thorough: 'Chekki is checking thoroughly for perfect answers.',
     loading_tip: '💡 Complex pages can take up to 30 seconds.',
     loading_almost: '🚀 Almost done! One final check...',
+    loading_subliminal: '💡 Tip: Understand first, then check the answer.',
     btn_cancel_retry: 'Stop scanning',
 
     // Results
@@ -606,6 +607,7 @@ const translations = {
     loading_thorough: '완벽한 정답을 위해 채키가 꼼꼼하게 확인하고 있어요.',
     loading_tip: '💡 내용이 많은 페이지는 최대 30초까지 걸릴 수 있어요.',
     loading_almost: '🚀 거의 다 됐어요! 마지막으로 한 번 더 확인 중이에요...',
+    loading_subliminal: '💡 팁: 정답을 쓰기 전에 먼저 이해해보세요.',
     btn_cancel_retry: '스캔 중지',
 
     // Results

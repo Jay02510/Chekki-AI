@@ -142,7 +142,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose, isNight = true }) => 
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleCopy('cafe')}
-                className="relative flex items-center justify-center gap-2 bg-[#2DB400]/10 hover:bg-[#2DB400]/20 border border-[#2DB400]/30 text-[#2DB400] py-2.5 rounded-xl font-bold text-xs transition-all active:scale-95"
+                className="relative flex items-center justify-center gap-2 bg-[#2DB400]/10 hover:bg-[#2DB400]/20 border border-[#2DB400]/30 text-[#2DB400] py-2.5 rounded-xl font-bold text-xs transition-all active:scale-[0.97]"
               >
                 {copySuccess === 'cafe' ? (
                   <span className="animate-fade-in">Copied! ✓</span>
@@ -154,7 +154,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose, isNight = true }) => 
               </button>
               <button
                 onClick={() => handleCopy('insta')}
-                className="relative flex items-center justify-center gap-2 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 text-pink-400 py-2.5 rounded-xl font-bold text-xs transition-all active:scale-95"
+                className="relative flex items-center justify-center gap-2 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 text-pink-400 py-2.5 rounded-xl font-bold text-xs transition-all active:scale-[0.97]"
               >
                 {copySuccess === 'insta' ? (
                   <span className="animate-fade-in">Copied! ✓</span>

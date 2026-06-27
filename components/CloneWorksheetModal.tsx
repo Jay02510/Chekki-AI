@@ -278,7 +278,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({
             <button
               onClick={handlePrint}
               disabled={isGeneratingPdf}
-              className={`px-10 py-3 rounded-xl font-bold bg-zinc-900 text-white shadow-xl flex items-center gap-2 transform transition-all active:scale-95 min-h-[48px] ${isGeneratingPdf ? 'opacity-80 cursor-wait' : ''}`}
+              className={`px-10 py-3 rounded-xl font-bold bg-zinc-900 text-white shadow-xl flex items-center gap-2 transform transition-all active:scale-[0.97] min-h-[48px] ${isGeneratingPdf ? 'opacity-80 cursor-wait' : ''}`}
             >
               {isGeneratingPdf ? (
                 <Spinner size={16} weight="bold" className="animate-spin text-orange-500" />

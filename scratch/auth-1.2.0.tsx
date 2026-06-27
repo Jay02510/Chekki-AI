@@ -13,8 +13,6 @@ import {
   OAuthProvider,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   signInWithCredential,
   signInWithCustomToken,
   type User,
@@ -245,43 +243,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Check for redirect result from Google/Apple Web Auth
-    const checkRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result && result.user) {
-          const existingProfile = await db.getUser(result.user.uid);
-          if (!existingProfile) {
-            const newProfile: UserProfile = {
-              name: result.user.displayName || 'User',
-              email: result.user.email || '',
-              plan: 'free',
-              scansUsedToday: 0,
-              lastScanDate: new Date().toISOString().split('T')[0],
-              maxScansPerDay: FREE_DAILY_LIMIT,
-              questionsUsedToday: 0,
-              maxQuestionsPerDay: 5,
-              lastQuestionDate: new Date().toISOString().split('T')[0],
-              schoolId: null,
-              schoolName: null,
-              subscriptionStartedAt: null,
-              nextBillingDate: null,
-            };
-            await db.createUser(result.user.uid, newProfile);
-            await fetchAndSetUserProfile(result.user, newProfile);
-          } else {
-            await fetchAndSetUserProfile(result.user, existingProfile);
-          }
-          localStorage.setItem('chekki_last_auth', Date.now().toString());
-          setShowLoginModal(false);
-        }
-      } catch (err) {
-        console.error('[AuthContext] Redirect login error:', err);
-      }
-    };
-    
-    checkRedirectResult();
-
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
@@ -315,33 +276,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (profile) {
           await fetchAndSetUserProfile(user, profile);
         } else {
-          // If the profile is null and we are not in the middle of a signup, 
-          // the user is authenticated in Firebase but has no Firestore profile.
-          // This happens if the page reloads during sign in (e.g. signInWithRedirect or Safari unloading).
+          // If the profile is null and we are not in the middle of a signup, set to null.
+          // Otherwise, the signup/social sign-in helper will create the profile and set it.
           if (!isSigningUpRef.current) {
-            console.log('[AuthContext] Creating missing profile for authenticated user');
-            const newProfile: UserProfile = {
-              name: user.displayName || 'User',
-              email: user.email || '',
-              plan: 'free',
-              scansUsedToday: 0,
-              lastScanDate: new Date().toISOString().split('T')[0],
-              maxScansPerDay: FREE_DAILY_LIMIT,
-              questionsUsedToday: 0,
-              maxQuestionsPerDay: 5,
-              lastQuestionDate: new Date().toISOString().split('T')[0],
-              schoolId: null,
-              schoolName: null,
-              subscriptionStartedAt: null,
-              nextBillingDate: null,
-            };
-            try {
-              await db.createUser(user.uid, newProfile);
-              await fetchAndSetUserProfile(user, newProfile);
-            } catch (err) {
-              console.error('[AuthContext] Failed to create fallback profile', err);
-              setUserProfile(null);
-            }
+            setUserProfile(null);
           }
         }
 
@@ -442,7 +380,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       await fetchAndSetUserProfile(res.user, activeProfile);
-      localStorage.setItem('chekki_last_auth', Date.now().toString());
       setShowLoginModal(false);
     } catch (err: any) {
       console.error('Signup error details:', err);
@@ -551,25 +488,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error('[AuthContext] Firebase Apple Sign-In Credential Error:', firebaseErr);
             throw new Error(`Firebase Auth Error: ${firebaseErr.code || firebaseErr.message}`);
           }
-          localStorage.setItem('chekki_last_auth', Date.now().toString());
           setShowLoginModal(false);
         } else {
           throw new Error('Apple Sign-In returned no identity token.');
         }
       } else {
         // WEB / ANDROID FLOW
-        try {
-          await signInWithRedirect(auth, provider);
-          // The page will redirect. Login completion is handled by getRedirectResult in useEffect.
-        } catch (popupErr: any) {
-          if (
-            popupErr.code === 'auth/argument-error' ||
-            popupErr.code === 'auth/internal-error'
-          ) {
-            throw new Error('Login interrupted. Please try again or use email login.');
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+          const existingProfile = await db.getUser(result.user.uid);
+          if (!existingProfile) {
+            const name = result.user.displayName || 'User';
+            const email = result.user.email || '';
+
+            const newProfile: UserProfile = {
+              name: name,
+              email: email,
+              plan: 'free',
+              scansUsedToday: 0,
+              lastScanDate: new Date().toISOString().split('T')[0],
+              maxScansPerDay: FREE_DAILY_LIMIT,
+              questionsUsedToday: 0,
+              maxQuestionsPerDay: 5,
+              lastQuestionDate: new Date().toISOString().split('T')[0],
+              schoolId: null,
+              schoolName: null,
+              subscriptionStartedAt: null,
+              nextBillingDate: null,
+            };
+            await db.createUser(result.user.uid, newProfile);
+            await fetchAndSetUserProfile(result.user, newProfile);
+          } else {
+            await fetchAndSetUserProfile(result.user, existingProfile);
           }
-          throw popupErr;
         }
+        setShowLoginModal(false);
       }
     } catch (err: any) {
       console.error('Apple Sign-In Error:', err);
@@ -620,7 +573,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 await fetchAndSetUserProfile(result.user, existingProfile);
               }
             }
-            localStorage.setItem('chekki_last_auth', Date.now().toString());
             setShowLoginModal(false);
             return;
           }
@@ -644,20 +596,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       // On mobile, popups can be blocked or cause argument-errors.
-      try {
-        await signInWithRedirect(auth, provider);
-        // The page will redirect. Login completion is handled by getRedirectResult in useEffect.
-      } catch (popupErr: any) {
-        if (
-          popupErr.code === 'auth/argument-error' ||
-          popupErr.code === 'auth/internal-error'
-        ) {
-          throw new Error('Login interrupted. Please try again or use email login.');
+      // We use the standard popup but with extra error handling.
+      const result = await signInWithPopup(auth, provider);
+
+      if (result.user) {
+        const existingProfile = await db.getUser(result.user.uid);
+        if (!existingProfile) {
+          const newProfile: UserProfile = {
+            name: result.user.displayName || 'User',
+            email: result.user.email || '',
+            plan: 'free',
+            scansUsedToday: 0,
+            lastScanDate: new Date().toISOString().split('T')[0],
+            maxScansPerDay: FREE_DAILY_LIMIT,
+            questionsUsedToday: 0,
+            maxQuestionsPerDay: 5,
+            lastQuestionDate: new Date().toISOString().split('T')[0],
+            schoolId: null,
+            schoolName: null,
+            subscriptionStartedAt: null,
+            nextBillingDate: null,
+          };
+          await db.createUser(result.user.uid, newProfile);
+          await fetchAndSetUserProfile(result.user, newProfile);
+        } else {
+          await fetchAndSetUserProfile(result.user, existingProfile);
         }
-        throw popupErr;
       }
+      setShowLoginModal(false);
     } catch (err: any) {
       console.error('Google Sign-In Technical Error:', err);
+      // If it's the specific mobile popup error, give a clear instruction
       if (err.code === 'auth/argument-error' || err.code === 'auth/internal-error') {
         throw new Error('Login interrupted. Please try again or use email login.');
       }
@@ -670,48 +639,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithKakao = async () => {
     try {
       isSigningUpRef.current = true;
-      let accessToken = '';
 
-      if (Capacitor.isNativePlatform()) {
-        const kakaoUser = await KakaoLogin.login();
-        if (!kakaoUser.accessToken) {
-          throw new Error('Failed to retrieve access token from Kakao login.');
-        }
-        accessToken = kakaoUser.accessToken;
-      } else {
-        // Web flow using Kakao JS SDK
-        if (!(window as any).Kakao) {
-          console.log('[AuthContext] Kakao SDK missing, attempting to inject dynamically...');
-          await new Promise<void>((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js';
-            script.onload = () => {
-              if ((window as any).Kakao && !(window as any).Kakao.isInitialized()) {
-                (window as any).Kakao.init('f06bc75426bf2b41940620d3ee942f06');
-              }
-              resolve();
-            };
-            script.onerror = () => reject(new Error('Failed to load Kakao SDK. Please disable your adblocker or try a different browser.'));
-            document.head.appendChild(script);
-          });
-        }
-        
-        if (!(window as any).Kakao) {
-          throw new Error('Kakao SDK not loaded. Please disable adblockers and try again.');
-        }
+      if (!Capacitor.isNativePlatform()) {
+        throw new Error('Kakao login is only supported on Android and iOS devices.');
+      }
 
-        const Kakao = (window as any).Kakao;
-        
-        accessToken = await new Promise<string>((resolve, reject) => {
-          Kakao.Auth.login({
-            success: (authObj: any) => {
-              resolve(authObj.access_token);
-            },
-            fail: (err: any) => {
-              reject(new Error(JSON.stringify(err)));
-            },
-          });
-        });
+      const kakaoUser = await KakaoLogin.login();
+      if (!kakaoUser.accessToken) {
+        throw new Error('Failed to retrieve access token from Kakao login.');
       }
 
       // Exchange Kakao Access Token for Firebase Custom Token
@@ -720,7 +655,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ accessToken }),
+        body: JSON.stringify({ accessToken: kakaoUser.accessToken }),
       });
 
       if (!response.ok) {
@@ -728,7 +663,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(errorData.error || 'Failed to authenticate with Kakao on the server.');
       }
 
-      const { customToken, profile } = await response.json();
+      const { customToken } = await response.json();
 
       // Sign in to Firebase with the Custom Token
       const result = await signInWithCustomToken(auth, customToken);
@@ -737,8 +672,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const existingProfile = await db.getUser(result.user.uid);
         if (!existingProfile) {
           const newProfile: UserProfile = {
-            name: profile?.name || result.user.displayName || 'Kakao User',
-            email: profile?.email || result.user.email || '',
+            name: kakaoUser.nickname || result.user.displayName || 'Kakao User',
+            email: kakaoUser.email || result.user.email || '',
             plan: 'free',
             scansUsedToday: 0,
             lastScanDate: new Date().toISOString().split('T')[0],
@@ -758,7 +693,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      localStorage.setItem('chekki_last_auth', Date.now().toString());
       setShowLoginModal(false);
     } catch (err: any) {
       // Capacitor plugin rejects with message="카카오 로그인 실패" and the real
@@ -807,10 +741,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    const uid = auth.currentUser?.uid || firebaseUser?.uid;
-    if (uid) {
-      localStorage.removeItem(`chekki_user_profile_${uid}`);
-    }
     subscriptionService.clearCache();
     revenueCatService.logout();
     signOut(auth);
@@ -1109,7 +1039,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         joinSchool,
         cancelSubscription,
         requestLimitReset,
-        isAuthenticated: !!userProfile && !!firebaseUser && !firebaseUser.isAnonymous,
+        isAuthenticated: !!userProfile,
         isLoading,
         showPaywall,
         setShowPaywall,
