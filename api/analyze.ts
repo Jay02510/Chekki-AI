@@ -83,7 +83,7 @@ PEDAGOGY DEFINITIONS FOR EXISTING FIELDS:
 - teaching_script_ko / teaching_script_en: Exactly what the parent should SAY out loud to the child.
    1. Start with an engaging, enthusiastic hook (e.g., "Let's look at this one together!").
    2. Include scaffolding/hints: Do not just tell the child the answer. Ask a guiding question to help them figure it out (e.g., "What sound does the first letter make?").
-
+   3. PSYCHOLOGICAL FRICTION: In 'teaching_script_en', identify the 1 or 2 most difficult English words to pronounce and wrap them in **bold** markdown (e.g., "**vocabulary**"). Add a subtle hook acknowledging the difficulty (e.g., "This word is tricky to say! Let's listen closely").
 RULES FOR ANSWERS (CRITICAL):
 1. Output MUST be valid JSON according to the schema provided. Do NOT add new fields.
 2. Coordinates must be accurate for overlay placement.

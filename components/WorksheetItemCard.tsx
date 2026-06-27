@@ -338,7 +338,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                         onStartPronunciation(e);
                       }
                     }}
-                    className={`w-14 h-14 md:w-16 md:h-16 rounded-[2rem] flex items-center justify-center btn-press hover:scale-[1.02] ${isListening ? 'bg-red-500 animate-pulse' : 'bg-indigo-600'} text-white shadow-lg`}
+                    className={`w-14 h-14 md:w-16 md:h-16 rounded-[2rem] flex items-center justify-center btn-press hover:scale-[1.02] ${isListening ? 'bg-red-500 animate-pulse' : index === 0 ? 'bg-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.6)] animate-pulse' : 'bg-indigo-600'} text-white shadow-lg relative`}
                   >
                     {isListening ? (
                       <div className="flex items-center gap-1.5">
@@ -361,16 +361,22 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                         ? language === 'ko'
                           ? '듣고 있어요...'
                           : 'Listening...'
-                        : `${language === 'ko' ? '질문' : 'Question'} ${item.id} - Coach`}
+                        : index === 0 
+                          ? language === 'ko' ? '무료 체험 코치' : 'Free Trial Coach'
+                          : `${language === 'ko' ? '질문' : 'Question'} ${item.id} - Coach`}
                     </p>
-                    <p className="text-[10px] text-indigo-300/80 font-bold">
+                    <p className={`text-[10px] ${index === 0 ? 'text-indigo-500 dark:text-indigo-400 font-black' : 'text-indigo-400/80 font-bold'}`}>
                       {isListening
                         ? language === 'ko'
                           ? '아이의 목소리를 분석 중입니다'
                           : "Analyzing child's voice..."
-                        : language === 'ko'
-                          ? '버튼을 누르고 발음해보세요!'
-                          : 'Tap to speak and check pronunciation!'}
+                        : index === 0
+                          ? language === 'ko'
+                            ? "아이의 차례입니다! 버튼을 누르고 말해보세요."
+                            : "It's your turn! Try speaking."
+                          : language === 'ko'
+                            ? '버튼을 누르고 발음해보세요!'
+                            : 'Tap to speak and check pronunciation!'}
                     </p>
                   </div>
                 </div>
@@ -429,11 +435,26 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                       >
                         <div className="p-5">
                           <div
-                            className={`text-base md:text-xl ${isNight ? 'text-zinc-100' : 'text-zinc-800'} font-korean leading-relaxed font-bold italic border-l-4 border-orange-500 pl-4`}
+                            className={`teaching-script-text text-base md:text-xl ${isNight ? 'text-zinc-100' : 'text-zinc-800'} font-korean leading-relaxed font-bold italic border-l-4 border-orange-500 pl-4`}
                             dangerouslySetInnerHTML={{
                               __html: renderMarkdown(`&quot;${displayScript || ''}&quot;`),
                             }}
                           />
+                          <style>{`
+                            .teaching-script-text strong {
+                              border-bottom: 2px dashed #a855f7;
+                              color: ${isNight ? '#c084fc' : '#9333ea'};
+                              font-style: normal;
+                              cursor: help;
+                              position: relative;
+                            }
+                            .teaching-script-text strong::after {
+                              content: '🔊';
+                              font-size: 0.75em;
+                              margin-left: 4px;
+                              vertical-align: text-top;
+                            }
+                          `}</style>
                         </div>
                       </div>
                     </div>
