@@ -272,6 +272,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             await fetchAndSetUserProfile(result.user, existingProfile);
           }
+          setShowLoginModal(false);
         }
       } catch (err) {
         console.error('[AuthContext] Redirect login error:', err);
@@ -531,35 +532,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         // WEB / ANDROID FLOW
-        const result = await signInWithPopup(auth, provider);
-        if (result.user) {
-          const existingProfile = await db.getUser(result.user.uid);
-          if (!existingProfile) {
-            const name = result.user.displayName || 'User';
-            const email = result.user.email || '';
+        try {
+          const result = await signInWithPopup(auth, provider);
+          if (result.user) {
+            const existingProfile = await db.getUser(result.user.uid);
+            if (!existingProfile) {
+              const name = result.user.displayName || 'User';
+              const email = result.user.email || '';
 
-            const newProfile: UserProfile = {
-              name: name,
-              email: email,
-              plan: 'free',
-              scansUsedToday: 0,
-              lastScanDate: new Date().toISOString().split('T')[0],
-              maxScansPerDay: FREE_DAILY_LIMIT,
-              questionsUsedToday: 0,
-              maxQuestionsPerDay: 5,
-              lastQuestionDate: new Date().toISOString().split('T')[0],
-              schoolId: null,
-              schoolName: null,
-              subscriptionStartedAt: null,
-              nextBillingDate: null,
-            };
-            await db.createUser(result.user.uid, newProfile);
-            await fetchAndSetUserProfile(result.user, newProfile);
+              const newProfile: UserProfile = {
+                name: name,
+                email: email,
+                plan: 'free',
+                scansUsedToday: 0,
+                lastScanDate: new Date().toISOString().split('T')[0],
+                maxScansPerDay: FREE_DAILY_LIMIT,
+                questionsUsedToday: 0,
+                maxQuestionsPerDay: 5,
+                lastQuestionDate: new Date().toISOString().split('T')[0],
+                schoolId: null,
+                schoolName: null,
+                subscriptionStartedAt: null,
+                nextBillingDate: null,
+              };
+              await db.createUser(result.user.uid, newProfile);
+              await fetchAndSetUserProfile(result.user, newProfile);
+            } else {
+              await fetchAndSetUserProfile(result.user, existingProfile);
+            }
+          }
+          setShowLoginModal(false);
+        } catch (popupErr: any) {
+          if (
+            popupErr.code === 'auth/popup-blocked' ||
+            popupErr.code === 'auth/popup-closed-by-user' ||
+            popupErr.code === 'auth/argument-error' ||
+            popupErr.code === 'auth/internal-error'
+          ) {
+            console.log('Popup failed, falling back to redirect');
+            await signInWithRedirect(auth, provider);
           } else {
-            await fetchAndSetUserProfile(result.user, existingProfile);
+            throw popupErr;
           }
         }
-        setShowLoginModal(false);
       }
     } catch (err: any) {
       console.error('Apple Sign-In Error:', err);
