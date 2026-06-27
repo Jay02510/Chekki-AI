@@ -827,7 +827,17 @@ export const SplitView: React.FC<SplitViewProps> = ({
             ))}
 
             {localItems.length > 0 && (
-              <div className="pt-6 pb-6 border-t border-white/5 mt-4 space-y-4 animate-fade-in">
+              <div className="pt-8 pb-6 border-t border-white/5 mt-4 space-y-6 animate-fade-in">
+                
+                {/* Heartfelt Message */}
+                <div className="text-center px-4">
+                  <p className={`text-sm md:text-base font-korean font-bold italic leading-relaxed ${isNight ? 'text-orange-300' : 'text-orange-500'}`}>
+                    {language === 'ko'
+                      ? '아무도 몰라줘도 채키는 알아요. 수고 많았어요, 엄마! 💌'
+                      : 'If nobody noticed, Chekki will. Great job today, Mom. 💌'}
+                  </p>
+                </div>
+
                 <div className="text-center">
                   <div className="flex justify-center">
                     <div

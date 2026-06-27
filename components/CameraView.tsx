@@ -558,9 +558,11 @@ export const CameraView: React.FC<Props> = ({
               <>
                 <div className="space-y-1 max-w-lg px-2">
                   <h3
-                    className={`text-xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight break-keep leading-[1.2]`}
+                    className={`text-xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight break-keep leading-[1.2] ${isProcessing ? 'text-orange-500 italic' : ''}`}
                   >
-                    {isProcessing ? t('processing') : t('drop_title')}
+                    {isProcessing 
+                      ? (language === 'ko' ? '채점 중... 칭찬만 준비하세요! 💖' : 'Grading... Prepare your praise! 💖') 
+                      : t('drop_title')}
                   </h3>
                   <p
                     className={`${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-bold font-korean text-xs md:text-2xl break-keep opacity-80 leading-relaxed`}

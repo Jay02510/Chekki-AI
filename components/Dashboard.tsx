@@ -363,8 +363,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
           <div className="w-full min-h-[140px] md:min-h-[180px] rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-6 text-center text-white/50 border-dashed">
             <FilePdf size={32} className="mb-2 opacity-50" />
-            <p className="text-sm font-bold">{language === 'ko' ? '스캔한 학습지가 없습니다.' : 'No recent worksheets.'}</p>
-            <p className="text-xs opacity-70 mt-1">{language === 'ko' ? '학습지를 촬영하여 정답을 확인하세요.' : 'Snap a photo to get started.'}</p>
+            <p className="text-sm font-bold font-korean italic opacity-90 leading-relaxed max-w-xs mx-auto">
+              {language === 'ko' 
+                ? '커피 한 잔 어때요 ☕️? 채점은 채키가 할게요.' 
+                : "Grab a coffee ☕️. We'll grade when you're ready."}
+            </p>
+            <p className="text-[10px] opacity-70 mt-3">{language === 'ko' ? '학습지를 촬영하여 정답을 확인하세요.' : 'Snap a photo to get started.'}</p>
           </div>
         </div>
       </div>
