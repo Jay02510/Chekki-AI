@@ -727,7 +727,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(errorData.error || 'Failed to authenticate with Kakao on the server.');
       }
 
-      const { customToken } = await response.json();
+      const { customToken, profile } = await response.json();
 
       // Sign in to Firebase with the Custom Token
       const result = await signInWithCustomToken(auth, customToken);
@@ -736,8 +736,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const existingProfile = await db.getUser(result.user.uid);
         if (!existingProfile) {
           const newProfile: UserProfile = {
-            name: kakaoUser.nickname || result.user.displayName || 'Kakao User',
-            email: kakaoUser.email || result.user.email || '',
+            name: profile?.name || result.user.displayName || 'Kakao User',
+            email: profile?.email || result.user.email || '',
             plan: 'free',
             scansUsedToday: 0,
             lastScanDate: new Date().toISOString().split('T')[0],
