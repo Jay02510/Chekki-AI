@@ -25,6 +25,7 @@ interface WorksheetItemCardProps {
   setUpsellFeature: (feature: 'pronunciation' | 'audio' | 'guide' | null) => void;
   style?: React.CSSProperties;
   hasHandwriting?: boolean;
+  index?: number;
 }
 
 const simplifyGuideText = (text: string) => {
@@ -70,6 +71,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     setUpsellFeature,
     style,
     hasHandwriting = true,
+    index = 0,
   }) => {
     const [isScriptExpanded, setIsScriptExpanded] = useState(true);
     const [isGuideExpanded, setIsGuideExpanded] = useState(false);
@@ -238,7 +240,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                     <button
                       onClick={(e) =>
                         handleActionClick(e, () => {
-                          if (userPlan !== 'pro') setShowPaywall(true);
+                          if (userPlan !== 'pro' && index !== 0) setShowPaywall(true);
                           else onRefine(item);
                         })
                       }
@@ -360,7 +362,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                     </p>
                   </div>
                 </div>
-                {userPlan === 'pro' ? (
+                {userPlan === 'pro' || index === 0 ? (
                   <>
                     {/* Collapsible Teaching Script (Mom's Tip) */}
                     <div

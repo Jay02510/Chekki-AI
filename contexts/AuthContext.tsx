@@ -272,6 +272,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             await fetchAndSetUserProfile(result.user, existingProfile);
           }
+          localStorage.setItem('chekki_last_auth', Date.now().toString());
           setShowLoginModal(false);
         }
       } catch (err) {
@@ -441,6 +442,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       await fetchAndSetUserProfile(res.user, activeProfile);
+      localStorage.setItem('chekki_last_auth', Date.now().toString());
       setShowLoginModal(false);
     } catch (err: any) {
       console.error('Signup error details:', err);
@@ -549,6 +551,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error('[AuthContext] Firebase Apple Sign-In Credential Error:', firebaseErr);
             throw new Error(`Firebase Auth Error: ${firebaseErr.code || firebaseErr.message}`);
           }
+          localStorage.setItem('chekki_last_auth', Date.now().toString());
           setShowLoginModal(false);
         } else {
           throw new Error('Apple Sign-In returned no identity token.');
@@ -584,6 +587,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               await fetchAndSetUserProfile(result.user, existingProfile);
             }
           }
+          localStorage.setItem('chekki_last_auth', Date.now().toString());
           setShowLoginModal(false);
         } catch (popupErr: any) {
           if (
@@ -647,6 +651,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 await fetchAndSetUserProfile(result.user, existingProfile);
               }
             }
+            localStorage.setItem('chekki_last_auth', Date.now().toString());
             setShowLoginModal(false);
             return;
           }
@@ -698,6 +703,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await fetchAndSetUserProfile(result.user, existingProfile);
           }
         }
+        localStorage.setItem('chekki_last_auth', Date.now().toString());
         setShowLoginModal(false);
       } catch (popupErr: any) {
         if (
@@ -736,7 +742,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('[AuthContext] Kakao SDK missing, attempting to inject dynamically...');
           await new Promise<void>((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'https://developers.kakao.com/sdk/js/kakao.min.js';
+            script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js';
             script.onload = () => {
               if ((window as any).Kakao && !(window as any).Kakao.isInitialized()) {
                 (window as any).Kakao.init('f06bc75426bf2b41940620d3ee942f06');
@@ -810,6 +816,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
+      localStorage.setItem('chekki_last_auth', Date.now().toString());
       setShowLoginModal(false);
     } catch (err: any) {
       // Capacitor plugin rejects with message="카카오 로그인 실패" and the real
