@@ -2,6 +2,7 @@ import { WorksheetAnalysis, WorksheetItem } from '../types';
 import { Capacitor } from '@capacitor/core';
 import { auth } from './database';
 import { API_BASE_URL, MOCK_MODE, MOCK_DELAY } from '../config';
+import { compressImage, stripDataUrlPrefix } from './compressImage';
 
 const getValidIdToken = async (maxRetries = 3): Promise<string | null> => {
   const user = auth.currentUser;
@@ -89,6 +90,22 @@ export const analyzeWorksheet = async (
     const timeoutId = setTimeout(() => timeoutController.abort(), 300000);
     const activeSignal = signal || timeoutController.signal;
 
+    // --- CLIENT-SIDE IMAGE COMPRESSION ---
+    // Downscale to max 1600px JPEG before sending to prevent the 4MB
+    // Vercel body limit from being hit by high-res phone photos.
+    let processedImage = base64Image;
+    try {
+      // If the input is a raw base64 string (no prefix), add one so the canvas can load it
+      const hasPrefix = base64Image.startsWith('data:');
+      const dataUrl = hasPrefix ? base64Image : `data:image/jpeg;base64,${base64Image}`;
+      const compressed = await compressImage(dataUrl);
+      // Strip the prefix back off — the API only wants the raw base64
+      processedImage = stripDataUrlPrefix(compressed);
+    } catch (compressionError) {
+      console.warn('[geminiService] Image compression failed, using original:', compressionError);
+    }
+    // --- END COMPRESSION ---
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Authorization: idToken ? `Bearer ${idToken}` : '',
@@ -103,7 +120,7 @@ export const analyzeWorksheet = async (
       signal: activeSignal,
       body: JSON.stringify({
         task: 'analyze',
-        image: base64Image,
+        image: processedImage,
         userPlan,
         childAge,
         childEnglishLevel,
@@ -309,4 +326,38 @@ export const askChekkiQuestion = async (
     console.error('[geminiService] Ask API error:', e);
     throw e;
   }
+};
+
+// ─── generateQuiz ─────────────────────────────────────────────────────────────
+export interface QuizItem {
+  question: string;
+  correct_answer: string;
+  distractors: string[];
+  options: string[];       // shuffled: correct_answer + distractors
+  explanation_ko: string;
+}
+
+export const generateQuiz = async (
+  mistakes: Array<{ question_text?: string; correct_answer?: string }>,
+  language: string = 'ko'
+): Promise<QuizItem[]> => {
+  const idToken = await getValidIdToken();
+  if (!idToken) throw new Error('UNAUTHORIZED: Must be signed in to generate a quiz.');
+
+  const response = await fetch(`${API_BASE_URL}/api/generate-quiz`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({ mistakes, language }),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData.message || errData.error || `QUIZ_FAILED_${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.quiz as QuizItem[];
 };

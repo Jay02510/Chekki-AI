@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
   onComplete: () => void;
@@ -29,172 +30,318 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   const { language } = useLanguage();
   const { updateChildProfile } = useAuth();
 
+  const [step, setStep] = useState(0);
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [parentLevel, setParentLevel] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleProfileSubmit = async () => {
     if (!selectedAge || !selectedLevel || !parentLevel) return;
     setIsSubmitting(true);
     try {
       await updateChildProfile(selectedAge, selectedLevel, parentLevel);
-      onComplete();
+      setStep(1); 
     } catch (e) {
       console.error(e);
-      onSkip(); // If it fails, fallback to skipping so we don't break the flow
+      onSkip(); 
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
-      <div
-        className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200'} p-6 md:p-8 rounded-3xl w-full max-w-sm shadow-[0_20px_60px_rgba(0,0,0,0.8)] animate-fade-in-up border transition-colors`}
-      >
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg ring-4 ring-orange-500/20">
-            ✨
-          </div>
-          <h3
-            className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}
-          >
-            {language === 'ko' ? '아이에게 딱 맞는 설명서' : 'Tailored Explanations'}
-          </h3>
-          <p className="text-xs text-zinc-400 mt-2 font-korean leading-relaxed">
-            {language === 'ko'
-              ? '아이의 연령과 수준을 알려주시면, AI가 그에 맞춰 가장 이해하기 쉬운 단어와 문장으로 티칭 가이드를 만들어 드립니다.'
-              : 'Tell us about your child, and our AI will tailor its vocabulary and teaching guides perfectly to their level.'}
-          </p>
-        </div>
+  const transitionSpring = {
+    type: 'spring' as const,
+    damping: 24,
+    stiffness: 200,
+  };
 
-        <div className="space-y-6 mb-8">
-          <div>
-            <label
-              className={`block text-[10px] font-black ${isNight ? 'text-white' : 'text-zinc-900'} uppercase tracking-widest mb-3 opacity-60`}
-            >
-              {language === 'ko' ? '아이의 연령' : "Child's Age"}
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {AGE_OPTIONS.map((opt) => (
-                <button
-                  key={opt.id}
-                  onClick={() => setSelectedAge(opt.id)}
-                  className={`py-3 px-2 rounded-xl text-xs font-bold transition-all border ${
-                    selectedAge === opt.id
-                      ? 'bg-orange-500 border-orange-500 text-white shadow-lg'
-                      : isNight
-                        ? 'bg-zinc-800 border-white/5 text-zinc-400 hover:bg-zinc-700'
-                        : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:bg-zinc-200'
-                  }`}
-                >
-                  {language === 'ko' ? opt.ko : opt.en}
-                </button>
-              ))}
-            </div>
-          </div>
+  const fadeVariants = {
+    initial: { opacity: 0, scale: 0.96, filter: 'blur(8px)', y: 20 },
+    animate: { opacity: 1, scale: 1, filter: 'blur(0px)', y: 0 },
+    exit: { opacity: 0, scale: 1.04, filter: 'blur(8px)', y: -20, transition: { duration: 0.2 } },
+  };
 
-          <div>
-            <label
-              className={`block text-[10px] font-black ${isNight ? 'text-white' : 'text-zinc-900'} uppercase tracking-widest mb-3 opacity-60`}
-            >
-              {language === 'ko' ? '영어 학습 경험' : 'English Experience'}
-            </label>
-            <div className="flex flex-col gap-2">
-              {LEVEL_OPTIONS.map((opt) => (
-                <button
-                  key={opt.id}
-                  onClick={() => setSelectedLevel(opt.id)}
-                  className={`py-3 px-4 rounded-xl text-xs font-bold transition-all border text-left flex justify-between items-center ${
-                    selectedLevel === opt.id
-                      ? 'bg-orange-500 border-orange-500 text-white shadow-lg'
-                      : isNight
-                        ? 'bg-zinc-800 border-white/5 text-zinc-400 hover:bg-zinc-700'
-                        : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:bg-zinc-200'
-                  }`}
-                >
-                  <span>{language === 'ko' ? opt.ko : opt.en}</span>
-                  {selectedLevel === opt.id && <span className="text-sm">✓</span>}
-                </button>
-              ))}
-            </div>
-          </div>
+  const renderStep0 = () => (
+    <motion.div 
+      key="step0"
+      variants={fadeVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={transitionSpring}
+      className="flex flex-col h-full"
+    >
+      <div className="text-center mb-10 pt-4">
+        <motion.div 
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="w-32 h-32 rounded-[2.5rem] mx-auto mb-6 shadow-[0_20px_40px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden"
+        >
+          <img src="/assets/onboarding_icon_setup_1782545212856.png" alt="Setup" className="w-full h-full object-cover" />
+        </motion.div>
+        <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight">
+          {language === 'ko' ? '아이에게 딱 맞는 설명서' : 'Tailored Explanations'}
+        </h3>
+        <p className="text-sm text-zinc-400 mt-4 font-korean leading-relaxed max-w-[280px] mx-auto">
+          {language === 'ko'
+            ? '아이의 연령과 수준을 알려주시면, AI가 그에 맞춰 가장 이해하기 쉬운 단어와 문장으로 티칭 가이드를 만들어 드립니다.'
+            : 'Tell us about your child, and our AI will tailor its vocabulary and teaching guides perfectly to their level.'}
+        </p>
+      </div>
 
-          <div>
-            <label
-              className={`block text-[10px] font-black ${isNight ? 'text-white' : 'text-zinc-900'} uppercase tracking-widest mb-3 opacity-60 mt-6`}
-            >
-              {language === 'ko' ? '엄마/아빠의 영어 수준' : "Parent's English Level"}
-            </label>
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => setParentLevel('beginner')}
-                className={`py-3 px-4 rounded-xl text-xs font-bold transition-all border text-left flex justify-between items-center ${
-                  parentLevel === 'beginner'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-lg'
-                    : isNight
-                      ? 'bg-zinc-800 border-white/5 text-zinc-400 hover:bg-zinc-700'
-                      : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:bg-zinc-200'
+      <div className="space-y-8 mb-10 flex-1 overflow-y-auto custom-scrollbar px-2 -mx-2">
+        {/* Age Select */}
+        <div>
+          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4">
+            {language === 'ko' ? '아이의 연령' : "Child's Age"}
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {AGE_OPTIONS.map((opt) => (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                key={opt.id}
+                onClick={() => setSelectedAge(opt.id)}
+                className={`relative overflow-hidden py-4 px-3 rounded-2xl text-sm font-bold transition-all duration-300 \${
+                  selectedAge === opt.id
+                    ? 'text-white ring-2 ring-orange-500 bg-orange-500/10'
+                    : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
                 }`}
               >
-                <span>{language === 'ko' ? '기본적인 문장만! (왕초보)' : 'Beginner'}</span>
-                {parentLevel === 'beginner' && <span className="text-sm">✓</span>}
-              </button>
-              <button
-                onClick={() => setParentLevel('fluent')}
-                className={`py-3 px-4 rounded-xl text-xs font-bold transition-all border text-left flex justify-between items-center ${
-                  parentLevel === 'fluent'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-lg'
-                    : isNight
-                      ? 'bg-zinc-800 border-white/5 text-zinc-400 hover:bg-zinc-700'
-                      : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:bg-zinc-200'
-                }`}
-              >
-                <span>
-                  {language === 'ko' ? '기본적인 설명 가능! (중급 이상)' : 'Comfortable (Fluent)'}
-                </span>
-                {parentLevel === 'fluent' && <span className="text-sm">✓</span>}
-              </button>
-            </div>
+                <span className="relative z-10">{language === 'ko' ? opt.ko : opt.en}</span>
+                {selectedAge === opt.id && (
+                  <motion.div 
+                    layoutId="age-active"
+                    className="absolute inset-0 bg-orange-500/20 blur-xl"
+                  />
+                )}
+              </motion.button>
+            ))}
           </div>
         </div>
 
-        <div className="space-y-3">
-          <button
-            onClick={handleSubmit}
-            disabled={!selectedAge || !selectedLevel || !parentLevel || isSubmitting}
-            className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all hover:bg-zinc-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            {isSubmitting
-              ? language === 'ko'
-                ? '저장 중...'
-                : 'Saving...'
-              : language === 'ko'
-                ? '설정 완료 (맞춤형 시작)'
-                : 'Save & Tailor Guides'}
-          </button>
-          <div className="flex gap-3">
-            <button
-              onClick={() => {
-                setSelectedAge(null);
-                setSelectedLevel(null);
-                setParentLevel(null);
-              }}
-              className={`flex-1 ${isNight ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'} py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all`}
-            >
-              {language === 'ko' ? '초기화' : 'Reset'}
-            </button>
-            <button
-              onClick={onSkip}
-              className="flex-1 bg-transparent text-zinc-500 py-3 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:text-orange-500 transition-colors"
-            >
-              {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
-            </button>
+        {/* Level Select */}
+        <div>
+          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4">
+            {language === 'ko' ? '영어 학습 경험' : 'English Experience'}
+          </label>
+          <div className="flex flex-col gap-3">
+            {LEVEL_OPTIONS.map((opt) => (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                key={opt.id}
+                onClick={() => setSelectedLevel(opt.id)}
+                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-300 text-left flex justify-between items-center \${
+                  selectedLevel === opt.id
+                    ? 'text-white ring-2 ring-orange-500 bg-orange-500/10'
+                    : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
+                }`}
+              >
+                <span className="relative z-10">{language === 'ko' ? opt.ko : opt.en}</span>
+                {selectedLevel === opt.id && (
+                  <motion.div 
+                    layoutId="level-active"
+                    className="absolute inset-0 bg-orange-500/20 blur-xl"
+                  />
+                )}
+                <AnimatePresence>
+                  {selectedLevel === opt.id && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs relative z-10"
+                    >
+                      ✓
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* Parent Level Select */}
+        <div>
+          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4">
+            {language === 'ko' ? '엄마/아빠의 영어 수준' : "Parent's English Level"}
+          </label>
+          <div className="flex flex-col gap-3">
+            {[
+              { id: 'beginner', ko: '기본적인 문장만! (왕초보)', en: 'Beginner' },
+              { id: 'fluent', ko: '기본적인 설명 가능! (중급 이상)', en: 'Comfortable (Fluent)' }
+            ].map((opt) => (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                key={opt.id}
+                onClick={() => setParentLevel(opt.id)}
+                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-300 text-left flex justify-between items-center \${
+                  parentLevel === opt.id
+                    ? 'text-white ring-2 ring-orange-500 bg-orange-500/10'
+                    : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
+                }`}
+              >
+                <span className="relative z-10">{language === 'ko' ? opt.ko : opt.en}</span>
+                {parentLevel === opt.id && (
+                  <motion.div 
+                    layoutId="parent-level-active"
+                    className="absolute inset-0 bg-orange-500/20 blur-xl"
+                  />
+                )}
+                <AnimatePresence>
+                  {parentLevel === opt.id && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs relative z-10"
+                    >
+                      ✓
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            ))}
           </div>
         </div>
       </div>
+
+      <div className="space-y-4 pt-4 border-t border-white/5">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleProfileSubmit}
+          disabled={!selectedAge || !selectedLevel || !parentLevel || isSubmitting}
+          className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black uppercase text-xs tracking-[0.15em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed group shadow-[0_10px_20px_rgba(255,255,255,0.1)]"
+        >
+          <span className="relative z-10">
+            {isSubmitting ? (language === 'ko' ? '저장 중...' : 'Saving...') : (language === 'ko' ? '저장 후 계속하기' : 'Save & Continue')}
+          </span>
+          <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+        </motion.button>
+        
+        <div className="flex justify-center">
+          <button
+            onClick={onSkip}
+            className="text-zinc-500 py-2 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
+          >
+            {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  const renderEducationalStep = (
+    imageSrc: string,
+    titleKo: string,
+    titleEn: string,
+    descKo: string,
+    descEn: string,
+    nextAction: () => void,
+    isLast: boolean = false
+  ) => (
+    <motion.div 
+      key={`step${step}`}
+      variants={fadeVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={transitionSpring}
+      className="flex flex-col h-full items-center justify-center text-center py-8"
+    >
+      <motion.div 
+        animate={{ y: [0, -10, 0], rotate: [2, -1, 2] }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+        className="w-48 h-48 rounded-[3rem] flex items-center justify-center mb-10 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/20"
+      >
+        <img src={imageSrc} alt="" className="w-full h-full object-cover" />
+      </motion.div>
+      <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight mb-5">
+        {language === 'ko' ? titleKo : titleEn}
+      </h3>
+      <p className="text-base text-zinc-400 mb-12 leading-relaxed max-w-[280px] font-korean">
+        {language === 'ko' ? descKo : descEn}
+      </p>
+
+      <div className="w-full mt-auto">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={nextAction}
+          className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black uppercase text-xs tracking-[0.15em] transition-colors shadow-[0_10px_20px_rgba(255,255,255,0.1)] group"
+        >
+          <span className="relative z-10">
+            {isLast ? (language === 'ko' ? '시작하기!' : 'Get Started!') : (language === 'ko' ? '다음' : 'Next')}
+          </span>
+          <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+        </motion.button>
+        
+        <div className="flex justify-center gap-3 mt-8">
+          {[1, 2, 3].map(i => (
+            <motion.div 
+              key={i}
+              layout
+              className={`h-1.5 rounded-full transition-colors \${step === i ? 'bg-orange-500 w-8' : 'bg-white/20 w-1.5'}`} 
+            />
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        className="absolute inset-0 bg-black/80 backdrop-blur-2xl"
+      />
+      
+      {/* Outer Shell Double-Bezel */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={transitionSpring}
+        className="relative w-full max-w-[420px] h-[750px] max-h-[90vh] bg-white/5 ring-1 ring-white/10 p-2 sm:p-2.5 rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.8)]"
+      >
+        {/* Inner Core */}
+        <div className="relative w-full h-full bg-[#050505] rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
+          <AnimatePresence mode="wait">
+            {step === 0 && renderStep0()}
+            {step === 1 && renderEducationalStep(
+              '/assets/onboarding_icon_grader_1782545224150.png',
+              '찰칵! 1초 채점',
+              'Instant Grader',
+              '아이가 푼 문제집을 촬영하세요. AI가 손글씨를 인식해 즉시 채점하고 정답을 알려줍니다.',
+              'Take a picture of the homework. Chekki will instantly grade their handwriting and show you the answers.',
+              () => setStep(2)
+            )}
+            {step === 2 && renderEducationalStep(
+              '/assets/onboarding_icon_dashboard_1782545238800.png',
+              '자동 오답 노트',
+              'Learning Dashboard',
+              '틀린 문제는 자동으로 학습 대시보드에 저장됩니다. 번거롭게 따로 기록할 필요가 없어요.',
+              'Wrong answers are automatically saved to your Dashboard. No need to manually keep track.',
+              () => setStep(3)
+            )}
+            {step === 3 && renderEducationalStep(
+              '/assets/onboarding_icon_loop_1782545249835.png',
+              '무한 복습 루프',
+              'The Infinite Loop',
+              '저장된 오답을 모아 맞춤형 복습 프린트물을 만들어주세요. 빈틈없는 영어 학습이 완성됩니다.',
+              'Generate practice worksheets from their mistakes. Close the learning gap automatically.',
+              onComplete, true
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
     </div>
   );
 };

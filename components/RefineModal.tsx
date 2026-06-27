@@ -148,7 +148,7 @@ export const RefineModal: React.FC<Props> = ({
                 <div className="flex items-center gap-2 mt-1">
                   <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
                   <p className="text-xs text-orange-500 font-black uppercase tracking-[0.2em]">
-                    AI TUTOR
+                    ASK CHEKKI
                   </p>
                 </div>
               </div>

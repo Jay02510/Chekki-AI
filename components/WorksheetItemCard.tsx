@@ -24,6 +24,7 @@ interface WorksheetItemCardProps {
   setShowPaywall: (show: boolean) => void;
   setUpsellFeature: (feature: 'pronunciation' | 'audio' | 'guide' | null) => void;
   style?: React.CSSProperties;
+  hasHandwriting?: boolean;
 }
 
 const simplifyGuideText = (text: string) => {
@@ -68,6 +69,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     setShowPaywall,
     setUpsellFeature,
     style,
+    hasHandwriting = true,
   }) => {
     const [isScriptExpanded, setIsScriptExpanded] = useState(true);
     const [isGuideExpanded, setIsGuideExpanded] = useState(false);
@@ -111,19 +113,45 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
 
           <div className="flex-1 min-w-0">
             <h4
-              className={`text-sm md:text-lg font-bold leading-relaxed mb-3 transition-colors break-keep ${isActive ? (isNight ? 'text-white' : 'text-zinc-900') : isNight ? 'text-zinc-500' : 'text-zinc-600'}`}
+              className={`text-sm md:text-lg font-bold leading-relaxed transition-colors break-keep ${isActive ? (isNight ? 'text-white' : 'text-zinc-900') : isNight ? 'text-zinc-500' : 'text-zinc-600'} ${item.question_translation ? 'mb-1' : 'mb-3'}`}
             >
               {item.question_text.replace(/^\d+[.)\s]+/, '')}
             </h4>
+            {item.question_translation && (
+              <p className={`text-[10px] md:text-xs font-korean italic leading-relaxed mb-3 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
+                {item.question_translation}
+              </p>
+            )}
 
             <div className="flex flex-col gap-4">
               <div className={`flex flex-col items-start gap-1`}>
                 <div
                   className={`relative px-0 py-1 transition-all duration-500 ease-in-out ${speechResult?.id === item.id ? (speechResult.success ? 'scale-110 z-10' : 'translate-x-1') : ''}`}
                 >
+                  {item.is_correct === false && hasHandwriting !== false && (
+                    <div className="mb-2">
+                      <span className="text-xs text-red-500/80 font-bold uppercase tracking-wider block mb-1">
+                        {language === 'ko' ? '아이의 답안' : "Child's Answer"}
+                      </span>
+                      <span className="font-hand text-2xl md:text-4xl text-red-500 line-through decoration-red-500/50 block rotate-[1.5deg]">
+                        {item.student_response || (language === 'ko' ? '(빈칸)' : '(blank)')}
+                      </span>
+                    </div>
+                  )}
+                  {item.is_correct === false && hasHandwriting !== false && (
+                    <span className="text-xs text-emerald-500/80 font-bold uppercase tracking-wider block mt-3 mb-1">
+                        {language === 'ko' ? '정답' : "Correct Answer"}
+                    </span>
+                  )}
+                  {hasHandwriting === false && (
+                    <span className="text-[10px] text-blue-500/80 font-black uppercase tracking-widest block mb-2 bg-blue-500/10 w-fit px-2 py-0.5 rounded-full border border-blue-500/20 shadow-sm">
+                        {language === 'ko' ? '정답 모드' : "Answer Key"}
+                    </span>
+                  )}
                   <span
                     className={`font-hand text-3xl md:text-5xl font-bold transition-colors duration-500 block break-words whitespace-normal break-keep rotate-[1.5deg] inline-block ${speechResult?.id === item.id ? (speechResult.success ? (isNight ? 'text-green-300 drop-shadow-[0_2px_8px_rgba(34,197,94,0.5)]' : 'text-green-600 drop-shadow-[0_2px_8px_rgba(22,163,74,0.3)]') : (isNight ? 'text-red-300 drop-shadow-[0_2px_8px_rgba(239,68,68,0.5)]' : 'text-red-600 drop-shadow-[0_2px_8px_rgba(220,38,38,0.3)]')) : isNight ? 'text-emerald-400' : 'text-emerald-600'}`}
                   >
+                    {item.is_correct === true && <span className="mr-2">✅</span>}
                     {answerText}
                   </span>
                   {speechResult?.id === item.id && speechResult.success && (
@@ -160,7 +188,8 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onPlayAudio(answerText);
+                        // Audio should read the AI Explanation if available, fallback to answer text
+                        onPlayAudio(displayScript || answerText);
                       }}
                       className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-orange-500/10 text-orange-500 btn-press hover:scale-105 hover:-translate-y-0.5 shadow-sm"
                       title={t('tt_audio')}
@@ -280,8 +309,8 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                   className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-korean leading-relaxed`}
                 >
                   {language === 'ko'
-                    ? '다정한 티칭 스크립트와 가이드를 보려면 로그인이 필요해요!'
-                    : 'Log in to unlock the full teaching scripts and guides!'}
+                    ? '채키의 다정한 해설과 가이드를 보려면 로그인이 필요해요!'
+                    : 'Log in to unlock the full explanation!'}
                 </p>
                 <button
                   onClick={openLoginModal}
@@ -342,7 +371,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                         className="w-full flex justify-between items-center p-4 md:p-5 hover:bg-orange-500/5 transition-colors text-left cursor-pointer"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="text-base md:text-lg">💌</span>
+                          <span className="text-base md:text-lg">🤖</span>
                           <p className="text-xs md:text-sm font-black uppercase text-orange-500 tracking-wider font-display">
                             {t('lbl_mom_tip')}
                           </p>
@@ -445,7 +474,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                         className={`${isNight ? 'bg-orange-500/5 border-orange-500/10 shadow-inner' : 'bg-orange-50/50 border-orange-100 shadow-sm'} border rounded-3xl p-4 md:p-5 text-left`}
                       >
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm">💌</span>
+                          <span className="text-sm">🤖</span>
                           <p className="text-xs font-black uppercase text-orange-500 tracking-wider font-display">
                             {t('lbl_mom_tip')}
                           </p>
@@ -525,8 +554,8 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                           className={`text-xs md:text-sm font-black font-korean ${isNight ? 'text-white' : 'text-zinc-900'} leading-snug`}
                         >
                           {language === 'ko'
-                            ? '티칭 가이드와 스크립트 전문 보기'
-                            : 'Unlock full Guide & Teaching Script'}
+                            ? '해설 및 가이드 전문 보기'
+                            : 'Unlock full explanation'}
                         </p>
                         <p className="text-[9px] text-zinc-500 font-bold mt-0.5">
                           {language === 'ko'

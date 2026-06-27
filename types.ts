@@ -18,6 +18,7 @@ export interface WorksheetItem {
   id: number;
   type: ItemType | string;
   question_text: string;
+  question_translation?: string;
   correct_answer: string;
   korean_guide: string;
   english_guide?: string;
@@ -87,6 +88,7 @@ export interface WorksheetSummary {
   overview_en?: string;
   total_score?: number;
   worksheet_type?: string;
+  has_handwriting?: boolean;
 }
 
 export interface WorksheetAnalysis {

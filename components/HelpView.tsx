@@ -132,7 +132,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
       <div className="max-w-5xl mx-auto px-4 mb-16 md:mb-32">
         <div className="text-center mb-8 md:mb-16">
           <h2
-            className={`text-3xl md:text-5xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-4`}
+            className={`text-balance text-3xl md:text-5xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-4`}
           >
             Confused about grammar?
           </h2>
@@ -155,7 +155,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
       <div className="max-w-7xl mx-auto px-4 space-y-20 md:space-y-40">
         <section>
           <h2
-            className={`text-2xl md:text-5xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display text-center mb-12 md:mb-24`}
+            className={`text-balance text-2xl md:text-5xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display text-center mb-12 md:mb-24`}
           >
             {t('how_title')}
           </h2>
@@ -232,7 +232,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
 
         <section className="text-center space-y-4">
           <h2
-            className={`text-3xl md:text-7xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase tracking-tight`}
+            className={`text-balance text-3xl md:text-7xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase`}
           >
             {t('magic_title')}
           </h2>
@@ -249,8 +249,8 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
         <section>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 mb-20 md:mb-40">
             {[
-              { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc') },
-              { id: 'ocr', emoji: '🎯', title: t('diff_ocr'), desc: t('diff_ocr_desc') },
+              { id: 'brand', emoji: '🪄', title: t('diff_brand'), desc: t('diff_brand_desc') },
+              { id: 'ocr', emoji: '✨', title: t('diff_ocr'), desc: t('diff_ocr_desc') },
               { id: 'script', emoji: '💌', title: t('diff_script'), desc: t('diff_script_desc') },
             ].map((feat) => (
               <div
@@ -259,7 +259,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               >
                 <span className="text-3xl md:text-5xl block mb-4 md:mb-6">{feat.emoji}</span>
                 <h3
-                  className={`text-lg md:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2 md:mb-3`}
+                  className={`text-balance text-lg md:text-2xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2 md:mb-3`}
                 >
                   {feat.title}
                 </h3>
@@ -276,7 +276,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
         {/* Why Chekki Section */}
         <section className="pt-20 md:pt-40 space-y-12 md:space-y-24">
           <h2
-            className={`text-3xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-display tracking-tight`}
+            className={`text-balance text-3xl md:text-6xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-display`}
           >
             {t('diff_title')}
           </h2>
@@ -285,11 +285,11 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-300`}
             >
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                <span className="text-8xl md:text-[12rem]">✍️</span>
+                <span className="text-8xl md:text-[12rem]">✨</span>
               </div>
-              <span className="text-4xl md:text-7xl mb-2">✍️</span>
+              <span className="text-4xl md:text-7xl mb-2">✨</span>
               <h3
-                className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight leading-tight`}
+                className={`text-balance text-2xl md:text-4xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} leading-tight`}
               >
                 {t('diff_ocr')}
               </h3>
@@ -307,7 +307,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               </div>
               <span className="text-4xl md:text-7xl mb-2">💌</span>
               <h3
-                className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight leading-tight`}
+                className={`text-balance text-2xl md:text-4xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} leading-tight`}
               >
                 {t('diff_script')}
               </h3>
@@ -324,7 +324,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
         <section className="pt-24 md:pt-60 pb-24 md:pb-60 space-y-12 md:space-y-24">
           <div className="text-center space-y-4 md:space-y-8">
             <h2
-              className={`text-3xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight`}
+              className={`text-balance text-3xl md:text-6xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}
             >
               {t('trust_title')}
             </h2>
@@ -338,7 +338,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               </div>
               <div className="space-y-4 md:space-y-6">
                 <h3
-                  className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight`}
+                  className={`text-balance text-2xl md:text-4xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}
                 >
                   {t('trust_privacy')}
                 </h3>
@@ -357,7 +357,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               </div>
               <div className="space-y-4 md:space-y-6">
                 <h3
-                  className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight`}
+                  className={`text-balance text-2xl md:text-4xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}
                 >
                   {t('trust_safety')}
                 </h3>

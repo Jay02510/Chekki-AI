@@ -27,20 +27,33 @@ service cloud.firestore {
       );
     }
     
+    // Helper to prevent storage exhaustion and ensure type safety
+    function isValidMistake() {
+      let data = request.resource.data;
+      let qValid = !data.keys().hasAny(['question_text']) || (data.question_text is string && data.question_text.size() < 1000);
+      let aValid = !data.keys().hasAny(['correct_answer']) || (data.correct_answer is string && data.correct_answer.size() < 1000);
+      return qValid && aValid;
+    }
+
     // Mistakes: Strict ownership check.
     match /mistakes/{mistakeId} {
-      allow get: if request.auth != null && (
-        (resource.data.userId == request.auth.uid) ||
-        isAdmin()
+      allow get, list: if request.auth != null && (
+        (resource.data.userId == request.auth.uid) || isAdmin()
       );
-      allow list: if request.auth != null && (
-        (resource.data.userId == request.auth.uid) ||
-        isAdmin()
+      
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && isValidMistake();
+        
+      allow update: if request.auth != null && (
+        isAdmin() ||
+        (resource.data.userId == request.auth.uid 
+         && request.resource.data.userId == request.auth.uid 
+         && isValidMistake())
       );
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if request.auth != null && (
-        (resource.data.userId == request.auth.uid) ||
-        isAdmin()
+      
+      allow delete: if request.auth != null && (
+        (resource.data.userId == request.auth.uid) || isAdmin()
       );
     }
 
@@ -71,6 +84,16 @@ service cloud.firestore {
     // Rate Limits: Only writable by the backend Admin SDK (service account).
     // Client-side access is explicitly denied. The Admin SDK bypasses these rules entirely.
     match /ratelimits/{docId} {
+      allow read, write: if false;
+    }
+
+    // Quiz Quotas: Tracked server-side only. No client read/write.
+    match /quiz_quotas/{docId} {
+      allow read, write: if false;
+    }
+
+    // Idempotency Keys: Used for deduplication server-side only.
+    match /idempotency_keys/{docId} {
       allow read, write: if false;
     }
   }

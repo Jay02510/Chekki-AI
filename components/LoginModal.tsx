@@ -170,8 +170,9 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
           role="dialog"
           aria-modal="true"
           aria-labelledby="login-modal-title"
-          className={`relative ${isNight ? 'bg-zinc-900 border-white/5 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-2xl'} rounded-3xl w-full max-w-sm border overflow-hidden animate-fade-in-up flex flex-col transition-colors duration-300`}
+          className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl modal-enter w-full max-w-sm flex flex-col mx-4`}
         >
+          <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-zinc-950/90' : 'bg-white/90'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
           {/* Clean header — no image */}
           <div className="relative flex items-center justify-between px-6 pt-6 pb-2 shrink-0">
             <div className="flex items-center gap-2">
@@ -197,7 +198,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
             <div className="text-center mb-6">
               <h2
                 id="login-modal-title"
-                className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-1.5 tracking-tight`}
+                className={`text-balance text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-1.5 tracking-tight`}
               >
                 {getTitle()}
               </h2>
@@ -526,6 +527,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 </button>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>

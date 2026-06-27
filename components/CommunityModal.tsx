@@ -11,8 +11,8 @@ const MOCK_POSTSList = (ko: boolean): CommunityPost[] => [
     avatar: '👩🏻',
     timeAgo: ko ? '예시' : 'Example',
     content: ko
-      ? '이번 주 오답노트 결과에요! 파닉스 헷갈려했는데 채키 AI로 발음 교정받고 많이 좋아졌어요. 🤗 #채키AI #영어홈스쿨링'
-      : "Check out this week's review note! My child struggled with phonics but improved so much with Chekki.",
+      ? '채키AI 덕분에 20분 걸리던 숙제 채점이 단 1초만에 끝났어요! ⏱️📸 이제 여유롭게 커피 한 잔 합니다. #채키AI #영어홈스쿨링 #시간단축'
+      : "Chekki's Instant Grader just turned 20 minutes of grading into 1 second! ⏱️📸 Finally having my coffee.",
     likes: 24,
     comments: 5,
     tag: ko ? '리뷰' : 'Review',
@@ -23,8 +23,8 @@ const MOCK_POSTSList = (ko: boolean): CommunityPost[] => [
     avatar: '👨🏻',
     timeAgo: ko ? '예시' : 'Example',
     content: ko
-      ? '오늘도 아이랑 리추얼 레코드(Ritual Record) 한 장 남겼어요! 🏆 종이 위에 바로 뜨는 정답 덕분에 설명해주기도 편하고, 아이도 신기해하며 좋아하네요.'
-      : 'Just saved another Ritual Record! 🏆 The instant answer overlays make it so easy to explain things, and my child loves seeing the magic happen.',
+      ? '매일 밤 숙제 때문에 싸우던 일상은 이제 안녕 👋 자동 오답 워크시트 덕분에 아이도 저도 스트레스 제로입니다 😭✨'
+      : 'No more fighting over English homework. The automated practice worksheets made my child finally understand it! 😭✨',
     likes: 156,
     comments: 12,
     tag: ko ? '성취' : 'Achievement',
@@ -35,8 +35,8 @@ const MOCK_POSTSList = (ko: boolean): CommunityPost[] => [
     avatar: '👩🏼',
     timeAgo: ko ? '예시' : 'Example',
     content: ko
-      ? '혹시 "Magic E" 관련해서 좋은 워크시트 자료 공유해주실 분 계신가요? ㅠㅠ'
-      : 'Does anyone have good worksheets for "Magic E"? Please share!',
+      ? '영알못 엄마라 항상 미안했는데, 채키 티칭 스크립트 그대로 읽어주니 아이가 절 영어 고수인 줄 알아요 ㅋㅋㅋ 😎'
+      : 'I was always worried about my own English level, but reading the Chekki teaching scripts makes me feel like a pro teacher! 😎',
     likes: 8,
     comments: 20,
     tag: ko ? '질문' : 'Question',
@@ -59,13 +59,13 @@ export const CommunityModal: React.FC<Props> = ({ onClose, isNight = true }) => 
     const base =
       postContent ||
       (language === 'ko'
-        ? '오늘도 채키랑 영어 숙제 끝냈어요! 🚀'
-        : 'Today we practiced English homework with Chekki! 🚀');
+        ? '오늘도 채키랑 숙제 싸움 없이 평화롭게 끝! 🚀'
+        : 'Another peaceful homework session with Chekki! 🚀');
 
     if (platform === 'cafe') {
-      return `[영유 숙제 기록] 채키 AI로 오늘도 열공 완료! ✨\n\n아이랑 영유 숙제하다 보면 저도 가끔 헷갈릴 때가 있는데,\n채키(Chekki) 덕분에 발음도 확인하고 설명도 다정하게 해줄 수 있어서 너무 좋네요.\n\n특히 어려워했던 문제는 오답노트로 따로 모아볼 수 있어서 주말 복습도 든든합니다.\n공유해주신 학습 팁들 항상 잘 보고 있어요! 다들 화이팅입니다. ❤️\n\n💬 기록 한마디: ${base}\n\n#채키AI #영유맘 #숙제도우미 #부모표영어 #7세영어 #자기주도학습`;
+      return `[영유 숙제 기록] 채키 AI로 오늘도 채점 지옥 탈출! ✨\n\n아이랑 영유 숙제하다 보면 저도 가끔 헷갈리고 설명하기 막막할 때가 많은데요,\n채키(Chekki) 앱으로 1초만에 채점하고 다정한 티칭 가이드까지 그대로 읽어줄 수 있어서 너무 편해요.\n\n무엇보다 아이랑 숙제하면서 화내는 일이 싹 사라졌어요. 😭\n틀린 문제는 오답노트에서 자동으로 복습 문제지로 만들어줘서 주말 대비도 끝이네요!\n\n💬 기록 한마디: ${base}\n\n#채키AI #영유맘 #숙제도우미 #부모표영어 #7세영어 #자기주도학습`;
     } else {
-      return `${base}\n\n오늘도 우리 아이 성장을 위해 찰칵! 📸\n영어 숙제 시간이 이제 스트레스가 아니라\n도란도란 이야기 나누는 즐거운 시간이 되었어요.\n\n채키(@Chekki_AI)가 알려주는 부모표 티칭 가이드 최고! 👍\n\n#공부기록 #홈스쿨링 #영유맘소통 #육아소통 #부모표영어 #ChekkiAI #ChekkiMoment #StudyGram`;
+      return `${base}\n\n오늘도 우리 아이 성장을 위해 찰칵! 📸\n퇴근 후 20분씩 걸리던 채점이 단 1초만에 끝나서 제 시간이 생겼어요 ☕️\n\n영어 숙제 시간이 이제 스트레스가 아니라\n도란도란 이야기 나누는 즐거운 시간이 되었어요.\n채키(@Chekki_AI)가 알려주는 부모표 티칭 가이드 최고! 👍\n\n#공부기록 #홈스쿨링 #영유맘소통 #육아소통 #부모표영어 #ChekkiAI #ChekkiMoment #StudyGram`;
     }
   };
 

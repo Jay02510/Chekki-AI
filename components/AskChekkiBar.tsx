@@ -31,12 +31,12 @@ export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({
         e.preventDefault();
         onSubmit(query);
       }}
-      className={`relative flex items-center ${isNight ? 'bg-zinc-900' : 'bg-white shadow-xl border-zinc-200'} border border-transparent hover:border-orange-500/30 focus-within:border-orange-500 rounded-3xl pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-all w-full`}
+      className={`relative flex items-center ${isNight ? 'bg-zinc-900' : 'bg-white shadow-xl border-zinc-200'} border border-transparent hover:border-orange-500/30 focus-within:border-orange-500 rounded-3xl pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 w-full`}
     >
       <button
         type="submit"
         disabled={!query.trim() || isAsking}
-        className={`shrink-0 mr-3 md:mr-4 transition-all duration-300 active:scale-90 ${query.trim() ? 'text-orange-500' : 'text-zinc-500'}`}
+        className={`shrink-0 mr-3 md:mr-4 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100  active:scale-[0.97] ${query.trim() ? 'text-orange-500' : 'text-zinc-500'}`}
         title="Search"
       >
         {isAsking ? (
@@ -137,7 +137,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
       const { saveImageToDevice } = await import('../utils/exportUtils');
       await saveImageToDevice(
         dataUrl,
-        'Chekki AI Tutor',
+        'Ask Chekki',
         language === 'ko' ? '채키가 제 질문에 답변해줬어요!' : 'Chekki answered my question!',
         'chekki-answer'
       );
@@ -185,7 +185,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
             <span className="text-2xl shrink-0">{isAsking ? '💭' : '🙋‍♂️'}</span>
             <div className="min-w-0 flex-1">
               <p className="text-[10px] text-orange-400 font-black uppercase tracking-wide leading-normal">
-                {language === 'ko' ? '채키 AI 튜터' : 'Chekki AI Tutor'}
+                {language === 'ko' ? '채키에게 물어보기' : 'Ask Chekki'}
               </p>
               <p
                 className={`${isNight ? 'text-white' : 'text-zinc-900'} text-xs font-semibold font-korean mt-0.5 opacity-60 leading-snug break-words pr-4`}
@@ -235,7 +235,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                     if (success) onClose();
                   }}
                   disabled={isSaving}
-                  className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black text-xs uppercase tracking-wide shadow-xl active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center`}
+                  className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black text-xs uppercase tracking-wide shadow-xl active:scale-[0.97] transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 disabled:opacity-50 flex items-center justify-center`}
                 >
                   {isSaving ? (
                     <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -246,7 +246,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                 <button
                   onClick={onClose}
                   disabled={isSaving}
-                  className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-2xl font-black text-xs uppercase tracking-wide border border-red-500/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-2xl font-black text-xs uppercase tracking-wide border border-red-500/20 active:scale-[0.97] transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 disabled:opacity-50"
                 >
                   {language === 'ko' ? '저장하지 않고 종료' : 'Close Anyway'}
                 </button>
@@ -347,7 +347,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
           >
             <form
               onSubmit={handleFollowUpSubmit}
-              className={`flex items-center gap-2 ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200 shadow-sm'} focus-within:border-orange-500/60 rounded-2xl px-4 py-2.5 transition-all`}
+              className={`flex items-center gap-2 ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200 shadow-sm'} focus-within:border-orange-500/60 rounded-2xl px-4 py-2.5 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100`}
             >
               <input
                 type="text"
@@ -365,7 +365,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
               <button
                 type="submit"
                 disabled={!followUpText.trim() || isAsking}
-                className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90 ${followUpText.trim() ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-500'}`}
+                className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97] ${followUpText.trim() ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-500'}`}
               >
                 <svg
                   className="w-4 h-4"
@@ -393,7 +393,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className={`w-full mt-3 py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wide transition-all active:scale-95 border ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'} disabled:opacity-50`}
+              className={`w-full mt-3 py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wide transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97] border ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'} disabled:opacity-50`}
             >
               {isSaving ? (
                 <div className="w-4 h-4 border-2 border-zinc-500/20 border-t-zinc-500 rounded-full animate-spin" />
@@ -431,7 +431,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                   onClose();
                   openLoginModal();
                 }}
-                className="text-[10px] bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-black uppercase tracking-wider whitespace-nowrap shadow-lg shadow-orange-500/20 transition-all active:scale-95"
+                className="text-[10px] bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-black uppercase tracking-wider whitespace-nowrap shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
               >
                 {language === 'ko' ? '회원가입' : 'Sign Up'}
               </button>

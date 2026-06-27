@@ -153,7 +153,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
               />
             </svg>
             <h2
-              className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}
+              className={`text-balance text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight`}
             >
               {t('billing_title')}
             </h2>
@@ -188,7 +188,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
           {subscriptionRecord?.subscription_status === 'active' ? (
             <>
               <h3
-                className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase`}
+                className={`text-balance text-[10px] font-black uppercase tracking-tight ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}
               >
                 {t('billing_active')}
               </h3>

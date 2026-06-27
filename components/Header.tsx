@@ -111,7 +111,16 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
           </div>
 
           <div className="flex items-center gap-1.5 md:gap-4 h-full flex-shrink-0">
-            {/* Removed Notebook and Theme icons from here to reduce cognitive load */}
+            {/* Back to Home Button */}
+            <a
+              href="/"
+              className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-[10px] md:text-xs font-bold transition-all duration-300 ${isNight ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' : 'bg-black/5 hover:bg-black/10 text-zinc-900 border border-black/5'}`}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              <span className="hidden sm:inline">{language === 'ko' ? '홈으로' : 'Home'}</span>
+            </a>
 
             <div className="flex items-center gap-2 md:gap-4">
               <div

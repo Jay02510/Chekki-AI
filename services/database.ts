@@ -143,6 +143,29 @@ export const db = {
     }
   },
 
+  async getUserMistakes(uid: string): Promise<any[]> {
+    try {
+      const docRef = doc(dbInstance, 'users', uid, 'data', 'mistakes');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data().items || [];
+      }
+      return [];
+    } catch (e) {
+      console.warn('[getUserMistakes] failed:', e);
+      return [];
+    }
+  },
+
+  async saveUserMistakes(uid: string, mistakes: any[]): Promise<void> {
+    try {
+      const docRef = doc(dbInstance, 'users', uid, 'data', 'mistakes');
+      await setDoc(docRef, { items: mistakes, updatedAt: new Date().toISOString() }, { merge: true });
+    } catch (e) {
+      console.error('[saveUserMistakes] failed:', e);
+    }
+  },
+
   logUserEvent(eventName: string, params?: any) {
     try {
       if (analytics) {

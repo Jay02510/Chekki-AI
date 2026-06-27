@@ -12,10 +12,8 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
     name: 'api-middleware',
     configureServer(server: any) {
       server.middlewares.use(async (req: any, res: any, next: any) => {
-        // Redirect root to app.html in dev mode if requested
-        if (req.url === '/' || req.url === '/index.html') {
-          req.url = '/app.html';
-        }
+        // In dev mode, let Vite serve index.html for / and app.html for /app.html
+        // We will remove the manual redirect so the landing page works.
 
         const apiPath = req.url?.split('?')[0];
         if (apiPath && apiPath.startsWith('/api/')) {

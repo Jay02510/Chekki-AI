@@ -21,6 +21,7 @@ import { refineWorksheetItem } from '../services/geminiService';
 import { WorksheetItemCard } from './WorksheetItemCard';
 import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
 import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
+import { Dashboard } from './Dashboard';
 
 const simplifyGuideText = (text: string) => {
   if (!text) return text;
@@ -88,6 +89,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
   const [speechResult, setSpeechResult] = useState<{ id: number; success: boolean } | null>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
   const recognitionRef = useRef<any>(null);
   const nativeListenerRef = useRef<any>(null);
   const endListenerRef = useRef<any>(null);
@@ -627,6 +629,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
             isNight={isNight}
             onConfirm={onConfirm}
             onSelect={(id) => setActiveItemId(id)}
+            hasHandwriting={data?.worksheet_summary?.has_handwriting}
             className="h-auto lg:h-full rounded-none"
           />
         </div>
@@ -656,9 +659,19 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
               <div className="flex items-center gap-2 shrink-0">
                 <button
+                  onClick={() => setShowDashboard(true)}
+                  className={`w-10 h-10 md:w-auto px-0 md:px-5 md:h-12 rounded-full bg-orange-500 text-white hover:bg-orange-600 flex items-center justify-center font-bold text-[11px] md:text-sm tracking-wide transition-all duration-300 active:scale-[0.98] group font-korean shadow-[0_0_20px_rgba(249,115,22,0.3)]`}
+                  title={language === 'ko' ? '대시보드 열기' : 'Open Dashboard'}
+                >
+                  <span className="hidden md:inline mr-2">{language === 'ko' ? '대시보드' : 'Dashboard'}</span>
+                  <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                  </svg>
+                </button>
+                <button
                   onClick={handleShare}
                   disabled={isSharing}
-                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center transition-all active:scale-90 border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
+                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center transition-all active:scale-[0.98] border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
                   title={language === 'ko' ? '기록 저장' : 'Save Image'}
                 >
                   {isSharing ? (
@@ -691,7 +704,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 </button>
                 <button
                   onClick={onClose}
-                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center text-lg transition-all active:scale-90 border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
+                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center text-lg transition-all active:scale-[0.98] border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
                   title={t('tt_close')}
                 >
                   <svg
@@ -772,6 +785,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   isAuthenticated={isAuthenticated}
                   userPlan={user?.plan}
                   isListening={isListening && activeItemId === item.id}
+                  hasHandwriting={data?.worksheet_summary?.has_handwriting}
                   onToggleActive={() => setActiveItemId(activeItemId === item.id ? null : item.id)}
                   onPlayAudio={playAudio}
                   onToggleMistake={toggleMistake}
@@ -820,7 +834,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                       else setShowCloneModal(true);
                     }}
                     disabled={isLoadingItems}
-                    className="w-full h-16 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-lg shadow-[0_20px_50px_rgba(249,115,22,0.3)] flex items-center justify-center gap-3 active:scale-95 transition-all"
+                    className="w-full h-16 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-lg shadow-[0_20px_50px_rgba(249,115,22,0.3)] flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
                   >
                     <span className="text-2xl">🪄</span>
                     {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
@@ -829,7 +843,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={onScanAgain}
-                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'}`}
+                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'}`}
                     >
                       <span className="text-xl">📸</span>
                       {t('ws_scan_again')}
@@ -837,7 +851,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                     <button
                       onClick={handleShare}
                       disabled={isSharing}
-                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${isNight ? 'bg-zinc-800 border-white/10 text-zinc-300 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
+                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] ${isNight ? 'bg-zinc-800 border-white/10 text-zinc-300 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
                     >
                       {isSharing ? (
                         <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -870,6 +884,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
           </div>
         </div>
       </div>
+      {showDashboard && <Dashboard onClose={() => setShowDashboard(false)} />}
     </>
   );
 };

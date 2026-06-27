@@ -198,13 +198,10 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p>
-                      <strong>2. 이미지 처리 및 보안 (Zero-Storage Policy)</strong>
+                      <strong>2. 데이터 저장 및 활용</strong>
                       <br />
-                      <strong>
-                        업로드된 학습지 이미지는 분석을 위해서만 일시적으로 처리되며, 서버에
-                        저장되지 않습니다.
-                      </strong>{' '}
-                      분석이 완료되는 즉시 메모리에서 삭제됩니다.
+                      업로드된 원본 학습지 이미지와 추출된 텍스트 및 오답 데이터는 개인 맞춤형 복습
+                      워크시트 생성 및 학습 진행도 추적을 위해 안전하게 서버에 저장됩니다.
                     </p>
 
                     <p>
@@ -243,13 +240,11 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p>
-                      <strong>2. Image Processing (Zero-Storage Policy)</strong>
+                      <strong>2. Data Storage & Usage</strong>
                       <br />
-                      <strong>
-                        Uploaded worksheet images are processed temporarily for analysis and are
-                        NEVER stored on our servers.
-                      </strong>{' '}
-                      Images are purged immediately after processing.
+                      Uploaded original worksheet images, along with extracted text and mistake data,
+                      are stored securely on our servers to generate customized PDF practice worksheets
+                      and track learning progress.
                     </p>
 
                     <p>

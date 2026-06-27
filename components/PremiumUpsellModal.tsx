@@ -40,8 +40,8 @@ export const PremiumUpsellModal: React.FC<Props> = ({
       icon: '📖',
       title_en: "Teacher's Guide",
       title_ko: '티칭 가이드',
-      desc_en: 'Get a warm, step-by-step teaching script to read with your child.',
-      desc_ko: '아이와 함께 읽을 수 있는 다정한 티칭 스크립트를 받아보세요.',
+      desc_en: 'Teach with absolute confidence using a step-by-step bilingual script.',
+      desc_ko: '영어를 몰라도 완벽하게 지도할 수 있는 다정한 티칭 스크립트를 받아보세요.',
     },
   };
 
@@ -110,8 +110,8 @@ export const PremiumUpsellModal: React.FC<Props> = ({
                 className={`text-[10px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'} font-medium break-keep`}
               >
                 {language === 'ko'
-                  ? '무제한 스캔, AI 튜터, 티칭 가이드 등 모든 프리미엄 기능'
-                  : 'Unlimited magic scans, AI Tutor, teaching guides & more'}
+                  ? '매일 밤의 숙제 전쟁을 끝내줄 무제한 1초 채점과 자동 오답 워크시트'
+                  : 'Stop the homework fights with unlimited Instant Grading and Automated Worksheets'}
               </p>
             </div>
           </div>

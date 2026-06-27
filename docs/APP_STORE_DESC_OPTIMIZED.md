@@ -34,7 +34,7 @@ Try Chekki PRO free for 7 days. No charge until your trial ends.
 5. Watch your child's confidence grow!
 
 **🛡️ SAFE FOR YOUR FAMILY**
-Privacy is our priority. Images are processed instantly and never stored on our servers. Zero data retention policy. End-to-end encrypted. Safe for the whole family.
+Privacy is our priority. Learning data is securely stored solely for personalized practice worksheets and progress tracking. End-to-end encrypted. Safe for the whole family.
 
 **💳 SUBSCRIPTION DETAILS**
 • Monthly Plan: $6.99/month — includes 7-day free trial
@@ -79,7 +79,7 @@ Empower your child's learning journey with ChekkiAI today.
 5. 웃으며 영어를 배우는 아이의 모습을 지켜보세요!
 
 **🛡️ 온 가족이 안심할 수 있는 보안**
-이미지는 즉시 스마트하게 분석된 후 서버에 저장되지 않고 즉시 삭제됩니다. 제로 데이터 보존 정책과 완벽한 암호화로 온 가족이 안심하고 사용할 수 있습니다.
+학습 진행도 추적과 맞춤형 워크시트 생성을 위해 필요한 데이터만 안전하게 서버에 보관됩니다. 완벽한 암호화로 온 가족이 안심하고 사용할 수 있습니다.
 
 **💳 구독 안내**
 • 월간 플랜: $6.99/월 — 7일 무료 체험 포함

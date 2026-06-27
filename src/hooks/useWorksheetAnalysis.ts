@@ -5,6 +5,7 @@ import { db } from '../../services/database';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { generateUUID } from '../../utils/uuid';
+import { useMistakes } from '../../contexts/MistakeContext';
 
 const SESSION_KEY = 'hw_last_session';
 const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
@@ -13,6 +14,7 @@ export const useWorksheetAnalysis = () => {
   const { user, openLoginModal, isAuthenticated, incrementScan, checkScanLimit, setShowPaywall } =
     useAuth();
   const { language } = useLanguage();
+  const { autoBookmark } = useMistakes();
 
   const [analysisState, setAnalysisState] = useState<AnalysisState>({
     status: 'idle',
@@ -143,6 +145,14 @@ export const useWorksheetAnalysis = () => {
           console.warn('Storage warning: Could not save session state', e);
         }
 
+        // Auto-bookmark incorrect items
+        if (result.items) {
+          const incorrectItems = result.items.filter((item: any) => item.is_correct === false);
+          if (incorrectItems.length > 0) {
+            autoBookmark(incorrectItems);
+          }
+        }
+
         // Log Analytics
         db.logUserEvent('scan_completed', {
           plan: user?.plan || 'free',
@@ -150,27 +160,36 @@ export const useWorksheetAnalysis = () => {
         });
 
         return true; // Success
-      } catch (e: any) {
-        if (e.name === 'AbortError') return;
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          if (e.name === 'AbortError') return;
+          console.error('[useWorksheetAnalysis] Analysis error:', e.message, e);
 
-        console.error('[useWorksheetAnalysis] Analysis error:', e.message, e);
+          const isGenericFail = !e.message || e.message === 'ANALYSIS_FAILED';
+          const errorMsg = isGenericFail
+            ? language === 'ko'
+              ? '분석에 실패했어요. 밝은 곳에서 사진을 다시 찍어주세요!'
+              : 'Analysis failed. Please try taking a clearer picture in good lighting!'
+            : e.message;
 
-        // Use specific error message if available, otherwise generic
-        const isGenericFail = !e.message || e.message === 'ANALYSIS_FAILED';
-        const errorMsg = isGenericFail
-          ? language === 'ko'
-            ? '분석에 실패했어요. 밝은 곳에서 사진을 다시 찍어주세요!'
-            : 'Analysis failed. Please try taking a clearer picture in good lighting!'
-          : e.message;
-
-        setAnalysisState({
-          status: 'error',
-          errorMessage: errorMsg,
-          data: null,
-          originalImage: displayUrl,
-          isSummaryLoaded: false,
-          isItemsLoaded: false,
-        });
+          setAnalysisState({
+            status: 'error',
+            errorMessage: errorMsg,
+            data: null,
+            originalImage: displayUrl,
+            isSummaryLoaded: false,
+            isItemsLoaded: false,
+          });
+        } else {
+          setAnalysisState({
+            status: 'error',
+            errorMessage: 'An unknown error occurred.',
+            data: null,
+            originalImage: displayUrl,
+            isSummaryLoaded: false,
+            isItemsLoaded: false,
+          });
+        }
         return false;
       }
     },
@@ -188,6 +207,7 @@ export const useWorksheetAnalysis = () => {
       language,
       analysisState.status,
       lastImageData,
+      autoBookmark,
     ]
   );
 
