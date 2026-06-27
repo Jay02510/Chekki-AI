@@ -227,6 +227,25 @@ export const SplitView: React.FC<SplitViewProps> = ({
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = 0.85;
+      
+      // Attempt to select a premium/clearer voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoiceNames = ['Google US English', 'Samantha', 'Alex'];
+      let selectedVoice = null;
+      
+      for (const name of preferredVoiceNames) {
+        selectedVoice = voices.find((v) => v.name.includes(name));
+        if (selectedVoice) break;
+      }
+      
+      if (!selectedVoice) {
+        selectedVoice = voices.find((v) => v.lang === 'en-US');
+      }
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+
       window.speechSynthesis.speak(utterance);
     }
   };
