@@ -434,7 +434,11 @@ function AppContent() {
             switchTab('help');
           }}
           onOpenDashboard={() => {
-            setShowDashboard(true);
+            if (user?.plan === 'pro') {
+              setShowDashboard(true);
+            } else {
+              setShowPaywall(true);
+            }
           }}
         />
         {/* Web-only mobile download banner */}
@@ -668,7 +672,13 @@ function AppContent() {
                       isNight={isNight}
                       onConfirm={(opts) => setConfirmDialog(opts)}
                       data={analysisState.data}
-                      onOpenDashboard={() => setShowDashboard(true)}
+                      onOpenDashboard={() => {
+                        if (user?.plan === 'pro') {
+                          setShowDashboard(true);
+                        } else {
+                          setShowPaywall(true);
+                        }
+                      }}
                     />
                   </div>
                 </div>

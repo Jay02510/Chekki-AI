@@ -362,7 +362,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                     </p>
                   </div>
                 </div>
-                {userPlan === 'pro' || (!isAuthenticated && index === 0) ? (
+                {userPlan === 'pro' || index === 0 ? (
                   <>
                     {/* Collapsible Teaching Script (Mom's Tip) */}
                     <div
