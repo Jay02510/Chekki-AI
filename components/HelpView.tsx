@@ -159,21 +159,42 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
           >
             {t('how_title')}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex flex-col items-center text-center group">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-orange-500 flex items-center justify-center text-xl md:text-3xl font-black text-white mb-6 md:mb-8 shadow-2xl group-hover:scale-110 transition-transform">
-                  {step}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mt-12">
+            {[
+              {
+                step: 1,
+                img: '/assets/onboarding_icon_grader_1782545224150.png',
+                ko: '찰칵! 1초 채점',
+                en: 'Instant Grader',
+                koDesc: '아이가 푼 문제집을 촬영하세요. AI가 손글씨를 인식해 즉시 채점하고 정답을 알려줍니다.',
+                enDesc: 'Take a picture of the homework. Chekki will instantly grade their handwriting and show you the answers.'
+              },
+              {
+                step: 2,
+                img: '/assets/onboarding_icon_dashboard_1782545238800.png',
+                ko: '자동 오답 노트',
+                en: 'Learning Dashboard',
+                koDesc: '틀린 문제는 자동으로 학습 대시보드에 저장됩니다. 번거롭게 따로 기록할 필요가 없어요.',
+                enDesc: 'Wrong answers are automatically saved to your Dashboard. No need to manually keep track.'
+              },
+              {
+                step: 3,
+                img: '/assets/onboarding_icon_loop_1782545249835.png',
+                ko: '무한 복습 루프',
+                en: 'The Infinite Loop',
+                koDesc: '저장된 오답을 모아 맞춤형 복습 프린트물을 만들어주세요. 빈틈없는 영어 학습이 완성됩니다.',
+                enDesc: 'Generate practice worksheets from their mistakes. Close the learning gap automatically.'
+              }
+            ].map((item) => (
+              <div key={item.step} className="flex flex-col items-center text-center group">
+                <div className={`w-32 h-32 md:w-48 md:h-48 rounded-[2rem] md:rounded-[3rem] flex items-center justify-center mb-6 md:mb-10 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ${isNight ? 'ring-white/10 bg-black/20' : 'ring-black/5 bg-zinc-50'} overflow-hidden group-hover:-translate-y-2 transition-transform duration-500`}>
+                  <img src={item.img} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
-                <h4
-                  className={`text-xl md:text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 md:mb-4`}
-                >
-                  {t(`how_step${step}`)}
+                <h4 className={`text-xl md:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight leading-tight mb-3`}>
+                  {language === 'ko' ? item.ko : item.en}
                 </h4>
-                <p
-                  className={`${isNight ? 'text-zinc-500' : 'text-zinc-400'} text-sm md:text-lg font-korean max-w-xs leading-relaxed`}
-                >
-                  {t(`how_step${step}_desc`)}
+                <p className={`${isNight ? 'text-zinc-400' : 'text-zinc-500'} text-sm md:text-base font-korean max-w-xs leading-relaxed`}>
+                  {language === 'ko' ? item.koDesc : item.enDesc}
                 </p>
               </div>
             ))}
