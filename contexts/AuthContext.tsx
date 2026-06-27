@@ -591,15 +591,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setShowLoginModal(false);
         } catch (popupErr: any) {
           if (
-            popupErr.code === 'auth/popup-blocked' ||
             popupErr.code === 'auth/argument-error' ||
             popupErr.code === 'auth/internal-error'
           ) {
-            console.log('Popup failed, falling back to redirect');
-            await signInWithRedirect(auth, provider);
-          } else {
-            throw popupErr;
+            throw new Error('Login interrupted. Please try again or use email login.');
           }
+          throw popupErr;
         }
       }
     } catch (err: any) {
@@ -675,10 +672,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       // On mobile, popups can be blocked or cause argument-errors.
-      // We use the standard popup but fallback to redirect
       try {
         const result = await signInWithPopup(auth, provider);
-
         if (result.user) {
           const existingProfile = await db.getUser(result.user.uid);
           if (!existingProfile) {
@@ -707,18 +702,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setShowLoginModal(false);
       } catch (popupErr: any) {
         if (
-          popupErr.code === 'auth/popup-blocked' ||
           popupErr.code === 'auth/argument-error' ||
           popupErr.code === 'auth/internal-error'
         ) {
-          console.log('Popup failed, falling back to redirect');
-          await signInWithRedirect(auth, provider);
-        } else {
-          throw popupErr;
+          throw new Error('Login interrupted. Please try again or use email login.');
         }
+        throw popupErr;
       }
     } catch (err: any) {
       console.error('Google Sign-In Technical Error:', err);
+      if (err.code === 'auth/argument-error' || err.code === 'auth/internal-error') {
+        throw new Error('Login interrupted. Please try again or use email login.');
+      }
       throw err;
     } finally {
       isSigningUpRef.current = false;

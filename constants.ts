@@ -19,8 +19,8 @@ export const ASSETS = {
   HERO_SLEEPY: `https://res.cloudinary.com/dginphpy4/image/upload/f_auto,q_auto/v1766246089/Sleepy-Chekki_xvg2n6.svg`,
 
   // PRIMARY LOADING ANIMATION (Local path recommended for smoothness)
-  VIDEO_ANALYZING: `https://res.cloudinary.com/dginphpy4/video/upload/v1/Chekki_Loading_Screen_x7fdky.mp4`,
-  VIDEO_SLEEPY: `https://res.cloudinary.com/dginphpy4/video/upload/v1/Sleepy_Chekki_Night_Float_fcqkyh.mp4`,
+  VIDEO_ANALYZING: `https://res.cloudinary.com/dginphpy4/video/upload/v1770019582/Chekki_Loading_Screen_x7fdky.mp4`,
+  VIDEO_SLEEPY: `https://res.cloudinary.com/dginphpy4/video/upload/v1765933993/Sleepy_Chekki_Night_Float_fcqkyh.mp4`,
 
   STAMP_SOUND: `https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3`,
 
