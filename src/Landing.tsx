@@ -19,7 +19,9 @@ import {
   TiktokLogo,
   GameController,
   ShareNetwork,
-  ChartBar
+  ChartBar,
+  MicrophoneStage,
+  CheckCircle
 } from "@phosphor-icons/react";
 
 export default function Landing() {
@@ -215,7 +217,7 @@ export default function Landing() {
             playsInline 
             className={`w-full h-full object-cover opacity-30 dark:opacity-20 ${theme === 'light' ? 'mix-blend-multiply' : 'mix-blend-screen'}`}
           >
-            <source src="https://res.cloudinary.com/dginphpy4/video/upload/v1765769964/chekki-intro_y7hj7c.mp4" type="video/mp4" />
+            <source src="/chekki-hero.mp4" type="video/mp4" />
           </video>
         </div>
 
@@ -346,7 +348,7 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Card 4: Interactive Quiz */}
+          {/* Card 4: Audio Practice Room */}
           <div 
             className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-500 cursor-pointer overflow-hidden relative"
             onClick={() => setFlippedCard(flippedCard === 4 ? null : 4)}
@@ -354,23 +356,16 @@ export default function Landing() {
             {/* Front Content */}
             <div className={`flex flex-col h-full transition-all duration-500 ${flippedCard === 4 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
               <div className="flex-1 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
-                {/* Animated quiz mock UI */}
-                <div className="w-full max-w-[220px] flex flex-col gap-2">
-                  <div className="bg-white/10 rounded-xl p-3">
-                    <p className="text-[10px] text-white/50 font-mono uppercase tracking-widest mb-1">{lang === 'en' ? 'Fix the sentence' : '문장을 고치세요'}</p>
-                    <p className="text-sm font-bold text-white">{lang === 'en' ? '"She is play soccer."' : '"She is play soccer."'}</p>
+                {/* Animated voice mock UI */}
+                <div className="w-full max-w-[220px] flex flex-col items-center gap-4">
+                  <div className="bg-white/10 rounded-xl p-4 text-center w-full">
+                    <p className="text-sm font-bold text-white mb-2">{lang === 'en' ? '"She plays soccer."' : '"She plays soccer."'}</p>
+                    <div className="flex items-center justify-center gap-1 h-6">
+                      {[1, 2, 3, 4, 3, 2, 1].map((bar, i) => (
+                        <div key={i} className="w-1.5 bg-emerald-400 rounded-full animate-pulse" style={{ height: `${bar * 20}%`, animationDelay: `${i * 0.1}s` }} />
+                      ))}
+                    </div>
                   </div>
-                  {[
-                    { label: lang === 'en' ? 'She plays soccer.' : 'She plays soccer.', correct: false },
-                    { label: lang === 'en' ? 'She is playing soccer.' : 'She is playing soccer.', correct: true },
-                    { label: lang === 'en' ? 'She are playing soccer.' : 'She are playing soccer.', correct: false },
-                  ].map((opt, i) => (
-                    <div key={i} className={`px-3 py-2 rounded-xl text-xs font-medium border-2 transition-colors ${
-                      opt.correct 
-                        ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
-                        : 'bg-white/5 border-white/10 text-white/60'
-                    }`}>{opt.label}</div>
-                  ))}
                 </div>
                 <div className="absolute bottom-4 right-4 bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-white" />
@@ -378,59 +373,57 @@ export default function Landing() {
               </div>
               <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between">
-                  {lang === 'en' ? 'Struggling to explain "why"?' : '"왜 틀렸는지" 설명하기 어려우신가요?'}
+                  {lang === 'en' ? 'Worried about pronunciation?' : '아이 발음이 걱정되시나요?'}
                 </h3>
               </div>
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-500 ${flippedCard === 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
-              <div className="w-12 h-12 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center mb-6">
-                <GameController weight="fill" className="text-2xl" />
+            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-500 ${flippedCard === 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-6">
+                <MicrophoneStage weight="fill" className="text-2xl" />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                {lang === 'en' ? 'Interactive Practice Quizzes' : '인터랙티브 복습 퀴즈'}
+                {lang === 'en' ? 'Interactive Audio Practice' : '스피킹 연습 룸'}
               </h3>
               <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed">
                 {lang === 'en' 
-                  ? "Turn every mistake into a game. Chekki auto-generates multiple-choice quizzes from your child's error bank — with Korean explanations for each answer, so you both understand why."
-                  : "틀린 문제를 게임으로 바꿔보세요. 체키는 오답 목록에서 자동으로 객관식 퀴즈를 생성하고, 각 정답마다 한국어 설명을 제공하여 아이와 함께 이해할 수 있습니다."}
+                  ? "From paper to pronunciation. Chekki turns grammar mistakes into interactive speaking exercises, using native AI to evaluate their speech in real-time."
+                  : "종이 위 오답을 말하기 연습으로. 체키는 문법 오답을 스피킹 연습으로 변환하고 AI가 아이의 발음을 실시간으로 듣고 평가합니다."}
               </p>
-              <div className="absolute top-6 right-6 text-orange-500">
+              <div className="absolute top-6 right-6 text-emerald-500">
                 <X weight="bold" className="text-xl" />
               </div>
             </div>
           </div>
 
-          {/* Card 5: Share with Tutor — Full Width */}
+          {/* Card 5: Pronunciation Check — Full Width */}
           <div 
             className="bento-card col-span-1 md:col-span-3 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-emerald-500/30 transition-colors duration-500 overflow-hidden relative min-h-[320px]"
           >
             {/* Left: Text */}
             <div className="flex-1 px-8 py-10 md:py-12 flex flex-col justify-center z-10 relative">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 w-fit">
-                <ShareNetwork size={12} weight="bold" />
-                {lang === 'en' ? 'Pro Feature' : 'Pro 기능'}
+                <MicrophoneStage size={12} weight="bold" />
+                {lang === 'en' ? 'No Typing. Just Speaking.' : '듣고 평가하는 AI'}
               </div>
               <h3 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight mb-5">
                 {lang === 'en' 
-                  ? <><span className="text-emerald-500">"Teacher,</span> here's exactly<br/>what they're struggling with."</>
-                  : <><span className="text-emerald-500">"선생님,</span><br/>아이가 어려워하는 부분이 바로 이겁니다."</>}
+                  ? <><span className="text-emerald-500">Speak it right,</span><br/>not just write it right.</>
+                  : <><span className="text-emerald-500">원어민 발음으로,</span><br/>자신 있게 말할 때까지.</>}
               </h3>
               <p className="text-slate-600 dark:text-white/60 text-base leading-relaxed max-w-lg mb-8">
                 {lang === 'en'
-                  ? "No more vague parent-teacher conversations. Share a precise, AI-generated progress report and quiz results directly with your child's tutor or classroom teacher — in one tap."
-                  : "막연한 학부모-교사 대화는 이제 그만. AI가 생성한 정확한 학습 리포트와 퀴즈 결과를 클릭 한 번으로 아이의 튜터나 선생님에게 바로 공유하세요."}
+                  ? "Traditional worksheets can't hear you. Chekki leverages advanced native device speech recognition to ensure your child isn't just fixing grammar, but mastering spoken English — privately and instantly."
+                  : "일반 문제집은 아이의 목소리를 듣지 못합니다. 체키는 네이티브 음성 인식 기술을 통해 아이가 문법뿐만 아니라 영어 말하기까지 완벽하게 마스터할 수 있도록 돕습니다."}
               </p>
               <div className="flex flex-wrap items-center gap-3">
-                <a href="/app" className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white font-bold rounded-full text-sm hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">
-                  <ShareNetwork size={16} weight="bold" />
-                  {lang === 'en' ? 'Try the Report Feature' : '리포트 기능 체험하기'}
+                <a href="/app" className="group relative overflow-hidden pl-8 pr-2 py-2 w-max bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-between gap-6 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-2xl shadow-emerald-500/20 outline-none">
+                  <span className="relative z-10">{lang === 'en' ? 'Try the Practice Room' : '오디오 연습실 체험하기'}</span>
+                  <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105 group-hover:translate-x-1 group-hover:-translate-y-[1px]">
+                    <MicrophoneStage weight="bold" />
+                  </div>
                 </a>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
-                  <ChartBar size={16} className="text-emerald-500" weight="bold" />
-                  <span className="text-xs font-bold text-slate-600 dark:text-white/70">{lang === 'en' ? 'Mistake trends over time' : '오답 트렌드 추적'}</span>
-                </div>
               </div>
             </div>
 
@@ -438,38 +431,21 @@ export default function Landing() {
             <div className="md:w-[45%] shrink-0 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8 min-h-[220px]">
               {/* Glow */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px]" />
-              {/* Mock report card */}
-              <div className="relative z-10 w-full max-w-[280px] bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">{lang === 'en' ? 'Progress Report' : '학습 리포트'}</p>
-                    <p className="text-sm font-bold text-white">{lang === 'en' ? 'Jun 2025 · Grammar' : '2025년 6월 · 문법'}</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                    <ShareNetwork size={16} className="text-emerald-400" />
-                  </div>
+              {/* Mock audio card */}
+              <div className="relative z-10 w-full max-w-[280px] bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 flex flex-col gap-6 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                  {lang === 'en' ? 'Read aloud' : '소리 내어 읽어보세요'}
+                </p>
+                <p className="text-xl font-bold text-white">She plays soccer.</p>
+                
+                <div className="w-20 h-20 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center relative">
+                  <div className="absolute inset-0 rounded-full border-2 border-emerald-400 animate-ping opacity-50" />
+                  <MicrophoneStage size={32} className="text-emerald-400" weight="fill" />
                 </div>
-                <div className="flex flex-col gap-2">
-                  {[
-                    { label: lang === 'en' ? 'Subject-verb agreement' : '주어-동사 일치', pct: 45, color: 'bg-red-500' },
-                    { label: lang === 'en' ? 'Pronouns' : '대명사', pct: 72, color: 'bg-orange-500' },
-                    { label: lang === 'en' ? 'Verb tenses' : '동사 시제', pct: 88, color: 'bg-emerald-500' },
-                  ].map((item, i) => (
-                    <div key={i}>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-[10px] text-white/60 font-medium">{item.label}</span>
-                        <span className="text-[10px] font-bold text-white/80">{item.pct}%</span>
-                      </div>
-                      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div className={`h-full ${item.color} rounded-full transition-all`} style={{ width: `${item.pct}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="pt-2 border-t border-white/5">
-                  <p className="text-[10px] text-white/40 font-medium">
-                    {lang === 'en' ? '3 quizzes completed · Shared with tutor ✓' : '퀴즈 3회 완료 · 튜터에게 공유 완료 ✓'}
-                  </p>
+                
+                <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-xl py-3 px-4 flex items-center justify-center gap-2">
+                  <CheckCircle size={20} className="text-emerald-400" weight="fill" />
+                  <span className="text-sm font-bold text-emerald-400">{lang === 'en' ? 'Perfect Match' : '완벽해요!'}</span>
                 </div>
               </div>
             </div>
