@@ -1,6 +1,14 @@
 # Optimized App Store Description
 
-Here is the polished and optimized App Store description. It includes emojis for better readability, highlights the new AI Tutor, and correctly explains that the Audio & Speaking Coach features are completely free!
+Here is the polished and optimized App Store description. It includes emojis for better readability, highlights the new features (like Ask Chekki and upgraded voice practice), and clearly outlines how user painpoints are solved.
+
+---
+
+## 🚀 WHAT'S NEW
+
+• **Ask Chekki Anywhere:** Got a tricky grammar question? You can now chat directly with our AI Tutor right from the Dashboard to get instant, preschooler-friendly explanations!
+• **Upgraded Speaking Coach:** We've made our pronunciation checks even more accurate. Plus, when your child gets it right, they'll be rewarded with a satisfying success chime and haptic feedback!
+• **Smarter Grading AI:** Scanning blank worksheets? Our AI is now smarter than ever and perfectly distinguishes between printed multiple-choice options and actual handwriting, eliminating grading errors.
 
 ---
 
@@ -12,6 +20,11 @@ ChekkiAI is the essential homework companion for parents and students in English
 
 Try Chekki PRO free for 7 days. No charge until your trial ends.
 
+**😩 PAINPOINTS AND HOW THEY ARE ADDRESSED**
+• **"My child cries when I correct their homework."** -> *Solved:* Chekki becomes the objective grader. No more emotional battles. You use the "Mom's Teaching Scripts" to become the helpful guide instead of the strict teacher.
+• **"I don't know how to explain English grammar to a 6-year-old."** -> *Solved:* Use the "Ask Chekki" AI Tutor! It gives you instant, preschooler-friendly analogies and simple breakdowns for any English question.
+• **"My child's pronunciation needs practice, but they get bored."** -> *Solved:* Our interactive Speaking Coach listens to them read sentences, demands high accuracy, and rewards them with a satisfying success chime and haptic buzz.
+
 **✨ WHAT YOU GET FOR FREE (Just Sign In!)**
 • **3 Magic Scans Daily:** Get instant answers overlaid on your child's worksheet.
 • **Native Audio (Free!):** Tap any answer to hear the perfect pronunciation.
@@ -20,17 +33,16 @@ Try Chekki PRO free for 7 days. No charge until your trial ends.
 
 **👑 WHAT YOU GET WITH CHEKKI PRO**
 • **Unlimited Magic Scans:** Grade as many worksheets as you need.
-• **🪄 NEW! Interactive AI Tutor:** Does your child need a simpler explanation? Tap the AI Tutor to instantly get alternative examples, simple analogies, and preschooler-friendly grammar breakdowns.
+• **🪄 Ask Chekki (AI Tutor):** Does your child need a simpler explanation? Chat with the AI Tutor to instantly get alternative examples and simple analogies.
 • **Mom's Teaching Scripts:** Step-by-step scripts that tell you exactly what to say to your child to help them learn without the tears.
 • **Deep Learning Guides:** Detailed Korean/English grammar breakdowns behind every answer.
 • **Cancel Anytime:** No commitment, no risk.
 
 **📱 HOW IT WORKS**
-
 1. Snap a photo of your child's English worksheet.
 2. Answers appear instantly on the screen in the exact right spots.
 3. Use the Teaching Script to explain kindly in English or Korean.
-4. Use the AI Tutor if they need a little extra help.
+4. Use "Ask Chekki" if they need a little extra help.
 5. Watch your child's confidence grow!
 
 **🛡️ SAFE FOR YOUR FAMILY**
@@ -51,31 +63,42 @@ Empower your child's learning journey with ChekkiAI today.
 
 ## 🇰🇷 한국어 (Korean) Description
 
+**🚀 업데이트 소식 (What's New)**
+• **어디서든 채키에게 물어보세요:** 헷갈리는 문법이 있나요? 이제 대시보드에서 바로 AI 튜터와 채팅하며 유치원생 눈높이에 맞춘 설명을 즉시 받아볼 수 있습니다!
+• **업그레이드된 스피킹 코치:** 발음 검사 기능이 더욱 정교해졌습니다. 정답을 완벽하게 읽으면 기분 좋은 성공 알림음과 진동(햅틱) 피드백으로 아이의 성취감을 높여줍니다!
+• **더 똑똑해진 AI 채점:** 빈 워크시트를 스캔해도 문제없습니다. 이제 AI가 인쇄된 보기와 아이의 실제 손글씨를 완벽하게 구분하여 채점 오류를 없앴습니다.
+
+---
+
 숙제 전쟁은 끝났습니다. 오늘 바로 채키AI를 무료로 시작하세요!
 
 채키AI는 영어유치원(영유) 및 어학원에 다니는 아이와 부모님을 위한 필수 영어 숙제 도우미입니다. 워크시트(학습지) 사진을 찍으면 즉시 종이 위에 가상의 정답지가 마법처럼 나타납니다. 한국어와 영어 편안한 언어로 작성된 다정한 '티칭 스크립트'를 통해 모든 문제를 자신 있게 설명해 주세요.
 
 채키 PRO를 7일간 무료로 체험해보세요. 체험 기간 종료 전까지는 비용이 청구되지 않습니다.
 
+**😩 학부모님의 고민과 채키의 해결책**
+• **"숙제 채점만 하면 아이가 울고 화를 내요."** -> *해결:* 채점은 객관적인 AI 채키에게 맡기세요. 부모님은 '엄마의 티칭 스크립트'를 읽으며 지적하는 선생님이 아닌 다정한 가이드가 될 수 있습니다.
+• **"6살 아이에게 영어 문법을 어떻게 설명해야 할지 막막해요."** -> *해결:* '채키에게 물어보기(AI 튜터)'를 활용하세요! 아이들 눈높이에 딱 맞는 쉬운 비유와 설명을 즉시 만들어줍니다.
+• **"아이가 영어 말하기 연습을 지루해해요."** -> *해결:* 인터랙티브 스피킹 코치 기능을 켜주세요. 완벽하게 문장을 읽어냈을 때 울리는 경쾌한 성공 효과음과 진동 피드백이 아이에게 큰 성취감을 줍니다.
+
 **✨ 무료 회원 특별 혜택 (가입만 하면 무료!)**
 • **매일 3회 매직 스캔:** 워크시트 위에 정답이 즉시 오버레이 됩니다.
 • **원어민 발음 듣기 (무료!):** 정답을 탭하면 정확한 원어민 발음을 들을 수 있습니다.
-• **스피킹 코치 (무료!):** 마이크에 대고 정답을 따라 말하며 칭찬 도장을 받아보세요!
+• **스피킹 코치 (무료!):** 마이크에 대고 정답을 따라 말하며 칭찬 효과음과 도장을 받아보세요!
 • **오답 노트:** 헷갈리는 문제는 북마크하여 나중에 복습할 수 있습니다.
 
 **👑 프리미엄 혜택 (채키 PRO)**
 • **무제한 매직 스캔:** 모든 워크시트를 즉시 채점하세요.
-• **🪄 NEW! 우리 아이 맞춤 AI 튜터:** 아이가 이해하기 어려워하나요? AI 튜터 버튼을 눌러 아이 눈높이에 딱 맞는 쉬운 비유나 추가 예시, 문법 설명을 즉시 받아보세요.
+• **🪄 채키에게 물어보기 (AI 튜터):** 아이가 이해하기 어려워하나요? AI 튜터와 채팅하며 아이 눈높이에 딱 맞는 쉬운 비유나 추가 예시, 문법 설명을 즉시 받아보세요.
 • **엄마의 티칭 스크립트:** 아이에게 어떻게 가르쳐야 할지 고민하지 마세요. 엄마가 텍스트 그대로 읽어주기만 하면 되는 다정한 대본을 제공합니다.
 • **이중 언어 학습 가이드:** 왜 이 단어가 정답인지 상세한 한/영 해설을 제공합니다.
 • **언제든지 해지 가능:** 약정이나 위약금이 전혀 없습니다.
 
 **📱 사용 방법**
-
 1. 자녀의 워크시트(숙제) 페이지를 찰칵 찍어주세요.
 2. 마법처럼 화면 속 문제 위치에 정확히 정답이 표시됩니다.
 3. 티칭 스크립트를 보며 친절하게 설명해주세요.
-4. 추가 설명이 필요하면 AI 튜터에게 도움을 요청하세요.
+4. 추가 설명이 필요하면 '채키에게 물어보기' 기능을 활용하세요.
 5. 웃으며 영어를 배우는 아이의 모습을 지켜보세요!
 
 **🛡️ 온 가족이 안심할 수 있는 보안**
