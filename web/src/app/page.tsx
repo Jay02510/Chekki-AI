@@ -16,6 +16,7 @@ import {
   FilePdf,
   UserCircle,
   InstagramLogo,
+  TiktokLogo,
   DownloadSimple
 } from "@phosphor-icons/react";
 
@@ -106,6 +107,9 @@ export default function Home() {
             <a href="https://www.instagram.com/chekki__ai" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] rounded-sm">
               <InstagramLogo size={20} weight="fill" />
             </a>
+            <a href="https://www.tiktok.com/@chekkiai" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] rounded-sm">
+              <TiktokLogo size={20} weight="fill" />
+            </a>
             <a href="https://chekki-ai.vercel.app/app" target="_blank" rel="noopener noreferrer" className="group relative overflow-hidden items-center gap-3 px-4 py-1.5 bg-brand text-white font-semibold rounded-full text-xs uppercase tracking-wider transition-transform duration-700 ease-[var(--ease-premium)] active:scale-[0.96] flex outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]">
               <span>Open App</span>
             </a>
@@ -128,9 +132,14 @@ export default function Home() {
             <a href="https://chekki-ai.vercel.app/app" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">Web App</a>
             <a href="#educators" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">For Educators</a>
             <a href="https://urlgeni.us/chekki" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">Download App</a>
-            <a href="https://www.instagram.com/chekki__ai" target="_blank" rel="noopener noreferrer" className="mt-8 text-brand outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full">
-              <InstagramLogo size={40} weight="fill" />
-            </a>
+            <div className="mt-8 flex gap-4 items-center">
+              <a href="https://www.instagram.com/chekki__ai" target="_blank" rel="noopener noreferrer" className="text-brand outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full">
+                <InstagramLogo size={40} weight="fill" />
+              </a>
+              <a href="https://www.tiktok.com/@chekkiai" target="_blank" rel="noopener noreferrer" className="text-brand outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full">
+                <TiktokLogo size={40} weight="fill" />
+              </a>
+            </div>
           </nav>
         </div>
       )}
@@ -369,9 +378,14 @@ export default function Home() {
             <a href="/privacy" className="hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white rounded-sm">Privacy Policy</a>
             <a href="/terms" className="hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white rounded-sm">Terms of Service</a>
           </div>
-          <a href="https://www.instagram.com/chekki__ai" target="_blank" rel="noopener noreferrer" className="w-16 h-16 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500 ease-[var(--ease-premium)] outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#020617]">
-            <InstagramLogo size={32} weight="fill" />
-          </a>
+          <div className="flex items-center gap-4">
+            <a href="https://www.instagram.com/chekki__ai" target="_blank" rel="noopener noreferrer" className="w-16 h-16 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500 ease-[var(--ease-premium)] outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#020617]">
+              <InstagramLogo size={32} weight="fill" />
+            </a>
+            <a href="https://www.tiktok.com/@chekkiai" target="_blank" rel="noopener noreferrer" className="w-16 h-16 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500 ease-[var(--ease-premium)] outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#020617]">
+              <TiktokLogo size={32} weight="fill" />
+            </a>
+          </div>
           <p className="text-white/60 font-medium">
             © {new Date().getFullYear()} Chekki. Designed for parents & educators.
           </p>
