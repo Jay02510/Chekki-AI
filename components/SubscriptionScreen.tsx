@@ -214,7 +214,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
     { icon: '📝', key: 'bene_tutor' },
     { icon: '📖', key: 'bene_scripts' },
     { icon: '✨', key: 'bene_overlays' },
-    { icon: '🔊', key: 'bene_pronounce' },
+    { icon: '🎤', key: 'bene_pronounce' },
     { icon: '🛡️', key: 'bene_anytime' },
   ];
 

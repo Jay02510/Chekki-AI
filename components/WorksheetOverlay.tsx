@@ -41,7 +41,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('fit');
-  const [displayFormat, setDisplayFormat] = useState<'overlay' | 'list'>('overlay');
+
   const [showSettings, setShowSettings] = useState(false);
   const [showFullscreenSettings, setShowFullscreenSettings] = useState(false);
   const [showBlankAnswers, setShowBlankAnswers] = useState(false);
@@ -190,55 +190,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
   const renderOverlayContent = (inFullscreen: boolean) => {
     const isBlankKeyMode = hasHandwriting === false;
 
-    if (displayFormat === 'list') {
-      return (
-        <div className={`w-full min-h-[400px] h-full overflow-y-auto px-4 md:px-8 py-8 ${isNight ? 'bg-zinc-900' : 'bg-zinc-50'}`}>
-          <div className="max-w-2xl mx-auto space-y-4 pt-16 pb-32">
-            <div className="flex flex-col gap-2 mb-8">
-              <h3 className={`text-2xl font-bold tracking-tight ${isNight ? 'text-white' : 'text-slate-900'}`}>
-                {language === 'ko' ? '정답 목록 보기' : 'Answer List'}
-              </h3>
-              <p className={`text-sm ${isNight ? 'text-zinc-400' : 'text-slate-500'}`}>
-                {language === 'ko' ? '글씨가 잘 안 보일 때 유용한 리스트 뷰입니다.' : 'Use this list view if the handwriting or image is too messy.'}
-              </p>
-            </div>
-            {items.map((item, idx) => (
-              <div 
-                key={item.id}
-                onClick={() => onSelect && onSelect(item.id)}
-                className={`w-full p-5 rounded-3xl flex flex-col gap-2 cursor-pointer transition-all border ${
-                  isNight 
-                    ? 'bg-zinc-800/80 border-white/5 hover:bg-zinc-800' 
-                    : 'bg-white border-zinc-200 hover:shadow-md'
-                } ${focusedId === item.id ? 'ring-2 ring-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.15)] scale-[1.02]' : ''}`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full ${isNight ? 'bg-white/10 text-white' : 'bg-black/5 text-slate-700'}`}>
-                    Q{item.id}
-                  </span>
-                  {item.is_correct !== undefined && !isBlankKeyMode && (
-                    <span className="text-xl">{item.is_correct ? '✅' : '❌'}</span>
-                  )}
-                </div>
-                {item.question_text && (
-                  <p className={`text-base font-medium mt-2 ${isNight ? 'text-zinc-300' : 'text-slate-700'}`}>
-                    {item.question_text}
-                  </p>
-                )}
-                <div className={`text-xl md:text-2xl font-hand font-bold mt-3 bg-white/5 rounded-2xl p-4 border border-white/5 ${
-                  isBlankKeyMode ? 'text-blue-500' : 
-                  item.is_correct === true ? 'text-emerald-500' :
-                  item.is_correct === false ? 'text-red-500' :
-                  'text-orange-500'
-                }`}>
-                  {item.correct_answer}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
+
 
     return (
       <div
@@ -318,25 +270,19 @@ export const WorksheetOverlay: React.FC<Props> = ({
                               : item.is_correct === false ? 'ring-4 ring-red-500/70 scale-[1.04] shadow-[0_0_30px_rgba(239,68,68,0.4)]'
                               : 'ring-4 ring-orange-500/70 scale-[1.04] shadow-[0_0_30px_rgba(249,115,22,0.4)]')
                           : ''}
-                        ${(item.is_correct === true && !isBlankKeyMode) ? 'p-1 md:p-1.5' : 'px-2.5 py-1.5 md:px-4 md:py-3'}
+                        px-2.5 py-1.5 md:px-4 md:py-3
                     `}
                   >
-                    {item.is_correct === true && !isBlankKeyMode ? (
-                       <div className="w-8 h-8 md:w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
-                         <span className="text-sm md:text-xl text-white drop-shadow-md">✅</span>
-                       </div>
-                    ) : (
-                      <>
-                        <div className="w-5 h-5 md:w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
-                          <span className="font-black text-[9px] md:text-sm text-white">{item.id}</span>
-                        </div>
-                        <span
-                          className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md text-sm md:text-xl rotate-[-1.5deg] inline-block`}
-                        >
-                          {displayValue}
-                        </span>
-                      </>
-                    )}
+                    <>
+                      <div className="w-5 h-5 md:w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
+                        <span className="font-black text-[9px] md:text-sm text-white">{item.id}</span>
+                      </div>
+                      <span
+                        className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md text-sm md:text-xl rotate-[-1.5deg] inline-block`}
+                      >
+                        {displayValue}
+                      </span>
+                    </>
                   </div>
                 </div>
               );
@@ -411,30 +357,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
           </div>
 
           <div className="flex items-center gap-3 pointer-events-auto shrink-0">
-            <div className={`flex items-center p-1 rounded-full backdrop-blur-xl border-2 ${isNight ? 'bg-black/60 border-white/10' : 'bg-white/80 border-zinc-200'}`}>
-              <button
-                onClick={() => setDisplayFormat('overlay')}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  displayFormat === 'overlay' 
-                    ? 'bg-orange-500 text-white shadow-lg scale-100' 
-                    : `text-zinc-400 hover:text-zinc-600 scale-95`
-                }`}
-                title="AR Overlay"
-              >
-                <Scan size={24} weight={displayFormat === 'overlay' ? 'bold' : 'regular'} />
-              </button>
-              <button
-                onClick={() => setDisplayFormat('list')}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  displayFormat === 'list' 
-                    ? 'bg-orange-500 text-white shadow-lg scale-100' 
-                    : `text-zinc-400 hover:text-zinc-600 scale-95`
-                }`}
-                title="List View"
-              >
-                <ListDashes size={24} weight={displayFormat === 'list' ? 'bold' : 'regular'} />
-              </button>
-            </div>
+
             <button
               onClick={() => setIsFullscreen(true)}
               className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/30 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center hover:bg-orange-500 hover:border-orange-400 hover:text-white opacity-70 md:opacity-40 md:hover:opacity-100 hover:scale-110 active:scale-90 transition-all duration-200 shadow-2xl group shrink-0`}

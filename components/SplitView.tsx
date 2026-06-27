@@ -619,7 +619,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
       >
         {/* Left side: Image (Scrolls with page on mobile, fixed height on desktop) */}
         <div
-          className={`relative w-full lg:w-1/2 lg:h-[80vh] border-r ${isNight ? 'border-white/5 bg-zinc-950' : 'border-zinc-200 bg-white'} lg:overflow-hidden shrink-0`}
+          className={`relative w-full lg:w-1/2 lg:sticky lg:top-0 lg:h-screen border-r ${isNight ? 'border-white/5 bg-zinc-950' : 'border-zinc-200 bg-white'} lg:overflow-hidden shrink-0`}
         >
           <WorksheetOverlay
             imageUrl={imageUrl}
@@ -827,18 +827,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <button
-                    onClick={() => {
-                      if (!isAuthenticated) openLoginModal();
-                      else if (user?.plan !== 'pro') setShowPaywall(true, 'practice_sheet');
-                      else setShowCloneModal(true);
-                    }}
-                    disabled={isLoadingItems}
-                    className="w-full h-16 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-black text-lg shadow-[0_20px_50px_rgba(249,115,22,0.3)] flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
-                  >
-                    <span className="text-2xl">🪄</span>
-                    {isLoadingItems ? t('growing_text') : t('ws_gen_practice')}
-                  </button>
 
                   <div className="grid grid-cols-2 gap-3">
                     <button

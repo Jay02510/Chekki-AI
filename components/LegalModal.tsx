@@ -202,6 +202,8 @@ export const LegalModal: React.FC<Props> = ({
                       <br />
                       업로드된 원본 학습지 이미지와 추출된 텍스트 및 오답 데이터는 개인 맞춤형 복습
                       워크시트 생성 및 학습 진행도 추적을 위해 안전하게 서버에 저장됩니다.
+                      <br />
+                      <strong>오디오 연습실 기능 사용 시 수집되는 음성 데이터는 기기 내부(Apple/Google 네이티브 음성 인식)에서만 처리되며 당사 서버로 전송되거나 저장되지 않습니다.</strong>
                     </p>
 
                     <p>
@@ -245,6 +247,8 @@ export const LegalModal: React.FC<Props> = ({
                       Uploaded original worksheet images, along with extracted text and mistake data,
                       are stored securely on our servers to generate customized PDF practice worksheets
                       and track learning progress.
+                      <br />
+                      <strong>Voice data processed during the Audio Practice Room feature is evaluated locally on your device (via Apple/Google native speech recognition) and is NOT transmitted to or stored on our servers.</strong>
                     </p>
 
                     <p>

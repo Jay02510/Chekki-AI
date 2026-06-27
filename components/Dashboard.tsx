@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, FilePdf, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy } from '@phosphor-icons/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { generateAndSharePDF } from '../services/pdfService';
 import { WorksheetItem } from '../types';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
+import { Capacitor } from '@capacitor/core';
 
 interface DashboardProps {
   onClose: () => void;
@@ -58,42 +59,97 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     return s.toLowerCase().replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ").trim();
   };
 
+  // Web Speech Fallback Ref
+  const webSpeechRef = useRef<any>(null);
+
   const handleMicPress = async () => {
     if (isListening) {
-      await SpeechRecognition.stop().catch(() => {});
+      if (Capacitor.isNativePlatform()) {
+        await SpeechRecognition.stop().catch(() => {});
+      } else if (webSpeechRef.current) {
+        webSpeechRef.current.stop();
+      }
       setIsListening(false);
       return;
     }
 
     try {
-      const perm = await SpeechRecognition.requestPermissions();
-      if (perm.speechRecognition !== 'granted') {
-        alert(language === 'ko' ? '마이크 권한이 필요합니다.' : 'Microphone permission is required.');
-        return;
-      }
-
-      setIsListening(true);
-      setSpokenText("");
-      setPracticeStatus('idle');
-
-      await SpeechRecognition.removeAllListeners();
-      
-      SpeechRecognition.addListener('partialResults', (data) => {
-        if (data.matches && data.matches.length > 0) {
-          setSpokenText(data.matches[0]);
+      if (Capacitor.isNativePlatform()) {
+        const perm = await SpeechRecognition.requestPermissions();
+        if (perm.speechRecognition !== 'granted') {
+          alert(language === 'ko' ? '마이크 권한이 필요합니다.' : 'Microphone permission is required.');
+          return;
         }
-      });
 
-      const result = await SpeechRecognition.start({
-        language: "en-US",
-        partialResults: true,
-        maxResults: 1
-      });
+        setIsListening(true);
+        setSpokenText("");
+        setPracticeStatus('idle');
 
-      setIsListening(false);
-      const finalTranscript = result.matches && result.matches.length > 0 ? result.matches[0] : spokenText;
-      setSpokenText(finalTranscript);
-      checkPronunciation(finalTranscript);
+        await SpeechRecognition.removeAllListeners();
+        
+        SpeechRecognition.addListener('partialResults', (data) => {
+          if (data.matches && data.matches.length > 0) {
+            setSpokenText(data.matches[0]);
+          }
+        });
+
+        const result = await SpeechRecognition.start({
+          language: "en-US",
+          partialResults: true,
+          maxResults: 1
+        });
+
+        setIsListening(false);
+        const finalTranscript = result.matches && result.matches.length > 0 ? result.matches[0] : spokenText;
+        setSpokenText(finalTranscript);
+        checkPronunciation(finalTranscript);
+      } else {
+        // Web Fallback
+        const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SpeechRec) {
+          alert("Speech recognition is not supported in this browser. Please use Chrome.");
+          return;
+        }
+
+        setIsListening(true);
+        setSpokenText("");
+        setPracticeStatus('idle');
+
+        const recognition = new SpeechRec();
+        webSpeechRef.current = recognition;
+        recognition.lang = 'en-US';
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = (event: any) => {
+          let interimTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              const finalTrans = event.results[i][0].transcript;
+              setSpokenText(finalTrans);
+              checkPronunciation(finalTrans);
+              setIsListening(false);
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+              setSpokenText(interimTranscript);
+            }
+          }
+        };
+
+        recognition.onerror = (event: any) => {
+          console.error(event.error);
+          setIsListening(false);
+          if (event.error !== 'aborted') {
+            alert(language === 'ko' ? '음성 인식에 실패했습니다. 다시 시도해주세요.' : 'Speech recognition failed. Try again.');
+          }
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognition.start();
+      }
 
     } catch (e: any) {
       console.error(e);
@@ -283,7 +339,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             </div>
           </div>
 
-          <div className={`md:col-span-4 md:row-span-1 ${cardShellClasses} min-h-[250px]`}>
+          <div className={`md:col-span-4 md:row-span-2 ${cardShellClasses} min-h-[250px]`}>
             <div className={`${cardCoreClasses}`}>
               <div className="absolute top-0 left-0 w-48 h-48 bg-blue-500/10 blur-[80px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
               
@@ -308,48 +364,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     <CaretRight size={14} weight="bold" />
                   </button>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={`md:col-span-4 md:row-span-1 ${cardShellClasses} min-h-[250px]`}>
-            <div className={`${cardCoreClasses}`}>
-              <div className="absolute bottom-0 right-0 w-48 h-48 bg-emerald-500/10 blur-[80px] rounded-full translate-x-1/4 translate-y-1/4 pointer-events-none" />
-              
-              <div className="flex items-center justify-between mb-6 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                    <ListDashes size={20} weight="bold" />
-                  </div>
-                  <h2 className="text-balance text-lg font-bold tracking-tight font-korean">
-                    {language === 'ko' ? '추천 워크시트' : 'Worksheet Examples'}
-                  </h2>
-                </div>
-                <button 
-                  onClick={handleRefreshExamples}
-                  className="text-zinc-500 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 active:scale-[0.98]"
-                  aria-label="Refresh Examples"
-                >
-                  <ArrowsClockwise size={18} weight="bold" />
-                </button>
-              </div>
-              
-              <div className="flex-1 flex flex-col justify-center gap-3 relative z-10">
-                {examples.map((example, i) => (
-                  <button 
-                    key={i}
-                    onClick={() => handleGeneratePdf(example)}
-                    disabled={isGeneratingPdf}
-                    className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 transition-colors rounded-xl px-4 py-3 flex items-center justify-between group btn-press disabled:opacity-50"
-                  >
-                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white">{example}</span>
-                    {isGeneratingPdf ? (
-                      <Spinner size={14} weight="bold" className="animate-spin text-emerald-400" />
-                    ) : (
-                      <CaretRight size={14} weight="bold" className="text-zinc-600 group-hover:text-emerald-400 transition-colors" />
-                    )}
-                  </button>
-                ))}
               </div>
             </div>
           </div>
