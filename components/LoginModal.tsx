@@ -446,19 +446,17 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 Continue with Google
               </button>
 
-              {Capacitor.isNativePlatform() && (
-                <button
-                  type="button"
-                  onClick={handleKakaoSignIn}
-                  disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#191919] font-bold py-3.5 rounded-2xl shadow-lg shadow-yellow-500/10 hover:bg-[#FADA0A] transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 text-xs"
-                >
-                  <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 3c-4.97 0-9 3.185-9 7.11 0 2.507 1.642 4.718 4.11 5.922l-.83 3.037c-.075.28.188.528.454.356l3.585-2.378c.552.077 1.114.118 1.681.118 4.97 0 9-3.185 9-7.11S16.97 3 12 3z" />
-                  </svg>
-                  Continue with Kakao
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleKakaoSignIn}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#191919] font-bold py-3.5 rounded-2xl shadow-lg shadow-yellow-500/10 hover:bg-[#FADA0A] transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 text-xs"
+              >
+                <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 3c-4.97 0-9 3.185-9 7.11 0 2.507 1.642 4.718 4.11 5.922l-.83 3.037c-.075.28.188.528.454.356l3.585-2.378c.552.077 1.114.118 1.681.118 4.97 0 9-3.185 9-7.11S16.97 3 12 3z" />
+                </svg>
+                Continue with Kakao
+              </button>
             </div>
 
             <div className="mt-8 flex flex-col items-center gap-4">

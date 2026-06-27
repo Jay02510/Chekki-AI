@@ -13,6 +13,8 @@ import {
   OAuthProvider,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithCredential,
   signInWithCustomToken,
   type User,
@@ -243,6 +245,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    // Check for redirect result from Google/Apple Web Auth
+    const checkRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          const existingProfile = await db.getUser(result.user.uid);
+          if (!existingProfile) {
+            const newProfile: UserProfile = {
+              name: result.user.displayName || 'User',
+              email: result.user.email || '',
+              plan: 'free',
+              scansUsedToday: 0,
+              lastScanDate: new Date().toISOString().split('T')[0],
+              maxScansPerDay: FREE_DAILY_LIMIT,
+              questionsUsedToday: 0,
+              maxQuestionsPerDay: 5,
+              lastQuestionDate: new Date().toISOString().split('T')[0],
+              schoolId: null,
+              schoolName: null,
+              subscriptionStartedAt: null,
+              nextBillingDate: null,
+            };
+            await db.createUser(result.user.uid, newProfile);
+            await fetchAndSetUserProfile(result.user, newProfile);
+          } else {
+            await fetchAndSetUserProfile(result.user, existingProfile);
+          }
+        }
+      } catch (err) {
+        console.error('[AuthContext] Redirect login error:', err);
+      }
+    };
+    
+    checkRedirectResult();
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
@@ -596,40 +633,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       // On mobile, popups can be blocked or cause argument-errors.
-      // We use the standard popup but with extra error handling.
-      const result = await signInWithPopup(auth, provider);
+      // We use the standard popup but fallback to redirect
+      try {
+        const result = await signInWithPopup(auth, provider);
 
-      if (result.user) {
-        const existingProfile = await db.getUser(result.user.uid);
-        if (!existingProfile) {
-          const newProfile: UserProfile = {
-            name: result.user.displayName || 'User',
-            email: result.user.email || '',
-            plan: 'free',
-            scansUsedToday: 0,
-            lastScanDate: new Date().toISOString().split('T')[0],
-            maxScansPerDay: FREE_DAILY_LIMIT,
-            questionsUsedToday: 0,
-            maxQuestionsPerDay: 5,
-            lastQuestionDate: new Date().toISOString().split('T')[0],
-            schoolId: null,
-            schoolName: null,
-            subscriptionStartedAt: null,
-            nextBillingDate: null,
-          };
-          await db.createUser(result.user.uid, newProfile);
-          await fetchAndSetUserProfile(result.user, newProfile);
+        if (result.user) {
+          const existingProfile = await db.getUser(result.user.uid);
+          if (!existingProfile) {
+            const newProfile: UserProfile = {
+              name: result.user.displayName || 'User',
+              email: result.user.email || '',
+              plan: 'free',
+              scansUsedToday: 0,
+              lastScanDate: new Date().toISOString().split('T')[0],
+              maxScansPerDay: FREE_DAILY_LIMIT,
+              questionsUsedToday: 0,
+              maxQuestionsPerDay: 5,
+              lastQuestionDate: new Date().toISOString().split('T')[0],
+              schoolId: null,
+              schoolName: null,
+              subscriptionStartedAt: null,
+              nextBillingDate: null,
+            };
+            await db.createUser(result.user.uid, newProfile);
+            await fetchAndSetUserProfile(result.user, newProfile);
+          } else {
+            await fetchAndSetUserProfile(result.user, existingProfile);
+          }
+        }
+        setShowLoginModal(false);
+      } catch (popupErr: any) {
+        if (
+          popupErr.code === 'auth/popup-blocked' ||
+          popupErr.code === 'auth/popup-closed-by-user' ||
+          popupErr.code === 'auth/argument-error' ||
+          popupErr.code === 'auth/internal-error'
+        ) {
+          console.log('Popup failed, falling back to redirect');
+          await signInWithRedirect(auth, provider);
         } else {
-          await fetchAndSetUserProfile(result.user, existingProfile);
+          throw popupErr;
         }
       }
-      setShowLoginModal(false);
     } catch (err: any) {
       console.error('Google Sign-In Technical Error:', err);
-      // If it's the specific mobile popup error, give a clear instruction
-      if (err.code === 'auth/argument-error' || err.code === 'auth/internal-error') {
-        throw new Error('Login interrupted. Please try again or use email login.');
-      }
       throw err;
     } finally {
       isSigningUpRef.current = false;
@@ -639,14 +686,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithKakao = async () => {
     try {
       isSigningUpRef.current = true;
+      let accessToken = '';
 
-      if (!Capacitor.isNativePlatform()) {
-        throw new Error('Kakao login is only supported on Android and iOS devices.');
-      }
-
-      const kakaoUser = await KakaoLogin.login();
-      if (!kakaoUser.accessToken) {
-        throw new Error('Failed to retrieve access token from Kakao login.');
+      if (Capacitor.isNativePlatform()) {
+        const kakaoUser = await KakaoLogin.login();
+        if (!kakaoUser.accessToken) {
+          throw new Error('Failed to retrieve access token from Kakao login.');
+        }
+        accessToken = kakaoUser.accessToken;
+      } else {
+        // Web flow using Kakao JS SDK
+        if (!(window as any).Kakao) {
+          throw new Error('Kakao SDK not loaded');
+        }
+        const Kakao = (window as any).Kakao;
+        
+        accessToken = await new Promise<string>((resolve, reject) => {
+          Kakao.Auth.login({
+            success: (authObj: any) => {
+              resolve(authObj.access_token);
+            },
+            fail: (err: any) => {
+              reject(new Error(JSON.stringify(err)));
+            },
+          });
+        });
       }
 
       // Exchange Kakao Access Token for Firebase Custom Token
@@ -655,7 +719,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ accessToken: kakaoUser.accessToken }),
+        body: JSON.stringify({ accessToken }),
       });
 
       if (!response.ok) {

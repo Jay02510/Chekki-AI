@@ -20,6 +20,13 @@
 </head>
 <body class="antialiased selection:bg-brand selection:text-white overscroll-none">
   <div id="root"></div>
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.5.0/kakao.min.js" integrity="sha384-kYPsUbBPlktXsYcc/0B4y1OvvSwaS1bTjB7x8P21k22SwaA1/eD/mX2aE+9rTtvC" crossorigin="anonymous"></script>
+  <script>
+    // Initialize Kakao SDK with the app key
+    if (window.Kakao && !window.Kakao.isInitialized()) {
+      window.Kakao.init('f06bc75426bf2b41940620d3ee942f06');
+    }
+  </script>
   <script type="module" src="/src/landing-entry.tsx"></script>
 </body>
 </html>
