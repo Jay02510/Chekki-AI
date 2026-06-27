@@ -110,6 +110,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               >
                 {tab.icon}
               </span>
+
+              <span className="absolute -top-10 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 bg-zinc-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-md whitespace-nowrap shadow-xl pointer-events-none origin-bottom">
+                {language === 'ko' ? tab.korean : tab.label}
+              </span>
               
               {isActive && (
                 <motion.span 

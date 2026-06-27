@@ -70,10 +70,9 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
             role="button"
             aria-label="Return to home"
             tabIndex={0}
-            className="flex items-center cursor-pointer group h-full flex-shrink-0 min-w-0"
+            className="flex items-center cursor-pointer group relative h-full flex-shrink-0 min-w-0"
             onClick={onReset}
             onKeyDown={(e) => e.key === 'Enter' && onReset()}
-            title={t('tt_home')}
           >
             {!logoError ? (
               <div className="relative w-8 h-8 md:w-10 md:h-10 flex-shrink-0">
@@ -105,6 +104,10 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                 </span>
               </h1>
             </div>
+
+            <span className="absolute top-[110%] left-0 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 bg-zinc-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-md whitespace-nowrap shadow-xl pointer-events-none origin-top-left z-50">
+              {t('tt_home')}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5 md:gap-4 h-full flex-shrink-0">
@@ -160,9 +163,8 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                   aria-label="Open account menu"
                   aria-haspopup="true"
                   aria-expanded={showUserMenu}
-                  className="h-8 w-8 md:h-10 md:w-10 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer btn-press group-hover:scale-[1.02] uppercase select-none text-xs md:text-sm"
+                  className="relative h-8 w-8 md:h-10 md:w-10 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer btn-press group-hover:scale-[1.02] uppercase select-none text-xs md:text-sm group"
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  title={user.name}
                 >
                   {user.plan === 'pro' ? (
                     <svg
@@ -204,6 +206,10 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                   ) : (
                     user.name.charAt(0)
                   )}
+
+                  <span className="absolute top-[115%] right-0 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 bg-zinc-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-md whitespace-nowrap shadow-xl pointer-events-none origin-top-right z-50">
+                    {user.name}
+                  </span>
                 </button>
 
                 {showUserMenu && (

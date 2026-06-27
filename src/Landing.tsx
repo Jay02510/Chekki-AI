@@ -143,7 +143,7 @@ export default function Landing() {
             made <span className="text-brand">transparent.</span>
           </h1>
           <p className="hero-text mt-8 text-lg md:text-xl text-white/60 leading-relaxed max-w-xl">
-            Empower your child's education. Chekki helps Korean parents stay connected to their child's daily assignments without the stress.
+            Empower your child&apos;s education. Chekki helps Korean parents stay connected to their child&apos;s daily assignments without the stress.
           </p>
           <div className="hero-text mt-12 flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
             {/* Primary Magnetic CTA */}

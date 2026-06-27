@@ -73,7 +73,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
         ))}
       </div>
 
-      <div className="relative w-72 h-72 md:w-[480px] md:h-[480px] mb-12 shrink-0 group">
+      <div className="relative w-64 h-64 md:w-80 md:h-80 mb-12 shrink-0 group">
         <div
           className={`absolute -inset-8 ${isNight ? 'bg-indigo-500/10' : 'bg-orange-500/20'} rounded-full blur-[100px] animate-pulse group-hover:opacity-100 transition-opacity`}
         ></div>
@@ -116,10 +116,10 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center z-20 max-w-lg w-full">
-        <div className="h-20 flex items-center justify-center mb-6">
+      <div className="flex flex-col items-center justify-center z-20 max-w-lg w-full px-4">
+        <div className="h-24 flex items-center justify-center mb-6">
           <h2
-            className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-korean animate-fade-in-up tracking-tight drop-shadow-md`}
+            className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-korean animate-fade-in-up tracking-tight drop-shadow-md break-keep text-balance`}
             key={textIndex}
           >
             {loadingTexts[textIndex]}
