@@ -160,6 +160,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     }
   };
 
+  const playSuccessFeedback = () => {
+    // Haptic feedback
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100]);
+    }
+    // Success sound (cheerful chime)
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      oscillator.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.1); // C6
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.3);
+    } catch (e) {
+      console.warn("AudioContext not supported", e);
+    }
+  };
+
   const checkPronunciation = (transcript: string) => {
     if (!transcript) return;
     const current = mockMistakes[practiceIndex];
@@ -172,13 +197,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     // Count how many target words are present in spoken words
     const matchCount = targetWords.filter(word => spokenWords.includes(word)).length;
     
-    // Pass if at least 60% of target words are matched (very forgiving for kids)
-    const threshold = Math.max(1, Math.ceil(targetWords.length * 0.6));
+    // Strict passing criteria: Must match almost all words to avoid passing partial sentences
+    const threshold = Math.max(targetWords.length, Math.ceil(targetWords.length * 0.9));
     const isPass = spoken === target || spoken.includes(target) || matchCount >= threshold;
 
     if (isPass) {
       setPracticeStatus('success');
       setScore(s => s + 1);
+      playSuccessFeedback();
     } else {
       setPracticeStatus('failed');
     }
