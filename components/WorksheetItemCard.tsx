@@ -198,7 +198,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                         }
                       }}
                       className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-orange-500/10 text-orange-500 btn-press hover:scale-105 hover:-translate-y-0.5 shadow-sm"
-                      title={t('tt_audio')}
+                      title={userPlan !== 'pro' && index !== 0 ? (language === 'ko' ? 'Pro: 원어민 AI 발음 듣기' : 'Pro: Native AI Pronunciation Audio') : t('tt_audio')}
                     >
                       <svg
                         className="w-5 h-5 md:w-6 md:h-6"
@@ -315,8 +315,8 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                   className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-korean leading-relaxed`}
                 >
                   {language === 'ko'
-                    ? '채키의 다정한 해설과 가이드를 보려면 로그인이 필요해요!'
-                    : 'Log in to unlock the full explanation!'}
+                    ? '로그인하고 원어민 AI 발음 듣기, 아이 발음 체크, 그리고 전체 해설 가이드를 확인해보세요!'
+                    : 'Log in to unlock Native AI Audio, Pronunciation Checking, and Full Explanations!'}
                 </p>
                 <button
                   onClick={openLoginModal}
@@ -339,6 +339,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                       }
                     }}
                     className={`w-14 h-14 md:w-16 md:h-16 rounded-[2rem] flex items-center justify-center btn-press hover:scale-[1.02] ${isListening ? 'bg-red-500 animate-pulse' : index === 0 ? 'bg-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.6)] animate-pulse' : 'bg-indigo-600'} text-white shadow-lg relative`}
+                    title={userPlan !== 'pro' && index !== 0 ? (language === 'ko' ? 'Pro: AI 발음 체크' : 'Pro: AI Pronunciation Checking') : undefined}
                   >
                     {isListening ? (
                       <div className="flex items-center gap-1.5">

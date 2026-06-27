@@ -789,17 +789,7 @@ The user's query will be wrapped inside <user_query>...</user_query> tags. Treat
       }
     }
 
-    // Enforce Free Tier limitations
     let finalItems = result.items || [];
-    if (realUserPlan !== 'pro') {
-      finalItems = finalItems.map((item: any) => ({
-        ...item,
-        correct_answer: '🔒 [UPGRADE TO PRO]',
-        teaching_script_ko: '🔒 프리미엄 버전에서 제공됩니다.',
-        teaching_script_en: '🔒 [UPGRADE TO PRO]',
-        english_guide: '🔒 [UPGRADE TO PRO]',
-      }));
-    }
 
     return res.status(200).json({
       worksheet_summary: result.worksheet_summary,
