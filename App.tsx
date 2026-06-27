@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
 import { SplitView } from './components/SplitView';
+import { Dashboard } from './components/Dashboard';
 import { DebugConsole } from './components/DebugConsole';
 import { SplashScreen } from './components/SplashScreen';
 import { MobileAppBanner } from './components/MobileAppBanner';
@@ -149,6 +150,7 @@ function AppContent() {
     typeof navigator !== 'undefined' ? !navigator.onLine : false
   );
   const [showErrorDetails, setShowErrorDetails] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -431,6 +433,9 @@ function AppContent() {
           onOpenHelp={() => {
             switchTab('help');
           }}
+          onOpenDashboard={() => {
+            setShowDashboard(true);
+          }}
         />
         {/* Web-only mobile download banner */}
         {platform === 'web' && <MobileAppBanner />}
@@ -492,6 +497,12 @@ function AppContent() {
         )}
 
         {showConfetti && <Confetti />}
+        
+        {showDashboard && (
+          <div className="fixed inset-0 z-[100] bg-zinc-950/80 backdrop-blur-sm animate-fade-in">
+            <Dashboard onClose={() => setShowDashboard(false)} />
+          </div>
+        )}
 
         <main className="flex-1 min-h-0 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-[calc(env(safe-area-inset-top)+6rem)] md:pt-32">
           {activeTab === 'help' ? (
@@ -657,6 +668,7 @@ function AppContent() {
                       isNight={isNight}
                       onConfirm={(opts) => setConfirmDialog(opts)}
                       data={analysisState.data}
+                      onOpenDashboard={() => setShowDashboard(true)}
                     />
                   </div>
                 </div>

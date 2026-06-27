@@ -16,9 +16,10 @@ interface Props {
   isNight: boolean;
   setIsNight: (val: boolean) => void;
   onOpenHelp?: () => void;
+  onOpenDashboard?: () => void;
 }
 
-export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHelp }) => {
+export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHelp, onOpenDashboard }) => {
   const { user, openLoginModal, logout, setShowPaywall } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const { setShowMistakeModal, mistakes } = useMistakes();
@@ -342,7 +343,11 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, onOpenHe
                         <button
                           onClick={() => {
                             setShowUserMenu(false);
-                            setShowMistakeModal(true);
+                            if (onOpenDashboard) {
+                              onOpenDashboard();
+                            } else {
+                              setShowMistakeModal(true);
+                            }
                           }}
                           className={`w-full text-left px-3 py-2 text-xs ${isNight ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'} rounded-lg transition-colors flex items-center justify-between group leading-tight`}
                         >

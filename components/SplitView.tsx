@@ -46,6 +46,7 @@ interface SplitViewProps {
     onConfirm: () => void;
   }) => void;
   data?: any; // Simplified for now, should be WorksheetAnalysis | null
+  onOpenDashboard?: () => void;
 }
 
 export const SplitView: React.FC<SplitViewProps> = ({
@@ -58,6 +59,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
   isNight = false,
   onConfirm,
   data,
+  onOpenDashboard,
 }) => {
   const { t, language } = useLanguage();
   const { toggleMistake, isMistake } = useMistakes();
@@ -89,7 +91,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
   // Pronunciation States
   const [isListening, setIsListening] = useState(false);
   const [speechResult, setSpeechResult] = useState<{ id: number; success: boolean } | null>(null);
-  const [showDashboard, setShowDashboard] = useState(false);
   const recognitionRef = useRef<any>(null);
   const nativeListenerRef = useRef<any>(null);
   const endListenerRef = useRef<any>(null);
@@ -635,7 +636,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
         </div>
 
         <div
-          className={`w-full lg:w-1/2 min-w-0 flex flex-col ${isNight ? 'bg-[#111111]/80 border-white/10 shadow-black/80' : 'bg-white/80 border-zinc-200 shadow-zinc-300/50'} backdrop-blur-2xl rounded-[2.5rem] border lg:overflow-hidden relative`}
+          className={`w-full lg:w-1/2 min-w-0 flex flex-col ${isNight ? 'bg-[#111111]/80 border-white/10 shadow-black/80' : 'bg-white/80 border-zinc-200 shadow-zinc-300/50'} backdrop-blur-2xl rounded-[2.5rem] border lg:overflow-hidden relative lg:h-screen`}
           onClick={() => setActiveItemId(null)}
         >
           <div
@@ -659,7 +660,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
               <div className="flex items-center gap-2 shrink-0">
                 <button
-                  onClick={() => setShowDashboard(true)}
+                  onClick={() => onOpenDashboard && onOpenDashboard()}
                   className={`w-10 h-10 md:w-auto px-0 md:px-5 md:h-12 rounded-full bg-orange-500 text-white hover:bg-orange-600 flex items-center justify-center font-bold text-[11px] md:text-sm tracking-wide transition-all duration-300 active:scale-[0.98] group font-korean shadow-[0_0_20px_rgba(249,115,22,0.3)]`}
                   title={language === 'ko' ? '대시보드 열기' : 'Open Dashboard'}
                 >
@@ -872,7 +873,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
           </div>
         </div>
       </div>
-      {showDashboard && <Dashboard onClose={() => setShowDashboard(false)} />}
     </>
   );
 };

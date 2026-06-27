@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, FilePdf, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy } from '@phosphor-icons/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useMistakes } from '../contexts/MistakeContext';
 import { generateAndSharePDF } from '../services/pdfService';
 import { WorksheetItem } from '../types';
 import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
@@ -17,6 +18,7 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const { language } = useLanguage();
   const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal } = useAuth();
+  const { mistakes } = useMistakes();
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // ── Ask Chekki State ───────────────────────────────────────────────────────
@@ -77,14 +79,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const [spokenText, setSpokenText] = useState("");
   const [practiceStatus, setPracticeStatus] = useState<'idle' | 'success' | 'failed'>('idle');
 
-  // Mock mistake bank — in production this would come from Firestore
-  const mockMistakes = [
-    { question_text: "He don't like apples.", correct_answer: "He doesn't like apples." },
-    { question_text: "I goes to school.", correct_answer: "I go to school." },
-    { question_text: "She is play soccer.", correct_answer: "She is playing soccer." },
-    { question_text: "Me like pizza.", correct_answer: "I like pizza." },
-    { question_text: "They is happy.", correct_answer: "They are happy." },
-  ];
+  // Mock mistake bank removed
 
   useEffect(() => {
     // Cleanup listeners on unmount
@@ -240,7 +235,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
   const checkPronunciation = (transcript: string) => {
     if (!transcript) return;
-    const current = mockMistakes[practiceIndex];
+    const current = mistakes[practiceIndex];
     const target = normalizeString(current.correct_answer);
     const spoken = normalizeString(transcript);
 
@@ -264,7 +259,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   };
 
   const handleNextPractice = () => {
-    if (practiceIndex + 1 >= mockMistakes.length) {
+    if (practiceIndex + 1 >= mistakes.length) {
       setPracticeDone(true);
     } else {
       setPracticeIndex(i => i + 1);
@@ -411,14 +406,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
               <div className="flex-1 w-full bg-black/40 rounded-2xl border border-white/5 p-4 flex flex-col gap-3 overflow-y-auto relative z-10">
                 <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">Past Mistakes</h3>
-                {mockMistakes.slice(0, 3).map((mistake, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default gap-3">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50">{mistake.question_text}</span>
-                      <span className="text-sm font-bold text-emerald-400">{mistake.correct_answer}</span>
-                    </div>
+                {mistakes.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 text-center h-full">
+                    <span className="text-4xl mb-4">📓</span>
+                    <p className="text-zinc-400 font-medium font-korean text-sm">
+                      {language === 'ko'
+                        ? '아직 복습할 문항이 없습니다. 스캔 결과에서 오답을 저장하면 여기에 표시됩니다.'
+                        : 'Your mistake bank is empty. It will be populated with real sentences when you save a mistake from a scan.'}
+                    </p>
                   </div>
-                ))}
+                ) : (
+                  mistakes.slice(0, 3).map((mistake, i) => (
+                    <div key={mistake.uniqueId || i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default gap-3">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50">{mistake.question_text}</span>
+                        <span className="text-sm font-bold text-emerald-400">{mistake.correct_answer}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className="mt-6 flex justify-end relative z-10">
@@ -485,13 +491,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 <h2 className="text-3xl font-black text-white">
                   {language === 'ko' ? '연습 완료!' : 'Practice Complete!'}
                 </h2>
-                <p className="text-5xl font-black text-emerald-400">
-                  {score}/{mockMistakes.length}
+                <p className="text-4xl font-black text-white mb-2">
+                  {score}/{mistakes.length}
                 </p>
-                <p className="text-zinc-400 font-korean">
+                <p className="text-zinc-400 mb-8 font-korean">
                   {language === 'ko'
-                    ? score === mockMistakes.length ? '발음이 완벽해요! 🎉' : '꾸준히 연습하면 더 좋아질 거에요!'
-                    : score === mockMistakes.length ? 'Perfect pronunciation! 🎉' : 'Keep practicing, you are doing great!'}
+                    ? score === mistakes.length ? '발음이 완벽해요! 🎉' : '꾸준히 연습하면 더 좋아질 거에요!'
+                    : score === mistakes.length ? 'Perfect pronunciation! 🎉' : 'Keep practicing, you are doing great!'}
                 </p>
                 <button
                   onClick={handleStartPractice}
@@ -501,17 +507,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 </button>
               </div>
             ) : (() => {
-              const current = mockMistakes[practiceIndex];
+              const current = mistakes[practiceIndex];
               return (
                 <div className="flex flex-col gap-6 items-center text-center">
                   <div className="w-full flex items-center justify-between mb-4">
-                    <span className="text-xs text-zinc-500 font-mono">
-                      {practiceIndex + 1} / {mockMistakes.length}
+                    <span className="font-bold">
+                      {practiceIndex + 1} / {mistakes.length}
                     </span>
-                    <div className="flex-1 mx-4 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                        style={{ width: `${((practiceIndex + 1) / mockMistakes.length) * 100}%` }}
+                    <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-orange-500 transition-all duration-300"
+                        style={{ width: `${((practiceIndex + 1) / mistakes.length) * 100}%` }}
                       />
                     </div>
                     <span className="text-xs font-bold text-emerald-400">{score} ✓</span>
@@ -567,8 +573,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                         onClick={handleNextPractice}
                         className="group relative overflow-hidden pl-8 pr-2 py-2 w-full sm:w-auto bg-emerald-500 text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-2xl shadow-emerald-500/20 outline-none"
                       >
-                        <span className="relative z-10 font-korean">
-                          {practiceIndex + 1 >= mockMistakes.length
+                        <span className="font-bold text-sm">
+                          {practiceIndex + 1 >= mistakes.length
                             ? (language === 'ko' ? '결과 보기' : 'See Results')
                             : (language === 'ko' ? '다음 문장' : 'Next Sentence')}
                         </span>

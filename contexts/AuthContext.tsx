@@ -736,14 +736,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('[AuthContext] Kakao SDK missing, attempting to inject dynamically...');
           await new Promise<void>((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js';
+            script.src = 'https://developers.kakao.com/sdk/js/kakao.min.js';
             script.onload = () => {
               if ((window as any).Kakao && !(window as any).Kakao.isInitialized()) {
                 (window as any).Kakao.init('f06bc75426bf2b41940620d3ee942f06');
               }
               resolve();
             };
-            script.onerror = () => reject(new Error('Failed to load Kakao SDK. Please disable your adblocker.'));
+            script.onerror = () => reject(new Error('Failed to load Kakao SDK. Please disable your adblocker or try a different browser.'));
             document.head.appendChild(script);
           });
         }
@@ -858,6 +858,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    const uid = auth.currentUser?.uid || firebaseUser?.uid;
+    if (uid) {
+      localStorage.removeItem(`chekki_user_profile_${uid}`);
+    }
     subscriptionService.clearCache();
     revenueCatService.logout();
     signOut(auth);
@@ -1156,7 +1160,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         joinSchool,
         cancelSubscription,
         requestLimitReset,
-        isAuthenticated: !!userProfile,
+        isAuthenticated: !!userProfile && !!firebaseUser && !firebaseUser.isAnonymous,
         isLoading,
         showPaywall,
         setShowPaywall,

@@ -423,9 +423,14 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                             : 'Subscribe via our mobile app'}
                         </p>
                         <div className="flex justify-center gap-3">
-                          <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 opacity-50 text-[8px] font-black text-zinc-500 uppercase tracking-widest">
+                          <a 
+                            href="https://apps.apple.com/app/id6741479840" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 opacity-80 hover:opacity-100 hover:bg-white/10 transition-colors text-[8px] font-black text-white uppercase tracking-widest"
+                          >
                             App Store
-                          </div>
+                          </a>
                           <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 opacity-50 text-[8px] font-black text-zinc-500 uppercase tracking-widest">
                             Google Play
                           </div>
