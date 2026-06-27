@@ -25,6 +25,7 @@ interface WorksheetItemCardProps {
   setUpsellFeature: (feature: 'pronunciation' | 'audio' | 'guide' | null) => void;
   style?: React.CSSProperties;
   hasHandwriting?: boolean;
+  index?: number;
 }
 
 const simplifyGuideText = (text: string) => {
@@ -70,6 +71,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     setUpsellFeature,
     style,
     hasHandwriting = true,
+    index = 0,
   }) => {
     const [isScriptExpanded, setIsScriptExpanded] = useState(true);
     const [isGuideExpanded, setIsGuideExpanded] = useState(false);
@@ -126,7 +128,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
             <div className="flex flex-col gap-4">
               <div className={`flex flex-col items-start gap-1`}>
                 <div
-                  className={`relative px-0 py-1 transition-all duration-500 ease-in-out ${speechResult?.id === item.id ? (speechResult.success ? 'scale-110 z-10' : 'translate-x-1') : ''}`}
+                  className={`relative px-0 py-1 transition-all duration-500 ease-in-out ${!isAuthenticated && index !== 0 ? 'blur-[4px] opacity-40 pointer-events-none select-none' : ''} ${speechResult?.id === item.id ? (speechResult.success ? 'scale-110 z-10' : 'translate-x-1') : ''}`}
                 >
                   {item.is_correct === false && hasHandwriting !== false && (
                     <div className="mb-2">
@@ -303,7 +305,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
 
         {isActive && (
           <div className="px-4 pb-6 md:px-10 md:pb-10 animate-fade-in-up space-y-6">
-            {!isAuthenticated ? (
+            {!isAuthenticated && index !== 0 ? (
               <div className="bg-orange-500/10 border border-orange-500/30 rounded-3xl p-6 text-center space-y-4">
                 <p
                   className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-korean leading-relaxed`}
@@ -360,7 +362,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                     </p>
                   </div>
                 </div>
-                {userPlan === 'pro' ? (
+                {userPlan === 'pro' || (!isAuthenticated && index === 0) ? (
                   <>
                     {/* Collapsible Teaching Script (Mom's Tip) */}
                     <div

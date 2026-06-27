@@ -775,6 +775,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 style={{ '--i': idx } as React.CSSProperties}
               >
                 <WorksheetItemCard
+                  index={idx}
                   item={item}
                   isActive={activeItemId === item.id}
                   isNight={isNight}
