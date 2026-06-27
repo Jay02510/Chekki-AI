@@ -2,8 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, FilePdf, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy } from '@phosphor-icons/react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { generateAndSharePDF } from '../services/pdfService';
 import { WorksheetItem } from '../types';
+import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
+import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 import { Capacitor } from '@capacitor/core';
 
@@ -13,7 +16,57 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const { language } = useLanguage();
+  const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal } = useAuth();
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  // ── Ask Chekki State ───────────────────────────────────────────────────────
+  const [askQuery, setAskQuery] = useState('');
+  const [askAnswer, setAskAnswer] = useState<string | null>(null);
+  const [askAnsweredQuestion, setAskAnsweredQuestion] = useState('');
+  const [isAskAsking, setIsAskAsking] = useState(false);
+  const [askHistory, setAskHistory] = useState<ChatTurn[]>([]);
+
+  const handleAskSubmit = async (question: string) => {
+    if (!question.trim() || isAskAsking) return;
+    if (isAuthenticated && !checkQuestionLimit()) return;
+
+    const isFollowUp = askHistory.length > 0;
+    if (!isFollowUp) {
+      setAskAnswer(null);
+      setAskHistory([]);
+    }
+
+    setAskAnsweredQuestion(question);
+    setIsAskAsking(true);
+
+    try {
+      const isGuest = !isAuthenticated;
+      const response = await askChekkiQuestion(
+        question,
+        language,
+        isGuest,
+        undefined,
+        askHistory
+      );
+      setAskAnswer(response);
+
+      setAskHistory((prev) => [
+        ...prev,
+        { role: 'user' as const, text: question },
+        { role: 'model' as const, text: response },
+      ]);
+
+      if (isAuthenticated) await incrementQuestion();
+    } catch (error: any) {
+      setAskAnswer(
+        language === 'ko'
+          ? '오류가 발생했습니다. 다시 시도해주세요.'
+          : 'Something went wrong. Please try again.'
+      );
+    } finally {
+      setIsAskAsking(false);
+    }
+  };
 
   // ── Voice Practice State ───────────────────────────────────────────────────
   const [isPracticing, setIsPracticing] = useState(false);
@@ -278,6 +331,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     <div className="fixed inset-0 z-[200] bg-[#050505] text-zinc-50 overflow-y-auto animate-fade-in font-sans">
       <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03] bg-noise mix-blend-overlay" />
       
+      <AskChekkiAnswerModal
+        answer={askAnswer}
+        isAsking={isAskAsking}
+        question={askAnsweredQuestion}
+        isAuthenticated={isAuthenticated}
+        language={language}
+        history={askHistory}
+        onClose={() => {
+          setAskAnswer(null);
+          setAskAnsweredQuestion('');
+          setAskHistory([]);
+        }}
+        openLoginModal={openLoginModal}
+        onFollowUp={handleAskSubmit}
+        isNight={true}
+      />
+      
       <div className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12 md:py-8 max-w-[1400px] mx-auto">
         <h1 className="text-balance text-2xl md:text-3xl font-black tracking-tighter flex items-center gap-2 font-korean">
           <span>{language === 'ko' ? '학습 대시보드' : 'Learning Dashboard'}</span>
@@ -380,15 +450,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 <div className="self-start bg-zinc-800/80 px-4 py-3 rounded-2xl rounded-tl-sm max-w-[85%] text-xs md:text-sm text-zinc-300 font-korean leading-relaxed border border-white/5">
                   {language === 'ko' ? '오늘 배운 내용 중 이해 안 되는 부분이 있나요?' : 'Is there anything you didn\'t understand today?'}
                 </div>
-                <div className="w-full mt-2 relative">
-                  <input 
-                    type="text" 
-                    placeholder={language === 'ko' ? '질문 입력...' : 'Type a question...'} 
-                    className="w-full bg-white/5 border border-white/10 rounded-full pl-5 pr-12 py-3 text-xs md:text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-white/20 transition-colors font-korean"
+                <div className="w-full mt-2 relative z-[100]">
+                  <AskChekkiBar
+                    query={askQuery}
+                    setQuery={setAskQuery}
+                    onSubmit={handleAskSubmit}
+                    isAsking={isAskAsking}
+                    language={language}
+                    isNight={true}
                   />
-                  <button className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition-colors">
-                    <CaretRight size={14} weight="bold" />
-                  </button>
                 </div>
               </div>
             </div>
@@ -464,20 +534,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   </div>
 
                   {practiceStatus === 'idle' && (
-                    <button
-                      onClick={handleMicPress}
-                      className={`group relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none ${
-                        isListening 
-                          ? 'active:scale-95 shadow-[0_0_40px_rgba(239,68,68,0.4)]' 
-                          : 'hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]'
-                      }`}
-                    >
-                      <div className={`absolute inset-0 rounded-full transition-colors duration-700 ${isListening ? 'bg-red-500/20' : 'bg-emerald-500/20'}`} />
-                      <div className={`relative z-10 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-full flex items-center justify-center transition-colors duration-700 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] ${isListening ? 'bg-red-500' : 'bg-emerald-500'}`}>
-                        {isListening && <div className="absolute inset-0 rounded-full border-2 border-red-300 animate-ping opacity-50" />}
-                        <MicrophoneStage size={36} weight="fill" className="text-white relative z-10 transition-transform duration-700 group-hover:scale-110" />
-                      </div>
-                    </button>
+                    <div className="flex flex-col items-center gap-4">
+                      <button
+                        onClick={handleMicPress}
+                        className={`group relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none ${
+                          isListening 
+                            ? 'active:scale-95 shadow-[0_0_40px_rgba(239,68,68,0.4)]' 
+                            : 'hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]'
+                        }`}
+                      >
+                        <div className={`absolute inset-0 rounded-full transition-colors duration-700 ${isListening ? 'bg-red-500/20' : 'bg-emerald-500/20'}`} />
+                        <div className={`relative z-10 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-full flex items-center justify-center transition-colors duration-700 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] ${isListening ? 'bg-red-500' : 'bg-emerald-500'}`}>
+                          {isListening && <div className="absolute inset-0 rounded-full border-2 border-red-300 animate-ping opacity-50" />}
+                          <MicrophoneStage size={36} weight="fill" className="text-white relative z-10 transition-transform duration-700 group-hover:scale-110" />
+                        </div>
+                      </button>
+                      {isListening && (
+                        <span className="text-xs text-red-400 font-bold tracking-widest uppercase animate-fade-in cursor-pointer" onClick={handleMicPress}>
+                          {language === 'ko' ? '정지 / 취소' : 'Stop / Cancel'}
+                        </span>
+                      )}
+                    </div>
                   )}
 
                   {practiceStatus === 'success' && (
