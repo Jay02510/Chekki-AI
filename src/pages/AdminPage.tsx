@@ -27,10 +27,10 @@ export default function AdminPage() {
     setLoading(true);
     setMessage({ text: '', type: '' });
     try {
-      const response = await fetch('/api/admin-users', {
+      const response = await fetch('/api/admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode }),
+        body: JSON.stringify({ passcode, action: 'list' }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -96,13 +96,14 @@ export default function AdminPage() {
       await setDoc(doc(dbInstance, 'users', uid), profile);
 
       // 3. Immediately call the serverless admin-upgrade endpoint to elevate to Pro
-      const response = await fetch('/api/admin-upgrade', {
+      const response = await fetch('/api/admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           passcode,
+          action: 'upgrade',
           email: cleanEmail,
           duration,
         }),
@@ -139,13 +140,14 @@ export default function AdminPage() {
     try {
       const cleanEmail = email.toLowerCase().trim();
 
-      const response = await fetch('/api/admin-upgrade', {
+      const response = await fetch('/api/admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           passcode,
+          action: 'upgrade',
           email: cleanEmail,
           duration,
         }),
@@ -176,10 +178,10 @@ export default function AdminPage() {
     setMessage({ text: '', type: '' });
     
     try {
-      const response = await fetch('/api/admin-delete-user', {
+      const response = await fetch('/api/admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode, uid }),
+        body: JSON.stringify({ passcode, action: 'delete', uid }),
       });
       const data = await response.json();
       
@@ -213,10 +215,10 @@ export default function AdminPage() {
     setLoading(true);
     setMessage({ text: '', type: '' });
     try {
-      const response = await fetch('/api/admin-downgrade', {
+      const response = await fetch('/api/admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode, uid }),
+        body: JSON.stringify({ passcode, action: 'downgrade', uid }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to downgrade user');
@@ -235,10 +237,10 @@ export default function AdminPage() {
     setLoading(true);
     setMessage({ text: '', type: '' });
     try {
-      const response = await fetch('/api/admin-impersonate', {
+      const response = await fetch('/api/admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode, uid }),
+        body: JSON.stringify({ passcode, action: 'impersonate', uid }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to get custom token');
