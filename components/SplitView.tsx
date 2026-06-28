@@ -17,7 +17,7 @@ import { Capacitor } from '@capacitor/core';
 import { PUBLIC_APP_URL } from '../config';
 import { toJpeg } from 'html-to-image';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
-import { normalizeText, compareSpeech } from '../utils/speechUtils';
+import { normalizeText, compareSpeech, cleanAnswerText, sanitizeForEnglishSpeech } from '../utils/speechUtils';
 import { refineWorksheetItem } from '../services/geminiService';
 import { WorksheetItemCard } from './WorksheetItemCard';
 import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
@@ -228,7 +228,11 @@ export const SplitView: React.FC<SplitViewProps> = ({
     }
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
+      
+      const cleanText = sanitizeForEnglishSpeech(text);
+      if (!cleanText) return;
+
+      const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = 'en-US';
       utterance.rate = 0.85;
       
@@ -363,7 +367,8 @@ export const SplitView: React.FC<SplitViewProps> = ({
           files: [savedFile.uri],
           dialogTitle: 'Share with Chekki AI',
         });
-      } else if (navigator.share) {
+      } else if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+        // Use native share on mobile web browsers where 'Save Image' is usually supported in the share sheet
         try {
           if (finalBase64Data) {
             const byteCharacters = atob(finalBase64Data);
@@ -389,8 +394,13 @@ export const SplitView: React.FC<SplitViewProps> = ({
           await navigator.share({ title: 'Chekki AI Result', text: shareText });
         }
       } else {
-        setShareWebNotice(true);
-        setTimeout(() => setShareWebNotice(false), 3000);
+        // Desktop Web Fallback: direct download to avoid confusing share sheet without save option
+        const link = document.createElement('a');
+        link.href = `data:image/jpeg;base64,${dataToSave}`;
+        link.download = `chekki-worksheet-${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
     } catch (err) {
       console.error('Error sharing:', err);
@@ -665,13 +675,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 <button
                   aria-label="Open Dashboard"
                   onClick={() => onOpenDashboard && onOpenDashboard()}
-                  className={`w-12 h-12 md:w-auto px-0 md:px-5 md:h-12 rounded-full bg-orange-500 text-white hover:bg-orange-600 flex items-center justify-center font-bold text-[11px] md:text-sm tracking-wide transition-all duration-200 active:scale-[0.98] group font-korean shadow-sm`}
+                  className={`h-12 px-5 rounded-full bg-orange-500 text-white hover:bg-orange-600 flex items-center justify-center font-black text-xs uppercase tracking-widest transition-all duration-200 active:scale-[0.98] group shadow-sm shrink-0`}
                   title={language === 'ko' ? '대시보드 열기' : 'Open Dashboard'}
                 >
-                  <span className="hidden md:inline mr-2"></span>
-                  <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-                  </svg>
+                  <span className="group-hover:scale-105 transition-transform">DASH</span>
                 </button>
                 <button
                   aria-label="Share"
@@ -879,7 +886,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                     <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-relaxed">
                       {language === 'ko'
                         ? '기록이 성공적으로 저장되었습니다! ✨'
-                        : 'Ritual Success! Image saved to gallery. ✨'}
+                        : 'Image saved to gallery! ✨'}
                     </p>
                   </div>
                 )}

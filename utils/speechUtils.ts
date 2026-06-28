@@ -6,7 +6,7 @@ export const removeMarkdown = (text: string): string => {
 export const cleanAnswerText = (text: string): string => {
   if (!text) return '';
   let cleaned = removeMarkdown(text);
-  const prefixRegex = /^([a-zA-Z0-9][.)]\s+)+/;
+  const prefixRegex = /^(\([a-zA-Z0-9]\)|\[[a-zA-Z0-9]\]|[a-zA-Z0-9][.)])\s+/;
   if (prefixRegex.test(cleaned)) {
     const stripped = cleaned.replace(prefixRegex, '');
     if (stripped.trim().length > 0) {
@@ -14,6 +14,14 @@ export const cleanAnswerText = (text: string): string => {
     }
   }
   return cleaned.trim();
+};
+
+export const sanitizeForEnglishSpeech = (text: string): string => {
+  if (!text) return '';
+  // Remove Korean characters (Hangul syllables, jamo, compatibility jamo)
+  let englishOnly = text.replace(/[\u3131-\uD79D]/g, '');
+  // Clean up extra whitespace that might be left behind
+  return englishOnly.replace(/\s+/g, ' ').trim();
 };
 
 export const normalizeText = (text: string): string => {
@@ -51,9 +59,9 @@ export const normalizeText = (text: string): string => {
     normalized = normalized.replace(new RegExp(`\\b${escapedKey}\\b`, 'g'), contractions[key]);
   });
 
-  // 3. Remove common prefixes like "A.", "1.", "a)", "1)"
-  // We only remove if it's followed by a punctuation mark AND space to avoid removing words like "I"
-  normalized = normalized.replace(/^[a-z0-9][.)]\s+/, '');
+  // 3. Remove common prefixes like "A.", "1.", "a)", "1)", "(A)", "[A]"
+  // We only remove if it's followed by a space to avoid removing words
+  normalized = normalized.replace(/^(\([a-z0-9]\)|\[[a-z0-9]\]|[a-z0-9][.)])\s+/, '');
 
   // 4. Convert written numbers to digits (1-10) for consistency
   const numbers: { [key: string]: string } = {

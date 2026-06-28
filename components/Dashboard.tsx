@@ -239,7 +239,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const checkPronunciation = (transcript: string) => {
     if (!transcript) return;
     const current = mistakes[practiceIndex];
-    const target = normalizeString(current.correct_answer);
+    const target = normalizeString(cleanAnswerText(current.correct_answer || ''));
     const spoken = normalizeString(transcript);
 
     const targetWords = target.split(' ').filter(w => w.length > 0);
@@ -379,7 +379,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   <MicrophoneStage size={20} weight="bold" />
                 </div>
                 <h2 className="text-balance text-xl font-bold tracking-tight font-korean">
-                  {language === 'ko' ? '오답 스피킹 연습' : 'Audio Practice Room'}
+                  {language === 'ko' ? '오답 인터랙티브 연습' : 'Interactive Practice Room'}
                 </h2>
               </div>
               
@@ -483,7 +483,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         </div>
       </div>
 
-      {/* ── Audio Practice Room Modal ─────────────────────────────────────────── */}
+      {/* ── Interactive Practice Room Modal ─────────────────────────────────────────── */}
       {isPracticing && (
         <div className="fixed inset-0 z-[300] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-4">
           <div className="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-[2rem] p-6 md:p-10 shadow-2xl">
@@ -539,7 +539,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   
                   <div className="bg-black/40 rounded-2xl p-6 border border-white/5 w-full">
                     <p className="text-sm text-zinc-500 line-through mb-2">{current.question_text}</p>
-                    <p className="text-2xl md:text-3xl font-bold text-emerald-400 mb-4">{cleanAnswerText(current.correct_answer || '')}</p>
+                    <p 
+                      className="text-2xl md:text-3xl font-bold text-emerald-400 mb-4 cursor-pointer active:scale-95 transition-transform"
+                      onClick={() => {
+                        const correctText = cleanAnswerText(current.correct_answer || '');
+                        setSpokenText(correctText);
+                        checkPronunciation(correctText);
+                      }}
+                      title={language === 'ko' ? '정답으로 바로 넘어가기' : 'Tap to skip speech recognition'}
+                    >
+                      {cleanAnswerText(current.correct_answer || '')}
+                    </p>
                     
                     <div className="h-20 flex items-center justify-center bg-white/5 rounded-xl border border-white/5 relative overflow-hidden">
                       {isListening && <div className="absolute inset-0 bg-emerald-500/10 animate-pulse" />}

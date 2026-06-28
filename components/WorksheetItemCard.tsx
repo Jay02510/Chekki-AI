@@ -246,26 +246,28 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                         </div>
                         
                         <div className="flex flex-col sm:flex-row justify-end gap-3 w-full">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (userPlan !== 'pro') {
-                                setUpsellFeature('guide');
-                              } else {
-                                onPlayAudio(displayScript || '');
-                              }
-                            }}
-                            className={`group flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-black tracking-wide transition-all border w-full sm:w-auto ${userPlan === 'pro' ? 'bg-blue-500 text-white border-blue-400 hover:scale-[1.02] active:scale-[0.97] shadow-md shadow-blue-500/20' : isNight ? 'bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20 active:scale-[0.97]' : 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 active:scale-[0.97]'}`}
-                          >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8 5v14l11-7z"/>
-                            </svg>
-                            <span>
-                              {userPlan === 'pro' 
-                                ? (language === 'ko' ? 'AI 튜터: 가이드 질문 읽기' : 'AI Tutor: Ask Guiding Question') 
-                                : (language === 'ko' ? 'Pro: 가이드 질문 읽기' : 'Pro: Ask Guiding Question')}
-                            </span>
-                          </button>
+                          {currentScriptLang === 'en' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (userPlan !== 'pro') {
+                                  setUpsellFeature('guide');
+                                } else {
+                                  onPlayAudio(displayScript || '');
+                                }
+                              }}
+                              className={`group flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-black tracking-wide transition-all border w-full sm:w-auto ${userPlan === 'pro' ? 'bg-blue-500 text-white border-blue-400 hover:scale-[1.02] active:scale-[0.97] shadow-md shadow-blue-500/20' : isNight ? 'bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20 active:scale-[0.97]' : 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 active:scale-[0.97]'}`}
+                            >
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                              <span>
+                                {userPlan === 'pro' 
+                                  ? (language === 'ko' ? 'AI 튜터: 가이드 질문 읽기' : 'AI Tutor: Ask Guiding Question') 
+                                  : (language === 'ko' ? 'Pro: 가이드 질문 읽기' : 'Pro: Ask Guiding Question')}
+                              </span>
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
