@@ -257,7 +257,7 @@ const translations = {
     tip_click_guide: 'Tap any question to see your Teaching Script!',
     lbl_mom_tip: 'Ask Chekki',
     lbl_audio: 'Listen',
-    lbl_bookmark: 'Save',
+    lbl_bookmark: 'Save to Dash',
     lbl_refine: 'Explain',
     growing_text: 'Generating...',
 
@@ -346,7 +346,7 @@ const translations = {
     // Tooltips
     tt_close: 'Deselect',
     tt_audio: 'Listen to Pronunciation',
-    tt_bookmark: 'Save for Review',
+    tt_bookmark: 'Save to Dashboard Mistake Bank',
     tt_refine: 'Explain More',
     tt_home: 'Return to Home',
     tt_lang_toggle: 'Switch Language',
@@ -621,7 +621,7 @@ const translations = {
     tip_click_guide: '질문을 탭하면 다정한 티칭 가이드가 나타나요!',
     lbl_mom_tip: '티칭 스크립트',
     lbl_audio: '듣기',
-    lbl_bookmark: '저장',
+    lbl_bookmark: '대시보드 저장',
     lbl_refine: '설명',
     growing_text: '생성 중...',
 
@@ -710,7 +710,7 @@ const translations = {
     // Tooltips
     tt_close: '선택 취소',
     tt_audio: '원어민 발음 듣기',
-    tt_bookmark: '오답 노트에 저장',
+    tt_bookmark: '대시보드 오답 노트에 저장',
     tt_refine: '상세 설명 보기',
     tt_home: '처음으로 돌아가기',
     tt_lang_toggle: '언어 변경',

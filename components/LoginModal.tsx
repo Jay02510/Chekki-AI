@@ -117,7 +117,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         return;
       }
       console.error('[LoginModal] Google Sign-In Error:', err);
-      setError(`Google Error: ${err.message || JSON.stringify(err)}`);
+      setError(err.message || 'Google Sign-In failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +140,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         return;
       }
       console.error('[LoginModal] Kakao Sign-In Error:', err);
-      setError(`Kakao Error: ${err.message || JSON.stringify(err)}`);
+      setError(err.message || 'Kakao Sign-In failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

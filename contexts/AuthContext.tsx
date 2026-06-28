@@ -594,9 +594,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (popupErr: any) {
           if (
             popupErr.code === 'auth/argument-error' ||
-            popupErr.code === 'auth/internal-error'
+            popupErr.code === 'auth/internal-error' ||
+            popupErr.code === 'auth/popup-blocked'
           ) {
-            throw new Error('Login interrupted. Please try again or use email login.');
+            throw new Error('Login interrupted (often due to Incognito mode or blocked cookies). Please try again or use email login.');
           }
           throw popupErr;
         }
@@ -705,9 +706,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (popupErr: any) {
         if (
           popupErr.code === 'auth/argument-error' ||
-          popupErr.code === 'auth/internal-error'
+          popupErr.code === 'auth/internal-error' ||
+          popupErr.code === 'auth/popup-blocked'
         ) {
-          throw new Error('Login interrupted. Please try again or use email login.');
+          throw new Error('Login interrupted (often due to Incognito mode or blocked cookies). Please try again or use email login.');
         }
         throw popupErr;
       }

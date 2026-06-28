@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, FilePdf, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy } from '@phosphor-icons/react';
+import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy } from '@phosphor-icons/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useMistakes } from '../contexts/MistakeContext';
@@ -10,6 +10,7 @@ import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
 import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 import { Capacitor } from '@capacitor/core';
+import { cleanAnswerText } from '../utils/speechUtils';
 
 interface DashboardProps {
   onClose: () => void;
@@ -355,23 +356,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         </button>
       </div>
 
-      <div className="relative z-10 px-6 md:px-12 mb-8 max-w-[1400px] mx-auto animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold tracking-tight font-korean">{language === 'ko' ? '최근 스캔한 학습지' : 'Recent Worksheets'}</h2>
-          <button className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors font-bold">{language === 'ko' ? '전체 보기' : 'View All'}</button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
-          <div className="w-full min-h-[140px] md:min-h-[180px] rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-6 text-center text-white/50 border-dashed">
-            <FilePdf size={32} className="mb-2 opacity-50" />
-            <p className="text-sm font-bold font-korean italic opacity-90 leading-relaxed max-w-xs mx-auto">
-              {language === 'ko' 
-                ? '커피 한 잔 어때요 ☕️? 채점은 채키가 할게요.' 
-                : "Grab a coffee ☕️. We'll grade when you're ready."}
-            </p>
-            <p className="text-[10px] opacity-70 mt-3">{language === 'ko' ? '학습지를 촬영하여 정답을 확인하세요.' : 'Snap a photo to get started.'}</p>
-          </div>
-        </div>
-      </div>
 
       <div className="relative z-10 px-4 md:px-12 pb-24 max-w-[1400px] mx-auto animate-fade-in-up" style={{ animationDelay: '200ms' }}>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
@@ -417,7 +401,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     <div key={mistake.uniqueId || i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default gap-3">
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50">{mistake.question_text}</span>
-                        <span className="text-sm font-bold text-emerald-400">{mistake.correct_answer}</span>
+                        <span className="text-sm font-bold text-emerald-400">{cleanAnswerText(mistake.correct_answer || '')}</span>
                       </div>
                     </div>
                   ))
@@ -526,7 +510,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   
                   <div className="bg-black/40 rounded-2xl p-6 border border-white/5 w-full">
                     <p className="text-sm text-zinc-500 line-through mb-2">{current.question_text}</p>
-                    <p className="text-2xl md:text-3xl font-bold text-emerald-400 mb-4">{current.correct_answer}</p>
+                    <p className="text-2xl md:text-3xl font-bold text-emerald-400 mb-4">{cleanAnswerText(current.correct_answer || '')}</p>
                     
                     <div className="h-20 flex items-center justify-center bg-white/5 rounded-xl border border-white/5 relative overflow-hidden">
                       {isListening && <div className="absolute inset-0 bg-emerald-500/10 animate-pulse" />}

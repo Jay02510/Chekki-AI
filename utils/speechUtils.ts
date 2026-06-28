@@ -1,3 +1,21 @@
+export const removeMarkdown = (text: string): string => {
+  if (!text) return '';
+  return text.replace(/[*_~`]/g, '').trim();
+};
+
+export const cleanAnswerText = (text: string): string => {
+  if (!text) return '';
+  let cleaned = removeMarkdown(text);
+  const prefixRegex = /^([a-zA-Z0-9][.)]\s+)+/;
+  if (prefixRegex.test(cleaned)) {
+    const stripped = cleaned.replace(prefixRegex, '');
+    if (stripped.trim().length > 0) {
+      cleaned = stripped;
+    }
+  }
+  return cleaned.trim();
+};
+
 export const normalizeText = (text: string): string => {
   if (!text) return '';
 
@@ -69,7 +87,7 @@ export const normalizeText = (text: string): string => {
  */
 export const compareSpeech = (transcript: string, expected: string): boolean => {
   const normSpeech = normalizeText(transcript);
-  const normExpected = normalizeText(expected);
+  const normExpected = normalizeText(cleanAnswerText(expected));
 
   if (!normSpeech || !normExpected) return false;
 

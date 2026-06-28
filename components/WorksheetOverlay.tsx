@@ -4,6 +4,7 @@ import { WorksheetItem } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ListDashes, Scan } from '@phosphor-icons/react';
+import { removeMarkdown } from '../utils/speechUtils';
 
 interface Props {
   imageUrl: string;
@@ -106,8 +107,8 @@ export const WorksheetOverlay: React.FC<Props> = ({
     const newPxY = e.clientY - rect.top - dragOffset.current.y;
     let left = (newPxX / rect.width) * 100;
     let top = (newPxY / rect.height) * 100;
-    top = Math.min(Math.max(top, 3), 97);
-    left = Math.min(Math.max(left, 3), 97);
+    top = Math.min(Math.max(top, -5), 105);
+    left = Math.min(Math.max(left, -5), 105);
 
     setItems((prev) =>
       prev.map((item) =>
@@ -239,7 +240,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
             (!isBlankKeyMode || showBlankAnswers) &&
             items.map((item, idx) => {
               const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
-              const displayValue = item.correct_answer;
+              const displayValue = removeMarkdown(item.correct_answer || '');
               const isDragging = draggingId === item.id;
 
               return (

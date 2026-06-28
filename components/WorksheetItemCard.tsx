@@ -1,6 +1,7 @@
 import React, { memo, useState } from 'react';
 import { WorksheetItem } from '../types';
 import { renderMarkdown } from '../utils/markdownUtils';
+import { cleanAnswerText, removeMarkdown } from '../utils/speechUtils';
 
 interface WorksheetItemCardProps {
   item: WorksheetItem;
@@ -79,7 +80,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
 
     const scriptText = language === 'ko' ? item.teaching_script_ko : item.teaching_script_en || '';
     const guideText = language === 'ko' ? item.korean_guide : item.english_guide || '';
-    const answerText = item.correct_answer;
+    const answerText = removeMarkdown(item.correct_answer || '');
 
     const handleActionClick = (e: React.MouseEvent, action: () => void) => {
       e.stopPropagation();
@@ -386,7 +387,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                 if (userPlan !== 'pro' && index !== 0) {
                                   setUpsellFeature('audio');
                                 } else {
-                                  onPlayAudio(displayScript || answerText);
+                                  onPlayAudio(cleanAnswerText(item.correct_answer || ''));
                                 }
                               }}
                               className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-[1.02] active:scale-[0.97] hover:-translate-y-0.5 shadow-sm transition-transform ${isNight ? 'bg-emerald-500/10 text-emerald-400 hover:text-emerald-300' : 'bg-emerald-600/10 text-emerald-600 hover:text-emerald-500'}`}
