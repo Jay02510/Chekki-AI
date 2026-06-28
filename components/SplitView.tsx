@@ -98,6 +98,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
   const recognitionRef = useRef<any>(null);
   const nativeListenerRef = useRef<any>(null);
   const endListenerRef = useRef<any>(null);
+  const lastAudioTextRef = useRef<string | null>(null);
   const lastTranscriptRef = useRef<string>('');
 
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
@@ -227,12 +228,27 @@ export const SplitView: React.FC<SplitViewProps> = ({
       return;
     }
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      
       const cleanText = sanitizeForEnglishSpeech(text);
       if (!cleanText) return;
 
+      // Toggle logic: stop playing if clicking the same text
+      if (window.speechSynthesis.speaking && lastAudioTextRef.current === cleanText) {
+        window.speechSynthesis.cancel();
+        lastAudioTextRef.current = null;
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      lastAudioTextRef.current = cleanText;
+
       const utterance = new SpeechSynthesisUtterance(cleanText);
+      
+      utterance.onend = () => {
+        if (lastAudioTextRef.current === cleanText) {
+          lastAudioTextRef.current = null;
+        }
+      };
+
       utterance.lang = 'en-US';
       utterance.rate = 0.85;
       
