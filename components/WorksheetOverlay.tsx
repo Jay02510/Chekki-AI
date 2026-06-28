@@ -356,6 +356,22 @@ export const WorksheetOverlay: React.FC<Props> = ({
             )}
           </div>
 
+          {/* Toggle Button for Blank Worksheet */}
+          {hasHandwriting === false && !isLoadingItems && items.length > 0 && (
+            <div className="flex justify-center pointer-events-none">
+              <button
+                onClick={() => setShowBlankAnswers(!showBlankAnswers)}
+                className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
+                  showBlankAnswers 
+                    ? 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' 
+                    : isNight ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
+                }`}
+              >
+                {showBlankAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-3 pointer-events-auto shrink-0">
 
             <button
@@ -395,22 +411,6 @@ export const WorksheetOverlay: React.FC<Props> = ({
               </div>
             )}
             {renderOverlayContent(false)}
-
-            {/* Toggle Button for Blank Worksheet */}
-            {hasHandwriting === false && !isLoadingItems && items.length > 0 && (
-              <div className="sticky bottom-4 md:bottom-8 left-0 right-0 z-50 flex justify-center pointer-events-none pb-4">
-                <button
-                  onClick={() => setShowBlankAnswers(!showBlankAnswers)}
-                  className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
-                    showBlankAnswers 
-                      ? 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' 
-                      : isNight ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
-                  }`}
-                >
-                  {showBlankAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -472,6 +472,22 @@ export const WorksheetOverlay: React.FC<Props> = ({
                     </div>
                   )}
                 </button>
+
+                {/* Toggle Button for Blank Worksheet in Fullscreen */}
+                {hasHandwriting === false && !isLoadingItems && items.length > 0 && (
+                  <div className="flex justify-center pointer-events-none absolute left-1/2 -translate-x-1/2">
+                    <button
+                      onClick={() => setShowBlankAnswers(!showBlankAnswers)}
+                      className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
+                        showBlankAnswers 
+                          ? 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' 
+                          : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-blue-500/50 hover:text-blue-400'
+                      }`}
+                    >
+                      {showBlankAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
+                    </button>
+                  </div>
+                )}
 
                 <button
                   onClick={() => setViewMode(viewMode === 'fit' ? 'fill' : 'fit')}
@@ -543,22 +559,6 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 className={`relative z-10 transform-gpu flex items-center justify-center p-4 md:p-12 ${viewMode === 'fill' ? 'w-full h-auto mt-24 mb-12' : 'w-full h-full'}`}
               >
                 {renderOverlayContent(true)}
-
-                {/* Toggle Button for Blank Worksheet in Fullscreen */}
-                {hasHandwriting === false && !isLoadingItems && items.length > 0 && (
-                  <div className="fixed bottom-4 md:bottom-8 left-0 right-0 z-[10003] flex justify-center pointer-events-none pb-4">
-                    <button
-                      onClick={() => setShowBlankAnswers(!showBlankAnswers)}
-                      className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
-                        showBlankAnswers 
-                          ? 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' 
-                          : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-blue-500/50 hover:text-blue-400'
-                      }`}
-                    >
-                      {showBlankAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>,

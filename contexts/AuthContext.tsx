@@ -369,13 +369,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('chekki_last_auth');
 
         // --- GUEST AUTH: Ensure every session has a token ---
-        try {
-          await withTimeout(signInAnonymously(auth), 5000, 'signInAnonymously timeout');
-          // onAuthStateChanged will fire again with the new anon user — return here
-          // so we don't call setIsLoading(false) twice.
-          return;
-        } catch (err) {
-          console.error('[AuthContext] Anonymous sign-in failed or timed out:', err);
+        if (Capacitor.isNativePlatform()) {
+          try {
+            await withTimeout(signInAnonymously(auth), 5000, 'signInAnonymously timeout');
+            // onAuthStateChanged will fire again with the new anon user — return here
+            // so we don't call setIsLoading(false) twice.
+            return;
+          } catch (err) {
+            console.error('[AuthContext] Anonymous sign-in failed or timed out:', err);
+          }
         }
       }
       setIsLoading(false);
@@ -559,8 +561,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         // WEB / ANDROID FLOW
         try {
-          await signInWithRedirect(auth, provider);
-          // The page will redirect. Login completion is handled by getRedirectResult in useEffect.
+          const result = await signInWithPopup(auth, provider);
+          if (result.user) {
+            const existingProfile = await db.getUser(result.user.uid);
+            if (!existingProfile) {
+              const name = result.user.displayName || 'User';
+              const email = result.user.email || '';
+              
+              const newProfile: UserProfile = {
+                name,
+                email,
+                plan: 'free',
+                scansUsedToday: 0,
+                lastScanDate: new Date().toISOString().split('T')[0],
+                maxScansPerDay: FREE_DAILY_LIMIT,
+                questionsUsedToday: 0,
+                maxQuestionsPerDay: 5,
+                lastQuestionDate: new Date().toISOString().split('T')[0],
+                schoolId: null,
+                schoolName: null,
+                subscriptionStartedAt: null,
+                nextBillingDate: null,
+              };
+              await db.createUser(result.user.uid, newProfile);
+              await fetchAndSetUserProfile(result.user, newProfile);
+            } else {
+              await fetchAndSetUserProfile(result.user, existingProfile);
+            }
+          }
+          localStorage.setItem('chekki_last_auth', Date.now().toString());
+          setShowLoginModal(false);
         } catch (popupErr: any) {
           if (
             popupErr.code === 'auth/argument-error' ||
@@ -645,8 +675,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // On mobile, popups can be blocked or cause argument-errors.
       try {
-        await signInWithRedirect(auth, provider);
-        // The page will redirect. Login completion is handled by getRedirectResult in useEffect.
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+          const existingProfile = await db.getUser(result.user.uid);
+          if (!existingProfile) {
+            const newProfile: UserProfile = {
+              name: result.user.displayName || 'User',
+              email: result.user.email || '',
+              plan: 'free',
+              scansUsedToday: 0,
+              lastScanDate: new Date().toISOString().split('T')[0],
+              maxScansPerDay: FREE_DAILY_LIMIT,
+              questionsUsedToday: 0,
+              maxQuestionsPerDay: 5,
+              lastQuestionDate: new Date().toISOString().split('T')[0],
+              schoolId: null,
+              schoolName: null,
+              subscriptionStartedAt: null,
+              nextBillingDate: null,
+            };
+            await db.createUser(result.user.uid, newProfile);
+            await fetchAndSetUserProfile(result.user, newProfile);
+          } else {
+            await fetchAndSetUserProfile(result.user, existingProfile);
+          }
+        }
+        localStorage.setItem('chekki_last_auth', Date.now().toString());
+        setShowLoginModal(false);
       } catch (popupErr: any) {
         if (
           popupErr.code === 'auth/argument-error' ||

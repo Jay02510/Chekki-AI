@@ -24,7 +24,7 @@ interface Props {
 }
 
 export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedMode, setIsSpeedMode, showSpeedToggle, onOpenHelp, onOpenDashboard }) => {
-  const { user, openLoginModal, logout, setShowPaywall } = useAuth();
+  const { user, isAuthenticated, openLoginModal, logout, setShowPaywall } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const { setShowMistakeModal, mistakes } = useMistakes();
 
@@ -206,7 +206,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedM
               )}
             </div>
 
-            {user ? (
+            {isAuthenticated && user ? (
               <div className="flex items-center gap-4 pl-1 relative flex-shrink-0">
                 <button
                   aria-label="Open account menu"
