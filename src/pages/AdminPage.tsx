@@ -87,7 +87,7 @@ export default function AdminPage() {
         plan: 'free',
         scansUsedToday: 0,
         lastScanDate: new Date().toISOString().split('T')[0],
-        maxScansPerDay: 3,
+        maxScansPerDay: 2,
         maxQuestionsPerDay: 5,
         uid,
       };

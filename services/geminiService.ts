@@ -275,7 +275,8 @@ export const askChekkiQuestion = async (
   isGuest: boolean = false,
   signal?: AbortSignal,
   history: ChatTurn[] = [],
-  idempotencyKey?: string
+  idempotencyKey?: string,
+  worksheetContext?: string
 ): Promise<string> => {
   if (MOCK_MODE) {
     await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
@@ -304,6 +305,7 @@ export const askChekkiQuestion = async (
         isGuest: isGuest,
         language: language,
         history: history,
+        worksheetContext: worksheetContext,
       }),
     });
 

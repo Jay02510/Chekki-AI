@@ -17,7 +17,7 @@ service cloud.firestore {
         isAdmin() || 
         (request.auth.uid == userId && 
          request.resource.data.plan == 'free' && 
-         request.resource.data.maxScansPerDay == 3 && 
+         request.resource.data.maxScansPerDay == 2 && 
          request.resource.data.maxQuestionsPerDay == 5)
       );
       allow delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
@@ -25,6 +25,10 @@ service cloud.firestore {
         isAdmin() || 
         (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['plan', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate']))
       );
+    }
+
+    match /users/{userId}/data/{document=**} {
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
     
     // Helper to prevent storage exhaustion and ensure type safety

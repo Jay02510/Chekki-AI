@@ -1,8 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
-import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 import { ASSETS } from '../constants';
 import { FeedbackModal } from './FeedbackModal';
 import { LegalType } from '../types';
@@ -18,63 +16,10 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
   const { t, language } = useLanguage();
   const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal } = useAuth();
 
-  // State for Grammar Chat
-  const [askQuery, setAskQuery] = useState('');
-  const [askAnswer, setAskAnswer] = useState<string | null>(null);
-  const [askAnsweredQuestion, setAskAnsweredQuestion] = useState('');
-  const [isAskAsking, setIsAskAsking] = useState(false);
-  const [askHistory, setAskHistory] = useState<ChatTurn[]>([]);
-
   // Modals
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showFlyerModal, setShowFlyerModal] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
-
-  const handleAskSubmit = useCallback(
-    async (question: string) => {
-      if (!question.trim() || isAskAsking) return;
-
-      if (isAuthenticated && !checkQuestionLimit()) return;
-
-      const isFollowUp = askHistory.length > 0;
-      if (!isFollowUp) {
-        setAskAnswer(null);
-        setAskHistory([]);
-      }
-
-      setAskAnsweredQuestion(question);
-      setIsAskAsking(true);
-
-      try {
-        const isGuest = !isAuthenticated;
-        const response = await askChekkiQuestion(
-          question,
-          language,
-          isGuest,
-          undefined,
-          askHistory
-        );
-        setAskAnswer(response);
-
-        setAskHistory((prev) => [
-          ...prev,
-          { role: 'user' as const, text: question },
-          { role: 'model' as const, text: response },
-        ]);
-
-        if (isAuthenticated) await incrementQuestion();
-      } catch (error: any) {
-        setAskAnswer(
-          language === 'ko'
-            ? '오류가 발생했습니다. 다시 시도해주세요.'
-            : 'Something went wrong. Please try again.'
-        );
-      } finally {
-        setIsAskAsking(false);
-      }
-    },
-    [isAuthenticated, checkQuestionLimit, incrementQuestion, language, askHistory, isAskAsking]
-  );
 
   return (
     <div className="animate-fade-in pb-32">
@@ -100,23 +45,6 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
         </div>
       )}
 
-      <AskChekkiAnswerModal
-        answer={askAnswer}
-        isAsking={isAskAsking}
-        question={askAnsweredQuestion}
-        isAuthenticated={isAuthenticated}
-        language={language}
-        history={askHistory}
-        onClose={() => {
-          setAskAnswer(null);
-          setAskAnsweredQuestion('');
-          setAskHistory([]);
-        }}
-        openLoginModal={openLoginModal}
-        onFollowUp={handleAskSubmit}
-        isNight={isNight}
-      />
-
       <div className="max-w-5xl mx-auto px-4 pt-8 md:pt-16 mb-8 flex justify-start">
         <button
           onClick={onClose}
@@ -129,27 +57,6 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
         </button>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 mb-16 md:mb-32">
-        <div className="text-center mb-8 md:mb-16">
-          <h2
-            className={`text-balance text-3xl md:text-5xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-4`}
-          >
-            Confused about grammar?
-          </h2>
-          <p className={`${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-korean font-bold`}>
-            {language === 'ko'
-              ? '궁금한 점이 있다면 채키에게 직접 물어보세요!'
-              : 'Ask Chekki anything about English grammar!'}
-          </p>
-        </div>
-        <AskChekkiBar
-          query={askQuery}
-          setQuery={setAskQuery}
-          onSubmit={handleAskSubmit}
-          isAsking={isAskAsking}
-          language={language}
-          isNight={isNight}
-        />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 space-y-20 md:space-y-40">

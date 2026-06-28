@@ -95,7 +95,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const FREE_DAILY_LIMIT = 3;
+const FREE_DAILY_LIMIT = 2;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
@@ -232,7 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: 'expired@example.com',
         name: 'Reviewer (Expired)',
         plan: 'free',
-        maxScansPerDay: 3,
+        maxScansPerDay: 2,
         maxQuestionsPerDay: 5,
       };
       if (!hasActiveAppStoreSub) {

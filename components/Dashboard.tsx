@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy } from '@phosphor-icons/react';
+import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy, Printer } from '@phosphor-icons/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useMistakes } from '../contexts/MistakeContext';
@@ -44,12 +44,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
     try {
       const isGuest = !isAuthenticated;
+      const contextString = mistakes.length > 0 
+        ? mistakes.map(m => `Q: ${m.question_text} | A: ${m.correct_answer}`).join('\n')
+        : undefined;
+
       const response = await askChekkiQuestion(
         question,
         language,
         isGuest,
         undefined,
-        askHistory
+        askHistory,
+        undefined,
+        contextString
       );
       setAskAnswer(response);
 
@@ -78,6 +84,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const [practiceDone, setPracticeDone] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [spokenText, setSpokenText] = useState("");
+  const [showHandoff, setShowHandoff] = useState(false);
   const [practiceStatus, setPracticeStatus] = useState<'idle' | 'success' | 'failed'>('idle');
 
   // Mock mistake bank removed
@@ -90,6 +97,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   }, []);
 
   const handleStartPractice = () => {
+    setShowHandoff(true);
+  };
+
+  const confirmStartPractice = () => {
+    setShowHandoff(false);
     setIsPracticing(true);
     setPracticeIndex(0);
     setScore(0);
@@ -326,6 +338,34 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   return createPortal(
     <div className="fixed inset-0 z-[200] bg-[#050505] text-zinc-50 overflow-y-auto animate-fade-in font-sans">
       <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03] bg-noise mix-blend-overlay" />
+
+      {showHandoff && (
+        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-6 bg-black/95 backdrop-blur-3xl animate-in fade-in zoom-in duration-300">
+          <div className="max-w-md w-full text-center space-y-8">
+            <div className="w-32 h-32 mx-auto bg-orange-500/20 rounded-full flex items-center justify-center mb-8 animate-pulse">
+              <span className="text-6xl">📱</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black text-white font-display tracking-tight leading-tight">
+              {language === 'ko' ? '아이에게 폰을\n건네주세요!' : 'Hand the phone\nto your child!'}
+            </h2>
+            <p className="text-zinc-400 font-korean text-lg mb-12">
+              {language === 'ko' ? '아이가 직접 틀린 문제를 오디오로 연습할 수 있습니다.' : 'Let them practice their mistakes with AI.'}
+            </p>
+            <button
+              onClick={confirmStartPractice}
+              className="w-full py-5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-full text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-95 transition-all"
+            >
+              {language === 'ko' ? '준비 완료!' : 'I\'m Ready!'}
+            </button>
+            <button
+              onClick={() => setShowHandoff(false)}
+              className="mt-4 text-zinc-500 hover:text-white font-korean text-sm"
+            >
+              {language === 'ko' ? '취소' : 'Cancel'}
+            </button>
+          </div>
+        </div>
+      )}
       
       <AskChekkiAnswerModal
         answer={askAnswer}
@@ -408,10 +448,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 )}
               </div>
 
-              <div className="mt-6 flex justify-end relative z-10">
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-end gap-3 relative z-10">
+                <button 
+                  onClick={() => handleGeneratePdf('Mistake Bank Review')}
+                  disabled={isGeneratingPdf || mistakes.length === 0}
+                  className={`group relative overflow-hidden px-6 py-3 bg-white/5 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.97] hover:bg-white/10 border border-white/10 font-korean disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {isGeneratingPdf ? (
+                    <Spinner size={18} className="animate-spin text-zinc-400" />
+                  ) : (
+                    <Printer size={18} weight="bold" />
+                  )}
+                  <span className="relative z-10">
+                    {language === 'ko' ? (isGeneratingPdf ? '생성 중...' : '프린트 학습지') : (isGeneratingPdf ? 'Generating...' : 'Print Review Sheet')}
+                  </span>
+                </button>
                 <button 
                   onClick={handleStartPractice}
-                  className={`group relative overflow-hidden px-8 py-3 bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-center gap-4 transition-all duration-200 active:scale-[0.96] shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-600 font-korean`}
+                  disabled={mistakes.length === 0}
+                  className={`group relative overflow-hidden px-8 py-3 bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.97] shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-600 font-korean disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-emerald-500/50`}
                 >
                   <MicrophoneStage size={18} weight="bold" />
                   <span className="relative z-10">
@@ -482,7 +537,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 </p>
                 <button
                   onClick={handleStartPractice}
-                  className="mt-4 px-8 py-3 bg-emerald-500 text-white font-bold rounded-full hover:bg-emerald-600 transition-colors font-korean"
+                  className="mt-4 px-8 py-3 bg-emerald-500 text-white font-bold rounded-full hover:bg-emerald-600 transition-all duration-200 active:scale-[0.97] font-korean"
                 >
                   {language === 'ko' ? '다시 연습하기' : 'Practice Again'}
                 </button>
