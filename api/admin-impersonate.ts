@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 const ADMIN_PASSCODE = 'ChecciAdmin2026!';
 
@@ -22,7 +22,7 @@ function initAdmin() {
 }
 
 initAdmin();
-const adminDb = getFirestore();
+const authDb = getAuth();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -32,38 +32,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { passcode } = req.body || {};
+  const { passcode, uid } = req.body || {};
 
   if (passcode !== ADMIN_PASSCODE) {
     return res.status(401).json({ error: 'Unauthorized: Invalid Passcode' });
   }
 
+  if (!uid) {
+    return res.status(400).json({ error: 'Missing uid' });
+  }
+
   try {
-    const usersSnapshot = await adminDb
-      .collection('users')
-      .orderBy('subscriptionStartedAt', 'desc')
-      .limit(100)
-      .get();
-
-    const users = usersSnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        uid: doc.id,
-        name: data.name || 'Unknown',
-        email: data.email || 'No email',
-        plan: data.plan || 'free',
-        subscriptionStartedAt: data.subscriptionStartedAt || null,
-        nextBillingDate: data.nextBillingDate || null,
-        maxScansPerDay: data.maxScansPerDay || 0,
-        scansUsedToday: data.scansUsedToday || 0,
-        lastScanDate: data.lastScanDate || null,
-        maxQuestionsPerDay: data.maxQuestionsPerDay || 0,
-      };
-    });
-
-    return res.status(200).json({ success: true, users });
+    const customToken = await authDb.createCustomToken(uid);
+    return res.status(200).json({ success: true, customToken });
   } catch (err: any) {
-    console.error('[admin-users] Error:', err);
+    console.error('[admin-impersonate] Error:', err);
     return res.status(500).json({ error: err.message || 'Internal server error' });
   }
 }

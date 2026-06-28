@@ -12,6 +12,7 @@ dependencies {
     implementation project(':capacitor-community-apple-sign-in')
     implementation project(':capacitor-community-in-app-review')
     implementation project(':capacitor-filesystem')
+    implementation project(':capacitor-haptics')
     implementation project(':capacitor-share')
     implementation project(':capgo-capacitor-speech-recognition')
     implementation project(':chuseok22-capacitor-kakao-login')

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { ChekkiMascot } from '../../components/Icons';
 import { auth, dbInstance } from '../../services/database';
-import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, signInWithCustomToken } from 'firebase/auth';
 import { doc, setDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 
-const ADMIN_PASSCODE = 'ChekkiAdmin2026!';
+const ADMIN_PASSCODE = 'ChecciAdmin2026!';
 
 export default function AdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -21,6 +21,7 @@ export default function AdminPage() {
   const [mode, setMode] = useState<'create' | 'upgrade' | 'view_members'>('create');
   const [message, setMessage] = useState({ text: '', type: '' });
   const [users, setUsers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleFetchUsers = async () => {
     setLoading(true);
@@ -166,6 +167,96 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteUser = async (uid: string, email: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete user ${email}?`)) {
+      return;
+    }
+    
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    
+    try {
+      const response = await fetch('/api/admin-delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, uid }),
+      });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete user');
+      }
+      
+      setMessage({ text: `✅ User ${email} deleted successfully!`, type: 'success' });
+      // Remove from local state immediately to avoid another fetch, or re-fetch
+      setUsers(users.filter(u => u.uid !== uid));
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error deleting user', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage({ text: `✅ Password reset email sent to ${email}`, type: 'success' });
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error sending password reset', type: 'error' });
+    }
+  };
+
+  const handleDowngradeUser = async (uid: string, email: string) => {
+    if (!window.confirm(`Are you sure you want to downgrade user ${email} to FREE?`)) return;
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin-downgrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, uid }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to downgrade user');
+      setMessage({ text: `✅ User ${email} downgraded successfully!`, type: 'success' });
+      handleFetchUsers();
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error downgrading user', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImpersonateUser = async (uid: string, email: string) => {
+    if (!window.confirm(`Are you sure you want to log in as ${email}? This will end your current admin session.`)) return;
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin-impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, uid }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to get custom token');
+      
+      await signInWithCustomToken(auth, data.customToken);
+      window.location.href = '/app.html';
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error impersonating user', type: 'error' });
+      setLoading(false);
+    }
+  };
+
+  const filteredUsers = users.filter(u => 
+    u.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-white font-sans">
       <div
@@ -285,7 +376,15 @@ export default function AdminPage() {
             </div>
 
             {mode === 'view_members' ? (
-              <div className="w-full overflow-x-auto mt-4">
+              <div className="w-full flex flex-col gap-4 mt-4">
+                <input
+                  type="text"
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium"
+                />
+              <div className="w-full overflow-x-auto">
                 {loading ? (
                   <div className="flex justify-center p-8 text-zinc-500 font-bold tracking-widest animate-pulse">
                     LOADING MEMBERS...
@@ -297,19 +396,20 @@ export default function AdminPage() {
                         <th className="py-3 px-4 font-bold">Name</th>
                         <th className="py-3 px-4 font-bold">Email</th>
                         <th className="py-3 px-4 font-bold">Plan</th>
-                        <th className="py-3 px-4 font-bold">Started At</th>
+                        <th className="py-3 px-4 font-bold">Insights</th>
                         <th className="py-3 px-4 font-bold">Billing Date</th>
+                        <th className="py-3 px-4 font-bold text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800/50">
-                      {users.length === 0 ? (
+                      {filteredUsers.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="py-8 text-center text-zinc-500">
+                          <td colSpan={6} className="py-8 text-center text-zinc-500">
                             No members found.
                           </td>
                         </tr>
                       ) : (
-                        users.map((user) => (
+                        filteredUsers.map((user) => (
                           <tr key={user.uid} className="hover:bg-zinc-800/30 transition-colors">
                             <td className="py-3 px-4 text-white font-medium">{user.name}</td>
                             <td className="py-3 px-4 text-zinc-400">{user.email}</td>
@@ -321,14 +421,48 @@ export default function AdminPage() {
                               </span>
                             </td>
                             <td className="py-3 px-4 text-zinc-500">
-                              {user.subscriptionStartedAt
-                                ? new Date(user.subscriptionStartedAt).toLocaleDateString()
-                                : '-'}
+                              <div className="flex flex-col">
+                                <span className="text-xs">Scans: {user.scansUsedToday} / {user.maxScansPerDay}</span>
+                                <span className="text-[10px] text-zinc-600">Last: {user.lastScanDate || 'N/A'}</span>
+                              </div>
                             </td>
                             <td className="py-3 px-4 text-zinc-500">
                               {user.nextBillingDate
                                 ? new Date(user.nextBillingDate).toLocaleDateString()
                                 : '-'}
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleResetPassword(user.email)}
+                                  className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                  title="Send Password Reset Email"
+                                >
+                                  Reset PW
+                                </button>
+                                <button
+                                  onClick={() => handleImpersonateUser(user.uid, user.email)}
+                                  className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                  title="Log in as user"
+                                >
+                                  Log In
+                                </button>
+                                {user.plan === 'pro' && (
+                                  <button
+                                    onClick={() => handleDowngradeUser(user.uid, user.email)}
+                                    className="px-2 py-1 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                    title="Downgrade to Free"
+                                  >
+                                    Downgrade
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDeleteUser(user.uid, user.email)}
+                                  className="px-2 py-1 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                >
+                                  Del
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -336,6 +470,7 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                 )}
+              </div>
               </div>
             ) : (
               <form
