@@ -27,7 +27,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   onSkip,
   isNight = true,
 }) => {
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const { updateChildProfile } = useAuth();
 
   const [step, setStep] = useState(0);
@@ -313,6 +313,21 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       >
         {/* Inner Core */}
         <div className="relative w-full h-full bg-[#050505] rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
+          {step === 0 && (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="absolute top-6 right-6 z-50"
+            >
+              <button 
+                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+                className="bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-[10px] font-bold px-3 py-1.5 rounded-full backdrop-blur-md transition-all tracking-wider border border-white/5 hover:border-white/20 flex items-center gap-1.5 shadow-lg"
+              >
+                <span className="text-[12px]">{language === 'ko' ? '🇺🇸' : '🇰🇷'}</span>
+                <span>{language === 'ko' ? 'ENG' : '한국어'}</span>
+              </button>
+            </motion.div>
+          )}
           <AnimatePresence mode="wait">
             {step === 0 && renderEducationalStep(
               '/assets/slide1_welcome_mascot.png',
