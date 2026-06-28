@@ -114,7 +114,7 @@ export default function Landing() {
 
       {/* Navigation */}
       <div className="fixed top-6 left-0 w-full z-50 flex justify-center px-4">
-        <header className="flex h-14 items-center justify-between px-6 max-w-4xl w-full mx-auto bg-white/80 dark:bg-white/5 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-2xl transition-colors duration-200">
+        <header className="relative flex h-14 items-center justify-between px-6 max-w-4xl w-full mx-auto bg-white/80 dark:bg-white/5 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-2xl transition-colors duration-200">
           <div className="flex items-center gap-[2px] text-2xl tracking-tighter cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <span className="font-bold text-slate-900 dark:text-white leading-none">Chekki</span>
             <span className="font-extrabold text-brand leading-none">ai</span>
@@ -153,6 +153,17 @@ export default function Landing() {
           >
             {mobileMenuOpen ? <X size={20} weight="bold" /> : <List size={20} weight="bold" />}
           </button>
+
+          {/* Mobile dropdown menu */}
+          {mobileMenuOpen && (
+            <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 w-full bg-white/95 dark:bg-[#111]/95 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:hidden z-50 origin-top animate-fade-in-up">
+              <div className="flex flex-col p-2 gap-1">
+                <a href="/app" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Web App</a>
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Features</a>
+                <a href="#ecosystem" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Ecosystem</a>
+              </div>
+            </div>
+          )}
         </header>
       </div>
 

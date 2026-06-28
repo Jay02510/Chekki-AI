@@ -79,35 +79,9 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedM
             onClick={onReset}
             onKeyDown={(e) => e.key === 'Enter' && onReset()}
           >
-            {!logoError ? (
-              <div className="relative w-8 h-8 md:w-10 md:h-10 flex-shrink-0">
-                <img
-                  src={ASSETS.LOGO}
-                  alt="Chekki AI"
-                  className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-full object-contain group-hover:scale-110 transition-transform duration-200 ease-[var(--ease-premium)] filter brightness-110 scale-[1.15] origin-left"
-                  onError={() => setLogoError(true)}
-                />
-              </div>
-            ) : (
-              <div
-                className={`w-8 h-8 md:w-10 md:h-10 ${isNight ? 'bg-gradient-to-br from-orange-500 to-pink-500' : 'bg-orange-500'} rounded-full flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-[1.02] transition-transform duration-200 ease-[var(--ease-premium)] flex-shrink-0`}
-              >
-                <ChekkiMascot
-                  className="w-5 h-5 text-white drop-shadow-md"
-                  mood="happy"
-                />
-              </div>
-            )}
-
-            <div className="flex flex-col justify-center relative z-10 pt-0.5 min-w-0 ml-2 hidden sm:flex">
-              <h1
-                className={`text-lg md:text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} leading-none font-display tracking-tight group-hover:tracking-normal transition-all duration-200 ease-[var(--ease-premium)] truncate`}
-              >
-                Chekki
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">
-                  AI
-                </span>
-              </h1>
+            <div className="flex items-center gap-[2px] text-xl md:text-2xl tracking-tighter cursor-pointer ml-1 transition-transform duration-200 ease-[var(--ease-premium)] group-hover:scale-[1.02]">
+              <span className={`font-bold ${isNight ? 'text-white' : 'text-slate-900'} leading-none`}>Chekki</span>
+              <span className="font-extrabold text-orange-500 leading-none">ai</span>
             </div>
 
             <span className="absolute top-[110%] left-0 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 bg-zinc-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-md whitespace-nowrap shadow-xl pointer-events-none origin-top-left z-50">
