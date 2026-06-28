@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useToast } from '../contexts/ToastContext';
 import { compressImage } from '../utils/imageUtils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -28,6 +29,7 @@ export const CameraView: React.FC<Props> = ({
   minimal = false,
   onOpenHelp,
 }) => {
+  const { showToast } = useToast();
   const {
     user,
     isAuthenticated,
@@ -99,7 +101,7 @@ export const CameraView: React.FC<Props> = ({
       // img.onload handles the rest, so we remove the direct call
     } catch (e) {
       console.error('Image processing failed.');
-      alert('Error processing image. Please try another photo.');
+      showToast({ message: 'Error processing image. Please try another photo.', type: 'error' });
     } finally {
       setIsProcessing(false);
     }
@@ -141,172 +143,7 @@ export const CameraView: React.FC<Props> = ({
     </div>
   );
 
-  const renderFeatureSection = () => (
-    <section className="py-12 md:py-32 px-4 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto w-full space-y-16 md:space-y-40">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10">
-        {[
-          { id: 'brand', emoji: '🏫', title: t('diff_brand'), desc: t('diff_brand_desc') },
-          { id: 'ocr', emoji: '🎯', title: t('diff_ocr'), desc: t('diff_ocr_desc') },
-          { id: 'script', emoji: '💌', title: t('diff_script'), desc: t('diff_script_desc') },
-        ].map((feat) => (
-          <div
-            key={feat.id}
-            className={`p-6 md:p-10 rounded-3xl ${isNight ? 'bg-zinc-900/40 border-white/5 hover:border-orange-500/20' : 'bg-white border-zinc-200 hover:border-orange-500/30 shadow-sm'} border hover:-translate-y-1 hover:shadow-lg transition-all duration-200`}
-          >
-            <span className="text-3xl md:text-5xl block mb-4 md:mb-6">{feat.emoji}</span>
-            <h3
-              className={`text-lg md:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2 md:mb-3`}
-            >
-              {feat.title}
-            </h3>
-            <p
-              className={`${isNight ? 'text-zinc-400 opacity-80' : 'text-zinc-600'} text-xs md:text-base leading-relaxed font-korean`}
-            >
-              {feat.desc}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <div className="space-y-10 md:space-y-20">
-        <h2
-          className={`text-2xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-display tracking-tight`}
-        >
-          {t('how_title')}
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16">
-          {[1, 2, 3].map((step) => (
-            <div key={step} className="flex flex-col items-center text-center group">
-              <div className="w-12 h-12 md:w-20 md:h-20 rounded-3xl bg-orange-500 flex items-center justify-center text-xl md:text-3xl font-black text-white mb-4 md:mb-8 shadow-2xl shadow-orange-500/20 group-hover:scale-110 transition-transform">
-                {step}
-              </div>
-              <h4
-                className={`text-lg md:text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 md:mb-3 tracking-tight`}
-              >
-                {t(`how_step${step}`)}
-              </h4>
-              <p
-                className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-xs md:text-lg font-korean max-w-xs leading-relaxed`}
-              >
-                {t(`how_step${step}_desc`)}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="pt-20 md:pt-40 pb-2 md:pb-4 text-center space-y-2 md:space-y-4">
-          <h2
-            className={`text-3xl md:text-8xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight break-keep leading-tight`}
-          >
-            {t('magic_title')}
-          </h2>
-          <p className="text-[10px] md:text-base font-black text-zinc-500 uppercase tracking-[0.4em] opacity-90">
-            {t('magic_subtitle')}
-          </p>
-        </div>
-
-        <ScreenshotCarousel />
-
-        {/* Why Chekki Section */}
-        <div className="pt-20 md:pt-40 space-y-12 md:space-y-24">
-          <h2
-            className={`text-3xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-display tracking-tight`}
-          >
-            {t('diff_title')}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 max-w-6xl mx-auto px-4">
-            <div
-              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-200`}
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-200">
-                <span className="text-8xl md:text-[12rem]">✍️</span>
-              </div>
-              <span className="text-4xl md:text-7xl mb-2">✍️</span>
-              <h3
-                className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight leading-tight`}
-              >
-                {t('diff_ocr')}
-              </h3>
-              <p
-                className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-650'} text-base md:text-2xl font-korean leading-relaxed max-w-md`}
-              >
-                {t('diff_ocr_desc')}
-              </p>
-            </div>
-            <div
-              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-200`}
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-200">
-                <span className="text-8xl md:text-[12rem]">💌</span>
-              </div>
-              <span className="text-4xl md:text-7xl mb-2">💌</span>
-              <h3
-                className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight leading-tight`}
-              >
-                {t('diff_script')}
-              </h3>
-              <p
-                className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-650'} text-base md:text-2xl font-korean leading-relaxed max-w-md`}
-              >
-                {t('diff_script_desc')}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Privacy Section */}
-        <div className="pt-24 md:pt-60 pb-24 md:pb-60 space-y-12 md:space-y-24">
-          <div className="text-center space-y-4 md:space-y-8">
-            <h2
-              className={`text-3xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight`}
-            >
-              {t('trust_title')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24 max-w-6xl mx-auto px-4">
-            <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
-              <div
-                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-200 group-hover:border-orange-500/30`}
-              >
-                🔒
-              </div>
-              <div className="space-y-4 md:space-y-6">
-                <h3
-                  className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight`}
-                >
-                  {t('trust_privacy')}
-                </h3>
-                <p
-                  className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-xl mx-auto`}
-                >
-                  {t('trust_privacy_desc')}
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
-              <div
-                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-200 group-hover:border-orange-500/30`}
-              >
-                👥
-              </div>
-              <div className="space-y-4 md:space-y-6">
-                <h3
-                  className={`text-2xl md:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} tracking-tight`}
-                >
-                  {t('trust_safety')}
-                </h3>
-                <p
-                  className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-xl mx-auto`}
-                >
-                  {t('trust_safety_desc')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+  const renderFeatureSection = () => null;
 
   // State for the inline Ask Chekki answer modal
   const [askQuery, setAskQuery] = useState('');
@@ -395,7 +232,7 @@ export const CameraView: React.FC<Props> = ({
             className={`relative group p-2.5 rounded-2xl border flex flex-col items-center text-center gap-1 transition-all ${
               isNight
                 ? 'bg-zinc-900/30 border-white/5 hover:bg-zinc-900/50'
-                : 'bg-orange-50/20 border-orange-100/30 shadow-[0_4px_12px_rgba(0,0,0,0.015)] hover:border-orange-500/30'
+                : 'bg-orange-50/20 border-orange-100/30 shadow-[0_4px_12px_rgba(0,0,0,0.015)] lg:hover:border-orange-500/30'
             }`}
           >
             <span className="text-sm md:text-base leading-none">{tip.emoji}</span>
@@ -481,20 +318,20 @@ export const CameraView: React.FC<Props> = ({
         className={`relative w-full ${size === 'large' ? 'min-h-[350px] md:min-h-[500px]' : 'h-full'} flex items-center justify-center py-4 md:py-8`}
       >
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-[2.5rem] animate-[pulse_5s_ease-[cubic-bezier(0.23,1,0.32,1)]_infinite] pointer-events-none`}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-[2.5rem]  pointer-events-none`}
         ></div>
         <div
           id="magic-drop-zone-inner"
-          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-[#050505]/40 border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-zinc-200 shadow-[0_30px_90px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[2.5rem] border transition-all duration-200 ease-[var(--ease-premium)] flex flex-col items-center justify-center p-5 md:p-12 group
-              ${dragActive && !isLocked ? 'border-orange-500 shadow-[0_0_80px_rgba(249,115,22,0.2)] scale-[1.02]' : 'hover:border-orange-500/30'}`}
+          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-[#050505]/40 border-white/10 shadow-2xl' : 'bg-white border-zinc-200 shadow-xl'} backdrop-blur-3xl rounded-[2.5rem] border transition-all duration-200 ease-[var(--ease-premium)] flex flex-col items-center justify-center p-5 md:p-12 group
+              ${dragActive && !isLocked ? 'border-orange-500 shadow-md scale-[1.02]' : 'lg:hover:border-orange-500/30'}`}
           onDragEnter={isLocked ? undefined : handleDrag}
           onDragLeave={isLocked ? undefined : handleDrag}
           onDragOver={isLocked ? undefined : handleDrag}
           onDrop={isLocked ? undefined : handleDrop}
         >
           {!isAuthenticated && !guestUsed && (
-            <div className="absolute top-4 md:top-10 z-40 animate-[bounce_4s_ease-[cubic-bezier(0.23,1,0.32,1)]_infinite] pointer-events-none">
-              <div className="bg-orange-500 text-white text-[8px] md:text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-[0_15px_40px_rgba(249,115,22,0.4)] flex items-center gap-2 border border-white/20 whitespace-nowrap">
+            <div className="absolute top-4 md:top-10 z-40  pointer-events-none">
+              <div className="bg-orange-500 text-white text-[8px] md:text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-2 border border-white/20 whitespace-nowrap">
                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
                 {t('guest_scan_badge')}
               </div>
@@ -512,12 +349,12 @@ export const CameraView: React.FC<Props> = ({
                   ></div>
                 </div>
               ) : (
-                <div className="w-full h-full animate-float flex items-center justify-center">
+                <div className="w-full h-full  flex items-center justify-center">
                   {!imgError ? (
                     <img
                       src={ASSETS.HERO_IMAGE}
                       alt="Chekki Mascot"
-                      className="w-full h-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)] filter brightness-110 transition-opacity duration-700"
+                      className="w-full h-full object-contain drop-shadow-lg filter brightness-110 transition-opacity duration-700"
                       onLoad={() => setMascotLoaded(true)}
                       onError={() => setImgError(true)}
                       loading="eager"
@@ -580,7 +417,7 @@ export const CameraView: React.FC<Props> = ({
                   title={t('btn_guest_scan')}
                 >
                   <div
-                    className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-[#1a1a1a] border-white/10' : 'bg-orange-500 border-white/20'} flex items-center justify-center shadow-[0_20px_50px_rgba(249,115,22,0.3)] transition-all duration-200 ease-[var(--ease-premium)] group-hover:scale-110 group-hover:shadow-[0_20px_60px_rgba(249,115,22,0.5)] border-4 active:scale-90 animate-glow-pulse`}
+                    className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-[#1a1a1a] border-white/10' : 'bg-orange-500 border-white/20'} flex items-center justify-center shadow-md transition-all duration-200 ease-[var(--ease-premium)] group-hover:scale-110 group-hover:shadow-lg border-4 active:scale-90 `}
                   >
                     <svg
                       className="w-8 h-8 md:w-14 md:h-14 text-white"

@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
+import { useToast } from '../contexts/ToastContext';
 import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useMistakes } from '../contexts/MistakeContext';
@@ -63,6 +64,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
   onOpenDashboard,
   isSpeedMode = false,
 }) => {
+  const { showToast } = useToast();
   const { t, language } = useLanguage();
   const { toggleMistake, isMistake } = useMistakes();
   const { user, setShowPaywall, isAuthenticated, openLoginModal } = useAuth();
@@ -156,7 +158,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
         console.error('Speech Recognition Error', e);
         setIsListening(false);
         if (e.error === 'not-allowed') {
-          alert('Microphone access was denied. Please check your browser settings.');
+          showToast({ message: 'Microphone access was denied. Please check your browser settings.', type: 'error' });
         }
       };
 
@@ -413,7 +415,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
         await navigator.share(shareData);
       } else {
         navigator.clipboard.writeText(PUBLIC_APP_URL);
-        alert(language === 'ko' ? '앱 링크가 복사되었습니다!' : 'App link copied!');
+        showToast({ message: language === 'ko' ? '앱 링크가 복사되었습니다!' : 'App link copied!', type: 'success' });
       }
     } catch (err) {
       console.error(err);
@@ -453,21 +455,13 @@ export const SplitView: React.FC<SplitViewProps> = ({
       try {
         const { available } = await SpeechRecognition.available();
         if (!available) {
-          alert(
-            language === 'ko'
-              ? '이 기기에서 음성 인식을 사용할 수 없습니다.'
-              : 'Speech recognition is not available on this device.'
-          );
+          showToast({ message: language === 'ko' ? '이 기기에서 음성 인식을 사용할 수 없습니다.' : 'Speech recognition is not available on this device.', type: 'error' });
           return;
         }
 
         const permStatus = await SpeechRecognition.requestPermissions();
         if (permStatus.speechRecognition !== 'granted') {
-          alert(
-            language === 'ko'
-              ? '마이크 및 음성 인식 권한을 허용해주세요.'
-              : 'Please allow microphone and speech recognition permissions.'
-          );
+          showToast({ message: language === 'ko' ? '마이크 및 음성 인식 권한을 허용해주세요.' : 'Please allow microphone and speech recognition permissions.', type: 'error' });
           return;
         }
 
@@ -524,11 +518,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
           endListenerRef.current = null;
         }
         if (err?.message?.includes('denied') || err?.message?.includes('permission')) {
-          alert(
-            language === 'ko'
-              ? '마이크 및 음성 인식 권한을 허용해주세요.'
-              : 'Please allow microphone and speech recognition permissions in Settings.'
-          );
+          showToast({ message: language === 'ko' ? '마이크 및 음성 인식 권한을 허용해주세요.' : 'Please allow microphone and speech recognition permissions in Settings.', type: 'error' });
         }
       }
       return;
@@ -536,11 +526,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
     // Web fallback: use Web Speech API
     if (!recognitionRef.current) {
-      alert(
-        language === 'ko'
-          ? '이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 이용해주세요.'
-          : 'Speech recognition is not supported in this browser. Please use Chrome.'
-      );
+      showToast({ message: language === 'ko' ? '이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 이용해주세요.' : 'Speech recognition is not supported in this browser. Please use Chrome.', type: 'error' });
       return;
     }
 
@@ -577,11 +563,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
       setLocalItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...refinedData } : i)));
       setRefiningItemId(null);
     } catch (err) {
-      alert(
-        language === 'ko'
-          ? '다듬기 실패했습니다. 다시 시도해주세요.'
-          : 'Failed to refine. Please try again.'
-      );
+      showToast({ message: language === 'ko' ? '다듬기 실패했습니다. 다시 시도해주세요.' : 'Failed to refine. Please try again.', type: 'error' });
     } finally {
       setIsRefining(false);
     }
@@ -661,7 +643,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
           onClick={() => setActiveItemId(null)}
         >
           <div
-            className={`px-6 py-5 border-b ${isNight ? 'border-white/5 bg-zinc-900/40' : 'border-zinc-100 bg-white/80'} flex flex-col shrink-0 transition-all`}
+            className={`px-4 py-3 border-b ${isNight ? 'border-white/5 bg-zinc-900/40' : 'border-zinc-100 bg-white/80'} flex flex-col shrink-0 transition-all`}
           >
             <div className="flex justify-between items-center w-full gap-4">
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -681,19 +663,21 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
               <div className="flex items-center gap-2 shrink-0">
                 <button
+                  aria-label="Open Dashboard"
                   onClick={() => onOpenDashboard && onOpenDashboard()}
-                  className={`w-10 h-10 md:w-auto px-0 md:px-5 md:h-12 rounded-full bg-orange-500 text-white hover:bg-orange-600 flex items-center justify-center font-bold text-[11px] md:text-sm tracking-wide transition-all duration-200 active:scale-[0.98] group font-korean shadow-[0_0_20px_rgba(249,115,22,0.3)]`}
+                  className={`w-12 h-12 md:w-auto px-0 md:px-5 md:h-12 rounded-full bg-orange-500 text-white hover:bg-orange-600 flex items-center justify-center font-bold text-[11px] md:text-sm tracking-wide transition-all duration-200 active:scale-[0.98] group font-korean shadow-sm`}
                   title={language === 'ko' ? '대시보드 열기' : 'Open Dashboard'}
                 >
-                  <span className="hidden md:inline mr-2">{language === 'ko' ? '대시보드' : 'Dashboard'}</span>
+                  <span className="hidden md:inline mr-2"></span>
                   <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
                   </svg>
                 </button>
                 <button
+                  aria-label="Share"
                   onClick={handleShare}
                   disabled={isSharing}
-                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center transition-all active:scale-[0.98] border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
+                  className={`w-12 h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center active:scale-[0.97] transition-transform duration-[160ms] ease-out border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
                   title={language === 'ko' ? '기록 저장' : 'Save Image'}
                 >
                   {isSharing ? (
@@ -725,8 +709,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   )}
                 </button>
                 <button
+                  aria-label="Close"
                   onClick={onClose}
-                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center text-lg transition-all active:scale-[0.98] border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
+                  className={`w-12 h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center text-lg active:scale-[0.97] transition-transform duration-[160ms] ease-out border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
                   title={t('tt_close')}
                 >
                   <svg
@@ -865,15 +850,16 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={onScanAgain}
-                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'}`}
+                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest active:scale-[0.97] transition-transform duration-[160ms] ease-out ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'}`}
                     >
                       <span className="text-xl">📸</span>
                       {t('ws_scan_again')}
                     </button>
                     <button
-                      onClick={handleShare}
-                      disabled={isSharing}
-                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] ${isNight ? 'bg-zinc-800 border-white/10 text-zinc-300 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
+                  aria-label="Share"
+                  onClick={handleShare}
+                  disabled={isSharing}
+                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest active:scale-[0.97] transition-transform duration-[160ms] ease-out ${isNight ? 'bg-zinc-800 border-white/10 text-zinc-300 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
                     >
                       {isSharing ? (
                         <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />

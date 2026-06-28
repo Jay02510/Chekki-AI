@@ -25,6 +25,7 @@ import { AnalysisState, LegalType } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { MistakeProvider } from './contexts/MistakeContext';
+import { ToastProvider } from './contexts/ToastContext';
 import { ChekkiMascot } from './components/Icons';
 import { db } from './services/database';
 import { Capacitor } from '@capacitor/core';
@@ -747,9 +748,11 @@ function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
+        <ToastProvider>
         <MistakeProvider>
           <AppContent />
         </MistakeProvider>
+      </ToastProvider>
       </AuthProvider>
     </LanguageProvider>
   );

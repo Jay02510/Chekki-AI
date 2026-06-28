@@ -247,7 +247,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 <div
                   key={item.id}
                   style={getStyle(item, idx)}
-                  className={`absolute pointer-events-auto transform-gpu animate-fade-in ${isFocused ? 'opacity-100' : 'opacity-20 blur-[2px]'}`}
+                  className={`absolute pointer-events-auto transform-gpu animate-[fadeIn_200ms_ease-out] ${isFocused ? 'opacity-100' : 'opacity-20 blur-[2px]'}`}
                   onPointerDown={(e) => handlePointerDown(e, item)}
                   onPointerUp={handlePointerUp}
                   onPointerCancel={handlePointerUp}
@@ -255,21 +255,21 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 >
                   <div
                     className={`
-                        rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-2 flex items-center gap-2 transform transition-all active:scale-[0.97] group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
-                        ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-[0_25px_70px_rgba(0,0,0,0.6)] ring-4 z-[1000]' : ''}
+                        rounded-2xl shadow-md border-2 flex items-center gap-2 transform transition-all active:scale-[0.97] group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
+                        ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-lg ring-4 z-[1000]' : ''}
                         ${isFocused 
                           ? (isBlankKeyMode 
-                              ? 'bg-blue-500 border-white shadow-blue-500/20' 
-                              : item.is_correct === true ? 'bg-emerald-500 border-white shadow-emerald-500/20' 
-                              : item.is_correct === false ? 'bg-red-500 border-white shadow-red-500/20' 
-                              : 'bg-orange-500 border-white shadow-orange-500/20')
+                              ? 'bg-blue-500 border-white shadow-sm' 
+                              : item.is_correct === true ? 'bg-emerald-500 border-white shadow-sm' 
+                              : item.is_correct === false ? 'bg-red-500 border-white shadow-sm' 
+                              : 'bg-orange-500 border-white shadow-sm')
                           : 'bg-transparent border-transparent'}
                         ${focusedId !== null && focusedId !== undefined && focusedId === item.id 
                           ? (isBlankKeyMode
-                              ? 'ring-4 ring-blue-500/70 scale-[1.04] shadow-[0_0_30px_rgba(59,130,246,0.4)]'
-                              : item.is_correct === true ? 'ring-4 ring-emerald-500/70 scale-[1.04] shadow-[0_0_30px_rgba(16,185,129,0.4)]'
-                              : item.is_correct === false ? 'ring-4 ring-red-500/70 scale-[1.04] shadow-[0_0_30px_rgba(239,68,68,0.4)]'
-                              : 'ring-4 ring-orange-500/70 scale-[1.04] shadow-[0_0_30px_rgba(249,115,22,0.4)]')
+                              ? 'ring-2 ring-blue-500/50 scale-[1.02] shadow-md'
+                              : item.is_correct === true ? 'ring-2 ring-emerald-500/50 scale-[1.02] shadow-md'
+                              : item.is_correct === false ? 'ring-2 ring-red-500/50 scale-[1.02] shadow-md'
+                              : 'ring-2 ring-orange-500/50 scale-[1.02] shadow-md')
                           : ''}
                         px-2.5 py-1.5 md:px-4 md:py-3
                     `}
@@ -279,7 +279,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                         <span className="font-black text-[9px] md:text-sm text-white">{item.id}</span>
                       </div>
                       <span
-                        className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md text-sm md:text-xl rotate-[-1.5deg] inline-block`}
+                        className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md text-sm md:text-xl  inline-block`}
                       >
                         {displayValue}
                       </span>
@@ -298,9 +298,10 @@ export const WorksheetOverlay: React.FC<Props> = ({
       <div
         className={`w-full flex flex-col ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200 shadow-xl'} lg:overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full rounded-3xl'}`}
       >
-        <div className="absolute top-4 left-4 right-4 md:top-8 md:left-8 md:right-8 z-50 flex justify-between items-start pointer-events-none gap-4">
+        <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50 flex flex-col items-end pointer-events-none gap-2">
           <div className="flex flex-col gap-3 items-start pointer-events-auto relative shrink-0">
             <button
+              aria-label={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
               onClick={() => setShowSettings(!showSettings)}
               className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/10 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-70 md:opacity-40 md:hover:opacity-100'} hover:scale-110 active:scale-90 hover:border-orange-500/50 hover:text-orange-500 transition-all duration-200 flex items-center justify-center text-xl shadow-2xl group shrink-0`}
               title={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
@@ -324,7 +325,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowSettings(false)}></div>
                 <div
-                  className={`flex flex-col gap-4 ${isNight ? 'bg-black/80 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-5 rounded-3xl border shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-fade-in-up origin-top-left absolute top-16 left-0 w-max z-[100]`}
+                  className={`flex flex-col gap-4 ${isNight ? 'bg-black/80 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-5 rounded-3xl border shadow-md animate-[fadeIn_200ms_ease-out]-up origin-top-left absolute top-16 left-0 w-max z-[100]`}
                 >
                   <div className="flex flex-col gap-2">
                     <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] px-1">
@@ -364,7 +365,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 onClick={() => setShowBlankAnswers(!showBlankAnswers)}
                 className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
                   showBlankAnswers 
-                    ? 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' 
+                    ? 'bg-blue-500 text-white border-blue-400 shadow-sm' 
                     : isNight ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
                 }`}
               >
@@ -420,7 +421,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className={`fixed inset-0 z-[9999] flex flex-col ${isNight ? 'bg-zinc-950' : 'bg-white'} animate-fade-in overflow-hidden select-none`}
+            className={`fixed inset-0 z-[9999] flex flex-col ${isNight ? 'bg-zinc-950' : 'bg-white'} animate-[fadeIn_200ms_ease-out] overflow-hidden select-none`}
           >
             {/* Top Control Bar with safe area awareness */}
             <div className="absolute top-0 left-0 right-0 z-[10002] px-6 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] flex justify-between items-start pointer-events-none gap-4">
@@ -441,7 +442,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
                   {showFullscreenSettings && (
                     <div
-                      className={`absolute top-20 left-0 flex flex-col gap-4 ${isNight ? 'bg-black/90 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-6 rounded-3xl border shadow-[0_30px_70px_rgba(0,0,0,0.7)] animate-fade-in-up origin-top-left w-max z-[10003]`}
+                      className={`absolute top-20 left-0 flex flex-col gap-4 ${isNight ? 'bg-black/90 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-6 rounded-3xl border shadow-[0_30px_70px_rgba(0,0,0,0.7)] animate-[fadeIn_200ms_ease-out]-up origin-top-left w-max z-[10003]`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex flex-col gap-3">
@@ -481,7 +482,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                       onClick={() => setShowBlankAnswers(!showBlankAnswers)}
                       className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
                         showBlankAnswers 
-                          ? 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' 
+                          ? 'bg-blue-500 text-white border-blue-400 shadow-sm' 
                           : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-blue-500/50 hover:text-blue-400'
                       }`}
                     >

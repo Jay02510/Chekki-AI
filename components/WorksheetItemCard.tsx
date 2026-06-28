@@ -118,7 +118,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
 
             <div className="flex-1 min-w-0">
               <h4
-                className={`text-sm md:text-lg font-bold leading-relaxed transition-colors break-keep ${isActive ? (isNight ? 'text-white' : 'text-zinc-900') : isNight ? 'text-zinc-500' : 'text-zinc-600'} ${item.question_translation ? 'mb-1' : 'mb-3'}`}
+                className={`text-sm md:text-lg font-bold leading-relaxed transition-colors break-words min-w-0 ${isActive ? (isNight ? 'text-white' : 'text-zinc-900') : isNight ? 'text-zinc-500' : 'text-zinc-600'} ${item.question_translation ? 'mb-1' : 'mb-3'}`}
               >
                 {item.question_text.replace(/^\d+[.)\s]+/, '')}
               </h4>
@@ -366,7 +366,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                             </span>
                           )}
                           <span
-                            className={`font-hand text-3xl md:text-5xl font-bold transition-colors duration-200 block break-words whitespace-normal break-keep rotate-[1.5deg] inline-block ${speechResult?.id === item.id ? (speechResult.success ? (isNight ? 'text-green-300 drop-shadow-[0_2px_8px_rgba(34,197,94,0.5)]' : 'text-green-600 drop-shadow-[0_2px_8px_rgba(22,163,74,0.3)]') : (isNight ? 'text-red-300 drop-shadow-[0_2px_8px_rgba(239,68,68,0.5)]' : 'text-red-600 drop-shadow-[0_2px_8px_rgba(220,38,38,0.3)]')) : isNight ? 'text-emerald-400' : 'text-emerald-600'}`}
+                            className={`font-hand text-3xl md:text-5xl font-bold transition-colors duration-200 block break-words whitespace-normal break-words min-w-0 rotate-[1.5deg] inline-block ${speechResult?.id === item.id ? (speechResult.success ? (isNight ? 'text-green-300 drop-shadow-[0_2px_8px_rgba(34,197,94,0.5)]' : 'text-green-600 drop-shadow-[0_2px_8px_rgba(22,163,74,0.3)]') : (isNight ? 'text-red-300 drop-shadow-[0_2px_8px_rgba(239,68,68,0.5)]' : 'text-red-600 drop-shadow-[0_2px_8px_rgba(220,38,38,0.3)]')) : isNight ? 'text-emerald-400' : 'text-emerald-600'}`}
                           >
                             {item.is_correct === true && <span className="mr-2">✅</span>}
                             {answerText}

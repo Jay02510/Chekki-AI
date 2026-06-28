@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useToast } from '../contexts/ToastContext';
 import { createPortal } from 'react-dom';
-import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy, Cards } from '@phosphor-icons/react';
+import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy, Cards, DeviceMobile } from '@phosphor-icons/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useMistakes } from '../contexts/MistakeContext';
@@ -18,6 +19,7 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
+  const { showToast } = useToast();
   const { language } = useLanguage();
   const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal } = useAuth();
   const { mistakes } = useMistakes();
@@ -68,11 +70,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
       if (isAuthenticated) await incrementQuestion();
     } catch (error: any) {
-      setAskAnswer(
-        language === 'ko'
-          ? '오류가 발생했습니다. 다시 시도해주세요.'
-          : 'Something went wrong. Please try again.'
-      );
+      const isNetwork = !window.navigator.onLine || error.message?.includes('network') || error.message?.includes('fetch');
+      const isQuota = error.message?.includes('quota') || error.status === 429;
+      let errorMsgEn = 'Something went wrong. Please try again.';
+      let errorMsgKo = '오류가 발생했습니다. 다시 시도해주세요.';
+      if (isNetwork) {
+        errorMsgEn = 'Network connection failed. Please check your internet and try again.';
+        errorMsgKo = '네트워크 연결에 실패했습니다. 인터넷을 확인하고 다시 시도해주세요.';
+      } else if (isQuota) {
+        errorMsgEn = 'You have reached the daily question limit. Please try again tomorrow.';
+        errorMsgKo = '일일 질문 한도에 도달했습니다. 내일 다시 시도해주세요.';
+      }
+      setAskAnswer(language === 'ko' ? errorMsgKo : errorMsgEn);
     } finally {
       setIsAskAsking(false);
     }
@@ -139,7 +148,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       if (Capacitor.isNativePlatform()) {
         const perm = await SpeechRecognition.requestPermissions();
         if (perm.speechRecognition !== 'granted') {
-          alert(language === 'ko' ? '마이크 권한이 필요합니다.' : 'Microphone permission is required.');
+          showToast({ message: language === 'ko' ? '마이크 권한이 필요합니다.' : 'Microphone permission is required.', type: 'error' });
           return;
         }
 
@@ -169,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         // Web Fallback
         const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRec) {
-          alert("Speech recognition is not supported in this browser. Please use Chrome.");
+          showToast({ message: 'Speech recognition is not supported in this browser. Please use Chrome.', type: 'error' });
           return;
         }
 
@@ -202,7 +211,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           console.error(event.error);
           setIsListening(false);
           if (event.error !== 'aborted') {
-            alert(language === 'ko' ? '음성 인식에 실패했습니다. 다시 시도해주세요.' : 'Speech recognition failed. Try again.');
+            showToast({ message: language === 'ko' ? '음성 인식에 실패했습니다. 다시 시도해주세요.' : 'Speech recognition failed. Try again.', type: 'error' });
           }
         };
 
@@ -217,7 +226,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       console.error(e);
       setIsListening(false);
       if (e.message !== 'recognition aborted') {
-        alert(language === 'ko' ? '음성 인식에 실패했습니다. 다시 시도해주세요.' : 'Speech recognition failed. Try again.');
+        showToast({ message: language === 'ko' ? '음성 인식에 실패했습니다. 다시 시도해주세요.' : 'Speech recognition failed. Try again.', type: 'error' });
       }
     }
   };
@@ -308,7 +317,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       await generateAndSharePDF(mockItems);
     } catch (e) {
       console.error(e);
-      alert(language === 'ko' ? 'PDF 생성에 실패했습니다.' : 'Failed to generate PDF');
+      showToast({ message: language === 'ko' ? 'PDF 생성에 실패했습니다.' : 'Failed to generate PDF', type: 'error' });
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -316,6 +325,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   
   const cardShellClasses = "relative rounded-[2rem] p-1.5 bg-white/5 border border-white/10 group transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[0.98]";
   const cardCoreClasses = "relative w-full h-full rounded-[calc(2rem-0.375rem)] bg-zinc-950/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col p-6 md:p-8 overflow-hidden";
+
+  const [isDark, setIsDark] = useState(true);
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'));
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   return createPortal(
     <div className="fixed inset-0 z-[200] bg-[#050505] text-zinc-50 overflow-y-auto animate-fade-in font-sans">
@@ -363,7 +382,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         }}
         openLoginModal={openLoginModal}
         onFollowUp={handleAskSubmit}
-        isNight={true}
+        isNight={isDark}
       />
       
       <div className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12 md:py-8 max-w-[1400px] mx-auto">
@@ -371,6 +390,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           <span>{language === 'ko' ? '학습 대시보드' : 'Learning Dashboard'}</span>
         </h1>
         <button 
+          aria-label="Close Dashboard"
           onClick={onClose}
           className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors active:scale-[0.97]"
         >
@@ -408,25 +428,39 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               </p>
 
               <div className="flex-1 w-full bg-black/40 rounded-2xl border border-white/5 p-4 flex flex-col gap-3 overflow-y-auto relative z-10">
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">Past Mistakes</h3>
-                {mistakes.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 text-center h-full">
-                    <span className="text-4xl mb-4">📓</span>
-                    <p className="text-zinc-400 font-medium font-korean text-sm">
-                      {language === 'ko'
-                        ? '아직 복습할 문항이 없습니다. 스캔 결과에서 오답을 저장하면 여기에 표시됩니다.'
-                        : 'Your mistake bank is empty. It will be populated with real sentences when you save a mistake from a scan.'}
-                    </p>
+                {showHandoff ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-4 animate-in fade-in">
+                    <DeviceMobile size={40} className="text-orange-500 mb-4 animate-pulse" weight="fill" />
+                    <h3 className="text-lg font-bold text-white mb-2">{language === 'ko' ? '폰을 테이블에 올려주세요!' : 'Tabletop Co-Pilot Mode Active'}</h3>
+                    <p className="text-xs text-zinc-400 mb-6">{language === 'ko' ? '화면 터치 없이 오디오로 복습이 진행됩니다.' : 'Hands-free interactive voice review is starting.'}</p>
+                    <div className="flex items-center gap-3 w-full">
+                      <button onClick={() => setShowHandoff(false)} className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-bold transition-all">Cancel</button>
+                      <button onClick={confirmStartPractice} className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">I'm Ready!</button>
+                    </div>
                   </div>
                 ) : (
-                  mistakes.slice(0, 3).map((mistake, i) => (
-                    <div key={mistake.uniqueId || i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default gap-3">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50">{mistake.question_text}</span>
-                        <span className="text-sm font-bold text-emerald-400">{cleanAnswerText(mistake.correct_answer || '')}</span>
+                  <>
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">Past Mistakes</h3>
+                    {mistakes.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center p-8 text-center h-full">
+                        <span className="text-4xl mb-4">📓</span>
+                        <p className="text-zinc-400 font-medium font-korean text-sm">
+                          {language === 'ko'
+                            ? '아직 복습할 문항이 없습니다. 스캔 결과에서 오답을 저장하면 여기에 표시됩니다.'
+                            : 'Your mistake bank is empty. It will be populated with real sentences when you save a mistake from a scan.'}
+                        </p>
                       </div>
-                    </div>
-                  ))
+                    ) : (
+                      mistakes.slice(0, 3).map((mistake, i) => (
+                        <div key={mistake.uniqueId || i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default gap-3">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50">{mistake.question_text}</span>
+                            <span className="text-sm font-bold text-emerald-400">{cleanAnswerText(mistake.correct_answer || '')}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </>
                 )}
               </div>
 
@@ -477,7 +511,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     onSubmit={handleAskSubmit}
                     isAsking={isAskAsking}
                     language={language}
-                    isNight={true}
+                    isNight={isDark}
                   />
                 </div>
               </div>

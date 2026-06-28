@@ -31,8 +31,7 @@ export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [lang, setLang] = useState<'en' | 'ko'>('en');
-  const [flippedCard, setFlippedCard] = useState<number | null>(null);
-
+  
   // Initialize theme
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -249,11 +248,10 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-[380px] gap-4">
           {/* Card 1: Setup */}
           <div 
-            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-300 cursor-pointer overflow-hidden relative"
-            onClick={() => setFlippedCard(flippedCard === 1 ? null : 1)}
+            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-300 overflow-hidden relative"
           >
             {/* Front Content */}
-            <div className={`flex flex-col h-full transition-all duration-300 ${flippedCard === 1 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
               <div className="flex-1 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
                 <img src="/assets/bento_reveal_only.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
@@ -268,7 +266,7 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-brand/5 dark:bg-brand/10 backdrop-blur-2xl transition-all duration-300 ${flippedCard === 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-brand/5 dark:bg-brand/10 backdrop-blur-2xl transition-all duration-300 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
               <div className="w-12 h-12 rounded-full bg-brand/20 text-brand flex items-center justify-center mb-6">
                 <GraduationCap weight="fill" className="text-2xl" />
               </div>
@@ -278,19 +276,16 @@ export default function Landing() {
               <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed">
                 {lang === 'en' ? 'No typing. No prompting. No endless scrolling. Our Reveal-Only interface hides all complex teaching instructions until you need them, saving your tired eyes and brain.' : '타이핑, 프롬프트, 끊임없는 스크롤은 이제 그만. 정답만 확인하세요. 복잡한 설명은 숨겨져 있어 피곤한 눈과 뇌를 보호해 줍니다.'}
               </p>
-              <div className="absolute top-6 right-6 text-brand">
-                <X weight="bold" className="text-xl" />
-              </div>
+              
             </div>
           </div>
 
           {/* Card 2: Assistant */}
           <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-300 cursor-pointer overflow-hidden relative"
-            onClick={() => setFlippedCard(flippedCard === 2 ? null : 2)}
+            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-300 overflow-hidden relative"
           >
             {/* Front Content */}
-            <div className={`flex flex-col md:flex-row h-full w-full transition-all duration-300 ${flippedCard === 2 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
               <div className="md:w-1/2 min-h-[140px] h-full px-5 py-6 md:py-10 flex flex-col justify-center order-2 md:order-1">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2">
                   {lang === 'en' ? 'Only have a few minutes?' : '시간이 몇 분밖에 없나요?'}
@@ -303,26 +298,23 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-blue-500/5 dark:bg-blue-500/10 backdrop-blur-2xl transition-all duration-300 ${flippedCard === 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-blue-500/5 dark:bg-blue-500/10 backdrop-blur-2xl transition-all duration-300 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
                 {lang === 'en' ? 'Speed vs. Tutor Mode' : '빠른 채점 vs 튜터 모드'}
               </h3>
               <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed max-w-lg">
                 {lang === 'en' ? 'Toggle "Speed Mode" to rapidly visually grade a 20-question worksheet with zero taps. Switch to "Tutor Mode" when your child is stuck, and let the native AI audio explain the concept for you.' : '"빠른 채점 모드"로 터치 없이 20문제를 눈으로 빠르게 채점하세요. 아이가 어려워할 땐 "튜터 모드"로 전환하여 원어민 AI가 직접 설명하게 할 수 있습니다.'}
               </p>
-              <div className="absolute top-6 right-6 text-blue-500">
-                <X weight="bold" className="text-xl" />
-              </div>
+              
             </div>
           </div>
 
           {/* Card 3: Dashboard */}
           <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-300 cursor-pointer overflow-hidden relative"
-            onClick={() => setFlippedCard(flippedCard === 3 ? null : 3)}
+            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-300 overflow-hidden relative"
           >
             {/* Front Content */}
-            <div className={`flex flex-col md:flex-row h-full w-full transition-all duration-300 ${flippedCard === 3 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
               <div className="md:w-1/2 h-48 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
                 <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
@@ -335,26 +327,23 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-300 ${flippedCard === 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-300 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
                 {lang === 'en' ? 'Mistake Tracking Dashboard' : '오답 추적 대시보드'}
               </h3>
               <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed max-w-lg">
                 {lang === 'en' ? 'Replace expensive homework tutors. Chekki automatically saves every struggled question into a stress-free dashboard, acting as a 24/7 private tutor.' : '비싼 숙제 과외 선생님 대신 채키를 활용하세요. 아이가 어려워했던 문제를 대시보드에 자동 저장하여 24시간 개인 튜터 역할을 합니다.'}
               </p>
-              <div className="absolute top-6 right-6 text-orange-500">
-                <X weight="bold" className="text-xl" />
-              </div>
+              
             </div>
           </div>
 
           {/* Card 4: Audio Practice Room */}
           <div 
-            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-300 cursor-pointer overflow-hidden relative"
-            onClick={() => setFlippedCard(flippedCard === 4 ? null : 4)}
+            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-300 overflow-hidden relative"
           >
             {/* Front Content */}
-            <div className={`flex flex-col h-full transition-all duration-300 ${flippedCard === 4 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
               <div className="flex-1 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
                 {/* Animated voice mock UI */}
                 <div className="w-full max-w-[220px] flex flex-col items-center gap-4">
@@ -379,7 +368,7 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className={`absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-300 ${flippedCard === 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-300 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
               <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-6">
                 <MicrophoneStage weight="fill" className="text-2xl" />
               </div>
@@ -391,9 +380,7 @@ export default function Landing() {
                   ? "From paper to pronunciation. Chekki turns grammar mistakes into interactive speaking exercises, using native AI to evaluate their speech in real-time."
                   : "종이 위 오답을 말하기 연습으로. 체키는 문법 오답을 스피킹 연습으로 변환하고 AI가 아이의 발음을 실시간으로 듣고 평가합니다."}
               </p>
-              <div className="absolute top-6 right-6 text-emerald-500">
-                <X weight="bold" className="text-xl" />
-              </div>
+              
             </div>
           </div>
 
