@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy, Printer } from '@phosphor-icons/react';
+import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy, Cards } from '@phosphor-icons/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useMistakes } from '../contexts/MistakeContext';
-import { generateAndSharePDF } from '../services/pdfService';
 import { WorksheetItem } from '../types';
 import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
+import { FlashcardsView } from './FlashcardsView';
 import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 import { Capacitor } from '@capacitor/core';
 import { cleanAnswerText } from '../utils/speechUtils';
+import { playSuccessSound, hapticSuccess, hapticError } from '../utils/feedbackUtils';
 
 interface DashboardProps {
   onClose: () => void;
@@ -20,7 +21,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const { language } = useLanguage();
   const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal } = useAuth();
   const { mistakes } = useMistakes();
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isFlashcardsActive, setIsFlashcardsActive] = useState(false);
 
   // ── Ask Chekki State ───────────────────────────────────────────────────────
   const [askQuery, setAskQuery] = useState('');
@@ -222,28 +223,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   };
 
   const playSuccessFeedback = () => {
-    // Haptic feedback
-    if ('vibrate' in navigator) {
-      navigator.vibrate([100, 50, 100]);
-    }
-    // Success sound (cheerful chime)
-    try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-      oscillator.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.1); // C6
-      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.start(audioCtx.currentTime);
-      oscillator.stop(audioCtx.currentTime + 0.3);
-    } catch (e) {
-      console.warn("AudioContext not supported", e);
-    }
+    playSuccessSound();
+    hapticSuccess();
   };
 
   const checkPronunciation = (transcript: string) => {
@@ -268,6 +249,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       playSuccessFeedback();
     } else {
       setPracticeStatus('failed');
+      hapticError();
     }
   };
 
@@ -450,17 +432,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
               <div className="mt-6 flex flex-col sm:flex-row items-center justify-end gap-3 relative z-10">
                 <button 
-                  onClick={() => handleGeneratePdf('Mistake Bank Review')}
-                  disabled={isGeneratingPdf || mistakes.length === 0}
+                  onClick={() => setIsFlashcardsActive(true)}
+                  disabled={mistakes.length === 0}
                   className={`group relative overflow-hidden px-6 py-3 bg-white/5 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.97] hover:bg-white/10 border border-white/10 font-korean disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  {isGeneratingPdf ? (
-                    <Spinner size={18} className="animate-spin text-zinc-400" />
-                  ) : (
-                    <Printer size={18} weight="bold" />
-                  )}
+                  <Cards size={18} weight="bold" />
                   <span className="relative z-10">
-                    {language === 'ko' ? (isGeneratingPdf ? '생성 중...' : '1초 복습지 프린트') : (isGeneratingPdf ? 'Generating...' : '1-Click Review PDF')}
+                    {language === 'ko' ? '디지털 플래시카드' : 'Digital Flashcards'}
                   </span>
                 </button>
                 <button 
@@ -649,6 +627,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             })()}
           </div>
         </div>
+      )}
+      
+      {isFlashcardsActive && (
+        <FlashcardsView
+          mistakes={mistakes}
+          language={language}
+          onClose={() => setIsFlashcardsActive(false)}
+        />
       )}
     </div>,
     document.body
