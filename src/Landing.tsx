@@ -182,8 +182,8 @@ export default function Landing() {
           </h1>
           <p className="hero-element mt-8 text-lg md:text-xl text-slate-600 dark:text-white/60 leading-relaxed max-w-xl">
             {lang === 'en' 
-              ? "Stop fighting over English homework. Chekki helps Korean parents easily track assignments, auto-grade worksheets, and understand exactly what their child is struggling with — no English skills required."
-              : "매일 반복되는 영어 숙제 전쟁, 이제 끝내세요. 체키는 영어에 자신 없는 부모님도 쉽게 아이의 숙제를 확인하고, 자동 채점하며, 취약점을 한눈에 파악할 수 있도록 돕습니다."}
+              ? "End the daily homework battle. Chekki instantly auto-grades English worksheets, tracks mistakes, and acts as a 24/7 private tutor. No typing. No prompting. Just answers."
+              : "매일 반복되는 숙제 전쟁, 이제 끝내세요. 체키가 즉시 학습지를 채점하고 오답을 추적하며 24시간 개인 튜터가 되어줍니다. 타이핑이나 프롬프트 입력 없이, 정답만 확인하세요."}
           </p>
           <div className="hero-element mt-12 flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
             {/* Primary Magnetic CTA */}
