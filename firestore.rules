@@ -28,7 +28,8 @@ service cloud.firestore {
     }
 
     match /users/{userId}/data/{document=**} {
-      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
     
     // Helper to prevent storage exhaustion and ensure type safety
@@ -61,9 +62,18 @@ service cloud.firestore {
       );
     }
 
+    
+    function isValidFeedback() {
+      let data = request.resource.data;
+      let cValid = !data.keys().hasAny(['comment']) || (data.comment is string && data.comment.size() < 2000);
+      let rValid = !data.keys().hasAny(['rating']) || (data.rating is number);
+      let uValid = !data.keys().hasAny(['userEmail']) || (data.userEmail is string && data.userEmail.size() < 100);
+      return cValid && rValid && uValid;
+    }
+
     // Feedback: Authenticated users can create, only admins can read.
     match /feedback/{feedbackId} {
-      allow create: if request.auth != null;
+      allow create: if request.auth != null && isValidFeedback();
       allow read: if request.auth != null && isAdmin();
     }
 
