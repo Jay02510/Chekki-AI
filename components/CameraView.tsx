@@ -622,45 +622,6 @@ export const CameraView: React.FC<Props> = ({
                 </div>
               </div>
             )}
-            {!isPro && (
-              <>
-                {/* Scan Tracker */}
-                <div
-                  className={`border rounded-xl md:rounded-2xl py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-200 hover:scale-[1.02] bg-[#0F1014] border-white/10`}
-                >
-                  <div
-                    className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] text-zinc-500`}
-                  >
-                    {t('lbl_magic_left')}
-                  </div>
-                  <div className="w-px h-3 md:h-4 bg-white/10"></div>
-                  <div
-                    className={`font-bold text-sm md:text-2xl font-display leading-none text-white`}
-                  >
-                    {remaining}
-                  </div>
-                </div>
-
-                {/* Question Tracker */}
-                <div
-                  className={`border rounded-xl md:rounded-2xl py-2 px-4 md:py-4 md:px-8 flex items-center gap-3 md:gap-4 shadow-2xl transition-all duration-200 hover:scale-[1.02] ${isNight ? 'bg-[#0F1014] border-white/10' : 'bg-white border-zinc-200'}`}
-                >
-                  <div
-                    className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.1em] ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}
-                  >
-                    Ask Chekki Left
-                  </div>
-                  <div
-                    className={`w-px h-3 md:h-4 ${isNight ? 'bg-white/10' : 'bg-zinc-200'}`}
-                  ></div>
-                  <div
-                    className={`font-bold text-sm md:text-2xl font-display leading-none ${isNight ? 'text-white' : 'text-zinc-900'}`}
-                  >
-                    {remainingQuestions}
-                  </div>
-                </div>
-              </>
-            )}
           </div>
 
           {!isPro && (

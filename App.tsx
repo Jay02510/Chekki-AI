@@ -173,6 +173,13 @@ function AppContent() {
   const [showHelp, setShowHelp] = useState(false);
   const platform = Capacitor.getPlatform();
 
+  // Trigger onboarding for authenticated users without a complete profile
+  useEffect(() => {
+    if (isAuthenticated && user && !user.childAge && !sessionStorage.getItem('skipped_child_profile')) {
+      setShowChildProfileModal(true);
+    }
+  }, [isAuthenticated, user]);
+
   // Listen for open-help events
   useEffect(() => {
     const handleOpenHelp = () => {
