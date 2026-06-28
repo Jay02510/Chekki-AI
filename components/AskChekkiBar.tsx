@@ -25,47 +25,66 @@ export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({
   isNight = false,
 }) => {
   const { t } = useLanguage();
+  const suggestions = language === 'ko' 
+    ? ['아이가 왜 이 문제를 틀렸을까요?', '아이에게 어떻게 쉽게 설명할까요?', '비슷한 예시 문제를 내주세요']
+    : ['Why did my child get this wrong?', 'How can I explain this easily?', 'Give me another example'];
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit(query);
-      }}
-      className={`relative flex items-center ${isNight ? 'bg-zinc-900' : 'bg-white shadow-xl border-zinc-200'} border border-transparent hover:border-orange-500/30 focus-within:border-orange-500 rounded-3xl pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 w-full`}
-    >
-      <button
-        type="submit"
-        disabled={!query.trim() || isAsking}
-        className={`shrink-0 mr-3 md:mr-4 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100  active:scale-[0.97] ${query.trim() ? 'text-orange-500' : 'text-zinc-500'}`}
-        title="Search"
-      >
-        {isAsking ? (
-          <div className="w-5 h-5 md:w-6 md:h-6 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-        ) : (
-          <svg
-            className="w-5 h-5 md:w-7 md:h-7"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth={2.5}
+    <div className="flex flex-col w-full gap-3">
+      {/* Suggestions */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        {suggestions.map((suggestion, idx) => (
+          <button
+            key={idx}
+            onClick={() => onSubmit(suggestion)}
+            className={`shrink-0 px-4 py-2 ${isNight ? 'bg-white/5 hover:bg-white/10 text-zinc-300 border-white/10' : 'bg-black/5 hover:bg-black/10 text-zinc-700 border-black/10'} text-[10px] sm:text-xs font-korean rounded-full border transition-colors whitespace-nowrap active:scale-[0.97]`}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        )}
-      </button>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={t('ask_placeholder')}
-        className={`flex-1 bg-transparent ${isNight ? 'text-white' : 'text-zinc-900'} text-[11px] sm:text-xs md:text-sm lg:text-base font-korean placeholder:text-zinc-500 focus:outline-none`}
-        enterKeyHint="send"
-      />
-    </form>
+            {suggestion}
+          </button>
+        ))}
+      </div>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit(query);
+        }}
+        className={`relative flex items-center ${isNight ? 'bg-zinc-900' : 'bg-white shadow-xl border-zinc-200'} border border-transparent hover:border-orange-500/30 focus-within:border-orange-500 rounded-3xl pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 w-full`}
+      >
+        <button
+          type="submit"
+          disabled={!query.trim() || isAsking}
+          className={`shrink-0 mr-3 md:mr-4 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100  active:scale-[0.97] ${query.trim() ? 'text-orange-500' : 'text-zinc-500'}`}
+          title="Search"
+        >
+          {isAsking ? (
+            <div className="w-5 h-5 md:w-6 md:h-6 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+          ) : (
+            <svg
+              className="w-5 h-5 md:w-7 md:h-7"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          )}
+        </button>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('ask_placeholder')}
+          className={`flex-1 bg-transparent ${isNight ? 'text-white' : 'text-zinc-900'} text-[11px] sm:text-xs md:text-sm lg:text-base font-korean placeholder:text-zinc-500 focus:outline-none`}
+          enterKeyHint="send"
+        />
+      </form>
+    </div>
   );
 };
 
