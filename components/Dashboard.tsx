@@ -346,10 +346,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               <span className="text-6xl">📱</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-white font-display tracking-tight leading-tight">
-              {language === 'ko' ? '아이에게 폰을\n건네주세요!' : 'Hand the phone\nto your child!'}
+              {language === 'ko' ? '폰을 테이블에\n올려주세요!' : 'Tabletop Co-Pilot\nMode Active'}
             </h2>
             <p className="text-zinc-400 font-korean text-lg mb-12">
-              {language === 'ko' ? '아이가 직접 틀린 문제를 오디오로 연습할 수 있습니다.' : 'Let them practice their mistakes with AI.'}
+              {language === 'ko' ? '화면 터치 없이 오디오로 복습이 진행됩니다.' : 'Hands-free interactive voice review is starting.'}
             </p>
             <button
               onClick={confirmStartPractice}
@@ -460,7 +460,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     <Printer size={18} weight="bold" />
                   )}
                   <span className="relative z-10">
-                    {language === 'ko' ? (isGeneratingPdf ? '생성 중...' : '프린트 학습지') : (isGeneratingPdf ? 'Generating...' : 'Print Review Sheet')}
+                    {language === 'ko' ? (isGeneratingPdf ? '생성 중...' : '1초 복습지 프린트') : (isGeneratingPdf ? 'Generating...' : '1-Click Review PDF')}
                   </span>
                 </button>
                 <button 
