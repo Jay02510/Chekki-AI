@@ -451,10 +451,10 @@ function AppContent() {
             window.dispatchEvent(new CustomEvent('open-help'));
           }}
           onOpenDashboard={() => {
-            if (user?.plan === 'pro') {
+            if (isAuthenticated) {
               setShowDashboard(true);
             } else {
-              setShowPaywall(true);
+              setShowLoginModal(true);
             }
           }}
         />
@@ -687,10 +687,10 @@ function AppContent() {
                       onConfirm={(opts) => setConfirmDialog(opts)}
                       data={analysisState.data}
                       onOpenDashboard={() => {
-                        if (user?.plan === 'pro') {
+                        if (isAuthenticated) {
                           setShowDashboard(true);
                         } else {
-                          setShowPaywall(true);
+                          setShowLoginModal(true);
                         }
                       }}
                     />

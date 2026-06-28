@@ -33,7 +33,7 @@ const translations = {
     login_guest_link: 'Not ready? Try 1 scan as guest',
     guest_scan_badge: 'Magic Scan ✨',
     guest_used_title: 'Seen the magic? ✨',
-    guest_used_desc: 'Sign up free to get 3 scans per day, plus teaching scripts and audio.',
+    guest_used_desc: 'Sign up free to get 2 scans per day to grade worksheets.',
 
     // Payments & Compliance
     pay_method_card: 'Credit / Debit Card',
@@ -397,8 +397,7 @@ const translations = {
     login_guest_link: '회원가입 없이 1회 체험하기',
     guest_scan_badge: '마법 스캔 ✨',
     guest_used_title: '마법을 경험하셨나요? ✨',
-    guest_used_desc:
-      '무료로 가입하면 하루 3회 스캔과 티칭 스크립트, 발음 듣기 기능을 이용할 수 있어요.',
+    guest_used_desc: '무료로 가입하면 매일 2회의 스캔을 이용할 수 있어요.',
 
     // Payments & Compliance
     pay_method_card: '일반 신용/체크카드',
