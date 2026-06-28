@@ -41,7 +41,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
     setIsSubmitting(true);
     try {
       await updateChildProfile(selectedAge, selectedLevel, parentLevel);
-      setStep(1); 
+      onComplete(); 
     } catch (e) {
       console.error(e);
       onSkip(); 
@@ -62,9 +62,9 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
     exit: { opacity: 0, scale: 1.04, filter: 'blur(8px)', y: -20, transition: { duration: 0.2 } },
   };
 
-  const renderStep0 = () => (
+  const renderProfileForm = () => (
     <motion.div 
-      key="step0"
+      key="profileForm"
       variants={fadeVariants}
       initial="initial"
       animate="animate"
@@ -78,15 +78,15 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           className="w-32 h-32 rounded-[2.5rem] mx-auto mb-6 shadow-[0_20px_40px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-[#050505]"
         >
-          <img src="/assets/bento_speed_mode.png" alt="Setup" className="w-full h-full object-cover" />
+          <img src="/assets/bento_reveal_only.png" alt="Setup" className="w-full h-full object-cover" />
         </motion.div>
         <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight">
-          {language === 'ko' ? '빠른 채점 & AI 튜터' : 'Speed Grading & AI Tutor'}
+          {language === 'ko' ? 'AI 튜터 설정' : 'Tailor the AI'}
         </h3>
         <p className="text-sm text-zinc-400 mt-4 font-korean leading-relaxed max-w-[280px] mx-auto">
           {language === 'ko' 
-            ? '빠른 채점 모드로 아이의 손글씨를 즉시 채점하거나, 튜터 모드로 전환해 AI가 단어와 해설을 제공하는 맞춤형 개인 과외 선생님이 되게 하세요.' 
-            : 'Choose "Speed Mode" to instantly grade handwriting. Or let the AI tailor its vocabulary and be your child\'s personal tutor in "Tutor Mode".'}
+            ? '아이의 학습 수준에 맞게 단어와 해설을 조정합니다.' 
+            : 'We\\'ll adjust the vocabulary and explanations to fit your child perfectly.'}
         </p>
       </div>
 
@@ -281,7 +281,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         </motion.button>
         
         <div className="flex justify-center gap-3 mt-8">
-          {[1, 2, 3].map(i => (
+          {[0, 1, 2, 3, 4].map(i => (
             <motion.div 
               key={i}
               layout
@@ -314,7 +314,14 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         {/* Inner Core */}
         <div className="relative w-full h-full bg-[#050505] rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
           <AnimatePresence mode="wait">
-            {step === 0 && renderStep0()}
+            {step === 0 && renderEducationalStep(
+              '/assets/slide1_welcome_mascot.png',
+              '체키에 오신 것을 환영합니다',
+              'Welcome to Chekki',
+              '우리 아이의 완벽한 AI 영어 튜터를 만나보세요.',
+              'Meet your child\\'s new personal AI English Tutor.',
+              () => setStep(1)
+            )}
             {step === 1 && renderEducationalStep(
               '/assets/onboarding_icon_grader_1782545224150.png',
               '찰칵! 1초 채점',
@@ -333,12 +340,21 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
             )}
             {step === 3 && renderEducationalStep(
               '/assets/onboarding_icon_loop_1782545249835.png',
-              '무한 복습 루프',
-              'The Infinite Loop',
+              '스마트 맞춤 학습지',
+              'Smart Practice Sheets',
               '저장된 오답을 모아 맞춤형 복습 프린트물을 만들어주세요. 빈틈없는 영어 학습이 완성됩니다.',
-              'Generate practice worksheets from their mistakes. Close the learning gap automatically.',
-              onComplete, true
+              'Generate practice worksheets from their mistakes. Close the learning gap easily and effectively.',
+              () => setStep(4)
             )}
+            {step === 4 && renderEducationalStep(
+              '/assets/bento_speed_mode.png',
+              '빠른 채점 & AI 튜터',
+              'Speed Grading & AI Tutor',
+              '빠른 채점 모드로 즉시 채점하거나, 튜터 모드로 맞춤형 개인 과외 선생님이 되게 하세요.',
+              'Choose "Speed Mode" to instantly grade handwriting. Or let the AI tailor its vocabulary and be your child\\'s personal tutor in "Tutor Mode".',
+              () => setStep(5)
+            )}
+            {step === 5 && renderProfileForm()}
           </AnimatePresence>
         </div>
       </motion.div>
