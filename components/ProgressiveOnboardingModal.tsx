@@ -86,7 +86,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <p className="text-sm text-zinc-400 mt-4 font-korean leading-relaxed max-w-[280px] mx-auto">
           {language === 'ko' 
             ? '아이의 학습 수준에 맞게 단어와 해설을 조정합니다.' 
-            : 'We\\'ll adjust the vocabulary and explanations to fit your child perfectly.'}
+            : "We'll adjust the vocabulary and explanations to fit your child perfectly."}
         </p>
       </div>
 
@@ -319,7 +319,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
               '체키에 오신 것을 환영합니다',
               'Welcome to Chekki',
               '우리 아이의 완벽한 AI 영어 튜터를 만나보세요.',
-              'Meet your child\\'s new personal AI English Tutor.',
+              "Meet your child's new personal AI English Tutor.",
               () => setStep(1)
             )}
             {step === 1 && renderEducationalStep(
@@ -351,7 +351,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
               '빠른 채점 & AI 튜터',
               'Speed Grading & AI Tutor',
               '빠른 채점 모드로 즉시 채점하거나, 튜터 모드로 맞춤형 개인 과외 선생님이 되게 하세요.',
-              'Choose "Speed Mode" to instantly grade handwriting. Or let the AI tailor its vocabulary and be your child\\'s personal tutor in "Tutor Mode".',
+              `Choose "Speed Mode" to instantly grade handwriting. Or let the AI tailor its vocabulary and be your child's personal tutor in "Tutor Mode".`,
               () => setStep(5)
             )}
             {step === 5 && renderProfileForm()}
