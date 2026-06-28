@@ -93,7 +93,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
               playsInline
               controls={false}
               crossOrigin="anonymous"
-              className="absolute inset-0 w-full h-full object-cover scale-105"
+              className="absolute inset-0 w-full h-full object-cover"
               onError={() => setVideoError(true)}
               style={{ WebkitTransform: 'translateZ(0)' }} // Hardware acceleration to force inline play
             >
@@ -107,7 +107,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
               <img
                 src={isNight ? ASSETS.HERO_SLEEPY : ASSETS.MASCOT_HAPPY}
                 alt="Chekki Mascot"
-                className="w-full h-full object-contain scale-150 md:scale-[1.8]"
+                className="w-full h-full object-contain"
               />
             </div>
           )}

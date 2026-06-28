@@ -255,7 +255,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 >
                   <div
                     className={`
-                        rounded-2xl shadow-md border-2 flex items-center gap-2 transform transition-all active:scale-[0.97] group cursor-grab w-max max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
+                        rounded-2xl shadow-md border-2 flex items-center gap-2 transform transition-all active:scale-[0.97] group cursor-grab w-fit max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
                         ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-lg ring-4 z-[1000]' : ''}
                         ${isFocused 
                           ? (isBlankKeyMode 
@@ -279,7 +279,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                         <span className="font-black text-[9px] md:text-sm text-white">{item.id}</span>
                       </div>
                       <span
-                        className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words break-keep text-left drop-shadow-md text-sm md:text-xl  inline-block`}
+                        className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words text-left text-balance drop-shadow-md text-sm md:text-xl  inline-block`}
                       >
                         {displayValue}
                       </span>

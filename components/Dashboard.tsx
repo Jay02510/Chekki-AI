@@ -519,7 +519,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             ) : (() => {
               const current = mistakes[practiceIndex];
               return (
-                <div className="flex flex-col gap-6 items-center text-center">
+                <div className="mt-12 flex flex-col gap-6 items-center text-center">
                   <div className="w-full flex items-center justify-between mb-4">
                     <span className="font-bold">
                       {practiceIndex + 1} / {mistakes.length}
