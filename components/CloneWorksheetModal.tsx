@@ -3,7 +3,6 @@ import { WorksheetItem } from '../types';
 import { generateSimilarWorksheet } from '../services/geminiService';
 import { ChekkiMascot } from './Icons';
 import { useLanguage } from '../contexts/LanguageContext';
-import { generateAndSharePDF } from '../services/pdfService';
 import { Spinner } from '@phosphor-icons/react';
 
 interface Props {
@@ -22,7 +21,6 @@ export const CloneWorksheetModal: React.FC<Props> = ({
   const { t, language } = useLanguage();
 
   const [isDigitalMode, setIsDigitalMode] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -104,18 +102,6 @@ export const CloneWorksheetModal: React.FC<Props> = ({
     setHasDrawn(false);
   };
 
-  const handlePrint = async () => {
-    if (isGeneratingPdf) return;
-    setIsGeneratingPdf(true);
-    try {
-      await generateAndSharePDF(items);
-    } catch (e) {
-      console.error(e);
-      alert('Failed to generate PDF');
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -274,20 +260,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({
           >
             Cancel
           </button>
-          {!isDigitalMode && (
-            <button
-              onClick={handlePrint}
-              disabled={isGeneratingPdf}
-              className={`px-10 py-3 rounded-xl font-bold bg-zinc-900 text-white shadow-xl flex items-center gap-2 transform transition-all active:scale-[0.97] min-h-[48px] ${isGeneratingPdf ? 'opacity-80 cursor-wait' : ''}`}
-            >
-              {isGeneratingPdf ? (
-                <Spinner size={16} weight="bold" className="animate-spin text-orange-500" />
-              ) : (
-                <span>🖨️</span>
-              )}
-              {isGeneratingPdf ? 'Generating...' : 'Print PDF'}
-            </button>
-          )}
+          
         </div>
       </div>
     </div>

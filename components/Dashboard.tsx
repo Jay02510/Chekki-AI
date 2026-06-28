@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { generateAndSharePDF } from '../services/pdfService';
 import { useToast } from '../contexts/ToastContext';
 import { createPortal } from 'react-dom';
 import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy, Cards, DeviceMobile } from '@phosphor-icons/react';
@@ -25,7 +24,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal } = useAuth();
   const { mistakes } = useMistakes();
   const [isFlashcardsActive, setIsFlashcardsActive] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // ── Ask Chekki State ───────────────────────────────────────────────────────
   const [askQuery, setAskQuery] = useState('');
@@ -286,44 +284,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     setExamples(shuffled.slice(0, 3));
   };
 
-  const handleGeneratePdf = async (topic?: string) => {
-    if (isGeneratingPdf) return;
-    setIsGeneratingPdf(true);
-    try {
-      let mockItems: WorksheetItem[] = [];
-      if (topic === 'Nouns & Pronouns') {
-        mockItems = [
-          { id: 1, type: 'fill_in', question_text: "Me like apples.", correct_answer: "I like apples.", teaching_script_ko: '', korean_guide: '' },
-          { id: 2, type: 'fill_in', question_text: "This is he book.", correct_answer: "This is his book.", teaching_script_ko: '', korean_guide: '' },
-          { id: 3, type: 'fill_in', question_text: "She goes to school with they.", correct_answer: "She goes to school with them.", teaching_script_ko: '', korean_guide: '' }
-        ];
-      } else if (topic === 'Action Verbs') {
-        mockItems = [
-          { id: 1, type: 'fill_in', question_text: "She run fast.", correct_answer: "She runs fast.", teaching_script_ko: '', korean_guide: '' },
-          { id: 2, type: 'fill_in', question_text: "They is playing soccer.", correct_answer: "They are playing soccer.", teaching_script_ko: '', korean_guide: '' },
-          { id: 3, type: 'fill_in', question_text: "He do not like carrots.", correct_answer: "He does not like carrots.", teaching_script_ko: '', korean_guide: '' }
-        ];
-      } else if (topic) {
-        mockItems = [
-          { id: 1, type: 'fill_in', question_text: `Example mistake for ${topic} 1`, correct_answer: `Correct answer 1`, teaching_script_ko: '', korean_guide: '' },
-          { id: 2, type: 'fill_in', question_text: `Example mistake for ${topic} 2`, correct_answer: `Correct answer 2`, teaching_script_ko: '', korean_guide: '' },
-          { id: 3, type: 'fill_in', question_text: `Example mistake for ${topic} 3`, correct_answer: `Correct answer 3`, teaching_script_ko: '', korean_guide: '' }
-        ];
-      } else {
-        mockItems = [
-          { id: 1, type: 'fill_in', question_text: "He don't like apples.", correct_answer: "He doesn't like apples.", teaching_script_ko: '', korean_guide: '' },
-          { id: 2, type: 'fill_in', question_text: "I goes to school.", correct_answer: "I go to school.", teaching_script_ko: '', korean_guide: '' },
-          { id: 3, type: 'fill_in', question_text: "She is play soccer.", correct_answer: "She is playing soccer.", teaching_script_ko: '', korean_guide: '' }
-        ];
-      }
-      await generateAndSharePDF(mockItems);
-    } catch (e) {
-      console.error(e);
-      showToast({ message: language === 'ko' ? 'PDF 생성에 실패했습니다.' : 'Failed to generate PDF', type: 'error' });
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  };
   
   const cardShellClasses = "relative rounded-[2rem] p-1.5 bg-white/5 border border-white/10 group transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[0.98]";
   const cardCoreClasses = "relative w-full h-full rounded-[calc(2rem-0.375rem)] bg-zinc-950/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col p-6 md:p-8 overflow-hidden";
