@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const DIRECTORIES = ['src', 'components', '.'];
+const DIRECTORIES = ['src', 'components'];
 const EXTENSIONS = ['.tsx', '.ts'];
 
 function processDirectory(directory) {

@@ -99,10 +99,10 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     return (
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`group relative rounded-[2.5rem] border overflow-hidden transition-all duration-500 ease-[var(--ease-premium)] p-1.5 ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]' : 'bg-white border-orange-500 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]') : isNight ? 'bg-[#111111]/80 border-white/5 hover:border-white/10' : 'bg-white/80 border-zinc-200 hover:border-zinc-300 shadow-sm hover:shadow-lg'}`}
+        className={`group relative rounded-[2.5rem] border overflow-hidden transition-all duration-200 ease-[var(--ease-premium)] p-1.5 ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]' : 'bg-white border-orange-500 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]') : isNight ? 'bg-[#111111]/80 border-white/5 hover:border-white/10' : 'bg-white/80 border-zinc-200 hover:border-zinc-300 shadow-sm hover:shadow-lg'}`}
         style={style}
       >
-        <div className={`w-full h-full rounded-[calc(2.5rem-0.375rem)] ${isNight ? 'bg-[#0A0A0A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)]'} transition-all duration-500 ease-[var(--ease-premium)]`}>
+        <div className={`w-full h-full rounded-[calc(2.5rem-0.375rem)] ${isNight ? 'bg-[#0A0A0A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)]'} transition-all duration-200 ease-[var(--ease-premium)]`}>
           <div
             onClick={(e) => {
               e.stopPropagation();
@@ -111,7 +111,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
             className="p-4 md:p-8 flex items-start gap-4 md:gap-8 cursor-pointer"
           >
             <div
-              className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 ${isActive ? 'bg-orange-500 text-white shadow-lg rotate-3' : isNight ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-100 text-zinc-400'}`}
+              className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-200 ${isActive ? 'bg-orange-500 text-white shadow-lg rotate-3' : isNight ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-100 text-zinc-400'}`}
             >
               <span className="text-xs md:text-xl font-black font-display">{item.id}</span>
             </div>
@@ -374,7 +374,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                             {answerText}
                           </span>
                           {speechResult?.id === item.id && speechResult.success && (
-                            <div className="absolute -top-4 -right-4 text-3xl animate-[bounce_1s_ease-in-out_infinite] drop-shadow-lg z-20">
+                            <div className="absolute -top-4 -right-4 text-3xl animate-[bounce_1s_ease-[cubic-bezier(0.23,1,0.32,1)]_infinite] drop-shadow-lg z-20">
                               🌟
                             </div>
                           )}

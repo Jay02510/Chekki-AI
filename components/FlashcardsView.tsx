@@ -96,7 +96,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
                 }}
                 className="group px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all duration-200 active:scale-[0.97] border border-white/5 flex items-center gap-3 font-korean"
               >
-                <Repeat size={20} weight="bold" className="group-hover:-rotate-180 transition-transform duration-500" />
+                <Repeat size={20} weight="bold" className="group-hover:-rotate-180 transition-transform duration-200" />
                 {language === 'ko' ? '다시 복습하기' : 'Review Again'}
               </button>
             </div>
@@ -152,7 +152,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
         </div>
 
         {/* Controls */}
-        <div className={`mt-8 flex items-center justify-center gap-4 transition-all duration-300 shrink-0 ${isFlipped && !isDone ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+        <div className={`mt-8 flex items-center justify-center gap-4 transition-all duration-200 shrink-0 ${isFlipped && !isDone ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
           <button
             onClick={() => handleNext(false)}
             className="flex-1 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-2xl border border-red-500/20 transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2 font-korean"

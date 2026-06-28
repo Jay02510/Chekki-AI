@@ -54,9 +54,8 @@ export const PremiumUpsellModal: React.FC<Props> = ({
         onClick={onClose}
       />
 
-      <div
-        className={`relative ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200 shadow-2xl'} rounded-t-3xl md:rounded-3xl w-full max-w-md overflow-hidden shadow-[0_0_80px_rgba(249,115,22,0.15)] border animate-fade-in-up`}
-      >
+      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-md mx-4">
+        <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
         {/* Back Button */}
         <div className="p-4 flex items-center">
           <button
@@ -134,6 +133,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
             {language === 'ko' ? '구독 옵션 보기' : 'View Subscription Options'}
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

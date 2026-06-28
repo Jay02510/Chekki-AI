@@ -108,13 +108,13 @@ export default function Landing() {
   }, [reduce]);
 
   return (
-    <main className="overflow-x-hidden w-full max-w-full bg-[#FAFAFA] dark:bg-[#050505] min-h-screen text-slate-900 dark:text-slate-50 transition-colors duration-300 selection:bg-brand selection:text-white">
+    <main className="overflow-x-hidden w-full max-w-full bg-[#FAFAFA] dark:bg-[#050505] min-h-screen text-slate-900 dark:text-slate-50 transition-colors duration-200 selection:bg-brand selection:text-white">
       {/* Global Noise */}
       <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.03] bg-noise mix-blend-overlay" />
 
       {/* Navigation */}
       <div className="fixed top-6 left-0 w-full z-50 flex justify-center px-4">
-        <header className="flex h-14 items-center justify-between px-6 max-w-4xl w-full mx-auto bg-white/80 dark:bg-white/5 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-2xl transition-colors duration-300">
+        <header className="flex h-14 items-center justify-between px-6 max-w-4xl w-full mx-auto bg-white/80 dark:bg-white/5 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-2xl transition-colors duration-200">
           <div className="flex items-center gap-[2px] text-2xl tracking-tighter cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <span className="font-bold text-slate-900 dark:text-white leading-none">Chekki</span>
             <span className="font-extrabold text-brand leading-none">ai</span>
@@ -248,10 +248,10 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-[380px] gap-4">
           {/* Card 1: Setup */}
           <div 
-            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-300 overflow-hidden relative"
+            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
           >
             {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
+            <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
               <div className="flex-1 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
                 <img src="/assets/bento_reveal_only.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
@@ -266,7 +266,7 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-brand/5 dark:bg-brand/10 backdrop-blur-2xl transition-all duration-300 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-brand/5 dark:bg-brand/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
               <div className="w-12 h-12 rounded-full bg-brand/20 text-brand flex items-center justify-center mb-6">
                 <GraduationCap weight="fill" className="text-2xl" />
               </div>
@@ -282,10 +282,10 @@ export default function Landing() {
 
           {/* Card 2: Assistant */}
           <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-300 overflow-hidden relative"
+            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
           >
             {/* Front Content */}
-            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
+            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
               <div className="md:w-1/2 min-h-[140px] h-full px-5 py-6 md:py-10 flex flex-col justify-center order-2 md:order-1">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2">
                   {lang === 'en' ? 'Only have a few minutes?' : '시간이 몇 분밖에 없나요?'}
@@ -298,7 +298,7 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-blue-500/5 dark:bg-blue-500/10 backdrop-blur-2xl transition-all duration-300 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-blue-500/5 dark:bg-blue-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
                 {lang === 'en' ? 'Speed vs. Tutor Mode' : '빠른 채점 vs 튜터 모드'}
               </h3>
@@ -311,10 +311,10 @@ export default function Landing() {
 
           {/* Card 3: Dashboard */}
           <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-300 overflow-hidden relative"
+            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
           >
             {/* Front Content */}
-            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
+            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
               <div className="md:w-1/2 h-48 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
                 <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
@@ -327,7 +327,7 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-300 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
                 {lang === 'en' ? 'Mistake Tracking Dashboard' : '오답 추적 대시보드'}
               </h3>
@@ -340,10 +340,10 @@ export default function Landing() {
 
           {/* Card 4: Audio Practice Room */}
           <div 
-            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-300 overflow-hidden relative"
+            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
           >
             {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
+            <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
               <div className="flex-1 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
                 {/* Animated voice mock UI */}
                 <div className="w-full max-w-[220px] flex flex-col items-center gap-4">
@@ -368,7 +368,7 @@ export default function Landing() {
             </div>
 
             {/* Back Content (Revealed) */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-300 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
               <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-6">
                 <MicrophoneStage weight="fill" className="text-2xl" />
               </div>
@@ -386,7 +386,7 @@ export default function Landing() {
 
           {/* Card 5: Pronunciation Check — Full Width */}
           <div 
-            className="bento-card col-span-1 md:col-span-3 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-emerald-500/30 transition-colors duration-300 overflow-hidden relative min-h-[320px]"
+            className="bento-card col-span-1 md:col-span-3 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-emerald-500/30 transition-colors duration-200 overflow-hidden relative min-h-[320px]"
           >
             {/* Left: Text */}
             <div className="flex-1 px-8 py-10 md:py-12 flex flex-col justify-center z-10 relative">

@@ -118,9 +118,10 @@ export const RefineModal: React.FC<Props> = ({
       onClick={handleClose}
     >
       <div
-        className={`${isNight ? 'bg-[#09090b] border-white/10' : 'bg-white border-zinc-200 shadow-2xl'} w-full sm:max-w-md md:max-w-lg rounded-3xl border shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-fade-in-up relative`}
+        className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter w-full sm:max-w-md md:max-w-lg flex flex-col max-h-[92vh] sm:max-h-[85vh] mx-4"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
         {/* Animated Glow Background */}
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-orange-500/10 blur-[100px] rounded-full animate-pulse"></div>
         <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 blur-[100px] rounded-full animate-pulse delay-700"></div>
@@ -250,6 +251,7 @@ export const RefineModal: React.FC<Props> = ({
               )}
             </button>
           </form>
+          </div>
         </div>
       </div>
     </div>

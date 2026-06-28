@@ -303,7 +303,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03] bg-noise mix-blend-overlay" />
 
       {showHandoff && (
-        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-6 bg-black/95 backdrop-blur-3xl animate-in fade-in zoom-in duration-300">
+        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-6 bg-black/95 backdrop-blur-3xl animate-in fade-in zoom-in duration-200">
           <div className="max-w-md w-full text-center space-y-8">
             <div className="w-32 h-32 mx-auto bg-orange-500/20 rounded-full flex items-center justify-center mb-8 animate-pulse">
               <span className="text-6xl">📱</span>
@@ -316,7 +316,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             </p>
             <button
               onClick={confirmStartPractice}
-              className="w-full py-5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-full text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-95 transition-all"
+              className="w-full py-5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-full text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.97] transition-all"
             >
               {language === 'ko' ? '준비 완료!' : 'I\'m Ready!'}
             </button>
@@ -540,7 +540,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   <div className="bg-black/40 rounded-2xl p-6 border border-white/5 w-full">
                     <p className="text-sm text-zinc-500 line-through mb-2">{current.question_text}</p>
                     <p 
-                      className="text-2xl md:text-3xl font-bold text-emerald-400 mb-4 cursor-pointer active:scale-95 transition-transform"
+                      className="text-2xl md:text-3xl font-bold text-emerald-400 mb-4 cursor-pointer active:scale-[0.97] transition-transform"
                       onClick={() => {
                         const correctText = cleanAnswerText(current.correct_answer || '');
                         setSpokenText(correctText);

@@ -88,9 +88,8 @@ export const CommunityModal: React.FC<Props> = ({ onClose, isNight = true }) => 
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
 
-      <div
-        className={`relative ${isNight ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-zinc-200'} rounded-3xl w-full max-w-lg md:max-w-2xl h-[80vh] flex flex-col shadow-2xl border animate-fade-in-up`}
-      >
+      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-lg max-w-2xl mx-4">
+        <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
         {/* Header */}
         <div
           className={`${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-50 border-zinc-200'} p-4 border-b flex justify-between items-center shrink-0`}
@@ -234,6 +233,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose, isNight = true }) => 
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

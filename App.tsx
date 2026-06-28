@@ -419,7 +419,7 @@ function AppContent() {
   return (
     <ErrorBoundary>
       <div
-        className={`min-h-[100dvh] ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-300 flex flex-col`}
+        className={`min-h-[100dvh] ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-200 flex flex-col`}
       >
         {standaloneLegal && (
           <div className="fixed inset-0 z-[200]">
