@@ -127,16 +127,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } 
     
     else if (action === 'delete') {
-      if (!uid) return res.status(400).json({ error: 'Missing uid' });
+      let targetUid = uid;
+      
+      if (!targetUid && email) {
+        const cleanEmail = email.toLowerCase().trim();
+        const usersRef = adminDb.collection('users');
+        const q = usersRef.where('email', '==', cleanEmail);
+        const querySnapshot = await q.get();
+
+        if (querySnapshot.empty) {
+          return res.status(404).json({ error: 'User not found. Please check the email address.' });
+        }
+        targetUid = querySnapshot.docs[0].id;
+      }
+      
+      if (!targetUid) return res.status(400).json({ error: 'Missing uid or email' });
       
       try {
-        await adminDb.collection('users').doc(uid).delete();
+        await adminDb.collection('users').doc(targetUid).delete();
       } catch (dbErr) {
         console.error('Error deleting user from Firestore:', dbErr);
       }
       
       try {
-        await authDb.deleteUser(uid);
+        await authDb.deleteUser(targetUid);
       } catch (authErr: any) {
         if (authErr.code !== 'auth/user-not-found') {
           console.error('Error deleting user from Auth:', authErr);

@@ -18,7 +18,7 @@ export default function AdminPage() {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('1_month');
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'create' | 'upgrade' | 'view_members'>('create');
+  const [mode, setMode] = useState<'create' | 'upgrade' | 'delete' | 'view_members'>('create');
   const [message, setMessage] = useState({ text: '', type: '' });
   const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -169,6 +169,46 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteUserByEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+
+    try {
+      const cleanEmail = email.toLowerCase().trim();
+      
+      if (!window.confirm(`Are you sure you want to permanently delete user ${cleanEmail}?`)) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          passcode,
+          action: 'delete',
+          email: cleanEmail,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete user');
+      }
+
+      setMessage({ text: '✅ User Deleted Successfully!', type: 'success' });
+      setEmail('');
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error deleting user', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleDeleteUser = async (uid: string, email: string) => {
     if (!window.confirm(`Are you sure you want to permanently delete user ${email}?`)) {
       return;
@@ -367,6 +407,16 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => {
+                  setMode('delete');
+                  setMessage({ text: '', type: '' });
+                }}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'delete' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+              >
+                Delete Existing
+              </button>
+              <button
+                type="button"
+                onClick={() => {
                   setMode('view_members');
                   setMessage({ text: '', type: '' });
                   handleFetchUsers();
@@ -476,7 +526,7 @@ export default function AdminPage() {
               </div>
             ) : (
               <form
-                onSubmit={mode === 'create' ? handleCreateProUser : handleUpgradeUser}
+                onSubmit={mode === 'create' ? handleCreateProUser : mode === 'delete' ? handleDeleteUserByEmail : handleUpgradeUser}
                 className="space-y-4"
               >
                 {mode === 'create' && (
@@ -568,48 +618,57 @@ export default function AdminPage() {
                   </div>
                 )}
 
-                <div>
-                  <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
-                    Pro Duration
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={duration}
-                      onChange={(e) => setDuration(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium appearance-none"
-                    >
-                      <option value="1_month">1 Month</option>
-                      <option value="1_year">1 Year</option>
-                      <option value="lifetime">Lifetime</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-500">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                {mode !== 'delete' && (
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                      Pro Duration
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={duration}
+                        onChange={(e) => setDuration(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium appearance-none"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        ></path>
-                      </svg>
+                        <option value="1_month">1 Month</option>
+                        <option value="1_year">1 Year</option>
+                        <option value="lifetime">Lifetime</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-500">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M19 9l-7 7-7-7"
+                          ></path>
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-black py-4 rounded-xl mt-4 shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                  className={`w-full text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${
+                    loading ? 'bg-zinc-800 cursor-not-allowed' : 
+                    mode === 'delete' ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400' : 'bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400'
+                  }`}
                 >
-                  {loading
-                    ? 'Processing...'
-                    : mode === 'create'
-                      ? 'Create Pro Account'
-                      : 'Upgrade Existing Account'}
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  ) : mode === 'create' ? (
+                    'Create Pro User'
+                  ) : mode === 'delete' ? (
+                    'Delete User'
+                  ) : (
+                    'Upgrade User'
+                  )}
                 </button>
               </form>
             )}
