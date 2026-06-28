@@ -57,8 +57,6 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
         </button>
       </div>
 
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 space-y-20 md:space-y-40">
         <section>
           <h2

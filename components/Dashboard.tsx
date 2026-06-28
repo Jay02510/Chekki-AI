@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { generateAndSharePDF } from '../services/pdfService';
 import { useToast } from '../contexts/ToastContext';
 import { createPortal } from 'react-dom';
 import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy, Cards, DeviceMobile } from '@phosphor-icons/react';
@@ -24,6 +25,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal } = useAuth();
   const { mistakes } = useMistakes();
   const [isFlashcardsActive, setIsFlashcardsActive] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // ── Ask Chekki State ───────────────────────────────────────────────────────
   const [askQuery, setAskQuery] = useState('');
