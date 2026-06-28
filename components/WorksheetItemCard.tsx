@@ -195,7 +195,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                       </svg>
                     </div>
 
-                    <div className={`transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden ${isScriptExpanded ? 'max-h-[800px] border-t border-orange-500/10 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 origin-top'}`}>
+                    <div className={`transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden ${isScriptExpanded ? 'max-h-[3000px] border-t border-orange-500/10 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 origin-top'}`}>
                       <div className="p-5 flex flex-col gap-5">
                         <div className="flex items-center justify-between gap-3">
                           {displayGuide && (
@@ -250,7 +250,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (userPlan !== 'pro') {
+                                if (userPlan !== 'pro' && index !== 0) {
                                   setUpsellFeature('guide');
                                 } else {
                                   onPlayAudio(displayScript || '');
@@ -299,7 +299,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                       </svg>
                     </div>
 
-                    <div className={`transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden ${isAnswerExpanded ? 'max-h-[1000px] border-t border-emerald-500/10 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 origin-top'}`}>
+                    <div className={`transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden ${isAnswerExpanded ? 'max-h-[3000px] border-t border-emerald-500/10 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 origin-top'}`}>
                       <div className="p-5 flex flex-col gap-6">
                         
                         {/* Voice Coach Inside Answer */}
@@ -423,7 +423,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                             <button
                               onClick={(e) =>
                                 handleActionClick(e, () => {
-                                  if (userPlan !== 'pro') setShowPaywall(true);
+                                  if (userPlan !== 'pro' && index !== 0) setShowPaywall(true);
                                   else onRefine(item);
                                 })
                               }

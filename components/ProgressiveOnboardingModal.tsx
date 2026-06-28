@@ -7,6 +7,7 @@ interface Props {
   onComplete: () => void;
   onSkip: () => void;
   isNight?: boolean;
+  initialStep?: number;
 }
 
 const AGE_OPTIONS = [
@@ -26,11 +27,12 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   onComplete,
   onSkip,
   isNight = true,
+  initialStep = 0,
 }) => {
   const { language, setLanguage } = useLanguage();
   const { updateChildProfile } = useAuth();
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(initialStep);
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [parentLevel, setParentLevel] = useState<string | null>(null);

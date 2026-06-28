@@ -622,6 +622,14 @@ export const CameraView: React.FC<Props> = ({
                 </div>
               </div>
             )}
+            {!isPro && (
+               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-2 shadow-sm ${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-100 border-zinc-200'}`}>
+                 <span className="text-xs">📸</span>
+                 <span className={`text-[10px] md:text-xs font-black ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                   {language === 'ko' ? `오늘 남은 무료 스캔: ${remainingCount}회` : `${remainingCount} free scans left today`}
+                 </span>
+               </div>
+            )}
           </div>
 
           {!isPro && (

@@ -64,6 +64,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedM
           onComplete={() => setShowOnboarding(false)}
           onSkip={() => setShowOnboarding(false)}
           isNight={isNight}
+          initialStep={5}
         />
       )}
       {showSupport && <LegalModal type="support" onClose={() => setShowSupport(false)} />}

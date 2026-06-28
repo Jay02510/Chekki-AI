@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -47,8 +48,8 @@ export const PremiumUpsellModal: React.FC<Props> = ({
 
   const info = featureInfo[featureName];
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[10005] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/85 backdrop-blur-xl animate-fade-in"
         onClick={onClose}
@@ -135,6 +136,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
         </div>
       </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

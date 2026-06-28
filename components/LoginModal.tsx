@@ -161,7 +161,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
   return (
     <>
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
-      <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 md:pt-28 overflow-y-auto">
+      <div className="fixed inset-0 z-[10010] flex items-start justify-center p-4 pt-20 md:pt-28 overflow-y-auto">
         <div
           className="absolute inset-0 bg-black/60 backdrop-blur-md"
           onClick={() => {

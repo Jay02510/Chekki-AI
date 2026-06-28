@@ -325,7 +325,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowSettings(false)}></div>
                 <div
-                  className={`flex flex-col gap-4 ${isNight ? 'bg-black/80 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-5 rounded-3xl border shadow-md animate-[fadeIn_200ms_ease-out]-up origin-top-left absolute top-16 left-0 w-max z-[100]`}
+                  className={`flex flex-col gap-4 ${isNight ? 'bg-black/80 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-5 rounded-3xl border shadow-md animate-[fadeIn_200ms_ease-out]-up origin-top-right absolute top-16 right-0 w-max z-[100]`}
                 >
                   <div className="flex flex-col gap-2">
                     <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] px-1">

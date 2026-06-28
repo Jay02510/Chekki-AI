@@ -50,7 +50,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const isDestructive = variant === 'destructive';
   return (
     <div
-      className="fixed inset-0 z-[250] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[10010] flex items-center justify-center p-4"
       onKeyDown={handleKeyDown}
     >
       <div
@@ -95,7 +95,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </div>
         <p
           id="confirm-title"
-          className={`${isNight ? 'text-white' : 'text-zinc-900'} font-black text-lg mb-6 font-korean uppercase tracking-tight`}
+          className={`${isNight ? 'text-white' : 'text-zinc-900'} font-black text-lg mb-6 font-korean uppercase tracking-tight text-center`}
         >
           {title}
         </p>

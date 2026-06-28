@@ -21,7 +21,7 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const { showToast } = useToast();
   const { language } = useLanguage();
-  const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal } = useAuth();
+  const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal, user, setShowPaywall } = useAuth();
   const { mistakes } = useMistakes();
   const [isFlashcardsActive, setIsFlashcardsActive] = useState(false);
 
@@ -107,7 +107,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   }, []);
 
   const handleStartPractice = () => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    if (user?.plan !== 'pro') {
+      const today = new Date().toISOString().split('T')[0];
+      const usedDate = localStorage.getItem('chekki_voice_limit_date');
+      if (usedDate === today) {
+        setShowPaywall(true);
+        return;
+      }
+      localStorage.setItem('chekki_voice_limit_date', today);
+    }
     setShowHandoff(true);
+  };
+
+  const handleStartFlashcards = () => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    if (user?.plan !== 'pro') {
+      const today = new Date().toISOString().split('T')[0];
+      const usedDate = localStorage.getItem('chekki_flashcard_limit_date');
+      if (usedDate === today) {
+        setShowPaywall(true);
+        return;
+      }
+      localStorage.setItem('chekki_flashcard_limit_date', today);
+    }
+    setIsFlashcardsActive(true);
   };
 
   const confirmStartPractice = () => {
@@ -428,7 +452,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
               <div className="mt-6 flex flex-col sm:flex-row items-center justify-end gap-3 relative z-10">
                 <button 
-                  onClick={() => setIsFlashcardsActive(true)}
+                  onClick={handleStartFlashcards}
                   disabled={mistakes.length === 0}
                   className={`group relative overflow-hidden px-6 py-3 bg-white/5 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.97] hover:bg-white/10 border border-white/10 font-korean disabled:opacity-50 disabled:cursor-not-allowed`}
                 >

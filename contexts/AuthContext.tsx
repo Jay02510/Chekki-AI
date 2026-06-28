@@ -977,7 +977,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = userProfile.lastQuestionDate !== today;
     const currentQuestions = isNewDay ? 0 : userProfile.questionsUsedToday;
-    const limit = userProfile.maxQuestionsPerDay || 5;
+    const limit = 1; // Enforce 1 question per day for free users
     if (currentQuestions >= limit) {
       setShowPaywall(true);
       return false;

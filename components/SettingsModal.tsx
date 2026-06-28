@@ -621,7 +621,14 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                   </p>
                   <div className="flex gap-2">
                     <button
-                      onClick={deleteAccount}
+                      onClick={async () => {
+                        try {
+                          await deleteAccount();
+                        } catch (e: any) {
+                          alert(e.message || 'Error deleting account');
+                          setShowDeleteConfirm(false);
+                        }
+                      }}
                       className="px-4 py-2 bg-red-600 text-white text-[10px] font-black rounded-lg"
                     >
                       {t('settings_delete_yes')}

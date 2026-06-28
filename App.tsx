@@ -711,7 +711,7 @@ function AppContent() {
 
         {/* Help View Overlay */}
         {showHelp && (
-          <div className="fixed inset-0 z-[100] animate-fade-in bg-zinc-950">
+          <div className="fixed inset-0 z-[100] animate-fade-in bg-zinc-950 overflow-y-auto touch-pan-y" style={{ WebkitOverflowScrolling: 'touch' }}>
             <HelpView isNight={isNight} onClose={() => setShowHelp(false)} />
           </div>
         )}
