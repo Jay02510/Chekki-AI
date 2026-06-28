@@ -904,8 +904,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteAccount = async () => {
     if (!firebaseUser) return;
     try {
-      await db.updateUser(firebaseUser.uid, { name: 'Deleted User' });
+      await db.deleteUserDoc(firebaseUser.uid);
       await deleteUser(firebaseUser);
+      
+      setUserProfile(null);
+      setFirebaseUser(null);
+      setSubscriptionRecord(null);
+      subscriptionService.clearCache();
     } catch (e: any) {
       console.error('Account deletion error:', e);
       // If re-authentication is needed, Firebase will throw 'auth/requires-recent-login'
@@ -915,11 +920,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
       }
       throw e;
-    } finally {
-      setUserProfile(null);
-      setFirebaseUser(null);
-      setSubscriptionRecord(null);
-      subscriptionService.clearCache();
     }
   };
 

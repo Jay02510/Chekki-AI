@@ -122,6 +122,15 @@ export const db = {
     }
   },
 
+  async deleteUserDoc(uid: string): Promise<void> {
+    try {
+      const userRef = doc(dbInstance, 'users', uid);
+      await deleteDoc(userRef);
+    } catch (e: any) {
+      console.error('Failed to delete user document:', e);
+    }
+  },
+
   async sendFeedback(
     uid: string,
     feedback: {
