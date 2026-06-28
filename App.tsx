@@ -7,7 +7,6 @@ import { Dashboard } from './components/Dashboard';
 import { DebugConsole } from './components/DebugConsole';
 import { SplashScreen } from './components/SplashScreen';
 import { MobileAppBanner } from './components/MobileAppBanner';
-import { BottomNav, TabID } from './components/BottomNav';
 import { HelpView } from './components/HelpView';
 import { Footer } from './components/Footer';
 import { ConfirmDialog } from './components/ConfirmDialog';
@@ -171,13 +170,17 @@ function AppContent() {
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
   const [showSubscribePage, setShowSubscribePage] = useState(false);
   const [showAdminPage, setShowAdminPage] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabID>('scan');
+  const [showHelp, setShowHelp] = useState(false);
   const platform = Capacitor.getPlatform();
 
-  // Always scroll to the top of the page when switching tabs or going back
-  const switchTab = React.useCallback((tab: TabID) => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    setActiveTab(tab);
+  // Listen for open-help events
+  useEffect(() => {
+    const handleOpenHelp = () => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      setShowHelp(true);
+    };
+    window.addEventListener('open-help', handleOpenHelp);
+    return () => window.removeEventListener('open-help', handleOpenHelp);
   }, []);
 
   // Global Confirmation State
@@ -396,7 +399,7 @@ function AppContent() {
     setShowErrorDetails(false);
   };
 
-  const isLocked = activeTab !== 'help' && analysisState.status === 'analyzing';
+  const isLocked = !showHelp && analysisState.status === 'analyzing';
 
   useEffect(() => {
     if (isLocked) {
@@ -436,7 +439,9 @@ function AppContent() {
           setIsSpeedMode={setIsSpeedMode}
           showSpeedToggle={analysisState.status === 'complete'}
           onOpenHelp={() => {
-            switchTab('help');
+            // We removed activeTab state, so we just use an event or a local state here if needed
+            // Actually, let's just trigger a custom event or you can manage it with a new state 'showHelp'
+            window.dispatchEvent(new CustomEvent('open-help'));
           }}
           onOpenDashboard={() => {
             if (user?.plan === 'pro') {
@@ -514,12 +519,8 @@ function AppContent() {
         )}
 
         <main className="flex-1 min-h-0 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-[calc(env(safe-area-inset-top)+6rem)] md:pt-32">
-          {activeTab === 'help' ? (
-            <div className="animate-fade-in">
-              <HelpView isNight={isNight} onClose={() => switchTab('scan')} />
-            </div>
-          ) : (
-            <>
+          {/* Main Content Area */}
+          <>
               {analysisState.status === 'idle' && (
                 <div className="animate-fade-in flex-1 h-full flex flex-col">
                   {isInApp && showInAppNotice && (
@@ -549,7 +550,7 @@ function AppContent() {
                       isNight={isNight}
                       onImageSelected={(data) => handleImageSelected(data)}
                       minimal
-                      onOpenHelp={() => switchTab('help')}
+                      onOpenHelp={() => window.dispatchEvent(new CustomEvent('open-help'))}
                     />
                   )}
                 </div>
@@ -690,7 +691,6 @@ function AppContent() {
                 </div>
               )}
             </>
-          )}
         </main>
 
         {/* --- PROFESSIONAL BUSINESS FOOTER --- */}
@@ -702,14 +702,13 @@ function AppContent() {
           />
         )}
 
-        <BottomNav
-          activeTab={activeTab}
-          onTabChange={switchTab}
-          isVisible={analysisState.status === 'idle'}
-          isNight={isNight}
-          isAuthenticated={isAuthenticated}
-          openLoginModal={openLoginModal}
-        />
+        {/* Help View Overlay */}
+        {showHelp && (
+          <div className="fixed inset-0 z-[100] animate-fade-in bg-zinc-950">
+            <HelpView isNight={isNight} onClose={() => setShowHelp(false)} />
+          </div>
+        )}
+        
         <DebugConsole />
 
         <style>{`
