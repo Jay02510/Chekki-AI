@@ -157,7 +157,7 @@ export default function Landing() {
       </div>
 
       {/* ATTENTION: Hero Section - Artistic Asymmetry */}
-      <section id="main-content" ref={heroRef} className="relative py-32 md:py-40 px-4 md:px-8 max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-12 md:gap-8 min-h-[80dvh]">
+      <section id="main-content" ref={heroRef} className="relative py-32 md:py-40 px-4 md:px-8 max-w-7xl mx-auto w-full flex flex-col-reverse md:flex-row items-center justify-between gap-12 md:gap-8 min-h-[80dvh]">
         <div className="flex-1 flex flex-col items-start z-10 w-full">
           <div className="hero-element mb-6 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-600 dark:text-white/70">
             {lang === 'en' ? 'For Parents & Educators' : '학부모 및 교육자를 위한'}
@@ -171,8 +171,8 @@ export default function Landing() {
           </h1>
           <p className="hero-element mt-8 text-lg md:text-xl text-slate-600 dark:text-white/60 leading-relaxed max-w-xl">
             {lang === 'en' 
-              ? "Empower your child's education. Chekki helps Korean parents track homework, auto-grade worksheets, and share interactive progress reports directly with tutors — no typing, no prompting."
-              : "자녀의 학습을 주도적으로 이끌어주세요. 체키는 숙제를 추적하고, 학습지를 자동 채점하며, 인터랙티브 리포트를 선생님께 바로 공유합니다 — 입력도, 프롬프트도 없이."}
+              ? "Stop fighting over English homework. Chekki helps Korean parents easily track assignments, auto-grade worksheets, and understand exactly what their child is struggling with — no English skills required."
+              : "매일 반복되는 영어 숙제 전쟁, 이제 끝내세요. 체키는 영어에 자신 없는 부모님도 쉽게 아이의 숙제를 확인하고, 자동 채점하며, 취약점을 한눈에 파악할 수 있도록 돕습니다."}
           </p>
           <div className="hero-element mt-12 flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
             {/* Primary Magnetic CTA */}
@@ -194,8 +194,8 @@ export default function Landing() {
         </div>
         
         {/* Overlapping Artistic Asset */}
-        <div className="hero-element flex-1 w-full relative h-[400px] md:h-[700px] flex justify-end">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[500px] aspect-square bg-brand/20 rounded-full blur-[120px]" />
+        <div className="hero-element flex-1 w-full relative h-[350px] md:h-[700px] flex justify-center md:justify-end">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[350px] md:max-w-[500px] aspect-square bg-brand/20 rounded-full blur-[100px] md:blur-[120px]" />
           <img
             src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png"
             alt="Chekki App Graphic"
@@ -286,13 +286,13 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col md:flex-row h-full w-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="md:w-1/2 min-h-[140px] h-full px-5 py-6 md:py-10 flex flex-col justify-center order-2 md:order-1">
+              <div className="md:w-1/2 min-h-[140px] md:h-full px-5 py-6 md:py-10 flex flex-col justify-center order-2 md:order-1">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2">
                   {lang === 'en' ? 'Only have a few minutes?' : '시간이 몇 분밖에 없나요?'}
                   <ArrowRight className="text-brand animate-pulse" />
                 </h3>
               </div>
-              <div className="md:w-1/2 h-48 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
+              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
                 <img src="/assets/bento_speed_mode.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
             </div>
@@ -315,10 +315,10 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col md:flex-row h-full w-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="md:w-1/2 h-48 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
+              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
                 <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
-              <div className="md:w-1/2 min-h-[140px] h-full px-5 py-6 md:py-10 flex flex-col justify-center">
+              <div className="md:w-1/2 min-h-[140px] md:h-full px-5 py-6 md:py-10 flex flex-col justify-center">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2">
                   {lang === 'en' ? 'Anxious they might fall behind?' : '우리 아이만 뒤쳐질까 봐 불안하신가요?'}
                   <ArrowRight className="text-orange-500 animate-pulse" />
