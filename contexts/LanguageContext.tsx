@@ -12,8 +12,8 @@ const translations = {
   en: {
     app_name: 'Chekki AI',
     tagline: 'Your AI Homework Helper',
-    login: 'Log In',
-    logout: 'Log Out',
+    login: 'Sign In',
+    logout: 'Sign Out',
     scans: 'Magic Scans',
     pro_plan: 'Premium 🚀',
     feat_overlay: '🎯 Instant Answer Overlays',

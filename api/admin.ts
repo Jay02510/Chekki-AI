@@ -128,36 +128,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     else if (action === 'delete') {
       let targetUid = uid;
+      let authUid = null;
+      let firestoreUid = null;
       
       if (!targetUid && email) {
         const cleanEmail = email.toLowerCase().trim();
+        
+        // 1. Try to find in Auth
+        try {
+          const userRecord = await authDb.getUserByEmail(cleanEmail);
+          authUid = userRecord.uid;
+        } catch (e: any) {
+          if (e.code !== 'auth/user-not-found') {
+            console.error('Error finding user in Auth:', e);
+          }
+        }
+
+        // 2. Try to find in Firestore
         const usersRef = adminDb.collection('users');
         const q = usersRef.where('email', '==', cleanEmail);
         const querySnapshot = await q.get();
 
-        if (querySnapshot.empty) {
+        if (!querySnapshot.empty) {
+          firestoreUid = querySnapshot.docs[0].id;
+        }
+
+        if (!authUid && !firestoreUid) {
           return res.status(404).json({ error: 'User not found. Please check the email address.' });
         }
-        targetUid = querySnapshot.docs[0].id;
+        
+        targetUid = authUid || firestoreUid; // Fallback to either
       }
       
       if (!targetUid) return res.status(400).json({ error: 'Missing uid or email' });
       
+      // Delete from Firestore (using firestoreUid if we looked up by email, otherwise targetUid)
+      const uidToDeleteFromFirestore = firestoreUid || targetUid;
       try {
-        await adminDb.collection('users').doc(targetUid).delete();
+        await adminDb.collection('users').doc(uidToDeleteFromFirestore).delete();
       } catch (dbErr) {
         console.error('Error deleting user from Firestore:', dbErr);
       }
       
+      // Delete from Auth (using authUid if we looked up by email, otherwise targetUid)
+      const uidToDeleteFromAuth = authUid || targetUid;
       try {
-        await authDb.deleteUser(targetUid);
+        await authDb.deleteUser(uidToDeleteFromAuth);
       } catch (authErr: any) {
         if (authErr.code !== 'auth/user-not-found') {
           console.error('Error deleting user from Auth:', authErr);
           throw authErr;
         }
-        // If user is not found in auth, we can still consider the deletion successful 
-        // since they are already gone from Auth and we just deleted them from Firestore
       }
       
       return res.status(200).json({ success: true, message: 'User deleted successfully' });

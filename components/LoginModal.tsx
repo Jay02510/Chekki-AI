@@ -392,7 +392,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                       ? 'Creating account...'
                       : 'Sending link...'
                   : viewMode === 'login'
-                    ? 'Log In'
+                    ? 'Sign In'
                     : viewMode === 'signup'
                       ? 'Sign Up'
                       : 'Send Reset Link'}
@@ -476,11 +476,11 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                   </>
                 ) : viewMode === 'signup' ? (
                   <>
-                    Already have an account? <span className="text-brand-orange">Log In</span>
+                    Already have an account? <span className="text-brand-orange">Sign In</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-brand-orange">Back to Log In</span>
+                    <span className="text-brand-orange">Back to Sign In</span>
                   </>
                 )}
               </button>

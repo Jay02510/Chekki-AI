@@ -497,7 +497,7 @@ export default function AdminPage() {
                                   className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors text-[10px] font-bold uppercase tracking-wider"
                                   title="Log in as user"
                                 >
-                                  Log In
+                                  Sign In
                                 </button>
                                 {user.plan === 'pro' && (
                                   <button
