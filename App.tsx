@@ -649,7 +649,37 @@ function AppContent() {
                 </div>
               )}
 
-              {analysisState.status === 'complete' && analysisState.data && (
+              {analysisState.status === 'complete' && analysisState.showHandwritingWarning && (
+                <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
+                  <div className="text-6xl md:text-7xl mb-6">📝</div>
+                  <h3 className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}>
+                    {language === 'ko' ? '글씨를 인식하기 어려워요' : 'Handwriting Unclear'}
+                  </h3>
+                  <div className="space-y-2 mb-8 max-w-md mx-auto">
+                    <p className={`${isNight ? 'text-zinc-400' : 'text-zinc-650'} font-korean leading-relaxed`}>
+                      {language === 'ko' 
+                        ? '작성된 글씨가 너무 흐리거나 알아보기 힘듭니다. AI가 채점을 시도하겠지만 결과가 부정확할 수 있습니다.' 
+                        : 'The handwriting on this worksheet is very messy or faded. Chekki tried its best, but the grading might be inaccurate.'}
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none justify-center">
+                    <button
+                      onClick={() => setAnalysisState(prev => ({ ...prev, showHandwritingWarning: false }))}
+                      className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg min-h-[48px] w-full sm:w-auto"
+                    >
+                      {language === 'ko' ? '그래도 진행하기' : 'Proceed Anyway'}
+                    </button>
+                    <button
+                      onClick={() => handleReset(false)}
+                      className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full sm:w-auto min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
+                    >
+                      {t('btn_retake')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {analysisState.status === 'complete' && !analysisState.showHandwritingWarning && analysisState.data && (
                 <div className="animate-fade-in-up flex flex-col pt-4 pb-4">
                   <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
                     <div className="flex items-center gap-3 min-w-0">

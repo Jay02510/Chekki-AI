@@ -89,6 +89,7 @@ export interface WorksheetSummary {
   total_score?: number;
   worksheet_type?: string;
   has_handwriting?: boolean;
+  is_handwriting_legible?: boolean;
 }
 
 export interface WorksheetAnalysis {
@@ -112,6 +113,7 @@ export interface AnalysisState {
   showReward?: boolean;
   isSummaryLoaded?: boolean;
   isItemsLoaded?: boolean;
+  showHandwritingWarning?: boolean;
 }
 
 export interface CommunityPost {

@@ -106,10 +106,13 @@ export const useWorksheetAnalysis = () => {
 
       try {
         // DEDUCT SCAN: Move this earlier to prevent quota bypass
-        if (isAuthenticated && user?.uid) {
-          await incrementScan();
-        } else {
-          localStorage.setItem(GUEST_SCAN_KEY, 'true');
+        // FIX: Do not deduct if this is a retry (the backend idempotency cache will serve the result for free)
+        if (!isRetry) {
+          if (isAuthenticated && user?.uid) {
+            await incrementScan();
+          } else {
+            localStorage.setItem(GUEST_SCAN_KEY, 'true');
+          }
         }
 
         const result = await analyzeWorksheet(
@@ -123,6 +126,10 @@ export const useWorksheetAnalysis = () => {
           idempotencyKeyRef.current
         );
 
+        const hasMessyHandwriting =
+          result.worksheet_summary?.has_handwriting &&
+          result.worksheet_summary?.is_handwriting_legible === false;
+
         const newState: AnalysisState = {
           status: 'complete',
           data: result,
@@ -131,6 +138,7 @@ export const useWorksheetAnalysis = () => {
           showReward: false,
           isSummaryLoaded: true,
           isItemsLoaded: true,
+          showHandwritingWarning: hasMessyHandwriting,
         };
 
         setAnalysisState(newState);
