@@ -291,8 +291,11 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
     try {
       const isGuest = !isAuthenticated;
+      const worksheetContext = localItems.length > 0 
+        ? localItems.map(i => `Question ${i.id}: Text: "${i.question_text}". Correct Answer: "${i.correct_answer}"`).join('\\n')
+        : undefined;
       // Pass history along with the new question
-      const response = await askChekkiQuestion(question, language, isGuest, undefined, askHistory);
+      const response = await askChekkiQuestion(question, language, isGuest, undefined, askHistory, undefined, worksheetContext);
 
       setAskAnswer(response);
       // Update history: add BOTH the question and the response

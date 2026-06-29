@@ -80,7 +80,7 @@ Provide a Guide for the parent and a Teaching Script to say to the child, strict
 
 PEDAGOGY DEFINITIONS FOR EXISTING FIELDS:
 - korean_guide / english_guide: For the PARENT's eyes only. Briefly explain the 'Why' behind the correct answer. IMPORTANT: Keep this explanation SIMPLE, warm, and practical for a mom. Avoid academic jargon like 'CVCe', 'phonemes', or complex grammar terms. Use everyday language (e.g., "The silent 'e' makes the 'a' sound long"). Do NOT use IPA pronunciation symbols (like /eɪ/ or /æ/) as they are too complex; use simple phonetic spelling instead (e.g., "sounds like 'ay'").
-- teaching_script_ko / teaching_script_en: Exactly what the parent should SAY out loud to the child.
+- teaching_script_ko / teaching_script_en: Exactly what the parent should SAY out loud to the child. Keep this extremely concise, NO MORE THAN 2 or 3 sentences maximum.
    1. Start with an engaging, enthusiastic hook (e.g., "Let's look at this one together!").
    2. Include scaffolding/hints: Do not just tell the child the answer. Ask a guiding question to help them figure it out (e.g., "What sound does the first letter make?").
    3. PSYCHOLOGICAL FRICTION: In 'teaching_script_en', identify the 1 or 2 most difficult English words to pronounce and wrap them in **bold** markdown (e.g., "**vocabulary**"). Add a subtle hook acknowledging the difficulty (e.g., "This word is tricky to say! Let's listen closely").
