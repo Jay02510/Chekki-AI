@@ -45,7 +45,21 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
   const [showSettings, setShowSettings] = useState(false);
   const [showFullscreenSettings, setShowFullscreenSettings] = useState(false);
-  const [showBlankAnswers, setShowBlankAnswers] = useState(false);
+  const [showAnswers, setShowAnswers] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('chekki_show_answers');
+      if (saved !== null) return saved === 'true';
+    }
+    return hasHandwriting !== false;
+  });
+
+  const handleToggleAnswers = () => {
+    const newVal = !showAnswers;
+    setShowAnswers(newVal);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('chekki_show_answers', String(newVal));
+    }
+  };
 
   const [bubbleScale, setBubbleScale] = useState(0.75);
   const [items, setItems] = useState<WorksheetItem[]>(initialItems);
@@ -237,9 +251,13 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
           {imageLoaded &&
             items &&
-            (!isBlankKeyMode || showBlankAnswers) &&
             items.map((item, idx) => {
               const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
+              const isExplicitlyFocused = focusedId === item.id;
+              
+              // Hide the bubble if answers are hidden AND this item isn't explicitly focused
+              if (!showAnswers && !isExplicitlyFocused) return null;
+
               const displayValue = removeMarkdown(item.correct_answer || '');
               const isDragging = draggingId === item.id;
 
@@ -398,18 +416,18 @@ export const WorksheetOverlay: React.FC<Props> = ({
             )}
             {renderOverlayContent(false)}
           </div>
-          {/* Toggle Button for Blank Worksheet */}
-          {hasHandwriting === false && !isLoadingItems && items.length > 0 && (
+          {/* Toggle Button for Worksheet Answers */}
+          {!isLoadingItems && items.length > 0 && (
             <div className="sticky bottom-6 left-0 right-0 flex justify-center pointer-events-none z-50 pb-6 mt-4">
               <button
-                onClick={() => setShowBlankAnswers(!showBlankAnswers)}
+                onClick={handleToggleAnswers}
                 className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
-                  showBlankAnswers 
+                  showAnswers 
                     ? 'bg-blue-500 text-white border-blue-400 shadow-sm' 
                     : isNight ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
                 }`}
               >
-                {showBlankAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
+                {showAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
               </button>
             </div>
           )}
@@ -474,18 +492,18 @@ export const WorksheetOverlay: React.FC<Props> = ({
                   )}
                 </button>
 
-                {/* Toggle Button for Blank Worksheet in Fullscreen */}
-                {hasHandwriting === false && !isLoadingItems && items.length > 0 && (
+                {/* Toggle Button for Answers in Fullscreen */}
+                {!isLoadingItems && items.length > 0 && (
                   <div className="flex justify-center pointer-events-none absolute left-1/2 -translate-x-1/2">
                     <button
-                      onClick={() => setShowBlankAnswers(!showBlankAnswers)}
+                      onClick={handleToggleAnswers}
                       className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
-                        showBlankAnswers 
+                        showAnswers 
                           ? 'bg-blue-500 text-white border-blue-400 shadow-sm' 
                           : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-blue-500/50 hover:text-blue-400'
                       }`}
                     >
-                      {showBlankAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
+                      {showAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
                     </button>
                   </div>
                 )}
