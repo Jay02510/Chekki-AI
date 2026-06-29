@@ -454,7 +454,7 @@ function AppContent() {
             if (isAuthenticated) {
               setShowDashboard(true);
             } else {
-              setShowLoginModal(true);
+              openLoginModal();
             }
           }}
         />
@@ -690,7 +690,7 @@ function AppContent() {
                         if (isAuthenticated) {
                           setShowDashboard(true);
                         } else {
-                          setShowLoginModal(true);
+                          openLoginModal();
                         }
                       }}
                     />
