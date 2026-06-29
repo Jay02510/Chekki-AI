@@ -494,6 +494,7 @@ function AppContent() {
               setShowChildProfileModal(false);
             }}
             isNight={isNight}
+            setIsNight={setIsNight}
           />
         )}
 

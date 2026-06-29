@@ -7,6 +7,7 @@ interface Props {
   onComplete: () => void;
   onSkip: () => void;
   isNight?: boolean;
+  setIsNight?: (val: boolean) => void;
   initialStep?: number;
 }
 
@@ -27,6 +28,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   onComplete,
   onSkip,
   isNight = true,
+  setIsNight,
   initialStep = 0,
 }) => {
   const { language, setLanguage } = useLanguage();
@@ -244,7 +246,8 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
     descKo: string,
     descEn: string,
     nextAction: () => void,
-    isLast: boolean = false
+    isLast: boolean = false,
+    extraContent?: React.ReactNode
   ) => (
     <motion.div 
       key={`step${step}`}
@@ -265,9 +268,11 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight mb-5">
         {language === 'ko' ? titleKo : titleEn}
       </h3>
-      <p className="text-base text-zinc-400 mb-12 leading-relaxed max-w-[280px] font-korean">
+      <p className={`text-base text-zinc-400 leading-relaxed max-w-[280px] font-korean \${extraContent ? 'mb-6' : 'mb-12'}`}>
         {language === 'ko' ? descKo : descEn}
       </p>
+
+      {extraContent && extraContent}
 
       <div className="w-full mt-auto">
         <motion.button
@@ -329,21 +334,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
               </button>
             </motion.div>
           )}
-          {step === 0 && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              className="absolute top-6 right-6 z-50"
-            >
-              <button 
-                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-                className="bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-[10px] font-bold px-3 py-1.5 rounded-full backdrop-blur-md transition-all tracking-wider border border-white/5 hover:border-white/20 flex items-center gap-1.5 shadow-lg"
-              >
-                <span className="text-[12px]">{language === 'ko' ? '🇺🇸' : '🇰🇷'}</span>
-                <span>{language === 'ko' ? 'ENG' : '한국어'}</span>
-              </button>
-            </motion.div>
-          )}
+
           <AnimatePresence mode="wait">
             {step === 0 && renderEducationalStep(
               '/assets/slide1_welcome_mascot.png',
@@ -351,7 +342,65 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
               'Welcome to Chekki',
               '우리 아이의 완벽한 AI 영어 튜터를 만나보세요.',
               "Meet your child's new personal AI English Tutor.",
-              () => setStep(1)
+              () => setStep(1),
+              false,
+              (
+                <div className="flex flex-col gap-4 mt-2 w-full max-w-[280px] mx-auto mb-8">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-left">
+                      {language === 'ko' ? '언어 (Language)' : 'Language'}
+                    </label>
+                    <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
+                      {/* Active Background for Language */}
+                      <div 
+                        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl bg-zinc-800 transition-transform duration-200 ease-out`}
+                        style={{ transform: `translateX(${language === 'en' ? '0' : '100%'})` }}
+                      />
+                      <button 
+                        onClick={() => setLanguage('en')}
+                        className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'en' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                      >
+                        English
+                      </button>
+                      <button 
+                        onClick={() => setLanguage('ko')}
+                        className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'ko' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                      >
+                        한국어
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {setIsNight && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-left">
+                        {language === 'ko' ? '테마 (View)' : 'View'}
+                      </label>
+                      <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
+                        {/* Active Background for Theme */}
+                        <div 
+                          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl bg-zinc-800 transition-transform duration-200 ease-out`}
+                          style={{ transform: `translateX(${!isNight ? '0' : '100%'})` }}
+                        />
+                        <button 
+                          onClick={() => setIsNight(false)}
+                          className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${!isNight ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>
+                          Light
+                        </button>
+                        <button 
+                          onClick={() => setIsNight(true)}
+                          className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${isNight ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>
+                          Dark
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
             )}
             {step === 1 && renderEducationalStep(
               '/assets/onboarding_icon_grader_1782545224150.png',

@@ -64,6 +64,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedM
           onComplete={() => setShowOnboarding(false)}
           onSkip={() => setShowOnboarding(false)}
           isNight={isNight}
+          setIsNight={setIsNight}
           initialStep={5}
         />
       )}
