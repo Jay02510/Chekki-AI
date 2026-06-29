@@ -45,7 +45,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto px-4 pt-8 md:pt-16 mb-8 flex justify-start">
+      <div className="max-w-5xl mx-auto px-4 pt-[calc(env(safe-area-inset-top)+1.5rem)] md:pt-[calc(env(safe-area-inset-top)+4rem)] mb-8 flex justify-start">
         <button
           onClick={onClose}
           className={`group flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all active:scale-[0.97] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 shadow-sm'}`}
@@ -85,7 +85,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               {
                 step: 3,
                 img: '/assets/onboarding_icon_dashboard_1782545238800.png',
-                ko: '자동 오답 노트',
+                ko: '자동 대시보드',
                 en: 'Learning Dashboard',
                 koDesc: '틀린 문제는 자동으로 학습 대시보드에 저장됩니다. 번거롭게 따로 기록할 필요가 없어요.',
                 enDesc: 'Wrong answers are automatically saved to your Dashboard. No need to manually keep track.'

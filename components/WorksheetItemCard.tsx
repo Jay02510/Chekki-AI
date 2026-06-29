@@ -413,7 +413,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                 })
                               }
                               className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-[1.02] active:scale-[0.97] hover:-translate-y-0.5 shadow-sm transition-transform ${flagged ? 'bg-red-500/10 text-red-500' : isNight ? 'bg-white/5 text-emerald-500/60 hover:text-emerald-400' : 'bg-emerald-500/5 text-emerald-600/50 hover:text-emerald-600'}`}
-                              title={userPlan !== 'pro' && index !== 0 ? (language === 'ko' ? 'Pro: 오답 노트 저장' : 'Pro: Bookmark Mistake') : t('tt_bookmark')}
+                              title={userPlan !== 'pro' && index !== 0 ? (language === 'ko' ? 'Pro: 대시보드 저장' : 'Pro: Save to Dashboard') : t('tt_bookmark')}
                             >
                               <svg className="w-5 h-5 md:w-6 md:h-6" fill={flagged ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />

@@ -371,7 +371,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         isNight={isDark}
       />
       
-      <div className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12 md:py-8 max-w-[1400px] mx-auto">
+      <div className="relative z-10 flex items-center justify-between px-6 pb-6 pt-[calc(env(safe-area-inset-top)+1.5rem)] md:px-12 md:pb-8 md:pt-[calc(env(safe-area-inset-top)+2rem)] max-w-[1400px] mx-auto">
         <h1 className="text-balance text-2xl md:text-3xl font-black tracking-tighter flex items-center gap-2 font-korean">
           <span>{language === 'ko' ? '학습 대시보드' : 'Learning Dashboard'}</span>
         </h1>
@@ -409,7 +409,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               
               <p className="text-zinc-400 text-sm max-w-md mb-8 relative z-10 font-korean leading-relaxed">
                 {language === 'ko' 
-                  ? '오답 노트의 문장들을 아이가 직접 소리 내어 말해보며 완벽히 익힐 수 있게 해보세요.'
+                  ? '대시보드의 문장들을 아이가 직접 소리 내어 말해보며 완벽히 익힐 수 있게 해보세요.'
                   : 'Turn saved mistakes into an interactive speaking exercise so your child learns to pronounce it correctly.'}
               </p>
 
@@ -433,7 +433,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                         <p className="text-zinc-400 font-medium font-korean text-sm">
                           {language === 'ko'
                             ? '아직 복습할 문항이 없습니다. 스캔 결과에서 오답을 저장하면 여기에 표시됩니다.'
-                            : 'Your mistake bank is empty. It will be populated with real sentences when you save a mistake from a scan.'}
+                            : 'Your dashboard is empty. It will be populated with real sentences when you save a mistake from a scan.'}
                         </p>
                       </div>
                     ) : (

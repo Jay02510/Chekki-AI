@@ -271,7 +271,7 @@ const translations = {
     fb_success: "Feedback sent! We'll review it within 1 business day.",
 
     // Review / Mistake Note
-    review_title: 'Mistake Bank',
+    review_title: 'Dashboard',
     review_empty_title: 'All caught up!',
     review_empty_desc: "You don't have any items to review yet.",
     review_print_btn: 'Save / Print PDF',
@@ -346,12 +346,12 @@ const translations = {
     // Tooltips
     tt_close: 'Deselect',
     tt_audio: 'Listen to Pronunciation',
-    tt_bookmark: 'Save to Dashboard Mistake Bank',
+    tt_bookmark: 'Save to Dashboard',
     tt_refine: 'Explain More',
     tt_home: 'Return to Home',
     tt_lang_toggle: 'Switch Language',
     tt_moms_lounge: "Mom's Lounge",
-    tt_review_note: 'Mistake Bank',
+    tt_review_note: 'Dashboard',
     tt_feedback: 'Share Feedback',
     tt_guide: 'Watch Guide',
     tt_resource: 'Parent Resources',
@@ -634,7 +634,7 @@ const translations = {
     fb_success: '의견을 보내주셔서 감사합니다! 1영업일 내에 검토해 드릴게요.',
 
     // Review / Mistake Note
-    review_title: '오답 노트',
+    review_title: '대시보드',
     review_empty_title: '복습할 내용이 없어요!',
     review_empty_desc: '아직 학습할 오답이 없습니다.',
     review_print_btn: 'PDF 저장 / 인쇄하기',
@@ -709,12 +709,12 @@ const translations = {
     // Tooltips
     tt_close: '선택 취소',
     tt_audio: '원어민 발음 듣기',
-    tt_bookmark: '대시보드 오답 노트에 저장',
+    tt_bookmark: '대시보드에 저장',
     tt_refine: '상세 설명 보기',
     tt_home: '처음으로 돌아가기',
     tt_lang_toggle: '언어 변경',
     tt_moms_lounge: '엄마들의 쉼터',
-    tt_review_note: '오답 노트',
+    tt_review_note: '대시보드',
     tt_feedback: '의견 보내기',
     tt_guide: '가이드 보기',
     tt_resource: '학부모 자료',
