@@ -315,6 +315,20 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       >
         {/* Inner Core */}
         <div className="relative w-full h-full bg-[#050505] rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
+          {step < 5 && (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="absolute top-6 left-6 z-50"
+            >
+              <button 
+                onClick={onSkip}
+                className="bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-[10px] font-bold px-4 py-1.5 rounded-full backdrop-blur-md transition-all tracking-widest uppercase border border-white/5 hover:border-white/20 shadow-lg"
+              >
+                {language === 'ko' ? '건너뛰기' : 'Skip'}
+              </button>
+            </motion.div>
+          )}
           {step === 0 && (
             <motion.div 
               initial={{ opacity: 0 }} 
