@@ -13,6 +13,22 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
   const [textIndex, setTextIndex] = useState(0);
   const [videoError, setVideoError] = useState(false);
   const [showCancel, setShowCancel] = useState(true);
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    setVideoError(false);
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Video autoplay failed or was blocked by browser:", err);
+          setVideoError(true);
+        });
+      }
+    }
+  }, [isNight]);
 
   // Stable memoized dependency
   const loadingTexts = useMemo(
@@ -87,12 +103,12 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
         >
           {!videoError ? (
             <video
+              ref={videoRef}
               autoPlay
               muted
               loop
               playsInline
               controls={false}
-              crossOrigin="anonymous"
               className="absolute inset-0 w-full h-full object-cover"
               onError={() => setVideoError(true)}
               style={{ WebkitTransform: 'translateZ(0)' }} // Hardware acceleration to force inline play
