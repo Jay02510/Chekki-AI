@@ -138,7 +138,7 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const autoBookmark = (items: WorksheetItem[]) => {
-    let newMistakes = [...mistakes];
+    const newMistakes = [...mistakes];
     let addedAny = false;
 
     items.forEach((item) => {

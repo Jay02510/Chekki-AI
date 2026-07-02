@@ -182,22 +182,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
         await SpeechRecognition.removeAllListeners();
         
+        let currentText = "";
+        
         SpeechRecognition.addListener('partialResults', (data) => {
           if (data.matches && data.matches.length > 0) {
-            setSpokenText(data.matches[0]);
+            currentText = data.matches[0];
+            setSpokenText(currentText);
           }
         });
 
-        const result = await SpeechRecognition.start({
-          language: "en-US",
-          partialResults: true,
-          maxResults: 1
+        SpeechRecognition.addListener('listeningState', (data) => {
+          if (data.status === 'stopped') {
+            setIsListening(false);
+            if (currentText) {
+              checkPronunciation(currentText);
+            }
+          }
         });
 
-        setIsListening(false);
-        const finalTranscript = result.matches && result.matches.length > 0 ? result.matches[0] : spokenText;
-        setSpokenText(finalTranscript);
-        checkPronunciation(finalTranscript);
+        await SpeechRecognition.start({
+          language: "en-US",
+          partialResults: true,
+          popup: false,
+          maxResults: 1
+        });
       } else {
         // Web Fallback
         const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -421,7 +429,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     <p className="text-xs text-zinc-400 mb-6">{language === 'ko' ? '화면 터치 없이 오디오로 복습이 진행됩니다.' : 'Hands-free interactive voice review is starting.'}</p>
                     <div className="flex items-center gap-3 w-full">
                       <button onClick={() => setShowHandoff(false)} className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-bold transition-all">Cancel</button>
-                      <button onClick={confirmStartPractice} className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">I'm Ready!</button>
+                      <button onClick={confirmStartPractice} className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">I&apos;m Ready!</button>
                     </div>
                   </div>
                 ) : (
@@ -439,9 +447,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     ) : (
                       mistakes.slice(0, 3).map((mistake, i) => (
                         <div key={mistake.uniqueId || i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default gap-3">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50">{mistake.question_text}</span>
-                            <span className="text-sm font-bold text-emerald-400">{cleanAnswerText(mistake.correct_answer || '')}</span>
+                          <div className="flex flex-col gap-1 min-w-0">
+                            <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50 break-words whitespace-normal">{mistake.question_text}</span>
+                            <span className="text-sm font-bold text-emerald-400 break-words whitespace-normal">{cleanAnswerText(mistake.correct_answer || '')}</span>
                           </div>
                         </div>
                       ))
@@ -486,8 +494,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 <h2 className="text-balance text-lg font-bold tracking-tight font-korean">Ask Chekki</h2>
               </div>
               
-              <div className="flex-1 w-full bg-black/40 rounded-xl border border-white/5 p-4 flex flex-col justify-end gap-3 relative z-10">
-                <div className="self-start bg-zinc-800/80 px-4 py-3 rounded-2xl rounded-tl-sm max-w-[85%] text-xs md:text-sm text-zinc-300 font-korean leading-relaxed border border-white/5">
+              <div className="flex-1 w-full bg-zinc-900/90 rounded-2xl border border-white/10 p-4 flex flex-col justify-end gap-3 relative z-10 shadow-inner">
+                <div className="self-start bg-orange-500/15 border border-orange-500/30 px-4 py-3 rounded-2xl rounded-tl-sm max-w-[85%] text-xs md:text-sm text-orange-200 font-medium font-korean leading-relaxed shadow-sm">
                   {language === 'ko' ? '오늘 배운 내용 중 이해 안 되는 부분이 있나요?' : 'Is there anything you didn\'t understand today?'}
                 </div>
                 <div className="w-full mt-2 relative z-[100]">

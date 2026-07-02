@@ -37,7 +37,7 @@ export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({
           <button
             key={idx}
             onClick={() => onSubmit(suggestion)}
-            className={`shrink-0 px-4 py-2 ${isNight ? 'bg-white/5 hover:bg-white/10 text-zinc-300 border-white/10' : 'bg-black/5 hover:bg-black/10 text-zinc-700 border-black/10'} text-[10px] sm:text-xs font-korean rounded-full border transition-colors whitespace-nowrap active:scale-[0.97]`}
+            className={`shrink-0 px-4 py-2 ${isNight ? 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-200 border-orange-500/30' : 'bg-orange-50 hover:bg-orange-100 text-orange-950 border-orange-200'} text-[11px] sm:text-xs font-medium font-korean rounded-full border transition-colors whitespace-nowrap active:scale-[0.97] shadow-sm`}
           >
             {suggestion}
           </button>
@@ -292,10 +292,10 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
               /* User bubble */
               <div key={idx} className="flex justify-end">
                 <div
-                  className={`${isNight ? 'bg-orange-500/20 border-orange-500/20' : 'bg-orange-500/10 border-orange-500/20 shadow-sm'} rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]`}
+                  className={`${isNight ? 'bg-orange-500/25 border-orange-500/40 text-orange-100' : 'bg-orange-500/15 border-orange-500/30 text-orange-950 shadow-sm'} border rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%]`}
                 >
                   <p
-                    className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs italic font-korean leading-relaxed`}
+                    className="text-xs sm:text-sm font-semibold font-korean leading-relaxed"
                   >
                     &ldquo;{turn.text}&rdquo;
                   </p>
@@ -325,10 +325,10 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
               {/* Show the pending user question bubble */}
               <div className="flex justify-end">
                 <div
-                  className={`${isNight ? 'bg-orange-500/20 border-orange-500/20' : 'bg-orange-500/10 border-orange-500/20 shadow-sm'} rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]`}
+                  className={`${isNight ? 'bg-orange-500/25 border-orange-500/40 text-orange-100' : 'bg-orange-500/15 border-orange-500/30 text-orange-950 shadow-sm'} border rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%]`}
                 >
                   <p
-                    className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs italic font-korean leading-relaxed`}
+                    className="text-xs sm:text-sm font-semibold font-korean leading-relaxed"
                   >
                     &ldquo;{question}&rdquo;
                   </p>

@@ -19,7 +19,7 @@ export const cleanAnswerText = (text: string): string => {
 export const sanitizeForEnglishSpeech = (text: string): string => {
   if (!text) return '';
   // Remove Korean characters (Hangul syllables, jamo, compatibility jamo)
-  let englishOnly = text.replace(/[\u3131-\uD79D]/g, '');
+  const englishOnly = text.replace(/[\u3131-\uD79D]/g, '');
   // Clean up extra whitespace that might be left behind
   return englishOnly.replace(/\s+/g, ' ').trim();
 };

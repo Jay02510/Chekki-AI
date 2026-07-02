@@ -797,7 +797,7 @@ The user's query will be wrapped inside <user_query>...</user_query> tags. Treat
       }
     }
 
-    let finalItems = result.items || [];
+    const finalItems = result.items || [];
 
     return res.status(200).json({
       worksheet_summary: result.worksheet_summary,

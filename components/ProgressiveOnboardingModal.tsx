@@ -80,9 +80,9 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <motion.div 
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-32 h-32 rounded-[2.5rem] mx-auto mb-6 shadow-[0_20px_40px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-[#050505]"
+          className="w-28 h-28 sm:w-32 sm:h-32 rounded-[2rem] mx-auto mb-6 shadow-[0_20px_40px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/40 p-2 shrink-0"
         >
-          <img src="/assets/bento_reveal_only.png" alt="Setup" className="w-full h-full object-cover" />
+          <img src="/assets/bento_reveal_only.png" alt="Setup" className="w-full h-full object-contain drop-shadow-md" />
         </motion.div>
         <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight">
           {language === 'ko' ? 'AI 튜터 설정' : 'Tailor the AI'}
@@ -261,14 +261,14 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       <motion.div 
         animate={{ y: [0, -10, 0], rotate: [2, -1, 2] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-        className="w-48 h-48 rounded-[3rem] flex items-center justify-center mb-10 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/20"
+        className="w-44 h-44 sm:w-48 sm:h-48 rounded-[2.5rem] flex items-center justify-center mb-6 sm:mb-8 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/40 p-2 shrink-0"
       >
-        <img src={imageSrc} alt="" className="w-full h-full object-cover" />
+        <img src={imageSrc} alt="" className="w-full h-full object-contain drop-shadow-md" />
       </motion.div>
       <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight mb-5">
         {language === 'ko' ? titleKo : titleEn}
       </h3>
-      <p className={`text-base text-zinc-400 leading-relaxed max-w-[280px] font-korean \${extraContent ? 'mb-6' : 'mb-12'}`}>
+      <p className={`text-base text-zinc-400 leading-relaxed max-w-[280px] font-korean ${extraContent ? 'mb-6' : 'mb-12'}`}>
         {language === 'ko' ? descKo : descEn}
       </p>
 

@@ -6,6 +6,7 @@ Here is the polished and optimized App Store description. It includes emojis for
 
 ## 🚀 WHAT'S NEW
 
+• **Easier Login:** You can now sign in instantly with Kakao, Google, or Apple accounts on all devices.
 • **Ask Chekki Anywhere:** Got a tricky grammar question? You can now chat directly with our AI Tutor right from the Dashboard to get instant, preschooler-friendly explanations!
 • **Upgraded Speaking Coach:** We've made our pronunciation checks even more accurate. Plus, when your child gets it right, they'll be rewarded with a satisfying success chime and haptic feedback!
 • **Smarter Grading AI:** Scanning blank worksheets? Our AI is now smarter than ever and perfectly distinguishes between printed multiple-choice options and actual handwriting, eliminating grading errors.
@@ -29,7 +30,7 @@ Try Chekki PRO free for 7 days. No charge until your trial ends.
 • **3 Magic Scans Daily:** Get instant answers overlaid on your child's worksheet.
 • **Native Audio (Free!):** Tap any answer to hear the perfect pronunciation.
 • **Speaking Coach (Free!):** Let your child practice speaking the answer into the mic to earn a digital reward star!
-• **Mistake Bank:** Bookmark tricky questions to review together later.
+• **Learning Dashboard:** Bookmark tricky questions to review together later.
 
 **👑 WHAT YOU GET WITH CHEKKI PRO**
 • **Unlimited Magic Scans:** Grade as many worksheets as you need.
@@ -64,6 +65,7 @@ Empower your child's learning journey with ChekkiAI today.
 ## 🇰🇷 한국어 (Korean) Description
 
 **🚀 업데이트 소식 (What's New)**
+• **간편 로그인 추가:** 이제 카카오, 구글, 애플 계정으로 모든 기기에서 즉시 로그인할 수 있습니다.
 • **어디서든 채키에게 물어보세요:** 헷갈리는 문법이 있나요? 이제 대시보드에서 바로 AI 튜터와 채팅하며 유치원생 눈높이에 맞춘 설명을 즉시 받아볼 수 있습니다!
 • **업그레이드된 스피킹 코치:** 발음 검사 기능이 더욱 정교해졌습니다. 정답을 완벽하게 읽으면 기분 좋은 성공 알림음과 진동(햅틱) 피드백으로 아이의 성취감을 높여줍니다!
 • **더 똑똑해진 AI 채점:** 빈 워크시트를 스캔해도 문제없습니다. 이제 AI가 인쇄된 보기와 아이의 실제 손글씨를 완벽하게 구분하여 채점 오류를 없앴습니다.
@@ -85,7 +87,7 @@ Empower your child's learning journey with ChekkiAI today.
 • **매일 3회 매직 스캔:** 워크시트 위에 정답이 즉시 오버레이 됩니다.
 • **원어민 발음 듣기 (무료!):** 정답을 탭하면 정확한 원어민 발음을 들을 수 있습니다.
 • **스피킹 코치 (무료!):** 마이크에 대고 정답을 따라 말하며 칭찬 효과음과 도장을 받아보세요!
-• **오답 노트:** 헷갈리는 문제는 북마크하여 나중에 복습할 수 있습니다.
+• **학습 대시보드 (Learning Dashboard):** 헷갈리는 문제는 북마크하여 나중에 복습할 수 있습니다.
 
 **👑 프리미엄 혜택 (채키 PRO)**
 • **무제한 매직 스캔:** 모든 워크시트를 즉시 채점하세요.

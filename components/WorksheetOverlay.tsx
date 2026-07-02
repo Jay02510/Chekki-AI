@@ -416,22 +416,23 @@ export const WorksheetOverlay: React.FC<Props> = ({
             )}
             {renderOverlayContent(false)}
           </div>
-          {/* Toggle Button for Worksheet Answers */}
-          {!isLoadingItems && items.length > 0 && (
-            <div className="sticky bottom-6 left-0 right-0 flex justify-center pointer-events-none z-50 pb-6 mt-4">
-              <button
-                onClick={handleToggleAnswers}
-                className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
-                  showAnswers 
-                    ? 'bg-blue-500 text-white border-blue-400 shadow-sm' 
-                    : isNight ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
-                }`}
-              >
-                {showAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
-              </button>
-            </div>
-          )}
         </div>
+
+        {/* Toggle Button for Worksheet Answers - Moved outside scrolling container */}
+        {!isLoadingItems && items.length > 0 && (
+          <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none z-[60]">
+            <button
+              onClick={handleToggleAnswers}
+              className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
+                showAnswers 
+                  ? 'bg-blue-500 text-white border-blue-400 shadow-sm' 
+                  : isNight ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
+              }`}
+            >
+              {showAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
+            </button>
+          </div>
+        )}
       </div>
 
       {isFullscreen &&

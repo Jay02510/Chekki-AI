@@ -123,7 +123,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                 {item.question_text.replace(/^\d+[.)\s]+/, '')}
               </h4>
               {item.question_translation && (
-                <p className={`text-[10px] md:text-xs font-korean italic leading-relaxed mb-3 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
+                <p className={`text-[10px] md:text-xs font-korean italic leading-relaxed mb-3 break-words whitespace-normal ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
                   {item.question_translation}
                 </p>
               )}
