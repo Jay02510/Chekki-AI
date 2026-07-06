@@ -171,24 +171,24 @@ export default function Landing() {
       <section id="main-content" ref={heroRef} className="relative py-32 md:py-40 px-4 md:px-8 max-w-7xl mx-auto w-full flex flex-col-reverse md:flex-row items-center justify-between gap-12 md:gap-8 min-h-[80dvh]">
         <div className="flex-1 flex flex-col items-start z-10 w-full">
           <div className="hero-element mb-6 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-600 dark:text-white/70">
-            {lang === 'en' ? 'For Parents & Educators' : '학부모 및 교육자를 위한'}
+            {lang === 'en' ? 'For Parents & Educators' : '아이와 엄마를 위한 영어 학습 파트너'}
           </div>
-          <h1 className="text-balance hero-element text-[clamp(2.5rem,5.5vw,6rem)] font-bold tracking-tighter leading-[1.05] text-slate-900 dark:text-white w-full max-w-4xl">
+          <h1 className="text-balance hero-element text-[clamp(2.5rem,5.5vw,6rem)] font-bold tracking-tighter leading-[1.05] text-slate-900 dark:text-white w-full max-w-4xl [word-break:keep-all]">
             {lang === 'en' ? (
               <>Homework tracking, <br />made <span className="text-brand">transparent.</span></>
             ) : (
-              <>복잡했던 숙제 관리, <br /><span className="text-brand">가장 투명하게.</span></>
+              <>매일 밤 힘들었던 영어 숙제, <br /><span className="text-brand">이제 엄마도 마음 편하게.</span></>
             )}
           </h1>
-          <p className="hero-element mt-8 text-lg md:text-xl text-slate-600 dark:text-white/60 leading-relaxed max-w-xl">
+          <p className="hero-element mt-8 text-lg md:text-xl text-slate-600 dark:text-white/60 leading-relaxed max-w-xl [word-break:keep-all]">
             {lang === 'en' 
               ? "End the daily homework battle. Chekki instantly auto-grades English worksheets, tracks mistakes, and acts as a 24/7 private tutor. No typing. No prompting. Just answers."
-              : "매일 반복되는 숙제 전쟁, 이제 끝내세요. 체키가 즉시 학습지를 채점하고 오답을 추적하며 24시간 개인 튜터가 되어줍니다. 타이핑이나 프롬프트 입력 없이, 정답만 확인하세요."}
+              : "퇴근 후 지친 저녁, 아이 영어 숙제 봐주느라 더 이상 애태우지 마세요. 체키가 사진 한 장으로 1초 만에 채점하고 오답을 챙겨주는 든든한 AI 튜터가 되어드릴게요."}
           </p>
           <div className="hero-element mt-12 flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
             {/* Primary Magnetic CTA */}
             <a href="/app" className="group relative w-full sm:w-auto overflow-hidden pl-8 pr-2 py-2 bg-brand text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 ease-[var(--ease-premium)] active:scale-[0.98] shadow-2xl shadow-brand/20 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#050505]">
-              <span className="relative z-10">{lang === 'en' ? 'Open Web App' : '웹 앱 열기'}</span>
+              <span className="relative z-10">{lang === 'en' ? 'Open Web App' : '웹 앱 시작하기'}</span>
               <div className="w-12 h-12 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
                 <ArrowRight weight="bold" />
               </div>
@@ -232,8 +232,8 @@ export default function Landing() {
         </div>
 
         <div className="max-w-5xl mx-auto text-center relative z-20">
-          <h2 ref={textRevealRef} className="text-balance text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[1.2] text-slate-900 dark:text-white tracking-tight">
-            {(lang === 'en' ? `Bridging the cultural gap between school and home.` : `학교와 가정, 두 문화 사이의 간극을 잇습니다.`).split(" ").map((word, i) => (
+          <h2 ref={textRevealRef} className="text-balance text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[1.2] text-slate-900 dark:text-white tracking-tight [word-break:keep-all]">
+            {(lang === 'en' ? `Bridging the cultural gap between school and home.` : `학원 숙제 고민부터 집에서의 영어 공부까지, 엄마의 마음으로 함께합니다.`).split(" ").map((word, i) => (
               <span key={i} className="reveal-word inline-block mr-[0.3em]">{word}</span>
             ))}
           </h2>
@@ -244,15 +244,19 @@ export default function Landing() {
       <section id="features" className="py-32 md:py-40 px-4 md:px-8 max-w-7xl mx-auto w-full">
         <div className="mb-16 flex flex-col items-center text-center">
           <div className="mb-4 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-600 dark:text-white/70">
-            {lang === 'en' ? 'Pain Points Solved' : '문제 해결'}
+            {lang === 'en' ? 'Pain Points Solved' : '엄마의 고민 해결'}
           </div>
-          <h2 className="text-balance text-[clamp(2.5rem,5vw,4rem)] font-bold tracking-tight text-slate-900 dark:text-white mb-6">
-            {lang === 'en' ? 'End the daily homework battle.' : '매일 반복되던 숙제 전쟁, 이제 끝내세요.'}
+          <h2 className="text-balance text-[clamp(2.5rem,5vw,4rem)] font-bold tracking-tight text-slate-900 dark:text-white mb-6 [word-break:keep-all]">
+            {lang === 'en' ? (
+              'End the daily homework battle.'
+            ) : (
+              <>아이와의 영어 숙제 스트레스, <br className="hidden sm:inline" />이제 내려놓으세요.</>
+            )}
           </h2>
-          <p className="text-xl text-slate-600 dark:text-white/60 max-w-2xl mx-auto">
+          <p className="text-xl text-slate-600 dark:text-white/60 max-w-2xl mx-auto [word-break:keep-all]">
             {lang === 'en' 
               ? 'We built Chekki to solve the exact challenges parents face when helping their children with English assignments.' 
-              : '체키는 영어 숙제를 지도할 때 부모님들이 겪는 실제 어려움을 정확히 해결하기 위해 만들어졌습니다.'}
+              : '아이 영어 숙제를 지도하며 느끼셨을 답답함과 지침, 엄마의 마음을 담아 가장 따뜻하고 쉽게 해결해 드립니다.'}
           </p>
         </div>
 
@@ -270,8 +274,8 @@ export default function Landing() {
                 </div>
               </div>
               <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between">
-                  {lang === 'en' ? 'Exhausted after work?' : '퇴근 후 피곤하신가요?'}
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]">
+                  {lang === 'en' ? 'Exhausted after work?' : '퇴근 후 지친 몸으로 숙제 검사하기 힘드시죠?'}
                 </h3>
               </div>
             </div>
@@ -281,11 +285,11 @@ export default function Landing() {
               <div className="w-12 h-12 rounded-full bg-brand/20 text-brand flex items-center justify-center mb-6">
                 <GraduationCap weight="fill" className="text-2xl" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                {lang === 'en' ? 'Zero Clutter UX' : '깔끔한 화면 구성'}
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
+                {lang === 'en' ? 'Zero Clutter UX' : '복잡함 없는 쉬운 화면'}
               </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed">
-                {lang === 'en' ? 'No typing. No prompting. No endless scrolling. Our Reveal-Only interface hides all complex teaching instructions until you need them, saving your tired eyes and brain.' : '타이핑, 프롬프트, 끊임없는 스크롤은 이제 그만. 정답만 확인하세요. 복잡한 설명은 숨겨져 있어 피곤한 눈과 뇌를 보호해 줍니다.'}
+              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed [word-break:keep-all]">
+                {lang === 'en' ? 'No typing. No prompting. No endless scrolling. Our Reveal-Only interface hides all complex teaching instructions until you need them, saving your tired eyes and brain.' : '타이핑이나 어려운 입력 필요 없이 카메라만 가져다 대세요. 꼭 필요한 정답과 설명만 쏙 보여드려 피곤한 엄마의 눈과 마음을 편안하게 해드려요.'}
               </p>
               
             </div>
@@ -298,9 +302,9 @@ export default function Landing() {
             {/* Front Content */}
             <div className="flex flex-col md:flex-row h-full w-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
               <div className="md:w-1/2 min-h-[140px] md:h-full px-5 py-6 md:py-10 flex flex-col justify-center order-2 md:order-1">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2">
-                  {lang === 'en' ? 'Only have a few minutes?' : '시간이 몇 분밖에 없나요?'}
-                  <ArrowRight className="text-brand animate-pulse" />
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2 [word-break:keep-all]">
+                  {lang === 'en' ? 'Only have a few minutes?' : '저녁 준비하느라 바쁜데 시간이 부족하신가요?'}
+                  <ArrowRight className="text-brand animate-pulse shrink-0" />
                 </h3>
               </div>
               <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
@@ -310,11 +314,11 @@ export default function Landing() {
 
             {/* Back Content (Revealed) */}
             <div className="absolute inset-0 p-8 flex flex-col justify-center bg-blue-500/5 dark:bg-blue-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                {lang === 'en' ? 'Speed vs. Tutor Mode' : '빠른 채점 vs 튜터 모드'}
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
+                {lang === 'en' ? 'Speed vs. Tutor Mode' : '바쁠 땐 1초 채점, 필요할 땐 AI 선생님'}
               </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed max-w-lg">
-                {lang === 'en' ? 'Toggle "Speed Mode" to rapidly visually grade a 20-question worksheet with zero taps. Switch to "Tutor Mode" when your child is stuck, and let the native AI audio explain the concept for you.' : '"빠른 채점 모드"로 터치 없이 20문제를 눈으로 빠르게 채점하세요. 아이가 어려워할 땐 "튜터 모드"로 전환하여 원어민 AI가 직접 설명하게 할 수 있습니다.'}
+              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed max-w-lg [word-break:keep-all]">
+                {lang === 'en' ? 'Toggle "Speed Mode" to rapidly visually grade a 20-question worksheet with zero taps. Switch to "Tutor Mode" when your child is stuck, and let the native AI audio explain the concept for you.' : '바쁜 저녁에는 "1초 채점 모드"로 눈으로 슥 채점하고, 아이가 모르는 문제가 생기면 "튜터 모드"로 전환해 다정한 원어민 AI 선생님에게 맡겨주세요.'}
               </p>
               
             </div>
@@ -330,20 +334,20 @@ export default function Landing() {
                 <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
               <div className="md:w-1/2 min-h-[140px] md:h-full px-5 py-6 md:py-10 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2">
-                  {lang === 'en' ? 'Anxious they might fall behind?' : '우리 아이만 뒤쳐질까 봐 불안하신가요?'}
-                  <ArrowRight className="text-orange-500 animate-pulse" />
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2 [word-break:keep-all]">
+                  {lang === 'en' ? 'Anxious they might fall behind?' : '우리 아이만 학원에서 뒤쳐질까 봐 걱정되시나요?'}
+                  <ArrowRight className="text-orange-500 animate-pulse shrink-0" />
                 </h3>
               </div>
             </div>
 
             {/* Back Content (Revealed) */}
             <div className="absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                {lang === 'en' ? 'Mistake Tracking Dashboard' : '오답 추적 대시보드'}
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
+                {lang === 'en' ? 'Mistake Tracking Dashboard' : '똑똑한 오답 정리 & 맞춤 케어'}
               </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed max-w-lg">
-                {lang === 'en' ? 'Replace expensive homework tutors. Chekki automatically saves every struggled question into a stress-free dashboard, acting as a 24/7 private tutor.' : '비싼 숙제 과외 선생님 대신 채키를 활용하세요. 아이가 어려워했던 문제를 대시보드에 자동 저장하여 24시간 개인 튜터 역할을 합니다.'}
+              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed max-w-lg [word-break:keep-all]">
+                {lang === 'en' ? 'Replace expensive homework tutors. Chekki automatically saves every struggled question into a stress-free dashboard, acting as a 24/7 private tutor.' : '비싼 과외 없이도 괜찮아요. 아이가 헷갈려했던 오답만 쏙쏙 모아 자동으로 정리해주니, 언제든 아이의 약점을 꼼꼼하게 챙겨줄 수 있어요.'}
               </p>
               
             </div>
@@ -372,8 +376,8 @@ export default function Landing() {
                 </div>
               </div>
               <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between">
-                  {lang === 'en' ? 'Worried about pronunciation?' : '아이 발음이 걱정되시나요?'}
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]">
+                  {lang === 'en' ? 'Worried about pronunciation?' : '엄마표 영어 발음 지도, 자신 없으셨나요?'}
                 </h3>
               </div>
             </div>
@@ -383,13 +387,13 @@ export default function Landing() {
               <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-6">
                 <MicrophoneStage weight="fill" className="text-2xl" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                {lang === 'en' ? 'Interactive Audio Practice' : '스피킹 연습 룸'}
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
+                {lang === 'en' ? 'Interactive Audio Practice' : '자연스러운 원어민 발음 연습'}
               </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed">
+              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed [word-break:keep-all]">
                 {lang === 'en' 
                   ? "From paper to pronunciation. Chekki turns grammar mistakes into interactive speaking exercises, using native AI to evaluate their speech in real-time."
-                  : "종이 위 오답을 말하기 연습으로. 체키는 문법 오답을 스피킹 연습으로 변환하고 AI가 아이의 발음을 실시간으로 듣고 평가합니다."}
+                  : "종이로 풀던 오답을 말하기 연습으로 이어줍니다. AI가 다정하게 아이의 발음을 듣고 교정해 주어, 엄마가 대신 가르쳐주지 않아도 스스로 자신감이 붙어요."}
               </p>
               
             </div>
@@ -403,21 +407,21 @@ export default function Landing() {
             <div className="flex-1 px-8 py-10 md:py-12 flex flex-col justify-center z-10 relative">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 w-fit">
                 <MicrophoneStage size={12} weight="bold" />
-                {lang === 'en' ? 'No Typing. Just Speaking.' : '듣고 평가하는 AI'}
+                {lang === 'en' ? 'No Typing. Just Speaking.' : '엄마 대신 듣고 말해주는 AI'}
               </div>
-              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight mb-5">
+              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight mb-5 [word-break:keep-all]">
                 {lang === 'en' 
                   ? <><span className="text-emerald-500">Speak it right,</span><br/>not just write it right.</>
-                  : <><span className="text-emerald-500">원어민 발음으로,</span><br/>자신 있게 말할 때까지.</>}
+                  : <><span className="text-emerald-500">틀린 문법도 원어민 발음으로,</span><br/>아이가 스스로 재미있게 말하도록.</>}
               </h3>
-              <p className="text-slate-600 dark:text-white/60 text-base leading-relaxed max-w-lg mb-8">
+              <p className="text-slate-600 dark:text-white/60 text-base leading-relaxed max-w-lg mb-8 [word-break:keep-all]">
                 {lang === 'en'
                   ? "Traditional worksheets can't hear you. Chekki leverages advanced native device speech recognition to ensure your child isn't just fixing grammar, but mastering spoken English — privately and instantly."
-                  : "일반 문제집은 아이의 목소리를 듣지 못합니다. 체키는 네이티브 음성 인식 기술을 통해 아이가 문법뿐만 아니라 영어 말하기까지 완벽하게 마스터할 수 있도록 돕습니다."}
+                  : "눈으로만 푸는 문제집은 이제 그만! 체키는 아이의 작은 목소리에도 귀 기울여, 문법 오답을 다정한 원어민 발음 연습으로 바꿔줍니다."}
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <a href="/app" className="group relative overflow-hidden pl-8 pr-2 py-2 w-max bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-between gap-6 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-2xl shadow-emerald-500/20 outline-none">
-                  <span className="relative z-10">{lang === 'en' ? 'Try the Practice Room' : '오디오 연습실 체험하기'}</span>
+                  <span className="relative z-10">{lang === 'en' ? 'Try the Practice Room' : '발음 연습실 체험해보기'}</span>
                   <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
                     <MicrophoneStage weight="bold" />
                   </div>
@@ -443,7 +447,7 @@ export default function Landing() {
                 
                 <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-xl py-3 px-4 flex items-center justify-center gap-2">
                   <CheckCircle size={20} className="text-emerald-400" weight="fill" />
-                  <span className="text-sm font-bold text-emerald-400">{lang === 'en' ? 'Perfect Match' : '완벽해요!'}</span>
+                  <span className="text-sm font-bold text-emerald-400">{lang === 'en' ? 'Perfect Match' : '참 잘했어요!'}</span>
                 </div>
               </div>
             </div>
@@ -533,8 +537,8 @@ export default function Landing() {
         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.05] bg-noise mix-blend-overlay" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] aspect-square bg-brand/10 rounded-full blur-[150px] pointer-events-none" />
         
-        <h2 className="text-balance relative z-10 text-[clamp(3.5rem,6vw,6rem)] font-bold tracking-tight max-w-4xl leading-[1.05] mb-16">
-          {lang === 'en' ? <>Ready to end the <br /> homework fights?</> : <>매일 밤 숙제 전쟁, <br /> 이제 끝낼 준비 되셨나요?</>}
+        <h2 className="text-balance relative z-10 text-[clamp(3.5rem,6vw,6rem)] font-bold tracking-tight max-w-4xl leading-[1.05] mb-16 [word-break:keep-all]">
+          {lang === 'en' ? <>Ready to end the <br /> homework fights?</> : <>매일 밤 힘들었던 영어 숙제, <br /> 이제 마음 편히 끝내볼까요?</>}
         </h2>
         
         <div className="bento-card relative z-10 flex flex-col items-center gap-6">
