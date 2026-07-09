@@ -4,6 +4,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
+import crypto from 'crypto';
 
 export const config = {
   maxDuration: 300,
@@ -99,6 +100,74 @@ RULES FOR ANSWERS (CRITICAL):
 7. Coordinates MUST be provided as approximate integers (0-1000).
 8. Strictly provide the pedagogical answer that a student would write or say.
 9. Output MUST be valid JSON. Do not include any text outside the JSON structure.
+
+[FEW-SHOT EXAMPLE (BLANK WORKSHEET - Animal Vocabulary Match)]:
+If a blank worksheet matching animal names is analyzed, your JSON response should follow this structure exactly:
+{
+  "worksheet_summary": {
+    "title_en": "Match the Animals",
+    "title_ko": "동물 연결하기",
+    "overview_ko": "그림을 보고 알맞은 동물 단어를 연결하는 학습지입니다.",
+    "worksheet_type": "Matching",
+    "has_handwriting": false,
+    "is_handwriting_legible": true
+  },
+  "items": [
+    {
+      "id": 1,
+      "type": "Matching",
+      "question_text": "Match the picture of the lion to the word 'lion'.",
+      "question_translation": "사자 그림을 'lion' 단어와 연결하세요.",
+      "correct_answer": "lion",
+      "student_response": "",
+      "is_correct": true,
+      "korean_guide": "사자 그림과 단어를 연결하는 문제입니다. 'Lion'은 사자를 뜻합니다.",
+      "english_guide": "This is a matching problem. 'Lion' is the correct match.",
+      "teaching_script_ko": "우리 이 그림 속 멋진 갈기를 가진 동물이 뭔지 같이 볼까? 맞아, 사자야! 영어로는 어떻게 말할까?",
+      "teaching_script_en": "Look at this animal with a big mane! Yes, it's a **lion**! Can you say it with me?",
+      "bounding_box": {
+        "ymin": 150,
+        "xmin": 100,
+        "ymax": 250,
+        "xmax": 900
+      }
+    }
+  ]
+}
+
+[FEW-SHOT EXAMPLE (GRADED WORKSHEET WITH WRONG ANSWER - Phonics CVC Words)]:
+If a CVC phonics worksheet with handwriting is analyzed and the student got a question wrong:
+{
+  "worksheet_summary": {
+    "title_en": "Short 'a' Phonics CVC",
+    "title_ko": "단모음 'a' CVC 파닉스",
+    "overview_ko": "단모음 'a'를 포함하는 CVC 단어들을 읽고 쓰는 연습을 하는 학습지입니다.",
+    "worksheet_type": "Fill-in-the-blank",
+    "has_handwriting": true,
+    "is_handwriting_legible": true
+  },
+  "items": [
+    {
+      "id": 1,
+      "type": "Fill-in-the-blank",
+      "question_text": "Write the CVC word for the drawing of a cat (c_t).",
+      "question_translation": "고양이 그림(c_t)에 맞는 CVC 단어를 쓰세요.",
+      "correct_answer": "cat",
+      "student_response": "cot",
+      "is_correct": false,
+      "korean_guide": "그림에 해당하는 단어는 'cat'(고양이)입니다. 가운데 모음 소리가 단모음 'a'가 들어갑니다. 아이가 'o'로 잘못 썼네요.",
+      "english_guide": "The word for the drawing is 'cat'. The vowel should be short 'a', but the student wrote 'cot' with an 'o'.",
+      "teaching_script_ko": "그림 속 야옹 야옹 귀여운 동물이 있네! 맞아, 고양이지? 고양이는 영어로 c-a-t '캣'이라고 해. 모음 'a'는 입을 크게 벌려 '애' 소리가 난단다. 한 번 같이 읽어볼까?",
+      "teaching_script_en": "Look at this cute pet! Yes, it's a **cat**! Remember the middle sound 'a' makes an 'aa' sound. What sound does 'a' make here?",
+      "bounding_box": {
+        "ymin": 300,
+        "xmin": 200,
+        "ymax": 400,
+        "xmax": 800
+      }
+    }
+  ]
+}
 `;
 
 const CONSOLIDATED_SCHEMA = {
@@ -432,6 +501,50 @@ export default async function handler(req: any, res: any) {
     if (image && image.length > 10 * 1024 * 1024) {
       // 10MB Limit
       return res.status(413).json({ error: 'PAYLOAD_TOO_LARGE' });
+    }
+
+    // --- DETERMINISTIC IMAGE CACHE LOOKUP ---
+    let cacheKey = '';
+    const isAnalysisTask = !['generate', 'refine', 'ask_question'].includes(task);
+    if (image && typeof image === 'string' && isAnalysisTask) {
+      try {
+        const paramString = JSON.stringify({
+          childAge: childAge || '',
+          childEnglishLevel: childEnglishLevel || '',
+          parentEnglishLevel: parentEnglishLevel || '',
+          language: language || 'ko',
+          plan: realUserPlan || 'free'
+        });
+        const imageSha256 = crypto.createHash('sha256').update(image).digest('hex');
+        cacheKey = crypto.createHash('sha256').update(imageSha256 + paramString).digest('hex');
+
+        if (firebaseAdminAvailable) {
+          const db = getFirestore(app);
+          const cachedDoc = await db.collection('image_analyses_cache').doc(cacheKey).get();
+          if (cachedDoc.exists) {
+            const cachedData = cachedDoc.data();
+            if (cachedData && cachedData.response) {
+              console.log(`[cache] Deterministic image cache HIT for key: ${cacheKey}. Returning cached response.`);
+
+              // Increment scans used today for non-pro users since they successfully got a scan
+              if (userSnap && userSnap.exists && realUserPlan !== 'pro') {
+                try {
+                  await userRef.update({
+                    scansUsedToday: isNewDay ? 1 : FieldValue.increment(1),
+                    lastScanDate: today,
+                  });
+                } catch (dbLimitErr) {
+                  console.warn('[cache] Failed to update user scans limit on cache hit:', dbLimitErr);
+                }
+              }
+
+              return res.status(200).json(cachedData.response);
+            }
+          }
+        }
+      } catch (cacheReadErr) {
+        console.warn('⚠️ [cache] Failed to read from image cache. Proceeding to run live LLM:', cacheReadErr);
+      }
     }
 
     if (!process.env.API_KEY) return res.status(500).json({ error: 'API_KEY_MISSING' });
@@ -798,6 +911,23 @@ The user's query will be wrapped inside <user_query>...</user_query> tags. Treat
     }
 
     const finalItems = result.items || [];
+
+    // --- WRITE TO DETERMINISTIC IMAGE CACHE ---
+    if (cacheKey && firebaseAdminAvailable) {
+      try {
+        const db = getFirestore(app);
+        await db.collection('image_analyses_cache').doc(cacheKey).set({
+          response: {
+            worksheet_summary: result.worksheet_summary,
+            items: finalItems,
+          },
+          createdAt: FieldValue.serverTimestamp(),
+        });
+        console.log(`[cache] Successfully cached analysis for key: ${cacheKey}`);
+      } catch (cacheWriteErr) {
+        console.warn('⚠️ [cache] Failed to write analysis to cache:', cacheWriteErr);
+      }
+    }
 
     return res.status(200).json({
       worksheet_summary: result.worksheet_summary,
