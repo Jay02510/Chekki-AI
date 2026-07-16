@@ -286,13 +286,23 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           </span>
           <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-200" />
         </motion.button>
+
+        {/* Skip for now option at the bottom */}
+        <div className="flex justify-center mt-3">
+          <button
+            onClick={onSkip}
+            className="text-zinc-500 py-1 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
+          >
+            {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
+          </button>
+        </div>
         
-        <div className="flex justify-center gap-3 mt-8">
-          {[0, 1, 2, 3, 4].map(i => (
+        <div className="flex justify-center gap-3 mt-5">
+          {[0, 1, 2, 3, 4, 5].map(i => (
             <motion.div 
               key={i}
               layout
-              className={`h-1.5 rounded-full transition-colors \${step === i ? 'bg-orange-500 w-8' : 'bg-white/20 w-1.5'}`} 
+              className={`h-1.5 rounded-full transition-colors ${step === i ? 'bg-orange-500 w-8' : 'bg-white/20 w-1.5'}`} 
             />
           ))}
         </div>
@@ -320,7 +330,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       >
         {/* Inner Core */}
         <div className="relative w-full h-full bg-[#050505] rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
-          {step < 5 && (
+          {step < 6 && (
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
@@ -427,14 +437,22 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
               () => setStep(4)
             )}
             {step === 4 && renderEducationalStep(
+              '/assets/onboarding_icon_grading_status.png',
+              '한눈에 보는 채점 결과',
+              'Grading Status at a Glance',
+              '학습지 리스트에서 빨간색과 초록색 박스로 채점 결과를 한눈에 확인해보세요. 오답을 찾기 위해 카드를 일일이 열어볼 필요가 없습니다.',
+              'Spot correct and incorrect answers instantly on your worksheet list. No need to expand each card to find mistakes.',
+              () => setStep(5)
+            )}
+            {step === 5 && renderEducationalStep(
               '/assets/bento_speed_mode.png',
               '빠른 채점 & AI 튜터',
               'Speed Grading & AI Tutor',
               '빠른 채점 모드로 즉시 채점하거나, 튜터 모드로 맞춤형 개인 과외 선생님이 되게 하세요.',
               `Choose "Speed Mode" to instantly grade handwriting. Or let the AI tailor its vocabulary and be your child's personal tutor in "Tutor Mode".`,
-              () => setStep(5)
+              () => setStep(6)
             )}
-            {step === 5 && renderProfileForm()}
+            {step === 6 && renderProfileForm()}
           </AnimatePresence>
         </div>
       </motion.div>

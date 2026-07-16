@@ -93,16 +93,20 @@ export const analyzeWorksheet = async (
     // --- CLIENT-SIDE IMAGE COMPRESSION ---
     // Downscale to max 1600px JPEG before sending to prevent the 4MB
     // Vercel body limit from being hit by high-res phone photos.
+    // Only compress if the image size is large (e.g. base64 string length > 1,500,000 characters),
+    // since the camera/upload views already compress images before passing them here.
     let processedImage = base64Image;
-    try {
-      // If the input is a raw base64 string (no prefix), add one so the canvas can load it
-      const hasPrefix = base64Image.startsWith('data:');
-      const dataUrl = hasPrefix ? base64Image : `data:image/jpeg;base64,${base64Image}`;
-      const compressed = await compressImage(dataUrl);
-      // Strip the prefix back off — the API only wants the raw base64
-      processedImage = stripDataUrlPrefix(compressed);
-    } catch (compressionError) {
-      console.warn('[geminiService] Image compression failed, using original:', compressionError);
+    if (base64Image.length > 1500000) {
+      try {
+        // If the input is a raw base64 string (no prefix), add one so the canvas can load it
+        const hasPrefix = base64Image.startsWith('data:');
+        const dataUrl = hasPrefix ? base64Image : `data:image/jpeg;base64,${base64Image}`;
+        const compressed = await compressImage(dataUrl);
+        // Strip the prefix back off — the API only wants the raw base64
+        processedImage = stripDataUrlPrefix(compressed);
+      } catch (compressionError) {
+        console.warn('[geminiService] Image compression failed, using original:', compressionError);
+      }
     }
     // --- END COMPRESSION ---
 

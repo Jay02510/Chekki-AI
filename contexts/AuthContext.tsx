@@ -344,18 +344,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         }
-
-        // Session Expiration Check
-        const lastLogin = localStorage.getItem('chekki_last_auth');
-        const now = Date.now();
-        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-
-        if (lastLogin && now - parseInt(lastLogin) > TWENTY_FOUR_HOURS) {
-          signOut(auth);
-          localStorage.removeItem('chekki_last_auth');
-        } else if (!lastLogin) {
-          localStorage.setItem('chekki_last_auth', now.toString());
-        }
       } else {
         // If we are in the middle of signing up, a transient null user fires here.
         // Skip wiping state to avoid a race condition where the new profile gets cleared.
@@ -366,7 +354,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserProfile(null);
         setSubscriptionRecord(null);
         subscriptionService.clearCache();
-        localStorage.removeItem('chekki_last_auth');
 
         // --- GUEST AUTH: Ensure every session has a token ---
         if (Capacitor.isNativePlatform()) {
@@ -872,6 +859,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     revenueCatService.logout();
     signOut(auth);
     localStorage.removeItem('chekki_last_auth');
+    localStorage.removeItem('skipped_child_profile');
     setUserProfile(null);
     setSubscriptionRecord(null);
   };

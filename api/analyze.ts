@@ -850,7 +850,7 @@ The user's query will be wrapped inside <user_query>...</user_query> tags. Treat
 
       if (useThinking && realUserPlan === 'pro') {
         currentModel = 'gemini-2.5-pro';
-        configOpts.thinkingConfig = { thinkingBudget: 20000 };
+        configOpts.thinkingConfig = { thinkingBudget: 2048 };
       }
 
       return ai.models.generateContent({

@@ -207,7 +207,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                 {language === 'ko' ? '채키에게 물어보기' : 'Ask Chekki'}
               </p>
               <p
-                className={`${isNight ? 'text-white' : 'text-zinc-900'} text-xs font-semibold font-korean mt-0.5 opacity-60 leading-snug break-words pr-4`}
+                className={`${isNight ? 'text-white' : 'text-zinc-900'} text-xs font-semibold font-korean mt-0.5 opacity-60 leading-snug break-keep pr-4`}
               >
                 {history.length > 0
                   ? language === 'ko'

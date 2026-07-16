@@ -44,7 +44,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
 
-      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-md mx-4">
+      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-md mx-2 sm:mx-4">
         <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
         <div
           className={`${isNight ? 'bg-zinc-950' : 'bg-zinc-50 border-b border-zinc-100'} p-6 flex justify-center relative shrink-0`}
@@ -60,11 +60,11 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
           </button>
         </div>
 
-        <div className="p-8 space-y-6 text-center overflow-y-auto custom-scrollbar flex-1 pb-10">
+        <div className="p-5 sm:p-8 space-y-6 text-center overflow-y-auto custom-scrollbar flex-1 pb-10">
           {isSuccess ? (
             <div className="py-10 animate-fade-in">
               <h3
-                className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}
+                className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean break-keep`}
               >
                 {t('fb_success')}
               </h3>
@@ -78,7 +78,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                 >
                   {t('fb_title')}
                 </h2>
-                <p className={`${isNight ? 'text-zinc-400' : 'text-zinc-500'} text-sm font-korean`}>
+                <p className={`${isNight ? 'text-zinc-400' : 'text-zinc-500'} text-sm font-korean break-keep`}>
                   {context ? t('fb_error_desc') : t('fb_desc')}
                 </p>
               </div>

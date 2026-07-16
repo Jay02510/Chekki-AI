@@ -61,7 +61,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
     }
   };
 
-  const [bubbleScale, setBubbleScale] = useState(0.75);
+  const [bubbleScale, setBubbleScale] = useState(0.95);
   const [items, setItems] = useState<WorksheetItem[]>(initialItems);
 
   const [draggingId, setDraggingId] = useState<number | null>(null);

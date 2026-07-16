@@ -173,11 +173,11 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
           role="dialog"
           aria-modal="true"
           aria-labelledby="login-modal-title"
-          className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl modal-enter w-full max-w-sm flex flex-col mx-4`}
+          className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl modal-enter w-full max-w-sm flex flex-col mx-2 sm:mx-4`}
         >
           <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-zinc-950/90' : 'bg-white/90'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
           {/* Clean header — no image */}
-          <div className="relative flex items-center justify-between px-6 pt-6 pb-2 shrink-0">
+          <div className="relative flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-2 shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-brand-orange flex items-center justify-center shadow-lg shadow-orange-500/25">
                 <span className="text-white text-xs font-black">C</span>
@@ -197,7 +197,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
             </button>
           </div>
 
-          <div className="p-6 md:p-8 pt-4 flex-1">
+          <div className="p-5 md:p-8 pt-4 flex-1">
             <div className="text-center mb-6">
               <h2
                 id="login-modal-title"
@@ -205,13 +205,13 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
               >
                 {getTitle()}
               </h2>
-              <p className="text-zinc-500 text-[11px] md:text-xs font-semibold leading-relaxed max-w-[240px] mx-auto">
+              <p className="text-zinc-500 text-[11px] md:text-xs font-semibold leading-relaxed max-w-[240px] mx-auto break-keep">
                 {getSubtitle()}
               </p>
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-2xl text-red-500 text-[11px] mb-5 font-semibold animate-shake flex items-start gap-2.5">
+              <div className="bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-2xl text-red-500 text-[11px] mb-5 font-semibold animate-shake flex items-start gap-2.5 break-keep">
                 <svg
                   className="w-4 h-4 shrink-0 mt-0.5"
                   fill="none"
@@ -229,7 +229,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
               </div>
             )}
             {success && (
-              <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-2xl text-emerald-500 text-[11px] mb-5 font-semibold flex items-start gap-2.5">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-2xl text-emerald-500 text-[11px] mb-5 font-semibold flex items-start gap-2.5 break-keep">
                 <svg
                   className="w-4 h-4 shrink-0 mt-0.5"
                   fill="none"
@@ -265,6 +265,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                   </svg>
                   <input
                     type="text"
+                    name="name"
+                    autoComplete="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Parent's Name"
@@ -291,6 +293,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 </svg>
                 <input
                   type="email"
+                  name="email"
+                  autoComplete="username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email Address"
@@ -318,6 +322,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                     </svg>
                     <input
                       type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      autoComplete={viewMode === 'signup' ? 'new-password' : 'current-password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Password"

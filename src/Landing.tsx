@@ -326,30 +326,67 @@ export default function Landing() {
 
           {/* Card 3: Dashboard */}
           <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
+            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
           >
             {/* Front Content */}
-            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
-                <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
+            <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
+              <div className="flex-1 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
+                <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]" />
+                <div className="absolute bottom-4 right-4 bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
+                  <ArrowRight className="text-white" />
+                </div>
               </div>
-              <div className="md:w-1/2 min-h-[140px] md:h-full px-5 py-6 md:py-10 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2 [word-break:keep-all]">
+              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]">
                   {lang === 'en' ? 'Anxious they might fall behind?' : '우리 아이만 학원에서 뒤쳐질까 봐 걱정되시나요?'}
-                  <ArrowRight className="text-orange-500 animate-pulse shrink-0" />
                 </h3>
               </div>
             </div>
 
             {/* Back Content (Revealed) */}
             <div className="absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+              <div className="w-12 h-12 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center mb-6">
+                <ChartBar weight="fill" className="text-2xl" />
+              </div>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
                 {lang === 'en' ? 'Mistake Tracking Dashboard' : '똑똑한 오답 정리 & 맞춤 케어'}
               </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed max-w-lg [word-break:keep-all]">
+              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed [word-break:keep-all]">
                 {lang === 'en' ? 'Replace expensive homework tutors. Chekki automatically saves every struggled question into a stress-free dashboard, acting as a 24/7 private tutor.' : '비싼 과외 없이도 괜찮아요. 아이가 헷갈려했던 오답만 쏙쏙 모아 자동으로 정리해주니, 언제든 아이의 약점을 꼼꼼하게 챙겨줄 수 있어요.'}
               </p>
-              
+            </div>
+          </div>
+
+          {/* Card 3.5: Grading Status */}
+          <div 
+            className="bento-card col-span-1 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
+          >
+            {/* Front Content */}
+            <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
+              <div className="flex-1 rounded-[2rem] bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
+                <img src="/assets/onboarding_icon_grading_status.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]" />
+                <div className="absolute bottom-4 right-4 bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
+                  <ArrowRight className="text-white" />
+                </div>
+              </div>
+              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]">
+                  {lang === 'en' ? 'Tired of checking every question?' : '틀린 문제를 일일이 찾기 번거로우신가요?'}
+                </h3>
+              </div>
+            </div>
+
+            {/* Back Content (Revealed) */}
+            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-6">
+                <CheckCircle weight="fill" className="text-2xl" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
+                {lang === 'en' ? 'Grading Status at a Glance' : '직관적인 정·오답 표시'}
+              </h3>
+              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed [word-break:keep-all]">
+                {lang === 'en' ? 'Spot correct and incorrect answers instantly on the list. Green and red box outlines show status at a glance, so you don\'t have to click each card.' : '학습지 리스트에서 초록색(정답)과 빨간색(오답) 테두리로 채점 결과를 한눈에 확인하세요. 이제 틀린 오답을 찾으려 카드를 일일이 열어볼 필요가 없습니다.'}
+              </p>
             </div>
           </div>
 

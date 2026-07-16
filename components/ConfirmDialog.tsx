@@ -58,8 +58,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         onClick={onCancel}
         aria-hidden="true"
       />
-      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-sm mx-4">
-        <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
+      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-sm mx-2 sm:mx-4">
+        <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden p-6 sm:p-8`}>
         <div
           className={`w-14 h-14 rounded-2xl ${isDestructive ? 'bg-red-950/40 border-red-500/20' : isNight ? 'bg-zinc-800 border-white/5' : 'bg-zinc-100 border-zinc-200'} border flex items-center justify-center mx-auto mb-5`}
         >
@@ -95,7 +95,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </div>
         <p
           id="confirm-title"
-          className={`${isNight ? 'text-white' : 'text-zinc-900'} font-black text-lg mb-6 font-korean uppercase tracking-tight text-center`}
+          className={`${isNight ? 'text-white' : 'text-zinc-900'} font-black text-lg mb-6 font-korean uppercase tracking-tight text-center break-keep`}
         >
           {title}
         </p>

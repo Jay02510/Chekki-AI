@@ -118,7 +118,7 @@ export const RefineModal: React.FC<Props> = ({
       onClick={handleClose}
     >
       <div
-        className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter w-full sm:max-w-md md:max-w-lg flex flex-col max-h-[92vh] sm:max-h-[85vh] mx-4"
+        className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter w-full sm:max-w-md md:max-w-lg flex flex-col max-h-[92vh] sm:max-h-[85vh] mx-2 sm:mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
@@ -133,7 +133,7 @@ export const RefineModal: React.FC<Props> = ({
 
         <div
           ref={scrollRef}
-          className="p-8 md:p-10 pt-10 md:pt-12 flex-1 overflow-y-auto custom-scrollbar relative z-10"
+          className="p-5 sm:p-8 md:p-10 pt-8 sm:pt-10 md:pt-12 flex-1 overflow-y-auto custom-scrollbar relative z-10"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-5">

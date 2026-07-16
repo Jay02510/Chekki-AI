@@ -132,10 +132,10 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-2xl max-w-3xl mx-4">
+      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-2xl mx-2 sm:mx-4">
         <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
         <div
-          className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-8 py-6 border-b flex justify-between items-center shrink-0`}
+          className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-5 py-5 sm:px-8 sm:py-6 border-b flex justify-between items-center shrink-0`}
         >
           <div className="flex items-center gap-3">
             <svg
@@ -165,7 +165,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
           </button>
         </div>
 
-        <div className="p-10 flex flex-col items-center text-center space-y-5 overflow-y-auto custom-scrollbar flex-1">
+        <div className="p-5 sm:p-8 md:p-10 flex flex-col items-center text-center space-y-5 overflow-y-auto custom-scrollbar flex-1">
           <div
             className={`w-20 h-20 rounded-full ${isNight ? 'bg-orange-500/10' : 'bg-orange-50 shadow-inner'} flex items-center justify-center`}
           >
@@ -290,7 +290,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
             >
               {t('billing_cancel_btn')}
             </h3>
-            <p className="text-zinc-400 text-sm font-medium mb-8 max-w-sm leading-relaxed">
+            <p className="text-zinc-400 text-sm font-medium mb-8 max-w-sm leading-relaxed break-keep">
               {t('billing_cancel_desc')}
             </p>
             <div className="flex flex-col gap-3 w-full max-w-xs">

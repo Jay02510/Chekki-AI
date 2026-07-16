@@ -46,7 +46,7 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
         role="dialog"
         aria-modal="true"
         aria-label="Premium subscription"
-        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter transition-opacity w-full max-w-lg md:max-w-2xl mx-4 ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter transition-opacity w-full max-w-lg md:max-w-2xl mx-2 sm:mx-4 ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
       >
         <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
         {/* Gradient glow */}

@@ -65,7 +65,7 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedM
           onSkip={() => setShowOnboarding(false)}
           isNight={isNight}
           setIsNight={setIsNight}
-          initialStep={5}
+          initialStep={6}
         />
       )}
       {showSupport && <LegalModal type="support" onClose={() => setShowSupport(false)} />}
@@ -141,8 +141,8 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedM
                 </button>
               </div>
 
-              {/* Speed Mode Toggle */}
-              {showSpeedToggle && (
+              {/* Speed Mode Toggle for logged-out / guest users */}
+              {showSpeedToggle && !(isAuthenticated && user) && (
                 <div
                   className={`relative flex items-center ${isNight ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50/80 border-orange-200'} p-1 rounded-full border overflow-hidden`}
                 >
@@ -282,6 +282,51 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedM
                               🚀
                             </div>
                           </button>
+                        </div>
+                      )}
+
+                      {showSpeedToggle && (
+                        <div className={`p-3 border-b ${isNight ? 'border-zinc-800 bg-zinc-900/20' : 'border-zinc-100 bg-zinc-50/50'}`}>
+                          <div className={`relative flex items-center w-full ${isNight ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50/80 border-orange-200'} p-0.5 rounded-xl border overflow-hidden`}>
+                            <div
+                              className={`absolute top-0.5 bottom-0.5 w-[calc(50%-2px)] rounded-lg transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-sm ${
+                                isSpeedMode ? 'translate-x-[calc(100%)]' : 'translate-x-0'
+                              } ${isNight ? 'bg-orange-500' : 'bg-orange-500'}`}
+                            ></div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsSpeedMode(false);
+                              }}
+                              className={`relative z-10 flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                                !isSpeedMode
+                                  ? 'text-white drop-shadow-md'
+                                  : isNight
+                                    ? 'text-orange-400 hover:text-orange-300'
+                                    : 'text-orange-600 hover:text-orange-500'
+                              } uppercase tracking-widest flex items-center justify-center gap-1.5`}
+                            >
+                              <span className="text-xs">🤖</span>
+                              {language === 'ko' ? '튜터' : 'TUTOR'}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsSpeedMode(true);
+                              }}
+                              className={`relative z-10 flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                                isSpeedMode
+                                  ? 'text-white drop-shadow-md'
+                                  : isNight
+                                    ? 'text-orange-400 hover:text-orange-300'
+                                    : 'text-orange-600 hover:text-orange-500'
+                              } uppercase tracking-widest flex items-center justify-center gap-1.5`}
+                            >
+                              <span className="text-xs">⚡</span>
+                              {language === 'ko' ? '스피드' : 'SPEED'}
+                            </button>
+                          </div>
                         </div>
                       )}
 

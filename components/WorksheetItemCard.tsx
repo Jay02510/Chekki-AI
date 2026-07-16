@@ -81,6 +81,8 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     const scriptText = language === 'ko' ? item.teaching_script_ko : item.teaching_script_en || '';
     const guideText = language === 'ko' ? item.korean_guide : item.english_guide || '';
     const answerText = removeMarkdown(item.correct_answer || '');
+    const isAnswerLong = answerText.length > 20;
+    const isStudentResponseLong = (item.student_response || '').length > 20;
 
     const handleActionClick = (e: React.MouseEvent, action: () => void) => {
       e.stopPropagation();
@@ -99,10 +101,26 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     return (
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`group relative rounded-[2.5rem] border overflow-hidden transition-all duration-200 ease-[var(--ease-premium)] p-1.5 ${isActive ? (isNight ? 'bg-zinc-900 border-orange-500/50 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]' : 'bg-white border-orange-500 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]') : isNight ? 'bg-[#111111]/80 border-white/5 hover:border-white/10' : 'bg-white/80 border-zinc-200 hover:border-zinc-300 shadow-sm hover:shadow-lg'}`}
+        className={`group relative rounded-[2.5rem] border overflow-hidden transition-all duration-300 ease-in-out p-1.5 ${
+          isActive
+            ? isNight
+              ? 'bg-zinc-900 border-orange-500/50 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]'
+              : 'bg-white border-orange-500 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]'
+            : item.is_correct === false && hasHandwriting !== false
+            ? isNight
+              ? 'bg-[#111111]/80 border-red-500/30 hover:border-red-500/50 shadow-[0_4px_20px_rgba(239,68,68,0.05)]'
+              : 'bg-white/80 border-red-300 hover:border-red-400 shadow-[0_4px_20px_rgba(239,68,68,0.05)]'
+            : item.is_correct === true
+            ? isNight
+              ? 'bg-[#111111]/80 border-emerald-500/20 hover:border-emerald-500/40 shadow-[0_4px_20px_rgba(16,185,129,0.02)]'
+              : 'bg-white/80 border-emerald-200 hover:border-emerald-300 shadow-[0_4px_20px_rgba(16,185,129,0.02)]'
+            : isNight
+            ? 'bg-[#111111]/80 border-white/5 hover:border-white/10'
+            : 'bg-white/80 border-zinc-200 hover:border-zinc-300 shadow-sm hover:shadow-lg'
+        }`}
         style={style}
       >
-        <div className={`w-full h-full rounded-[calc(2.5rem-0.375rem)] ${isNight ? 'bg-[#0A0A0A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)]'} transition-all duration-200 ease-[var(--ease-premium)]`}>
+        <div className={`w-full h-full rounded-[calc(2.5rem-0.375rem)] ${isNight ? 'bg-[#0A0A0A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)]'} transition-all duration-300 ease-in-out`}>
           <div
             onClick={(e) => {
               e.stopPropagation();
@@ -111,7 +129,17 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
             className="p-4 md:p-8 flex items-start gap-4 md:gap-8 cursor-pointer"
           >
             <div
-              className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-200 ${isActive ? 'bg-orange-500 text-white shadow-lg rotate-3' : isNight ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-100 text-zinc-400'}`}
+              className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 ease-in-out ${
+                isActive
+                  ? 'bg-orange-500 text-white shadow-lg rotate-3'
+                  : item.is_correct === false && hasHandwriting !== false
+                  ? 'bg-red-500 text-white shadow-md shadow-red-500/20'
+                  : item.is_correct === true
+                  ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
+                  : isNight
+                  ? 'bg-zinc-800 text-zinc-500'
+                  : 'bg-zinc-100 text-zinc-400'
+              }`}
             >
               <span className="text-xs md:text-xl font-black font-display">{item.id}</span>
             </div>
@@ -123,7 +151,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                 {item.question_text.replace(/^\d+[.)\s]+/, '')}
               </h4>
               {item.question_translation && (
-                <p className={`text-[10px] md:text-xs font-korean italic leading-relaxed mb-3 break-words whitespace-normal ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
+                <p className={`text-[10px] md:text-xs font-korean italic leading-relaxed mb-3 break-keep whitespace-normal ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
                   {item.question_translation}
                 </p>
               )}
@@ -131,11 +159,27 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
               {/* Show simple hint when inactive */}
               {!isActive && (
                 <div className="flex items-center gap-1.5 ml-1 animate-pulse mt-2">
-                  <span className="text-[7px] font-black uppercase text-orange-500 tracking-[0.1em] opacity-70">
-                    {language === 'ko' ? '정답 확인하기' : 'Check Answers'}
+                  <span className={`text-[7px] font-black uppercase tracking-[0.1em] opacity-70 ${
+                    item.is_correct === false && hasHandwriting !== false
+                      ? 'text-red-500'
+                      : item.is_correct === true
+                      ? 'text-emerald-500'
+                      : 'text-orange-500'
+                  }`}>
+                    {item.is_correct === false && hasHandwriting !== false
+                      ? (language === 'ko' ? '오답 확인하기' : 'Review Mistake')
+                      : item.is_correct === true
+                      ? (language === 'ko' ? '학습 가이드 보기' : 'View Study Guide')
+                      : (language === 'ko' ? '정답 확인하기' : 'Check Answers')}
                   </span>
                   <svg
-                    className="w-2.5 h-2.5 text-orange-500"
+                    className={`w-2.5 h-2.5 ${
+                      item.is_correct === false && hasHandwriting !== false
+                        ? 'text-red-500'
+                        : item.is_correct === true
+                        ? 'text-emerald-500'
+                        : 'text-orange-500'
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -352,7 +396,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                               <span className="text-xs text-red-500/80 font-bold uppercase tracking-wider block mb-1">
                                 {language === 'ko' ? '아이의 답안' : "Child's Answer"}
                               </span>
-                              <span className="font-hand text-2xl md:text-4xl text-red-500 line-through decoration-red-500/50 block rotate-[1.5deg]">
+                              <span className={`font-hand text-red-500 line-through decoration-red-500/50 block rotate-[1.5deg] ${isStudentResponseLong ? 'text-lg md:text-2xl' : 'text-2xl md:text-4xl'}`}>
                                 {item.student_response || (language === 'ko' ? '(빈칸)' : '(blank)')}
                               </span>
                             </div>
@@ -368,16 +412,16 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                             </span>
                           )}
                           <span
-                            className={`font-hand text-3xl md:text-5xl font-bold transition-colors duration-200 block break-words whitespace-normal break-words min-w-0 rotate-[1.5deg] inline-block ${speechResult?.id === item.id ? (speechResult.success ? (isNight ? 'text-green-300 drop-shadow-[0_2px_8px_rgba(34,197,94,0.5)]' : 'text-green-600 drop-shadow-[0_2px_8px_rgba(22,163,74,0.3)]') : (isNight ? 'text-red-300 drop-shadow-[0_2px_8px_rgba(239,68,68,0.5)]' : 'text-red-600 drop-shadow-[0_2px_8px_rgba(220,38,38,0.3)]')) : isNight ? 'text-emerald-400' : 'text-emerald-600'}`}
+                            className={`font-hand ${isAnswerLong ? 'text-xl md:text-3xl' : 'text-3xl md:text-5xl'} font-bold transition-colors duration-200 block break-words whitespace-normal break-words min-w-0 rotate-[1.5deg] inline-block ${speechResult?.id === item.id ? (speechResult.success ? (isNight ? 'text-green-300 drop-shadow-[0_2px_8px_rgba(34,197,94,0.5)]' : 'text-green-600 drop-shadow-[0_2px_8px_rgba(22,163,74,0.3)]') : (isNight ? 'text-red-300 drop-shadow-[0_2px_8px_rgba(239,68,68,0.5)]' : 'text-red-600 drop-shadow-[0_2px_8px_rgba(220,38,38,0.3)]')) : isNight ? 'text-emerald-400' : 'text-emerald-600'}`}
                           >
                             {item.is_correct === true && <span className="mr-2">✅</span>}
                             {answerText}
+                            {speechResult?.id === item.id && speechResult.success && (
+                              <span className="ml-3 inline-block animate-[bounce_1s_ease-[cubic-bezier(0.23,1,0.32,1)]_infinite] drop-shadow-lg z-20 text-3xl">
+                                🌟
+                              </span>
+                            )}
                           </span>
-                          {speechResult?.id === item.id && speechResult.success && (
-                            <div className="absolute -top-4 -right-4 text-3xl animate-[bounce_1s_ease-[cubic-bezier(0.23,1,0.32,1)]_infinite] drop-shadow-lg z-20">
-                              🌟
-                            </div>
-                          )}
                         </div>
 
                         {/* Tool Actions */}

@@ -175,7 +175,7 @@ function AppContent() {
 
   // Trigger onboarding for authenticated users without a complete profile
   useEffect(() => {
-    if (isAuthenticated && user && !user.childAge && !sessionStorage.getItem('skipped_child_profile')) {
+    if (isAuthenticated && user && !user.childAge && !localStorage.getItem('skipped_child_profile')) {
       setShowChildProfileModal(true);
     }
   }, [isAuthenticated, user]);
@@ -490,7 +490,7 @@ function AppContent() {
           <ProgressiveOnboardingModal
             onComplete={() => setShowChildProfileModal(false)}
             onSkip={() => {
-              sessionStorage.setItem('skipped_child_profile', 'true');
+              localStorage.setItem('skipped_child_profile', 'true');
               setShowChildProfileModal(false);
             }}
             isNight={isNight}
