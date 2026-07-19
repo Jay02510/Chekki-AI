@@ -57,6 +57,15 @@ export const CameraView: React.FC<Props> = ({
   const { t, language } = useLanguage();
 
   const [guestUsed, setGuestUsed] = useState(false);
+  const [classCodeBannerDismissed, setClassCodeBannerDismissed] = useState(
+    () => localStorage.getItem('chekki_classcode_banner_dismissed') === '1'
+  );
+
+  const dismissClassCodeBanner = () => {
+    localStorage.setItem('chekki_classcode_banner_dismissed', '1');
+    setClassCodeBannerDismissed(true);
+  };
+
   useEffect(() => {
     const used = localStorage.getItem('chekki_guest_scan_used') === 'true';
     setGuestUsed(used);
@@ -765,6 +774,45 @@ export const CameraView: React.FC<Props> = ({
       </div>
 
       <div className="w-full max-w-4xl mx-auto px-4">
+        {/* Class Code Prompt Banner */}
+        {isAuthenticated && !user?.schoolId && !user?.classId && !classCodeBannerDismissed && (
+          <div className={`mb-4 flex items-center gap-3 px-4 py-3 rounded-2xl border ${
+            isNight
+              ? 'bg-orange-500/8 border-orange-500/20 text-orange-300'
+              : 'bg-orange-50 border-orange-200 text-orange-700'
+          } animate-fade-in-up`}>
+            <span className="text-lg flex-shrink-0">🏫</span>
+            <div className="flex-1 min-w-0">
+              <p className={`text-xs font-black uppercase tracking-wider ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
+                {language === 'ko' ? '학원 코드가 있으신가요?' : 'Got a class code from your teacher?'}
+              </p>
+              <p className={`text-[11px] font-medium mt-0.5 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {language === 'ko'
+                  ? '코드를 입력하면 채점이 학원 교재에 맞게 조정됩니다.'
+                  : 'Enter it to align grading with your child\'s class curriculum.'}
+              </p>
+            </div>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-settings-class-code'))}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                isNight
+                  ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20'
+                  : 'bg-orange-500 hover:bg-orange-600 text-white'
+              }`}
+            >
+              {language === 'ko' ? '코드 입력' : 'Enter Code'}
+            </button>
+            <button
+              onClick={dismissClassCodeBanner}
+              className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-lg transition-colors ${
+                isNight ? 'text-zinc-600 hover:text-zinc-300 hover:bg-white/5' : 'text-zinc-400 hover:text-zinc-700 hover:bg-black/5'
+              }`}
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        )}
         {renderDropZone('large')}
         {renderTrustAndSteps()}
       </div>

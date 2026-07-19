@@ -32,7 +32,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   initialStep = 0,
 }) => {
   const { language, setLanguage } = useLanguage();
-  const { updateChildProfile } = useAuth();
+  const { updateChildProfile, joinClassWithCode } = useAuth();
 
   const [step, setStep] = useState(initialStep);
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
@@ -40,17 +40,43 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   const [parentLevel, setParentLevel] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // School code step state
+  const [classCode, setClassCode] = useState('');
+  const [isJoiningClass, setIsJoiningClass] = useState(false);
+  const [classJoinError, setClassJoinError] = useState('');
+  const [classJoinSuccess, setClassJoinSuccess] = useState(false);
+
   const handleProfileSubmit = async () => {
     if (!selectedAge || !selectedLevel || !parentLevel) return;
     setIsSubmitting(true);
     try {
       await updateChildProfile(selectedAge, selectedLevel, parentLevel);
-      onComplete(); 
+      setStep(7); // advance to school code step
     } catch (e) {
       console.error(e);
-      onSkip(); 
+      onSkip();
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleJoinClass = async () => {
+    const code = classCode.trim().toUpperCase();
+    if (code.length < 4) return;
+    setIsJoiningClass(true);
+    setClassJoinError('');
+    try {
+      const success = await joinClassWithCode(code);
+      if (success) {
+        setClassJoinSuccess(true);
+        setTimeout(() => onComplete(), 1200);
+      } else {
+        setClassJoinError(language === 'ko' ? '올바르지 않은 코드입니다. 다시 확인해 주세요.' : 'Invalid code. Please double-check with your teacher.');
+      }
+    } catch {
+      setClassJoinError(language === 'ko' ? '오류가 발생했습니다. 다시 시도해 주세요.' : 'Something went wrong. Please try again.');
+    } finally {
+      setIsJoiningClass(false);
     }
   };
 
@@ -298,7 +324,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         </div>
         
         <div className="flex justify-center gap-3 mt-5">
-          {[0, 1, 2, 3, 4, 5].map(i => (
+          {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
             <motion.div 
               key={i}
               layout
@@ -453,6 +479,93 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
               () => setStep(6)
             )}
             {step === 6 && renderProfileForm()}
+            {step === 7 && (
+              <motion.div
+                key="schoolCodeStep"
+                variants={fadeVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={transitionSpring}
+                className="flex flex-col h-full items-center justify-center text-center py-8"
+              >
+                {/* Illustration */}
+                <motion.div
+                  animate={{ y: [0, -10, 0], rotate: [1, -1, 1] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-40 h-40 rounded-[2.5rem] flex items-center justify-center mb-6 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/40 p-2 shrink-0"
+                >
+                  <img src="/assets/teacher_ob_share_code.png" alt="" className="w-full h-full object-contain drop-shadow-md" />
+                </motion.div>
+
+                <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight mb-4">
+                  {language === 'ko' ? '학원 코드가 있으신가요?' : 'Got a Class Code?'}
+                </h3>
+                <p className="text-base text-zinc-400 leading-relaxed max-w-[260px] mb-6">
+                  {language === 'ko'
+                    ? '선생님께 받은 6자리 학급 코드를 입력하면 숙제 채점이 교재에 맞게 자동 조정됩니다.'
+                    : "Enter the 6-letter code from your teacher to sync homework grading with your child's class curriculum."}
+                </p>
+
+                {classJoinSuccess ? (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="flex flex-col items-center gap-3 py-4"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-3xl">
+                      ✓
+                    </div>
+                    <p className="text-emerald-400 font-bold text-sm">
+                      {language === 'ko' ? '학급에 연결되었습니다!' : 'Linked to class!'}
+                    </p>
+                  </motion.div>
+                ) : (
+                  <div className="w-full max-w-[280px] space-y-3">
+                    <input
+                      type="text"
+                      value={classCode}
+                      onChange={(e) => { setClassCode(e.target.value.toUpperCase()); setClassJoinError(''); }}
+                      placeholder={language === 'ko' ? '예: MERC82' : 'e.g. MERC82'}
+                      maxLength={8}
+                      className="w-full bg-white/5 border border-white/10 focus:border-orange-500 outline-none text-white font-black text-xl text-center tracking-[0.3em] p-4 rounded-2xl transition-colors uppercase placeholder:text-zinc-600 placeholder:tracking-normal placeholder:text-sm placeholder:font-normal"
+                    />
+                    {classJoinError && (
+                      <p className="text-red-400 text-xs font-semibold">{classJoinError}</p>
+                    )}
+                    <button
+                      onClick={handleJoinClass}
+                      disabled={classCode.trim().length < 4 || isJoiningClass}
+                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                    >
+                      {isJoiningClass ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <span>{language === 'ko' ? '학급 연결하기' : 'Link My Class'}</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                <div className="w-full mt-auto pt-6">
+                  <div className="flex justify-center gap-3 mb-4">
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
+                      <motion.div
+                        key={i}
+                        layout
+                        className={`h-1.5 rounded-full transition-colors ${step === i ? 'bg-orange-500 w-8' : 'bg-white/20 w-1.5'}`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={onComplete}
+                    className="text-zinc-500 py-2 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
+                  >
+                    {language === 'ko' ? '나중에 입력할게요' : 'Skip for now'}
+                  </button>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </motion.div>

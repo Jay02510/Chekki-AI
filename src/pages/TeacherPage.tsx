@@ -45,6 +45,10 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [isLoadingRoster, setIsLoadingRoster] = useState(false);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState<any | null>(null);
 
+  // Teacher onboarding
+  const [showTeacherOnboarding, setShowTeacherOnboarding] = useState(false);
+  const [teacherObStep, setTeacherObStep] = useState(0);
+
   const isKo = language === 'ko';
 
   // Load classes if authenticated and role is teacher
@@ -53,6 +57,48 @@ export default function TeacherPage({ isNight = true }: Props) {
       fetchClasses();
     }
   }, [isAuthenticated, user]);
+
+  // Show teacher onboarding once when first authenticated with no classes
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      user?.role === 'teacher' &&
+      classes.length === 0 &&
+      !localStorage.getItem('chekki_teacher_ob_done')
+    ) {
+      setShowTeacherOnboarding(true);
+    }
+  }, [isAuthenticated, user, classes]);
+
+  const dismissTeacherOnboarding = () => {
+    localStorage.setItem('chekki_teacher_ob_done', '1');
+    setShowTeacherOnboarding(false);
+  };
+
+  // Teacher onboarding steps config
+  const teacherObSteps = [
+    {
+      img: '/assets/teacher_ob_create_class.png',
+      titleEn: 'Create Your First Class',
+      titleKo: '첫 번째 학급을 만드세요',
+      descEn: 'Set up a class for each group you teach. Give it a name and level — you can create as many as you need.',
+      descKo: '가르치는 반마다 학급을 만들어 보세요. 이름과 레벨을 설정하면 준비 완료!',
+    },
+    {
+      img: '/assets/teacher_ob_seed_curriculum.png',
+      titleEn: 'Seed Your Weekly Curriculum',
+      titleKo: '주간 커리큘럼을 등록하세요',
+      descEn: "Add this week's vocabulary words, phonics targets, and reading passages. Chekki grades homework against your exact curriculum.",
+      descKo: '이번 주 단어, 파닉스, 읽기 지문을 등록하세요. Chekki가 교재에 맞춰 자동 채점합니다.',
+    },
+    {
+      img: '/assets/teacher_ob_share_code.png',
+      titleEn: 'Share Your Class Code',
+      titleKo: '학급 코드를 학부모님께 공유하세요',
+      descEn: 'Each class gets a unique 6-letter code. Parents enter it in their Chekki app to link their child automatically.',
+      descKo: '각 반에는 고유 6자리 코드가 생성됩니다. 학부모님이 앱에 입력하면 즉시 연동됩니다.',
+    },
+  ];
 
   const fetchClasses = async () => {
     if (!user?.uid) return;
@@ -584,7 +630,68 @@ export default function TeacherPage({ isNight = true }: Props) {
   // --- RENDER CORE DASHBOARD LAYOUT SHELL ---
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 flex flex-col md:flex-row font-korean">
-      
+
+      {/* Teacher Onboarding Modal */}
+      {showTeacherOnboarding && (() => {
+        const step = teacherObSteps[teacherObStep];
+        const isLast = teacherObStep === teacherObSteps.length - 1;
+        return (
+          <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-2xl" onClick={dismissTeacherOnboarding} />
+            <div className="relative w-full max-w-[400px] bg-[#0c0c0c] border border-white/10 rounded-[2.5rem] p-8 flex flex-col items-center text-center shadow-2xl">
+              {/* Skip */}
+              <button
+                onClick={dismissTeacherOnboarding}
+                className="absolute top-5 right-5 text-zinc-500 hover:text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 transition-all"
+              >
+                {isKo ? '건너뛰기' : 'Skip'}
+              </button>
+
+              {/* Illustration */}
+              <div className="w-44 h-44 mb-6 rounded-3xl overflow-hidden bg-black/40 border border-white/5 shadow-[0_20px_40px_rgba(249,115,22,0.15)]">
+                <img src={step.img} alt="" className="w-full h-full object-contain p-2" />
+              </div>
+
+              {/* Text */}
+              <h3 className="text-2xl font-black text-white tracking-tight mb-3">
+                {isKo ? step.titleKo : step.titleEn}
+              </h3>
+              <p className="text-sm text-zinc-400 leading-relaxed max-w-[280px] mb-8">
+                {isKo ? step.descKo : step.descEn}
+              </p>
+
+              {/* Step dots */}
+              <div className="flex items-center gap-2 mb-6">
+                {teacherObSteps.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === teacherObStep ? 'w-8 bg-orange-500' : 'w-1.5 bg-white/20'}`}
+                  />
+                ))}
+              </div>
+
+              {/* CTA */}
+              <button
+                onClick={() => {
+                  if (isLast) {
+                    dismissTeacherOnboarding();
+                    setShowCreateClassModal(true);
+                  } else {
+                    setTeacherObStep(teacherObStep + 1);
+                  }
+                }}
+                className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98]"
+              >
+                {isLast
+                  ? (isKo ? '🚀 첫 학급 만들기' : '🚀 Create First Class')
+                  : (isKo ? '다음' : 'Next')}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
+
       {/* Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-[#0a0a0a] border-b md:border-b-0 md:border-r border-zinc-900 flex flex-col shrink-0">
         
@@ -735,11 +842,15 @@ export default function TeacherPage({ isNight = true }: Props) {
         {/* Tab Content Rendering Container */}
         <section className="p-6 md:p-8 flex-1 relative z-10">
           {classes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-24 h-24 mb-6 opacity-30">
-                <ChekkiMascot className="w-full h-full" mood="thinking" />
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-56 h-56 mb-4 mx-auto">
+                <img
+                  src="/assets/teacher_ob_empty_state.png"
+                  alt="Create your first class"
+                  className="w-full h-full object-contain drop-shadow-2xl"
+                />
               </div>
-              <h3 className="text-xl font-bold text-zinc-400 mb-2">
+              <h3 className="text-xl font-bold text-zinc-300 mb-2">
                 {isKo ? '등록된 반이 없습니다' : 'No Classes Registered Yet'}
               </h3>
               <p className="text-zinc-600 text-xs font-medium max-w-sm mb-6 break-keep leading-relaxed">
@@ -747,12 +858,20 @@ export default function TeacherPage({ isNight = true }: Props) {
                   ? '교사 대시보드를 사용하려면 첫 번째 학급반을 먼저 만들어 주세요.' 
                   : 'Start by creating your first class to manage student rosters and homework curricula.'}
               </p>
-              <button
-                onClick={() => setShowCreateClassModal(true)}
-                className="px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98]"
-              >
-                🚀 {isKo ? '새 학급반 만들기' : 'Create Class Now'}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowCreateClassModal(true)}
+                  className="px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98]"
+                >
+                  🚀 {isKo ? '새 학급반 만들기' : 'Create Class Now'}
+                </button>
+                <button
+                  onClick={() => { setShowTeacherOnboarding(true); setTeacherObStep(0); }}
+                  className="px-5 py-3.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white font-bold text-xs rounded-xl transition-all"
+                >
+                  {isKo ? '사용 가이드 보기' : 'View Guide'}
+                </button>
+              </div>
             </div>
           ) : (
             // Tabs Skeletons to be built in subsequent steps
