@@ -122,6 +122,9 @@ export default function Landing() {
           
           <nav className="hidden md:flex items-center gap-8">
             <a href="/app" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">Web App</a>
+            <a href="/schools" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">
+              {lang === 'en' ? 'For Schools' : '교육기관용'}
+            </a>
             <a href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">Features</a>
             <a href="#ecosystem" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">Ecosystem</a>
           </nav>
@@ -159,6 +162,9 @@ export default function Landing() {
             <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 w-full bg-white/95 dark:bg-[#111]/95 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:hidden z-50 origin-top animate-fade-in-up">
               <div className="flex flex-col p-2 gap-1">
                 <a href="/app" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Web App</a>
+                <a href="/schools" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                  {lang === 'en' ? 'For Schools' : '교육기관용'}
+                </a>
                 <a href="#features" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Features</a>
                 <a href="#ecosystem" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Ecosystem</a>
               </div>
@@ -586,6 +592,7 @@ export default function Landing() {
         
         <div className="bento-card relative z-10 mt-32 flex flex-col items-center gap-6">
           <div className="flex items-center gap-6 text-white/50 text-sm font-medium mb-4">
+            <a href="/schools" className="hover:text-white transition-colors">{lang === 'en' ? 'For Schools' : '교육기관용'}</a>
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
           </div>
