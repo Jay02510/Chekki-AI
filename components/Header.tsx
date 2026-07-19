@@ -100,24 +100,6 @@ export const Header: React.FC<Props> = ({ onReset, isNight, setIsNight, isSpeedM
               <House weight="bold" className="text-sm md:text-base" />
             </button>
 
-            {/* For Schools link */}
-            <a
-              href="/schools"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState({}, '', '/schools');
-                window.dispatchEvent(new PopStateEvent('popstate'));
-              }}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-black transition-all ${
-                isNight 
-                  ? 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 shadow-md shadow-orange-500/2' 
-                  : 'bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200'
-              } uppercase tracking-wider cursor-pointer`}
-            >
-              <span>🏫</span>
-              <span className="hidden sm:inline">{language === 'ko' ? '학원/교사' : 'Schools'}</span>
-            </a>
-
             <div className="flex items-center gap-2 md:gap-4">
               <div
                 className={`relative flex items-center ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-200'} p-1 rounded-full border overflow-hidden`}

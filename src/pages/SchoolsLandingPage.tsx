@@ -157,6 +157,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             {isKo ? '교사용 데모 로그인' : 'Try Demo Portal'}
           </a>
         </div>
+
+        {/* Hero UI Mockup Image */}
+        <div className="mt-12 w-full max-w-3xl mx-auto">
+          <div className={`relative rounded-3xl overflow-hidden shadow-2xl border ${
+            isNight ? 'border-white/10' : 'border-zinc-200'
+          }`}>
+            <img
+              src="/assets/schools/schools_hero.png"
+              alt="AI Grading Dashboard mockup"
+              className="w-full h-auto object-cover"
+              loading="lazy"
+            />
+          </div>
+        </div>
       </section>
 
       {/* --- BENTO GRID SECTION --- */}
@@ -178,23 +192,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
               : 'bg-white border-zinc-200 hover:border-zinc-300'
           } hover:-translate-y-0.5 duration-200 shadow-sm relative overflow-hidden group`}>
-            {/* Decorative background mark */}
-            <div className="absolute top-4 right-4 text-orange-500/10 group-hover:text-orange-500/15 group-hover:scale-110 transition-all duration-300 pointer-events-none">
-              <FileText size={180} weight="light" />
-            </div>
 
-            <div>
-              <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-6">
-                <GraduationCap size={20} weight="bold" />
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="flex-1">
+                <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-6">
+                  <GraduationCap size={20} weight="bold" />
+                </div>
+                <h3 className={`text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo ? '매주 맞춤 교재 단어장 연동 (Curriculum Seeding)' : 'Weekly Curriculum Pre-seeding'}
+                </h3>
+                <p className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                  {isKo 
+                    ? '선생님이 대시보드에 학년별/학급별 주간 단어와 핵심 리딩 문장을 입력해 두면, 학생이 올린 오답을 분석할 때 인공지능이 우리 학원 교재를 기반으로 100% 맞춤형 첨삭을 수행합니다.'
+                    : "Seed each class's active spelling vocabulary lists, target phonics, and reading passages. Our grading engine aligns its OCR check straight to your weekly textbook targets."}
+                </p>
               </div>
-              <h3 className={`text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '매주 맞춤 교재 단어장 연동 (Curriculum Seeding)' : 'Weekly Curriculum Pre-seeding'}
-              </h3>
-              <p className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {isKo 
-                  ? '선생님이 대시보드에 학년별/학급별 주간 단어와 핵심 리딩 문장을 입력해 두면, 학생이 올린 오답을 분석할 때 인공지능이 우리 학원 교재를 기반으로 100% 맞춤형 첨삭을 수행합니다.'
-                  : "Seed each class's active spelling vocabulary lists, target phonics, and reading passages. Our grading engine aligns its OCR check straight to your weekly textbook targets."}
-              </p>
+              <div className="w-full md:w-48 lg:w-56 flex-shrink-0 rounded-2xl overflow-hidden opacity-90 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
+                <img src="/assets/schools/schools_bento_curriculum.png" alt="Curriculum seeding interface" className="w-full h-auto object-cover" loading="lazy" />
+              </div>
             </div>
 
             <div className="mt-8 pt-4 border-t border-zinc-900/10 flex items-center gap-2 text-xs font-bold text-orange-500">
@@ -210,7 +225,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               : 'bg-white border-zinc-200 hover:border-zinc-300'
           } hover:-translate-y-0.5 duration-200 shadow-sm relative overflow-hidden group`}>
             <div>
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
                 <Users size={20} weight="bold" />
               </div>
               <h3 className={`text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
@@ -223,9 +238,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </p>
             </div>
 
-            <div className="mt-6 flex gap-2">
-              <span className={`text-[10px] font-mono px-2 py-1 rounded ${isNight ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-100 text-zinc-600'}`}>MERC82</span>
-              <span className={`text-[10px] font-mono px-2 py-1 rounded ${isNight ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-100 text-zinc-600'}`}>POLY10</span>
+            <div className="mt-4 rounded-2xl overflow-hidden shadow-md opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+              <img src="/assets/schools/schools_bento_join_code.png" alt="Class join code entry UI" className="w-full h-auto object-cover" loading="lazy" />
             </div>
           </div>
 
@@ -236,7 +250,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               : 'bg-white border-zinc-200 hover:border-zinc-300'
           } hover:-translate-y-0.5 duration-200 shadow-sm relative overflow-hidden group`}>
             <div>
-              <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
                 <ChartBar size={20} weight="bold" />
               </div>
               <h3 className={`text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
@@ -249,8 +263,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </p>
             </div>
 
-            <div className={`mt-6 text-xs p-3 rounded-xl border ${isNight ? 'bg-zinc-950/80 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
-              📉 <span className="font-bold text-orange-500">Struggle Rate</span>: "umbrella" - 42%
+            <div className="mt-4 rounded-2xl overflow-hidden shadow-md opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+              <img src="/assets/schools/schools_bento_diagnostics.png" alt="Classroom diagnostics dashboard" className="w-full h-auto object-cover" loading="lazy" />
             </div>
           </div>
 
@@ -260,27 +274,28 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
               : 'bg-white border-zinc-200 hover:border-zinc-300'
           } hover:-translate-y-0.5 duration-200 shadow-sm relative overflow-hidden group`}>
-            <div className="absolute top-4 right-4 text-emerald-500/10 group-hover:text-emerald-500/15 group-hover:scale-110 transition-all duration-300 pointer-events-none">
-              <Users size={180} weight="light" />
-            </div>
 
-            <div>
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6">
-                <Sparkle size={20} weight="bold" />
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="flex-1">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6">
+                  <Sparkle size={20} weight="bold" />
+                </div>
+                <h3 className={`text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo ? '학부모 만족도를 높이는 전용 AI 오답 리포트' : 'Elevated Parent Care & Branding'}
+                </h3>
+                <p className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                  {isKo 
+                    ? '가정에서 숙제를 카메라로 찍으면 3초 만에 학원 진도에 맞게 자동 채점됩니다. 학부모님께는 학원 로고가 포함된 정교한 교정 결과와 원어민 발음 듣기, AI 튜터 챗봇 창이 노출되어 학원의 디지털 관리 신뢰도가 비약적으로 향상됩니다.'
+                    : "Every homework graded in parents' app matches your academy dashboard. Deliver native pronunciation audio files, custom review tips, and personalized feedback matching the student's age."}
+                </p>
+                <div className="mt-8 pt-4 border-t border-zinc-900/10 flex items-center gap-1.5 text-xs font-bold text-emerald-400">
+                  <CheckCircle size={14} weight="bold" />
+                  <span>{isKo ? '밀착 학부모 케어로 재원율 증가' : 'Increase student retention with digital care'}</span>
+                </div>
               </div>
-              <h3 className={`text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '학부모 만족도를 높이는 전용 AI 오답 리포트' : 'Elevated Parent Care & Branding'}
-              </h3>
-              <p className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {isKo 
-                  ? '가정에서 숙제를 카메라로 찍으면 3초 만에 학원 진도에 맞게 자동 채점됩니다. 학부모님께는 학원 로고가 포함된 정교한 교정 결과와 원어민 발음 듣기, AI 튜터 챗봇 창이 노출되어 학원의 디지털 관리 신뢰도가 비약적으로 향상됩니다.'
-                  : "Every homework graded in parents' app matches your academy dashboard. Deliver native pronunciation audio files, custom review tips, and personalized feedback matching the student's age."}
-              </p>
-            </div>
-
-            <div className="mt-8 pt-4 border-t border-zinc-900/10 flex items-center gap-1.5 text-xs font-bold text-emerald-400">
-              <CheckCircle size={14} weight="bold" />
-              <span>{isKo ? '밀착 학부모 케어로 재원율 증가' : 'Increase student retention with digital care'}</span>
+              <div className="w-full md:w-44 lg:w-52 flex-shrink-0 rounded-2xl overflow-hidden opacity-90 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
+                <img src="/assets/schools/schools_bento_parent_care.png" alt="Parent homework report UI" className="w-full h-auto object-cover" loading="lazy" />
+              </div>
             </div>
           </div>
         </div>
