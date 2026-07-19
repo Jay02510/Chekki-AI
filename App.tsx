@@ -20,6 +20,8 @@ import { LegalModal } from './components/LegalModal';
 import { ProgressiveOnboardingModal } from './components/ProgressiveOnboardingModal';
 import SubscribePage from './src/pages/SubscribePage';
 import AdminPage from './src/pages/AdminPage';
+import TeacherPage from './src/pages/TeacherPage';
+import SchoolsLandingPage from './src/pages/SchoolsLandingPage';
 import { AnalysisState, LegalType } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -170,6 +172,8 @@ function AppContent() {
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
   const [showSubscribePage, setShowSubscribePage] = useState(false);
   const [showAdminPage, setShowAdminPage] = useState(false);
+  const [showTeacherPage, setShowTeacherPage] = useState(false);
+  const [showSchoolsPage, setShowSchoolsPage] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const platform = Capacitor.getPlatform();
 
@@ -188,6 +192,24 @@ function AppContent() {
     };
     window.addEventListener('open-help', handleOpenHelp);
     return () => window.removeEventListener('open-help', handleOpenHelp);
+  }, []);
+
+  // Listen for history popstate navigation changes (Dynamic Web Routing)
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname;
+      setShowSubscribePage(path === '/subscribe');
+      setShowAdminPage(path === '/admin');
+      setShowTeacherPage(path === '/teacher');
+      setShowSchoolsPage(path === '/schools' || path === '/for-schools');
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    handleLocationChange(); // Trigger on mount
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+    };
   }, []);
 
   // Global Confirmation State
@@ -217,6 +239,18 @@ function AppContent() {
     if (window.location.pathname === '/admin' && Capacitor.getPlatform() === 'web') {
       setShowSplash(false);
       setShowAdminPage(true);
+    }
+
+    // /teacher route — web only
+    if (window.location.pathname === '/teacher' && Capacitor.getPlatform() === 'web') {
+      setShowSplash(false);
+      setShowTeacherPage(true);
+    }
+
+    // /schools and /for-schools route — web only
+    if ((window.location.pathname === '/schools' || window.location.pathname === '/for-schools') && Capacitor.getPlatform() === 'web') {
+      setShowSplash(false);
+      setShowSchoolsPage(true);
     }
 
     // Handle return from password reset
@@ -422,6 +456,8 @@ function AppContent() {
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
   if (showSubscribePage && platform === 'web') return <SubscribePage />;
   if (showAdminPage && platform === 'web') return <AdminPage />;
+  if (showTeacherPage && platform === 'web') return <TeacherPage isNight={isNight} />;
+  if (showSchoolsPage && platform === 'web') return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
 
   return (
     <ErrorBoundary>

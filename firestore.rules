@@ -9,10 +9,38 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    // User Profiles: Users can only read/write their own profile
+    // Helper: Check if user belongs to a school
+    function userBelongsToSchool(schoolId) {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == schoolId;
+    }
+
+    // Helper: Check if parent belongs to a class
+    function userBelongsToClass(classId) {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.classId == classId;
+    }
+
+    // Helper: Check if user is the designated teacher of a class
+    function isClassTeacher(classId) {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/classes/$(classId)).data.teacherUid == request.auth.uid;
+    }
+
+    // User Profiles: Users can only read/write their own profile, except teachers who manage classes
     match /users/{userId} {
-      allow get: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow list: if isAdmin();
+      allow get: if request.auth != null && (
+        request.auth.uid == userId || 
+        isAdmin() ||
+        (resource.data.classId != null && isClassTeacher(resource.data.classId)) ||
+        (resource.data.schoolId != null && request.auth.uid != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId)
+      );
+      
+      allow list: if request.auth != null && (
+        isAdmin() ||
+        (request.auth.uid != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher')
+      );
+
       allow create: if request.auth != null && (
         isAdmin() || 
         (request.auth.uid == userId && 
@@ -21,14 +49,32 @@ service cloud.firestore {
          request.resource.data.maxQuestionsPerDay == 5)
       );
       allow delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      
       allow update: if request.auth != null && (
         isAdmin() || 
-        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['plan', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate']))
+        // User updating their own profile
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate'])) ||
+        // Teacher updating classroom fields
+        (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' &&
+          (
+            (request.resource.data.classId != null && isClassTeacher(request.resource.data.classId)) ||
+            (resource.data.classId != null && isClassTeacher(resource.data.classId) && request.resource.data.classId == null)
+          ) &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'email', 'name', 'schoolId', 'schoolName', 'childAge', 'childEnglishLevel', 'parentEnglishLevel'])
+        )
       );
     }
 
     match /users/{userId}/data/{document=**} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow read: if request.auth != null && (
+        request.auth.uid == userId || 
+        isAdmin() ||
+        (
+          get(/databases/$(database)/documents/users/$(userId)).data.classId != null &&
+          isClassTeacher(get(/databases/$(database)/documents/users/$(userId)).data.classId)
+        )
+      );
       allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
     
@@ -109,6 +155,42 @@ service cloud.firestore {
     // Idempotency Keys: Used for deduplication server-side only.
     match /idempotency_keys/{docId} {
       allow read, write: if false;
+    }
+
+    // Schools rules
+    match /schools/{schoolId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && isAdmin();
+    }
+
+    // Classes rules
+    match /classes/{classId} {
+      allow read: if request.auth != null && (
+        resource.data.teacherUid == request.auth.uid ||
+        userBelongsToClass(classId) ||
+        isAdmin()
+      );
+      allow write: if request.auth != null && (
+        (request.resource.data.teacherUid == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // Curriculum pre-seeding rules
+    match /curriculums/{curriculumId} {
+      allow read: if request.auth != null && (
+        userBelongsToClass(resource.data.classId) ||
+        isClassTeacher(resource.data.classId) ||
+        isAdmin()
+      );
+      allow create, update: if request.auth != null && (
+        isClassTeacher(request.resource.data.classId) ||
+        isAdmin()
+      );
+      allow delete: if request.auth != null && (
+        isClassTeacher(resource.data.classId) ||
+        isAdmin()
+      );
     }
   }
 }

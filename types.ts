@@ -53,6 +53,10 @@ export interface UserProfile {
   childAge?: string;
   childEnglishLevel?: string;
   parentEnglishLevel?: string;
+  role?: 'parent' | 'teacher' | 'admin';
+  classId?: string | null;
+  studentName?: string | null;
+  classStatus?: 'pending' | 'active' | null;
 }
 
 // --- Subscription System ---

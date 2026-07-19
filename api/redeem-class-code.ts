@@ -38,28 +38,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const idToken = authHeader.split('Bearer ')[1].trim();
 
-  const { schoolCode } = req.body || {};
-  if (!schoolCode) {
-    return res.status(400).json({ error: 'Missing schoolCode' });
+  const { classCode } = req.body || {};
+  if (!classCode) {
+    return res.status(400).json({ error: 'Missing classCode' });
   }
 
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    const sanitized = schoolCode.toUpperCase().trim();
+    const sanitized = classCode.toUpperCase().trim();
     
-    // Fetch school config from Firestore
-    const schoolDoc = await adminDb.collection('schools').doc(sanitized).get();
-    if (!schoolDoc.exists) {
-      return res.status(400).json({ error: 'Invalid school code. Please check again.' });
+    // Find the class document by joinCode
+    const classesRef = adminDb.collection('classes');
+    const qSnapshot = await classesRef.where('joinCode', '==', sanitized).limit(1).get();
+
+    if (qSnapshot.empty) {
+      return res.status(404).json({ error: 'Invalid class code. Please check with your teacher.' });
     }
 
-    const schoolName = schoolDoc.data()?.name || sanitized;
+    const classDoc = qSnapshot.docs[0];
+    const classData = classDoc.data();
+    const classId = classDoc.id;
+    const schoolId = classData.schoolId;
+    const schoolName = classData.schoolName || schoolId;
 
+    // Update parent profile in Firestore
     await adminDb.collection('users').doc(uid).set({
-      schoolId: sanitized,
+      schoolId: schoolId,
       schoolName: schoolName,
+      classId: classId,
+      classStatus: 'pending',
       plan: 'pro',
       maxScansPerDay: 9999,
       maxQuestionsPerDay: 9999,
@@ -68,11 +77,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({
       success: true,
+      schoolId,
       schoolName,
-      message: 'School code redeemed successfully',
+      classId,
+      className: classData.name,
+      message: 'Class code redeemed successfully',
     });
-  } catch (err: any) {
-    console.error('[redeem-school-code] Error:', err);
-    return res.status(401).json({ error: 'Authentication failed' });
+  } catch (error: any) {
+    console.error('Redeem class code error:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }

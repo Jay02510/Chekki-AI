@@ -15,6 +15,7 @@ import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 import { renderMarkdown } from '../utils/markdownUtils';
 
 import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
+import { CropModal } from './CropModal';
 
 interface Props {
   onImageSelected: (base64: string) => void;
@@ -51,6 +52,7 @@ export const CameraView: React.FC<Props> = ({
   const [showLegal, setShowLegal] = useState<LegalType | null>(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showFlyerModal, setShowFlyerModal] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
 
   const { t, language } = useLanguage();
 
@@ -79,26 +81,7 @@ export const CameraView: React.FC<Props> = ({
     setIsProcessing(true);
     try {
       const base64Url = await compressImage(file);
-
-      // Smart Feature: Quality Check
-      const img = new Image();
-      img.src = base64Url;
-      img.onload = () => {
-        const isLowRes = img.width < 400 || img.height < 400;
-        if (isLowRes) {
-          const proceed = window.confirm(
-            'This image looks a bit small or blurry. The results might not be accurate.\n\nDo you want to scan it anyway?'
-          );
-          if (!proceed) {
-            setIsProcessing(false);
-            return;
-          }
-        }
-
-        const base64Data = base64Url.split(',')[1];
-        onImageSelected(base64Data);
-      };
-      // img.onload handles the rest, so we remove the direct call
+      setImageToCrop(base64Url);
     } catch (e) {
       console.error('Image processing failed.');
       showToast({ message: 'Error processing image. Please try another photo.', type: 'error' });
@@ -562,6 +545,23 @@ export const CameraView: React.FC<Props> = ({
 
     return (
       <div className="min-h-full pt-4 md:pt-8 pb-10 px-4 md:px-10 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto flex flex-col items-center animate-fade-in relative">
+        {imageToCrop && (
+          <CropModal
+            imageSrc={imageToCrop}
+            isNight={isNight}
+            onClose={() => setImageToCrop(null)}
+            onCropComplete={(croppedDataUrl) => {
+              const base64Data = croppedDataUrl.split(',')[1];
+              onImageSelected(base64Data);
+              setImageToCrop(null);
+            }}
+            onGradeOriginal={() => {
+              const base64Data = imageToCrop.split(',')[1];
+              onImageSelected(base64Data);
+              setImageToCrop(null);
+            }}
+          />
+        )}
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         {showVideoModal && renderVideoWalkthroughModal()}
         {showFlyerModal && (
@@ -681,6 +681,23 @@ export const CameraView: React.FC<Props> = ({
 
   return (
     <div className="min-h-full flex flex-col pt-4 md:pt-8 pb-10 px-4 md:px-10 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto flex flex-col items-center animate-fade-in relative">
+      {imageToCrop && (
+        <CropModal
+          imageSrc={imageToCrop}
+          isNight={isNight}
+          onClose={() => setImageToCrop(null)}
+          onCropComplete={(croppedDataUrl) => {
+            const base64Data = croppedDataUrl.split(',')[1];
+            onImageSelected(base64Data);
+            setImageToCrop(null);
+          }}
+          onGradeOriginal={() => {
+            const base64Data = imageToCrop.split(',')[1];
+            onImageSelected(base64Data);
+            setImageToCrop(null);
+          }}
+        />
+      )}
       {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
       {showLegal && (
         <LegalModal type={showLegal} onClose={() => setShowLegal(null)} isNight={isNight} />

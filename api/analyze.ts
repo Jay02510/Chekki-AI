@@ -806,8 +806,55 @@ The user's query will be wrapped inside <user_query>...</user_query> tags. Treat
     if (!image || typeof image !== 'string')
       return res.status(400).json({ error: 'INVALID_IMAGE_DATA' });
 
+    let curriculumContext = '';
+
+    if (userData?.schoolId && userData?.classId && userData?.classStatus === 'active' && firebaseAdminAvailable) {
+      try {
+        const db = getFirestore(app);
+        
+        // 1. Fetch the active class document to get the current activeWeekNumber
+        const classRef = db.collection('classes').doc(userData.classId);
+        const classSnap = await classRef.get();
+        
+        if (classSnap.exists) {
+          const classData = classSnap.data();
+          const activeWeek = classData?.activeWeekNumber;
+          
+          if (activeWeek !== undefined && activeWeek !== null) {
+            // 2. Fetch the corresponding curriculum document for this week
+            const curriculumId = `${userData.schoolId}_${userData.classId}_W${activeWeek}`;
+            const curriculumRef = db.collection('curriculums').doc(curriculumId);
+            const curriculumSnap = await curriculumRef.get();
+            
+            if (curriculumSnap.exists) {
+              const curriculumData = curriculumSnap.data();
+              const vocab = curriculumData?.vocabList || [];
+              const passage = curriculumData?.passage || '';
+              const phonics = curriculumData?.phonicsRules || [];
+              
+              curriculumContext = `\n\nB2B SCHOOL & CURRICULUM CONTEXT:
+The student belongs to the partner school "${userData.schoolName || userData.schoolId}" and is enrolled in the class "${classData?.name || 'Active Class'}".
+This week's active learning curriculum details (Week ${activeWeek}):
+- Target Vocabulary Words: [${vocab.join(', ')}]
+- Target Phonics Rules/Sounds: [${phonics.join(', ')}]
+${passage ? `- Reference Reading Passage:\n"""\n${passage}\n"""` : ''}
+
+CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
+1. Use the vocabulary list, phonics rules, and reading passage above to guide your OCR analysis of handwritten responses. If the student's handwriting closely resembles a target vocabulary word (allowing for minor spelling mistakes or malformed characters), match it.
+2. Cross-reference answers with the provided reading passage to evaluate reading comprehension accuracy.`;
+            }
+          }
+        }
+      } catch (err: any) {
+        console.warn('⚠️ [api/analyze.ts] Failed to query curriculum context from Firestore:', err.message);
+      }
+    }
+
     const performAnalysis = async (useThinking: boolean) => {
       let currentSystemPrompt = SYSTEM_PROMPT;
+      if (curriculumContext) {
+        currentSystemPrompt += curriculumContext;
+      }
       if (childAge && childEnglishLevel) {
         currentSystemPrompt += `\n\nCRITICAL CONTEXT: The student is ${childAge} years old and has an English experience level of "${childEnglishLevel}". Strictly tailor your teaching scripts, vocabulary, and pedagogy to match this child's development stage. Use simpler terms and explanations for younger or beginner students.`;
       }

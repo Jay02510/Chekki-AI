@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LegalModal } from './LegalModal';
 import { FeedbackModal } from './FeedbackModal';
-import { db } from '../services/database';
+import { db, dbInstance } from '../services/database';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { InAppReview } from '@capacitor-community/in-app-review';
 
 interface Props {
@@ -14,8 +15,17 @@ interface Props {
 }
 
 export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight }) => {
-  const { user, updateProfile, deleteAccount, firebaseUser, setShowPaywall, subscriptionRecord } =
-    useAuth();
+  const { 
+    user, 
+    updateProfile, 
+    deleteAccount, 
+    firebaseUser, 
+    setShowPaywall, 
+    subscriptionRecord, 
+    updateClassroomProfile,
+    joinClassWithCode,
+    leaveClassroom
+  } = useAuth();
   const { language, setLanguage, t } = useLanguage();
 
   const [name, setName] = useState('');
@@ -34,6 +44,60 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
     speech: '...',
     auth: '...',
   });
+
+  // B2B Student/Class state
+  const [studentName, setStudentName] = useState('');
+  const [classJoinCode, setClassJoinCode] = useState('');
+  const [isUpgradingCode, setIsUpgradingCode] = useState(false);
+  const [redeemError, setRedeemError] = useState('');
+  const [redeemSuccess, setRedeemSuccess] = useState('');
+  
+  const [activeClassDetails, setActiveClassDetails] = useState<any>(null);
+  const [isLoadingClassDetails, setIsLoadingClassDetails] = useState(false);
+
+  useEffect(() => {
+    if (user?.studentName) setStudentName(user.studentName);
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.classId) {
+      setIsLoadingClassDetails(true);
+      const docRef = doc(dbInstance, 'classes', user.classId);
+      getDoc(docRef).then((docSnap) => {
+        if (docSnap.exists()) {
+          setActiveClassDetails(docSnap.data());
+        }
+      }).catch(err => {
+        console.error('Error fetching class details:', err);
+      }).finally(() => {
+        setIsLoadingClassDetails(false);
+      });
+    } else {
+      setActiveClassDetails(null);
+    }
+  }, [user?.classId]);
+
+  const handleRedeemClassCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!classJoinCode) return;
+    setRedeemError('');
+    setRedeemSuccess('');
+    setIsUpgradingCode(true);
+    try {
+      const sanitized = classJoinCode.toUpperCase().trim();
+      const success = await joinClassWithCode(sanitized);
+      if (success) {
+        setRedeemSuccess(language === 'ko' ? '학습지 파트너십 인증에 성공했습니다!' : 'Academy code redeemed successfully!');
+        setClassJoinCode('');
+      } else {
+        setRedeemError(language === 'ko' ? '올바르지 않은 코드이거나 활성화되지 않은 학급 코드입니다.' : 'Invalid or inactive class code.');
+      }
+    } catch (err: any) {
+      setRedeemError(err.message || 'Failed to redeem code.');
+    } finally {
+      setIsUpgradingCode(false);
+    }
+  };
 
   useEffect(() => {
     if (user) setName(user.name);
@@ -64,10 +128,17 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
     setDiagResults(results);
   };
 
-  const handleSave = () => {
-    updateProfile(name);
-    setSuccessMsg(t('settings_saved'));
-    setTimeout(() => setSuccessMsg(''), 3000);
+  const handleSave = async () => {
+    try {
+      await updateProfile(name);
+      if (user?.schoolId && user?.classId) {
+        await updateClassroomProfile(user.classId, studentName);
+      }
+      setSuccessMsg(t('settings_saved'));
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (e) {
+      console.error('Failed to save settings:', e);
+    }
   };
 
   return (
@@ -471,6 +542,139 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                 />
               </div>
             </div>
+
+            {/* --- SCHOOL & CLASSROOM SETTINGS (Case A: B2C Parents, allow late B2B redemption) --- */}
+            {!user?.schoolId ? (
+              <div className="space-y-6 pt-4 border-t border-zinc-900/10">
+                <h3 className="text-balance text-xs font-black text-zinc-500 uppercase tracking-tight">
+                  {language === 'ko' ? '🏫 학급 가입 및 Premium 인증' : '🏫 School Sponsorship'}
+                </h3>
+                
+                <form onSubmit={handleRedeemClassCode} className="p-5 bg-zinc-900/40 border border-zinc-900 rounded-3xl space-y-4 text-left">
+                  <p className="text-xs text-zinc-400 font-medium leading-relaxed break-keep">
+                    {language === 'ko' 
+                      ? '다니고 계신 어학원(Poly, GATE, ECC 등) 담당 선생님께 발급받은 6자리 학급 코드가 있으신가요? 코드를 입력해 Premium 혜택과 맞춤형 숙제 관리를 시작하세요.' 
+                      : 'Enter the 6-character class code shared by your teacher (Poly, GATE, ECC, etc.) to activate premium grading and sync homework.'}
+                  </p>
+
+                  {user?.plan === 'pro' && (
+                    <div className="p-3 bg-orange-500/5 border border-orange-500/15 text-orange-400 text-[10px] sm:text-xs font-semibold rounded-xl leading-normal font-korean">
+                      ⚠️ {language === 'ko'
+                        ? '주의: 현재 유료 정기 결제 플랜을 사용 중이십니다. 학원 코드를 등록해도 자동 정기 결제는 연동되지 않으므로, 이중 청구를 방지하기 위해 App Store 또는 Google Play에서 구독을 수동으로 취소해 주세요.'
+                        : 'Note: You have an active Premium plan. Joining via school code transitions your account sponsorship. Please cancel your App Store or Play Store subscription manually to avoid duplicate billing.'}
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <label className={`block text-xs font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}>
+                      {language === 'ko' ? '학급 코드 입력 (6자리)' : 'Enter Class Code (6 chars)'}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={classJoinCode}
+                        onChange={(e) => setClassJoinCode(e.target.value)}
+                        placeholder="E.g. MERC82"
+                        maxLength={6}
+                        className={`flex-1 ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-2xl px-5 py-3 focus:border-orange-500 outline-none text-sm uppercase font-mono tracking-widest`}
+                      />
+                      <button
+                        type="submit"
+                        disabled={isUpgradingCode}
+                        className="px-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0"
+                      >
+                        {isUpgradingCode ? (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <span>{language === 'ko' ? '등록' : 'Redeem'}</span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {redeemError && (
+                    <p className="text-red-400 text-xs font-semibold pl-1">⚠️ {redeemError}</p>
+                  )}
+                  {redeemSuccess && (
+                    <p className="text-emerald-400 text-xs font-semibold pl-1">✓ {redeemSuccess}</p>
+                  )}
+                </form>
+              </div>
+            ) : (
+              /* --- SCHOOL & CLASSROOM SETTINGS (Case B: Already B2B, configure child/class) --- */
+              <div className="space-y-6 pt-4 border-t border-zinc-900/10">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-balance text-xs font-black text-zinc-500 uppercase tracking-tight">
+                    {language === 'ko' ? '🏫 학교 / 학급 정보' : '🏫 School & Classroom Info'}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      if (confirm(language === 'ko' ? '정말 학급에서 탈퇴하시겠습니까? 학원 전용 Premium 플랜도 해제됩니다.' : 'Are you sure you want to leave this class? Your premium sponsorship will be deactivated.')) {
+                        leaveClassroom();
+                      }
+                    }}
+                    className="text-[10px] font-black text-red-500 hover:text-red-400 transition-colors uppercase tracking-wider"
+                  >
+                    {language === 'ko' ? '학급 연동 해제' : 'Leave Class'}
+                  </button>
+                </div>
+                
+                <div className="p-5 bg-orange-500/5 border border-orange-500/10 rounded-3xl space-y-4 text-left">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block mb-0.5">
+                        {language === 'ko' ? '소속 교육기관' : 'Partner School'}
+                      </span>
+                      <p className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'} truncate`}>
+                        {user.schoolName || user.schoolId}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block mb-0.5">
+                        {language === 'ko' ? '소속 학급반' : 'Classroom'}
+                      </span>
+                      {isLoadingClassDetails ? (
+                        <div className="w-16 h-4 bg-zinc-900 animate-pulse rounded" />
+                      ) : (
+                        <p className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'} truncate`}>
+                          {activeClassDetails ? `${activeClassDetails.name} (${activeClassDetails.level})` : 'N/A'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Class Status Banner */}
+                  {user.classId && user.classStatus === 'pending' && (
+                    <div className="p-3 bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] sm:text-xs font-semibold rounded-xl leading-normal font-korean">
+                      ⏳ {language === 'ko'
+                        ? '교사의 학급 승인을 기다리고 있습니다. 승인이 완료되면 학급 진도에 맞춰 채점이 자동 활성화됩니다.'
+                        : 'Awaiting teacher approval. Once approved, homework grading will automatically align with the class curriculum.'}
+                    </div>
+                  )}
+                  {user.classId && user.classStatus === 'active' && (
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] sm:text-xs font-semibold rounded-xl leading-normal font-korean">
+                      ✅ {language === 'ko'
+                        ? '가입 승인 완료: 현재 이 반의 주간 커리큘럼 기반으로 채점이 진행되고 있습니다.'
+                        : 'Classroom enrollment active: Graders are currently aligned with the weekly curriculum.'}
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5 pt-2 border-t border-zinc-900/10">
+                    <label className={`block text-xs font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}>
+                      {language === 'ko' ? '자녀 이름' : "Child's Name"}
+                    </label>
+                    <input
+                      type="text"
+                      value={studentName}
+                      onChange={(e) => setStudentName(e.target.value)}
+                      placeholder={language === 'ko' ? '예: 김유나' : 'E.g. Yuna Kim'}
+                      className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-2xl px-5 py-4 focus:border-orange-500 outline-none text-sm transition-colors`}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* --- PREFERENCES --- */}
             <div className="space-y-6">

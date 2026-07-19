@@ -92,6 +92,12 @@ interface AuthContextType {
     childEnglishLevel: string,
     parentEnglishLevel: string
   ) => Promise<void>;
+  updateClassroomProfile: (
+    classId: string,
+    studentName: string
+  ) => Promise<void>;
+  joinClassWithCode: (classCode: string) => Promise<boolean>;
+  leaveClassroom: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -889,6 +895,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await db.updateUser(firebaseUser.uid, updates);
   };
 
+  const updateClassroomProfile = async (
+    classId: string,
+    studentName: string
+  ) => {
+    if (userProfile?.email === 'test@example.com' || userProfile?.email === 'expired@example.com') {
+      setUserProfile({ ...userProfile, classId, studentName, classStatus: classId ? 'pending' : null });
+      return;
+    }
+    if (!firebaseUser || !userProfile) return;
+
+    // Only set pending if a non-empty class ID is selected and it differs from current classId
+    const isNewEnrollment = classId && classId !== userProfile.classId;
+    const classStatus = isNewEnrollment ? 'pending' : (classId ? userProfile.classStatus || 'pending' : null);
+
+    const updates = {
+      classId: classId || null,
+      studentName: studentName.trim() || null,
+      classStatus: classStatus || null
+    };
+
+    setUserProfile({ ...userProfile, ...updates });
+    await db.updateUser(firebaseUser.uid, updates);
+  };
+
   const deleteAccount = async () => {
     if (!firebaseUser) return;
     try {
@@ -1054,11 +1084,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const joinClassWithCode = async (classCode: string): Promise<boolean> => {
+    if (!firebaseUser || !userProfile) return false;
+
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      const response = await fetch(`${PUBLIC_APP_URL}/api/redeem-class-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ classCode }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const updates: Partial<UserProfile> = {
+            schoolId: data.schoolId,
+            schoolName: data.schoolName,
+            classId: data.classId,
+            classStatus: 'pending',
+            plan: 'pro',
+            maxScansPerDay: 9999,
+            maxQuestionsPerDay: 9999,
+            subscriptionPlatform: 'school_code',
+          };
+          setUserProfile({ ...userProfile, ...updates });
+          return true;
+        }
+      }
+      return false;
+    } catch (err) {
+      console.error('joinClassWithCode error:', err);
+      return false;
+    }
+  };
+
+  const leaveClassroom = async () => {
+    if (!firebaseUser || !userProfile) return;
+    const isPaidUser = subscriptionRecord && subscriptionRecord.subscription_status === 'active';
+    const updates = {
+      classId: null,
+      classStatus: null,
+      schoolId: null,
+      schoolName: null,
+      plan: (isPaidUser ? 'pro' : 'free') as 'free' | 'pro',
+      maxScansPerDay: isPaidUser ? 9999 : FREE_DAILY_LIMIT,
+      maxQuestionsPerDay: isPaidUser ? 9999 : 5,
+    };
+    setUserProfile({ ...userProfile, ...updates });
+    await db.updateUser(firebaseUser.uid, updates);
+  };
+
   const upgradeToPro = async (code?: string): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return false;
 
     if (code) {
       const sanitizedCode = code.toUpperCase().trim();
+      if (sanitizedCode.length === 6) {
+        const isClass = await joinClassWithCode(sanitizedCode);
+        if (isClass) return true;
+      }
       const isSchool = await joinSchool(sanitizedCode);
       if (isSchool) return true;
     }
@@ -1163,6 +1251,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         openLoginModal,
         closeLoginModal,
         updateChildProfile,
+        updateClassroomProfile,
+        joinClassWithCode,
+        leaveClassroom,
       }}
     >
       {children}

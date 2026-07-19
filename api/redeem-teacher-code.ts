@@ -38,27 +38,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const idToken = authHeader.split('Bearer ')[1].trim();
 
-  const { schoolCode } = req.body || {};
-  if (!schoolCode) {
-    return res.status(400).json({ error: 'Missing schoolCode' });
+  const { teacherCode } = req.body || {};
+  if (!teacherCode) {
+    return res.status(400).json({ error: 'Missing teacherCode' });
   }
 
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    const sanitized = schoolCode.toUpperCase().trim();
+    const sanitized = teacherCode.toUpperCase().trim();
     
-    // Fetch school config from Firestore
-    const schoolDoc = await adminDb.collection('schools').doc(sanitized).get();
-    if (!schoolDoc.exists) {
-      return res.status(400).json({ error: 'Invalid school code. Please check again.' });
+    // Find school document where teacherCode matches
+    const schoolsRef = adminDb.collection('schools');
+    const qSnapshot = await schoolsRef.where('teacherCode', '==', sanitized).limit(1).get();
+
+    if (qSnapshot.empty) {
+      return res.status(400).json({ error: 'Invalid teacher authorization code. Please verify.' });
     }
 
-    const schoolName = schoolDoc.data()?.name || sanitized;
+    const schoolDoc = qSnapshot.docs[0];
+    const schoolId = schoolDoc.id;
+    const schoolName = schoolDoc.data()?.name || schoolId;
 
+    // Update user profile in Firestore
     await adminDb.collection('users').doc(uid).set({
-      schoolId: sanitized,
+      role: 'teacher',
+      schoolId: schoolId,
       schoolName: schoolName,
       plan: 'pro',
       maxScansPerDay: 9999,
@@ -68,11 +74,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({
       success: true,
-      schoolName,
-      message: 'School code redeemed successfully',
+      schoolId: schoolId,
+      schoolName: schoolName,
+      message: 'Teacher registration completed successfully',
     });
   } catch (err: any) {
-    console.error('[redeem-school-code] Error:', err);
+    console.error('[redeem-teacher-code] Error:', err);
     return res.status(401).json({ error: 'Authentication failed' });
   }
 }
