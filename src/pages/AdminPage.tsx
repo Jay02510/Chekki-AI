@@ -18,10 +18,22 @@ export default function AdminPage() {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('1_month');
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'create' | 'upgrade' | 'delete' | 'view_members'>('create');
+  const [mode, setMode] = useState<'create' | 'upgrade' | 'delete' | 'view_members' | 'schools'>('create');
   const [message, setMessage] = useState({ text: '', type: '' });
   const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Schools State
+  const [schools, setSchools] = useState<any[]>([]);
+  const [schoolSearchQuery, setSchoolSearchQuery] = useState('');
+  const [schoolIdInput, setSchoolIdInput] = useState('');
+  const [schoolNameInput, setSchoolNameInput] = useState('');
+  const [schoolTeacherCodeInput, setSchoolTeacherCodeInput] = useState('');
+  const [schoolMaxUsesInput, setSchoolMaxUsesInput] = useState(5);
+  const [assignEmailInput, setAssignEmailInput] = useState('');
+  const [assignSchoolIdInput, setAssignSchoolIdInput] = useState('');
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showCreateSchoolModal, setShowCreateSchoolModal] = useState(false);
 
   const handleFetchUsers = async () => {
     setLoading(true);
@@ -44,6 +56,102 @@ export default function AdminPage() {
       setLoading(false);
     }
   };
+
+  const handleFetchSchools = async () => {
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'list_schools' }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch schools');
+      }
+      setSchools(data.schools || []);
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error fetching schools', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateSchool = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          passcode,
+          action: 'create_school',
+          schoolId: schoolIdInput,
+          schoolName: schoolNameInput,
+          teacherCode: schoolTeacherCodeInput,
+          maxUses: schoolMaxUsesInput,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create school');
+      }
+      setMessage({ text: '✅ School created successfully!', type: 'success' });
+      setSchoolIdInput('');
+      setSchoolNameInput('');
+      setSchoolTeacherCodeInput('');
+      setSchoolMaxUsesInput(5);
+      setShowCreateSchoolModal(false);
+      handleFetchSchools();
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error creating school', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAssignTeacher = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          passcode,
+          action: 'assign_teacher',
+          email: assignEmailInput,
+          schoolId: assignSchoolIdInput,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to assign teacher');
+      }
+      setMessage({ text: '✅ Teacher assigned successfully!', type: 'success' });
+      setAssignEmailInput('');
+      setAssignSchoolIdInput('');
+      setShowAssignModal(false);
+      handleFetchSchools();
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error assigning teacher', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredSchools = schools.filter(s =>
+    s.name.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
+    s.schoolId.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
+    s.teacherCode.toLowerCase().includes(schoolSearchQuery.toLowerCase())
+  );
 
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
@@ -302,7 +410,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-white font-sans">
       <div
-        className={`w-full bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-200 ${mode === 'view_members' && isAuthorized ? 'max-w-4xl' : 'max-w-md'}`}
+        className={`w-full bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-200 ${(mode === 'view_members' || mode === 'schools') && isAuthorized ? 'max-w-4xl' : 'max-w-md'}`}
       >
         {/* Glow effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -425,6 +533,17 @@ export default function AdminPage() {
               >
                 View Members
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('schools');
+                  setMessage({ text: '', type: '' });
+                  handleFetchSchools();
+                }}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'schools' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+              >
+                Schools
+              </button>
             </div>
 
             {mode === 'view_members' ? (
@@ -523,6 +642,247 @@ export default function AdminPage() {
                   </table>
                 )}
               </div>
+              </div>
+            ) : mode === 'schools' ? (
+              <div className="w-full flex flex-col gap-4 mt-4 animate-fade-in">
+                {/* School List Header & Control Bar */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                  <input
+                    type="text"
+                    placeholder="Search by school name or code..."
+                    value={schoolSearchQuery}
+                    onChange={(e) => setSchoolSearchQuery(e.target.value)}
+                    className="w-full sm:w-72 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 text-sm font-medium"
+                  />
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMessage({ text: '', type: '' });
+                        setShowCreateSchoolModal(true);
+                      }}
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-lg flex items-center justify-center gap-1.5"
+                    >
+                      <span>+ Create School</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMessage({ text: '', type: '' });
+                        setAssignSchoolIdInput('');
+                        setAssignEmailInput('');
+                        setShowAssignModal(true);
+                      }}
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-zinc-800 text-zinc-200 hover:bg-zinc-700 hover:text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all border border-zinc-700 flex items-center justify-center gap-1.5"
+                    >
+                      <span>Assign Teacher</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Table View */}
+                <div className="w-full overflow-x-auto">
+                  {loading ? (
+                    <div className="flex justify-center p-8 text-zinc-500 font-bold tracking-widest animate-pulse">
+                      LOADING SCHOOLS...
+                    </div>
+                  ) : (
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead>
+                        <tr className="border-b border-zinc-800 text-zinc-400">
+                          <th className="py-3 px-4 font-bold">School Code (ID)</th>
+                          <th className="py-3 px-4 font-bold">School Name</th>
+                          <th className="py-3 px-4 font-bold">Teacher Auth Code</th>
+                          <th className="py-3 px-4 font-bold">Teacher Quota</th>
+                          <th className="py-3 px-4 font-bold">Created At</th>
+                          <th className="py-3 px-4 font-bold text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800/50">
+                        {filteredSchools.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-zinc-500">
+                              No schools found.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredSchools.map((school) => (
+                            <tr key={school.schoolId} className="hover:bg-zinc-800/30 transition-colors">
+                              <td className="py-3 px-4 text-white font-bold tracking-wide">{school.schoolId}</td>
+                              <td className="py-3 px-4 text-zinc-300 font-medium">{school.name}</td>
+                              <td className="py-3 px-4 text-orange-400 font-mono font-bold">{school.teacherCode}</td>
+                              <td className="py-3 px-4 text-zinc-400">
+                                <div className="flex flex-col">
+                                  <span>{school.usedByUids?.length || 0} / {school.maxUses} used</span>
+                                  <span className="text-[10px] text-zinc-600 truncate max-w-[150px]" title={school.usedByUids?.join(', ') || ''}>
+                                    {school.usedByUids?.length > 0 ? school.usedByUids.join(', ') : 'None'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-zinc-500">
+                                {school.createdAt ? new Date(school.createdAt).toLocaleDateString() : '-'}
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <button
+                                  onClick={() => {
+                                    setAssignSchoolIdInput(school.schoolId);
+                                    setAssignEmailInput('');
+                                    setShowAssignModal(true);
+                                  }}
+                                  className="px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                >
+                                  + Assign Teacher
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+                {/* MODALS */}
+                {showCreateSchoolModal && (
+                  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
+                      <h3 className="text-lg font-black uppercase tracking-wider mb-4">Create New School Code</h3>
+                      <form onSubmit={handleCreateSchool} className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                            School Code (ID / Student Redemption)
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. POLY10"
+                            value={schoolIdInput}
+                            onChange={(e) => setSchoolIdInput(e.target.value)}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-bold uppercase tracking-wider"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                            School Name
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. POLY Seocho"
+                            value={schoolNameInput}
+                            onChange={(e) => setSchoolNameInput(e.target.value)}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                            Teacher Authorization Code
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. POLY10-TEACHER"
+                            value={schoolTeacherCodeInput}
+                            onChange={(e) => setSchoolTeacherCodeInput(e.target.value)}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-bold uppercase tracking-wider"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                            Max Teacher Redemptions
+                          </label>
+                          <input
+                            type="number"
+                            required
+                            value={schoolMaxUsesInput}
+                            onChange={(e) => setSchoolMaxUsesInput(parseInt(e.target.value, 10) || 0)}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium"
+                          />
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowCreateSchoolModal(false)}
+                            className="flex-1 py-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold uppercase tracking-wider rounded-xl transition-all text-xs"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 py-3.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white font-black uppercase tracking-wider rounded-xl transition-all shadow-lg text-xs"
+                          >
+                            Create School
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+
+                {showAssignModal && (
+                  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
+                      <h3 className="text-lg font-black uppercase tracking-wider mb-4">Assign Teacher to School</h3>
+                      <form onSubmit={handleAssignTeacher} className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                            Teacher Email
+                          </label>
+                          <input
+                            type="email"
+                            required
+                            placeholder="teacher@school.com"
+                            value={assignEmailInput}
+                            onChange={(e) => setAssignEmailInput(e.target.value)}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                            Select School
+                          </label>
+                          <div className="relative">
+                            <select
+                              required
+                              value={assignSchoolIdInput}
+                              onChange={(e) => setAssignSchoolIdInput(e.target.value)}
+                              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium appearance-none"
+                            >
+                              <option value="">-- Choose School --</option>
+                              {schools.map((s) => (
+                                <option key={s.schoolId} value={s.schoolId}>
+                                  {s.name} ({s.schoolId})
+                                </option>
+                              ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-500">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowAssignModal(false)}
+                            className="flex-1 py-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold uppercase tracking-wider rounded-xl transition-all text-xs"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 py-3.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white font-black uppercase tracking-wider rounded-xl transition-all shadow-lg text-xs"
+                          >
+                            Assign Teacher
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <form

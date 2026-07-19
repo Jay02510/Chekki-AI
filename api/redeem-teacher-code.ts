@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
 function initAdmin() {
@@ -59,7 +59,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const schoolDoc = qSnapshot.docs[0];
     const schoolId = schoolDoc.id;
-    const schoolName = schoolDoc.data()?.name || schoolId;
+    const schoolData = schoolDoc.data() || {};
+    const schoolName = schoolData.name || schoolId;
+
+    // Usage limits verification
+    const usedByUids = schoolData.usedByUids || [];
+    const maxUses = schoolData.maxUses ?? 5;
+
+    if (!usedByUids.includes(uid) && usedByUids.length >= maxUses) {
+      return res.status(400).json({ error: 'This teacher authorization code has reached its maximum usage limit.' });
+    }
 
     // Update user profile in Firestore
     await adminDb.collection('users').doc(uid).set({
@@ -71,6 +80,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       maxQuestionsPerDay: 9999,
       subscriptionPlatform: 'school_code',
     }, { merge: true });
+
+    // Track usage on school document
+    await adminDb.collection('schools').doc(schoolId).update({
+      usedByUids: FieldValue.arrayUnion(uid),
+    });
 
     return res.status(200).json({
       success: true,

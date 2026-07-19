@@ -34,7 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { passcode, action, uid, email, duration } = req.body || {};
+  const { passcode, action, uid, email, duration, schoolId, schoolName, teacherCode, maxUses } = req.body || {};
 
   if (passcode !== ADMIN_PASSCODE) {
     return res.status(401).json({ error: 'Unauthorized: Invalid Passcode' });
@@ -184,6 +184,85 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ success: true, message: 'User deleted successfully' });
     } 
     
+    else if (action === 'create_school') {
+      if (!schoolId) return res.status(400).json({ error: 'Missing schoolId (School Code)' });
+      if (!schoolName) return res.status(400).json({ error: 'Missing schoolName' });
+      if (!teacherCode) return res.status(400).json({ error: 'Missing teacherCode' });
+
+      const sanitizedSchoolId = schoolId.toUpperCase().trim();
+      const sanitizedTeacherCode = teacherCode.toUpperCase().trim();
+
+      await adminDb.collection('schools').doc(sanitizedSchoolId).set({
+        name: schoolName.trim(),
+        teacherCode: sanitizedTeacherCode,
+        maxUses: maxUses ? parseInt(maxUses, 10) : 5,
+        usedByUids: [],
+        createdAt: new Date().toISOString(),
+      });
+
+      return res.status(200).json({ success: true, message: 'School created successfully' });
+    }
+
+    else if (action === 'list_schools') {
+      const schoolsSnapshot = await adminDb.collection('schools').get();
+      const schools = schoolsSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          schoolId: doc.id,
+          name: data.name || '',
+          teacherCode: data.teacherCode || '',
+          maxUses: data.maxUses ?? 5,
+          usedByUids: data.usedByUids || [],
+          createdAt: data.createdAt || null,
+        };
+      });
+
+      return res.status(200).json({ success: true, schools });
+    }
+
+    else if (action === 'assign_teacher') {
+      if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
+      let targetUid = uid;
+
+      if (!targetUid && email) {
+        const cleanEmail = email.toLowerCase().trim();
+        const usersRef = adminDb.collection('users');
+        const q = usersRef.where('email', '==', cleanEmail);
+        const querySnapshot = await q.get();
+
+        if (querySnapshot.empty) {
+          return res.status(404).json({ error: 'User not found in Firestore.' });
+        }
+        targetUid = querySnapshot.docs[0].id;
+      }
+
+      if (!targetUid) return res.status(400).json({ error: 'Missing uid or email' });
+
+      const schoolDoc = await adminDb.collection('schools').doc(schoolId).get();
+      if (!schoolDoc.exists) {
+        return res.status(404).json({ error: 'School not found' });
+      }
+
+      const sName = schoolDoc.data()?.name || schoolId;
+
+      await adminDb.collection('users').doc(targetUid).set({
+        role: 'teacher',
+        schoolId: schoolId,
+        schoolName: sName,
+        plan: 'pro',
+        maxScansPerDay: 9999,
+        maxQuestionsPerDay: 9999,
+        subscriptionPlatform: 'admin_assign',
+      }, { merge: true });
+
+      // Add user to usedByUids array on the school doc
+      await adminDb.collection('schools').doc(schoolId).update({
+        usedByUids: FieldValue.arrayUnion(targetUid)
+      });
+
+      return res.status(200).json({ success: true, message: 'User assigned as teacher successfully' });
+    }
+
     else if (action === 'impersonate') {
       if (!uid) return res.status(400).json({ error: 'Missing uid' });
       const customToken = await authDb.createCustomToken(uid);
