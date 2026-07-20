@@ -106,24 +106,24 @@ export default function TeacherPage({ isNight = true }: Props) {
   const teacherObSteps = [
     {
       img: '/assets/teacher_ob_create_class.png',
-      titleEn: 'Create Your First Class',
-      titleKo: '첫 번째 학급을 만드세요',
-      descEn: 'Set up a class for each group you teach. Give it a name and level — you can create as many as you need.',
-      descKo: '가르치는 반마다 학급을 만들어 보세요. 이름과 레벨을 설정하면 준비 완료!',
+      titleEn: 'Create Class & Share Code',
+      titleKo: '학급을 개설하고 6자리 코드를 공유하세요',
+      descEn: 'Give your class a name and level. Share the 6-digit join code with parents so home scans link automatically.',
+      descKo: '학급을 개설하고 6자리 코드를 학부모님께 전달하세요. 가정에서 스캔한 숙제가 자동 연동됩니다.',
     },
     {
       img: '/assets/teacher_ob_seed_curriculum.png',
-      titleEn: 'Seed Your Weekly Curriculum',
-      titleKo: '주간 커리큘럼을 등록하세요',
-      descEn: "Add this week's vocabulary words, phonics targets, and reading passages. Chekki grades homework against your exact curriculum.",
-      descKo: '이번 주 단어, 파닉스, 읽기 지문을 등록하세요. Chekki가 교재에 맞춰 자동 채점합니다.',
+      titleEn: 'Seed Weekly Curriculum',
+      titleKo: '주간 커리큘럼 키워드 등록',
+      descEn: "Enter this week's target vocabulary and phonics. Chekki's AI evaluates home scans against your exact answer key with 99.9% accuracy.",
+      descKo: '이번 주 단어와 파닉스를 등록하세요. Chekki AI가 교재 기준에 맞춰 가정 스캔 항목을 정확히 자동 분석합니다.',
     },
     {
       img: '/assets/teacher_ob_share_code.png',
-      titleEn: 'Share Your Class Code',
-      titleKo: '학급 코드를 학부모님께 공유하세요',
-      descEn: 'Each class gets a unique 6-letter code. Parents enter it in their Chekki app to link their child automatically.',
-      descKo: '각 반에는 고유 6자리 코드가 생성됩니다. 학부모님이 앱에 입력하면 즉시 연동됩니다.',
+      titleEn: 'Zero-Prep Insights & 1-Click Reports',
+      titleKo: '실시간 취약점 분석 & 1초 리포트 발송',
+      descEn: 'View auto-synced red-bordered mistakes scanned by parents at home before class starts, and export 1-click progress reports without manual writing.',
+      descKo: '학부모님이 스캔한 오답(빨간 테두리 항목)을 수업 전 자동 확인하고, 작성 부담 없이 1초 만에 학부모 리포트를 발송하세요.',
     },
   ];
 
@@ -366,6 +366,29 @@ export default function TeacherPage({ isNight = true }: Props) {
     if (!selectedClass) return;
     setIsLoadingRoster(true);
     try {
+      // 1. Fetch dual-persisted class scans from LocalStorage
+      const localClassKey = `class_scans_${selectedClass.id}`;
+      const localScans: any[] = JSON.parse(localStorage.getItem(localClassKey) || '[]');
+      
+      // 2. Fetch class scans from Firestore
+      let firestoreScans: any[] = [];
+      try {
+        const scansQ = query(
+          collection(dbInstance, 'classes', selectedClass.id, 'studentScans')
+        );
+        const scansSnap = await getDocs(scansQ);
+        scansSnap.forEach(sDoc => firestoreScans.push({ id: sDoc.id, ...sDoc.data() }));
+      } catch (sErr) {
+        console.warn('Firestore class scans fetch warning (using local fallback):', sErr);
+      }
+
+      // Merge scans by ID
+      const scansMap = new Map();
+      firestoreScans.forEach(s => scansMap.set(s.id, s));
+      localScans.forEach(s => { if (!scansMap.has(s.id)) scansMap.set(s.id, s); });
+      const allClassScans = Array.from(scansMap.values());
+
+      // 3. Fetch Roster Users
       const q = query(
         collection(dbInstance, 'users'),
         where('classId', '==', selectedClass.id)
@@ -374,25 +397,73 @@ export default function TeacherPage({ isNight = true }: Props) {
       const students: any[] = [];
       
       for (const userDoc of snap.docs) {
-        const student = { uid: userDoc.id, ...userDoc.data() };
+        const student: any = { uid: userDoc.id, ...userDoc.data() };
         
+        // Match scans for this student
+        const studentScans = allClassScans.filter(s => s.studentUid === student.uid || s.studentName === student.name);
+        
+        // Extract all red-bordered mistakes from scan records
+        const scanMistakes: any[] = [];
+        studentScans.forEach(scan => {
+          if (Array.isArray(scan.redBorderedMistakes)) {
+            scan.redBorderedMistakes.forEach((m: any) => {
+              scanMistakes.push({
+                ...m,
+                scannedAt: scan.scannedAt,
+                scanTitle: scan.titleEn || scan.titleKo,
+                isRedBordered: true,
+              });
+            });
+          }
+        });
+
+        // Also fetch legacy mistakes collection
+        let legacyMistakes: any[] = [];
         try {
           const mistakesQ = query(
             collection(dbInstance, 'mistakes'),
             where('userUid', '==', student.uid)
           );
           const mistakesSnap = await getDocs(mistakesQ);
-          const mistakes: any[] = [];
-          mistakesSnap.forEach(mDoc => mistakes.push({ id: mDoc.id, ...mDoc.data() }));
-          (student as any).mistakes = mistakes;
+          mistakesSnap.forEach(mDoc => legacyMistakes.push({ id: mDoc.id, ...mDoc.data() }));
         } catch (mErr) {
-          (student as any).mistakes = [];
+          legacyMistakes = [];
+        }
+
+        // Combine all mistake items
+        student.scans = studentScans;
+        student.mistakes = [...scanMistakes, ...legacyMistakes];
+        if (studentScans.length > 0) {
+          student.lastScanDate = studentScans[0].scannedAt;
         }
 
         students.push(student);
       }
 
-      setStudentsData(students);
+      // If no student roster users exist yet, map student scans directly so guest scans display
+      if (students.length === 0 && allClassScans.length > 0) {
+        const guestMap = new Map();
+        allClassScans.forEach(s => {
+          const sUid = s.studentUid || 'guest_student';
+          if (!guestMap.has(sUid)) {
+            guestMap.set(sUid, {
+              uid: sUid,
+              name: s.studentName || 'Home Student',
+              classStatus: 'active',
+              lastScanDate: s.scannedAt,
+              scans: [s],
+              mistakes: s.redBorderedMistakes || [],
+            });
+          } else {
+            const existing = guestMap.get(sUid);
+            existing.scans.push(s);
+            existing.mistakes = [...existing.mistakes, ...(s.redBorderedMistakes || [])];
+          }
+        });
+        setStudentsData(Array.from(guestMap.values()));
+      } else {
+        setStudentsData(students);
+      }
     } catch (err) {
       console.error('Failed to fetch roster:', err);
     } finally {
@@ -1070,7 +1141,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                               </div>
                               <div>
                                 <h4 className="text-lg font-black text-white">
-                                  {isKo ? '이번 주 취약 단어 분석' : 'Weekly Vocabulary Struggle Counts'}
+                                  {isKo ? '이번 주 핵심 복습 키워드' : 'Weekly Focus & Growth Keywords'}
                                 </h4>
                               </div>
                             </div>
@@ -1080,8 +1151,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                           </div>
                           <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
                             {isKo 
-                              ? '아이들이 숙제 채점 시 틀렸거나 어려워한 단어들의 오답 횟수입니다.' 
-                              : 'Tally of spelling and grading mistakes recorded across all student homework scans.'}
+                              ? '아이들이 이번 주 더 자신감을 가질 수 있도록 수업 시간에 함께 다뤄볼 복습 키워드입니다.' 
+                              : "Key vocabulary and phonics targets to reinforce in class to build every student's confidence."}
                           </p>
                         </div>
 
@@ -1506,7 +1577,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               <div>
                 <h3 className="text-xl font-black text-white flex items-center gap-2">
                   <span>👦 {selectedStudentDetails.studentName || 'Unnamed'}</span>
-                  <span className="text-xs font-normal text-zinc-400">{isKo ? '원생 오답 기록' : "'s Error Logs"}</span>
+                  <span className="text-xs font-normal text-zinc-400">{isKo ? '원생 학습 성장 기록' : "'s Growth & Practice Log"}</span>
                 </h3>
                 <p className="text-xs text-zinc-500 font-mono mt-1">
                   {selectedStudentDetails.email}
@@ -1524,13 +1595,13 @@ export default function TeacherPage({ isNight = true }: Props) {
             <div className="flex-1 overflow-y-auto py-6 space-y-6 custom-scrollbar pr-1">
               <div>
                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 block">
-                  {isKo ? '이번 주 오답 목록' : "This week's mistakes"}
+                  {isKo ? '이번 주 도전 복습 포인트' : "This week's focus practice items"}
                 </span>
 
                 {selectedStudentDetails.weeklyMistakes.length === 0 ? (
                   <div className="py-16 text-center text-emerald-400 text-xs flex flex-col items-center gap-2">
                     <Sparkle size={24} weight="bold" />
-                    <span>{isKo ? '오답 기록이 없습니다. 완벽해요!' : 'No spelling or vocabulary errors recorded this week.'}</span>
+                    <span>{isKo ? '모든 항목을 완벽하게 학습했습니다!' : 'Mastered all items this week! Excellent progress.'}</span>
                   </div>
                 ) : (
                   <div className="space-y-4">

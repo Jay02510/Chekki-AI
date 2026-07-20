@@ -190,12 +190,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <GraduationCap size={20} weight="bold" />
                 </div>
                 <h3 className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {isKo ? '매주 맞춤 교재 단어장 연동 (Curriculum Seeding)' : 'Weekly Curriculum Pre-seeding'}
+                  {isKo ? '주간 교재 키워드 등록 (99.9% AI 정밀 채점)' : 'Weekly Curriculum Seeding (99.9% AI Accuracy)'}
                 </h3>
                 <p className={`text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {isKo 
-                    ? '선생님이 대시보드에 학년별/학급별 주간 단어와 핵심 리딩 문장을 입력해 두면, 학생이 올린 오답을 분석할 때 인공지능이 우리 학원 교재를 기반으로 100% 맞춤형 첨삭을 수행합니다.'
-                    : "Seed each class's active spelling vocabulary lists, target phonics, and reading passages. Our grading engine aligns its OCR check straight to your weekly textbook targets."}
+                    ? '선생님이 학급별 주간 단어와 파닉스를 대시보드에 등록해 두면, 가정에서 학부모가 스캔한 오답 항목이 우리 학원 교재 정답 기준에 맞춰 99.9% 정확하게 분석됩니다.'
+                    : 'Seed your class active vocabulary lists and phonics targets once. Our AI evaluates home scans against your exact answer key with 99.9% accuracy, eliminating false OCR grading errors.'}
                 </p>
               </div>
               <div className="w-full md:w-56 lg:w-64 flex-shrink-0 rounded-2xl overflow-hidden p-1 flex justify-center items-center">
@@ -204,7 +204,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </div>
 
             <div className="mt-6 pt-4 border-t border-zinc-200/60 dark:border-white/10 flex items-center gap-2 text-xs font-bold text-orange-500">
-              <span>{isKo ? 'AI 교정 일치율 극대화' : 'Near-perfect hand-written text resolution'}</span>
+              <span>{isKo ? '교재 기반 정답지로 환각 현상 0%' : 'Ground-truth answer keys eliminate AI hallucination'}</span>
               <Sparkle size={12} weight="bold" />
             </div>
           </div>
@@ -220,12 +220,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 <Users size={20} weight="bold" />
               </div>
               <h3 className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '6자리 학급 코드로 원스톱 가입' : 'Quick Class Join Code'}
+                {isKo ? '6자리 코드로 가정 숙제 자동 연동' : '6-Digit Join Code & Auto-Sync'}
               </h3>
               <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '복잡한 이메일 추가 절차 없이, 선생님이 발급한 학급 코드만 학부모가 입력하면 신청 끝. 클릭 한 번으로 수락 및 이동 관리가 가능합니다.'
-                  : 'Skip complex email invitations. Teachers distribute simple 6-letter class codes. Parents enter it inside Settings and link automatically.'}
+                  ? '학부모가 앱에서 6자리 학급 코드를 입력하면 연동 완료. 집에서 스캔한 빨간 테두리 오답과 점수가 선생님 대시보드로 실시간 자동 전송됩니다.'
+                  : 'Parents enter a simple 6-letter class code once. Homework scans and red-bordered mistake data silently sync straight to your teacher dashboard.'}
               </p>
             </div>
 
@@ -245,12 +245,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 <ChartBar size={20} weight="bold" />
               </div>
               <h3 className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '자동 취약 어휘 분석 리포트' : 'Classroom Diagnostics'}
+                {isKo ? '교실 밖 학습 진단 (Visibility Beyond the Classroom)' : 'Visibility Beyond the Classroom'}
               </h3>
               <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '반 아이들의 오답 데이터가 실시간으로 분석 보드에 집계됩니다. 교사는 매주 학생들이 가장 많이 틀리는 어휘 순위를 보고받아 보강 수업에 적용할 수 있습니다.'
-                  : 'Mistake histories are parsed concurrently. Instantly view vocabulary struggle rates across your entire class list and focus lessons on actual blind spots.'}
+                  ? '선생님이 옆에 없을 때 아이들이 집에서 무엇을 어려워했는지 한눈에 확인하세요. 가정 스캔 데이터를 기반으로 다음 수업의 핵심 복습 포인트를 정확히 집어냅니다.'
+                  : "See how your students perform when you're not around. Chekki tracks home scan difficulty rates so you know the exact phonics rules and vocabulary items to reinforce in your next lesson."}
               </p>
             </div>
 
@@ -273,17 +273,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <Sparkle size={20} weight="bold" />
                   </div>
                   <h3 className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo ? '학부모 만족도를 높이는 전용 AI 오답 리포트' : 'Elevated Parent Care & Branding'}
+                    {isKo ? '1초 만에 자동 생성되는 학부모 칭찬 & 성장 리포트' : '1-Click Parent Growth & Progress Report Cards'}
                   </h3>
                   <p className={`text-sm leading-relaxed mb-4 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                     {isKo 
-                      ? '가정에서 숙제를 카메라로 찍으면 3초 만에 학원 진도에 맞게 자동 채점됩니다. 학부모님께는 학원 로고가 포함된 정교한 교정 결과와 원어민 발음 듣기, AI 튜터 챗봇 창이 노출되어 학원의 디지털 관리 신뢰도가 비약적으로 향상됩니다.'
-                      : "Every homework graded in parents' app matches your academy dashboard. Deliver native pronunciation audio files, custom review tips, and personalized feedback matching the student's age."}
+                      ? '매월 10시간 이상 걸리던 수동 평가서 작성을 대체합니다. 가정 스캔 데이터를 기반으로 아이의 긍정적 성장과 칭찬 포인트가 담긴 PDF 리포트를 1초 만에 학부모님께 발송하세요.'
+                      : 'Eliminate 5-10 hours a month of manual report writing. Chekki auto-compiles home scan data into encouraging, branded growth reports with 1 click.'}
                   </p>
                 </div>
                 <div className="pt-3 border-t border-zinc-200/60 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold text-pink-500">
                   <CheckCircle size={14} weight="bold" />
-                  <span>{isKo ? '밀착 학부모 케어로 재원율 증가' : 'Increase student retention with digital care'}</span>
+                  <span>{isKo ? '선생님 행정 부담 90% 감소 & 재원율 증가' : 'Reduces teacher admin work by 90% & boosts retention'}</span>
                 </div>
               </div>
 
