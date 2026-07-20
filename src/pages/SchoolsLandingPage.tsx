@@ -151,7 +151,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 : 'bg-white/80 border-zinc-300 hover:bg-white text-zinc-900 shadow-sm'
             }`}
           >
-            {isKo ? '교사용 데모 로그인' : 'Try Demo Portal'}
+            {isKo ? '교사용 로그인' : 'Teacher Login'}
           </a>
         </div>
 
@@ -289,7 +289,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
               <div className="md:col-span-5 flex items-center justify-center">
                 <div className="w-full max-w-[240px] md:max-w-[260px] flex justify-center items-center">
-                  <img src={isNight ? "/assets/schools/schools_bento_parent_care.png" : "/assets/schools/schools_bento_parent_care_light.png"} alt="Parent homework report UI" className="w-full h-auto object-contain filter drop-shadow-md" loading="lazy" />
+                  <img src={isNight ? "/assets/schools/schools_bento_parent_care_dark.png" : "/assets/schools/schools_bento_parent_care_light.png"} alt="Parent homework report UI" className="w-full h-auto object-contain filter drop-shadow-md" loading="lazy" />
                 </div>
               </div>
             </div>
