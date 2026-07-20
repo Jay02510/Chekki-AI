@@ -125,12 +125,18 @@ export default function Landing() {
           </div>
           
           <nav className="hidden md:flex items-center gap-8">
-            <a href="/app" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">Web App</a>
+            <a href="/app" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">
+              {lang === 'en' ? 'Web App' : '웹 앱'}
+            </a>
             <a href="/schools" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">
               {lang === 'en' ? 'For Schools' : '교육기관용'}
             </a>
-            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">Features</a>
-            <a href="#ecosystem" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">Ecosystem</a>
+            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">
+              {lang === 'en' ? 'Features' : '주요 기능'}
+            </a>
+            <a href="#ecosystem" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">
+              {lang === 'en' ? 'Ecosystem' : '생태계'}
+            </a>
           </nav>
           
           <div className="hidden md:flex items-center gap-4">
@@ -149,7 +155,7 @@ export default function Landing() {
               {theme === 'light' ? <Moon size={20} weight="bold" /> : <Sun size={20} weight="bold" />}
             </button>
             <a href="/app" className="group relative overflow-hidden items-center gap-3 px-4 py-1.5 bg-brand text-white font-semibold rounded-full text-xs uppercase tracking-wider transition-transform duration-700 ease-[var(--ease-premium)] active:scale-[0.96] flex outline-none focus-visible:ring-2 focus-visible:ring-brand">
-              <span>Open App</span>
+              <span>{lang === 'en' ? 'Open App' : '앱 실행'}</span>
             </a>
           </div>
 
@@ -165,12 +171,18 @@ export default function Landing() {
           {mobileMenuOpen && (
             <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 w-full bg-white/95 dark:bg-[#111]/95 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:hidden z-50 origin-top animate-fade-in-up">
               <div className="flex flex-col p-2 gap-1">
-                <a href="/app" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Web App</a>
+                <a href="/app" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                  {lang === 'en' ? 'Web App' : '웹 앱'}
+                </a>
                 <a href="/schools" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                   {lang === 'en' ? 'For Schools' : '교육기관용'}
                 </a>
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Features</a>
-                <a href="#ecosystem" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Ecosystem</a>
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                  {lang === 'en' ? 'Features' : '주요 기능'}
+                </a>
+                <a href="#ecosystem" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                  {lang === 'en' ? 'Ecosystem' : '생태계'}
+                </a>
               </div>
             </div>
           )}
@@ -287,7 +299,7 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-slate-200/50 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-6 md:p-8">
+              <div className="flex-1 rounded-[2rem] bg-white dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-6 md:p-8">
                 <img src={theme === 'light' ? '/assets/bento_light_reveal_only.png' : '/assets/bento_reveal_only.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
@@ -326,7 +338,7 @@ export default function Landing() {
                   <ArrowRight className="text-brand animate-pulse shrink-0" />
                 </h3>
               </div>
-              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-slate-200/50 dark:border-white/5 relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-6 md:p-8">
+              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-white dark:bg-[#050505] relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-6 md:p-8">
                 <img src={theme === 'light' ? '/assets/bento_light_speed_mode.png' : '/assets/bento_speed_mode.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
             </div>
@@ -348,7 +360,7 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-slate-200/50 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-6 md:p-8">
+              <div className="flex-1 rounded-[2rem] bg-white dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-6 md:p-8">
                 <img src={theme === 'light' ? '/assets/bento_light_dashboard.png' : '/assets/onboarding_icon_dashboard_1782545238800.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
@@ -381,7 +393,7 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-slate-200/50 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-6 md:p-8">
+              <div className="flex-1 rounded-[2rem] bg-white dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-6 md:p-8">
                 <img src={theme === 'light' ? '/assets/bento_light_grading_status.png' : '/assets/onboarding_icon_grading_status.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
@@ -455,36 +467,34 @@ export default function Landing() {
 
           {/* Card 5: Pronunciation Check — Full Width */}
           <div 
-            className="bento-card col-span-1 md:col-span-4 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-6 md:p-8 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row items-center justify-between gap-8 group hover:border-emerald-500/30 transition-colors duration-200 overflow-hidden relative min-h-[340px]"
+            className="bento-card col-span-1 md:col-span-4 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-6 md:p-10 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row items-center justify-between gap-8 group hover:border-emerald-500/30 transition-colors duration-200 relative"
           >
             {/* Left: Text */}
-            <div className="flex-1 px-4 md:px-8 py-4 flex flex-col justify-center z-10 relative">
+            <div className="flex-1 flex flex-col items-start justify-center z-10 relative">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 w-fit">
-                <MicrophoneStage size={12} weight="bold" />
-                {lang === 'en' ? 'No Typing. Just Speaking.' : '엄마 대신 듣고 말해주는 AI'}
+                <MicrophoneStage size={14} weight="bold" />
+                <span>{lang === 'en' ? 'No Typing. Just Speaking.' : '엄마 대신 듣고 말해주는 AI'}</span>
               </div>
-              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight mb-5 [word-break:keep-all]">
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-[1.25] mb-4 [word-break:keep-all]">
                 {lang === 'en' 
                   ? <><span className="text-emerald-500">Speak it right,</span><br/>not just write it right.</>
                   : <><span className="text-emerald-500">틀린 문법도 원어민 발음으로,</span><br/>아이가 스스로 재미있게 말하도록.</>}
               </h3>
-              <p className="text-slate-600 dark:text-white/60 text-base leading-relaxed max-w-md mb-8 [word-break:keep-all]">
+              <p className="text-slate-600 dark:text-white/60 text-sm sm:text-base leading-relaxed max-w-lg mb-6 [word-break:keep-all]">
                 {lang === 'en'
                   ? "Traditional worksheets can't hear you. Chekki leverages advanced native device speech recognition to ensure your child isn't just fixing grammar, but mastering spoken English — privately and instantly."
                   : "눈으로만 푸는 문제집은 이제 그만! 체키는 아이의 작은 목소리에도 귀 기울여, 문법 오답을 다정한 원어민 발음 연습으로 바꿔줍니다."}
               </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <a href="/app" className="group relative overflow-hidden pl-8 pr-2 py-2 w-max bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-between gap-6 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-2xl shadow-emerald-500/20 outline-none">
-                  <span className="relative z-10">{lang === 'en' ? 'Try the Practice Room' : '발음 연습실 체험해보기'}</span>
-                  <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
-                    <MicrophoneStage weight="bold" />
-                  </div>
-                </a>
-              </div>
+              <a href="/app" className="group relative overflow-hidden pl-7 pr-2 py-2 w-max bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-between gap-6 transition-transform duration-300 active:scale-[0.98] shadow-lg shadow-emerald-500/20 outline-none">
+                <span className="relative z-10">{lang === 'en' ? 'Try the Practice Room' : '발음 연습실 체험해보기'}</span>
+                <div className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                  <MicrophoneStage weight="bold" />
+                </div>
+              </a>
             </div>
 
             {/* Right: Visual */}
-            <div className="md:w-[45%] shrink-0 rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8 min-h-[240px]">
+            <div className="md:w-[45%] shrink-0 rounded-[2rem] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-6 md:p-8 min-h-[240px]">
               {/* Glow */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px]" />
               {/* Mock audio card */}

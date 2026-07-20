@@ -260,32 +260,37 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </div>
 
           {/* Bento Cell 4: Parent Sync (Large block, spans 2 columns) */}
-          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
+          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl transition-all ${
             isNight 
               ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
               : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
           } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
 
-            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
-              <div className="flex-1">
-                <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-500 mb-5">
-                  <Sparkle size={20} weight="bold" />
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
+              <div className="md:col-span-7 flex flex-col justify-between h-full">
+                <div>
+                  <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-500 mb-4">
+                    <Sparkle size={20} weight="bold" />
+                  </div>
+                  <h3 className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {isKo ? '학부모 만족도를 높이는 전용 AI 오답 리포트' : 'Elevated Parent Care & Branding'}
+                  </h3>
+                  <p className={`text-sm leading-relaxed mb-4 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    {isKo 
+                      ? '가정에서 숙제를 카메라로 찍으면 3초 만에 학원 진도에 맞게 자동 채점됩니다. 학부모님께는 학원 로고가 포함된 정교한 교정 결과와 원어민 발음 듣기, AI 튜터 챗봇 창이 노출되어 학원의 디지털 관리 신뢰도가 비약적으로 향상됩니다.'
+                      : "Every homework graded in parents' app matches your academy dashboard. Deliver native pronunciation audio files, custom review tips, and personalized feedback matching the student's age."}
+                  </p>
                 </div>
-                <h3 className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {isKo ? '학부모 만족도를 높이는 전용 AI 오답 리포트' : 'Elevated Parent Care & Branding'}
-                </h3>
-                <p className={`text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                  {isKo 
-                    ? '가정에서 숙제를 카메라로 찍으면 3초 만에 학원 진도에 맞게 자동 채점됩니다. 학부모님께는 학원 로고가 포함된 정교한 교정 결과와 원어민 발음 듣기, AI 튜터 챗봇 창이 노출되어 학원의 디지털 관리 신뢰도가 비약적으로 향상됩니다.'
-                    : "Every homework graded in parents' app matches your academy dashboard. Deliver native pronunciation audio files, custom review tips, and personalized feedback matching the student's age."}
-                </p>
-                <div className="mt-6 pt-4 border-t border-zinc-200/60 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold text-pink-500">
+                <div className="pt-3 border-t border-zinc-200/60 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold text-pink-500">
                   <CheckCircle size={14} weight="bold" />
                   <span>{isKo ? '밀착 학부모 케어로 재원율 증가' : 'Increase student retention with digital care'}</span>
                 </div>
               </div>
-              <div className={`w-full md:w-44 lg:w-52 flex-shrink-0 rounded-2xl overflow-hidden p-2 transition-all duration-300 ${isNight ? 'bg-zinc-950/80 border border-white/10' : 'bg-white border border-zinc-200/80 shadow-sm'}`}>
-                <img src={isNight ? "/assets/schools/schools_bento_parent_care.png" : "/assets/schools/schools_bento_parent_care_light.png"} alt="Parent homework report UI" className="w-full h-auto object-contain filter drop-shadow-md" loading="lazy" />
+
+              <div className="md:col-span-5 flex items-center justify-center">
+                <div className="w-full max-w-[240px] md:max-w-[260px] flex justify-center items-center">
+                  <img src={isNight ? "/assets/schools/schools_bento_parent_care.png" : "/assets/schools/schools_bento_parent_care_light.png"} alt="Parent homework report UI" className="w-full h-auto object-contain filter drop-shadow-md" loading="lazy" />
+                </div>
               </div>
             </div>
           </div>
