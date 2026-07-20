@@ -63,14 +63,11 @@ export default function Landing() {
 
     const ctx = gsap.context(() => {
       // Hero animations
-      gsap.from('.hero-element', {
-        y: 40,
-        opacity: 0,
-        duration: 1.2,
-        stagger: 0.1,
-        ease: 'power3.out',
-        delay: 0.1,
-      });
+      gsap.fromTo(
+        '.hero-element',
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: 'power3.out', delay: 0.05 }
+      );
 
       // Trust Text Reveal
       if (textRevealRef.current) {
@@ -317,21 +314,21 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-6 auto-rows-[380px] gap-4">
           {/* Card 1: Setup */}
           <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]"
+            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-6 shadow-xl flex flex-col group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]"
           >
             {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[calc(2.5rem-0.75rem)] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none justify-between">
+              <div className="flex-1 relative overflow-hidden flex items-center justify-center p-4 min-h-[220px]">
                 <img
                   src="/assets/bento_reveal_only.png"
-                  className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]"
+                  className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]"
                 />
-                <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
+                <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
               </div>
-              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
+              <div className="pt-4 flex flex-col justify-center">
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
                   {lang === 'en'
                     ? 'Exhausted after work?'
                     : '퇴근 후 지친 몸으로 숙제 검사하기 힘드시죠?'}
@@ -357,19 +354,19 @@ export default function Landing() {
 
           {/* Card 2: Assistant */}
           <div 
-            className="bento-card col-span-1 md:col-span-4 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]"
+            className="bento-card col-span-1 md:col-span-4 row-span-1 rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-6 shadow-xl flex flex-col md:flex-row group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]"
           >
             {/* Front Content */}
-            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="md:w-1/2 min-h-[140px] md:h-full px-5 py-6 md:py-10 flex flex-col justify-center order-2 md:order-1">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2 [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
+            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none items-center">
+              <div className="md:w-1/2 px-2 py-4 flex flex-col justify-center order-2 md:order-1">
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2 [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
                   {lang === 'en'
                     ? 'Only have a few minutes?'
                     : '저녁 준비하느라 바쁜데 시간이 부족하신가요?'}
                   <ArrowRight className="text-brand animate-pulse shrink-0" />
                 </h3>
               </div>
-              <div className="md:w-1/2 flex-1 md:h-full rounded-[calc(2.5rem-0.75rem)] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
+              <div className="md:w-1/2 flex-1 md:h-full relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-4 min-h-[200px]">
                 <img
                   src="/assets/bento_speed_mode.png"
                   className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]"
@@ -392,21 +389,21 @@ export default function Landing() {
 
           {/* Card 3: Dashboard */}
           <div 
-            className="bento-card col-span-1 md:col-span-3 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]"
+            className="bento-card col-span-1 md:col-span-3 row-span-1 rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-6 shadow-xl flex flex-col group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]"
           >
             {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[calc(2.5rem-0.75rem)] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none justify-between">
+              <div className="flex-1 relative overflow-hidden flex items-center justify-center p-4 min-h-[220px]">
                 <img
                   src="/assets/onboarding_icon_dashboard_1782545238800.png"
                   className="w-full h-full object-contain filter drop-shadow-2xl"
                 />
-                <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
+                <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
               </div>
-              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
+              <div className="pt-4 flex flex-col justify-center">
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
                   {lang === 'en'
                     ? 'Anxious they might fall behind?'
                     : '우리 아이만 학원에서 뒤쳐질까 봐 걱정되시나요?'}
@@ -432,21 +429,21 @@ export default function Landing() {
 
           {/* Card 3.5: Grading Status */}
           <div 
-            className="bento-card col-span-1 md:col-span-3 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]"
+            className="bento-card col-span-1 md:col-span-3 row-span-1 rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-6 shadow-xl flex flex-col group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]"
           >
             {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[calc(2.5rem-0.75rem)] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none justify-between">
+              <div className="flex-1 relative overflow-hidden flex items-center justify-center p-4 min-h-[220px]">
                 <img
                   src="/assets/onboarding_icon_grading_status.png"
                   className="w-full h-full object-contain filter drop-shadow-2xl"
                 />
-                <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
+                <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
               </div>
-              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
+              <div className="pt-4 flex flex-col justify-center">
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
                   {lang === 'en'
                     ? 'Tired of checking every question?'
                     : '틀린 문제를 일일이 찾기 번거로우신가요?'}
@@ -471,10 +468,10 @@ export default function Landing() {
           </div>
 
           {/* Card 4: Audio Practice Room */}
-          <div className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]">
+          <div className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-6 shadow-xl flex flex-col group hover:border-brand/30 transition-all duration-300 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative active:scale-[0.99]">
             {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[calc(2.5rem-0.75rem)] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+            <div className="flex flex-col h-full transition-all duration-300 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none justify-between">
+              <div className="flex-1 relative overflow-hidden flex items-center justify-center p-4 min-h-[220px]">
                 {/* Animated voice mock UI */}
                 <div className="w-full max-w-[220px] flex flex-col items-center gap-4">
                   <div className="bg-black/5 dark:bg-white/10 rounded-xl p-4 text-center w-full">
@@ -492,12 +489,12 @@ export default function Landing() {
                     </div>
                   </div>
                 </div>
-                <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
+                <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
               </div>
-              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
+              <div className="pt-4 flex flex-col justify-center">
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]" style={{ letterSpacing: '-0.025em' }}>
                   {lang === 'en'
                     ? 'Worried about pronunciation?'
                     : '엄마표 영어 발음 지도, 자신 없으셨나요?'}

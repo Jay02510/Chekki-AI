@@ -205,173 +205,165 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Bento Cell 1: Curriculum Pre-seeding (Large block, spans 2 columns) */}
           <div
-            className={`md:col-span-2 p-3 border rounded-[2rem] transition-all duration-500 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-xl active:scale-[0.995] ${
+            className={`md:col-span-2 p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-xl active:scale-[0.995] ${
               isNight
-                ? 'bg-zinc-900/50 border-white/5 hover:border-white/15'
-                : 'bg-white border-zinc-200 hover:border-zinc-300'
-            }`}
+                ? 'bg-zinc-900/50 border-white/5 hover:border-orange-500/20'
+                : 'bg-white border-zinc-200/80 hover:border-orange-500/30'
+            } shadow-sm group`}
           >
-            <div className={`p-6 rounded-[calc(2rem-0.75rem)] h-full flex flex-col justify-between ${isNight ? 'bg-zinc-950/20' : 'bg-zinc-50/30'} group`}>
-              <div className="flex flex-col md:flex-row gap-6 items-start">
-                <div className="flex-1">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-6">
-                    <GraduationCap size={20} weight="bold" />
-                  </div>
-                  <h3
-                    className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`} style={{ letterSpacing: '-0.025em' }}
-                  >
-                    {isKo
-                      ? '매주 맞춤 교재 단어장 연동 (Curriculum Seeding)'
-                      : 'Weekly Curriculum Pre-seeding'}
-                  </h3>
-                  <p
-                    className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
-                  >
-                    {isKo
-                      ? '선생님이 대시보드에 학년별/학급별 주간 단어와 핵심 리딩 문장을 입력해 두면, 학생이 올린 오답을 분석할 때 인공지능이 우리 학원 교재를 기반으로 100% 맞춤형 첨삭을 수행합니다.'
-                      : "Seed each class's active spelling vocabulary lists, target phonics, and reading passages. Our grading engine aligns its OCR check straight to your weekly textbook targets."}
-                  </p>
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="flex-1">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-6">
+                  <GraduationCap size={20} weight="bold" />
                 </div>
-                <div className="w-full md:w-48 lg:w-56 flex-shrink-0">
-                  <img
-                    src="/assets/schools/schools_bento_curriculum.png"
-                    alt="Curriculum seeding interface"
-                    className="w-full h-auto object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_10px_20px_rgba(255,255,255,0.05)] opacity-95 group-hover:opacity-100 transition-opacity duration-300"
-                    loading="lazy"
-                  />
-                </div>
+                <h3
+                  className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`} style={{ letterSpacing: '-0.025em' }}
+                >
+                  {isKo
+                    ? '매주 맞춤 교재 단어장 연동 (Curriculum Seeding)'
+                    : 'Weekly Curriculum Pre-seeding'}
+                </h3>
+                <p
+                  className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
+                >
+                  {isKo
+                    ? '선생님이 대시보드에 학년별/학급별 주간 단어와 핵심 리딩 문장을 입력해 두면, 학생이 올린 오답을 분석할 때 인공지능이 우리 학원 교재를 기반으로 100% 맞춤형 첨삭을 수행합니다.'
+                    : "Seed each class's active spelling vocabulary lists, target phonics, and reading passages. Our grading engine aligns its OCR check straight to your weekly textbook targets."}
+                </p>
               </div>
+              <div className="w-full md:w-48 lg:w-56 flex-shrink-0">
+                <img
+                  src="/assets/schools/schools_bento_curriculum.png"
+                  alt="Curriculum seeding interface"
+                  className="w-full h-auto object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.12)] dark:drop-shadow-[0_12px_24px_rgba(255,255,255,0.08)] opacity-95 group-hover:opacity-100 transition-opacity duration-300"
+                  loading="lazy"
+                />
+              </div>
+            </div>
 
-              <div className="mt-8 pt-4 border-t border-zinc-900/10 flex items-center gap-2 text-xs font-bold text-orange-500">
-                <span>
-                  {isKo ? 'AI 교정 일치율 극대화' : 'Near-perfect hand-written text resolution'}
-                </span>
-                <Sparkle size={12} weight="bold" />
-              </div>
+            <div className="mt-8 pt-4 border-t border-zinc-900/10 dark:border-white/10 flex items-center gap-2 text-xs font-bold text-orange-500">
+              <span>
+                {isKo ? 'AI 교정 일치율 극대화' : 'Near-perfect hand-written text resolution'}
+              </span>
+              <Sparkle size={12} weight="bold" />
             </div>
           </div>
 
           {/* Bento Cell 2: Roster approvals (1 column) */}
           <div
-            className={`p-3 border rounded-[2rem] transition-all duration-500 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-xl active:scale-[0.99] ${
+            className={`p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-xl active:scale-[0.99] ${
               isNight
-                ? 'bg-zinc-900/50 border-white/5 hover:border-white/15'
-                : 'bg-white border-zinc-200 hover:border-zinc-300'
-            }`}
+                ? 'bg-zinc-900/50 border-white/5 hover:border-orange-500/20'
+                : 'bg-white border-zinc-200/80 hover:border-orange-500/30'
+            } shadow-sm group`}
           >
-            <div className={`p-6 rounded-[calc(2rem-0.75rem)] h-full flex flex-col justify-between ${isNight ? 'bg-zinc-950/20' : 'bg-zinc-50/30'} group`}>
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-brand-purple mb-4">
-                  <Users size={20} weight="bold" />
-                </div>
-                <h3
-                  className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`} style={{ letterSpacing: '-0.025em' }}
-                >
-                  {isKo ? '6자리 학급 코드로 원스톱 가입' : 'Quick Class Join Code'}
-                </h3>
-                <p
-                  className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
-                >
-                  {isKo
-                    ? '복잡한 이메일 추가 절차 없이, 선생님이 발급한 학급 코드(예: MERC82)만 학부모가 입력하면 신청 끝. 클릭 한 번으로 수락 및 이동 관리가 가능합니다.'
-                    : 'Skip complex email invitations. Teachers distribute simple 6-letter class codes. Parents enter it inside Settings and link automatically.'}
-                </p>
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-brand-purple mb-4">
+                <Users size={20} weight="bold" />
               </div>
+              <h3
+                className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`} style={{ letterSpacing: '-0.025em' }}
+              >
+                {isKo ? '6자리 학급 코드로 원스톱 가입' : 'Quick Class Join Code'}
+              </h3>
+              <p
+                className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
+              >
+                {isKo
+                  ? '복잡한 이메일 추가 절차 없이, 선생님이 발급한 학급 코드(예: MERC82)만 학부모가 입력하면 신청 끝. 클릭 한 번으로 수락 및 이동 관리가 가능합니다.'
+                  : 'Skip complex email invitations. Teachers distribute simple 6-letter class codes. Parents enter it inside Settings and link automatically.'}
+              </p>
+            </div>
 
-              <div className="mt-4 flex justify-center w-full">
-                <img
-                  src="/assets/schools/schools_bento_join_code.png"
-                  alt="Class join code entry UI"
-                  className="w-full max-w-[280px] h-auto object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_10px_20px_rgba(255,255,255,0.05)] opacity-95 group-hover:opacity-100 transition-opacity duration-300"
-                  loading="lazy"
-                />
-              </div>
+            <div className="mt-4 flex justify-center w-full">
+              <img
+                src="/assets/schools/schools_bento_join_code.png"
+                alt="Class join code entry UI"
+                className="w-full max-w-[280px] h-auto object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.12)] dark:drop-shadow-[0_12px_24px_rgba(255,255,255,0.08)] opacity-95 group-hover:opacity-100 transition-opacity duration-300"
+                loading="lazy"
+              />
             </div>
           </div>
 
           {/* Bento Cell 3: Analytics (1 column) */}
           <div
-            className={`p-3 border rounded-[2rem] transition-all duration-500 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-xl active:scale-[0.99] ${
+            className={`p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-xl active:scale-[0.99] ${
               isNight
-                ? 'bg-zinc-900/50 border-white/5 hover:border-white/15'
-                : 'bg-white border-zinc-200 hover:border-zinc-300'
-            }`}
+                ? 'bg-zinc-900/50 border-white/5 hover:border-orange-500/20'
+                : 'bg-white border-zinc-200/80 hover:border-orange-500/30'
+            } shadow-sm group`}
           >
-            <div className={`p-6 rounded-[calc(2rem-0.75rem)] h-full flex flex-col justify-between ${isNight ? 'bg-zinc-950/20' : 'bg-zinc-50/30'} group`}>
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
-                  <ChartBar size={20} weight="bold" />
-                </div>
-                <h3
-                  className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`} style={{ letterSpacing: '-0.025em' }}
-                >
-                  {isKo ? '자동 취약 어휘 분석 리포트' : 'Classroom Diagnostics'}
-                </h3>
-                <p
-                  className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
-                >
-                  {isKo
-                    ? '반 아이들의 오답 데이터가 실시간으로 분석 보드에 집계됩니다. 교사는 매주 학생들이 가장 많이 틀리는 어휘와 파닉스 단어 순위를 보고받아 보강 수업에 적용할 수 있습니다.'
-                    : 'Mistake histories are parsed concurrently. Instantly view vocabulary struggle rates across your entire class list and focus lessons on actual blind spots.'}
-                </p>
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
+                <ChartBar size={20} weight="bold" />
               </div>
+              <h3
+                className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`} style={{ letterSpacing: '-0.025em' }}
+              >
+                {isKo ? '자동 취약 어휘 분석 리포트' : 'Classroom Diagnostics'}
+              </h3>
+              <p
+                className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
+              >
+                {isKo
+                  ? '반 아이들의 오답 데이터가 실시간으로 분석 보드에 집계됩니다. 교사는 매주 학생들이 가장 많이 틀리는 어휘와 파닉스 단어 순위를 보고받아 보강 수업에 적용할 수 있습니다.'
+                  : 'Mistake histories are parsed concurrently. Instantly view vocabulary struggle rates across your entire class list and focus lessons on actual blind spots.'}
+              </p>
+            </div>
 
-              <div className="mt-4 flex justify-center w-full">
-                <img
-                  src="/assets/schools/schools_bento_diagnostics.png"
-                  alt="Classroom diagnostics dashboard"
-                  className="w-full max-w-[280px] h-auto object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_10px_20px_rgba(255,255,255,0.05)] opacity-95 group-hover:opacity-100 transition-opacity duration-300"
-                  loading="lazy"
-                />
-              </div>
+            <div className="mt-4 flex justify-center w-full">
+              <img
+                src="/assets/schools/schools_bento_diagnostics.png"
+                alt="Classroom diagnostics dashboard"
+                className="w-full max-w-[280px] h-auto object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.12)] dark:drop-shadow-[0_12px_24px_rgba(255,255,255,0.08)] opacity-95 group-hover:opacity-100 transition-opacity duration-300"
+                loading="lazy"
+              />
             </div>
           </div>
 
           {/* Bento Cell 4: Parent Sync (Large block, spans 2 columns) */}
           <div
-            className={`md:col-span-2 p-3 border rounded-[2rem] transition-all duration-500 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-xl active:scale-[0.995] ${
+            className={`md:col-span-2 p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ease-[var(--ease-premium)] hover:-translate-y-1 hover:shadow-xl active:scale-[0.995] ${
               isNight
-                ? 'bg-zinc-900/50 border-white/5 hover:border-white/15'
-                : 'bg-white border-zinc-200 hover:border-zinc-300'
-            }`}
+                ? 'bg-zinc-900/50 border-white/5 hover:border-orange-500/20'
+                : 'bg-white border-zinc-200/80 hover:border-orange-500/30'
+            } shadow-sm group`}
           >
-            <div className={`p-6 rounded-[calc(2rem-0.75rem)] h-full flex flex-col justify-between ${isNight ? 'bg-zinc-950/20' : 'bg-zinc-50/30'} group`}>
-              <div className="flex flex-col md:flex-row gap-6 items-start">
-                <div className="flex-1">
-                  <div className="w-10 h-10 rounded-xl bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center text-brand-pink mb-6">
-                    <Sparkle size={20} weight="bold" />
-                  </div>
-                  <h3
-                    className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`} style={{ letterSpacing: '-0.025em' }}
-                  >
-                    {isKo
-                      ? '학부모 만족도를 높이는 전용 AI 오답 리포트'
-                      : 'Elevated Parent Care & Branding'}
-                  </h3>
-                  <p
-                    className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
-                  >
-                    {isKo
-                      ? '가정에서 숙제를 카메라로 찍으면 3초 만에 학원 진도에 맞게 자동 채점됩니다. 학부모님께는 학원 로고가 포함된 정교한 교정 결과와 원어민 발음 듣기, AI 튜터 챗봇 창이 노출되어 학원의 디지털 관리 신뢰도가 비약적으로 향상됩니다.'
-                      : "Every homework graded in parents' app matches your academy dashboard. Deliver native pronunciation audio files, custom review tips, and personalized feedback matching the student's age."}
-                  </p>
-                  <div className="mt-8 pt-4 border-t border-zinc-900/10 flex items-center gap-1.5 text-xs font-bold text-brand-pink">
-                    <CheckCircle size={14} weight="bold" />
-                    <span>
-                      {isKo
-                        ? '밀착 학부모 케어로 재원율 증가'
-                        : 'Increase student retention with digital care'}
-                    </span>
-                  </div>
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="flex-1">
+                <div className="w-10 h-10 rounded-xl bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center text-brand-pink mb-6">
+                  <Sparkle size={20} weight="bold" />
                 </div>
-                <div className="w-full md:w-44 lg:w-52 flex-shrink-0">
-                  <img
-                    src="/assets/schools/schools_bento_parent_care.png"
-                    alt="Parent homework report UI"
-                    className="w-full h-auto object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_10px_20px_rgba(255,255,255,0.05)] opacity-95 group-hover:opacity-100 transition-opacity duration-300"
-                    loading="lazy"
-                  />
+                <h3
+                  className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`} style={{ letterSpacing: '-0.025em' }}
+                >
+                  {isKo
+                    ? '학부모 만족도를 높이는 전용 AI 오답 리포트'
+                    : 'Elevated Parent Care & Branding'}
+                </h3>
+                <p
+                  className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
+                >
+                  {isKo
+                    ? '가정에서 숙제를 카메라로 찍으면 3초 만에 학원 진도에 맞게 자동 채점됩니다. 학부모님께는 학원 로고가 포함된 정교한 교정 결과와 원어민 발음 듣기, AI 튜터 챗봇 창이 노출되어 학원의 디지털 관리 신뢰도가 비약적으로 향상됩니다.'
+                    : "Every homework graded in parents' app matches your academy dashboard. Deliver native pronunciation audio files, custom review tips, and personalized feedback matching the student's age."}
+                </p>
+                <div className="mt-8 pt-4 border-t border-zinc-900/10 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold text-brand-pink">
+                  <CheckCircle size={14} weight="bold" />
+                  <span>
+                    {isKo
+                      ? '밀착 학부모 케어로 재원율 증가'
+                      : 'Increase student retention with digital care'}
+                  </span>
                 </div>
+              </div>
+              <div className="w-full md:w-44 lg:w-52 flex-shrink-0">
+                <img
+                  src="/assets/schools/schools_bento_parent_care.png"
+                  alt="Parent homework report UI"
+                  className="w-full h-auto object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.12)] dark:drop-shadow-[0_12px_24px_rgba(255,255,255,0.08)] opacity-95 group-hover:opacity-100 transition-opacity duration-300"
+                  loading="lazy"
+                />
               </div>
             </div>
           </div>
