@@ -352,6 +352,162 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
+      {/* --- PRICING SECTION --- */}
+      <section className={`py-20 px-4 md:px-8 max-w-7xl mx-auto w-full ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">
+            {isKo ? '투명한 요금 정책' : 'PREDICTABLE SCHOOL PRICING'}
+          </span>
+          <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight mb-4">
+            {isKo ? '교사 수에 맞춘 합리적인 월정액 요금제' : 'Transparent Monthly Teacher Tiers'}
+          </h2>
+          <p className={`text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+            {isKo 
+              ? '복잡한 스캔 건수 계산 없이, 교사 수에 맞춘 예측 가능한 월정액 플랜입니다. 모든 학교/학원 플랜에는 소속 원생 학부모 전원 무료 Chekki Pro 앱 이용권(월 ₩9,900 상당)이 포함됩니다.'
+              : 'No usage-based line-item surprises. Simple per-teacher monthly tiers. Every school plan includes FREE Chekki Pro home accounts for all enrolled parents (₩9,900/mo value per family).'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* Plan 1: Small Academy */}
+          <div className={`p-8 border rounded-3xl flex flex-col justify-between transition-all ${
+            isNight 
+              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
+              : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
+          }`}>
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-xs font-black uppercase tracking-wider text-zinc-400">
+                  {isKo ? '소형 학원 (1~2인 강사)' : '1–2 Teachers'}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="font-display text-4xl font-black text-white">{isKo ? '₩49,000' : '$35'}</span>
+                <span className="text-xs text-zinc-500 font-bold">{isKo ? '/월 (강사 1인당)' : '/mo per teacher'}</span>
+              </div>
+              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+                {isKo ? '1~2명의 강사가 운영하는 소형 어학원 및 공부방에 적합한 플랜' : 'Ideal for small academies or independent learning centers with 1–2 teachers.'}
+              </p>
+              <ul className="space-y-3 text-xs text-zinc-300 mb-8 border-t border-white/5 pt-6">
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <span>{isKo ? '무제한 학급 개설 & 주간 키워드 등록' : 'Unlimited Class Creation & Curriculums'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <span>{isKo ? '수업 전 오답 분석 (Zero-Prep 대시보드)' : 'Zero-Prep Class Analytics Dashboard'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <span>{isKo ? '1초 만에 생성되는 학부모 칭찬 리포트' : '1-Click Parent Progress Reports'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-400">
+                  <Sparkle size={14} weight="bold" />
+                  <span>{isKo ? '소속 학부모 전원 Chekki Pro 무료 제공' : 'FREE Chekki Pro for All Class Parents'}</span>
+                </li>
+              </ul>
+            </div>
+            <a
+              href="#demo"
+              className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold text-xs rounded-2xl border border-white/10 text-center transition-all active:scale-[0.98]"
+            >
+              {isKo ? '도입 문의하기' : 'Get Started'}
+            </a>
+          </div>
+
+          {/* Plan 2: Medium Academy (POPULAR) */}
+          <div className="p-8 border border-orange-500/50 bg-[#0a0705] rounded-3xl flex flex-col justify-between transition-all relative shadow-2xl shadow-orange-500/10 scale-[1.02]">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-orange-500 text-white text-[10px] font-black tracking-widest uppercase rounded-full shadow-lg">
+              {isKo ? '가장 인기 있는 플랜' : 'MOST POPULAR'}
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-4 pt-2">
+                <span className="text-xs font-black uppercase tracking-wider text-orange-400">
+                  {isKo ? '중형 학원 (3~5인 강사)' : '3–5 Teachers'}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="font-display text-4xl font-black text-white">{isKo ? '₩39,000' : '$28'}</span>
+                <span className="text-xs text-zinc-500 font-bold">{isKo ? '/월 (강사 1인당)' : '/mo per teacher'}</span>
+              </div>
+              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+                {isKo ? '체계적인 원생 관리와 브랜드 리포트가 필요한 중형 어학원 전용' : 'Optimized for growing academies needing multi-teacher coordination & branding.'}
+              </p>
+              <ul className="space-y-3 text-xs text-zinc-300 mb-8 border-t border-white/10 pt-6">
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <span>{isKo ? '소형 플랜의 모든 기능 포함' : 'Includes all Small Academy features'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <span>{isKo ? '학원 로고 삽입 맞춤 PDF 리포트' : 'Custom Academy Logo on PDF Reports'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <span>{isKo ? '우선 기술 지원 & 온보딩 가이드' : 'Priority Technical Support & Onboarding'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-400">
+                  <Sparkle size={14} weight="bold" />
+                  <span>{isKo ? '소속 학부모 전원 Chekki Pro 무료 제공' : 'FREE Chekki Pro for All Class Parents'}</span>
+                </li>
+              </ul>
+            </div>
+            <a
+              href="#demo"
+              className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98]"
+            >
+              {isKo ? '도입 문의하기' : 'Get Started'}
+            </a>
+          </div>
+
+          {/* Plan 3: Large Academy & Franchise */}
+          <div className={`p-8 border rounded-3xl flex flex-col justify-between transition-all ${
+            isNight 
+              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
+              : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
+          }`}>
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-xs font-black uppercase tracking-wider text-purple-400">
+                  {isKo ? '대형 학원 & 프랜차이즈 (6인 이상)' : '6+ Teachers'}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="font-display text-4xl font-black text-white">{isKo ? '₩29,000' : '$22'}</span>
+                <span className="text-xs text-zinc-500 font-bold">{isKo ? '/월 (강사 1인당)' : '/mo per teacher'}</span>
+              </div>
+              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+                {isKo ? '대형 어학원 및 여러 캠퍼스를 보유한 교육 기관을 위한 볼륨 할인 플랜' : 'Volume-discounted solution for multi-branch campuses and large academies.'}
+              </p>
+              <ul className="space-y-3 text-xs text-zinc-300 mb-8 border-t border-white/5 pt-6">
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <span>{isKo ? '중형 플랜의 모든 기능 포함' : 'Includes all Medium Academy features'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <span>{isKo ? '원장 전용 전 캠퍼스 통합 대시보드' : 'Multi-Campus Director Dashboard'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <span>{isKo ? '전담 매니저 배정 & 1:1 세팅 지원' : 'Dedicated Account Success Manager'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-400">
+                  <Sparkle size={14} weight="bold" />
+                  <span>{isKo ? '소속 학부모 전원 Chekki Pro 무료 제공' : 'FREE Chekki Pro for All Class Parents'}</span>
+                </li>
+              </ul>
+            </div>
+            <a
+              href="#demo"
+              className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold text-xs rounded-2xl border border-white/10 text-center transition-all active:scale-[0.98]"
+            >
+              {isKo ? '맞춤 문의하기' : 'Contact Sales'}
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* --- SIGNUP / PARTNERSHIP DEMO FORM --- */}
       <section id="demo" className="max-w-xl mx-auto px-6 py-24 w-full text-center">
         <h2 className={`font-display text-3xl font-black tracking-tight mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
