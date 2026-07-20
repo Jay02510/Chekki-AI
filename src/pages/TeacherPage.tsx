@@ -127,24 +127,57 @@ export default function TeacherPage({ isNight = true }: Props) {
     },
   ];
 
-  const fetchClasses = async () => {
-    if (!user?.uid) return;
-    try {
-      const q = query(
-        collection(dbInstance, 'classes'),
-        where('teacherUid', '==', user.uid)
-      );
-      const querySnapshot = await getDocs(q);
-      const fetched: any[] = [];
-      querySnapshot.forEach((doc) => {
-        fetched.push({ id: doc.id, ...doc.data() });
-      });
-      setClasses(fetched);
-      if (fetched.length > 0 && !selectedClass) {
-        setSelectedClass(fetched[0]);
+  // Initial load from localStorage so saved classes appear instantly on mount
+  useEffect(() => {
+    if (isAuthenticated) {
+      const uid = user?.uid || 'guest';
+      const localKey = `teacher_classes_${uid}`;
+      const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
+      const globalSaved = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
+      
+      const map = new Map();
+      localSaved.forEach((c: any) => map.set(c.id, c));
+      globalSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
+      
+      const combined = Array.from(map.values());
+      if (combined.length > 0) {
+        setClasses(combined);
+        setSelectedClass(combined[0]);
       }
-    } catch (err) {
-      console.error('Error fetching classes:', err);
+    }
+  }, [isAuthenticated, user?.uid]);
+
+  const fetchClasses = async () => {
+    const uid = user?.uid || 'guest';
+    let fetchedFromFirestore: any[] = [];
+    if (user?.uid) {
+      try {
+        const q = query(
+          collection(dbInstance, 'classes'),
+          where('teacherUid', '==', user.uid)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          fetchedFromFirestore.push({ id: doc.id, ...doc.data() });
+        });
+      } catch (err) {
+        console.warn('Firestore fetch warning (falling back to local storage):', err);
+      }
+    }
+
+    const localKey = `teacher_classes_${uid}`;
+    const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
+    const globalSaved = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
+
+    const map = new Map();
+    fetchedFromFirestore.forEach(c => map.set(c.id, c));
+    localSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
+    globalSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
+
+    const combined = Array.from(map.values());
+    setClasses(combined);
+    if (combined.length > 0) {
+      setSelectedClass((prev: any) => (prev && combined.some((c: any) => c.id === prev.id)) ? prev : combined[0]);
     }
   };
 
@@ -190,10 +223,10 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.uid) return;
+    const uid = user?.uid || 'guest';
     setIsCreatingClass(true);
     try {
-      const schoolId = user.schoolId || `school_${user.uid.slice(0, 8)}`;
+      const schoolId = user?.schoolId || `school_${uid.slice(0, 8)}`;
       const sanitizedName = newClassName.trim().replace(/\s+/g, '-');
       const classId = `${schoolId}_${sanitizedName}_${Date.now()}`;
       
@@ -206,10 +239,10 @@ export default function TeacherPage({ isNight = true }: Props) {
       const newClass: any = {
         id: classId,
         schoolId: schoolId,
-        schoolName: user.schoolName || 'B2B Academy',
+        schoolName: user?.schoolName || 'B2B Academy',
         name: newClassName.trim(),
         level: newClassLevel,
-        teacherUid: user.uid,
+        teacherUid: uid,
         activeWeekNumber: 1,
         joinCode: joinCode,
         createdAt: new Date().toISOString(),
@@ -221,18 +254,27 @@ export default function TeacherPage({ isNight = true }: Props) {
         console.warn('Firestore write warning (proceeding with local sync):', firestoreErr);
       }
 
-      localStorage.setItem(`teacher_ob_done_${user.uid}`, 'true');
+      // Persist in localStorage under user-specific and fallback keys
+      const localKey = `teacher_classes_${uid}`;
+      const existingLocal = JSON.parse(localStorage.getItem(localKey) || '[]');
+      const updatedLocal = [newClass, ...existingLocal.filter((c: any) => c.id !== newClass.id)];
+      localStorage.setItem(localKey, JSON.stringify(updatedLocal));
+
+      const existingGlobal = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
+      const updatedGlobal = [newClass, ...existingGlobal.filter((c: any) => c.id !== newClass.id)];
+      localStorage.setItem('teacher_classes_fallback', JSON.stringify(updatedGlobal));
+
+      localStorage.setItem(`teacher_ob_done_${uid}`, 'true');
       setShowTeacherOnboarding(false);
       
       setClasses((prev) => {
         const exists = prev.some((c) => c.id === classId);
-        return exists ? prev : [...prev, newClass];
+        return exists ? prev : [newClass, ...prev];
       });
       setSelectedClass(newClass);
 
       setNewClassName('');
       setShowCreateClassModal(false);
-      await fetchClasses();
     } catch (err: any) {
       console.error('Failed to create class:', err);
       alert(isKo ? '학급 개설 중 오류가 발생했습니다. 다시 시도해 주세요.' : `Failed to create class: ${err?.message || 'Please try again.'}`);
