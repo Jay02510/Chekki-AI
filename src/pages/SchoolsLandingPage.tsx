@@ -180,7 +180,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Bento Cell 1: Curriculum Pre-seeding (Large block, spans 2 columns) */}
           <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
             isNight 
-              ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
+              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
               : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
           } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
 
@@ -212,7 +212,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Bento Cell 2: Roster approvals (1 column) */}
           <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
             isNight 
-              ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
+              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
               : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
           } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
             <div>
@@ -237,7 +237,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Bento Cell 3: Analytics (1 column) */}
           <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
             isNight 
-              ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
+              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
               : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
           } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
             <div>
@@ -262,7 +262,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Bento Cell 4: Parent Sync (Large block, spans 2 columns) */}
           <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl transition-all ${
             isNight 
-              ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
+              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
               : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
           } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
 
