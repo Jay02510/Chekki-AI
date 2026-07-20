@@ -63,6 +63,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const schoolId = classData.schoolId;
     const schoolName = classData.schoolName || schoolId;
 
+    // --- ANTI-FRAUD GUARDRAIL: Student Enrollment Cap ---
+    // Prevents public code leaks. Default: 30 students per class seat.
+    const maxStudents = classData.maxStudents || 30;
+    const enrolledSnapshot = await adminDb
+      .collection('users')
+      .where('classId', '==', classId)
+      .get();
+
+    const isAlreadyEnrolled = enrolledSnapshot.docs.some((doc) => doc.id === uid);
+    if (!isAlreadyEnrolled && enrolledSnapshot.size >= maxStudents) {
+      return res.status(400).json({
+        error: `This class has reached its enrollment capacity (${maxStudents} students). Please contact your teacher.`,
+      });
+    }
+
     // Update parent profile in Firestore
     await adminDb.collection('users').doc(uid).set(
       {

@@ -431,7 +431,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-xs font-black uppercase tracking-wider text-zinc-400">
-                  {isKo ? '소형 학원 (1~2인 강사)' : '1–2 Teachers'}
+                  {isKo ? '개인 강사 / 튜터 / 공부방 (1~2인 강사)' : 'Tutors, Freelancers & 1-2 Teachers'}
                 </span>
               </div>
               <div className="flex items-baseline gap-1 mb-6">
@@ -439,7 +439,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 <span className="text-xs text-zinc-500 font-bold">{isKo ? '/월 (강사 1인당)' : '/mo per teacher'}</span>
               </div>
               <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                {isKo ? '1~2명의 강사가 운영하는 소형 어학원 및 공부방에 적합한 플랜' : 'Ideal for small academies or independent learning centers with 1–2 teachers.'}
+                {isKo ? '개인 튜터, 프리랜서 강사 및 소형 공부방을 위한 전용 단독 플랜 (강사당 30인 학부모 석)' : 'Perfect for independent tutors, freelance teachers, and small study rooms (30 student seats/teacher).'}
               </p>
               <ul className="space-y-3 text-xs text-zinc-300 mb-8 border-t border-white/5 pt-6">
                 <li className="flex items-center gap-2">
@@ -456,13 +456,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </li>
                 <li className="flex items-center gap-2 font-bold text-orange-400">
                   <Sparkle size={14} weight="bold" />
-                  <span>{isKo ? '소속 학부모 전원 Chekki Pro 무료 제공' : 'FREE Chekki Pro for All Class Parents'}</span>
+                  <span>{isKo ? '담당 학부모 최대 30인 Chekki Pro 무료 제공' : 'FREE Chekki Pro for Up to 30 Class Parents'}</span>
                 </li>
               </ul>
             </div>
             <button
               type="button"
-              onClick={() => openPlanModal('small', 'Small Academy Plan (1-2 Teachers)', '소형 학원 플랜 (1~2인 강사)', 49000, 1)}
+              onClick={() => openPlanModal('small', 'Tutor & Freelancer Plan (1-2 Teachers)', '개인 튜터 & 공부방 플랜 (1~2인 강사)', 49000, 1)}
               className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold text-xs rounded-2xl border border-white/10 text-center transition-all active:scale-[0.98] cursor-pointer"
             >
               {isKo ? '계좌이체 & 세금계산서 신청' : 'Request Bank Invoice'}
