@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { dbInstance } from '../../services/database';
+import { dbInstance, auth } from '../../services/database';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
 import { 
@@ -29,7 +30,8 @@ import {
   UserCheck,
   MagnifyingGlass,
   X,
-  Notebook
+  Notebook,
+  Gear
 } from '@phosphor-icons/react';
 
 interface Props {
@@ -72,11 +74,40 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [isLoadingRoster, setIsLoadingRoster] = useState(false);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState<any | null>(null);
 
-  // Teacher onboarding
+  // Teacher onboarding & Academy Branding & Settings
   const [showTeacherOnboarding, setShowTeacherOnboarding] = useState(false);
   const [teacherObStep, setTeacherObStep] = useState(0);
+  const [academyLogo, setAcademyLogo] = useState<string>(() => localStorage.getItem('chekki_academy_logo') || '');
+  const [showLogoModal, setShowLogoModal] = useState(false);
+  const [tempLogoUrl, setTempLogoUrl] = useState(academyLogo);
+
+  // Teacher Settings Modal
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [resetPwStatus, setResetPwStatus] = useState<{ text: string; isError?: boolean } | null>(null);
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   const isKo = language === 'ko';
+
+  const handleSendResetPassword = async () => {
+    if (!user?.email) return;
+    setIsSendingReset(true);
+    setResetPwStatus(null);
+    try {
+      await sendPasswordResetEmail(auth, user.email);
+      setResetPwStatus({
+        text: isKo
+          ? `비밀번호 재설정 링크가 ${user.email}로 발송되었습니다.`
+          : `Password reset email sent to ${user.email}.`,
+      });
+    } catch (err: any) {
+      setResetPwStatus({
+        text: err.message || (isKo ? '비밀번호 재설정 이메일 발송 실패' : 'Failed to send password reset email'),
+        isError: true,
+      });
+    } finally {
+      setIsSendingReset(false);
+    }
+  };
 
   // Load classes if authenticated and role is teacher
   useEffect(() => {
@@ -838,18 +869,46 @@ export default function TeacherPage({ isNight = true }: Props) {
       <aside className="w-full md:w-72 bg-[#08080a] border-b md:border-b-0 md:border-r border-white/5 flex flex-col shrink-0">
         
         {/* Sidebar Header / Brand */}
-        <div className="p-6 border-b border-white/5 flex items-center gap-3.5">
-          <div className="w-11 h-11 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-center text-orange-400 shadow-lg shadow-orange-500/5">
-            <ChalkboardTeacher size={22} weight="bold" />
+        <div className="p-6 border-b border-white/5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3.5 min-w-0">
+            {academyLogo ? (
+              <img 
+                src={academyLogo} 
+                alt="Academy Logo" 
+                className="w-11 h-11 rounded-2xl object-cover border border-white/10 shadow-md bg-white/5" 
+              />
+            ) : (
+              <div className="w-11 h-11 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-center text-orange-400 shadow-lg shadow-orange-500/5 flex-shrink-0">
+                <ChalkboardTeacher size={22} weight="bold" />
+              </div>
+            )}
+            <div className="min-w-0">
+              <h1 className="text-sm font-black text-white leading-tight truncate">
+                {user.schoolName || 'B2B Academy'}
+              </h1>
+              <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
+                <Sparkle size={10} weight="bold" />
+                <span>Teacher Portal</span>
+              </span>
+            </div>
           </div>
-          <div className="min-w-0">
-            <h1 className="text-sm font-black text-white leading-tight truncate">
-              {user.schoolName || 'B2B Academy'}
-            </h1>
-            <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
-              <Sparkle size={10} weight="bold" />
-              <span>Teacher Portal</span>
-            </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
+              title={isKo ? '학원 로고 설정' : 'Custom Academy Logo Settings'}
+              className="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all text-xs font-bold active:scale-[0.95]"
+            >
+              🖼️
+            </button>
+            <button
+              type="button"
+              onClick={() => { setResetPwStatus(null); setShowSettingsModal(true); }}
+              title={isKo ? '교사 환경 설정' : 'Teacher Settings'}
+              className="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all active:scale-[0.95]"
+            >
+              <Gear size={16} weight="bold" />
+            </button>
           </div>
         </div>
 
@@ -918,13 +977,22 @@ export default function TeacherPage({ isNight = true }: Props) {
               <p className="text-[10px] text-zinc-500 truncate">{user.email}</p>
             </div>
           </div>
-          <button
-            onClick={logout}
-            className="p-2.5 text-zinc-500 hover:text-white rounded-xl hover:bg-white/10 transition-all active:scale-[0.95] shrink-0"
-            title="Log Out"
-          >
-            <SignOut size={18} weight="bold" />
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => { setResetPwStatus(null); setShowSettingsModal(true); }}
+              className="p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/10 transition-all active:scale-[0.95]"
+              title={isKo ? '교사 설정' : 'Teacher Settings'}
+            >
+              <Gear size={16} weight="bold" />
+            </button>
+            <button
+              onClick={logout}
+              className="p-2 text-zinc-500 hover:text-red-400 rounded-xl hover:bg-red-500/10 transition-all active:scale-[0.95]"
+              title={isKo ? '로그아웃' : 'Log Out'}
+            >
+              <SignOut size={16} weight="bold" />
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -1647,11 +1715,19 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
 
             {/* Drawer Footer */}
-            <div className="pt-6 border-t border-white/10 shrink-0">
+            <div className="pt-6 border-t border-white/10 shrink-0 flex gap-3">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="w-1/2 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl transition-all shadow-lg shadow-orange-500/20 active:scale-[0.98] flex items-center justify-center gap-1.5"
+              >
+                <Printer size={16} weight="bold" />
+                <span>{isKo ? '맞춤 로고 성적표 인쇄' : 'Print Branded Report'}</span>
+              </button>
               <button
                 type="button"
                 onClick={() => setSelectedStudentDetails(null)}
-                className="w-full py-4 bg-[#050505] hover:bg-white/5 text-zinc-300 font-bold text-xs rounded-2xl transition-all border border-white/10 active:scale-[0.98]"
+                className="w-1/2 py-4 bg-[#050505] hover:bg-white/5 text-zinc-300 font-bold text-xs rounded-2xl transition-all border border-white/10 active:scale-[0.98]"
               >
                 {isKo ? '닫기' : 'Close'}
               </button>
@@ -1737,6 +1813,242 @@ export default function TeacherPage({ isNight = true }: Props) {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* --- CUSTOM ACADEMY LOGO CONFIGURATION MODAL --- */}
+      {showLogoModal && (
+        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            onClick={() => setShowLogoModal(false)} 
+          />
+          <div className="relative p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in text-left">
+            <div className="relative w-full h-full rounded-[calc(2.5rem-0.25rem)] bg-[#0c0c0e] text-zinc-200 p-8">
+              <button
+                type="button"
+                onClick={() => setShowLogoModal(false)}
+                className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all"
+              >
+                <X size={16} weight="bold" />
+              </button>
+
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                  <Sparkle size={22} weight="bold" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 font-mono">
+                    {isKo ? '맞춤 브랜드 설정' : 'ACADEMY BRANDING'}
+                  </span>
+                  <h3 className="text-xl font-black text-white">
+                    {isKo ? '학원 맞춤 로고 등록' : 'Custom Academy Logo'}
+                  </h3>
+                </div>
+              </div>
+
+              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+                {isKo 
+                  ? '등록된 학원 로고는 모든 학부모 성적표 리포트 및 인쇄용 오답 학습지에 맞춤 헤더로 삽입됩니다.' 
+                  : 'Your custom logo will be featured on all parent progress reports and printed worksheets.'}
+              </p>
+
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  localStorage.setItem('chekki_academy_logo', tempLogoUrl);
+                  setAcademyLogo(tempLogoUrl);
+                  setShowLogoModal(false);
+                  alert(isKo ? '학원 맞춤 로고가 저장되었습니다!' : 'Custom Academy Logo saved!');
+                }}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                    {isKo ? '학원 로고 이미지 URL' : 'Academy Logo Image URL'}
+                  </label>
+                  <input
+                    type="url"
+                    value={tempLogoUrl}
+                    onChange={(e) => setTempLogoUrl(e.target.value)}
+                    placeholder="https://example.com/logo.png"
+                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600 font-mono"
+                  />
+                </div>
+
+                {tempLogoUrl && (
+                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-3">
+                    <img src={tempLogoUrl} alt="Preview" className="w-12 h-12 rounded-xl object-contain bg-white/10 border border-white/10" />
+                    <div>
+                      <p className="text-xs font-bold text-white">{isKo ? '미리보기' : 'Logo Preview'}</p>
+                      <p className="text-[10px] text-emerald-400">{isKo ? '성적표 헤더에 적용됨' : 'Ready for report cards'}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-2 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTempLogoUrl('');
+                      setAcademyLogo('');
+                      localStorage.removeItem('chekki_academy_logo');
+                      setShowLogoModal(false);
+                    }}
+                    className="w-1/3 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs rounded-2xl border border-red-500/20 transition-all active:scale-[0.98]"
+                  >
+                    {isKo ? '로고 초기화' : 'Remove Logo'}
+                  </button>
+                  <button
+                    type="submit"
+                    className="w-2/3 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98]"
+                  >
+                    {isKo ? '로고 저장하기' : 'Save Logo'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* --- TEACHER SETTINGS MODAL --- */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-[260] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            onClick={() => setShowSettingsModal(false)} 
+          />
+          <div className="relative p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-lg mx-4 animate-fade-in text-left">
+            <div className="relative w-full h-full rounded-[calc(2.5rem-0.25rem)] bg-[#0c0c0e] text-zinc-200 p-8">
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all"
+              >
+                <X size={16} weight="bold" />
+              </button>
+
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                  <Gear size={24} weight="bold" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 font-mono">
+                    {isKo ? '교사 포털 설정' : 'TEACHER PORTAL SETTINGS'}
+                  </span>
+                  <h3 className="text-xl font-black text-white">
+                    {isKo ? '선생님 환경 설정' : 'Teacher Account & Settings'}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {/* Profile Info */}
+                <div className="p-4 bg-[#050505] border border-white/10 rounded-2xl space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">
+                    {isKo ? '계정 프로필 정보' : 'ACCOUNT PROFILE'}
+                  </span>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-zinc-400">{isKo ? '선생님 이름' : 'Teacher Name'}:</span>
+                    <strong className="text-white">{user?.name || 'Teacher'}</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-zinc-400">{isKo ? '이메일 주소' : 'Email Address'}:</span>
+                    <strong className="text-white font-mono">{user?.email}</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-zinc-400">{isKo ? '소속 학원' : 'Assigned School'}:</span>
+                    <strong className="text-orange-400">{user?.schoolName || 'B2B Academy'}</strong>
+                  </div>
+                </div>
+
+                {/* Custom Branding Quick Option */}
+                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-xs font-bold text-white mb-0.5">
+                      {isKo ? '맞춤 학원 로고' : 'Custom Academy Logo'}
+                    </h4>
+                    <p className="text-[11px] text-zinc-400">
+                      {isKo ? '성적표 및 인쇄 학습지에 학원 전용 로고 표시' : 'Show your academy logo on student report cards.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSettingsModal(false);
+                      setTempLogoUrl(academyLogo);
+                      setShowLogoModal(true);
+                    }}
+                    className="px-3.5 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold text-xs rounded-xl border border-orange-500/20 transition-all whitespace-nowrap cursor-pointer"
+                  >
+                    {isKo ? '로고 변경' : 'Edit Logo'}
+                  </button>
+                </div>
+
+                {/* Password Reset */}
+                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h4 className="text-xs font-bold text-white mb-0.5">
+                        {isKo ? '비밀번호 재설정' : 'Password & Security'}
+                      </h4>
+                      <p className="text-[11px] text-zinc-400">
+                        {isKo ? '이메일로 비밀번호 재설정 링크를 받습니다.' : 'Receive a password reset link via email.'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={isSendingReset}
+                      onClick={handleSendResetPassword}
+                      className="px-3.5 py-2 bg-white/10 hover:bg-white/15 disabled:opacity-50 text-white font-bold text-xs rounded-xl border border-white/10 transition-all whitespace-nowrap cursor-pointer"
+                    >
+                      {isSendingReset ? (isKo ? '발송 중...' : 'Sending...') : (isKo ? '재설정 이메일 발송' : 'Reset Password')}
+                    </button>
+                  </div>
+                  {resetPwStatus && (
+                    <p className={`text-xs p-2.5 rounded-xl font-medium ${resetPwStatus.isError ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
+                      {resetPwStatus.text}
+                    </p>
+                  )}
+                </div>
+
+                {/* Re-open Walkthrough Guide */}
+                <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl">
+                  <div>
+                    <h4 className="text-xs font-bold text-white mb-0.5">
+                      {isKo ? '교사 온보딩 가이드 다시보기' : 'Onboarding Walkthrough'}
+                    </h4>
+                    <p className="text-[11px] text-zinc-400">
+                      {isKo ? '학급 개설 및 학부모 6자리 코드 연결 가이드' : 'Review 3-step teacher tutorial guide.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSettingsModal(false);
+                      setTeacherObStep(0);
+                      setShowTeacherOnboarding(true);
+                    }}
+                    className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white font-bold text-xs rounded-xl border border-white/10 transition-all whitespace-nowrap cursor-pointer"
+                  >
+                    {isKo ? '가이드 열기' : 'Open Tutorial'}
+                  </button>
+                </div>
+
+                {/* Log Out Action */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSettingsModal(false);
+                    logout();
+                  }}
+                  className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs rounded-2xl border border-red-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                >
+                  <SignOut size={16} weight="bold" />
+                  <span>{isKo ? '교사 계정 로그아웃' : 'Log Out of Teacher Account'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

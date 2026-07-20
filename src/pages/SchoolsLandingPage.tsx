@@ -33,21 +33,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [showBankModal, setShowBankModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<{ id: string; nameEn: string; nameKo: string; price: number }>({
+  const [selectedPlan, setSelectedPlan] = useState<{ id: string; nameEn: string; nameKo: string; price: number; minSeats?: number }>({
     id: 'medium',
     nameEn: 'Medium Academy Plan (3-5 Teachers)',
     nameKo: '중형 학원 플랜 (3~5인 강사)',
-    price: 39000
+    price: 39000,
+    minSeats: 3
   });
   const [teacherCount, setTeacherCount] = useState(3);
+  const [studentCount, setStudentCount] = useState('');
   const [bizRegNumber, setBizRegNumber] = useState('');
   const [invoiceResult, setInvoiceResult] = useState<any>(null);
   const [isRequestingInvoice, setIsRequestingInvoice] = useState(false);
   const [copiedBank, setCopiedBank] = useState(false);
 
-  const openPlanModal = (planId: string, nameEn: string, nameKo: string, price: number, defaultTeachers: number) => {
-    setSelectedPlan({ id: planId, nameEn, nameKo, price });
+  const openPlanModal = (planId: string, nameEn: string, nameKo: string, price: number, defaultTeachers: number, minSeats: number = 1) => {
+    setSelectedPlan({ id: planId, nameEn, nameKo, price, minSeats });
     setTeacherCount(defaultTeachers);
     setInvoiceResult(null);
     setShowBankModal(true);
@@ -70,6 +73,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           planId: selectedPlan.id,
           planName: isKo ? selectedPlan.nameKo : selectedPlan.nameEn,
           teacherCount,
+          studentCount,
+          billingCycle,
         }),
       });
       const data = await res.json();
@@ -85,16 +90,14 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!academyName || !contactName || !email) return;
-    setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      setAcademyName('');
-      setContactName('');
-      setPhone('');
-      setEmail('');
-    }, 1500);
+    // Trigger the official bank invoice generation modal directly with the entered details
+    openPlanModal(
+      selectedPlan.id || 'medium',
+      selectedPlan.nameEn || 'Medium Academy Plan (3-5 Teachers)',
+      selectedPlan.nameKo || '중형 학원 플랜 (3~5인 강사)',
+      selectedPlan.price || 39000,
+      teacherCount || 3
+    );
   };
 
   return (
@@ -388,7 +391,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   : '"Parents check target curriculums on their own app. Approval flow with class codes works beautifully. It saves countless administrative phone calls."'}
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-brand-purple/20 text-brand-purple flex items-center justify-center font-bold text-sm">
+                <div className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center font-bold text-sm">
                   K
                 </div>
                 <div>
@@ -406,7 +409,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       </section>
 
       {/* --- PRICING SECTION --- */}
-      <section className={`py-20 px-4 md:px-8 max-w-7xl mx-auto w-full ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+      <section id="pricing" className={`py-20 px-4 md:px-8 max-w-7xl mx-auto w-full ${isNight ? 'text-white' : 'text-zinc-900'}`}>
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">
             {isKo ? '투명한 요금 정책' : 'PREDICTABLE SCHOOL PRICING'}
@@ -414,271 +417,407 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight mb-4">
             {isKo ? '교사 수에 맞춘 합리적인 월정액 요금제' : 'Transparent Monthly Teacher Tiers'}
           </h2>
-          <p className={`text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+          <p className={`text-sm leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
             {isKo 
-              ? '복잡한 스캔 건수 계산 없이, 교사 수에 맞춘 예측 가능한 월정액 플랜입니다. 모든 학교/학원 플랜에는 소속 원생 학부모 전원 무료 Chekki Pro 앱 이용권(월 ₩9,900 상당)이 포함됩니다.'
+              ? '프리랜서 1인 강사부터 대형 어학원까지 복잡한 스캔 건수 제한 없는 예측 가능한 월정액 플랜입니다. 모든 플랜에는 소속 학부모 전원 무료 Chekki Pro 앱 이용권(월 ₩9,900 상당)이 포함됩니다.'
               : 'No usage-based line-item surprises. Simple per-teacher monthly tiers. Every school plan includes FREE Chekki Pro home accounts for all enrolled parents (₩9,900/mo value per family).'}
           </p>
+
+          {/* Monthly / Yearly Billing Toggle */}
+          <div className="inline-flex items-center p-1.5 bg-[#0a0a0c] border border-white/10 rounded-full shadow-inner mb-10">
+            <button
+              type="button"
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                billingCycle === 'monthly'
+                  ? 'bg-orange-500 text-white shadow-md'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              {isKo ? '월간 결제' : 'Monthly Billing'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                billingCycle === 'yearly'
+                  ? 'bg-orange-500 text-white shadow-md'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <span>{isKo ? '연간 결제' : 'Yearly Billing'}</span>
+              <span className="px-2 py-0.5 bg-emerald-500 text-black text-[9px] font-black uppercase rounded-full">
+                {isKo ? '20% 할인' : 'Save 20%'}
+              </span>
+            </button>
+          </div>
+
+          {/* 14-Day Free Teacher Trial Banner */}
+          <div className="max-w-2xl mx-auto p-4 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border border-orange-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                🎁
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-white">
+                  {isKo ? '1인 강사 14일 무제한 무료 체험' : '14-Day FREE Teacher Trial'}
+                </h4>
+                <p className="text-xs text-zinc-400">
+                  {isKo ? '결제 수단 등록 없이 강사 1인 14일간 모든 채점 기능 체험' : 'No credit card required. Experience all AI autograding features.'}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => openPlanModal('trial', '14-Day Free Teacher Trial', '강사 1인 14일 무료 체험', 0, 1, 1)}
+              className="w-full sm:w-auto px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-xl transition-all shadow-md active:scale-[0.97] whitespace-nowrap cursor-pointer"
+            >
+              {isKo ? '무료 체험 신청하기' : 'Start Free Trial'}
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Plan 1: Small Academy */}
-          <div className={`p-8 border rounded-3xl flex flex-col justify-between transition-all ${
-            isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
-              : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
-          }`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto items-stretch">
+          {/* Card 1: Freelancer & Solo Tutor */}
+          <div 
+            onClick={() => openPlanModal('freelancer', 'Freelancer & Solo Tutor Plan (1 Teacher)', '프리랜서 & 개인 튜터 플랜 (1인 강사)', billingCycle === 'yearly' ? 28000 : 35000, 1, 1)}
+            className={`p-6 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
+              isNight 
+                ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
+                : 'bg-white border-zinc-200 hover:border-orange-500/50 hover:shadow-xl shadow-sm'
+            }`}
+          >
             <div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-xs font-black uppercase tracking-wider text-zinc-400">
-                  {isKo ? '개인 강사 / 튜터 / 공부방 (1~2인 강사)' : 'Tutors, Freelancers & 1-2 Teachers'}
+              <div className="flex justify-between items-center mb-3">
+                <span className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black tracking-wider uppercase rounded-full">
+                  {isKo ? '프리랜서 & 1인 강사' : 'SOLO TUTORS & FREELANCERS'}
                 </span>
               </div>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="font-display text-4xl font-black text-white">{isKo ? '₩49,000' : '$35'}</span>
-                <span className="text-xs text-zinc-500 font-bold">{isKo ? '/월 (강사 1인당)' : '/mo per teacher'}</span>
+              <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {isKo ? '프리랜서 / 개인 튜터' : 'Freelancer & Solo Tutor'}
+              </h3>
+              <div className="flex items-baseline gap-1 mb-3">
+                <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo ? (billingCycle === 'yearly' ? '₩28,000' : '₩35,000') : (billingCycle === 'yearly' ? '$20' : '$25')}
+                </span>
+                <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
+                </span>
               </div>
-              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                {isKo ? '개인 튜터, 프리랜서 강사 및 소형 공부방을 위한 전용 단독 플랜 (강사당 30인 학부모 석)' : 'Perfect for independent tutors, freelance teachers, and small study rooms (30 student seats/teacher).'}
+              <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {isKo 
+                  ? '🎯 대상: 개인 방문 튜터, 프리랜서 강사 및 1인 공부방 (최대 30인 원생)' 
+                  : '🎯 Target: Freelance private tutors, 1-on-1 educators, and home classrooms (up to 30 students).'}
               </p>
-              <ul className="space-y-3 text-xs text-zinc-300 mb-8 border-t border-white/5 pt-6">
+              <ul className={`space-y-2.5 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
-                  <span>{isKo ? '무제한 학급 개설 & 주간 키워드 등록' : 'Unlimited Class Creation & Curriculums'}</span>
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '강사 1인 전용 포털 계정' : '1 Teacher Portal Seat'}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
-                  <span>{isKo ? '수업 전 오답 분석 (Zero-Prep 대시보드)' : 'Zero-Prep Class Analytics Dashboard'}</span>
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '담당 학부모 30인 무료 포함' : 'Up to 30 Student/Parent Seats'}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
-                  <span>{isKo ? '1초 만에 생성되는 학부모 칭찬 리포트' : '1-Click Parent Progress Reports'}</span>
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '99.9% AI 손글씨 숙제 자동 채점' : '99.9% AI Handwriting Autograding'}</span>
                 </li>
-                <li className="flex items-center gap-2 font-bold text-orange-400">
-                  <Sparkle size={14} weight="bold" />
-                  <span>{isKo ? '담당 학부모 최대 30인 Chekki Pro 무료 제공' : 'FREE Chekki Pro for Up to 30 Class Parents'}</span>
+                <li className="flex items-center gap-2 font-bold text-orange-500">
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '맞춤 학원 로고 & PDF 성적표 브랜드' : 'Custom Academy Logo on PDF Reports'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '1초 학부모 칭찬 & 성과 리포트' : '1-Click Parent Progress Reports'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-500">
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '소속 학부모 Chekki Pro 앱 무료' : 'FREE Chekki Pro App for Parents'}</span>
                 </li>
               </ul>
             </div>
             <button
               type="button"
-              onClick={() => openPlanModal('small', 'Tutor & Freelancer Plan (1-2 Teachers)', '개인 튜터 & 공부방 플랜 (1~2인 강사)', 49000, 1)}
-              className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold text-xs rounded-2xl border border-white/10 text-center transition-all active:scale-[0.98] cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                openPlanModal('freelancer', 'Freelancer & Solo Tutor Plan (1 Teacher)', '프리랜서 & 개인 튜터 플랜 (1인 강사)', billingCycle === 'yearly' ? 28000 : 35000, 1, 1);
+              }}
+              className={`w-full py-3 font-bold text-xs rounded-2xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
+                isNight 
+                  ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' 
+                  : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
+              }`}
             >
-              {isKo ? '계좌이체 & 세금계산서 신청' : 'Request Bank Invoice'}
+              {isKo ? '청구서 발행 신청' : 'Get Bank Invoice'}
             </button>
           </div>
 
-          {/* Plan 2: Medium Academy (POPULAR) */}
-          <div className="p-8 border border-orange-500/50 bg-[#0a0705] rounded-3xl flex flex-col justify-between transition-all relative shadow-2xl shadow-orange-500/10 scale-[1.02]">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-orange-500 text-white text-[10px] font-black tracking-widest uppercase rounded-full shadow-lg">
+          {/* Card 2: Small School (1–2 Teachers) */}
+          <div 
+            onClick={() => openPlanModal('small', 'Small School Plan (1-2 Teachers)', '소형 학원 플랜 (1~2인 강사)', billingCycle === 'yearly' ? 39000 : 49000, 2, 1)}
+            className={`p-6 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
+              isNight 
+                ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
+                : 'bg-white border-zinc-200 hover:border-orange-500/50 hover:shadow-xl shadow-sm'
+            }`}
+          >
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[10px] font-black tracking-wider uppercase rounded-full">
+                  {isKo ? '소형 학원 (1~2인 강사)' : 'SMALL SCHOOL (1-2 TEACHERS)'}
+                </span>
+              </div>
+              <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {isKo ? '소형 학원 & 공부방' : 'Small School & Study Room'}
+              </h3>
+              <div className="flex items-baseline gap-1 mb-3">
+                <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo ? (billingCycle === 'yearly' ? '₩39,000' : '₩49,000') : (billingCycle === 'yearly' ? '$28' : '$35')}
+                </span>
+                <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인당)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
+                </span>
+              </div>
+              <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {isKo 
+                  ? '🎯 대상: 강사 1~2인 규모 소형 어학원, 부티크 학원 및 공부방 (최대 75인 원생)' 
+                  : '🎯 Target: Small neighborhood academies, study rooms, and boutique centers (up to 75 students).'}
+              </p>
+              <ul className={`space-y-2.5 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '강사 1~2인 포털 계정 (최대 75인 원생)' : '1–2 Teacher Seats (Up to 75 students)'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-500">
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '맞춤 학원 로고 & PDF 성적표 브랜드' : 'Custom Academy Logo on PDF Reports'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '6자리 학급 코드로 자동 가정 연동' : '6-Digit Class Join Code & Sync'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '수업 전 오답 진단 대시보드' : 'Zero-Prep Class Diagnostic Dashboard'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '1초 학부모 성장 발송 리포트' : '1-Click Parent Progress Reports'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-500">
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '소속 학부모 Chekki Pro 앱 무료' : 'FREE Chekki Pro App for Parents'}</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openPlanModal('small', 'Small School Plan (1-2 Teachers)', '소형 학원 플랜 (1~2인 강사)', billingCycle === 'yearly' ? 39000 : 49000, 2, 1);
+              }}
+              className={`w-full py-3 font-bold text-xs rounded-2xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
+                isNight 
+                  ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' 
+                  : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
+              }`}
+            >
+              {isKo ? '청구서 발행 신청' : 'Get Bank Invoice'}
+            </button>
+          </div>
+
+          {/* Card 3: Medium School (3–5 Teachers) [MOST POPULAR] */}
+          <div 
+            onClick={() => openPlanModal('medium', 'Medium Academy Plan (3-5 Teachers)', '중형 학원 플랜 (3~5인 강사)', billingCycle === 'yearly' ? 31000 : 39000, 3, 3)}
+            className="p-6 border border-orange-500/60 bg-[#0a0705] rounded-3xl flex flex-col justify-between transition-all relative shadow-2xl shadow-orange-500/10 scale-[1.02] cursor-pointer group hover:border-orange-500"
+          >
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-orange-500 text-white text-[9px] font-black tracking-widest uppercase rounded-full shadow-lg">
               {isKo ? '가장 인기 있는 플랜' : 'MOST POPULAR'}
             </div>
             <div>
-              <div className="flex justify-between items-center mb-4 pt-2">
-                <span className="text-xs font-black uppercase tracking-wider text-orange-400">
-                  {isKo ? '중형 학원 (3~5인 강사)' : '3–5 Teachers'}
+              <div className="flex justify-between items-center mb-3 pt-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-orange-400">
+                  {isKo ? '중형 학원 (3~5인 강사)' : '3–5 TEACHERS'}
                 </span>
               </div>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="font-display text-4xl font-black text-white">{isKo ? '₩39,000' : '$28'}</span>
-                <span className="text-xs text-zinc-500 font-bold">{isKo ? '/월 (강사 1인당)' : '/mo per teacher'}</span>
+              <h3 className="text-base font-black mb-1 text-white">
+                {isKo ? '중형 어학원 플랜' : 'Medium Academy Plan'}
+              </h3>
+              <div className="flex items-baseline gap-1 mb-3">
+                <span className="font-display text-3xl font-black text-white">
+                  {isKo ? (billingCycle === 'yearly' ? '₩31,000' : '₩39,000') : (billingCycle === 'yearly' ? '$22' : '$28')}
+                </span>
+                <span className="text-[11px] text-zinc-400 font-bold">
+                  {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인당)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
+                </span>
               </div>
-              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                {isKo ? '체계적인 원생 관리와 브랜드 리포트가 필요한 중형 어학원 전용' : 'Optimized for growing academies needing multi-teacher coordination & branding.'}
+              <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
+                {isKo 
+                  ? '🎯 대상: 체계적인 멀티 강사 수강 관리 및 학부모 소통이 필요한 중형 학원 (최대 200인 원생)' 
+                  : '🎯 Target: Established growing academies needing multi-teacher roster management (up to 200 students).'}
               </p>
-              <ul className="space-y-3 text-xs text-zinc-300 mb-8 border-t border-white/10 pt-6">
+              <ul className="space-y-2.5 text-xs text-zinc-300 mb-6 border-t border-white/10 pt-4">
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
-                  <span>{isKo ? '소형 플랜의 모든 기능 포함' : 'Includes all Small Academy features'}</span>
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400 flex-shrink-0" />
+                  <span>{isKo ? '소형 플랜의 모든 기능 포함' : 'Includes all Small School features'}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
-                  <span>{isKo ? '학원 로고 삽입 맞춤 PDF 리포트' : 'Custom Academy Logo on PDF Reports'}</span>
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400 flex-shrink-0" />
+                  <span>{isKo ? '강사 3~5인 포털 계정 (최대 200인 원생)' : '3–5 Teacher Seats (Up to 200 students)'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-400">
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '맞춤 학원 로고 & PDF 성적표 브랜드' : 'Custom Academy Logo on PDF Reports'}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400 flex-shrink-0" />
+                  <span>{isKo ? '중앙 반별 학급 관리 시스템' : 'Centralized Class Roster Management'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-400 flex-shrink-0" />
                   <span>{isKo ? '우선 기술 지원 & 온보딩 가이드' : 'Priority Technical Support & Onboarding'}</span>
                 </li>
                 <li className="flex items-center gap-2 font-bold text-orange-400">
-                  <Sparkle size={14} weight="bold" />
-                  <span>{isKo ? '소속 학부모 전원 Chekki Pro 무료 제공' : 'FREE Chekki Pro for All Class Parents'}</span>
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '소속 학부모 Chekki Pro 앱 무료' : 'FREE Chekki Pro App for Parents'}</span>
                 </li>
               </ul>
             </div>
             <button
               type="button"
-              onClick={() => openPlanModal('medium', 'Medium Academy Plan (3-5 Teachers)', '중형 학원 플랜 (3~5인 강사)', 39000, 3)}
-              className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                openPlanModal('medium', 'Medium Academy Plan (3-5 Teachers)', '중형 학원 플랜 (3~5인 강사)', billingCycle === 'yearly' ? 31000 : 39000, 3, 3);
+              }}
+              className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
             >
-              {isKo ? '계좌이체 & 세금계산서 신청' : 'Request Bank Invoice'}
+              {isKo ? '청구서 발행 신청' : 'Get Bank Invoice'}
             </button>
           </div>
 
-          {/* Plan 3: Large Academy & Franchise */}
-          <div className={`p-8 border rounded-3xl flex flex-col justify-between transition-all ${
-            isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
-              : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
-          }`}>
+          {/* Card 4: Large School & Franchise (6+ Teachers) */}
+          <div 
+            onClick={() => openPlanModal('large', 'Large Academy Plan (6+ Teachers)', '대형 학원 플랜 (6인 이상)', billingCycle === 'yearly' ? 23000 : 29000, 6, 6)}
+            className={`p-6 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
+              isNight 
+                ? 'bg-[#050505] border-white/10 hover:border-purple-500/50 hover:bg-zinc-900/30' 
+                : 'bg-white border-zinc-200 hover:border-purple-500/50 hover:shadow-xl shadow-sm'
+            }`}
+          >
             <div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-xs font-black uppercase tracking-wider text-purple-400">
-                  {isKo ? '대형 학원 & 프랜차이즈 (6인 이상)' : '6+ Teachers'}
+              <div className="flex justify-between items-center mb-3">
+                <span className="px-2.5 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-500 text-[10px] font-black tracking-wider uppercase rounded-full">
+                  {isKo ? '대형 학원 & 프랜차이즈' : 'LARGE ACADEMY & FRANCHISE'}
                 </span>
               </div>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="font-display text-4xl font-black text-white">{isKo ? '₩29,000' : '$22'}</span>
-                <span className="text-xs text-zinc-500 font-bold">{isKo ? '/월 (강사 1인당)' : '/mo per teacher'}</span>
+              <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {isKo ? '대형 학원 / 프랜차이즈' : 'Large Academy & Franchise'}
+              </h3>
+              <div className="flex items-baseline gap-1 mb-3">
+                <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo ? (billingCycle === 'yearly' ? '₩23,000' : '₩29,000') : (billingCycle === 'yearly' ? '$17' : '$22')}
+                </span>
+                <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인당)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
+                </span>
               </div>
-              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                {isKo ? '대형 어학원 및 여러 캠퍼스를 보유한 교육 기관을 위한 볼륨 할인 플랜' : 'Volume-discounted solution for multi-branch campuses and large academies.'}
+              <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {isKo 
+                  ? '🎯 대상: 여러 직영/가맹 캠퍼스를 보유한 대형 학원 및 프랜차이즈 (6인 이상 강사)' 
+                  : '🎯 Target: Multi-branch campuses, franchise networks, and large academies (6+ teachers).'}
               </p>
-              <ul className="space-y-3 text-xs text-zinc-300 mb-8 border-t border-white/5 pt-6">
+              <ul className={`space-y-2.5 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
                   <span>{isKo ? '중형 플랜의 모든 기능 포함' : 'Includes all Medium Academy features'}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
-                  <span>{isKo ? '원장 전용 전 캠퍼스 통합 대시보드' : 'Multi-Campus Director Dashboard'}</span>
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '강사 6인 이상 (원생 수 무제한)' : '6+ Teacher Seats (Unlimited Students)'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-500">
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '맞춤 학원 로고 & PDF 성적표 브랜드' : 'Custom Academy Logo on PDF Reports'}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400" />
-                  <span>{isKo ? '전담 매니저 배정 & 1:1 세팅 지원' : 'Dedicated Account Success Manager'}</span>
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '강사 수에 따른 최적의 볼륨 할인' : 'Maximum Volume Discounted Pricing'}</span>
                 </li>
-                <li className="flex items-center gap-2 font-bold text-orange-400">
-                  <Sparkle size={14} weight="bold" />
-                  <span>{isKo ? '소속 학부모 전원 Chekki Pro 무료 제공' : 'FREE Chekki Pro for All Class Parents'}</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '전담 성공 매니저 배정 & 1:1 세팅' : 'Dedicated Success Manager & 1:1 Setup'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-500">
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '소속 학부모 Chekki Pro 앱 무료' : 'FREE Chekki Pro App for Parents'}</span>
                 </li>
               </ul>
             </div>
             <button
               type="button"
-              onClick={() => openPlanModal('large', 'Large Academy Plan (6+ Teachers)', '대형 학원 플랜 (6인 이상)', 29000, 6)}
-              className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold text-xs rounded-2xl border border-white/10 text-center transition-all active:scale-[0.98] cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                openPlanModal('large', 'Large Academy Plan (6+ Teachers)', '대형 학원 플랜 (6인 이상)', billingCycle === 'yearly' ? 23000 : 29000, 6, 6);
+              }}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-2xl text-center transition-all active:scale-[0.98] shadow-md cursor-pointer"
             >
-              {isKo ? '계좌이체 & 세금계산서 신청' : 'Request Bank Invoice'}
+              {isKo ? '청구서 발행 신청' : 'Get Bank Invoice'}
             </button>
           </div>
         </div>
       </section>
 
-      {/* --- SIGNUP / PARTNERSHIP DEMO FORM --- */}
-      <section id="demo" className="max-w-xl mx-auto px-6 py-24 w-full text-center">
-        <h2 className={`font-display text-3xl font-black tracking-tight mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-          {isKo ? 'ChekkiAI 도입 문의' : 'Apply for Partnership'}
+      {/* --- GET IN TOUCH & CONSULTATION SECTION --- */}
+      <section id="demo" className={`py-20 px-6 max-w-4xl mx-auto w-full text-center rounded-3xl my-12 border ${
+        isNight ? 'bg-gradient-to-b from-zinc-950 to-[#050505] border-white/10' : 'bg-gradient-to-b from-orange-50/50 to-white border-zinc-200 shadow-md'
+      }`}>
+        <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">
+          {isKo ? '학원 도입 & 맞춤 상담' : 'CUSTOM ONBOARDING & CONSULTATION'}
+        </span>
+        <h2 className={`font-display text-2xl sm:text-4xl font-black tracking-tight mb-4 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+          {isKo ? '우리 학원에 맞는 플랜과 세팅이 궁금하신가요?' : 'Need Help Choosing the Right Academy Plan?'}
         </h2>
-        <p className={`text-sm leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+        <p className={`text-sm max-w-2xl mx-auto leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
           {isKo 
-            ? '정보를 남겨주시면 담당 파트너가 24시간 내에 제휴 설명서 및 데모 어카운트 구성을 위해 연락드리겠습니다.'
-            : 'Fill out the form below. Our school operations team will contact you within 24 hours to set up your academy dashboard demo.'}
+            ? 'ChekkiAI 전문 팀이 학원 규모 및 운영 방식에 맞춘 1:1 온보딩 상담과 청구서 발행을 도와드립니다.'
+            : 'Get in touch with our operations team for a 1:1 onboarding consultation, custom multi-teacher setups, or bank invoice inquiries.'}
         </p>
 
-        {submitSuccess ? (
-          <div className={`p-8 border rounded-2xl text-center space-y-4 ${
-            isNight ? 'bg-emerald-500/5 border-emerald-500/10' : 'bg-emerald-50 border-emerald-200'
-          }`}>
-            <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-xl">
-              ✓
-            </div>
-            <h3 className={`font-display text-lg font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-              {isKo ? '도입 신청 완료!' : 'Application Submitted!'}
-            </h3>
-            <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-              {isKo 
-                ? '입력해주신 연락처/이메일로 제휴 파트너가 곧 연락드리겠습니다. 감사합니다.'
-                : 'We have received your request and will follow up shortly to provision your demo account.'}
-            </p>
-            <button
-              onClick={() => setSubmitSuccess(false)}
-              className="text-xs text-orange-500 font-bold hover:underline mt-2 block mx-auto"
-            >
-              {isKo ? '새 신청서 작성' : 'Submit another request'}
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 text-left">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className={`block text-xs font-black ${isNight ? 'text-zinc-400' : 'text-zinc-600'} uppercase tracking-widest`}>
-                  {isKo ? '교육기관명/학원명 *' : 'Academy Name *'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={academyName}
-                  onChange={(e) => setAcademyName(e.target.value)}
-                  placeholder="E.g. POLY Seocho"
-                  className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-xl px-4 py-3 focus:border-orange-500 outline-none text-sm`}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className={`block text-xs font-black ${isNight ? 'text-zinc-400' : 'text-zinc-600'} uppercase tracking-widest`}>
-                  {isKo ? '담당자 성함 *' : 'Contact Person *'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={contactName}
-                  onChange={(e) => setContactName(e.target.value)}
-                  placeholder="E.g. John Doe"
-                  className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-xl px-4 py-3 focus:border-orange-500 outline-none text-sm`}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className={`block text-xs font-black ${isNight ? 'text-zinc-400' : 'text-zinc-600'} uppercase tracking-widest`}>
-                {isKo ? '이메일 주소 *' : 'Email Address *'}
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="director@academy.com"
-                className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-xl px-4 py-3 focus:border-orange-500 outline-none text-sm`}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className={`block text-xs font-black ${isNight ? 'text-zinc-400' : 'text-zinc-600'} uppercase tracking-widest`}>
-                {isKo ? '연락처 (선택)' : 'Phone Number (Optional)'}
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="010-0000-0000"
-                className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-xl px-4 py-3 focus:border-orange-500 outline-none text-sm`}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-black text-sm rounded-3xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 mt-2"
-            >
-              {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <span>{isKo ? '문의 및 데모 신청 접수' : 'Submit Demo Request'}</span>
-              )}
-            </button>
-          </form>
-        )}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <button
+            type="button"
+            onClick={() => {
+              const pricingEl = document.getElementById('pricing');
+              if (pricingEl) pricingEl.scrollIntoView({ behavior: 'smooth' });
+              else openPlanModal('medium', 'Medium Academy Plan (3-5 Teachers)', '중형 학원 플랜 (3~5인 강사)', 39000, 3, 3);
+            }}
+            className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span>{isKo ? '요금제 플랜 선택하기' : 'Select a Plan'}</span>
+            <ArrowRight size={16} weight="bold" />
+          </button>
+          <button
+            type="button"
+            onClick={() => openPlanModal('custom', 'Custom Academy Setup', '맞춤 학원 도입 상담', 0, 1, 1)}
+            className={`w-full sm:w-auto px-8 py-4 font-bold text-sm rounded-2xl border transition-all active:scale-[0.97] cursor-pointer ${
+              isNight 
+                ? 'bg-white/5 hover:bg-white/10 text-white border-white/10' 
+                : 'bg-white hover:bg-zinc-50 text-zinc-900 border-zinc-300 shadow-sm'
+            }`}
+          >
+            {isKo ? '1:1 학원 맞춤 상담 신청' : 'Schedule 1:1 Consultation'}
+          </button>
+        </div>
       </section>
 
       {/* --- CORPORATE BANK TRANSFER & TAX INVOICE MODAL --- */}
       {showBankModal && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 overflow-y-auto">
           <div 
-            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            className="fixed inset-0 bg-black/85 backdrop-blur-md" 
             onClick={() => setShowBankModal(false)} 
           />
-          <div className="relative w-full max-w-lg p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl animate-fade-in text-left">
+          <div className="relative w-full max-w-lg p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8">
             <div className="bg-[#0c0c0e] rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 text-zinc-200">
               <button
                 onClick={() => setShowBankModal(false)}
@@ -691,18 +830,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 /* Invoice Created Confirmation View */
                 <div className="space-y-6 animate-fade-in">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
                       <Receipt size={24} weight="bold" />
                     </div>
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 font-mono">
-                        {isKo ? '신청 접수 완료' : 'INVOICE CREATED'}
+                        {isKo ? '신청 접수 완료' : 'APPLICATION SUBMITTED'}
                       </span>
                       <h3 className="text-xl font-black text-white">
-                        {isKo ? '계좌이체 & 세금계산서 청구서' : 'Bank Transfer Invoice'}
+                        {isKo ? '학원 정보 접수 & 청구서 발송' : 'Invoice & Onboarding Requested'}
                       </h3>
                     </div>
                   </div>
+
+                  <p className="text-xs text-zinc-300 leading-relaxed bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-xl">
+                    {isKo 
+                      ? `✅ 학원 등록 정보가 Chekki AI 운영팀에 전달되었습니다! 아래 입금 계좌로 수강료를 입금해 주시면, 24시간 이내에 입력해주신 이메일(${invoiceResult.email})로 국세청 전자 세금계산서와 교사 인증 코드가 자동 발송됩니다.`
+                      : `✅ Your academy details have been registered with Chekki AI! A confirmation & tax invoice email has been sent to ${invoiceResult.email}. Please refer to the bank account details below to complete your payment.`}
+                  </p>
 
                   {/* Summary Card */}
                   <div className="p-5 bg-[#050505] border border-white/10 rounded-2xl space-y-3">
@@ -711,12 +856,26 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       <span className="font-bold text-orange-400">{invoiceResult.invoiceId}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
+                      <span className="text-zinc-400">{isKo ? '학원 / 기관명' : 'Academy Name'}:</span>
+                      <span className="font-bold text-white">{invoiceResult.academyName}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
                       <span className="text-zinc-400">{isKo ? '선택 플랜' : 'Selected Plan'}:</span>
                       <span className="font-bold text-white">{isKo ? selectedPlan.nameKo : selectedPlan.nameEn}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-zinc-400">{isKo ? '신청 교사 수' : 'Teacher Seats'}:</span>
+                      <span className="text-zinc-400">{isKo ? '신청 강사 수' : 'Teacher Seats'}:</span>
                       <span className="font-bold text-white">{invoiceResult.teacherCount} {isKo ? '명' : 'seats'}</span>
+                    </div>
+                    {invoiceResult.studentCount && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-zinc-400">{isKo ? '추정 재원생 수' : 'Enrolled Students'}:</span>
+                        <span className="font-bold text-white">{invoiceResult.studentCount} {isKo ? '명' : 'students'}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-zinc-400">{isKo ? '수신 이메일' : 'Tax Invoice Email'}:</span>
+                      <span className="font-bold text-white font-mono">{invoiceResult.email}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm pt-2 border-t border-white/5 font-bold">
                       <span className="text-zinc-300">{isKo ? '총 입금 금액' : 'Total Amount'}:</span>
@@ -727,17 +886,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   </div>
 
                   {/* Corporate Bank Account Details */}
-                  <div className="p-5 bg-orange-500/5 border border-orange-500/20 rounded-2xl space-y-3">
+                  <div className="p-5 bg-orange-500/10 border border-orange-500/30 rounded-2xl space-y-3">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 flex items-center gap-1.5 font-mono">
                       <Bank size={14} weight="bold" />
-                      <span>{isKo ? '입금 계좌 정보' : 'Corporate Bank Account'}</span>
+                      <span>{isKo ? '체키AI 법인 계좌 정보' : 'Chekki AI Corporate Bank Account'}</span>
                     </span>
 
-                    <div className="space-y-1 text-xs">
+                    <div className="space-y-1.5 text-xs">
                       <p className="text-zinc-400">{isKo ? '은행' : 'Bank'}: <strong className="text-white">신한은행 (Shinhan Bank)</strong></p>
                       <p className="text-zinc-400">{isKo ? '예금주' : 'Holder'}: <strong className="text-white">(주)체키AI (Chekki AI Inc.)</strong></p>
-                      <div className="flex items-center justify-between gap-2 pt-2">
-                        <p className="font-mono text-base font-black text-white select-all">110-524-889012</p>
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-orange-500/20">
+                        <p className="font-mono text-lg font-black text-white select-all">110-524-889012</p>
                         <button
                           type="button"
                           onClick={() => {
@@ -745,41 +904,47 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                             setCopiedBank(true);
                             setTimeout(() => setCopiedBank(false), 2000);
                           }}
-                          className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] rounded-xl flex items-center gap-1 transition-all active:scale-[0.95]"
+                          className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.95] shadow-md cursor-pointer"
                         >
-                          <Copy size={12} weight="bold" />
-                          <span>{copiedBank ? (isKo ? '복사됨!' : 'Copied!') : (isKo ? '계좌 복사' : 'Copy')}</span>
+                          <Copy size={14} weight="bold" />
+                          <span>{copiedBank ? (isKo ? '복사 완료!' : 'Copied!') : (isKo ? '계좌번호 복사' : 'Copy Account')}</span>
                         </button>
                       </div>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-zinc-400 leading-relaxed text-center bg-white/5 p-3 rounded-xl border border-white/5">
-                    {isKo 
-                      ? '💡 입금 확인 후 24시간 내에 국세청 전자 세금계산서가 발행되며, 교사 인증 코드가 이메일로 즉시 발송됩니다.'
-                      : '💡 Electronic tax invoice will be issued within 24 hours of payment verification. Teacher authorization codes will be emailed immediately.'}
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={() => { setShowBankModal(false); setInvoiceResult(null); }}
-                    className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98]"
-                  >
-                    {isKo ? '확인 및 닫기' : 'Done & Close'}
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => window.print()}
+                      className="w-1/3 py-3.5 bg-white/10 hover:bg-white/15 text-white font-bold text-xs rounded-2xl border border-white/10 transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      {isKo ? '청구서 인쇄' : 'Print Invoice'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowBankModal(false); setInvoiceResult(null); }}
+                      className="w-2/3 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      {isKo ? '확인 및 닫기' : 'Done & Close'}
+                    </button>
+                  </div>
                 </div>
               ) : (
                 /* Bank Transfer Request Form */
                 <form onSubmit={handleRequestBankInvoice} className="space-y-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center flex-shrink-0">
                       <Bank size={20} weight="bold" />
                     </div>
                     <div>
+                      <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest block font-mono">
+                        {isKo ? '학원 정보 입력 & 청구서 신청' : 'ACADEMY DETAILS & INVOICE'}
+                      </span>
                       <h3 className="text-xl font-black text-white">
-                        {isKo ? '계좌이체 & 세금계산서 신청' : 'Request Bank Invoice'}
+                        {isKo ? '학원 정보 입력 및 세금계산서 신청' : 'School Details & Bank Invoice'}
                       </h3>
-                      <p className="text-xs text-orange-400 font-bold">
+                      <p className="text-xs text-zinc-400 font-bold">
                         {isKo ? selectedPlan.nameKo : selectedPlan.nameEn}
                       </p>
                     </div>
@@ -787,14 +952,14 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
                   <div className="space-y-1 text-left">
                     <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                      {isKo ? '교육기관명 / 학원명 *' : 'Academy Name *'}
+                      {isKo ? '교육기관명 / 학원명 *' : 'Academy / Organization Name *'}
                     </label>
                     <input
                       type="text"
                       required
                       value={academyName}
                       onChange={(e) => setAcademyName(e.target.value)}
-                      placeholder="E.g. POLY Seocho"
+                      placeholder="E.g. POLY Seocho / Chekki English Studio"
                       className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
                     />
                   </div>
@@ -815,31 +980,46 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     </div>
                     <div className="space-y-1 text-left">
                       <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                        {isKo ? '필요 교사 수 *' : 'Teacher Seats *'}
+                        {isKo ? '필요 강사 수 *' : 'Teacher Seats *'}
                       </label>
                       <input
                         type="number"
-                        min="1"
+                        min={selectedPlan.minSeats || 1}
+                        disabled={selectedPlan.id === 'freelancer'}
                         required
                         value={teacherCount}
-                        onChange={(e) => setTeacherCount(Math.max(1, Number(e.target.value)))}
-                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white font-mono"
+                        onChange={(e) => setTeacherCount(Math.max(selectedPlan.minSeats || 1, Number(e.target.value)))}
+                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white font-mono disabled:opacity-60"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-1 text-left">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                      {isKo ? '세금계산서 수신 이메일 *' : 'Tax Invoice Email *'}
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="billing@academy.com"
-                      className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1 text-left">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                        {isKo ? '세금계산서 수신 이메일 *' : 'Tax Invoice Email *'}
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="billing@academy.com"
+                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                      />
+                    </div>
+                    <div className="space-y-1 text-left">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                        {isKo ? '재원생 수 (선택)' : 'Enrolled Students'}
+                      </label>
+                      <input
+                        type="text"
+                        value={studentCount}
+                        onChange={(e) => setStudentCount(e.target.value)}
+                        placeholder="E.g. 50"
+                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -869,23 +1049,25 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center text-xs mt-2">
-                    <span className="text-zinc-400 font-bold">{isKo ? '예상 월 청구액' : 'Total Monthly Amount'}:</span>
-                    <span className="text-lg font-black text-emerald-400 font-mono">
-                      ₩{(selectedPlan.price * teacherCount).toLocaleString()}
-                    </span>
-                  </div>
+                  {selectedPlan.price > 0 && (
+                    <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center text-xs mt-2">
+                      <span className="text-zinc-400 font-bold">{isKo ? '월 정액 청구 금액' : 'Total Monthly Amount'}:</span>
+                      <span className="text-lg font-black text-emerald-400 font-mono">
+                        ₩{(selectedPlan.price * teacherCount).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
 
                   <button
                     type="submit"
                     disabled={isRequestingInvoice}
-                    className="group w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-black text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 mt-4"
+                    className="group w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-black text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 mt-4 cursor-pointer"
                   >
                     {isRequestingInvoice ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        <span>{isKo ? '청구서 생성 및 계좌 정보 받기' : 'Generate Bank Invoice'}</span>
+                        <span>{isKo ? '신청서 제출 및 청구서 발송 요청' : 'Submit Request & Get Bank Invoice'}</span>
                         <ArrowRight size={14} weight="bold" />
                       </>
                     )}

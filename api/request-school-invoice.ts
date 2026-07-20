@@ -42,19 +42,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       planId,
       planName,
       teacherCount = 1,
+      studentCount = '',
+      billingCycle = 'monthly',
     } = body || {};
 
     if (!academyName || !contactName || !email) {
       return res.status(400).json({ error: 'Missing required fields (academyName, contactName, email)' });
     }
 
-    // Determine unit pricing based on planId
     let unitPrice = 49000;
-    if (planId === 'medium' || teacherCount >= 3) unitPrice = 39000;
-    if (planId === 'large' || teacherCount >= 6) unitPrice = 29000;
+    let actualSeats = Math.max(1, Number(teacherCount));
+    let isTrial = planId === 'trial';
 
-    const totalAmount = unitPrice * Math.max(1, Number(teacherCount));
-    const invoiceId = `INV-${Date.now().toString().slice(-6)}`;
+    if (isTrial) {
+      unitPrice = 0;
+      actualSeats = 1;
+    } else if (planId === 'freelancer') {
+      unitPrice = 35000;
+      actualSeats = 1;
+    } else if (planId === 'small') {
+      unitPrice = 49000;
+      actualSeats = Math.min(2, Math.max(1, actualSeats));
+    } else if (planId === 'medium') {
+      unitPrice = 39000;
+      actualSeats = Math.max(3, actualSeats);
+    } else if (planId === 'large') {
+      unitPrice = 29000;
+      actualSeats = Math.max(6, actualSeats);
+    } else {
+      if (actualSeats >= 6) unitPrice = 29000;
+      else if (actualSeats >= 3) unitPrice = 39000;
+      else unitPrice = 49000;
+    }
+
+    const months = billingCycle === 'yearly' ? 12 : 1;
+    const discountMultiplier = billingCycle === 'yearly' ? 0.8 : 1.0; // 20% discount on yearly
+    const totalAmount = isTrial ? 0 : Math.round(unitPrice * actualSeats * months * discountMultiplier);
+    const invoiceId = isTrial ? `TRIAL-${Date.now().toString().slice(-6)}` : `INV-${Date.now().toString().slice(-6)}`;
 
     const bankInfo = {
       bankName: 'Shinhan Bank (신한은행)',
@@ -72,6 +96,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       planId: planId || 'small',
       planName: planName || 'Small Academy Plan',
       teacherCount: Math.max(1, Number(teacherCount)),
+      studentCount: String(studentCount || '').trim(),
       unitPrice,
       totalAmount,
       status: 'pending_payment',

@@ -1098,7 +1098,18 @@ export default function AdminPage() {
                               <div className="text-zinc-500 text-[11px]">{inv.contactName} ({inv.email})</div>
                             </td>
                             <td className="py-3.5 px-4">
-                              <div className="text-zinc-300 font-medium">{inv.planName}</div>
+                              <div className="text-zinc-300 font-medium flex items-center gap-1.5">
+                                <span>{inv.planName}</span>
+                                {inv.planId === 'trial' ? (
+                                  <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-[9px] font-black uppercase rounded">TRIAL</span>
+                                ) : (
+                                  <span className={`px-1.5 py-0.5 text-[9px] font-black uppercase rounded ${
+                                    inv.billingCycle === 'yearly' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-zinc-400'
+                                  }`}>
+                                    {inv.billingCycle === 'yearly' ? 'YEARLY (20% OFF)' : 'MONTHLY'}
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-zinc-500 text-[11px]">{inv.teacherCount} Teacher Seats</div>
                             </td>
                             <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
