@@ -9,7 +9,11 @@ import {
   ArrowRight, 
   CheckCircle,
   Sun,
-  Moon
+  Moon,
+  Bank,
+  Copy,
+  Receipt,
+  X
 } from '@phosphor-icons/react';
 
 interface Props {
@@ -28,6 +32,55 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const [showBankModal, setShowBankModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ id: string; nameEn: string; nameKo: string; price: number }>({
+    id: 'medium',
+    nameEn: 'Medium Academy Plan (3-5 Teachers)',
+    nameKo: '중형 학원 플랜 (3~5인 강사)',
+    price: 39000
+  });
+  const [teacherCount, setTeacherCount] = useState(3);
+  const [bizRegNumber, setBizRegNumber] = useState('');
+  const [invoiceResult, setInvoiceResult] = useState<any>(null);
+  const [isRequestingInvoice, setIsRequestingInvoice] = useState(false);
+  const [copiedBank, setCopiedBank] = useState(false);
+
+  const openPlanModal = (planId: string, nameEn: string, nameKo: string, price: number, defaultTeachers: number) => {
+    setSelectedPlan({ id: planId, nameEn, nameKo, price });
+    setTeacherCount(defaultTeachers);
+    setInvoiceResult(null);
+    setShowBankModal(true);
+  };
+
+  const handleRequestBankInvoice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!academyName || !contactName || !email) return;
+    setIsRequestingInvoice(true);
+    try {
+      const res = await fetch('/api/request-school-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          academyName,
+          contactName,
+          email,
+          phone,
+          bizRegNumber,
+          planId: selectedPlan.id,
+          planName: isKo ? selectedPlan.nameKo : selectedPlan.nameEn,
+          teacherCount,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invoice request failed');
+      setInvoiceResult(data.invoice);
+    } catch (err: any) {
+      alert(err.message || (isKo ? '요청 처리 실패. 다시 시도해주세요.' : 'Request failed. Please try again.'));
+    } finally {
+      setIsRequestingInvoice(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -407,12 +460,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </li>
               </ul>
             </div>
-            <a
-              href="#demo"
-              className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold text-xs rounded-2xl border border-white/10 text-center transition-all active:scale-[0.98]"
+            <button
+              type="button"
+              onClick={() => openPlanModal('small', 'Small Academy Plan (1-2 Teachers)', '소형 학원 플랜 (1~2인 강사)', 49000, 1)}
+              className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold text-xs rounded-2xl border border-white/10 text-center transition-all active:scale-[0.98] cursor-pointer"
             >
-              {isKo ? '도입 문의하기' : 'Get Started'}
-            </a>
+              {isKo ? '계좌이체 & 세금계산서 신청' : 'Request Bank Invoice'}
+            </button>
           </div>
 
           {/* Plan 2: Medium Academy (POPULAR) */}
@@ -452,12 +506,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </li>
               </ul>
             </div>
-            <a
-              href="#demo"
-              className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98]"
+            <button
+              type="button"
+              onClick={() => openPlanModal('medium', 'Medium Academy Plan (3-5 Teachers)', '중형 학원 플랜 (3~5인 강사)', 39000, 3)}
+              className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
             >
-              {isKo ? '도입 문의하기' : 'Get Started'}
-            </a>
+              {isKo ? '계좌이체 & 세금계산서 신청' : 'Request Bank Invoice'}
+            </button>
           </div>
 
           {/* Plan 3: Large Academy & Franchise */}
@@ -498,12 +553,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </li>
               </ul>
             </div>
-            <a
-              href="#demo"
-              className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold text-xs rounded-2xl border border-white/10 text-center transition-all active:scale-[0.98]"
+            <button
+              type="button"
+              onClick={() => openPlanModal('large', 'Large Academy Plan (6+ Teachers)', '대형 학원 플랜 (6인 이상)', 29000, 6)}
+              className="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold text-xs rounded-2xl border border-white/10 text-center transition-all active:scale-[0.98] cursor-pointer"
             >
-              {isKo ? '맞춤 문의하기' : 'Contact Sales'}
-            </a>
+              {isKo ? '계좌이체 & 세금계산서 신청' : 'Request Bank Invoice'}
+            </button>
           </div>
         </div>
       </section>
@@ -614,6 +670,232 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </form>
         )}
       </section>
+
+      {/* --- CORPORATE BANK TRANSFER & TAX INVOICE MODAL --- */}
+      {showBankModal && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            onClick={() => setShowBankModal(false)} 
+          />
+          <div className="relative w-full max-w-lg p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl animate-fade-in text-left">
+            <div className="bg-[#0c0c0e] rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 text-zinc-200">
+              <button
+                onClick={() => setShowBankModal(false)}
+                className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all active:scale-[0.95]"
+              >
+                <X size={18} weight="bold" />
+              </button>
+
+              {invoiceResult ? (
+                /* Invoice Created Confirmation View */
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <Receipt size={24} weight="bold" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 font-mono">
+                        {isKo ? '신청 접수 완료' : 'INVOICE CREATED'}
+                      </span>
+                      <h3 className="text-xl font-black text-white">
+                        {isKo ? '계좌이체 & 세금계산서 청구서' : 'Bank Transfer Invoice'}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Summary Card */}
+                  <div className="p-5 bg-[#050505] border border-white/10 rounded-2xl space-y-3">
+                    <div className="flex justify-between items-center text-xs pb-3 border-b border-white/5 font-mono">
+                      <span className="text-zinc-500">{isKo ? '청구 코드' : 'Invoice ID'}:</span>
+                      <span className="font-bold text-orange-400">{invoiceResult.invoiceId}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-zinc-400">{isKo ? '선택 플랜' : 'Selected Plan'}:</span>
+                      <span className="font-bold text-white">{isKo ? selectedPlan.nameKo : selectedPlan.nameEn}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-zinc-400">{isKo ? '신청 교사 수' : 'Teacher Seats'}:</span>
+                      <span className="font-bold text-white">{invoiceResult.teacherCount} {isKo ? '명' : 'seats'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm pt-2 border-t border-white/5 font-bold">
+                      <span className="text-zinc-300">{isKo ? '총 입금 금액' : 'Total Amount'}:</span>
+                      <span className="text-xl font-black text-emerald-400 font-mono">
+                        ₩{(invoiceResult.totalAmount || 0).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Corporate Bank Account Details */}
+                  <div className="p-5 bg-orange-500/5 border border-orange-500/20 rounded-2xl space-y-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 flex items-center gap-1.5 font-mono">
+                      <Bank size={14} weight="bold" />
+                      <span>{isKo ? '입금 계좌 정보' : 'Corporate Bank Account'}</span>
+                    </span>
+
+                    <div className="space-y-1 text-xs">
+                      <p className="text-zinc-400">{isKo ? '은행' : 'Bank'}: <strong className="text-white">신한은행 (Shinhan Bank)</strong></p>
+                      <p className="text-zinc-400">{isKo ? '예금주' : 'Holder'}: <strong className="text-white">(주)체키AI (Chekki AI Inc.)</strong></p>
+                      <div className="flex items-center justify-between gap-2 pt-2">
+                        <p className="font-mono text-base font-black text-white select-all">110-524-889012</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText('110-524-889012');
+                            setCopiedBank(true);
+                            setTimeout(() => setCopiedBank(false), 2000);
+                          }}
+                          className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] rounded-xl flex items-center gap-1 transition-all active:scale-[0.95]"
+                        >
+                          <Copy size={12} weight="bold" />
+                          <span>{copiedBank ? (isKo ? '복사됨!' : 'Copied!') : (isKo ? '계좌 복사' : 'Copy')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-zinc-400 leading-relaxed text-center bg-white/5 p-3 rounded-xl border border-white/5">
+                    {isKo 
+                      ? '💡 입금 확인 후 24시간 내에 국세청 전자 세금계산서가 발행되며, 교사 인증 코드가 이메일로 즉시 발송됩니다.'
+                      : '💡 Electronic tax invoice will be issued within 24 hours of payment verification. Teacher authorization codes will be emailed immediately.'}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => { setShowBankModal(false); setInvoiceResult(null); }}
+                    className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98]"
+                  >
+                    {isKo ? '확인 및 닫기' : 'Done & Close'}
+                  </button>
+                </div>
+              ) : (
+                /* Bank Transfer Request Form */
+                <form onSubmit={handleRequestBankInvoice} className="space-y-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                      <Bank size={20} weight="bold" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-white">
+                        {isKo ? '계좌이체 & 세금계산서 신청' : 'Request Bank Invoice'}
+                      </h3>
+                      <p className="text-xs text-orange-400 font-bold">
+                        {isKo ? selectedPlan.nameKo : selectedPlan.nameEn}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 text-left">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                      {isKo ? '교육기관명 / 학원명 *' : 'Academy Name *'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={academyName}
+                      onChange={(e) => setAcademyName(e.target.value)}
+                      placeholder="E.g. POLY Seocho"
+                      className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1 text-left">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                        {isKo ? '담당자 성함 *' : 'Contact Name *'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        placeholder="John Doe"
+                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                      />
+                    </div>
+                    <div className="space-y-1 text-left">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                        {isKo ? '필요 교사 수 *' : 'Teacher Seats *'}
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        required
+                        value={teacherCount}
+                        onChange={(e) => setTeacherCount(Math.max(1, Number(e.target.value)))}
+                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 text-left">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                      {isKo ? '세금계산서 수신 이메일 *' : 'Tax Invoice Email *'}
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="billing@academy.com"
+                      className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1 text-left">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                        {isKo ? '사업자등록번호 (선택)' : 'Biz Reg Number (Optional)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={bizRegNumber}
+                        onChange={(e) => setBizRegNumber(e.target.value)}
+                        placeholder="123-45-67890"
+                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1 text-left">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                        {isKo ? '연락처 (선택)' : 'Phone Number'}
+                      </label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="010-0000-0000"
+                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center text-xs mt-2">
+                    <span className="text-zinc-400 font-bold">{isKo ? '예상 월 청구액' : 'Total Monthly Amount'}:</span>
+                    <span className="text-lg font-black text-emerald-400 font-mono">
+                      ₩{(selectedPlan.price * teacherCount).toLocaleString()}
+                    </span>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isRequestingInvoice}
+                    className="group w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-black text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 mt-4"
+                  >
+                    {isRequestingInvoice ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <span>{isKo ? '청구서 생성 및 계좌 정보 받기' : 'Generate Bank Invoice'}</span>
+                        <ArrowRight size={14} weight="bold" />
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* --- FOOTER --- */}
       <footer className={`py-12 border-t ${isNight ? 'border-white/5 bg-black/30' : 'border-zinc-200 bg-white'} px-6 text-center`}>

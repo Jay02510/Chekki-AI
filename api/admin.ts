@@ -254,6 +254,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await adminDb.collection('schools').doc(sanitizedSchoolId).delete();
 
       return res.status(200).json({ success: true, message: 'School deleted successfully' });
+    } else if (action === 'list_invoices') {
+      const invoicesSnapshot = await adminDb
+        .collection('school_invoices')
+        .orderBy('createdAt', 'desc')
+        .limit(100)
+        .get();
+
+      const invoices = invoicesSnapshot.docs.map((doc) => ({
+        invoiceId: doc.id,
+        ...doc.data(),
+      }));
+
+      return res.status(200).json({ success: true, invoices });
+    } else if (action === 'confirm_invoice') {
+      const { invoiceId } = req.body;
+      if (!invoiceId) return res.status(400).json({ error: 'Missing invoiceId' });
+
+      const invoiceRef = adminDb.collection('school_invoices').doc(invoiceId);
+      const invoiceSnap = await invoiceRef.get();
+      if (!invoiceSnap.exists) return res.status(404).json({ error: 'Invoice not found' });
+
+      const invoiceData = invoiceSnap.data() || {};
+      const sanitizedSchoolId = (invoiceData.academyName || 'SCHOOL').toUpperCase().replace(/\s+/g, '-').slice(0, 10) + `_${Date.now().toString().slice(-4)}`;
+      const teacherCode = `${sanitizedSchoolId.split('_')[0]}-TEACHER`;
+
+      // 1. Create school in schools collection
+      await adminDb.collection('schools').doc(sanitizedSchoolId).set({
+        name: invoiceData.academyName || 'B2B Academy',
+        teacherCode: teacherCode,
+        maxUses: invoiceData.teacherCount || 5,
+        usedByUids: [],
+        createdAt: new Date().toISOString(),
+      });
+
+      // 2. Mark invoice as paid
+      await invoiceRef.update({
+        status: 'paid',
+        paidAt: new Date().toISOString(),
+        generatedSchoolId: sanitizedSchoolId,
+        generatedTeacherCode: teacherCode,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Payment confirmed and School Account Activated!',
+        schoolId: sanitizedSchoolId,
+        teacherCode: teacherCode,
+      });
     } else if (action === 'assign_teacher') {
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
       let targetUid = uid;

@@ -23,12 +23,15 @@ export default function AdminPage() {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('1_month');
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'create' | 'upgrade' | 'delete' | 'view_members' | 'schools'>(
+  const [mode, setMode] = useState<'create' | 'upgrade' | 'delete' | 'view_members' | 'schools' | 'invoices'>(
     'create'
   );
   const [message, setMessage] = useState({ text: '', type: '' });
   const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Invoices State
+  const [invoices, setInvoices] = useState<any[]>([]);
 
   // Schools State
   const [schools, setSchools] = useState<any[]>([]);
@@ -41,6 +44,52 @@ export default function AdminPage() {
   const [assignSchoolIdInput, setAssignSchoolIdInput] = useState('');
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showCreateSchoolModal, setShowCreateSchoolModal] = useState(false);
+
+  const handleFetchInvoices = async () => {
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'list_invoices' }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch invoices');
+      }
+      setInvoices(data.invoices || []);
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error fetching invoices', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmInvoice = async (invoiceId: string) => {
+    if (!window.confirm('Confirm corporate bank payment received & activate teacher codes?')) return;
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'confirm_invoice', invoiceId }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to confirm invoice');
+      }
+      setMessage({ text: `✅ ${data.message} Teacher Code: ${data.teacherCode}`, type: 'success' });
+      handleFetchInvoices();
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error confirming invoice', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFetchUsers = async () => {
     setLoading(true);
@@ -592,6 +641,17 @@ export default function AdminPage() {
               >
                 Schools
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('invoices');
+                  setMessage({ text: '', type: '' });
+                  handleFetchInvoices();
+                }}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'invoices' ? 'bg-orange-500 text-white shadow font-black' : 'text-zinc-500 hover:text-white/80'}`}
+              >
+                Bank Invoices 🧾
+              </button>
             </div>
 
             {mode === 'view_members' ? (
@@ -990,6 +1050,93 @@ export default function AdminPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            ) : mode === 'invoices' ? (
+              <div className="w-full flex flex-col gap-4 mt-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">
+                    School Bank Invoice Requests ({invoices.length})
+                  </h3>
+                  <button
+                    onClick={handleFetchInvoices}
+                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-bold transition-all"
+                  >
+                    Refresh List
+                  </button>
+                </div>
+
+                <div className="w-full overflow-x-auto">
+                  {loading ? (
+                    <div className="flex justify-center p-8 text-zinc-500 font-bold tracking-widest animate-pulse">
+                      LOADING INVOICES...
+                    </div>
+                  ) : invoices.length === 0 ? (
+                    <div className="p-8 text-center text-zinc-500 text-sm">
+                      No corporate bank invoice requests found.
+                    </div>
+                  ) : (
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead>
+                        <tr className="border-b border-zinc-800 text-zinc-400 text-xs uppercase">
+                          <th className="py-3 px-4 font-bold">Invoice ID</th>
+                          <th className="py-3 px-4 font-bold">Academy & Contact</th>
+                          <th className="py-3 px-4 font-bold">Plan & Seats</th>
+                          <th className="py-3 px-4 font-bold">Amount</th>
+                          <th className="py-3 px-4 font-bold">Biz Reg No.</th>
+                          <th className="py-3 px-4 font-bold">Status</th>
+                          <th className="py-3 px-4 font-bold text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800/50">
+                        {invoices.map((inv) => (
+                          <tr key={inv.invoiceId} className="hover:bg-zinc-900/50 text-xs">
+                            <td className="py-3.5 px-4 font-mono font-bold text-orange-400">
+                              {inv.invoiceId}
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="font-bold text-white">{inv.academyName}</div>
+                              <div className="text-zinc-500 text-[11px]">{inv.contactName} ({inv.email})</div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="text-zinc-300 font-medium">{inv.planName}</div>
+                              <div className="text-zinc-500 text-[11px]">{inv.teacherCount} Teacher Seats</div>
+                            </td>
+                            <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
+                              ₩{(inv.totalAmount || 0).toLocaleString()}
+                            </td>
+                            <td className="py-3.5 px-4 font-mono text-zinc-400">
+                              {inv.bizRegNumber || '-'}
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
+                                inv.status === 'paid' 
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                                  : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                              }`}>
+                                {inv.status === 'paid' ? 'PAID & ACTIVATED' : 'PENDING PAYMENT'}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-right">
+                              {inv.status !== 'paid' && (
+                                <button
+                                  onClick={() => handleConfirmInvoice(inv.invoiceId)}
+                                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs shadow transition-all active:scale-[0.95]"
+                                >
+                                  Confirm Bank Payment & Activate
+                                </button>
+                              )}
+                              {inv.status === 'paid' && (
+                                <span className="text-[11px] font-mono text-zinc-500">
+                                  Code: {inv.generatedTeacherCode}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               </div>
             ) : (
               <form
