@@ -287,8 +287,8 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
-                <img src="/assets/bento_reveal_only.png" className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
+              <div className="flex-1 rounded-[2rem] bg-white dark:bg-[#050505] border border-slate-100 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+                <img src={theme === 'light' ? '/assets/bento_light_reveal_only.png' : '/assets/bento_reveal_only.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
@@ -326,8 +326,8 @@ export default function Landing() {
                   <ArrowRight className="text-brand animate-pulse shrink-0" />
                 </h3>
               </div>
-              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
-                <img src="/assets/bento_speed_mode.png" className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
+              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-white dark:bg-[#050505] border border-slate-100 dark:border-white/5 relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
+                <img src={theme === 'light' ? '/assets/bento_light_speed_mode.png' : '/assets/bento_speed_mode.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
             </div>
 
@@ -348,8 +348,8 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
-                <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
+              <div className="flex-1 rounded-[2rem] bg-white dark:bg-[#050505] border border-slate-100 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+                <img src={theme === 'light' ? '/assets/bento_light_dashboard.png' : '/assets/onboarding_icon_dashboard_1782545238800.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
@@ -381,8 +381,8 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
-                <img src="/assets/onboarding_icon_grading_status.png" className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
+              <div className="flex-1 rounded-[2rem] bg-white dark:bg-[#050505] border border-slate-100 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+                <img src={theme === 'light' ? '/assets/bento_light_grading_status.png' : '/assets/onboarding_icon_grading_status.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
