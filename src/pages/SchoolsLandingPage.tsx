@@ -57,8 +57,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             href="/"
             onClick={(e) => {
               e.preventDefault();
-              window.history.pushState({}, '', '/');
-              window.dispatchEvent(new PopStateEvent('popstate'));
+              window.location.href = '/';
             }}
             className="flex items-center gap-[2px] text-xl font-bold tracking-tighter"
           >
@@ -98,8 +97,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               href="/teacher"
               onClick={(e) => {
                 e.preventDefault();
-                window.history.pushState({}, '', '/teacher');
-                window.dispatchEvent(new PopStateEvent('popstate'));
+                window.location.href = '/teacher';
               }}
               className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-full transition-all active:scale-[0.97]"
             >
@@ -145,8 +143,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             href="/teacher"
             onClick={(e) => {
               e.preventDefault();
-              window.history.pushState({}, '', '/teacher');
-              window.dispatchEvent(new PopStateEvent('popstate'));
+              window.location.href = '/teacher';
             }}
             className={`w-full sm:w-auto px-8 py-4 font-black text-sm rounded-3xl border transition-all active:scale-[0.97] ${
               isNight 
@@ -158,15 +155,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </a>
         </div>
 
-        {/* Hero UI Mockup Image */}
-        <div className="mt-12 w-full max-w-3xl mx-auto">
-          <div className={`relative rounded-2xl overflow-hidden border ${
-            isNight ? 'border-orange-500/20' : 'border-orange-500/10'
-          }`}>
+        {/* Hero UI Image - Using main Chekki asset */}
+        <div className="mt-12 w-full max-w-2xl mx-auto">
+          <div className="relative flex justify-center items-center">
             <img
-              src="/assets/schools/schools_hero.png"
-              alt="AI Grading Dashboard mockup"
-              className="w-full h-auto object-cover"
+              src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png"
+              alt="Chekki AI Mascot & Dashboard"
+              className="w-full max-w-[480px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.25)]"
               loading="lazy"
             />
           </div>
@@ -204,8 +199,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     : "Seed each class's active spelling vocabulary lists, target phonics, and reading passages. Our grading engine aligns its OCR check straight to your weekly textbook targets."}
                 </p>
               </div>
-              <div className="w-full md:w-48 lg:w-56 flex-shrink-0 rounded-xl overflow-hidden opacity-90 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
-                <img src="/assets/schools/schools_bento_curriculum.png" alt="Curriculum seeding interface" className="w-full h-auto object-cover" loading="lazy" />
+              <div className={`w-full md:w-48 lg:w-56 flex-shrink-0 rounded-2xl overflow-hidden p-2 transition-all duration-300 ${isNight ? 'bg-zinc-950/60 border border-white/10' : 'bg-slate-100/80 border border-slate-200/80'}`}>
+                <img src="/assets/schools/schools_bento_curriculum.png" alt="Curriculum seeding interface" className="w-full h-auto object-contain filter drop-shadow-md" loading="lazy" />
               </div>
             </div>
 
@@ -235,8 +230,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </p>
             </div>
 
-            <div className="mt-4 rounded-xl overflow-hidden shadow-md opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-              <img src="/assets/schools/schools_bento_join_code.png" alt="Class join code entry UI" className="w-full h-auto object-cover" loading="lazy" />
+            <div className={`mt-4 rounded-2xl overflow-hidden p-2 flex justify-center transition-all duration-300 ${isNight ? 'bg-zinc-950/60 border border-white/10' : 'bg-slate-100/80 border border-slate-200/80'}`}>
+              <img src="/assets/schools/schools_bento_join_code.png" alt="Class join code entry UI" className="w-full max-w-[240px] h-auto object-contain filter drop-shadow-md" loading="lazy" />
             </div>
           </div>
 
@@ -260,8 +255,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </p>
             </div>
 
-            <div className="mt-4 rounded-xl overflow-hidden shadow-md opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-              <img src="/assets/schools/schools_bento_diagnostics.png" alt="Classroom diagnostics dashboard" className="w-full h-auto object-cover" loading="lazy" />
+            <div className={`mt-4 rounded-2xl overflow-hidden p-2 flex justify-center transition-all duration-300 ${isNight ? 'bg-zinc-950/60 border border-white/10' : 'bg-slate-100/80 border border-slate-200/80'}`}>
+              <img src="/assets/schools/schools_bento_diagnostics.png" alt="Classroom diagnostics dashboard" className="w-full max-w-[240px] h-auto object-contain filter drop-shadow-md" loading="lazy" />
             </div>
           </div>
 
@@ -290,8 +285,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <span>{isKo ? '밀착 학부모 케어로 재원율 증가' : 'Increase student retention with digital care'}</span>
                 </div>
               </div>
-              <div className="w-full md:w-44 lg:w-52 flex-shrink-0 rounded-xl overflow-hidden opacity-90 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
-                <img src="/assets/schools/schools_bento_parent_care.png" alt="Parent homework report UI" className="w-full h-auto object-cover" loading="lazy" />
+              <div className={`w-full md:w-44 lg:w-52 flex-shrink-0 rounded-2xl overflow-hidden p-2 transition-all duration-300 ${isNight ? 'bg-zinc-950/60 border border-white/10' : 'bg-slate-100/80 border border-slate-200/80'}`}>
+                <img src="/assets/schools/schools_bento_parent_care.png" alt="Parent homework report UI" className="w-full h-auto object-contain filter drop-shadow-md" loading="lazy" />
               </div>
             </div>
           </div>

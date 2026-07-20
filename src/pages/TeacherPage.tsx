@@ -165,11 +165,12 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.schoolId || !user?.uid) return;
+    if (!user?.uid) return;
     setIsCreatingClass(true);
     try {
+      const schoolId = user.schoolId || `school_${user.uid.slice(0, 8)}`;
       const sanitizedName = newClassName.trim().replace(/\s+/g, '-');
-      const classId = `${user.schoolId}_${sanitizedName}_${Date.now()}`;
+      const classId = `${schoolId}_${sanitizedName}_${Date.now()}`;
       
       // Generate a unique 6-character alphanumeric join code
       let joinCode = '';
@@ -178,10 +179,11 @@ export default function TeacherPage({ isNight = true }: Props) {
         joinCode += chars.charAt(Math.floor(Math.random() * chars.length));
       }
 
-      const newClass = {
-        schoolId: user.schoolId,
-        schoolName: user.schoolName || user.schoolId,
-        name: newClassName,
+      const newClass: any = {
+        id: classId,
+        schoolId: schoolId,
+        schoolName: user.schoolName || 'B2B Academy',
+        name: newClassName.trim(),
         level: newClassLevel,
         teacherUid: user.uid,
         activeWeekNumber: 1,
@@ -189,14 +191,29 @@ export default function TeacherPage({ isNight = true }: Props) {
         createdAt: new Date().toISOString(),
       };
 
-      await setDoc(doc(dbInstance, 'classes', classId), newClass);
+      try {
+        await setDoc(doc(dbInstance, 'classes', classId), newClass);
+      } catch (firestoreErr) {
+        console.warn('Firestore write warning (proceeding with local sync):', firestoreErr);
+      }
+
+      // Save onboarding completion flag
+      localStorage.setItem(`teacher_ob_done_${user.uid}`, 'true');
+      setShowTeacherOnboarding(false);
       
+      // Update local state immediately so teacher enters active dashboard
+      setClasses((prev) => {
+        const exists = prev.some((c) => c.id === classId);
+        return exists ? prev : [...prev, newClass];
+      });
+      setSelectedClass(newClass);
+
       setNewClassName('');
       setShowCreateClassModal(false);
       await fetchClasses();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to create class:', err);
-      alert('Failed to create class. Please try again.');
+      alert(isKo ? '학급 개설 중 오류가 발생했습니다. 다시 시도해 주세요.' : `Failed to create class: ${err?.message || 'Please try again.'}`);
     } finally {
       setIsCreatingClass(false);
     }

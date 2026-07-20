@@ -226,7 +226,7 @@ export default function Landing() {
       </section>
 
       {/* DESIRE: GSAP Scrubbing Text Reveal with Video Background */}
-      <section className="py-32 md:py-40 px-4 bg-[#FAFAFA] dark:bg-[#050505] border-y border-black/5 dark:border-white/5 relative overflow-hidden flex items-center justify-center min-h-[70dvh]">
+      <section className="py-16 md:py-20 px-4 bg-[#FAFAFA] dark:bg-[#050505] border-y border-black/5 dark:border-white/5 relative overflow-hidden flex flex-col items-center justify-center">
         {/* Cinematic Video Background */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[#FAFAFA]/90 dark:bg-[#050505]/80 z-10" />
@@ -241,17 +241,27 @@ export default function Landing() {
           </video>
         </div>
 
-        <div className="max-w-5xl mx-auto text-center relative z-20">
-          <h2 ref={textRevealRef} className="text-balance text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[1.2] text-slate-900 dark:text-white tracking-tight [word-break:keep-all]">
+        <div className="max-w-5xl mx-auto text-center relative z-20 flex flex-col items-center">
+          <h2 ref={textRevealRef} className="text-balance text-[clamp(2rem,4.5vw,4.5rem)] font-bold leading-[1.2] text-slate-900 dark:text-white tracking-tight [word-break:keep-all]">
             {(lang === 'en' ? `Bridging the cultural gap between school and home.` : `학원 숙제 고민부터 집에서의 영어 공부까지, 엄마의 마음으로 함께합니다.`).split(" ").map((word, i) => (
               <span key={i} className="reveal-word inline-block mr-[0.3em]">{word}</span>
             ))}
           </h2>
+
+          <div className="mt-8">
+            <a
+              href="/schools"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-brand hover:bg-brand-hover text-white font-bold text-base rounded-full shadow-xl shadow-brand/20 transition-all duration-300 active:scale-[0.97] group"
+            >
+              <span>{lang === 'en' ? 'Chekki for English Academies' : '학원·교육기관 전용 체키 보러가기'}</span>
+              <ArrowRight size={20} weight="bold" className="group-hover:translate-x-1 transition-transform" />
+            </a>
+          </div>
         </div>
       </section>
 
       {/* GAPLESS BENTO FEATURES */}
-      <section id="features" className="py-32 md:py-40 px-4 md:px-8 max-w-7xl mx-auto w-full">
+      <section id="features" className="py-16 md:py-24 px-4 md:px-8 max-w-7xl mx-auto w-full">
         <div className="mb-16 flex flex-col items-center text-center">
           <div className="mb-4 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-600 dark:text-white/70">
             {lang === 'en' ? 'Pain Points Solved' : '엄마의 고민 해결'}
@@ -277,8 +287,8 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
-                <img src="/assets/bento_reveal_only.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]" />
+              <div className="flex-1 rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
+                <img src="/assets/bento_reveal_only.png" className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
@@ -316,8 +326,8 @@ export default function Landing() {
                   <ArrowRight className="text-brand animate-pulse shrink-0" />
                 </h3>
               </div>
-              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
-                <img src="/assets/bento_speed_mode.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
+              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
+                <img src="/assets/bento_speed_mode.png" className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
             </div>
 
@@ -338,8 +348,8 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
-                <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]" />
+              <div className="flex-1 rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
+                <img src="/assets/onboarding_icon_dashboard_1782545238800.png" className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
@@ -371,8 +381,8 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
-                <img src="/assets/onboarding_icon_grading_status.png" className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-[var(--ease-premium)]" />
+              <div className="flex-1 rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
+                <img src="/assets/onboarding_icon_grading_status.png" className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
                 </div>
@@ -404,7 +414,7 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+              <div className="flex-1 rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
                 {/* Animated voice mock UI */}
                 <div className="w-full max-w-[220px] flex flex-col items-center gap-4">
                   <div className="bg-black/5 dark:bg-white/10 rounded-xl p-4 text-center w-full">
