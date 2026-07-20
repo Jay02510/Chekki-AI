@@ -45,13 +45,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   };
 
   return (
-    <div className={`min-h-screen ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans transition-colors duration-200 relative overflow-hidden flex flex-col`}>
+    <div className={`min-h-screen ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#F3F4F6] text-zinc-900'} font-sans transition-colors duration-200 relative overflow-hidden flex flex-col`}>
       {/* Background radial glows */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Mini top bar */}
-      <div className={`border-b ${isNight ? 'border-white/5 bg-black/10' : 'border-zinc-200 bg-white/50'} py-3 px-6 backdrop-blur-md sticky top-0 z-50`}>
+      <div className={`border-b ${isNight ? 'border-white/5 bg-black/10' : 'border-zinc-200/60 bg-white/60'} py-3 px-6 backdrop-blur-md sticky top-0 z-50`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <a
             href="/"
@@ -63,7 +63,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           >
             <span className={isNight ? 'text-white' : 'text-zinc-900'}>Chekki</span>
             <span className="text-orange-500 font-extrabold">ai</span>
-            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ml-2 ${isNight ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-100 text-zinc-500'}`}>
+            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ml-2 ${isNight ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-200/70 text-zinc-600'}`}>
               {isKo ? '교육기관용' : 'Institutions'}
             </span>
           </a>
@@ -75,7 +75,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               className={`px-3 py-1.5 rounded-full text-[10px] font-black border tracking-wider transition-colors ${
                 isNight 
                   ? 'border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white' 
-                  : 'border-zinc-200 hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900'
+                  : 'border-zinc-300 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900'
               }`}
             >
               {language === 'ko' ? 'ENGLISH' : '한국어'}
@@ -87,7 +87,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               className={`p-2 rounded-full border transition-colors ${
                 isNight 
                   ? 'border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white' 
-                  : 'border-zinc-200 hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900'
+                  : 'border-zinc-300 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900'
               }`}
             >
               {isNight ? <Sun size={14} weight="bold" /> : <Moon size={14} weight="bold" />}
@@ -148,7 +148,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             className={`w-full sm:w-auto px-8 py-4 font-black text-sm rounded-3xl border transition-all active:scale-[0.97] ${
               isNight 
                 ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white' 
-                : 'bg-zinc-100 border-zinc-200 hover:bg-zinc-200 text-zinc-900'
+                : 'bg-white/80 border-zinc-300 hover:bg-white text-zinc-900 shadow-sm'
             }`}
           >
             {isKo ? '교사용 데모 로그인' : 'Try Demo Portal'}
@@ -168,56 +168,55 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
-      {/* --- BENTO GRID SECTION --- */}
-      <section className="max-w-7xl mx-auto px-6 py-20 w-full flex-1">
-        <div className="text-center mb-12">
-          <h2 className={`font-display text-2xl sm:text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-            {isKo ? '영어 전문 교육을 위한 완벽한 시스템' : 'Designed Specially for English Academies'}
+      {/* --- BENTO GRID FEATURES --- */}
+      <section className="py-16 md:py-24 px-4 md:px-8 max-w-7xl mx-auto w-full">
+        <div className="mb-12 text-center">
+          <h2 className={`font-display text-2xl sm:text-4xl font-black tracking-tight mb-4 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+            {isKo ? '학원 운영을 위해 설계된 핵심 기능' : 'Designed Specially for English Academies'}
           </h2>
         </div>
 
-        {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Bento Cell 1: Curriculum Pre-seeding (Large block, spans 2 columns) */}
-          <div className={`md:col-span-2 p-8 border rounded-2xl flex flex-col justify-between transition-all ${
+          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
             isNight 
               ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
-              : 'bg-white border-zinc-200 hover:border-zinc-300'
-          } hover:-translate-y-0.5 duration-200 shadow-sm relative overflow-hidden group`}>
+              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
+          } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
 
-            <div className="flex flex-col md:flex-row gap-6 items-start">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
               <div className="flex-1">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-5">
                   <GraduationCap size={20} weight="bold" />
                 </div>
                 <h3 className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                   {isKo ? '매주 맞춤 교재 단어장 연동 (Curriculum Seeding)' : 'Weekly Curriculum Pre-seeding'}
                 </h3>
-                <p className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                <p className={`text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {isKo 
                     ? '선생님이 대시보드에 학년별/학급별 주간 단어와 핵심 리딩 문장을 입력해 두면, 학생이 올린 오답을 분석할 때 인공지능이 우리 학원 교재를 기반으로 100% 맞춤형 첨삭을 수행합니다.'
                     : "Seed each class's active spelling vocabulary lists, target phonics, and reading passages. Our grading engine aligns its OCR check straight to your weekly textbook targets."}
                 </p>
               </div>
-              <div className={`w-full md:w-48 lg:w-56 flex-shrink-0 rounded-2xl overflow-hidden p-2 transition-all duration-300 ${isNight ? 'bg-zinc-950/80 border border-white/10' : 'bg-white border border-zinc-200/80 shadow-sm'}`}>
+              <div className="w-full md:w-56 lg:w-64 flex-shrink-0 rounded-2xl overflow-hidden p-1 flex justify-center items-center">
                 <img src={isNight ? "/assets/schools/schools_bento_curriculum.png" : "/assets/schools/schools_bento_curriculum_light.png"} alt="Curriculum seeding interface" className="w-full h-auto object-contain filter drop-shadow-md" loading="lazy" />
               </div>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-zinc-900/10 flex items-center gap-2 text-xs font-bold text-orange-500">
+            <div className="mt-6 pt-4 border-t border-zinc-200/60 dark:border-white/10 flex items-center gap-2 text-xs font-bold text-orange-500">
               <span>{isKo ? 'AI 교정 일치율 극대화' : 'Near-perfect hand-written text resolution'}</span>
               <Sparkle size={12} weight="bold" />
             </div>
           </div>
 
           {/* Bento Cell 2: Roster approvals (1 column) */}
-          <div className={`p-8 border rounded-2xl flex flex-col justify-between transition-all ${
+          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
             isNight 
               ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
-              : 'bg-white border-zinc-200 hover:border-zinc-300'
-          } hover:-translate-y-0.5 duration-200 shadow-sm relative overflow-hidden group`}>
+              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
+          } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
             <div>
-              <div className="w-10 h-10 rounded-xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-brand-purple mb-4">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500 mb-5">
                 <Users size={20} weight="bold" />
               </div>
               <h3 className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
@@ -225,24 +224,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </h3>
               <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '복잡한 이메일 추가 절차 없이, 선생님이 발급한 학급 코드(예: MERC82)만 학부모가 입력하면 신청 끝. 클릭 한 번으로 수락 및 이동 관리가 가능합니다.'
+                  ? '복잡한 이메일 추가 절차 없이, 선생님이 발급한 학급 코드만 학부모가 입력하면 신청 끝. 클릭 한 번으로 수락 및 이동 관리가 가능합니다.'
                   : 'Skip complex email invitations. Teachers distribute simple 6-letter class codes. Parents enter it inside Settings and link automatically.'}
               </p>
             </div>
 
-            <div className={`mt-4 rounded-2xl overflow-hidden p-2 flex justify-center transition-all duration-300 ${isNight ? 'bg-zinc-950/80 border border-white/10' : 'bg-white border border-zinc-200/80 shadow-sm'}`}>
-              <img src={isNight ? "/assets/schools/schools_bento_join_code.png" : "/assets/schools/schools_bento_join_code_light.png"} alt="Class join code entry UI" className="w-full max-w-[240px] h-auto object-contain filter drop-shadow-md" loading="lazy" />
+            <div className="mt-6 rounded-2xl overflow-hidden p-1 flex justify-center items-center">
+              <img src={isNight ? "/assets/schools/schools_bento_join_code.png" : "/assets/schools/schools_bento_join_code_light.png"} alt="Class join code entry UI" className="w-full max-w-[220px] h-auto object-contain filter drop-shadow-md" loading="lazy" />
             </div>
           </div>
 
           {/* Bento Cell 3: Analytics (1 column) */}
-          <div className={`p-8 border rounded-2xl flex flex-col justify-between transition-all ${
+          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
             isNight 
               ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
-              : 'bg-white border-zinc-200 hover:border-zinc-300'
-          } hover:-translate-y-0.5 duration-200 shadow-sm relative overflow-hidden group`}>
+              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
+          } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
             <div>
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-5">
                 <ChartBar size={20} weight="bold" />
               </div>
               <h3 className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
@@ -250,37 +249,37 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </h3>
               <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '반 아이들의 오답 데이터가 실시간으로 분석 보드에 집계됩니다. 교사는 매주 학생들이 가장 많이 틀리는 어휘와 파닉스 단어 순위를 보고받아 보강 수업에 적용할 수 있습니다.'
+                  ? '반 아이들의 오답 데이터가 실시간으로 분석 보드에 집계됩니다. 교사는 매주 학생들이 가장 많이 틀리는 어휘 순위를 보고받아 보강 수업에 적용할 수 있습니다.'
                   : 'Mistake histories are parsed concurrently. Instantly view vocabulary struggle rates across your entire class list and focus lessons on actual blind spots.'}
               </p>
             </div>
 
-            <div className={`mt-4 rounded-2xl overflow-hidden p-2 flex justify-center transition-all duration-300 ${isNight ? 'bg-zinc-950/80 border border-white/10' : 'bg-white border border-zinc-200/80 shadow-sm'}`}>
-              <img src={isNight ? "/assets/schools/schools_bento_diagnostics.png" : "/assets/schools/schools_bento_diagnostics_light.png"} alt="Classroom diagnostics dashboard" className="w-full max-w-[240px] h-auto object-contain filter drop-shadow-md" loading="lazy" />
+            <div className="mt-6 rounded-2xl overflow-hidden p-1 flex justify-center items-center">
+              <img src={isNight ? "/assets/schools/schools_bento_diagnostics.png" : "/assets/schools/schools_bento_diagnostics_light.png"} alt="Classroom diagnostics dashboard" className="w-full max-w-[220px] h-auto object-contain filter drop-shadow-md" loading="lazy" />
             </div>
           </div>
 
           {/* Bento Cell 4: Parent Sync (Large block, spans 2 columns) */}
-          <div className={`md:col-span-2 p-8 border rounded-2xl flex flex-col justify-between transition-all ${
+          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
             isNight 
               ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' 
-              : 'bg-white border-zinc-200 hover:border-zinc-300'
-          } hover:-translate-y-0.5 duration-200 shadow-sm relative overflow-hidden group`}>
+              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
+          } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
 
-            <div className="flex flex-col md:flex-row gap-6 items-start">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
               <div className="flex-1">
-                <div className="w-10 h-10 rounded-xl bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center text-brand-pink mb-6">
+                <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-500 mb-5">
                   <Sparkle size={20} weight="bold" />
                 </div>
                 <h3 className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                   {isKo ? '학부모 만족도를 높이는 전용 AI 오답 리포트' : 'Elevated Parent Care & Branding'}
                 </h3>
-                <p className={`text-sm leading-relaxed max-w-xl ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                <p className={`text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {isKo 
                     ? '가정에서 숙제를 카메라로 찍으면 3초 만에 학원 진도에 맞게 자동 채점됩니다. 학부모님께는 학원 로고가 포함된 정교한 교정 결과와 원어민 발음 듣기, AI 튜터 챗봇 창이 노출되어 학원의 디지털 관리 신뢰도가 비약적으로 향상됩니다.'
                     : "Every homework graded in parents' app matches your academy dashboard. Deliver native pronunciation audio files, custom review tips, and personalized feedback matching the student's age."}
                 </p>
-                <div className="mt-8 pt-4 border-t border-zinc-900/10 flex items-center gap-1.5 text-xs font-bold text-brand-pink">
+                <div className="mt-6 pt-4 border-t border-zinc-200/60 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold text-pink-500">
                   <CheckCircle size={14} weight="bold" />
                   <span>{isKo ? '밀착 학부모 케어로 재원율 증가' : 'Increase student retention with digital care'}</span>
                 </div>

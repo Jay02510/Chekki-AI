@@ -112,7 +112,7 @@ export default function Landing() {
   }, [reduce]);
 
   return (
-    <main className="overflow-x-hidden w-full max-w-full bg-[#FAFAFA] dark:bg-[#050505] min-h-screen text-slate-900 dark:text-slate-50 transition-colors duration-200 selection:bg-brand selection:text-white">
+    <main className="overflow-x-hidden w-full max-w-full bg-[#F3F4F6] dark:bg-[#050505] min-h-screen text-slate-900 dark:text-slate-50 transition-colors duration-200 selection:bg-brand selection:text-white">
       {/* Global Noise */}
       <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.03] bg-noise mix-blend-overlay" />
 
@@ -226,10 +226,10 @@ export default function Landing() {
       </section>
 
       {/* DESIRE: GSAP Scrubbing Text Reveal with Video Background */}
-      <section className="py-16 md:py-20 px-4 bg-[#FAFAFA] dark:bg-[#050505] border-y border-black/5 dark:border-white/5 relative overflow-hidden flex flex-col items-center justify-center">
+      <section className="py-16 md:py-20 px-4 bg-[#F3F4F6] dark:bg-[#050505] border-y border-black/5 dark:border-white/5 relative overflow-hidden flex flex-col items-center justify-center">
         {/* Cinematic Video Background */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[#FAFAFA]/90 dark:bg-[#050505]/80 z-10" />
+          <div className="absolute inset-0 bg-[#F3F4F6]/90 dark:bg-[#050505]/80 z-10" />
           <video 
             autoPlay 
             loop 
@@ -287,7 +287,7 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-white dark:bg-[#050505] border border-slate-100 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+              <div className="flex-1 rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-slate-200/50 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-6 md:p-8">
                 <img src={theme === 'light' ? '/assets/bento_light_reveal_only.png' : '/assets/bento_reveal_only.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
@@ -326,7 +326,7 @@ export default function Landing() {
                   <ArrowRight className="text-brand animate-pulse shrink-0" />
                 </h3>
               </div>
-              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-white dark:bg-[#050505] border border-slate-100 dark:border-white/5 relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-8">
+              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-slate-200/50 dark:border-white/5 relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-6 md:p-8">
                 <img src={theme === 'light' ? '/assets/bento_light_speed_mode.png' : '/assets/bento_speed_mode.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
               </div>
             </div>
@@ -348,7 +348,7 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-white dark:bg-[#050505] border border-slate-100 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+              <div className="flex-1 rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-slate-200/50 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-6 md:p-8">
                 <img src={theme === 'light' ? '/assets/bento_light_dashboard.png' : '/assets/onboarding_icon_dashboard_1782545238800.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
@@ -381,7 +381,7 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-white dark:bg-[#050505] border border-slate-100 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8">
+              <div className="flex-1 rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-slate-200/50 dark:border-white/5 relative overflow-hidden flex items-center justify-center p-6 md:p-8">
                 <img src={theme === 'light' ? '/assets/bento_light_grading_status.png' : '/assets/onboarding_icon_grading_status.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
                 <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
                   <ArrowRight className="text-slate-800 dark:text-white" />
@@ -455,11 +455,11 @@ export default function Landing() {
 
           {/* Card 5: Pronunciation Check — Full Width */}
           <div 
-            className="bento-card col-span-1 md:col-span-4 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-emerald-500/30 transition-colors duration-200 overflow-hidden relative min-h-[320px]"
+            className="bento-card col-span-1 md:col-span-4 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-6 md:p-8 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row items-center justify-between gap-8 group hover:border-emerald-500/30 transition-colors duration-200 overflow-hidden relative min-h-[340px]"
           >
             {/* Left: Text */}
-            <div className="flex-1 px-8 py-10 md:py-12 flex flex-col justify-center z-10 relative">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 w-fit">
+            <div className="flex-1 px-4 md:px-8 py-4 flex flex-col justify-center z-10 relative">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 w-fit">
                 <MicrophoneStage size={12} weight="bold" />
                 {lang === 'en' ? 'No Typing. Just Speaking.' : '엄마 대신 듣고 말해주는 AI'}
               </div>
@@ -468,7 +468,7 @@ export default function Landing() {
                   ? <><span className="text-emerald-500">Speak it right,</span><br/>not just write it right.</>
                   : <><span className="text-emerald-500">틀린 문법도 원어민 발음으로,</span><br/>아이가 스스로 재미있게 말하도록.</>}
               </h3>
-              <p className="text-slate-600 dark:text-white/60 text-base leading-relaxed max-w-lg mb-8 [word-break:keep-all]">
+              <p className="text-slate-600 dark:text-white/60 text-base leading-relaxed max-w-md mb-8 [word-break:keep-all]">
                 {lang === 'en'
                   ? "Traditional worksheets can't hear you. Chekki leverages advanced native device speech recognition to ensure your child isn't just fixing grammar, but mastering spoken English — privately and instantly."
                   : "눈으로만 푸는 문제집은 이제 그만! 체키는 아이의 작은 목소리에도 귀 기울여, 문법 오답을 다정한 원어민 발음 연습으로 바꿔줍니다."}
@@ -484,7 +484,7 @@ export default function Landing() {
             </div>
 
             {/* Right: Visual */}
-            <div className="md:w-[45%] shrink-0 rounded-[2rem] bg-slate-50 dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8 min-h-[220px]">
+            <div className="md:w-[45%] shrink-0 rounded-[2rem] bg-[#F3F4F6] dark:bg-[#050505] border border-black/[0.03] dark:border-white/5 relative overflow-hidden flex items-center justify-center p-8 min-h-[240px]">
               {/* Glow */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px]" />
               {/* Mock audio card */}
