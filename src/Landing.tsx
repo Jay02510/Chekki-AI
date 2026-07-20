@@ -92,17 +92,21 @@ export default function Landing() {
       }
 
       // Bento Cards Scroll Animation
-      gsap.from(".bento-card", {
-        y: 60,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.15,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: "#features",
-          start: "top 75%",
+      gsap.fromTo(
+        ".bento-card",
+        { y: 30, opacity: 0.8 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: "#features",
+            start: "top 95%",
+          }
         }
-      });
+      );
     });
     return () => ctx.revert();
   }, [reduce]);
@@ -593,8 +597,8 @@ export default function Landing() {
         <div className="bento-card relative z-10 mt-32 flex flex-col items-center gap-6">
           <div className="flex items-center gap-6 text-white/50 text-sm font-medium mb-4">
             <a href="/schools" className="hover:text-white transition-colors">{lang === 'en' ? 'For Schools' : '교육기관용'}</a>
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="/privacy.html" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="/terms.html" className="hover:text-white transition-colors">Terms of Service</a>
           </div>
           <a href="https://www.instagram.com/chekki__ai" target="_blank" rel="noopener noreferrer" className="text-brand hover:text-brand-hover transition-colors">
             <InstagramLogo size={32} weight="fill" />
