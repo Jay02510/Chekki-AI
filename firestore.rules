@@ -89,10 +89,15 @@ service cloud.firestore {
       return qValid && aValid;
     }
 
-    // Mistakes: Strict ownership check.
+    // Mistakes: Strict ownership check & authorized teacher analytics access.
     match /mistakes/{mistakeId} {
       allow get, list: if request.auth != null && (
-        (resource.data.userId == request.auth.uid) || isAdmin()
+        (resource.data.userId == request.auth.uid) || 
+        isAdmin() ||
+        (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' &&
+          isClassTeacher(get(/databases/$(database)/documents/users/$(resource.data.userId)).data.classId)
+        )
       );
       
       allow create: if request.auth != null 
