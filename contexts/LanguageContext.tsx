@@ -226,12 +226,13 @@ const translations = {
     diff_title: 'Why Chekki?',
     diff_ocr: 'Magic Scans & Audio',
     diff_ocr_desc:
-      "Get instant digital answer keys directly on the worksheet. Tap any answer for native pronunciation.",
-    diff_script: 'Mom\'s Teaching Scripts',
+      'Get instant digital answer keys directly on the worksheet. Tap any answer for native pronunciation.',
+    diff_script: "Mom's Teaching Scripts",
     diff_script_desc:
       'Receive bilingual step-by-step scripts and grammar guides to confidently teach your child without frustration.',
     diff_brand: 'Interactive AI Tutor',
-    diff_brand_desc: 'Need a simpler explanation? Get preschooler-friendly analogies and examples instantly.',
+    diff_brand_desc:
+      'Need a simpler explanation? Get preschooler-friendly analogies and examples instantly.',
 
     // Analysis & Loading
     processing: 'Generating answer key...',
@@ -365,7 +366,7 @@ const translations = {
     privacy_pledge: 'Privacy Pledge',
     zero_memory_policy: 'Secure Storage Policy',
     zero_memory_desc:
-      "We securely store your learning data solely for generating personalized practice worksheets and tracking progress.",
+      'We securely store your learning data solely for generating personalized practice worksheets and tracking progress.',
     share_app: 'Share Chekki AI',
     copy_script: 'Copy Script',
     script_copied: 'Copied!',
@@ -594,7 +595,8 @@ const translations = {
     diff_script_desc:
       '아이에게 어떻게 가르쳐야 할지 고민하지 마세요. 엄마가 그대로 읽어주기만 하면 되는 한/영 대본을 제공합니다.',
     diff_brand: '우리 아이 맞춤 AI 튜터',
-    diff_brand_desc: '아이가 이해하기 어려워하나요? 아이 눈높이에 딱 맞는 쉬운 비유와 추가 예시를 즉시 받아보세요.',
+    diff_brand_desc:
+      '아이가 이해하기 어려워하나요? 아이 눈높이에 딱 맞는 쉬운 비유와 추가 예시를 즉시 받아보세요.',
 
     // Analysis & Loading
     processing: '정답지를 만들고 있어요...',

@@ -23,25 +23,25 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
         particleCount: 150,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ['#10B981', '#F59E0B', '#3B82F6']
+        colors: ['#10B981', '#F59E0B', '#3B82F6'],
       });
     }
   }, [isDone]);
 
   const handleNext = (correct: boolean) => {
     if (correct) {
-      setScore(prev => prev + 1);
+      setScore((prev) => prev + 1);
       playSuccessSound();
       hapticSuccess();
     } else {
       hapticError();
     }
-    
+
     setIsFlipped(false);
-    
+
     setTimeout(() => {
       if (currentIndex < mistakes.length - 1) {
-        setCurrentIndex(prev => prev + 1);
+        setCurrentIndex((prev) => prev + 1);
       } else {
         setIsDone(true);
       }
@@ -53,7 +53,6 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
   return (
     <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4">
       <div className="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-[2.5rem] p-6 md:p-12 shadow-2xl flex flex-col h-[80vh] md:h-[600px]">
-        
         {/* Header */}
         <div className="flex items-center justify-between mb-8 shrink-0 relative z-10">
           <div className="flex flex-col gap-1">
@@ -96,27 +95,31 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
                 }}
                 className="group px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all duration-200 active:scale-[0.97] border border-white/5 flex items-center gap-3 font-korean"
               >
-                <Repeat size={20} weight="bold" className="group-hover:-rotate-180 transition-transform duration-200" />
+                <Repeat
+                  size={20}
+                  weight="bold"
+                  className="group-hover:-rotate-180 transition-transform duration-200"
+                />
                 {language === 'ko' ? '다시 복습하기' : 'Review Again'}
               </button>
             </div>
           ) : (
-            <div 
+            <div
               className="w-full h-full relative cursor-pointer group"
               onClick={() => {
                 setIsFlipped(!isFlipped);
                 hapticLight();
               }}
             >
-              <div 
+              <div
                 className="w-full h-full absolute transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]"
-                style={{ 
+                style={{
                   transformStyle: 'preserve-3d',
-                  transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' 
+                  transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 }}
               >
                 {/* Front of Card */}
-                <div 
+                <div
                   className="absolute inset-0 bg-black/40 border border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:bg-white/5 transition-colors"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
@@ -132,11 +135,11 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
                 </div>
 
                 {/* Back of Card */}
-                <div 
+                <div
                   className="absolute inset-0 bg-emerald-900/20 border border-emerald-500/20 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-[inset_0_1px_1px_rgba(16,185,129,0.1)]"
-                  style={{ 
+                  style={{
                     backfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)' 
+                    transform: 'rotateY(180deg)',
                   }}
                 >
                   <span className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-500 mb-6 absolute top-8">
@@ -152,7 +155,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
         </div>
 
         {/* Controls */}
-        <div className={`mt-8 flex items-center justify-center gap-4 transition-all duration-200 shrink-0 ${isFlipped && !isDone ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+        <div
+          className={`mt-8 flex items-center justify-center gap-4 transition-all duration-200 shrink-0 ${isFlipped && !isDone ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+        >
           <button
             onClick={() => handleNext(false)}
             className="flex-1 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-2xl border border-red-500/20 transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2 font-korean"

@@ -233,7 +233,6 @@ export const CameraView: React.FC<Props> = ({
             >
               {tip.label}
             </span>
-
           </div>
         ))}
       </div>
@@ -389,8 +388,10 @@ export const CameraView: React.FC<Props> = ({
                   <h3
                     className={`text-xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight break-keep leading-[1.2] ${isProcessing ? 'text-orange-500 italic' : ''}`}
                   >
-                    {isProcessing 
-                      ? (language === 'ko' ? '채점 중... 칭찬만 준비하세요! 💖' : 'Grading... We\'ve got this! 💖') 
+                    {isProcessing
+                      ? language === 'ko'
+                        ? '채점 중... 칭찬만 준비하세요! 💖'
+                        : "Grading... We've got this! 💖"
                       : t('drop_title')}
                   </h3>
                   <p
@@ -607,7 +608,13 @@ export const CameraView: React.FC<Props> = ({
               className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display break-keep leading-tight tracking-tight`}
             >
               {t('dash_welcome')}{' '}
-              <span className={isNight ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500' : 'text-brand-orange'}>
+              <span
+                className={
+                  isNight
+                    ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500'
+                    : 'text-brand-orange'
+                }
+              >
                 {user.name}!
               </span>
             </h1>
@@ -632,12 +639,18 @@ export const CameraView: React.FC<Props> = ({
               </div>
             )}
             {!isPro && (
-               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-2 shadow-sm ${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-100 border-zinc-200'}`}>
-                 <span className="text-xs">📸</span>
-                 <span className={`text-[10px] md:text-xs font-black ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                   {language === 'ko' ? `오늘 남은 무료 스캔: ${remainingCount}회` : `${remainingCount} free scans left today`}
-                 </span>
-               </div>
+              <div
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-2 shadow-sm ${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-100 border-zinc-200'}`}
+              >
+                <span className="text-xs">📸</span>
+                <span
+                  className={`text-[10px] md:text-xs font-black ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
+                >
+                  {language === 'ko'
+                    ? `오늘 남은 무료 스캔: ${remainingCount}회`
+                    : `${remainingCount} free scans left today`}
+                </span>
+              </div>
             )}
           </div>
 
@@ -776,20 +789,28 @@ export const CameraView: React.FC<Props> = ({
       <div className="w-full max-w-4xl mx-auto px-4">
         {/* Class Code Prompt Banner */}
         {isAuthenticated && !user?.schoolId && !user?.classId && !classCodeBannerDismissed && (
-          <div className={`mb-4 flex items-center gap-3 px-4 py-3 rounded-2xl border ${
-            isNight
-              ? 'bg-orange-500/8 border-orange-500/20 text-orange-300'
-              : 'bg-orange-50 border-orange-200 text-orange-700'
-          } animate-fade-in-up`}>
+          <div
+            className={`mb-4 flex items-center gap-3 px-4 py-3 rounded-2xl border ${
+              isNight
+                ? 'bg-orange-500/8 border-orange-500/20 text-orange-300'
+                : 'bg-orange-50 border-orange-200 text-orange-700'
+            } animate-fade-in-up`}
+          >
             <span className="text-lg flex-shrink-0">🏫</span>
             <div className="flex-1 min-w-0">
-              <p className={`text-xs font-black uppercase tracking-wider ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                {language === 'ko' ? '학원 코드가 있으신가요?' : 'Got a class code from your teacher?'}
+              <p
+                className={`text-xs font-black uppercase tracking-wider ${isNight ? 'text-orange-400' : 'text-orange-600'}`}
+              >
+                {language === 'ko'
+                  ? '학원 코드가 있으신가요?'
+                  : 'Got a class code from your teacher?'}
               </p>
-              <p className={`text-[11px] font-medium mt-0.5 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              <p
+                className={`text-[11px] font-medium mt-0.5 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
+              >
                 {language === 'ko'
                   ? '코드를 입력하면 채점이 학원 교재에 맞게 조정됩니다.'
-                  : 'Enter it to align grading with your child\'s class curriculum.'}
+                  : "Enter it to align grading with your child's class curriculum."}
               </p>
             </div>
             <button
@@ -805,7 +826,9 @@ export const CameraView: React.FC<Props> = ({
             <button
               onClick={dismissClassCodeBanner}
               className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-lg transition-colors ${
-                isNight ? 'text-zinc-600 hover:text-zinc-300 hover:bg-white/5' : 'text-zinc-400 hover:text-zinc-700 hover:bg-black/5'
+                isNight
+                  ? 'text-zinc-600 hover:text-zinc-300 hover:bg-white/5'
+                  : 'text-zinc-400 hover:text-zinc-700 hover:bg-black/5'
               }`}
               aria-label="Dismiss"
             >

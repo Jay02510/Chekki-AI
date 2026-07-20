@@ -36,8 +36,8 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
         let loadedMistakes: MistakeItem[] = [];
 
         // 1. Fetch Local Mistakes (Always)
-        const localHistory = await localHistoryService.getRecentStruggles() || [];
-        const mappedLocalMistakes: MistakeItem[] = localHistory.map(h => ({
+        const localHistory = (await localHistoryService.getRecentStruggles()) || [];
+        const mappedLocalMistakes: MistakeItem[] = localHistory.map((h) => ({
           id: parseInt(h.id, 10) || 0,
           type: 'text',
           question_text: h.question_text,
@@ -56,12 +56,14 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (user?.uid) {
           // 2. User is logged in -> Fetch Cloud Mistakes
           const cloudMistakes = await db.getUserMistakes(user.uid);
-          
+
           if (mappedLocalMistakes.length > 0) {
             // 3. Migration: Merge Local Mistakes into Cloud and clear local
             const merged = [...cloudMistakes, ...mappedLocalMistakes];
             // Deduplicate by uniqueId
-            const unique = Array.from(new Map(merged.map(item => [item.uniqueId, item])).values());
+            const unique = Array.from(
+              new Map(merged.map((item) => [item.uniqueId, item])).values()
+            );
             await db.saveUserMistakes(user.uid, unique);
             await localHistoryService.clearHistory();
             loadedMistakes = unique;
@@ -89,7 +91,7 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
         await db.saveUserMistakes(user.uid, updatedMistakes);
       } else {
         // Save to Local
-        const records: StruggleRecord[] = updatedMistakes.map(m => ({
+        const records: StruggleRecord[] = updatedMistakes.map((m) => ({
           id: m.uniqueId,
           date: m.dateAdded || new Date().toISOString(),
           question_text: m.question_text,
@@ -120,7 +122,7 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
       };
       newMistakes = [newItem, ...newMistakes];
     }
-    
+
     setMistakes(newMistakes);
     saveState(newMistakes);
   };

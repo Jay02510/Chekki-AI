@@ -48,7 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const uid = decodedToken.uid;
 
     const sanitized = classCode.toUpperCase().trim();
-    
+
     // Find the class document by joinCode
     const classesRef = adminDb.collection('classes');
     const qSnapshot = await classesRef.where('joinCode', '==', sanitized).limit(1).get();
@@ -64,16 +64,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const schoolName = classData.schoolName || schoolId;
 
     // Update parent profile in Firestore
-    await adminDb.collection('users').doc(uid).set({
-      schoolId: schoolId,
-      schoolName: schoolName,
-      classId: classId,
-      classStatus: 'pending',
-      plan: 'pro',
-      maxScansPerDay: 9999,
-      maxQuestionsPerDay: 9999,
-      subscriptionPlatform: 'school_code',
-    }, { merge: true });
+    await adminDb.collection('users').doc(uid).set(
+      {
+        schoolId: schoolId,
+        schoolName: schoolName,
+        classId: classId,
+        classStatus: 'pending',
+        plan: 'pro',
+        maxScansPerDay: 9999,
+        maxQuestionsPerDay: 9999,
+        subscriptionPlatform: 'school_code',
+      },
+      { merge: true }
+    );
 
     return res.status(200).json({
       success: true,

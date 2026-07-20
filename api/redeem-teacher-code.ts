@@ -48,7 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const uid = decodedToken.uid;
 
     const sanitized = teacherCode.toUpperCase().trim();
-    
+
     // Find school document where teacherCode matches
     const schoolsRef = adminDb.collection('schools');
     const qSnapshot = await schoolsRef.where('teacherCode', '==', sanitized).limit(1).get();
@@ -67,24 +67,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const maxUses = schoolData.maxUses ?? 5;
 
     if (!usedByUids.includes(uid) && usedByUids.length >= maxUses) {
-      return res.status(400).json({ error: 'This teacher authorization code has reached its maximum usage limit.' });
+      return res
+        .status(400)
+        .json({ error: 'This teacher authorization code has reached its maximum usage limit.' });
     }
 
     // Update user profile in Firestore
-    await adminDb.collection('users').doc(uid).set({
-      role: 'teacher',
-      schoolId: schoolId,
-      schoolName: schoolName,
-      plan: 'pro',
-      maxScansPerDay: 9999,
-      maxQuestionsPerDay: 9999,
-      subscriptionPlatform: 'school_code',
-    }, { merge: true });
+    await adminDb.collection('users').doc(uid).set(
+      {
+        role: 'teacher',
+        schoolId: schoolId,
+        schoolName: schoolName,
+        plan: 'pro',
+        maxScansPerDay: 9999,
+        maxQuestionsPerDay: 9999,
+        subscriptionPlatform: 'school_code',
+      },
+      { merge: true }
+    );
 
     // Track usage on school document
-    await adminDb.collection('schools').doc(schoolId).update({
-      usedByUids: FieldValue.arrayUnion(uid),
-    });
+    await adminDb
+      .collection('schools')
+      .doc(schoolId)
+      .update({
+        usedByUids: FieldValue.arrayUnion(uid),
+      });
 
     return res.status(200).json({
       success: true,

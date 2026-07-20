@@ -48,7 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const uid = decodedToken.uid;
 
     const sanitized = schoolCode.toUpperCase().trim();
-    
+
     // Fetch school config from Firestore
     const schoolDoc = await adminDb.collection('schools').doc(sanitized).get();
     if (!schoolDoc.exists) {
@@ -57,14 +57,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const schoolName = schoolDoc.data()?.name || sanitized;
 
-    await adminDb.collection('users').doc(uid).set({
-      schoolId: sanitized,
-      schoolName: schoolName,
-      plan: 'pro',
-      maxScansPerDay: 9999,
-      maxQuestionsPerDay: 9999,
-      subscriptionPlatform: 'school_code',
-    }, { merge: true });
+    await adminDb.collection('users').doc(uid).set(
+      {
+        schoolId: sanitized,
+        schoolName: schoolName,
+        plan: 'pro',
+        maxScansPerDay: 9999,
+        maxQuestionsPerDay: 9999,
+        subscriptionPlatform: 'school_code',
+      },
+      { merge: true }
+    );
 
     return res.status(200).json({
       success: true,

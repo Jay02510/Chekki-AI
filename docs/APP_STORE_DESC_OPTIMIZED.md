@@ -22,9 +22,9 @@ ChekkiAI is the essential homework companion for parents and students in English
 Try Chekki PRO free for 7 days. No charge until your trial ends.
 
 **😩 PAINPOINTS AND HOW THEY ARE ADDRESSED**
-• **"My child cries when I correct their homework."** -> *Solved:* Chekki becomes the objective grader. No more emotional battles. You use the "Mom's Teaching Scripts" to become the helpful guide instead of the strict teacher.
-• **"I don't know how to explain English grammar to a 6-year-old."** -> *Solved:* Use the "Ask Chekki" AI Tutor! It gives you instant, preschooler-friendly analogies and simple breakdowns for any English question.
-• **"My child's pronunciation needs practice, but they get bored."** -> *Solved:* Our interactive Speaking Coach listens to them read sentences, demands high accuracy, and rewards them with a satisfying success chime and haptic buzz.
+• **"My child cries when I correct their homework."** -> _Solved:_ Chekki becomes the objective grader. No more emotional battles. You use the "Mom's Teaching Scripts" to become the helpful guide instead of the strict teacher.
+• **"I don't know how to explain English grammar to a 6-year-old."** -> _Solved:_ Use the "Ask Chekki" AI Tutor! It gives you instant, preschooler-friendly analogies and simple breakdowns for any English question.
+• **"My child's pronunciation needs practice, but they get bored."** -> _Solved:_ Our interactive Speaking Coach listens to them read sentences, demands high accuracy, and rewards them with a satisfying success chime and haptic buzz.
 
 **✨ WHAT YOU GET FOR FREE (Just Sign In!)**
 • **3 Magic Scans Daily:** Get instant answers overlaid on your child's worksheet.
@@ -40,6 +40,7 @@ Try Chekki PRO free for 7 days. No charge until your trial ends.
 • **Cancel Anytime:** No commitment, no risk.
 
 **📱 HOW IT WORKS**
+
 1. Snap a photo of your child's English worksheet.
 2. Answers appear instantly on the screen in the exact right spots.
 3. Use the Teaching Script to explain kindly in English or Korean.
@@ -79,9 +80,9 @@ Empower your child's learning journey with ChekkiAI today.
 채키 PRO를 7일간 무료로 체험해보세요. 체험 기간 종료 전까지는 비용이 청구되지 않습니다.
 
 **😩 학부모님의 고민과 채키의 해결책**
-• **"숙제 채점만 하면 아이가 울고 화를 내요."** -> *해결:* 채점은 객관적인 AI 채키에게 맡기세요. 부모님은 '엄마의 티칭 스크립트'를 읽으며 지적하는 선생님이 아닌 다정한 가이드가 될 수 있습니다.
-• **"6살 아이에게 영어 문법을 어떻게 설명해야 할지 막막해요."** -> *해결:* '채키에게 물어보기(AI 튜터)'를 활용하세요! 아이들 눈높이에 딱 맞는 쉬운 비유와 설명을 즉시 만들어줍니다.
-• **"아이가 영어 말하기 연습을 지루해해요."** -> *해결:* 인터랙티브 스피킹 코치 기능을 켜주세요. 완벽하게 문장을 읽어냈을 때 울리는 경쾌한 성공 효과음과 진동 피드백이 아이에게 큰 성취감을 줍니다.
+• **"숙제 채점만 하면 아이가 울고 화를 내요."** -> _해결:_ 채점은 객관적인 AI 채키에게 맡기세요. 부모님은 '엄마의 티칭 스크립트'를 읽으며 지적하는 선생님이 아닌 다정한 가이드가 될 수 있습니다.
+• **"6살 아이에게 영어 문법을 어떻게 설명해야 할지 막막해요."** -> _해결:_ '채키에게 물어보기(AI 튜터)'를 활용하세요! 아이들 눈높이에 딱 맞는 쉬운 비유와 설명을 즉시 만들어줍니다.
+• **"아이가 영어 말하기 연습을 지루해해요."** -> _해결:_ 인터랙티브 스피킹 코치 기능을 켜주세요. 완벽하게 문장을 읽어냈을 때 울리는 경쾌한 성공 효과음과 진동 피드백이 아이에게 큰 성취감을 줍니다.
 
 **✨ 무료 회원 특별 혜택 (가입만 하면 무료!)**
 • **매일 3회 매직 스캔:** 워크시트 위에 정답이 즉시 오버레이 됩니다.
@@ -97,6 +98,7 @@ Empower your child's learning journey with ChekkiAI today.
 • **언제든지 해지 가능:** 약정이나 위약금이 전혀 없습니다.
 
 **📱 사용 방법**
+
 1. 자녀의 워크시트(숙제) 페이지를 찰칵 찍어주세요.
 2. 마법처럼 화면 속 문제 위치에 정확히 정답이 표시됩니다.
 3. 티칭 스크립트를 보며 친절하게 설명해주세요.

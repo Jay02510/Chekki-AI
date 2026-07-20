@@ -105,7 +105,9 @@ export const LegalModal: React.FC<Props> = ({
                     <p>
                       <strong>제1조 (서비스 목적 및 내용)</strong>
                       <br />
-                      Chekki (채키)는 부모가 가정에서 자녀의 영어 학습을 보다 원활하게 지도할 수 있도록 돕는 학습 보조 도구입니다. 제공되는 서비스는 AI를 활용한 학습지 분석 및 대시보드 관리 기능을 포함합니다.
+                      Chekki (채키)는 부모가 가정에서 자녀의 영어 학습을 보다 원활하게 지도할 수
+                      있도록 돕는 학습 보조 도구입니다. 제공되는 서비스는 AI를 활용한 학습지 분석 및
+                      대시보드 관리 기능을 포함합니다.
                     </p>
                     <p>
                       <strong>제2조 (유료 서비스 및 이용 기간)</strong>
@@ -201,7 +203,10 @@ export const LegalModal: React.FC<Props> = ({
                       업로드된 원본 학습지 이미지와 추출된 텍스트 및 오답 데이터는 개인 맞춤형 복습
                       워크시트 생성 및 학습 진행도 추적을 위해 안전하게 서버에 저장됩니다.
                       <br />
-                      <strong>오디오 연습실 기능 사용 시 수집되는 음성 데이터는 기기 내부(Apple/Google 네이티브 음성 인식)에서만 처리되며 당사 서버로 전송되거나 저장되지 않습니다.</strong>
+                      <strong>
+                        오디오 연습실 기능 사용 시 수집되는 음성 데이터는 기기 내부(Apple/Google
+                        네이티브 음성 인식)에서만 처리되며 당사 서버로 전송되거나 저장되지 않습니다.
+                      </strong>
                     </p>
 
                     <p>
@@ -242,11 +247,15 @@ export const LegalModal: React.FC<Props> = ({
                     <p>
                       <strong>2. Data Storage & Usage</strong>
                       <br />
-                      Uploaded original worksheet images, along with extracted text and mistake data,
-                      are stored securely on our servers to generate customized PDF practice worksheets
-                      and track learning progress.
+                      Uploaded original worksheet images, along with extracted text and mistake
+                      data, are stored securely on our servers to generate customized PDF practice
+                      worksheets and track learning progress.
                       <br />
-                      <strong>Voice data processed during the Audio Practice Room feature is evaluated locally on your device (via Apple/Google native speech recognition) and is NOT transmitted to or stored on our servers.</strong>
+                      <strong>
+                        Voice data processed during the Audio Practice Room feature is evaluated
+                        locally on your device (via Apple/Google native speech recognition) and is
+                        NOT transmitted to or stored on our servers.
+                      </strong>
                     </p>
 
                     <p>

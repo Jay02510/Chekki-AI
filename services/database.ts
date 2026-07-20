@@ -59,7 +59,7 @@ export const dbInstance = (() => {
   try {
     if (isNativePlatform) {
       return initializeFirestore(app, {
-        experimentalForceLongPolling: true
+        experimentalForceLongPolling: true,
       });
     }
     return getFirestore(app);
@@ -169,7 +169,11 @@ export const db = {
   async saveUserMistakes(uid: string, mistakes: any[]): Promise<void> {
     try {
       const docRef = doc(dbInstance, 'users', uid, 'data', 'mistakes');
-      await setDoc(docRef, { items: mistakes, updatedAt: new Date().toISOString() }, { merge: true });
+      await setDoc(
+        docRef,
+        { items: mistakes, updatedAt: new Date().toISOString() },
+        { merge: true }
+      );
     } catch (e) {
       console.error('[saveUserMistakes] failed:', e);
     }

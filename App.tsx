@@ -179,7 +179,12 @@ function AppContent() {
 
   // Trigger onboarding for authenticated users without a complete profile
   useEffect(() => {
-    if (isAuthenticated && user && !user.childAge && !localStorage.getItem('skipped_child_profile')) {
+    if (
+      isAuthenticated &&
+      user &&
+      !user.childAge &&
+      !localStorage.getItem('skipped_child_profile')
+    ) {
       setShowChildProfileModal(true);
     }
   }, [isAuthenticated, user]);
@@ -248,7 +253,10 @@ function AppContent() {
     }
 
     // /schools and /for-schools route — web only
-    if ((window.location.pathname === '/schools' || window.location.pathname === '/for-schools') && Capacitor.getPlatform() === 'web') {
+    if (
+      (window.location.pathname === '/schools' || window.location.pathname === '/for-schools') &&
+      Capacitor.getPlatform() === 'web'
+    ) {
       setShowSplash(false);
       setShowSchoolsPage(true);
     }
@@ -457,7 +465,8 @@ function AppContent() {
   if (showSubscribePage && platform === 'web') return <SubscribePage />;
   if (showAdminPage && platform === 'web') return <AdminPage />;
   if (showTeacherPage && platform === 'web') return <TeacherPage isNight={isNight} />;
-  if (showSchoolsPage && platform === 'web') return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
+  if (showSchoolsPage && platform === 'web')
+    return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
 
   return (
     <ErrorBoundary>
@@ -555,7 +564,7 @@ function AppContent() {
         )}
 
         {showConfetti && <Confetti />}
-        
+
         {showDashboard && (
           <div className="fixed inset-0 z-[100] bg-zinc-950/80 backdrop-blur-sm animate-fade-in">
             <Dashboard onClose={() => setShowDashboard(false)} />
@@ -565,158 +574,166 @@ function AppContent() {
         <main className="flex-1 min-h-0 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-[calc(env(safe-area-inset-top)+6rem)] md:pt-32">
           {/* Main Content Area */}
           <>
-              {analysisState.status === 'idle' && (
-                <div className="animate-fade-in flex-1 h-full flex flex-col">
-                  {isInApp && showInAppNotice && (
-                    <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">⚠️</span>
-                        <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
-                          {language === 'ko'
-                            ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요."
-                            : 'Open in Safari or Chrome for the best experience (Camera/Mic).'}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setShowInAppNotice(false)}
-                        className="text-white/60 p-1 ml-2"
-                      >
-                        ✕
-                      </button>
+            {analysisState.status === 'idle' && (
+              <div className="animate-fade-in flex-1 h-full flex flex-col">
+                {isInApp && showInAppNotice && (
+                  <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">⚠️</span>
+                      <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
+                        {language === 'ko'
+                          ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요."
+                          : 'Open in Safari or Chrome for the best experience (Camera/Mic).'}
+                      </p>
                     </div>
-                  )}
-                  {isAuthLoading ? (
-                    <div className="flex items-center justify-center min-h-[50vh]">
-                      <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-                    </div>
-                  ) : (
-                    <CameraView
-                      isNight={isNight}
-                      onImageSelected={(data) => handleImageSelected(data)}
-                      minimal
-                      onOpenHelp={() => window.dispatchEvent(new CustomEvent('open-help'))}
-                    />
-                  )}
-                </div>
-              )}
-
-              {analysisState.status === 'analyzing' && (
-                <div className="animate-fade-in flex-1 h-full flex flex-col">
-                  <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />
-                </div>
-              )}
-
-              {analysisState.status === 'error' && (
-                <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
-                  <div className="relative w-40 h-40 md:w-52 md:h-52 mb-10">
-                    {/* Empathy ring — expands outward to convey "something happened" */}
-                    <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ring-pulse" />
-                    <div
-                      className="absolute inset-0 rounded-full bg-red-500/10 animate-ring-pulse"
-                      style={{ animationDelay: '0.4s' }}
-                    />
-                    <div className="relative w-full h-full bg-red-950/20 rounded-full flex items-center justify-center border border-red-500/30 overflow-hidden">
-                      <img
-                        src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png"
-                        alt="Chekki"
-                        className="w-36 h-36 md:w-48 md:h-48 object-contain"
-                      />
-                    </div>
+                    <button
+                      onClick={() => setShowInAppNotice(false)}
+                      className="text-white/60 p-1 ml-2"
+                    >
+                      ✕
+                    </button>
                   </div>
-                  <h3
-                    className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}
+                )}
+                {isAuthLoading ? (
+                  <div className="flex items-center justify-center min-h-[50vh]">
+                    <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                  </div>
+                ) : (
+                  <CameraView
+                    isNight={isNight}
+                    onImageSelected={(data) => handleImageSelected(data)}
+                    minimal
+                    onOpenHelp={() => window.dispatchEvent(new CustomEvent('open-help'))}
+                  />
+                )}
+              </div>
+            )}
+
+            {analysisState.status === 'analyzing' && (
+              <div className="animate-fade-in flex-1 h-full flex flex-col">
+                <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />
+              </div>
+            )}
+
+            {analysisState.status === 'error' && (
+              <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
+                <div className="relative w-40 h-40 md:w-52 md:h-52 mb-10">
+                  {/* Empathy ring — expands outward to convey "something happened" */}
+                  <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ring-pulse" />
+                  <div
+                    className="absolute inset-0 rounded-full bg-red-500/10 animate-ring-pulse"
+                    style={{ animationDelay: '0.4s' }}
+                  />
+                  <div className="relative w-full h-full bg-red-950/20 rounded-full flex items-center justify-center border border-red-500/30 overflow-hidden">
+                    <img
+                      src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png"
+                      alt="Chekki"
+                      className="w-36 h-36 md:w-48 md:h-48 object-contain"
+                    />
+                  </div>
+                </div>
+                <h3
+                  className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}
+                >
+                  {t('error_title')}
+                </h3>
+                <div className="space-y-2 mb-8 max-w-md mx-auto">
+                  <p
+                    className={`${isNight ? 'text-zinc-400' : 'text-zinc-650'} font-korean leading-relaxed`}
                   >
-                    {t('error_title')}
-                  </h3>
-                  <div className="space-y-2 mb-8 max-w-md mx-auto">
-                    <p
-                      className={`${isNight ? 'text-zinc-400' : 'text-zinc-650'} font-korean leading-relaxed`}
-                    >
-                      {translateError(analysisState.errorMessage || '')}
-                    </p>
-                    <p
-                      className={`text-xs md:text-sm font-semibold mt-4 ${isNight ? 'text-zinc-500' : 'text-zinc-450'} font-korean leading-snug`}
-                    >
-                      {language === 'ko'
-                        ? '💡 팁: 학습지를 평평하게 펴고, 밝은 곳에서 글자가 선명하게 보이도록 다시 촬영해 보세요.'
-                        : '💡 Tip: Flatten the paper, ensure bright lighting, and make sure the text is in focus.'}
-                    </p>
-                    {analysisState.errorMessage && (
-                      <div className="mt-6">
-                        <button
-                          type="button"
-                          onClick={() => setShowErrorDetails(!showErrorDetails)}
-                          className={`text-[10px] uppercase font-bold tracking-wider opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1 mx-auto ${
-                            isNight ? 'text-zinc-400' : 'text-zinc-500'
+                    {translateError(analysisState.errorMessage || '')}
+                  </p>
+                  <p
+                    className={`text-xs md:text-sm font-semibold mt-4 ${isNight ? 'text-zinc-500' : 'text-zinc-450'} font-korean leading-snug`}
+                  >
+                    {language === 'ko'
+                      ? '💡 팁: 학습지를 평평하게 펴고, 밝은 곳에서 글자가 선명하게 보이도록 다시 촬영해 보세요.'
+                      : '💡 Tip: Flatten the paper, ensure bright lighting, and make sure the text is in focus.'}
+                  </p>
+                  {analysisState.errorMessage && (
+                    <div className="mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setShowErrorDetails(!showErrorDetails)}
+                        className={`text-[10px] uppercase font-bold tracking-wider opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1 mx-auto ${
+                          isNight ? 'text-zinc-400' : 'text-zinc-500'
+                        }`}
+                      >
+                        <span>{showErrorDetails ? '▼' : '▶'}</span>
+                        <span>
+                          {language === 'ko' ? '상세 에러 정보 보기' : 'View Technical Details'}
+                        </span>
+                      </button>
+                      {showErrorDetails && (
+                        <div
+                          className={`mt-3 p-4 rounded-2xl border text-left text-[10px] font-mono break-all max-w-sm mx-auto overflow-y-auto max-h-32 transition-all duration-200 ${
+                            isNight
+                              ? 'bg-zinc-950/80 border-white/5 text-zinc-500'
+                              : 'bg-zinc-100 border-zinc-200 text-zinc-600'
                           }`}
                         >
-                          <span>{showErrorDetails ? '▼' : '▶'}</span>
-                          <span>
-                            {language === 'ko' ? '상세 에러 정보 보기' : 'View Technical Details'}
-                          </span>
-                        </button>
-                        {showErrorDetails && (
-                          <div
-                            className={`mt-3 p-4 rounded-2xl border text-left text-[10px] font-mono break-all max-w-sm mx-auto overflow-y-auto max-h-32 transition-all duration-200 ${
-                              isNight
-                                ? 'bg-zinc-950/80 border-white/5 text-zinc-500'
-                                : 'bg-zinc-100 border-zinc-200 text-zinc-600'
-                            }`}
-                          >
-                            {analysisState.errorMessage}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
-                    <button
-                      onClick={hookHandleScanAgain}
-                      className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]"
-                    >
-                      {t('btn_scan_again_simple')}
-                    </button>
-                    <button
-                      onClick={() => handleReset(false)}
-                      className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
-                    >
-                      {t('btn_retake')}
-                    </button>
-                  </div>
+                          {analysisState.errorMessage}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
-
-              {analysisState.status === 'complete' && analysisState.showHandwritingWarning && (
-                <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
-                  <div className="text-6xl md:text-7xl mb-6">📝</div>
-                  <h3 className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}>
-                    {language === 'ko' ? '글씨를 인식하기 어려워요' : 'Handwriting Unclear'}
-                  </h3>
-                  <div className="space-y-2 mb-8 max-w-md mx-auto">
-                    <p className={`${isNight ? 'text-zinc-400' : 'text-zinc-650'} font-korean leading-relaxed`}>
-                      {language === 'ko' 
-                        ? '작성된 글씨가 너무 흐리거나 알아보기 힘듭니다. AI가 채점을 시도하겠지만 결과가 부정확할 수 있습니다.' 
-                        : 'The handwriting on this worksheet is very messy or faded. Chekki tried its best, but the grading might be inaccurate.'}
-                    </p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none justify-center">
-                    <button
-                      onClick={() => setAnalysisState(prev => ({ ...prev, showHandwritingWarning: false }))}
-                      className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg min-h-[48px] w-full sm:w-auto"
-                    >
-                      {language === 'ko' ? '그래도 진행하기' : 'Proceed Anyway'}
-                    </button>
-                    <button
-                      onClick={() => handleReset(false)}
-                      className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full sm:w-auto min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
-                    >
-                      {t('btn_retake')}
-                    </button>
-                  </div>
+                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
+                  <button
+                    onClick={hookHandleScanAgain}
+                    className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]"
+                  >
+                    {t('btn_scan_again_simple')}
+                  </button>
+                  <button
+                    onClick={() => handleReset(false)}
+                    className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
+                  >
+                    {t('btn_retake')}
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
 
-              {analysisState.status === 'complete' && !analysisState.showHandwritingWarning && analysisState.data && (
+            {analysisState.status === 'complete' && analysisState.showHandwritingWarning && (
+              <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
+                <div className="text-6xl md:text-7xl mb-6">📝</div>
+                <h3
+                  className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}
+                >
+                  {language === 'ko' ? '글씨를 인식하기 어려워요' : 'Handwriting Unclear'}
+                </h3>
+                <div className="space-y-2 mb-8 max-w-md mx-auto">
+                  <p
+                    className={`${isNight ? 'text-zinc-400' : 'text-zinc-650'} font-korean leading-relaxed`}
+                  >
+                    {language === 'ko'
+                      ? '작성된 글씨가 너무 흐리거나 알아보기 힘듭니다. AI가 채점을 시도하겠지만 결과가 부정확할 수 있습니다.'
+                      : 'The handwriting on this worksheet is very messy or faded. Chekki tried its best, but the grading might be inaccurate.'}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none justify-center">
+                  <button
+                    onClick={() =>
+                      setAnalysisState((prev) => ({ ...prev, showHandwritingWarning: false }))
+                    }
+                    className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg min-h-[48px] w-full sm:w-auto"
+                  >
+                    {language === 'ko' ? '그래도 진행하기' : 'Proceed Anyway'}
+                  </button>
+                  <button
+                    onClick={() => handleReset(false)}
+                    className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full sm:w-auto min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
+                  >
+                    {t('btn_retake')}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {analysisState.status === 'complete' &&
+              !analysisState.showHandwritingWarning &&
+              analysisState.data && (
                 <div className="animate-fade-in-up flex flex-col pt-4 pb-4">
                   <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
                     <div className="flex items-center gap-3 min-w-0">
@@ -764,7 +781,7 @@ function AppContent() {
                   </div>
                 </div>
               )}
-            </>
+          </>
         </main>
 
         {/* --- PROFESSIONAL BUSINESS FOOTER --- */}
@@ -778,11 +795,14 @@ function AppContent() {
 
         {/* Help View Overlay */}
         {showHelp && (
-          <div className={`fixed inset-0 z-[100] animate-fade-in ${isNight ? 'bg-zinc-950' : 'bg-white'} overflow-y-auto touch-pan-y`} style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div
+            className={`fixed inset-0 z-[100] animate-fade-in ${isNight ? 'bg-zinc-950' : 'bg-white'} overflow-y-auto touch-pan-y`}
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
             <HelpView isNight={isNight} onClose={() => setShowHelp(false)} />
           </div>
         )}
-        
+
         <DebugConsole />
 
         <style>{`
@@ -822,10 +842,10 @@ function App() {
     <LanguageProvider>
       <AuthProvider>
         <ToastProvider>
-        <MistakeProvider>
-          <AppContent />
-        </MistakeProvider>
-      </ToastProvider>
+          <MistakeProvider>
+            <AppContent />
+          </MistakeProvider>
+        </ToastProvider>
       </AuthProvider>
     </LanguageProvider>
   );

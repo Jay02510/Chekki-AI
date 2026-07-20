@@ -92,10 +92,7 @@ interface AuthContextType {
     childEnglishLevel: string,
     parentEnglishLevel: string
   ) => Promise<void>;
-  updateClassroomProfile: (
-    classId: string,
-    studentName: string
-  ) => Promise<void>;
+  updateClassroomProfile: (classId: string, studentName: string) => Promise<void>;
   joinClassWithCode: (classCode: string) => Promise<boolean>;
   leaveClassroom: () => Promise<void>;
 }
@@ -107,30 +104,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [userProfile, _setUserProfile] = useState<UserProfile | null>(null);
 
-  const setUserProfile = useCallback((profileOrUpdater: UserProfile | null | ((prev: UserProfile | null) => UserProfile | null)) => {
-    _setUserProfile((prev) => {
-      let next: UserProfile | null;
-      if (typeof profileOrUpdater === 'function') {
-        next = profileOrUpdater(prev);
-      } else {
-        next = profileOrUpdater;
-      }
-      
-      const uid = auth.currentUser?.uid || firebaseUser?.uid;
-      if (uid) {
-        if (next) {
-          try {
-            localStorage.setItem(`chekki_user_profile_${uid}`, JSON.stringify(next));
-          } catch (e) {
-            console.warn('[AuthContext] Cache set error:', e);
-          }
+  const setUserProfile = useCallback(
+    (profileOrUpdater: UserProfile | null | ((prev: UserProfile | null) => UserProfile | null)) => {
+      _setUserProfile((prev) => {
+        let next: UserProfile | null;
+        if (typeof profileOrUpdater === 'function') {
+          next = profileOrUpdater(prev);
         } else {
-          localStorage.removeItem(`chekki_user_profile_${uid}`);
+          next = profileOrUpdater;
         }
-      }
-      return next;
-    });
-  }, [firebaseUser]);
+
+        const uid = auth.currentUser?.uid || firebaseUser?.uid;
+        if (uid) {
+          if (next) {
+            try {
+              localStorage.setItem(`chekki_user_profile_${uid}`, JSON.stringify(next));
+            } catch (e) {
+              console.warn('[AuthContext] Cache set error:', e);
+            }
+          } else {
+            localStorage.removeItem(`chekki_user_profile_${uid}`);
+          }
+        }
+        return next;
+      });
+    },
+    [firebaseUser]
+  );
   const [subscriptionRecord, setSubscriptionRecord] = useState<SubscriptionRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPaywall, setShowPaywallState] = useState(false);
@@ -285,7 +285,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('[AuthContext] Redirect login error:', err);
       }
     };
-    
+
     checkRedirectResult();
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -321,7 +321,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (profile) {
           await fetchAndSetUserProfile(user, profile);
         } else {
-          // If the profile is null and we are not in the middle of a signup, 
+          // If the profile is null and we are not in the middle of a signup,
           // the user is authenticated in Firebase but has no Firestore profile.
           // This happens if the page reloads during sign in (e.g. signInWithRedirect or Safari unloading).
           if (!isSigningUpRef.current) {
@@ -560,7 +560,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!existingProfile) {
               const name = result.user.displayName || 'User';
               const email = result.user.email || '';
-              
+
               const newProfile: UserProfile = {
                 name,
                 email,
@@ -590,7 +590,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             popupErr.code === 'auth/internal-error' ||
             popupErr.code === 'auth/popup-blocked'
           ) {
-            throw new Error('Login interrupted (often due to Incognito mode or blocked cookies). Please try again or use email login.');
+            throw new Error(
+              'Login interrupted (often due to Incognito mode or blocked cookies). Please try again or use email login.'
+            );
           }
           throw popupErr;
         }
@@ -702,7 +704,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           popupErr.code === 'auth/internal-error' ||
           popupErr.code === 'auth/popup-blocked'
         ) {
-          throw new Error('Login interrupted (often due to Incognito mode or blocked cookies). Please try again or use email login.');
+          throw new Error(
+            'Login interrupted (often due to Incognito mode or blocked cookies). Please try again or use email login.'
+          );
         }
         throw popupErr;
       }
@@ -741,17 +745,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
               resolve();
             };
-            script.onerror = () => reject(new Error('Failed to load Kakao SDK. Please disable your adblocker or try a different browser.'));
+            script.onerror = () =>
+              reject(
+                new Error(
+                  'Failed to load Kakao SDK. Please disable your adblocker or try a different browser.'
+                )
+              );
             document.head.appendChild(script);
           });
         }
-        
+
         if (!(window as any).Kakao) {
           throw new Error('Kakao SDK not loaded. Please disable adblockers and try again.');
         }
 
         const Kakao = (window as any).Kakao;
-        
+
         accessToken = await new Promise<string>((resolve, reject) => {
           Kakao.Auth.login({
             success: (authObj: any) => {
@@ -895,24 +904,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await db.updateUser(firebaseUser.uid, updates);
   };
 
-  const updateClassroomProfile = async (
-    classId: string,
-    studentName: string
-  ) => {
+  const updateClassroomProfile = async (classId: string, studentName: string) => {
     if (userProfile?.email === 'test@example.com' || userProfile?.email === 'expired@example.com') {
-      setUserProfile({ ...userProfile, classId, studentName, classStatus: classId ? 'pending' : null });
+      setUserProfile({
+        ...userProfile,
+        classId,
+        studentName,
+        classStatus: classId ? 'pending' : null,
+      });
       return;
     }
     if (!firebaseUser || !userProfile) return;
 
     // Only set pending if a non-empty class ID is selected and it differs from current classId
     const isNewEnrollment = classId && classId !== userProfile.classId;
-    const classStatus = isNewEnrollment ? 'pending' : (classId ? userProfile.classStatus || 'pending' : null);
+    const classStatus = isNewEnrollment
+      ? 'pending'
+      : classId
+        ? userProfile.classStatus || 'pending'
+        : null;
 
     const updates = {
       classId: classId || null,
       studentName: studentName.trim() || null,
-      classStatus: classStatus || null
+      classStatus: classStatus || null,
     };
 
     setUserProfile({ ...userProfile, ...updates });
@@ -924,7 +939,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await db.deleteUserDoc(firebaseUser.uid);
       await deleteUser(firebaseUser);
-      
+
       setUserProfile(null);
       setFirebaseUser(null);
       setSubscriptionRecord(null);

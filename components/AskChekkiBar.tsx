@@ -25,9 +25,18 @@ export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({
   isNight = false,
 }) => {
   const { t } = useLanguage();
-  const suggestions = language === 'ko' 
-    ? ['아이가 왜 이 문제를 틀렸을까요?', '아이에게 어떻게 쉽게 설명할까요?', '비슷한 예시 문제를 내주세요']
-    : ['Why did my child get this wrong?', 'How can I explain this easily?', 'Give me another example'];
+  const suggestions =
+    language === 'ko'
+      ? [
+          '아이가 왜 이 문제를 틀렸을까요?',
+          '아이에게 어떻게 쉽게 설명할까요?',
+          '비슷한 예시 문제를 내주세요',
+        ]
+      : [
+          'Why did my child get this wrong?',
+          'How can I explain this easily?',
+          'Give me another example',
+        ];
 
   return (
     <div className="flex flex-col w-full gap-3">
@@ -294,9 +303,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                 <div
                   className={`${isNight ? 'bg-orange-500/25 border-orange-500/40 text-orange-100' : 'bg-orange-500/15 border-orange-500/30 text-orange-950 shadow-sm'} border rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%]`}
                 >
-                  <p
-                    className="text-xs sm:text-sm font-semibold font-korean leading-relaxed"
-                  >
+                  <p className="text-xs sm:text-sm font-semibold font-korean leading-relaxed">
                     &ldquo;{turn.text}&rdquo;
                   </p>
                 </div>
@@ -327,9 +334,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                 <div
                   className={`${isNight ? 'bg-orange-500/25 border-orange-500/40 text-orange-100' : 'bg-orange-500/15 border-orange-500/30 text-orange-950 shadow-sm'} border rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%]`}
                 >
-                  <p
-                    className="text-xs sm:text-sm font-semibold font-korean leading-relaxed"
-                  >
+                  <p className="text-xs sm:text-sm font-semibold font-korean leading-relaxed">
                     &ldquo;{question}&rdquo;
                   </p>
                 </div>

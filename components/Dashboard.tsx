@@ -1,7 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { createPortal } from 'react-dom';
-import { X, Camera, ChatCircleDots, TrendUp, CaretRight, Spinner, ArrowsClockwise, ListDashes, MicrophoneStage, CheckCircle, XCircle, Trophy, Cards, DeviceMobile } from '@phosphor-icons/react';
+import {
+  X,
+  Camera,
+  ChatCircleDots,
+  TrendUp,
+  CaretRight,
+  Spinner,
+  ArrowsClockwise,
+  ListDashes,
+  MicrophoneStage,
+  CheckCircle,
+  XCircle,
+  Trophy,
+  Cards,
+  DeviceMobile,
+} from '@phosphor-icons/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useMistakes } from '../contexts/MistakeContext';
@@ -21,7 +36,14 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const { showToast } = useToast();
   const { language } = useLanguage();
-  const { isAuthenticated, checkQuestionLimit, incrementQuestion, openLoginModal, user, setShowPaywall } = useAuth();
+  const {
+    isAuthenticated,
+    checkQuestionLimit,
+    incrementQuestion,
+    openLoginModal,
+    user,
+    setShowPaywall,
+  } = useAuth();
   const { mistakes } = useMistakes();
   const [isFlashcardsActive, setIsFlashcardsActive] = useState(false);
 
@@ -47,9 +69,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
     try {
       const isGuest = !isAuthenticated;
-      const contextString = mistakes.length > 0 
-        ? mistakes.map(m => `Q: ${m.question_text} | A: ${m.correct_answer}`).join('\n')
-        : undefined;
+      const contextString =
+        mistakes.length > 0
+          ? mistakes.map((m) => `Q: ${m.question_text} | A: ${m.correct_answer}`).join('\n')
+          : undefined;
 
       const response = await askChekkiQuestion(
         question,
@@ -70,7 +93,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
       if (isAuthenticated) await incrementQuestion();
     } catch (error: any) {
-      const isNetwork = !window.navigator.onLine || error.message?.includes('network') || error.message?.includes('fetch');
+      const isNetwork =
+        !window.navigator.onLine ||
+        error.message?.includes('network') ||
+        error.message?.includes('fetch');
       const isQuota = error.message?.includes('quota') || error.status === 429;
       let errorMsgEn = 'Something went wrong. Please try again.';
       let errorMsgKo = '오류가 발생했습니다. 다시 시도해주세요.';
@@ -93,7 +119,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const [score, setScore] = useState(0);
   const [practiceDone, setPracticeDone] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [spokenText, setSpokenText] = useState("");
+  const [spokenText, setSpokenText] = useState('');
   const [showHandoff, setShowHandoff] = useState(false);
   const [practiceStatus, setPracticeStatus] = useState<'idle' | 'success' | 'failed'>('idle');
 
@@ -107,7 +133,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   }, []);
 
   const handleStartPractice = () => {
-    if (!isAuthenticated) { openLoginModal(); return; }
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
     if (user?.plan !== 'pro') {
       const today = new Date().toISOString().split('T')[0];
       const usedDate = localStorage.getItem('chekki_voice_limit_date');
@@ -121,7 +150,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   };
 
   const handleStartFlashcards = () => {
-    if (!isAuthenticated) { openLoginModal(); return; }
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
     if (user?.plan !== 'pro') {
       const today = new Date().toISOString().split('T')[0];
       const usedDate = localStorage.getItem('chekki_flashcard_limit_date');
@@ -140,7 +172,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     setPracticeIndex(0);
     setScore(0);
     setPracticeDone(false);
-    setSpokenText("");
+    setSpokenText('');
     setPracticeStatus('idle');
   };
 
@@ -151,7 +183,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   };
 
   const normalizeString = (s: string) => {
-    return s.toLowerCase().replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ").trim();
+    return s
+      .toLowerCase()
+      .replace(/[^\w\s]|_/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   };
 
   // Web Speech Fallback Ref
@@ -172,18 +208,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       if (Capacitor.isNativePlatform()) {
         const perm = await SpeechRecognition.requestPermissions();
         if (perm.speechRecognition !== 'granted') {
-          showToast({ message: language === 'ko' ? '마이크 권한이 필요합니다.' : 'Microphone permission is required.', type: 'error' });
+          showToast({
+            message:
+              language === 'ko'
+                ? '마이크 권한이 필요합니다.'
+                : 'Microphone permission is required.',
+            type: 'error',
+          });
           return;
         }
 
         setIsListening(true);
-        setSpokenText("");
+        setSpokenText('');
         setPracticeStatus('idle');
 
         await SpeechRecognition.removeAllListeners();
-        
-        let currentText = "";
-        
+
+        let currentText = '';
+
         SpeechRecognition.addListener('partialResults', (data) => {
           if (data.matches && data.matches.length > 0) {
             currentText = data.matches[0];
@@ -201,21 +243,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         });
 
         await SpeechRecognition.start({
-          language: "en-US",
+          language: 'en-US',
           partialResults: true,
           popup: false,
-          maxResults: 1
+          maxResults: 1,
         });
       } else {
         // Web Fallback
-        const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        const SpeechRec =
+          (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRec) {
-          showToast({ message: 'Speech recognition is not supported in this browser. Please use Chrome.', type: 'error' });
+          showToast({
+            message: 'Speech recognition is not supported in this browser. Please use Chrome.',
+            type: 'error',
+          });
           return;
         }
 
         setIsListening(true);
-        setSpokenText("");
+        setSpokenText('');
         setPracticeStatus('idle');
 
         const recognition = new SpeechRec();
@@ -243,7 +289,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           console.error(event.error);
           setIsListening(false);
           if (event.error !== 'aborted') {
-            showToast({ message: language === 'ko' ? '음성 인식에 실패했습니다. 다시 시도해주세요.' : 'Speech recognition failed. Try again.', type: 'error' });
+            showToast({
+              message:
+                language === 'ko'
+                  ? '음성 인식에 실패했습니다. 다시 시도해주세요.'
+                  : 'Speech recognition failed. Try again.',
+              type: 'error',
+            });
           }
         };
 
@@ -253,12 +305,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
         recognition.start();
       }
-
     } catch (e: any) {
       console.error(e);
       setIsListening(false);
       if (e.message !== 'recognition aborted') {
-        showToast({ message: language === 'ko' ? '음성 인식에 실패했습니다. 다시 시도해주세요.' : 'Speech recognition failed. Try again.', type: 'error' });
+        showToast({
+          message:
+            language === 'ko'
+              ? '음성 인식에 실패했습니다. 다시 시도해주세요.'
+              : 'Speech recognition failed. Try again.',
+          type: 'error',
+        });
       }
     }
   };
@@ -274,19 +331,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     const target = normalizeString(cleanAnswerText(current.correct_answer || ''));
     const spoken = normalizeString(transcript);
 
-    const targetWords = target.split(' ').filter(w => w.length > 0);
-    const spokenWords = spoken.split(' ').filter(w => w.length > 0);
-    
+    const targetWords = target.split(' ').filter((w) => w.length > 0);
+    const spokenWords = spoken.split(' ').filter((w) => w.length > 0);
+
     // Count how many target words are present in spoken words
-    const matchCount = targetWords.filter(word => spokenWords.includes(word)).length;
-    
+    const matchCount = targetWords.filter((word) => spokenWords.includes(word)).length;
+
     // Strict passing criteria: Must match almost all words to avoid passing partial sentences
     const threshold = Math.max(targetWords.length, Math.ceil(targetWords.length * 0.9));
     const isPass = spoken === target || spoken.includes(target) || matchCount >= threshold;
 
     if (isPass) {
       setPracticeStatus('success');
-      setScore(s => s + 1);
+      setScore((s) => s + 1);
       playSuccessFeedback();
     } else {
       setPracticeStatus('failed');
@@ -298,27 +355,33 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     if (practiceIndex + 1 >= mistakes.length) {
       setPracticeDone(true);
     } else {
-      setPracticeIndex(i => i + 1);
+      setPracticeIndex((i) => i + 1);
       setPracticeStatus('idle');
-      setSpokenText("");
+      setSpokenText('');
     }
   };
 
   const allExamples = [
-    'Nouns & Pronouns', 'Action Verbs', 'Prepositions', 
-    'Adjectives & Adverbs', 'Present Continuous', 'Past Tense', 
-    'Future Tense', 'Articles (a, an, the)'
+    'Nouns & Pronouns',
+    'Action Verbs',
+    'Prepositions',
+    'Adjectives & Adverbs',
+    'Present Continuous',
+    'Past Tense',
+    'Future Tense',
+    'Articles (a, an, the)',
   ];
   const [examples, setExamples] = useState(allExamples.slice(0, 3));
-  
+
   const handleRefreshExamples = () => {
     const shuffled = [...allExamples].sort(() => 0.5 - Math.random());
     setExamples(shuffled.slice(0, 3));
   };
 
-  
-  const cardShellClasses = "relative rounded-[2rem] p-1.5 bg-white/5 border border-white/10 group transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[0.98]";
-  const cardCoreClasses = "relative w-full h-full rounded-[calc(2rem-0.375rem)] bg-zinc-950/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col p-6 md:p-8 overflow-hidden";
+  const cardShellClasses =
+    'relative rounded-[2rem] p-1.5 bg-white/5 border border-white/10 group transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[0.98]';
+  const cardCoreClasses =
+    'relative w-full h-full rounded-[calc(2rem-0.375rem)] bg-zinc-950/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col p-6 md:p-8 overflow-hidden';
 
   const [isDark, setIsDark] = useState(true);
   useEffect(() => {
@@ -344,13 +407,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               {language === 'ko' ? '폰을 테이블에\n올려주세요!' : 'Tabletop Co-Pilot\nMode Active'}
             </h2>
             <p className="text-zinc-400 font-korean text-lg mb-12">
-              {language === 'ko' ? '화면 터치 없이 오디오로 복습이 진행됩니다.' : 'Hands-free interactive voice review is starting.'}
+              {language === 'ko'
+                ? '화면 터치 없이 오디오로 복습이 진행됩니다.'
+                : 'Hands-free interactive voice review is starting.'}
             </p>
             <button
               onClick={confirmStartPractice}
               className="w-full py-5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-full text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.97] transition-all"
             >
-              {language === 'ko' ? '준비 완료!' : 'I\'m Ready!'}
+              {language === 'ko' ? '준비 완료!' : "I'm Ready!"}
             </button>
             <button
               onClick={() => setShowHandoff(false)}
@@ -361,7 +426,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           </div>
         </div>
       )}
-      
+
       <AskChekkiAnswerModal
         answer={askAnswer}
         isAsking={isAskAsking}
@@ -378,12 +443,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         onFollowUp={handleAskSubmit}
         isNight={isDark}
       />
-      
+
       <div className="relative z-10 flex items-center justify-between px-6 pb-6 pt-[calc(env(safe-area-inset-top)+1.5rem)] md:px-12 md:pb-8 md:pt-[calc(env(safe-area-inset-top)+2rem)] max-w-[1400px] mx-auto">
         <h1 className="text-balance text-2xl md:text-3xl font-black tracking-tighter flex items-center gap-2 font-korean">
           <span>{language === 'ko' ? '학습 대시보드' : 'Learning Dashboard'}</span>
         </h1>
-        <button 
+        <button
           aria-label="Close Dashboard"
           onClick={onClose}
           className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors active:scale-[0.97]"
@@ -392,20 +457,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         </button>
       </div>
 
-
-      <div className="relative z-10 px-4 md:px-12 pb-24 max-w-[1400px] mx-auto animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+      <div
+        className="relative z-10 px-4 md:px-12 pb-24 max-w-[1400px] mx-auto animate-fade-in-up"
+        style={{ animationDelay: '200ms' }}
+      >
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
-          
-          <div className={`md:col-span-8 md:row-span-2 ${cardShellClasses} flex flex-col min-h-[350px] md:min-h-[450px]`}>
+          <div
+            className={`md:col-span-8 md:row-span-2 ${cardShellClasses} flex flex-col min-h-[350px] md:min-h-[450px]`}
+          >
             <div className={`${cardCoreClasses}`}>
-              <div 
+              <div
                 className="absolute top-0 right-0 w-[600px] h-[600px] pointer-events-none -translate-y-1/3 translate-x-1/3 opacity-30 mix-blend-screen"
-                style={{ maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 70%)', WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 70%)' }}
+                style={{
+                  maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 70%)',
+                  WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 70%)',
+                }}
               >
                 <div className="absolute inset-0 bg-emerald-500/30 blur-[100px] rounded-full" />
-                <img src="/dashboard-bg.png" alt="3D Geometric UI Asset" className="w-full h-full object-cover scale-110" />
+                <img
+                  src="/dashboard-bg.png"
+                  alt="3D Geometric UI Asset"
+                  className="w-full h-full object-cover scale-110"
+                />
               </div>
-              
+
               <div className="flex items-center gap-3 mb-6 relative z-10">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
                   <MicrophoneStage size={20} weight="bold" />
@@ -414,9 +489,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   {language === 'ko' ? '오답 인터랙티브 연습' : 'Interactive Practice Room'}
                 </h2>
               </div>
-              
+
               <p className="text-zinc-400 text-sm max-w-md mb-8 relative z-10 font-korean leading-relaxed">
-                {language === 'ko' 
+                {language === 'ko'
                   ? '대시보드의 문장들을 아이가 직접 소리 내어 말해보며 완벽히 익힐 수 있게 해보세요.'
                   : 'Turn saved mistakes into an interactive speaking exercise so your child learns to pronounce it correctly.'}
               </p>
@@ -424,17 +499,41 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               <div className="flex-1 w-full bg-black/40 rounded-2xl border border-white/5 p-4 flex flex-col gap-3 overflow-y-auto relative z-10">
                 {showHandoff ? (
                   <div className="flex flex-col items-center justify-center h-full text-center p-4 animate-in fade-in">
-                    <DeviceMobile size={40} className="text-orange-500 mb-4 animate-pulse" weight="fill" />
-                    <h3 className="text-lg font-bold text-white mb-2">{language === 'ko' ? '폰을 테이블에 올려주세요!' : 'Tabletop Co-Pilot Mode Active'}</h3>
-                    <p className="text-xs text-zinc-400 mb-6">{language === 'ko' ? '화면 터치 없이 오디오로 복습이 진행됩니다.' : 'Hands-free interactive voice review is starting.'}</p>
+                    <DeviceMobile
+                      size={40}
+                      className="text-orange-500 mb-4 animate-pulse"
+                      weight="fill"
+                    />
+                    <h3 className="text-lg font-bold text-white mb-2">
+                      {language === 'ko'
+                        ? '폰을 테이블에 올려주세요!'
+                        : 'Tabletop Co-Pilot Mode Active'}
+                    </h3>
+                    <p className="text-xs text-zinc-400 mb-6">
+                      {language === 'ko'
+                        ? '화면 터치 없이 오디오로 복습이 진행됩니다.'
+                        : 'Hands-free interactive voice review is starting.'}
+                    </p>
                     <div className="flex items-center gap-3 w-full">
-                      <button onClick={() => setShowHandoff(false)} className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-bold transition-all">Cancel</button>
-                      <button onClick={confirmStartPractice} className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">I&apos;m Ready!</button>
+                      <button
+                        onClick={() => setShowHandoff(false)}
+                        className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-bold transition-all"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={confirmStartPractice}
+                        className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all"
+                      >
+                        I&apos;m Ready!
+                      </button>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">Past Mistakes</h3>
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">
+                      Past Mistakes
+                    </h3>
                     {mistakes.length === 0 ? (
                       <div className="flex flex-col items-center justify-center p-8 text-center h-full">
                         <span className="text-4xl mb-4">📓</span>
@@ -446,10 +545,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       </div>
                     ) : (
                       mistakes.slice(0, 3).map((mistake, i) => (
-                        <div key={mistake.uniqueId || i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default gap-3">
+                        <div
+                          key={mistake.uniqueId || i}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default gap-3"
+                        >
                           <div className="flex flex-col gap-1 min-w-0">
-                            <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50 break-words whitespace-normal">{mistake.question_text}</span>
-                            <span className="text-sm font-bold text-emerald-400 break-words whitespace-normal">{cleanAnswerText(mistake.correct_answer || '')}</span>
+                            <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50 break-words whitespace-normal">
+                              {mistake.question_text}
+                            </span>
+                            <span className="text-sm font-bold text-emerald-400 break-words whitespace-normal">
+                              {cleanAnswerText(mistake.correct_answer || '')}
+                            </span>
                           </div>
                         </div>
                       ))
@@ -459,7 +565,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               </div>
 
               <div className="mt-6 flex flex-col sm:flex-row items-center justify-end gap-3 relative z-10">
-                <button 
+                <button
                   onClick={handleStartFlashcards}
                   disabled={mistakes.length === 0}
                   className={`group relative overflow-hidden px-6 py-3 bg-white/5 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.97] hover:bg-white/10 border border-white/10 font-korean disabled:opacity-50 disabled:cursor-not-allowed`}
@@ -469,7 +575,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     {language === 'ko' ? '디지털 플래시카드' : 'Digital Flashcards'}
                   </span>
                 </button>
-                <button 
+                <button
                   onClick={handleStartPractice}
                   disabled={mistakes.length === 0}
                   className={`group relative overflow-hidden px-8 py-3 bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.97] shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-600 font-korean disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-emerald-500/50`}
@@ -486,17 +592,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           <div className={`md:col-span-4 md:row-span-2 ${cardShellClasses} min-h-[250px]`}>
             <div className={`${cardCoreClasses}`}>
               <div className="absolute top-0 left-0 w-48 h-48 bg-blue-500/10 blur-[80px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-              
+
               <div className="flex items-center gap-3 mb-4 relative z-10">
                 <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20">
                   <ChatCircleDots size={20} weight="bold" />
                 </div>
-                <h2 className="text-balance text-lg font-bold tracking-tight font-korean">Ask Chekki</h2>
+                <h2 className="text-balance text-lg font-bold tracking-tight font-korean">
+                  Ask Chekki
+                </h2>
               </div>
-              
+
               <div className="flex-1 w-full bg-zinc-900/90 rounded-2xl border border-white/10 p-4 flex flex-col justify-end gap-3 relative z-10 shadow-inner">
                 <div className="self-start bg-orange-500/15 border border-orange-500/30 px-4 py-3 rounded-2xl rounded-tl-sm max-w-[85%] text-xs md:text-sm text-orange-200 font-medium font-korean leading-relaxed shadow-sm">
-                  {language === 'ko' ? '오늘 배운 내용 중 이해 안 되는 부분이 있나요?' : 'Is there anything you didn\'t understand today?'}
+                  {language === 'ko'
+                    ? '오늘 배운 내용 중 이해 안 되는 부분이 있나요?'
+                    : "Is there anything you didn't understand today?"}
                 </div>
                 <div className="w-full mt-2 relative z-[100]">
                   <AskChekkiBar
@@ -511,7 +621,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -538,8 +647,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 </p>
                 <p className="text-zinc-400 mb-8 font-korean">
                   {language === 'ko'
-                    ? score === mistakes.length ? '발음이 완벽해요! 🎉' : '꾸준히 연습하면 더 좋아질 거에요!'
-                    : score === mistakes.length ? 'Perfect pronunciation! 🎉' : 'Keep practicing, you are doing great!'}
+                    ? score === mistakes.length
+                      ? '발음이 완벽해요! 🎉'
+                      : '꾸준히 연습하면 더 좋아질 거에요!'
+                    : score === mistakes.length
+                      ? 'Perfect pronunciation! 🎉'
+                      : 'Keep practicing, you are doing great!'}
                 </p>
                 <button
                   onClick={handleStartPractice}
@@ -548,125 +661,164 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   {language === 'ko' ? '다시 연습하기' : 'Practice Again'}
                 </button>
               </div>
-            ) : (() => {
-              const current = mistakes[practiceIndex];
-              return (
-                <div className="mt-12 flex flex-col gap-6 items-center text-center">
-                  <div className="w-full flex items-center justify-between mb-4">
-                    <span className="font-bold">
-                      {practiceIndex + 1} / {mistakes.length}
-                    </span>
-                    <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-orange-500 transition-all duration-200"
-                        style={{ width: `${((practiceIndex + 1) / mistakes.length) * 100}%` }}
-                      />
+            ) : (
+              (() => {
+                const current = mistakes[practiceIndex];
+                return (
+                  <div className="mt-12 flex flex-col gap-6 items-center text-center">
+                    <div className="w-full flex items-center justify-between mb-4">
+                      <span className="font-bold">
+                        {practiceIndex + 1} / {mistakes.length}
+                      </span>
+                      <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-orange-500 transition-all duration-200"
+                          style={{ width: `${((practiceIndex + 1) / mistakes.length) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-emerald-400">{score} ✓</span>
                     </div>
-                    <span className="text-xs font-bold text-emerald-400">{score} ✓</span>
-                  </div>
 
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
-                    {language === 'ko' ? '다음 문장을 소리 내어 읽어보세요' : 'Read the sentence out loud'}
-                  </p>
-                  
-                  <div className="bg-black/40 rounded-2xl p-6 border border-white/5 w-full">
-                    <p className="text-sm text-zinc-500 line-through mb-2">{current.question_text}</p>
-                    <p 
-                      className="text-2xl md:text-3xl font-bold text-emerald-400 mb-4 cursor-pointer active:scale-[0.97] transition-transform"
-                      onClick={() => {
-                        const correctText = cleanAnswerText(current.correct_answer || '');
-                        setSpokenText(correctText);
-                        checkPronunciation(correctText);
-                      }}
-                      title={language === 'ko' ? '정답으로 바로 넘어가기' : 'Tap to skip speech recognition'}
-                    >
-                      {cleanAnswerText(current.correct_answer || '')}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
+                      {language === 'ko'
+                        ? '다음 문장을 소리 내어 읽어보세요'
+                        : 'Read the sentence out loud'}
                     </p>
-                    
-                    <div className="h-20 flex items-center justify-center bg-white/5 rounded-xl border border-white/5 relative overflow-hidden">
-                      {isListening && <div className="absolute inset-0 bg-emerald-500/10 animate-pulse" />}
-                      <p className={`text-lg font-medium relative z-10 px-4 ${spokenText ? 'text-white' : 'text-zinc-600'}`}>
-                        {spokenText || (language === 'ko' ? '(마이크 버튼을 누르고 말하세요)' : '(Tap the mic and speak)')}
+
+                    <div className="bg-black/40 rounded-2xl p-6 border border-white/5 w-full">
+                      <p className="text-sm text-zinc-500 line-through mb-2">
+                        {current.question_text}
                       </p>
-                    </div>
-                  </div>
-
-                  {practiceStatus === 'idle' && (
-                    <div className="flex flex-col items-center gap-4">
-                      <button
-                        onClick={handleMicPress}
-                        className={`group relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none ${
-                          isListening 
-                            ? 'active:scale-[0.97] shadow-[0_0_40px_rgba(239,68,68,0.4)]' 
-                            : 'hover:scale-[1.02] active:scale-[0.97] shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]'
-                        }`}
-                      >
-                        <div className={`absolute inset-0 rounded-full transition-colors duration-700 ${isListening ? 'bg-red-500/20' : 'bg-emerald-500/20'}`} />
-                        <div className={`relative z-10 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-full flex items-center justify-center transition-colors duration-700 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] ${isListening ? 'bg-red-500' : 'bg-emerald-500'}`}>
-                          {isListening && <div className="absolute inset-0 rounded-full border-2 border-red-300 animate-ping opacity-50" />}
-                          <MicrophoneStage size={36} weight="fill" className="text-white relative z-10 transition-transform duration-700 group-hover:scale-110" />
-                        </div>
-                      </button>
-                      {isListening && (
-                        <span className="text-xs text-red-400 font-bold tracking-widest uppercase animate-fade-in cursor-pointer" onClick={handleMicPress}>
-                          {language === 'ko' ? '정지 / 취소' : 'Stop / Cancel'}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {practiceStatus === 'success' && (
-                    <div className="flex flex-col items-center gap-6 animate-fade-in w-full">
-                      <div className="flex items-center gap-3 text-emerald-400 bg-emerald-500/10 px-6 py-3 rounded-full border border-emerald-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-                        <CheckCircle size={24} weight="fill" />
-                        <span className="text-lg font-bold font-korean">{language === 'ko' ? '완벽해요!' : 'Perfect!'}</span>
-                      </div>
-                      <button
-                        onClick={handleNextPractice}
-                        className="group relative overflow-hidden pl-8 pr-2 py-2 w-full sm:w-auto bg-emerald-500 text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-2xl shadow-emerald-500/20 outline-none"
-                      >
-                        <span className="font-bold text-sm">
-                          {practiceIndex + 1 >= mistakes.length
-                            ? (language === 'ko' ? '결과 보기' : 'See Results')
-                            : (language === 'ko' ? '다음 문장' : 'Next Sentence')}
-                        </span>
-                        <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
-                          <CaretRight size={20} weight="bold" />
-                        </div>
-                      </button>
-                    </div>
-                  )}
-
-                  {practiceStatus === 'failed' && (
-                    <div className="flex flex-col items-center gap-6 animate-fade-in w-full">
-                      <div className="flex items-center gap-3 text-red-400 bg-red-500/10 px-6 py-3 rounded-full border border-red-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-                        <XCircle size={24} weight="fill" />
-                        <span className="text-lg font-bold font-korean">{language === 'ko' ? '조금 아쉬워요. 다시 해볼까요?' : 'Not quite. Let\'s try again!'}</span>
-                      </div>
-                      <button
+                      <p
+                        className="text-2xl md:text-3xl font-bold text-emerald-400 mb-4 cursor-pointer active:scale-[0.97] transition-transform"
                         onClick={() => {
-                          setPracticeStatus('idle');
-                          setSpokenText("");
+                          const correctText = cleanAnswerText(current.correct_answer || '');
+                          setSpokenText(correctText);
+                          checkPronunciation(correctText);
                         }}
-                        className="group relative overflow-hidden pl-8 pr-2 py-2 w-full sm:w-auto bg-white/10 text-white font-bold rounded-full border border-white/20 hover:bg-white/20 text-lg flex items-center justify-between gap-8 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] outline-none"
+                        title={
+                          language === 'ko'
+                            ? '정답으로 바로 넘어가기'
+                            : 'Tap to skip speech recognition'
+                        }
                       >
-                        <span className="relative z-10 font-korean">
-                          {language === 'ko' ? '다시 말하기' : 'Try Again'}
-                        </span>
-                        <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:-rotate-90">
-                          <ArrowsClockwise size={20} weight="bold" />
-                        </div>
-                      </button>
-                    </div>
-                  )}
+                        {cleanAnswerText(current.correct_answer || '')}
+                      </p>
 
-                </div>
-              );
-            })()}
+                      <div className="h-20 flex items-center justify-center bg-white/5 rounded-xl border border-white/5 relative overflow-hidden">
+                        {isListening && (
+                          <div className="absolute inset-0 bg-emerald-500/10 animate-pulse" />
+                        )}
+                        <p
+                          className={`text-lg font-medium relative z-10 px-4 ${spokenText ? 'text-white' : 'text-zinc-600'}`}
+                        >
+                          {spokenText ||
+                            (language === 'ko'
+                              ? '(마이크 버튼을 누르고 말하세요)'
+                              : '(Tap the mic and speak)')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {practiceStatus === 'idle' && (
+                      <div className="flex flex-col items-center gap-4">
+                        <button
+                          onClick={handleMicPress}
+                          className={`group relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none ${
+                            isListening
+                              ? 'active:scale-[0.97] shadow-[0_0_40px_rgba(239,68,68,0.4)]'
+                              : 'hover:scale-[1.02] active:scale-[0.97] shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]'
+                          }`}
+                        >
+                          <div
+                            className={`absolute inset-0 rounded-full transition-colors duration-700 ${isListening ? 'bg-red-500/20' : 'bg-emerald-500/20'}`}
+                          />
+                          <div
+                            className={`relative z-10 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-full flex items-center justify-center transition-colors duration-700 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] ${isListening ? 'bg-red-500' : 'bg-emerald-500'}`}
+                          >
+                            {isListening && (
+                              <div className="absolute inset-0 rounded-full border-2 border-red-300 animate-ping opacity-50" />
+                            )}
+                            <MicrophoneStage
+                              size={36}
+                              weight="fill"
+                              className="text-white relative z-10 transition-transform duration-700 group-hover:scale-110"
+                            />
+                          </div>
+                        </button>
+                        {isListening && (
+                          <span
+                            className="text-xs text-red-400 font-bold tracking-widest uppercase animate-fade-in cursor-pointer"
+                            onClick={handleMicPress}
+                          >
+                            {language === 'ko' ? '정지 / 취소' : 'Stop / Cancel'}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {practiceStatus === 'success' && (
+                      <div className="flex flex-col items-center gap-6 animate-fade-in w-full">
+                        <div className="flex items-center gap-3 text-emerald-400 bg-emerald-500/10 px-6 py-3 rounded-full border border-emerald-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                          <CheckCircle size={24} weight="fill" />
+                          <span className="text-lg font-bold font-korean">
+                            {language === 'ko' ? '완벽해요!' : 'Perfect!'}
+                          </span>
+                        </div>
+                        <button
+                          onClick={handleNextPractice}
+                          className="group relative overflow-hidden pl-8 pr-2 py-2 w-full sm:w-auto bg-emerald-500 text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-2xl shadow-emerald-500/20 outline-none"
+                        >
+                          <span className="font-bold text-sm">
+                            {practiceIndex + 1 >= mistakes.length
+                              ? language === 'ko'
+                                ? '결과 보기'
+                                : 'See Results'
+                              : language === 'ko'
+                                ? '다음 문장'
+                                : 'Next Sentence'}
+                          </span>
+                          <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
+                            <CaretRight size={20} weight="bold" />
+                          </div>
+                        </button>
+                      </div>
+                    )}
+
+                    {practiceStatus === 'failed' && (
+                      <div className="flex flex-col items-center gap-6 animate-fade-in w-full">
+                        <div className="flex items-center gap-3 text-red-400 bg-red-500/10 px-6 py-3 rounded-full border border-red-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                          <XCircle size={24} weight="fill" />
+                          <span className="text-lg font-bold font-korean">
+                            {language === 'ko'
+                              ? '조금 아쉬워요. 다시 해볼까요?'
+                              : "Not quite. Let's try again!"}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setPracticeStatus('idle');
+                            setSpokenText('');
+                          }}
+                          className="group relative overflow-hidden pl-8 pr-2 py-2 w-full sm:w-auto bg-white/10 text-white font-bold rounded-full border border-white/20 hover:bg-white/20 text-lg flex items-center justify-between gap-8 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] outline-none"
+                        >
+                          <span className="relative z-10 font-korean">
+                            {language === 'ko' ? '다시 말하기' : 'Try Again'}
+                          </span>
+                          <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:-rotate-90">
+                            <ArrowsClockwise size={20} weight="bold" />
+                          </div>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()
+            )}
           </div>
         </div>
       )}
-      
+
       {isFlashcardsActive && (
         <FlashcardsView
           mistakes={mistakes}
@@ -678,4 +830,3 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     document.body
   );
 };
-

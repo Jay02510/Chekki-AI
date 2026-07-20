@@ -23,9 +23,9 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       ...opts,
       type: opts.type || 'info',
       duration: opts.duration || 3000,
-      id: Date.now()
+      id: Date.now(),
     };
-    
+
     setToast(newToast);
 
     setTimeout(() => {
@@ -43,13 +43,15 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       {children}
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none w-full px-4 flex justify-center animate-[fadeIn_200ms_ease-out]">
-          <div className={`px-5 py-3 rounded-full shadow-2xl backdrop-blur-xl border flex items-center gap-3 max-w-sm ${
-            toast.type === 'error' 
-              ? 'bg-red-500/90 border-red-500/20 text-white' 
-              : toast.type === 'success'
-                ? 'bg-emerald-500/90 border-emerald-500/20 text-white'
-                : 'bg-zinc-900/90 border-white/10 text-white'
-          }`}>
+          <div
+            className={`px-5 py-3 rounded-full shadow-2xl backdrop-blur-xl border flex items-center gap-3 max-w-sm ${
+              toast.type === 'error'
+                ? 'bg-red-500/90 border-red-500/20 text-white'
+                : toast.type === 'success'
+                  ? 'bg-emerald-500/90 border-emerald-500/20 text-white'
+                  : 'bg-zinc-900/90 border-white/10 text-white'
+            }`}
+          >
             <span className="shrink-0 text-xl leading-none">
               {toast.type === 'error' ? '⚠️' : toast.type === 'success' ? '✨' : '💡'}
             </span>

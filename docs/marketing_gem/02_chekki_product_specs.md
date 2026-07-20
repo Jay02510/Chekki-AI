@@ -1,4 +1,5 @@
 # 02. Feature & Limitation Manifesto (`chekki_product_specs.md`)
+
 **Chekki AI Knowledge Base — Technical Product Specs, Feature Capabilities & Hardware Limits**
 
 ---
@@ -12,8 +13,9 @@ This manifesto serves as the single source of truth for Chekki AI's capabilities
 ## ⚡ Core Features & Practical Specifications
 
 ### 1. Magic Scan (매직 스캔) & Visual Ink Overlay
+
 - **Component File:** [WorksheetOverlay.tsx](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/components/WorksheetOverlay.tsx) & [useWorksheetAnalysis.ts](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/src/hooks/useWorksheetAnalysis.ts)
-- **How it Works:** 
+- **How it Works:**
   1. The user snaps a photo of a physical printed worksheet using the in-app camera or uploads an image.
   2. The image is processed via a **Parallel Hybrid Execution Model**:
      - **Fast Pass (Gemini 2.5 Flash):** High-speed OCR parses text, layout boundaries, and item coordinates (`ymin, xmin, ymax, xmax` on 0-1000 scale) in ~2 seconds.
@@ -21,27 +23,32 @@ This manifesto serves as the single source of truth for Chekki AI's capabilities
   3. **Visual Output:** Bounding box answer overlays are rendered directly on top of the physical worksheet image in a natural "digital ink" aesthetic. Correct items display in clear green/indigo ink, while items needing attention highlight target answer areas.
 
 ### 2. "Mom's Script" & Pedagogical Guides (엄마 가이드 & 스크립트)
+
 - **Component File:** [WorksheetItemCard.tsx](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/components/WorksheetItemCard.tsx)
 - **How it Works:** Tapping any overlaid item opens a dedicated detail card providing:
-  - **Korean Rule Explanation (엄마가 이해하는 핵심 원리):** A clear 1-2 sentence Korean explanation of the phonics rule, grammar concept, or vocabulary meaning (e.g., *"Silent 'e' at the end makes the preceding vowel say its long name"*).
-  - **Teaching Script (엄마의 대화 스크립트):** A verbatim dialogue script in Korean/English that the parent can read aloud to guide their child toward the answer with encouraging hints rather than giving away raw answers (e.g., *"OO야, 여기서 알파벳 E는 읏! 입을 다물고 A 소리를 길게 만들어준대. 같이 읽어볼까?"*).
+  - **Korean Rule Explanation (엄마가 이해하는 핵심 원리):** A clear 1-2 sentence Korean explanation of the phonics rule, grammar concept, or vocabulary meaning (e.g., _"Silent 'e' at the end makes the preceding vowel say its long name"_).
+  - **Teaching Script (엄마의 대화 스크립트):** A verbatim dialogue script in Korean/English that the parent can read aloud to guide their child toward the answer with encouraging hints rather than giving away raw answers (e.g., _"OO야, 여기서 알파벳 E는 읏! 입을 다물고 A 소리를 길게 만들어준대. 같이 읽어볼까?"_).
 
 ### 3. Native Pronunciation & Interactive Speech Coach (원어민 발음 & 스피킹 코치)
+
 - **Component File:** Embedded inside [WorksheetItemCard.tsx](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/components/WorksheetItemCard.tsx) & [speechUtils.ts](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/utils/speechUtils.ts)
 - **How it Works:**
   - **Text-to-Speech (TTS):** Uses native North American English speech synthesis. Children tap the audio icon to listen to standard native pronunciation of phonics blends, target words, or sentences.
   - **Speech-to-Text (STT) Pronunciation Drill:** Uses Capacitor Speech Recognition. The child holds the microphone button and pronounces the target word. If recognized correctly, the app triggers dopamine-building star badge animations with native haptic feedback.
 
 ### 4. Interactive AI Tutor (Ask Chekki / 채키에게 물어보기)
+
 - **Component File:** [AskChekkiBar.tsx](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/components/AskChekkiBar.tsx)
-- **How it Works:** A sticky conversational chat bar at the bottom of the worksheet analysis screen. Parents can ask follow-up questions if their child asks a tricky "why" question (e.g., *"How do I explain why 'ph' makes an 'f' sound to a 6-year-old?"*). Answers are tuned to preschool/elementary pedagogical analogies.
+- **How it Works:** A sticky conversational chat bar at the bottom of the worksheet analysis screen. Parents can ask follow-up questions if their child asks a tricky "why" question (e.g., _"How do I explain why 'ph' makes an 'f' sound to a 6-year-old?"_). Answers are tuned to preschool/elementary pedagogical analogies.
 - **Session Boundary:** Chat memory is capped at 10 conversational turns per worksheet session to maintain context focus and prevent performance lag.
 
 ### 5. Automated Mistake Bank (오답 노트)
+
 - **Component File:** [OdapNoteModal.tsx](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/components/OdapNoteModal.tsx)
 - **How it Works:** Scanned items marked incorrect or bookmarked by the user are automatically saved into a personal Cloud Firestore mistake bank. Parents can open the Mistake Bank on weekends to generate focused review sessions or re-test weak phonics rules.
 
 ### 6. AI Practice Sheet Generator (AI 맞춤 학습지 생성기 - Pro Feature)
+
 - **Component File:** [CloneWorksheetModal.tsx](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/components/CloneWorksheetModal.tsx)
 - **How it Works:** Analyzes the layout and question structure of a scanned worksheet, then generates a fresh, printable PDF worksheet canvas with new vocabulary words at the child's specific skill level.
 

@@ -24,10 +24,10 @@ export const playSuccessSound = () => {
     const gainNode = audioContext.createGain();
 
     oscillator.type = 'sine';
-    
+
     // Play a high C (C6) note for a bright "ding"
-    oscillator.frequency.setValueAtTime(1046.50, audioContext.currentTime);
-    
+    oscillator.frequency.setValueAtTime(1046.5, audioContext.currentTime);
+
     // Quick fade out for a bell-like sound
     gainNode.gain.setValueAtTime(0, audioContext.currentTime);
     gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.05);

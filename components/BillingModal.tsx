@@ -133,186 +133,188 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-2xl mx-2 sm:mx-4">
-        <div className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}>
         <div
-          className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-5 py-5 sm:px-8 sm:py-6 border-b flex justify-between items-center shrink-0`}
+          className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
         >
-          <div className="flex items-center gap-3">
-            <svg
-              className={`w-6 h-6 ${isNight ? 'text-orange-400' : 'text-orange-500'}`}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
-              />
-            </svg>
-            <h2
-              className={`text-balance text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight`}
-            >
-              {t('billing_title')}
-            </h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-zinc-500 hover:text-orange-500 transition-colors"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="p-5 sm:p-8 md:p-10 flex flex-col items-center text-center space-y-5 overflow-y-auto custom-scrollbar flex-1">
           <div
-            className={`w-20 h-20 rounded-full ${isNight ? 'bg-orange-500/10' : 'bg-orange-50 shadow-inner'} flex items-center justify-center`}
+            className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-5 py-5 sm:px-8 sm:py-6 border-b flex justify-between items-center shrink-0`}
           >
-            <svg
-              className={`w-10 h-10 ${isNight ? 'text-orange-400' : 'text-orange-500'}`}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
-              />
-            </svg>
-          </div>
-
-          {subscriptionRecord?.subscription_status === 'active' ? (
-            <>
-              <h3
-                className={`text-balance text-[10px] font-black uppercase tracking-tight ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}
-              >
-                {t('billing_active')}
-              </h3>
-              {platformBadge()}
-              <div className="space-y-1.5 text-zinc-400 font-medium text-sm">
-                <p>
-                  {t('billing_plan')}:{' '}
-                  <span className="text-orange-500 font-black">
-                    {subscriptionRecord.apple_product_id === 'com.chekkiai.app.yearly'
-                      ? t('sub_yearly')
-                      : t('sub_monthly')}
-                  </span>
-                </p>
-                {user?.subscriptionStartedAt && (
-                  <p>
-                    {t('billing_started')}: {formatDate(user.subscriptionStartedAt)}
-                  </p>
-                )}
-                {user?.nextBillingDate && (
-                  <p>
-                    {t('billing_next')}: {formatDate(user.nextBillingDate)}
-                  </p>
-                )}
-                {subscriptionRecord?.subscription_expiry_date && (
-                  <p>
-                    {t('billing_expires')}:{' '}
-                    {formatDate(subscriptionRecord.subscription_expiry_date)}
-                  </p>
-                )}
-                {user?.isCanceled && (
-                  <p className="text-red-400 text-xs font-bold mt-2">
-                    {t('billing_canceled_notice')}
-                  </p>
-                )}
-              </div>
-
-              {/* Cancel instructions — platform-specific */}
-              {cancelInstructions() && (
-                <div
-                  className={`${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-50 border-zinc-200 shadow-inner'} rounded-2xl p-6 w-full max-w-sm text-left border`}
-                >
-                  {cancelInstructions()}
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              <h3
-                className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase`}
-              >
-                {t('sub_no_active')}
-              </h3>
-              <p className="text-zinc-400 text-sm font-medium max-w-xs leading-relaxed">
-                {language === 'ko'
-                  ? '모든 AI 기능을 무제한으로 사용하세요.'
-                  : 'Unlock all AI tools with unlimited access.'}
-              </p>
-              <button
-                onClick={() => {
-                  onClose();
-                  setShowPaywall(true);
-                }}
-                className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-[0.97] transition-all"
-              >
-                {t('sub_subscribe_now')}
-              </button>
-            </>
-          )}
-
-          <div className={`h-px w-12 ${isNight ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
-          <button
-            onClick={onClose}
-            className={`${isNight ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500 shadow-sm'} px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all`}
-          >
-            {t('billing_back')}
-          </button>
-        </div>
-
-        {showCancelConfirm && (
-          <div
-            className={`absolute inset-0 ${isNight ? 'bg-zinc-950/95' : 'bg-white/95'} backdrop-blur-md flex flex-col justify-center items-center p-8 text-center animate-fade-in z-50`}
-          >
-            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6">
+            <div className="flex items-center gap-3">
               <svg
-                className="w-8 h-8 text-red-400"
+                className={`w-6 h-6 ${isNight ? 'text-orange-400' : 'text-orange-500'}`}
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="1.5"
                 viewBox="0 0 24 24"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+                  d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+                />
+              </svg>
+              <h2
+                className={`text-balance text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight`}
+              >
+                {t('billing_title')}
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-zinc-500 hover:text-orange-500 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="p-5 sm:p-8 md:p-10 flex flex-col items-center text-center space-y-5 overflow-y-auto custom-scrollbar flex-1">
+            <div
+              className={`w-20 h-20 rounded-full ${isNight ? 'bg-orange-500/10' : 'bg-orange-50 shadow-inner'} flex items-center justify-center`}
+            >
+              <svg
+                className={`w-10 h-10 ${isNight ? 'text-orange-400' : 'text-orange-500'}`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
                 />
               </svg>
             </div>
-            <h3
-              className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2`}
+
+            {subscriptionRecord?.subscription_status === 'active' ? (
+              <>
+                <h3
+                  className={`text-balance text-[10px] font-black uppercase tracking-tight ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}
+                >
+                  {t('billing_active')}
+                </h3>
+                {platformBadge()}
+                <div className="space-y-1.5 text-zinc-400 font-medium text-sm">
+                  <p>
+                    {t('billing_plan')}:{' '}
+                    <span className="text-orange-500 font-black">
+                      {subscriptionRecord.apple_product_id === 'com.chekkiai.app.yearly'
+                        ? t('sub_yearly')
+                        : t('sub_monthly')}
+                    </span>
+                  </p>
+                  {user?.subscriptionStartedAt && (
+                    <p>
+                      {t('billing_started')}: {formatDate(user.subscriptionStartedAt)}
+                    </p>
+                  )}
+                  {user?.nextBillingDate && (
+                    <p>
+                      {t('billing_next')}: {formatDate(user.nextBillingDate)}
+                    </p>
+                  )}
+                  {subscriptionRecord?.subscription_expiry_date && (
+                    <p>
+                      {t('billing_expires')}:{' '}
+                      {formatDate(subscriptionRecord.subscription_expiry_date)}
+                    </p>
+                  )}
+                  {user?.isCanceled && (
+                    <p className="text-red-400 text-xs font-bold mt-2">
+                      {t('billing_canceled_notice')}
+                    </p>
+                  )}
+                </div>
+
+                {/* Cancel instructions — platform-specific */}
+                {cancelInstructions() && (
+                  <div
+                    className={`${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-50 border-zinc-200 shadow-inner'} rounded-2xl p-6 w-full max-w-sm text-left border`}
+                  >
+                    {cancelInstructions()}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <h3
+                  className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase`}
+                >
+                  {t('sub_no_active')}
+                </h3>
+                <p className="text-zinc-400 text-sm font-medium max-w-xs leading-relaxed">
+                  {language === 'ko'
+                    ? '모든 AI 기능을 무제한으로 사용하세요.'
+                    : 'Unlock all AI tools with unlimited access.'}
+                </p>
+                <button
+                  onClick={() => {
+                    onClose();
+                    setShowPaywall(true);
+                  }}
+                  className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-[0.97] transition-all"
+                >
+                  {t('sub_subscribe_now')}
+                </button>
+              </>
+            )}
+
+            <div className={`h-px w-12 ${isNight ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
+            <button
+              onClick={onClose}
+              className={`${isNight ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500 shadow-sm'} px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all`}
             >
-              {t('billing_cancel_btn')}
-            </h3>
-            <p className="text-zinc-400 text-sm font-medium mb-8 max-w-sm leading-relaxed break-keep">
-              {t('billing_cancel_desc')}
-            </p>
-            <div className="flex flex-col gap-3 w-full max-w-xs">
-              <button
-                onClick={async () => {
-                  await cancelSubscription();
-                  setShowCancelConfirm(false);
-                }}
-                className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black transition-all active:scale-[0.97] shadow-lg shadow-red-500/20"
-              >
-                {t('billing_cancel_yes')}
-              </button>
-              <button
-                onClick={() => setShowCancelConfirm(false)}
-                className={`w-full ${isNight ? 'bg-zinc-800 hover:bg-zinc-700' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500'} text-white py-4 rounded-xl font-black transition-all`}
-              >
-                {t('billing_cancel_no')}
-              </button>
-            </div>
+              {t('billing_back')}
+            </button>
           </div>
-        )}
-      </div>
+
+          {showCancelConfirm && (
+            <div
+              className={`absolute inset-0 ${isNight ? 'bg-zinc-950/95' : 'bg-white/95'} backdrop-blur-md flex flex-col justify-center items-center p-8 text-center animate-fade-in z-50`}
+            >
+              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6">
+                <svg
+                  className="w-8 h-8 text-red-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+                  />
+                </svg>
+              </div>
+              <h3
+                className={`text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2`}
+              >
+                {t('billing_cancel_btn')}
+              </h3>
+              <p className="text-zinc-400 text-sm font-medium mb-8 max-w-sm leading-relaxed break-keep">
+                {t('billing_cancel_desc')}
+              </p>
+              <div className="flex flex-col gap-3 w-full max-w-xs">
+                <button
+                  onClick={async () => {
+                    await cancelSubscription();
+                    setShowCancelConfirm(false);
+                  }}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black transition-all active:scale-[0.97] shadow-lg shadow-red-500/20"
+                >
+                  {t('billing_cancel_yes')}
+                </button>
+                <button
+                  onClick={() => setShowCancelConfirm(false)}
+                  className={`w-full ${isNight ? 'bg-zinc-800 hover:bg-zinc-700' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500'} text-white py-4 rounded-xl font-black transition-all`}
+                >
+                  {t('billing_cancel_no')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

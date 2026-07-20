@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { ChekkiMascot } from '../../components/Icons';
 import { auth, dbInstance } from '../../services/database';
-import { createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, signInWithCustomToken } from 'firebase/auth';
-import { doc, setDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
+import {
+  createUserWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  signInWithCustomToken,
+} from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 const ADMIN_PASSCODE = 'ChecciAdmin2026!';
 
@@ -18,7 +23,9 @@ export default function AdminPage() {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('1_month');
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'create' | 'upgrade' | 'delete' | 'view_members' | 'schools'>('create');
+  const [mode, setMode] = useState<'create' | 'upgrade' | 'delete' | 'view_members' | 'schools'>(
+    'create'
+  );
   const [message, setMessage] = useState({ text: '', type: '' });
   const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -147,10 +154,45 @@ export default function AdminPage() {
     }
   };
 
-  const filteredSchools = schools.filter(s =>
-    s.name.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
-    s.schoolId.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
-    s.teacherCode.toLowerCase().includes(schoolSearchQuery.toLowerCase())
+  const handleDeleteSchool = async (schoolId: string, schoolName: string) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to permanently delete school "${schoolName}" (${schoolId})?\nAll associated teachers will be unassigned and downgraded to FREE.`
+      )
+    ) {
+      return;
+    }
+
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'delete_school', schoolId }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete school');
+      }
+
+      setMessage({ text: `✅ School ${schoolName} deleted successfully!`, type: 'success' });
+      handleFetchSchools();
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error deleting school', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredSchools = schools.filter(
+    (s) =>
+      s.name.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
+      s.schoolId.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
+      s.teacherCode.toLowerCase().includes(schoolSearchQuery.toLowerCase())
   );
 
   const handleAuthorize = (e: React.FormEvent) => {
@@ -284,7 +326,7 @@ export default function AdminPage() {
 
     try {
       const cleanEmail = email.toLowerCase().trim();
-      
+
       if (!window.confirm(`Are you sure you want to permanently delete user ${cleanEmail}?`)) {
         setLoading(false);
         return;
@@ -321,10 +363,10 @@ export default function AdminPage() {
     if (!window.confirm(`Are you sure you want to permanently delete user ${email}?`)) {
       return;
     }
-    
+
     setLoading(true);
     setMessage({ text: '', type: '' });
-    
+
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
@@ -332,14 +374,14 @@ export default function AdminPage() {
         body: JSON.stringify({ passcode, action: 'delete', uid }),
       });
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to delete user');
       }
-      
+
       setMessage({ text: `✅ User ${email} deleted successfully!`, type: 'success' });
       // Remove from local state immediately to avoid another fetch, or re-fetch
-      setUsers(users.filter(u => u.uid !== uid));
+      setUsers(users.filter((u) => u.uid !== uid));
     } catch (err: any) {
       console.error(err);
       setMessage({ text: err.message || 'Error deleting user', type: 'error' });
@@ -381,7 +423,12 @@ export default function AdminPage() {
   };
 
   const handleImpersonateUser = async (uid: string, email: string) => {
-    if (!window.confirm(`Are you sure you want to log in as ${email}? This will end your current admin session.`)) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to log in as ${email}? This will end your current admin session.`
+      )
+    )
+      return;
     setLoading(true);
     setMessage({ text: '', type: '' });
     try {
@@ -392,7 +439,7 @@ export default function AdminPage() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to get custom token');
-      
+
       await signInWithCustomToken(auth, data.customToken);
       window.location.href = '/app.html';
     } catch (err: any) {
@@ -402,9 +449,10 @@ export default function AdminPage() {
     }
   };
 
-  const filteredUsers = users.filter(u => 
-    u.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    u.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = users.filter(
+    (u) =>
+      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -555,93 +603,112 @@ export default function AdminPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium"
                 />
-              <div className="w-full overflow-x-auto">
-                {loading ? (
-                  <div className="flex justify-center p-8 text-zinc-500 font-bold tracking-widest animate-pulse">
-                    LOADING MEMBERS...
-                  </div>
-                ) : (
-                  <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead>
-                      <tr className="border-b border-zinc-800 text-zinc-400">
-                        <th className="py-3 px-4 font-bold">Name</th>
-                        <th className="py-3 px-4 font-bold">Email</th>
-                        <th className="py-3 px-4 font-bold">Plan</th>
-                        <th className="py-3 px-4 font-bold">Insights</th>
-                        <th className="py-3 px-4 font-bold">Billing Date</th>
-                        <th className="py-3 px-4 font-bold text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-800/50">
-                      {filteredUsers.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="py-8 text-center text-zinc-500">
-                            No members found.
-                          </td>
+                <div className="w-full overflow-x-auto">
+                  {loading ? (
+                    <div className="flex justify-center p-8 text-zinc-500 font-bold tracking-widest animate-pulse">
+                      LOADING MEMBERS...
+                    </div>
+                  ) : (
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead>
+                        <tr className="border-b border-zinc-800 text-zinc-400">
+                          <th className="py-3 px-4 font-bold">Name</th>
+                          <th className="py-3 px-4 font-bold">Email</th>
+                          <th className="py-3 px-4 font-bold">Role / School</th>
+                          <th className="py-3 px-4 font-bold">Plan</th>
+                          <th className="py-3 px-4 font-bold">Insights</th>
+                          <th className="py-3 px-4 font-bold">Billing Date</th>
+                          <th className="py-3 px-4 font-bold text-right">Actions</th>
                         </tr>
-                      ) : (
-                        filteredUsers.map((user) => (
-                          <tr key={user.uid} className="hover:bg-zinc-800/30 transition-colors">
-                            <td className="py-3 px-4 text-white font-medium">{user.name}</td>
-                            <td className="py-3 px-4 text-zinc-400">{user.email}</td>
-                            <td className="py-3 px-4">
-                              <span
-                                className={`px-2 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${user.plan === 'pro' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-zinc-800 text-zinc-300'}`}
-                              >
-                                {user.plan || 'FREE'}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-zinc-500">
-                              <div className="flex flex-col">
-                                <span className="text-xs">Scans: {user.scansUsedToday} / {user.maxScansPerDay}</span>
-                                <span className="text-[10px] text-zinc-600">Last: {user.lastScanDate || 'N/A'}</span>
-                              </div>
-                            </td>
-                            <td className="py-3 px-4 text-zinc-500">
-                              {user.nextBillingDate
-                                ? new Date(user.nextBillingDate).toLocaleDateString()
-                                : '-'}
-                            </td>
-                            <td className="py-3 px-4 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <button
-                                  onClick={() => handleResetPassword(user.email)}
-                                  className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors text-[10px] font-bold uppercase tracking-wider"
-                                  title="Send Password Reset Email"
-                                >
-                                  Reset PW
-                                </button>
-                                <button
-                                  onClick={() => handleImpersonateUser(user.uid, user.email)}
-                                  className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors text-[10px] font-bold uppercase tracking-wider"
-                                  title="Log in as user"
-                                >
-                                  Sign In
-                                </button>
-                                {user.plan === 'pro' && (
-                                  <button
-                                    onClick={() => handleDowngradeUser(user.uid, user.email)}
-                                    className="px-2 py-1 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
-                                    title="Downgrade to Free"
-                                  >
-                                    Downgrade
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => handleDeleteUser(user.uid, user.email)}
-                                  className="px-2 py-1 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
-                                >
-                                  Del
-                                </button>
-                              </div>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800/50">
+                        {filteredUsers.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="py-8 text-center text-zinc-500">
+                              No members found.
                             </td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+                        ) : (
+                          filteredUsers.map((user) => (
+                            <tr key={user.uid} className="hover:bg-zinc-800/30 transition-colors">
+                              <td className="py-3 px-4 text-white font-medium">{user.name}</td>
+                              <td className="py-3 px-4 text-zinc-400">{user.email}</td>
+                              <td className="py-3 px-4 text-zinc-400">
+                                <div className="flex flex-col">
+                                  <span
+                                    className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider w-fit ${user.role === 'teacher' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : user.role === 'admin' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-zinc-800 text-zinc-400'}`}
+                                  >
+                                    {user.role || 'parent'}
+                                  </span>
+                                  {user.schoolName && (
+                                    <span className="text-[10px] text-zinc-500 mt-1 font-bold">
+                                      {user.schoolName}
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span
+                                  className={`px-2 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${user.plan === 'pro' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-zinc-800 text-zinc-300'}`}
+                                >
+                                  {user.plan || 'FREE'}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-zinc-500">
+                                <div className="flex flex-col">
+                                  <span className="text-xs">
+                                    Scans: {user.scansUsedToday} / {user.maxScansPerDay}
+                                  </span>
+                                  <span className="text-[10px] text-zinc-600">
+                                    Last: {user.lastScanDate || 'N/A'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-zinc-500">
+                                {user.nextBillingDate
+                                  ? new Date(user.nextBillingDate).toLocaleDateString()
+                                  : '-'}
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    onClick={() => handleResetPassword(user.email)}
+                                    className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                    title="Send Password Reset Email"
+                                  >
+                                    Reset PW
+                                  </button>
+                                  <button
+                                    onClick={() => handleImpersonateUser(user.uid, user.email)}
+                                    className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                    title="Log in as user"
+                                  >
+                                    Sign In
+                                  </button>
+                                  {user.plan === 'pro' && (
+                                    <button
+                                      onClick={() => handleDowngradeUser(user.uid, user.email)}
+                                      className="px-2 py-1 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                      title="Downgrade to Free"
+                                    >
+                                      Downgrade
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => handleDeleteUser(user.uid, user.email)}
+                                    className="px-2 py-1 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                  >
+                                    Del
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               </div>
             ) : mode === 'schools' ? (
               <div className="w-full flex flex-col gap-4 mt-4 animate-fade-in">
@@ -707,32 +774,56 @@ export default function AdminPage() {
                           </tr>
                         ) : (
                           filteredSchools.map((school) => (
-                            <tr key={school.schoolId} className="hover:bg-zinc-800/30 transition-colors">
-                              <td className="py-3 px-4 text-white font-bold tracking-wide">{school.schoolId}</td>
+                            <tr
+                              key={school.schoolId}
+                              className="hover:bg-zinc-800/30 transition-colors"
+                            >
+                              <td className="py-3 px-4 text-white font-bold tracking-wide">
+                                {school.schoolId}
+                              </td>
                               <td className="py-3 px-4 text-zinc-300 font-medium">{school.name}</td>
-                              <td className="py-3 px-4 text-orange-400 font-mono font-bold">{school.teacherCode}</td>
+                              <td className="py-3 px-4 text-orange-400 font-mono font-bold">
+                                {school.teacherCode}
+                              </td>
                               <td className="py-3 px-4 text-zinc-400">
                                 <div className="flex flex-col">
-                                  <span>{school.usedByUids?.length || 0} / {school.maxUses} used</span>
-                                  <span className="text-[10px] text-zinc-600 truncate max-w-[150px]" title={school.usedByUids?.join(', ') || ''}>
-                                    {school.usedByUids?.length > 0 ? school.usedByUids.join(', ') : 'None'}
+                                  <span>
+                                    {school.usedByUids?.length || 0} / {school.maxUses} used
+                                  </span>
+                                  <span
+                                    className="text-[10px] text-zinc-600 truncate max-w-[150px]"
+                                    title={school.usedByUids?.join(', ') || ''}
+                                  >
+                                    {school.usedByUids?.length > 0
+                                      ? school.usedByUids.join(', ')
+                                      : 'None'}
                                   </span>
                                 </div>
                               </td>
                               <td className="py-3 px-4 text-zinc-500">
-                                {school.createdAt ? new Date(school.createdAt).toLocaleDateString() : '-'}
+                                {school.createdAt
+                                  ? new Date(school.createdAt).toLocaleDateString()
+                                  : '-'}
                               </td>
                               <td className="py-3 px-4 text-right">
-                                <button
-                                  onClick={() => {
-                                    setAssignSchoolIdInput(school.schoolId);
-                                    setAssignEmailInput('');
-                                    setShowAssignModal(true);
-                                  }}
-                                  className="px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
-                                >
-                                  + Assign Teacher
-                                </button>
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    onClick={() => {
+                                      setAssignSchoolIdInput(school.schoolId);
+                                      setAssignEmailInput('');
+                                      setShowAssignModal(true);
+                                    }}
+                                    className="px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                  >
+                                    + Assign Teacher
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteSchool(school.schoolId, school.name)}
+                                    className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))
@@ -746,7 +837,9 @@ export default function AdminPage() {
                 {showCreateSchoolModal && (
                   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-                      <h3 className="text-lg font-black uppercase tracking-wider mb-4">Create New School Code</h3>
+                      <h3 className="text-lg font-black uppercase tracking-wider mb-4">
+                        Create New School Code
+                      </h3>
                       <form onSubmit={handleCreateSchool} className="space-y-4">
                         <div>
                           <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
@@ -795,7 +888,9 @@ export default function AdminPage() {
                             type="number"
                             required
                             value={schoolMaxUsesInput}
-                            onChange={(e) => setSchoolMaxUsesInput(parseInt(e.target.value, 10) || 0)}
+                            onChange={(e) =>
+                              setSchoolMaxUsesInput(parseInt(e.target.value, 10) || 0)
+                            }
                             className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium"
                           />
                         </div>
@@ -823,7 +918,9 @@ export default function AdminPage() {
                 {showAssignModal && (
                   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-                      <h3 className="text-lg font-black uppercase tracking-wider mb-4">Assign Teacher to School</h3>
+                      <h3 className="text-lg font-black uppercase tracking-wider mb-4">
+                        Assign Teacher to School
+                      </h3>
                       <form onSubmit={handleAssignTeacher} className="space-y-4">
                         <div>
                           <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
@@ -857,8 +954,18 @@ export default function AdminPage() {
                               ))}
                             </select>
                             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-500">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M19 9l-7 7-7-7"
+                                ></path>
                               </svg>
                             </div>
                           </div>
@@ -886,7 +993,13 @@ export default function AdminPage() {
               </div>
             ) : (
               <form
-                onSubmit={mode === 'create' ? handleCreateProUser : mode === 'delete' ? handleDeleteUserByEmail : handleUpgradeUser}
+                onSubmit={
+                  mode === 'create'
+                    ? handleCreateProUser
+                    : mode === 'delete'
+                      ? handleDeleteUserByEmail
+                      : handleUpgradeUser
+                }
                 className="space-y-4"
               >
                 {mode === 'create' && (
@@ -1016,8 +1129,11 @@ export default function AdminPage() {
                   type="submit"
                   disabled={loading}
                   className={`w-full text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${
-                    loading ? 'bg-zinc-800 cursor-not-allowed' : 
-                    mode === 'delete' ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400' : 'bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400'
+                    loading
+                      ? 'bg-zinc-800 cursor-not-allowed'
+                      : mode === 'delete'
+                        ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400'
+                        : 'bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400'
                   }`}
                 >
                   {loading ? (

@@ -12,9 +12,9 @@ export interface StruggleRecord {
 
 /**
  * Local-First Privacy Storage Service
- * 
- * To honor the "Zero Data Stored" promise on the backend while still allowing 
- * personalized PDF worksheet generation, we store the student's historical 
+ *
+ * To honor the "Zero Data Stored" promise on the backend while still allowing
+ * personalized PDF worksheet generation, we store the student's historical
  * struggle data strictly on the local device.
  */
 export const localHistoryService = {
@@ -23,10 +23,10 @@ export const localHistoryService = {
    */
   logStruggles: async (items: WorksheetItem[]): Promise<void> => {
     try {
-      const incorrectItems = items.filter(item => item.is_correct === false);
+      const incorrectItems = items.filter((item) => item.is_correct === false);
       if (incorrectItems.length === 0) return;
 
-      const newRecords: StruggleRecord[] = incorrectItems.map(item => ({
+      const newRecords: StruggleRecord[] = incorrectItems.map((item) => ({
         id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
         date: new Date().toISOString(),
         question_text: item.question_text,
@@ -36,10 +36,10 @@ export const localHistoryService = {
 
       const existingData = localStorage.getItem(HISTORY_STORAGE_KEY);
       let history: StruggleRecord[] = existingData ? JSON.parse(existingData) : [];
-      
+
       // Append new records and keep only the last 50 struggles to prevent bloating
       history = [...history, ...newRecords].slice(-50);
-      
+
       localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
     } catch (error) {
       console.warn('[localHistoryService] Failed to log struggles locally', error);
@@ -68,5 +68,5 @@ export const localHistoryService = {
     } catch (error) {
       console.warn('[localHistoryService] Failed to clear local history', error);
     }
-  }
+  },
 };

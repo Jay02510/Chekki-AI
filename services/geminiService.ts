@@ -339,7 +339,7 @@ export interface QuizItem {
   question: string;
   correct_answer: string;
   distractors: string[];
-  options: string[];       // shuffled: correct_answer + distractors
+  options: string[]; // shuffled: correct_answer + distractors
   explanation_ko: string;
 }
 

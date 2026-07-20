@@ -1,10 +1,10 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --font-sans: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
-  --color-brand: #EA580C; /* Vibrant Orange */
-  --color-brand-hover: #C2410C;
-  --color-navy-base: #0F172A; /* Slate 900 */
+  --color-brand: #ea580c; /* Vibrant Orange */
+  --color-brand-hover: #c2410c;
+  --color-navy-base: #0f172a; /* Slate 900 */
 }
 
 @layer base {

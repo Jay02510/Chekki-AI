@@ -161,7 +161,9 @@
 
   /* Emil Blur Crossfade */
   .blur-transition {
-    transition: filter 200ms ease, opacity 200ms ease;
+    transition:
+      filter 200ms ease,
+      opacity 200ms ease;
   }
   .blur-transition.transitioning {
     filter: blur(2px);
@@ -172,8 +174,10 @@
   .modal-enter {
     opacity: 1;
     transform: scale(1);
-    transition: opacity 300ms var(--ease-premium), transform 300ms var(--ease-premium);
-    
+    transition:
+      opacity 300ms var(--ease-premium),
+      transform 300ms var(--ease-premium);
+
     @starting-style {
       opacity: 0;
       transform: scale(0.95);
@@ -183,7 +187,9 @@
   .toast-enter {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 400ms var(--ease-premium), transform 400ms var(--ease-premium);
+    transition:
+      opacity 400ms var(--ease-premium),
+      transform 400ms var(--ease-premium);
 
     @starting-style {
       opacity: 0;

@@ -1,11 +1,12 @@
 # 04. Objection & FAQ Bible (`chekki_faq_handler.md`)
+
 **Chekki AI Knowledge Base — Parent Objection Handling & FAQ Reference**
 
 ---
 
 ## 🏛️ Executive Summary
 
-When drafting DM responses, ad copy, landing page FAQs, or handling social media comments, parents frequently express predictable hesitations regarding screen time, accent quality, safety, and academy alignment. 
+When drafting DM responses, ad copy, landing page FAQs, or handling social media comments, parents frequently express predictable hesitations regarding screen time, accent quality, safety, and academy alignment.
 
 This document provides standardized, brand-aligned answers to handle these objections smoothly.
 
@@ -14,6 +15,7 @@ This document provides standardized, brand-aligned answers to handle these objec
 ## 🛡️ Top Parent Objections & Recommended Responses
 
 ### Objection 1: "Will using this app make my child too dependent on smartphones/screens?"
+
 - **Core Parent Concern:** Anxiety about early smartphone addiction and passive screen consumption.
 - **Brand Position:** Chekki is a **paper-to-digital bridge**, NOT a passive video or gaming app.
 - **Standard Response (Korean):**
@@ -26,6 +28,7 @@ This document provides standardized, brand-aligned answers to handle these objec
 ---
 
 ### Objection 2: "Does the pronunciation coaching use standard American accent profiles?"
+
 - **Core Parent Concern:** Fear that AI speech models will expose their child to artificial, robotic, or non-standard accents.
 - **Brand Position:** Built on native North American speech synthesis and high-precision speech recognition.
 - **Standard Response (Korean):**
@@ -38,8 +41,9 @@ This document provides standardized, brand-aligned answers to handle these objec
 ---
 
 ### Objection 3: "Is it safe for a 6-year-old to use independently, or must I sit with them?"
+
 - **Core Parent Concern:** Child safety, appropriate content, and whether the app requires constant parent supervision.
-- **Brand Position:** Co-learning by design (*"Praise by Mom"*), but completely kid-safe and ad-free.
+- **Brand Position:** Co-learning by design (_"Praise by Mom"_), but completely kid-safe and ad-free.
 - **Standard Response (Korean):**
   > "채키는 광고나 부적절한 외부 링크가 전혀 없는 100% 안전한 아동 친화적 공간입니다. 6~7세 아이가 혼자서 발음 연습(STT)을 하거나 오답 노트를 복습할 수도 있지만, 채키의 진가인 [엄마 스크립트]를 활용해 부모님이 곁에서 힌트를 주고 칭찬해 주실 때 학습 효과와 정서적 유대감이 가장 극대화됩니다."
 - **Key Talking Points:**
@@ -50,6 +54,7 @@ This document provides standardized, brand-aligned answers to handle these objec
 ---
 
 ### Objection 4: "How does Chekki handle curriculum variations between different academies like Poly, GATE, or PSA?"
+
 - **Core Parent Concern:** Concern that the AI won't recognize their specific school's custom workbook or page layout.
 - **Brand Position:** Dynamic Multimodal Gemini AI OCR parses ANY physical layout without needing pre-configured fixed templates.
 - **Standard Response (Korean):**
@@ -62,6 +67,7 @@ This document provides standardized, brand-aligned answers to handle these objec
 ---
 
 ### Objection 5: "Is Chekki expensive compared to private tutoring or homework checking services?"
+
 - **Core Parent Concern:** Price sensitivity vs. high tuition already paid for English Kindergartens.
 - **Brand Position:** Exceptional ROI compared to private tutors (saving tens of thousands of KRW monthly while providing daily instant help).
 - **Standard Response (Korean):**

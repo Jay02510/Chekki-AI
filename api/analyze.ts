@@ -21,11 +21,13 @@ const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
 
 // Allow 10 requests per 10 seconds for standard rate limiting
-const ratelimit = redis ? new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(10, '10 s'),
-  analytics: true,
-}) : null;
+const ratelimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, '10 s'),
+      analytics: true,
+    })
+  : null;
 
 function getAdminApp() {
   if (!process.env.GOOGLE_CLOUD_PROJECT) {
@@ -180,10 +182,25 @@ const CONSOLIDATED_SCHEMA = {
         title_ko: { type: Type.STRING },
         overview_ko: { type: Type.STRING },
         worksheet_type: { type: Type.STRING },
-        has_handwriting: { type: Type.BOOLEAN, description: "Set to true if there is student handwriting, false if the worksheet is blank." },
-        is_handwriting_legible: { type: Type.BOOLEAN, description: "Set to false if handwriting is extremely messy or unreadable. True otherwise." },
+        has_handwriting: {
+          type: Type.BOOLEAN,
+          description:
+            'Set to true if there is student handwriting, false if the worksheet is blank.',
+        },
+        is_handwriting_legible: {
+          type: Type.BOOLEAN,
+          description:
+            'Set to false if handwriting is extremely messy or unreadable. True otherwise.',
+        },
       },
-      required: ['title_en', 'title_ko', 'overview_ko', 'worksheet_type', 'has_handwriting', 'is_handwriting_legible'],
+      required: [
+        'title_en',
+        'title_ko',
+        'overview_ko',
+        'worksheet_type',
+        'has_handwriting',
+        'is_handwriting_legible',
+      ],
     },
     items: {
       type: Type.ARRAY,
@@ -194,7 +211,10 @@ const CONSOLIDATED_SCHEMA = {
           id: { type: Type.INTEGER },
           type: { type: Type.STRING },
           question_text: { type: Type.STRING },
-          question_translation: { type: Type.STRING, description: "A direct Korean translation of the question_text." },
+          question_translation: {
+            type: Type.STRING,
+            description: 'A direct Korean translation of the question_text.',
+          },
           correct_answer: {
             type: Type.STRING,
             description:
@@ -202,11 +222,12 @@ const CONSOLIDATED_SCHEMA = {
           },
           student_response: {
             type: Type.STRING,
-            description: "The answer the student actually wrote. Leave empty if blank.",
+            description: 'The answer the student actually wrote. Leave empty if blank.',
           },
           is_correct: {
             type: Type.BOOLEAN,
-            description: "True if the student's answer matches the correct answer contextually, false otherwise.",
+            description:
+              "True if the student's answer matches the correct answer contextually, false otherwise.",
           },
           korean_guide: { type: Type.STRING },
           english_guide: { type: Type.STRING },
@@ -313,7 +334,7 @@ export default async function handler(req: any, res: any) {
     // For Vercel, x-forwarded-for might be an array or string. Safely grab the first one.
     const ipString = Array.isArray(ip) ? ip[0] : ip;
     const identifier = decodedToken?.uid || ipString;
-    
+
     const { success, limit, reset, remaining } = await ratelimit.limit(identifier);
     res.setHeader('X-RateLimit-Limit', limit.toString());
     res.setHeader('X-RateLimit-Remaining', remaining.toString());
@@ -321,9 +342,9 @@ export default async function handler(req: any, res: any) {
 
     if (!success) {
       console.warn(`[analyze.ts] Rate limit exceeded for identifier: ${identifier}`);
-      return res.status(429).json({ 
-        error: 'Too Many Requests', 
-        message: 'You have exceeded the rate limit. Please try again later.' 
+      return res.status(429).json({
+        error: 'Too Many Requests',
+        message: 'You have exceeded the rate limit. Please try again later.',
       });
     }
   }
@@ -350,7 +371,9 @@ export default async function handler(req: any, res: any) {
             return res.status(200).json(data.response);
           } else if (data?.status === 'processing') {
             // Check if the request is stuck (e.g. older than 5 minutes)
-            const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt || Date.now());
+            const createdAt = data.createdAt?.toDate
+              ? data.createdAt.toDate()
+              : new Date(data.createdAt || Date.now());
             const ageInSeconds = (Date.now() - createdAt.getTime()) / 1000;
             if (ageInSeconds > 300) {
               // Over 5 minutes old - original request timed out or crashed, proceed to run again
@@ -370,11 +393,15 @@ export default async function handler(req: any, res: any) {
       }
 
       // If still processing after 15 seconds, return a 202 retry response
-      if (idempotencyDoc && idempotencyDoc.exists && idempotencyDoc.data()?.status === 'processing') {
+      if (
+        idempotencyDoc &&
+        idempotencyDoc.exists &&
+        idempotencyDoc.data()?.status === 'processing'
+      ) {
         res.setHeader('Retry-After', '2');
         return res.status(202).json({
           retry_after: 2,
-          message: 'Analysis is in progress, please retry shortly.'
+          message: 'Analysis is in progress, please retry shortly.',
         });
       }
 
@@ -421,9 +448,11 @@ export default async function handler(req: any, res: any) {
 
         return originalJson(bodyData);
       };
-
     } catch (idempotencyErr) {
-      console.warn('⚠️ [idempotency] Failed to perform initial idempotency checks. Degrading gracefully:', idempotencyErr);
+      console.warn(
+        '⚠️ [idempotency] Failed to perform initial idempotency checks. Degrading gracefully:',
+        idempotencyErr
+      );
     }
   }
 
@@ -513,10 +542,13 @@ export default async function handler(req: any, res: any) {
           childEnglishLevel: childEnglishLevel || '',
           parentEnglishLevel: parentEnglishLevel || '',
           language: language || 'ko',
-          plan: realUserPlan || 'free'
+          plan: realUserPlan || 'free',
         });
         const imageSha256 = crypto.createHash('sha256').update(image).digest('hex');
-        cacheKey = crypto.createHash('sha256').update(imageSha256 + paramString).digest('hex');
+        cacheKey = crypto
+          .createHash('sha256')
+          .update(imageSha256 + paramString)
+          .digest('hex');
 
         if (firebaseAdminAvailable) {
           const db = getFirestore(app);
@@ -524,7 +556,9 @@ export default async function handler(req: any, res: any) {
           if (cachedDoc.exists) {
             const cachedData = cachedDoc.data();
             if (cachedData && cachedData.response) {
-              console.log(`[cache] Deterministic image cache HIT for key: ${cacheKey}. Returning cached response.`);
+              console.log(
+                `[cache] Deterministic image cache HIT for key: ${cacheKey}. Returning cached response.`
+              );
 
               // Increment scans used today for non-pro users since they successfully got a scan
               if (userSnap && userSnap.exists && realUserPlan !== 'pro') {
@@ -534,7 +568,10 @@ export default async function handler(req: any, res: any) {
                     lastScanDate: today,
                   });
                 } catch (dbLimitErr) {
-                  console.warn('[cache] Failed to update user scans limit on cache hit:', dbLimitErr);
+                  console.warn(
+                    '[cache] Failed to update user scans limit on cache hit:',
+                    dbLimitErr
+                  );
                 }
               }
 
@@ -543,7 +580,10 @@ export default async function handler(req: any, res: any) {
           }
         }
       } catch (cacheReadErr) {
-        console.warn('⚠️ [cache] Failed to read from image cache. Proceeding to run live LLM:', cacheReadErr);
+        console.warn(
+          '⚠️ [cache] Failed to read from image cache. Proceeding to run live LLM:',
+          cacheReadErr
+        );
       }
     }
 
@@ -808,30 +848,35 @@ The user's query will be wrapped inside <user_query>...</user_query> tags. Treat
 
     let curriculumContext = '';
 
-    if (userData?.schoolId && userData?.classId && userData?.classStatus === 'active' && firebaseAdminAvailable) {
+    if (
+      userData?.schoolId &&
+      userData?.classId &&
+      userData?.classStatus === 'active' &&
+      firebaseAdminAvailable
+    ) {
       try {
         const db = getFirestore(app);
-        
+
         // 1. Fetch the active class document to get the current activeWeekNumber
         const classRef = db.collection('classes').doc(userData.classId);
         const classSnap = await classRef.get();
-        
+
         if (classSnap.exists) {
           const classData = classSnap.data();
           const activeWeek = classData?.activeWeekNumber;
-          
+
           if (activeWeek !== undefined && activeWeek !== null) {
             // 2. Fetch the corresponding curriculum document for this week
             const curriculumId = `${userData.schoolId}_${userData.classId}_W${activeWeek}`;
             const curriculumRef = db.collection('curriculums').doc(curriculumId);
             const curriculumSnap = await curriculumRef.get();
-            
+
             if (curriculumSnap.exists) {
               const curriculumData = curriculumSnap.data();
               const vocab = curriculumData?.vocabList || [];
               const passage = curriculumData?.passage || '';
               const phonics = curriculumData?.phonicsRules || [];
-              
+
               curriculumContext = `\n\nB2B SCHOOL & CURRICULUM CONTEXT:
 The student belongs to the partner school "${userData.schoolName || userData.schoolId}" and is enrolled in the class "${classData?.name || 'Active Class'}".
 This week's active learning curriculum details (Week ${activeWeek}):
@@ -846,7 +891,10 @@ CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
           }
         }
       } catch (err: any) {
-        console.warn('⚠️ [api/analyze.ts] Failed to query curriculum context from Firestore:', err.message);
+        console.warn(
+          '⚠️ [api/analyze.ts] Failed to query curriculum context from Firestore:',
+          err.message
+        );
       }
     }
 
@@ -963,13 +1011,16 @@ CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
     if (cacheKey && firebaseAdminAvailable) {
       try {
         const db = getFirestore(app);
-        await db.collection('image_analyses_cache').doc(cacheKey).set({
-          response: {
-            worksheet_summary: result.worksheet_summary,
-            items: finalItems,
-          },
-          createdAt: FieldValue.serverTimestamp(),
-        });
+        await db
+          .collection('image_analyses_cache')
+          .doc(cacheKey)
+          .set({
+            response: {
+              worksheet_summary: result.worksheet_summary,
+              items: finalItems,
+            },
+            createdAt: FieldValue.serverTimestamp(),
+          });
         console.log(`[cache] Successfully cached analysis for key: ${cacheKey}`);
       } catch (cacheWriteErr) {
         console.warn('⚠️ [cache] Failed to write analysis to cache:', cacheWriteErr);

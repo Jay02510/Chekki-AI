@@ -17,7 +17,12 @@ import { Capacitor } from '@capacitor/core';
 import { PUBLIC_APP_URL } from '../config';
 import { toJpeg } from 'html-to-image';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
-import { normalizeText, compareSpeech, cleanAnswerText, sanitizeForEnglishSpeech } from '../utils/speechUtils';
+import {
+  normalizeText,
+  compareSpeech,
+  cleanAnswerText,
+  sanitizeForEnglishSpeech,
+} from '../utils/speechUtils';
 import { refineWorksheetItem } from '../services/geminiService';
 import { WorksheetItemCard } from './WorksheetItemCard';
 import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
@@ -159,7 +164,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
         console.error('Speech Recognition Error', e);
         setIsListening(false);
         if (e.error === 'not-allowed') {
-          showToast({ message: 'Microphone access was denied. Please check your browser settings.', type: 'error' });
+          showToast({
+            message: 'Microphone access was denied. Please check your browser settings.',
+            type: 'error',
+          });
         }
       };
 
@@ -242,7 +250,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
       lastAudioTextRef.current = cleanText;
 
       const utterance = new SpeechSynthesisUtterance(cleanText);
-      
+
       utterance.onend = () => {
         if (lastAudioTextRef.current === cleanText) {
           lastAudioTextRef.current = null;
@@ -251,21 +259,21 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
       utterance.lang = 'en-US';
       utterance.rate = 0.85;
-      
+
       // Attempt to select a premium/clearer voice if available
       const voices = window.speechSynthesis.getVoices();
       const preferredVoiceNames = ['Google US English', 'Samantha', 'Alex'];
       let selectedVoice = null;
-      
+
       for (const name of preferredVoiceNames) {
         selectedVoice = voices.find((v) => v.name.includes(name));
         if (selectedVoice) break;
       }
-      
+
       if (!selectedVoice) {
         selectedVoice = voices.find((v) => v.lang === 'en-US');
       }
-      
+
       if (selectedVoice) {
         utterance.voice = selectedVoice;
       }
@@ -291,11 +299,25 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
     try {
       const isGuest = !isAuthenticated;
-      const worksheetContext = localItems.length > 0 
-        ? localItems.map(i => `Question ${i.id}: Text: "${i.question_text}". Correct Answer: "${i.correct_answer}"`).join('\\n')
-        : undefined;
+      const worksheetContext =
+        localItems.length > 0
+          ? localItems
+              .map(
+                (i) =>
+                  `Question ${i.id}: Text: "${i.question_text}". Correct Answer: "${i.correct_answer}"`
+              )
+              .join('\\n')
+          : undefined;
       // Pass history along with the new question
-      const response = await askChekkiQuestion(question, language, isGuest, undefined, askHistory, undefined, worksheetContext);
+      const response = await askChekkiQuestion(
+        question,
+        language,
+        isGuest,
+        undefined,
+        askHistory,
+        undefined,
+        worksheetContext
+      );
 
       setAskAnswer(response);
       // Update history: add BOTH the question and the response
@@ -444,7 +466,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
         await navigator.share(shareData);
       } else {
         navigator.clipboard.writeText(PUBLIC_APP_URL);
-        showToast({ message: language === 'ko' ? '앱 링크가 복사되었습니다!' : 'App link copied!', type: 'success' });
+        showToast({
+          message: language === 'ko' ? '앱 링크가 복사되었습니다!' : 'App link copied!',
+          type: 'success',
+        });
       }
     } catch (err) {
       console.error(err);
@@ -484,13 +509,25 @@ export const SplitView: React.FC<SplitViewProps> = ({
       try {
         const { available } = await SpeechRecognition.available();
         if (!available) {
-          showToast({ message: language === 'ko' ? '이 기기에서 음성 인식을 사용할 수 없습니다.' : 'Speech recognition is not available on this device.', type: 'error' });
+          showToast({
+            message:
+              language === 'ko'
+                ? '이 기기에서 음성 인식을 사용할 수 없습니다.'
+                : 'Speech recognition is not available on this device.',
+            type: 'error',
+          });
           return;
         }
 
         const permStatus = await SpeechRecognition.requestPermissions();
         if (permStatus.speechRecognition !== 'granted') {
-          showToast({ message: language === 'ko' ? '마이크 및 음성 인식 권한을 허용해주세요.' : 'Please allow microphone and speech recognition permissions.', type: 'error' });
+          showToast({
+            message:
+              language === 'ko'
+                ? '마이크 및 음성 인식 권한을 허용해주세요.'
+                : 'Please allow microphone and speech recognition permissions.',
+            type: 'error',
+          });
           return;
         }
 
@@ -547,7 +584,13 @@ export const SplitView: React.FC<SplitViewProps> = ({
           endListenerRef.current = null;
         }
         if (err?.message?.includes('denied') || err?.message?.includes('permission')) {
-          showToast({ message: language === 'ko' ? '마이크 및 음성 인식 권한을 허용해주세요.' : 'Please allow microphone and speech recognition permissions in Settings.', type: 'error' });
+          showToast({
+            message:
+              language === 'ko'
+                ? '마이크 및 음성 인식 권한을 허용해주세요.'
+                : 'Please allow microphone and speech recognition permissions in Settings.',
+            type: 'error',
+          });
         }
       }
       return;
@@ -555,7 +598,13 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
     // Web fallback: use Web Speech API
     if (!recognitionRef.current) {
-      showToast({ message: language === 'ko' ? '이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 이용해주세요.' : 'Speech recognition is not supported in this browser. Please use Chrome.', type: 'error' });
+      showToast({
+        message:
+          language === 'ko'
+            ? '이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 이용해주세요.'
+            : 'Speech recognition is not supported in this browser. Please use Chrome.',
+        type: 'error',
+      });
       return;
     }
 
@@ -592,7 +641,13 @@ export const SplitView: React.FC<SplitViewProps> = ({
       setLocalItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...refinedData } : i)));
       setRefiningItemId(null);
     } catch (err) {
-      showToast({ message: language === 'ko' ? '다듬기 실패했습니다. 다시 시도해주세요.' : 'Failed to refine. Please try again.', type: 'error' });
+      showToast({
+        message:
+          language === 'ko'
+            ? '다듬기 실패했습니다. 다시 시도해주세요.'
+            : 'Failed to refine. Please try again.',
+        type: 'error',
+      });
     } finally {
       setIsRefining(false);
     }
@@ -757,7 +812,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
               <div className="mt-3 animate-fade-in-up">
                 <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl px-4 py-2.5 flex items-center gap-3">
                   <span className="text-orange-500 text-sm animate-pulse shrink-0">💡</span>
-                  <p className={`text-xs md:text-sm font-black ${isNight ? 'text-orange-400' : 'text-orange-600'} uppercase tracking-wide leading-relaxed pt-0.5 break-keep`}>
+                  <p
+                    className={`text-xs md:text-sm font-black ${isNight ? 'text-orange-400' : 'text-orange-600'} uppercase tracking-wide leading-relaxed pt-0.5 break-keep`}
+                  >
                     {t('tip_click_guide')}
                   </p>
                 </div>
@@ -839,10 +896,11 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
             {localItems.length > 0 && (
               <div className="pt-8 pb-6 border-t border-white/5 mt-4 space-y-6 animate-fade-in">
-                
                 {/* Heartfelt Message */}
                 <div className="text-center px-4">
-                  <p className={`text-sm md:text-base font-korean font-bold italic leading-relaxed ${isNight ? 'text-orange-300' : 'text-orange-500'}`}>
+                  <p
+                    className={`text-sm md:text-base font-korean font-bold italic leading-relaxed ${isNight ? 'text-orange-300' : 'text-orange-500'}`}
+                  >
                     {language === 'ko'
                       ? '아무도 몰라줘도 채키는 알아요. 수고 많았어요, 엄마! 💌'
                       : 'If nobody noticed, Chekki will. Great job today, Mom. 💌'}
@@ -872,7 +930,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-3">
-
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={onScanAgain}
@@ -882,9 +939,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
                       {t('ws_scan_again')}
                     </button>
                     <button
-                  aria-label="Share"
-                  onClick={handleShare}
-                  disabled={isSharing}
+                      aria-label="Share"
+                      onClick={handleShare}
+                      disabled={isSharing}
                       className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest active:scale-[0.97] transition-transform duration-[160ms] ease-out ${isNight ? 'bg-zinc-800 border-white/10 text-zinc-300 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
                     >
                       {isSharing ? (

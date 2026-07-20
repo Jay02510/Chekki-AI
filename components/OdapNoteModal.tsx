@@ -219,7 +219,6 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
         >
           {/* Inner Core */}
           <div className="relative h-full max-h-[calc(90vh-1.5rem)] flex flex-col bg-[#050505] rounded-[2rem] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden">
-            
             {/* Header */}
             <div className="flex-none p-6 sm:p-10 flex justify-between items-start z-10 bg-gradient-to-b from-[#050505] to-transparent">
               <div>
@@ -240,7 +239,9 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                   transition={{ delay: 0.15, ...transitionSpring }}
                   className="text-4xl sm:text-5xl font-display font-black tracking-tight text-white"
                 >
-                  Learning<br /><span className="text-zinc-500">Dashboard</span>
+                  Learning
+                  <br />
+                  <span className="text-zinc-500">Dashboard</span>
                 </motion.h2>
               </div>
 
@@ -252,8 +253,18 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                 onClick={() => setShowMistakeModal(false)}
                 className="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 flex items-center justify-center transition-colors cursor-pointer"
               >
-                <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-5 h-5 text-zinc-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </motion.button>
             </div>
@@ -286,16 +297,18 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
-                        transition={{ 
-                          layout: { type: "spring", bounce: 0.2, duration: 0.6 },
+                        transition={{
+                          layout: { type: 'spring', bounce: 0.2, duration: 0.6 },
                           opacity: { duration: 0.2 },
-                          delay: index * 0.05 
+                          delay: index * 0.05,
                         }}
                         key={item.uniqueId}
                         className={`\${index === 0 && mistakes.length > 1 ? 'md:col-span-2 md:flex-row md:items-center' : 'flex-col'} group relative flex gap-6 p-1.5 rounded-[1.75rem] bg-white/5 ring-1 ring-white/10 overflow-hidden`}
                       >
                         {/* Inner Core of Bento Card */}
-                        <div className={`\${index === 0 && mistakes.length > 1 ? 'md:flex-row md:items-center' : 'flex-col'} relative flex-1 bg-[#0f1014] rounded-[1.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex gap-6`}>
+                        <div
+                          className={`\${index === 0 && mistakes.length > 1 ? 'md:flex-row md:items-center' : 'flex-col'} relative flex-1 bg-[#0f1014] rounded-[1.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex gap-6`}
+                        >
                           <div className="flex-1">
                             <span className="inline-block px-3 py-1 rounded-full bg-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-widest mb-4">
                               {t('lbl_question')}
@@ -303,7 +316,7 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                             <h4 className="text-lg sm:text-xl font-medium text-white mb-6 leading-snug">
                               {item.question_text}
                             </h4>
-                            
+
                             <div className="p-4 rounded-2xl bg-black/50 ring-1 ring-white/5">
                               <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
                                 {t('lbl_correct_answer')}
@@ -312,16 +325,20 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                                 {item.correct_answer}
                               </p>
                             </div>
-                            
+
                             {item.korean_guide && (
                               <p className="text-zinc-500 text-sm mt-6 leading-relaxed font-korean">
-                                <span className="text-white/40 block mb-1 text-xs">{t('lbl_mom_tip')}</span>
+                                <span className="text-white/40 block mb-1 text-xs">
+                                  {t('lbl_mom_tip')}
+                                </span>
                                 {item.korean_guide}
                               </p>
                             )}
                           </div>
 
-                          <div className={`\${index === 0 && mistakes.length > 1 ? 'md:self-end md:w-auto w-full mt-4 md:mt-0' : 'w-full mt-4'}`}>
+                          <div
+                            className={`\${index === 0 && mistakes.length > 1 ? 'md:self-end md:w-auto w-full mt-4 md:mt-0' : 'w-full mt-4'}`}
+                          >
                             <motion.button
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.97 }}
@@ -358,7 +375,12 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                   <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
                 ) : (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
                   </svg>
                 )}
                 <span>
@@ -368,12 +390,17 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                       : 'Preparing...'
                     : t('review_print_btn')}
                 </span>
-                
+
                 {/* Button-in-Button pattern */}
                 {!isPrinting && mistakes.length > 0 && (
                   <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center transition-transform group-hover:translate-x-1 group-hover:-translate-y-px">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                      />
                     </svg>
                   </div>
                 )}
@@ -396,35 +423,103 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
           }}
           ref={printRef}
         >
-          <div style={{ textAlign: 'center', marginBottom: '40px', borderBottom: '3px solid #f97316', paddingBottom: '20px' }}>
+          <div
+            style={{
+              textAlign: 'center',
+              marginBottom: '40px',
+              borderBottom: '3px solid #f97316',
+              paddingBottom: '20px',
+            }}
+          >
             <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f97316' }}>Chekki AI</div>
-            <div style={{ fontSize: '32px', fontWeight: '900', margin: '10px 0' }}>{t('review_title')}</div>
+            <div style={{ fontSize: '32px', fontWeight: '900', margin: '10px 0' }}>
+              {t('review_title')}
+            </div>
             <div style={{ color: '#666', fontStyle: 'italic' }}>
               {language === 'ko' ? '오늘도 한 걸음 더 성장했어요!' : 'Growing every day!'}
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
             {mistakes.map((m, idx) => (
-              <div key={idx} style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '12px', background: '#fafafa' }}>
-                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#999', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              <div
+                key={idx}
+                style={{
+                  border: '1px solid #ddd',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  background: '#fafafa',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    color: '#999',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                  }}
+                >
                   {t('lbl_question')}
                 </div>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', margin: '5px 0 15px 0' }}>{m.question_text}</div>
-                <div style={{ background: 'white', border: '2px dashed #cbd5e1', padding: '20px', borderRadius: '8px', marginTop: '10px', minHeight: '80px' }}>
-                  <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '5px', fontWeight: '500' }}>{t('lbl_write_answer')}</div>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', margin: '5px 0 15px 0' }}>
+                  {m.question_text}
+                </div>
+                <div
+                  style={{
+                    background: 'white',
+                    border: '2px dashed #cbd5e1',
+                    padding: '20px',
+                    borderRadius: '8px',
+                    marginTop: '10px',
+                    minHeight: '80px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: '#9ca3af',
+                      marginBottom: '5px',
+                      fontWeight: '500',
+                    }}
+                  >
+                    {t('lbl_write_answer')}
+                  </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-                  <div style={{ color: '#f97316', fontWeight: 'bold', fontSize: '11px', transform: 'rotate(180deg)', display: 'inline-block' }}>
+                  <div
+                    style={{
+                      color: '#f97316',
+                      fontWeight: 'bold',
+                      fontSize: '11px',
+                      transform: 'rotate(180deg)',
+                      display: 'inline-block',
+                    }}
+                  >
                     ({t('lbl_correct_answer')} {m.correct_answer})
                   </div>
                 </div>
-                <div style={{ marginTop: '15px', fontSize: '14px', color: '#666', fontStyle: 'italic', borderLeft: '3px solid #f97316', paddingLeft: '10px', lineHeight: '1.5' }}>
-                  <strong>{t('lbl_mom_tip')}</strong> {language === 'ko' ? m.teaching_script_ko : m.teaching_script_en || m.teaching_script_ko}
+                <div
+                  style={{
+                    marginTop: '15px',
+                    fontSize: '14px',
+                    color: '#666',
+                    fontStyle: 'italic',
+                    borderLeft: '3px solid #f97316',
+                    paddingLeft: '10px',
+                    lineHeight: '1.5',
+                  }}
+                >
+                  <strong>{t('lbl_mom_tip')}</strong>{' '}
+                  {language === 'ko'
+                    ? m.teaching_script_ko
+                    : m.teaching_script_en || m.teaching_script_ko}
                 </div>
               </div>
             ))}
           </div>
-          <div style={{ marginTop: '50px', textAlign: 'center', fontSize: '12px', color: '#aaa' }}>{t('print_footer')}</div>
+          <div style={{ marginTop: '50px', textAlign: 'center', fontSize: '12px', color: '#aaa' }}>
+            {t('print_footer')}
+          </div>
         </div>
       </div>
     </>

@@ -10,4 +10,3 @@
  * 3. Tag your commit with 'vX.X.X'
  */
 export const APP_VERSION = '1.2.2';
-

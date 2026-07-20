@@ -71,10 +71,18 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         setClassJoinSuccess(true);
         setTimeout(() => onComplete(), 1200);
       } else {
-        setClassJoinError(language === 'ko' ? '올바르지 않은 코드입니다. 다시 확인해 주세요.' : 'Invalid code. Please double-check with your teacher.');
+        setClassJoinError(
+          language === 'ko'
+            ? '올바르지 않은 코드입니다. 다시 확인해 주세요.'
+            : 'Invalid code. Please double-check with your teacher.'
+        );
       }
     } catch {
-      setClassJoinError(language === 'ko' ? '오류가 발생했습니다. 다시 시도해 주세요.' : 'Something went wrong. Please try again.');
+      setClassJoinError(
+        language === 'ko'
+          ? '오류가 발생했습니다. 다시 시도해 주세요.'
+          : 'Something went wrong. Please try again.'
+      );
     } finally {
       setIsJoiningClass(false);
     }
@@ -93,7 +101,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   };
 
   const renderProfileForm = () => (
-    <motion.div 
+    <motion.div
       key="profileForm"
       variants={fadeVariants}
       initial="initial"
@@ -103,19 +111,23 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       className="flex flex-col h-full"
     >
       <div className="text-center mb-10 pt-4">
-        <motion.div 
+        <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           className="w-28 h-28 sm:w-32 sm:h-32 rounded-[2rem] mx-auto mb-6 shadow-[0_20px_40px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/40 p-2 shrink-0"
         >
-          <img src="/assets/bento_reveal_only.png" alt="Setup" className="w-full h-full object-contain drop-shadow-md" />
+          <img
+            src="/assets/bento_reveal_only.png"
+            alt="Setup"
+            className="w-full h-full object-contain drop-shadow-md"
+          />
         </motion.div>
         <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight">
           {language === 'ko' ? 'AI 튜터 설정' : 'Tailor the AI'}
         </h3>
         <p className="text-sm text-zinc-400 mt-4 font-korean leading-relaxed max-w-[280px] mx-auto">
-          {language === 'ko' 
-            ? '아이의 학습 수준에 맞게 단어와 해설을 조정합니다.' 
+          {language === 'ko'
+            ? '아이의 학습 수준에 맞게 단어와 해설을 조정합니다.'
             : "We'll adjust the vocabulary and explanations to fit your child perfectly."}
         </p>
       </div>
@@ -141,7 +153,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
               >
                 <span className="relative z-10">{language === 'ko' ? opt.ko : opt.en}</span>
                 {selectedAge === opt.id && (
-                  <motion.div 
+                  <motion.div
                     layoutId="age-active"
                     className="absolute inset-0 bg-orange-500/20 blur-xl"
                   />
@@ -171,7 +183,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
               >
                 <span className="relative z-10">{language === 'ko' ? opt.ko : opt.en}</span>
                 {selectedLevel === opt.id && (
-                  <motion.div 
+                  <motion.div
                     layoutId="level-active"
                     className="absolute inset-0 bg-orange-500/20 blur-xl"
                   />
@@ -201,7 +213,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           <div className="flex flex-col gap-3">
             {[
               { id: 'beginner', ko: '기본적인 문장만! (왕초보)', en: 'Beginner' },
-              { id: 'fluent', ko: '기본적인 설명 가능! (중급 이상)', en: 'Comfortable (Fluent)' }
+              { id: 'fluent', ko: '기본적인 설명 가능! (중급 이상)', en: 'Comfortable (Fluent)' },
             ].map((opt) => (
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -216,7 +228,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
               >
                 <span className="relative z-10">{language === 'ko' ? opt.ko : opt.en}</span>
                 {parentLevel === opt.id && (
-                  <motion.div 
+                  <motion.div
                     layoutId="parent-level-active"
                     className="absolute inset-0 bg-orange-500/20 blur-xl"
                   />
@@ -248,11 +260,17 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black uppercase text-xs tracking-[0.15em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed group shadow-[0_10px_20px_rgba(255,255,255,0.1)]"
         >
           <span className="relative z-10">
-            {isSubmitting ? (language === 'ko' ? '저장 중...' : 'Saving...') : (language === 'ko' ? '저장 후 계속하기' : 'Save & Continue')}
+            {isSubmitting
+              ? language === 'ko'
+                ? '저장 중...'
+                : 'Saving...'
+              : language === 'ko'
+                ? '저장 후 계속하기'
+                : 'Save & Continue'}
           </span>
           <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-200" />
         </motion.button>
-        
+
         <div className="flex justify-center">
           <button
             onClick={onSkip}
@@ -275,7 +293,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
     isLast: boolean = false,
     extraContent?: React.ReactNode
   ) => (
-    <motion.div 
+    <motion.div
       key={`step${step}`}
       variants={fadeVariants}
       initial="initial"
@@ -284,7 +302,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       transition={transitionSpring}
       className="flex flex-col h-full items-center justify-center text-center py-8"
     >
-      <motion.div 
+      <motion.div
         animate={{ y: [0, -10, 0], rotate: [2, -1, 2] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
         className="w-44 h-44 sm:w-48 sm:h-48 rounded-[2.5rem] flex items-center justify-center mb-6 sm:mb-8 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/40 p-2 shrink-0"
@@ -294,7 +312,9 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight mb-5">
         {language === 'ko' ? titleKo : titleEn}
       </h3>
-      <p className={`text-base text-zinc-400 leading-relaxed max-w-[280px] font-korean ${extraContent ? 'mb-6' : 'mb-12'}`}>
+      <p
+        className={`text-base text-zinc-400 leading-relaxed max-w-[280px] font-korean ${extraContent ? 'mb-6' : 'mb-12'}`}
+      >
         {language === 'ko' ? descKo : descEn}
       </p>
 
@@ -308,7 +328,13 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black uppercase text-xs tracking-[0.15em] transition-colors shadow-[0_10px_20px_rgba(255,255,255,0.1)] group"
         >
           <span className="relative z-10">
-            {isLast ? (language === 'ko' ? '시작하기!' : 'Get Started!') : (language === 'ko' ? '다음' : 'Next')}
+            {isLast
+              ? language === 'ko'
+                ? '시작하기!'
+                : 'Get Started!'
+              : language === 'ko'
+                ? '다음'
+                : 'Next'}
           </span>
           <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-200" />
         </motion.button>
@@ -322,13 +348,13 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
             {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
           </button>
         </div>
-        
+
         <div className="flex justify-center gap-3 mt-5">
-          {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
-            <motion.div 
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+            <motion.div
               key={i}
               layout
-              className={`h-1.5 rounded-full transition-colors ${step === i ? 'bg-orange-500 w-8' : 'bg-white/20 w-1.5'}`} 
+              className={`h-1.5 rounded-full transition-colors ${step === i ? 'bg-orange-500 w-8' : 'bg-white/20 w-1.5'}`}
             />
           ))}
         </div>
@@ -345,7 +371,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="absolute inset-0 bg-black/80 backdrop-blur-2xl"
       />
-      
+
       {/* Outer Shell Double-Bezel */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -357,12 +383,12 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         {/* Inner Core */}
         <div className="relative w-full h-full bg-[#050505] rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
           {step < 6 && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="absolute top-6 left-6 z-50"
             >
-              <button 
+              <button
                 onClick={onSkip}
                 className="bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-[10px] font-bold px-4 py-1.5 rounded-full backdrop-blur-md transition-all tracking-widest uppercase border border-white/5 hover:border-white/20 shadow-lg"
               >
@@ -372,15 +398,15 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           )}
 
           <AnimatePresence mode="wait">
-            {step === 0 && renderEducationalStep(
-              '/assets/slide1_welcome_mascot.png',
-              '체키에 오신 것을 환영합니다',
-              'Welcome to Chekki',
-              '우리 아이의 완벽한 AI 영어 튜터를 만나보세요.',
-              "Meet your child's new personal AI English Tutor.",
-              () => setStep(1),
-              false,
-              (
+            {step === 0 &&
+              renderEducationalStep(
+                '/assets/slide1_welcome_mascot.png',
+                '체키에 오신 것을 환영합니다',
+                'Welcome to Chekki',
+                '우리 아이의 완벽한 AI 영어 튜터를 만나보세요.',
+                "Meet your child's new personal AI English Tutor.",
+                () => setStep(1),
+                false,
                 <div className="flex flex-col gap-4 mt-2 w-full max-w-[280px] mx-auto mb-8">
                   <div className="flex flex-col gap-2">
                     <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-left">
@@ -388,17 +414,17 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                     </label>
                     <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
                       {/* Active Background for Language */}
-                      <div 
+                      <div
                         className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl bg-zinc-800 transition-transform duration-200 ease-out`}
                         style={{ transform: `translateX(${language === 'en' ? '0' : '100%'})` }}
                       />
-                      <button 
+                      <button
                         onClick={() => setLanguage('en')}
                         className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'en' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
                       >
                         English
                       </button>
-                      <button 
+                      <button
                         onClick={() => setLanguage('ko')}
                         className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'ko' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
                       >
@@ -406,7 +432,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       </button>
                     </div>
                   </div>
-                  
+
                   {setIsNight && (
                     <div className="flex flex-col gap-2">
                       <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-left">
@@ -414,70 +440,98 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       </label>
                       <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
                         {/* Active Background for Theme */}
-                        <div 
+                        <div
                           className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl bg-zinc-800 transition-transform duration-200 ease-out`}
                           style={{ transform: `translateX(${!isNight ? '0' : '100%'})` }}
                         />
-                        <button 
+                        <button
                           onClick={() => setIsNight(false)}
                           className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${!isNight ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>
+                          <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                            />
+                          </svg>
                           Light
                         </button>
-                        <button 
+                        <button
                           onClick={() => setIsNight(true)}
                           className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${isNight ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>
+                          <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+                            />
+                          </svg>
                           Dark
                         </button>
                       </div>
                     </div>
                   )}
                 </div>
-              )
-            )}
-            {step === 1 && renderEducationalStep(
-              '/assets/onboarding_icon_grader_1782545224150.png',
-              '찰칵! 1초 채점',
-              'Instant Grader',
-              '아이가 푼 문제집을 촬영하세요. AI가 손글씨를 인식해 즉시 채점하고 정답을 알려줍니다.',
-              'Take a picture of the homework. Chekki will instantly grade their handwriting and show you the answers.',
-              () => setStep(2)
-            )}
-            {step === 2 && renderEducationalStep(
-              '/assets/onboarding_icon_dashboard_1782545238800.png',
-              '자동 오답 노트',
-              'Learning Dashboard',
-              '틀린 문제는 자동으로 학습 대시보드에 저장됩니다. 번거롭게 따로 기록할 필요가 없어요.',
-              'Wrong answers are automatically saved to your Dashboard. No need to manually keep track.',
-              () => setStep(3)
-            )}
-            {step === 3 && renderEducationalStep(
-              '/assets/onboarding_icon_loop_1782545249835.png',
-              '스마트 맞춤 학습지',
-              'Smart Practice Sheets',
-              '저장된 오답을 모아 맞춤형 복습 프린트물을 만들어주세요. 빈틈없는 영어 학습이 완성됩니다.',
-              'Generate practice worksheets from their mistakes. Close the learning gap easily and effectively.',
-              () => setStep(4)
-            )}
-            {step === 4 && renderEducationalStep(
-              '/assets/onboarding_icon_grading_status.png',
-              '한눈에 보는 채점 결과',
-              'Grading Status at a Glance',
-              '학습지 리스트에서 빨간색과 초록색 박스로 채점 결과를 한눈에 확인해보세요. 오답을 찾기 위해 카드를 일일이 열어볼 필요가 없습니다.',
-              'Spot correct and incorrect answers instantly on your worksheet list. No need to expand each card to find mistakes.',
-              () => setStep(5)
-            )}
-            {step === 5 && renderEducationalStep(
-              '/assets/bento_speed_mode.png',
-              '빠른 채점 & AI 튜터',
-              'Speed Grading & AI Tutor',
-              '빠른 채점 모드로 즉시 채점하거나, 튜터 모드로 맞춤형 개인 과외 선생님이 되게 하세요.',
-              `Choose "Speed Mode" to instantly grade handwriting. Or let the AI tailor its vocabulary and be your child's personal tutor in "Tutor Mode".`,
-              () => setStep(6)
-            )}
+              )}
+            {step === 1 &&
+              renderEducationalStep(
+                '/assets/onboarding_icon_grader_1782545224150.png',
+                '찰칵! 1초 채점',
+                'Instant Grader',
+                '아이가 푼 문제집을 촬영하세요. AI가 손글씨를 인식해 즉시 채점하고 정답을 알려줍니다.',
+                'Take a picture of the homework. Chekki will instantly grade their handwriting and show you the answers.',
+                () => setStep(2)
+              )}
+            {step === 2 &&
+              renderEducationalStep(
+                '/assets/onboarding_icon_dashboard_1782545238800.png',
+                '자동 오답 노트',
+                'Learning Dashboard',
+                '틀린 문제는 자동으로 학습 대시보드에 저장됩니다. 번거롭게 따로 기록할 필요가 없어요.',
+                'Wrong answers are automatically saved to your Dashboard. No need to manually keep track.',
+                () => setStep(3)
+              )}
+            {step === 3 &&
+              renderEducationalStep(
+                '/assets/onboarding_icon_loop_1782545249835.png',
+                '스마트 맞춤 학습지',
+                'Smart Practice Sheets',
+                '저장된 오답을 모아 맞춤형 복습 프린트물을 만들어주세요. 빈틈없는 영어 학습이 완성됩니다.',
+                'Generate practice worksheets from their mistakes. Close the learning gap easily and effectively.',
+                () => setStep(4)
+              )}
+            {step === 4 &&
+              renderEducationalStep(
+                '/assets/onboarding_icon_grading_status.png',
+                '한눈에 보는 채점 결과',
+                'Grading Status at a Glance',
+                '학습지 리스트에서 빨간색과 초록색 박스로 채점 결과를 한눈에 확인해보세요. 오답을 찾기 위해 카드를 일일이 열어볼 필요가 없습니다.',
+                'Spot correct and incorrect answers instantly on your worksheet list. No need to expand each card to find mistakes.',
+                () => setStep(5)
+              )}
+            {step === 5 &&
+              renderEducationalStep(
+                '/assets/bento_speed_mode.png',
+                '빠른 채점 & AI 튜터',
+                'Speed Grading & AI Tutor',
+                '빠른 채점 모드로 즉시 채점하거나, 튜터 모드로 맞춤형 개인 과외 선생님이 되게 하세요.',
+                `Choose "Speed Mode" to instantly grade handwriting. Or let the AI tailor its vocabulary and be your child's personal tutor in "Tutor Mode".`,
+                () => setStep(6)
+              )}
             {step === 6 && renderProfileForm()}
             {step === 7 && (
               <motion.div
@@ -495,7 +549,11 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                   className="w-40 h-40 rounded-[2.5rem] flex items-center justify-center mb-6 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/40 p-2 shrink-0"
                 >
-                  <img src="/assets/teacher_ob_share_code.png" alt="" className="w-full h-full object-contain drop-shadow-md" />
+                  <img
+                    src="/assets/teacher_ob_share_code.png"
+                    alt=""
+                    className="w-full h-full object-contain drop-shadow-md"
+                  />
                 </motion.div>
 
                 <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight mb-4">
@@ -525,7 +583,10 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                     <input
                       type="text"
                       value={classCode}
-                      onChange={(e) => { setClassCode(e.target.value.toUpperCase()); setClassJoinError(''); }}
+                      onChange={(e) => {
+                        setClassCode(e.target.value.toUpperCase());
+                        setClassJoinError('');
+                      }}
                       placeholder={language === 'ko' ? '예: MERC82' : 'e.g. MERC82'}
                       maxLength={8}
                       className="w-full bg-white/5 border border-white/10 focus:border-orange-500 outline-none text-white font-black text-xl text-center tracking-[0.3em] p-4 rounded-2xl transition-colors uppercase placeholder:text-zinc-600 placeholder:tracking-normal placeholder:text-sm placeholder:font-normal"
@@ -549,7 +610,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
                 <div className="w-full mt-auto pt-6">
                   <div className="flex justify-center gap-3 mb-4">
-                    {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
                       <motion.div
                         key={i}
                         layout

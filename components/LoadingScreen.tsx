@@ -23,7 +23,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
-          console.warn("Video autoplay failed or was blocked by browser:", err);
+          console.warn('Video autoplay failed or was blocked by browser:', err);
           setVideoError(true);
         });
       }

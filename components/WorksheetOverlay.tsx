@@ -205,8 +205,6 @@ export const WorksheetOverlay: React.FC<Props> = ({
   const renderOverlayContent = (inFullscreen: boolean) => {
     const isBlankKeyMode = hasHandwriting === false;
 
-
-
     return (
       <div
         id={inFullscreen ? 'worksheet-overlay-fullscreen' : 'worksheet-overlay-capture'}
@@ -226,7 +224,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
         ></div>
 
         {/* The precise bounding container for the image and bubbles */}
-        <div 
+        <div
           ref={containerRef}
           onPointerMove={handlePointerMove}
           className="relative inline-block max-w-full max-h-full"
@@ -237,7 +235,13 @@ export const WorksheetOverlay: React.FC<Props> = ({
             className={`block transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform-gpu pointer-events-none ${
               imageLoaded || inFullscreen ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'
             }`}
-            style={{ maxWidth: '100%', maxHeight: inFullscreen && viewMode === 'fit' ? '100vh' : '100%', width: 'auto', height: 'auto', display: 'block' }}
+            style={{
+              maxWidth: '100%',
+              maxHeight: inFullscreen && viewMode === 'fit' ? '100vh' : '100%',
+              width: 'auto',
+              height: 'auto',
+              display: 'block',
+            }}
             onLoad={() => setImageLoaded(true)}
             draggable={false}
             loading="eager"
@@ -252,9 +256,10 @@ export const WorksheetOverlay: React.FC<Props> = ({
           {imageLoaded &&
             items &&
             items.map((item, idx) => {
-              const isFocused = focusedId === null || focusedId === undefined || item.id === focusedId;
+              const isFocused =
+                focusedId === null || focusedId === undefined || item.id === focusedId;
               const isExplicitlyFocused = focusedId === item.id;
-              
+
               // Hide the bubble if answers are hidden AND this item isn't explicitly focused
               if (!showAnswers && !isExplicitlyFocused) return null;
 
@@ -275,26 +280,36 @@ export const WorksheetOverlay: React.FC<Props> = ({
                     className={`
                         rounded-2xl shadow-md border-2 flex items-center gap-2 transform transition-all active:scale-[0.97] group cursor-grab w-fit max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
                         ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-lg ring-4 z-[1000]' : ''}
-                        ${isFocused 
-                          ? (isBlankKeyMode 
-                              ? 'bg-blue-500 border-white shadow-sm' 
-                              : item.is_correct === true ? 'bg-emerald-500 border-white shadow-sm' 
-                              : item.is_correct === false ? 'bg-red-500 border-white shadow-sm' 
-                              : 'bg-orange-500 border-white shadow-sm')
-                          : 'bg-transparent border-transparent'}
-                        ${focusedId !== null && focusedId !== undefined && focusedId === item.id 
-                          ? (isBlankKeyMode
+                        ${
+                          isFocused
+                            ? isBlankKeyMode
+                              ? 'bg-blue-500 border-white shadow-sm'
+                              : item.is_correct === true
+                                ? 'bg-emerald-500 border-white shadow-sm'
+                                : item.is_correct === false
+                                  ? 'bg-red-500 border-white shadow-sm'
+                                  : 'bg-orange-500 border-white shadow-sm'
+                            : 'bg-transparent border-transparent'
+                        }
+                        ${
+                          focusedId !== null && focusedId !== undefined && focusedId === item.id
+                            ? isBlankKeyMode
                               ? 'ring-2 ring-blue-500/50 scale-[1.02] shadow-md'
-                              : item.is_correct === true ? 'ring-2 ring-emerald-500/50 scale-[1.02] shadow-md'
-                              : item.is_correct === false ? 'ring-2 ring-red-500/50 scale-[1.02] shadow-md'
-                              : 'ring-2 ring-orange-500/50 scale-[1.02] shadow-md')
-                          : ''}
+                              : item.is_correct === true
+                                ? 'ring-2 ring-emerald-500/50 scale-[1.02] shadow-md'
+                                : item.is_correct === false
+                                  ? 'ring-2 ring-red-500/50 scale-[1.02] shadow-md'
+                                  : 'ring-2 ring-orange-500/50 scale-[1.02] shadow-md'
+                            : ''
+                        }
                         px-2.5 py-1.5 md:px-4 md:py-3
                     `}
                   >
                     <>
                       <div className="w-5 h-5 md:w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
-                        <span className="font-black text-[9px] md:text-sm text-white">{item.id}</span>
+                        <span className="font-black text-[9px] md:text-sm text-white">
+                          {item.id}
+                        </span>
                       </div>
                       <span
                         className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words text-left text-balance drop-shadow-md text-sm md:text-xl  inline-block`}
@@ -377,7 +392,6 @@ export const WorksheetOverlay: React.FC<Props> = ({
           </div>
 
           <div className="flex items-center gap-3 pointer-events-auto shrink-0">
-
             <button
               onClick={() => setIsFullscreen(true)}
               className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/30 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center hover:bg-orange-500 hover:border-orange-400 hover:text-white opacity-70 md:opacity-40 md:hover:opacity-100 hover:scale-110 active:scale-90 transition-all duration-200 shadow-2xl group shrink-0`}
@@ -424,12 +438,20 @@ export const WorksheetOverlay: React.FC<Props> = ({
             <button
               onClick={handleToggleAnswers}
               className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
-                showAnswers 
-                  ? 'bg-blue-500 text-white border-blue-400 shadow-sm' 
-                  : isNight ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
+                showAnswers
+                  ? 'bg-blue-500 text-white border-blue-400 shadow-sm'
+                  : isNight
+                    ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400'
+                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
               }`}
             >
-              {showAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
+              {showAnswers
+                ? language === 'ko'
+                  ? '정답 숨기기'
+                  : 'Hide Answers'
+                : language === 'ko'
+                  ? '👀 정답 보기'
+                  : '👀 Show Answers'}
             </button>
           </div>
         )}
@@ -499,12 +521,18 @@ export const WorksheetOverlay: React.FC<Props> = ({
                     <button
                       onClick={handleToggleAnswers}
                       className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
-                        showAnswers 
-                          ? 'bg-blue-500 text-white border-blue-400 shadow-sm' 
+                        showAnswers
+                          ? 'bg-blue-500 text-white border-blue-400 shadow-sm'
                           : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-blue-500/50 hover:text-blue-400'
                       }`}
                     >
-                      {showAnswers ? (language === 'ko' ? '정답 숨기기' : 'Hide Answers') : (language === 'ko' ? '👀 정답 보기' : '👀 Show Answers')}
+                      {showAnswers
+                        ? language === 'ko'
+                          ? '정답 숨기기'
+                          : 'Hide Answers'
+                        : language === 'ko'
+                          ? '👀 정답 보기'
+                          : '👀 Show Answers'}
                     </button>
                   </div>
                 )}

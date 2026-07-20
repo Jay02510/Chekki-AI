@@ -1,13 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
-@import "tailwindcss";
+@import 'tailwindcss';
 @custom-variant dark (&:is(.dark, .dark *));
 
-
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --color-brand: #EA580C; /* Vibrant Orange */
-  --color-brand-hover: #C2410C;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Playfair Display', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --color-brand: #ea580c; /* Vibrant Orange */
+  --color-brand-hover: #c2410c;
 }
 
 @layer base {
@@ -17,7 +16,16 @@
     --ease-premium: cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  p, h1, h2, h3, h4, h5, h6, span, a, button {
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  span,
+  a,
+  button {
     word-break: keep-all;
     overflow-wrap: break-word;
   }
