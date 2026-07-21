@@ -325,12 +325,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
 
         {/* Right: Teacher Mascot Image Side (Holding Laptop) */}
-        <div className="flex-1 w-full flex justify-center md:justify-end relative z-10">
+        <div className="flex-1 w-full flex justify-center items-center relative z-10 md:-translate-x-4">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[380px] md:max-w-[460px] aspect-square bg-orange-500/15 rounded-full blur-[90px] pointer-events-none" />
           <img
             src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1784647907/Chekki_Holding_Laptop_2_vhwcgy.jpg"
             alt="Chekki AI Mascot holding laptop"
-            className="w-full max-w-[340px] sm:max-w-[400px] md:max-w-[440px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.3)] relative z-10 hover:scale-105 transition-transform duration-500"
+            className="w-full max-w-[340px] sm:max-w-[400px] md:max-w-[460px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.3)] relative z-10 hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
         </div>
