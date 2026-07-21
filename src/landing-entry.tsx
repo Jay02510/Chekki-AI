@@ -15,23 +15,29 @@ function LandingRoot() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // If URL path is for Teacher Portal, Admin, Subscribe or Main App -> render App.tsx
+  // Web App route: chekkiai.com/app (also teacher portal, admin, subscribe)
   if (
-    pathname.startsWith('/teacher') || 
     pathname.startsWith('/app') || 
+    pathname.startsWith('/teacher') || 
     pathname.startsWith('/admin') || 
     pathname.startsWith('/subscribe')
   ) {
     return <App />;
   }
 
-  // If path is explicitly /parent, show parent landing page
-  if (pathname === '/parent') {
-    return <Landing />;
+  // School Landing Page route: chekkiai.com/school (also /schools and /for-schools)
+  if (
+    pathname === '/school' || 
+    pathname === '/schools' || 
+    pathname === '/for-schools' ||
+    pathname.startsWith('/school/') ||
+    pathname.startsWith('/schools/')
+  ) {
+    return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
   }
 
-  // Default: Main Landing Page with updated Bento Grid & Floating Island Header
-  return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
+  // Default Main Page: chekkiai.com (/)
+  return <Landing />;
 }
 
 const rootElement = document.getElementById('root');

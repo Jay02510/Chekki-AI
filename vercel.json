@@ -13,7 +13,7 @@
       "destination": "/app.html"
     },
     {
-      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher|schools|for-schools)",
+      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher|school|schools|for-schools)",
       "destination": "/app.html"
     }
   ],
