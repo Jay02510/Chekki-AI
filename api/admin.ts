@@ -3,7 +3,7 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'ChecciAdmin2026!';
+const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
 
 function initAdmin() {
   if (getApps().length > 0) return;
@@ -297,7 +297,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       // 3. Send automated activation email via Resend
-      const resendApiKey = process.env.RESEND_API_KEY || 're_M5DhPwyN_JpZFiMpUAt2sZoWd27zSKVfN';
+      const resendApiKey = process.env.RESEND_API_KEY;
       if (resendApiKey && invoiceData.email) {
         try {
           await fetch('https://api.resend.com/emails', {

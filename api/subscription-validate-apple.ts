@@ -32,7 +32,7 @@ const APPLE_PRODUCTION_URL = 'https://buy.itunes.apple.com/verifyReceipt';
 const APPLE_SANDBOX_URL = 'https://sandbox.itunes.apple.com/verifyReceipt';
 
 // Your Apple App-Specific Shared Secret
-const APPLE_SHARED_SECRET = process.env.APPLE_SHARED_SECRET || '2a83e06681154ff2b2cd9921dfd9efae';
+const APPLE_SHARED_SECRET = process.env.APPLE_SHARED_SECRET;
 
 async function validateWithApple(receiptData: string, useSandbox = false): Promise<any> {
   const url = useSandbox ? APPLE_SANDBOX_URL : APPLE_PRODUCTION_URL;

@@ -108,7 +108,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await adminDb.collection('school_invoices').doc(invoiceId).set(invoicePayload);
 
     // Send automated email via Resend
-    const resendApiKey = process.env.RESEND_API_KEY || 're_M5DhPwyN_JpZFiMpUAt2sZoWd27zSKVfN';
+    const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
       try {
         await fetch('https://api.resend.com/emails', {
