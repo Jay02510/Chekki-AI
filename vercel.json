@@ -5,6 +5,10 @@
       "destination": "/api/$1"
     },
     {
+      "source": "/app/googlec1811764640ede22.html",
+      "destination": "/googlec1811764640ede22.html"
+    },
+    {
       "source": "/app",
       "destination": "/app.html"
     },
