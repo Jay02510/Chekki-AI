@@ -54,12 +54,6 @@
     "api/subscription-validate-apple.ts": {
       "maxDuration": 30
     },
-    "api/subscription-validate-google.ts": {
-      "maxDuration": 10
-    },
-    "api/subscription-validate-web.ts": {
-      "maxDuration": 10
-    },
     "api/subscription-webhook-apple.ts": {
       "maxDuration": 15
     }
