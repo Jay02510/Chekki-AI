@@ -25,13 +25,13 @@ function LandingRoot() {
     return <App />;
   }
 
-  // If path is explicitly /parent, show parent landing page
-  if (pathname === '/parent') {
-    return <Landing />;
+  // If path is explicitly for Schools & Institutions landing page
+  if (pathname === '/schools' || pathname === '/for-schools') {
+    return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
   }
 
-  // Default: Teacher & Institutions Landing Page
-  return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
+  // Default: Main / Parent Landing Page (chekkiai.com /)
+  return <Landing />;
 }
 
 const rootElement = document.getElementById('root');

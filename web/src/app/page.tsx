@@ -147,7 +147,7 @@ export default function Home() {
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-6">
             <a
-              href={isKo ? 'http://localhost:3001?lang=ko' : 'http://localhost:3001?lang=en'}
+              href={isKo ? '/schools?lang=ko' : '/schools?lang=en'}
               className={`text-sm font-medium transition-colors ${
                 isNight ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
@@ -233,7 +233,7 @@ export default function Home() {
             </a>
             
             <a
-              href="http://localhost:3001"
+              href="/schools"
               onClick={() => setMobileMenuOpen(false)}
               className="text-brand font-black hover:scale-105 transition-transform"
             >
@@ -368,7 +368,7 @@ export default function Home() {
           {/* FOR SCHOOLS CTA BUTTON IN THE SECOND SECTION (PER USER REQUEST) */}
           <div className="mt-12 flex justify-center">
             <a
-              href="http://localhost:3001"
+              href="/schools"
               className="group relative overflow-hidden px-8 py-4 bg-brand hover:bg-brand/90 text-white font-bold rounded-full text-lg flex items-center gap-3 transition-transform duration-500 active:scale-95 shadow-2xl shadow-brand/30"
             >
               <Buildings size={22} weight="fill" />
@@ -589,7 +589,7 @@ export default function Home() {
           </a>
 
           <a
-            href="http://localhost:3001"
+            href="/schools"
             className="group relative overflow-hidden pl-10 pr-3 py-3 bg-orange-500/20 border border-orange-500/40 text-orange-300 font-bold rounded-full text-xl flex items-center justify-between gap-8 transition-transform duration-700 active:scale-[0.98] shadow-2xl hover:bg-orange-500/30"
           >
             <span className="relative z-20 tracking-wide">{isKo ? '학원/교사 안내' : 'For Schools'}</span>

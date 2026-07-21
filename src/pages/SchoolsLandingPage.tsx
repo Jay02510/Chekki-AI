@@ -216,10 +216,10 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             : 'bg-white/90 border-slate-200/90 text-slate-900 shadow-slate-200/60'
         }`}>
           <a
-            href="http://localhost:3000"
+            href="/"
             onClick={(e) => {
               e.preventDefault();
-              window.location.href = isKo ? 'http://localhost:3000?lang=ko' : 'http://localhost:3000?lang=en';
+              window.location.href = isKo ? '/?lang=ko' : '/?lang=en';
             }}
             className="flex items-center gap-[2px] text-xl font-bold tracking-tighter hover:opacity-80 transition-opacity cursor-pointer"
             title={isKo ? '메인 랜딩페이지로 이동' : 'Back to Main Landing Page'}
