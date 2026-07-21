@@ -357,21 +357,21 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
             </div>
           </div>
 
-          {/* 2. Automatic ODAP Error Notes Feature Card (Problem -> Solution Hover Reveal) */}
+          {/* 2. Rescan & Retry Mastery Loop Card (Problem -> Solution Hover Reveal) */}
           <div className={`rounded-[2.25rem] p-1.5 backdrop-blur-xl group transition-all duration-500 cursor-pointer ${
             isNight 
-              ? 'bg-white/[0.03] border border-white/10 shadow-2xl hover:border-indigo-500/50' 
-              : 'bg-white border border-zinc-200/90 shadow-xl shadow-zinc-200/40 hover:border-indigo-500/50'
+              ? 'bg-white/[0.03] border border-white/10 shadow-2xl hover:border-emerald-500/50' 
+              : 'bg-white border border-zinc-200/90 shadow-xl shadow-zinc-200/40 hover:border-emerald-500/50'
           }`}>
-            <div className={`rounded-[calc(2.25rem-0.375rem)] p-6 relative overflow-hidden flex flex-col justify-between min-h-[170px] transition-all duration-500 ${
-              isNight ? 'bg-[#050505] group-hover:bg-[#0A0714]' : 'bg-white group-hover:bg-indigo-50/40'
+            <div className={`rounded-[calc(2.25rem-0.375rem)] p-6 relative overflow-hidden flex flex-col justify-between min-h-[175px] transition-all duration-500 ${
+              isNight ? 'bg-[#050505] group-hover:bg-[#06140A]' : 'bg-white group-hover:bg-emerald-50/40'
             }`}>
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
-                  <TreeStructure size={22} weight="fill" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                  <Lightning size={22} weight="fill" />
                 </div>
                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
-                  isNight ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-700'
+                  isNight ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-100 text-emerald-700'
                 }`}>
                   Hover Solution
                 </span>
@@ -379,20 +379,24 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
 
               {/* Default Problem */}
               <div className="transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">
-                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block mb-1">Problem</span>
+                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest block mb-1">Problem</span>
                 <h3 className={`text-base font-bold leading-snug ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  "Rewriting mistake notes by hand?"
+                  {activeTab === 'korean' 
+                    ? '"틀린 문제 때문에 아이와 실랑이하시나요?"' 
+                    : '"Frustrated by homework arguments over wrong answers?"'}
                 </h3>
               </div>
 
               {/* Hover Solution */}
               <div className="opacity-0 group-hover:opacity-100 absolute inset-x-6 top-16 transition-all duration-500">
                 <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
-                <h3 className={`text-sm font-bold mb-1 ${isNight ? 'text-indigo-300' : 'text-indigo-700'}`}>
-                  Auto-ODAP Flashcards
+                <h3 className={`text-sm font-bold mb-1 ${isNight ? 'text-emerald-300' : 'text-emerald-700'}`}>
+                  {activeTab === 'korean' ? '⚡ 2차 재도전 완벽 마스터' : '⚡ 2nd Rescan & Mastery'}
                 </h3>
                 <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                  Isolates mistake patterns into review flashcards instantly.
+                  {activeTab === 'korean'
+                    ? '엄마는 5초 꿀팁 가이드만 전하고, 아이가 종이에 직접 고쳐 쓴 뒤 재도전 스캔하면 100% 완벽 마스터!'
+                    : 'Mom shares a 5-sec coaching tip, child fixes the paper, rescans, and achieves 100% Mastery without tears.'}
                 </p>
               </div>
             </div>

@@ -302,16 +302,16 @@ export default function ChekkiTeacherBentoGrid({ isNight = true, isKo = true }: 
                   <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
                     isNight ? 'bg-orange-500/20 text-orange-300' : 'bg-orange-100 text-orange-700'
                   }`}>
-                    Seeding
+                    AI Auto-Fill
                   </span>
                 </div>
                 <h3 className={`text-base font-bold mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {activeTab === 'korean' ? '주간 교재 키워드 등록' : 'Curriculum Seeding'}
+                  {activeTab === 'korean' ? '3초 교재 AI 자동 등록' : '3-Sec Textbook AI Auto-Fill'}
                 </h3>
                 <p className={`text-xs leading-relaxed mb-3 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {activeTab === 'korean' 
-                    ? '학급별 단어 및 파닉스를 대시보드에 사전 등록하여 채점 기준 표준화.'
-                    : 'Seed your class active vocabulary once for 99.9% accuracy.'}
+                    ? '교재 페이지 사진이나 PDF를 드롭하면 AI가 단어, 파닉스 규칙, 지문을 3초 만에 자동 채워줍니다.'
+                    : 'Drop a textbook photo or PDF. AI extracts target words, phonics rules & stories in 3 seconds.'}
                 </p>
               </div>
 
