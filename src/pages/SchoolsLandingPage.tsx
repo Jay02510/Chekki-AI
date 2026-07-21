@@ -88,6 +88,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [currency, setCurrency] = useState<'KRW' | 'USD'>('KRW');
   const [showBankModal, setShowBankModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('medium');
   const [teacherCount, setTeacherCount] = useState(3);
@@ -102,11 +103,28 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const getPlanUnitPrice = (planId: string, cycle: 'monthly' | 'yearly') => {
     const tier = PRICING_TIERS[planId as keyof typeof PRICING_TIERS];
     if (!tier) return 0;
-    return isKo ? tier[cycle].krw : tier[cycle].usd;
+    return currency === 'KRW' ? tier[cycle].krw : tier[cycle].usd;
   };
 
   const formatPrice = (price: number) => {
-    return isKo ? `₩${price.toLocaleString()}` : `$${price}`;
+    return currency === 'KRW' ? `₩${price.toLocaleString()}` : `$${price}`;
+  };
+
+  const handleTeacherCountChange = (count: number) => {
+    const safeCount = Math.max(1, count);
+    setTeacherCount(safeCount);
+    
+    // Automatically switch plan tier based on seat count threshold
+    if (selectedPlanId === 'freelancer' && safeCount === 1) {
+      return;
+    }
+    if (safeCount <= 2) {
+      setSelectedPlanId('small');
+    } else if (safeCount >= 3 && safeCount <= 5) {
+      setSelectedPlanId('medium');
+    } else {
+      setSelectedPlanId('large');
+    }
   };
 
   const openPlanModal = (planId: string, defaultTeachers: number, minSeats: number = 1) => {
@@ -188,6 +206,18 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </a>
 
           <div className="flex items-center gap-3">
+            {/* Currency toggle */}
+            <button
+              onClick={() => setCurrency(currency === 'KRW' ? 'USD' : 'KRW')}
+              className={`px-3 py-1.5 rounded-full text-[10px] font-black border tracking-wider transition-colors cursor-pointer flex items-center gap-1 ${
+                isNight 
+                  ? 'border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white' 
+                  : 'border-zinc-300 hover:bg-zinc-100 text-zinc-700 hover:text-zinc-900'
+              }`}
+            >
+              <span>{currency === 'KRW' ? '₩ KRW (Default)' : '$ USD'}</span>
+            </button>
+
             {/* Language toggle */}
             <button
               onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
@@ -1167,22 +1197,45 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       />
                     </div>
                     <div className="space-y-1 text-left">
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '필요 강사 수 *' : 'Teacher Seats *'}
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 flex items-center justify-between ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                        <span>{isKo ? '필요 강사 수 *' : 'Teacher Seats *'}</span>
+                        <span className="text-[9px] text-orange-500 font-normal">
+                          {teacherCount <= 2 ? (isKo ? '소형 플랜' : 'Small Plan') : teacherCount <= 5 ? (isKo ? '중형 플랜' : 'Medium Plan') : (isKo ? '대형 플랜' : 'Large Plan')}
+                        </span>
                       </label>
-                      <input
-                        type="number"
-                        min={activePlan.minSeats || 1}
-                        disabled={selectedPlanId === 'freelancer' || selectedPlanId === 'trial'}
-                        required
-                        value={teacherCount}
-                        onChange={(e) => setTeacherCount(Math.max(activePlan.minSeats || 1, Number(e.target.value)))}
-                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all font-mono disabled:opacity-60 ${
-                          isNight 
-                            ? 'bg-[#050505] border-white/10 text-white' 
-                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 focus:bg-white'
-                        }`}
-                      />
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleTeacherCountChange(teacherCount - 1)}
+                          disabled={teacherCount <= 1}
+                          className={`w-10 h-10 rounded-xl border flex items-center justify-center text-sm font-bold transition-all disabled:opacity-30 cursor-pointer ${
+                            isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
+                          }`}
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          min={1}
+                          required
+                          value={teacherCount}
+                          onChange={(e) => handleTeacherCountChange(Number(e.target.value))}
+                          className={`w-full border focus:border-orange-500 outline-none text-xs p-3 rounded-xl transition-all font-mono font-bold text-center ${
+                            isNight 
+                              ? 'bg-[#050505] border-white/10 text-white' 
+                              : 'bg-zinc-50 border-zinc-300 text-zinc-900 focus:bg-white'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleTeacherCountChange(teacherCount + 1)}
+                          className={`w-10 h-10 rounded-xl border flex items-center justify-center text-sm font-bold transition-all cursor-pointer ${
+                            isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
+                          }`}
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
 

@@ -279,225 +279,227 @@ export default function Landing() {
             {lang === 'en' ? 'Pain Points Solved' : '엄마의 고민 해결'}
           </div>
           <h2 className="text-balance text-[clamp(2.5rem,5vw,4rem)] font-bold tracking-tight text-slate-900 dark:text-white mb-6 [word-break:keep-all]">
-            {lang === 'en' ? (
-              'End the daily homework battle.'
+            {lang === "en" ? (
+              "End the daily homework battle."
             ) : (
               <>아이와의 영어 숙제 스트레스, <br className="hidden sm:inline" />이제 내려놓으세요.</>
             )}
           </h2>
           <p className="text-xl text-slate-600 dark:text-white/60 max-w-2xl mx-auto [word-break:keep-all]">
-            {lang === 'en' 
-              ? 'We built Chekki to solve the exact challenges parents face when helping their children with English assignments.' 
-              : '아이 영어 숙제를 지도하며 느끼셨을 답답함과 지침, 엄마의 마음을 담아 가장 따뜻하고 쉽게 해결해 드립니다.'}
+            {lang === "en" 
+              ? "We built Chekki to solve the exact challenges parents face when helping their children with English assignments." 
+              : "아이 영어 숙제를 지도하며 느끼셨을 답답함과 지침, 엄마의 마음을 담아 가장 따뜻하고 쉽게 해결해 드립니다."}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-6 auto-rows-[380px] gap-4">
-          {/* Card 1: Setup */}
-          <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
-          >
-            {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center p-3 sm:p-4">
-                <div className="w-full h-full p-2.5 sm:p-3 rounded-2xl border bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-zinc-900/90 dark:to-zinc-950/90 border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-xl ring-1 ring-black/[0.03] dark:ring-white/5 flex flex-col transition-all duration-300">
-                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
-                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
-                  </div>
-                  <div className="flex-1 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-2 flex items-center justify-center relative">
-                    <img src={theme === 'light' ? '/assets/bento_light_reveal_only.png' : '/assets/bento_reveal_only.png'} className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
-                    <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-1.5 animate-pulse">
-                      <ArrowRight className="text-slate-800 dark:text-white" size={14} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+          <div className="bento-card col-span-1 md:col-span-2 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xl flex flex-col justify-between group hover:border-brand/40 transition-all duration-300 relative overflow-hidden">
+            <div>
+              {/* Problem Badge & Title */}
+              <div className="mb-4">
+                <span className="inline-block px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 text-[10px] font-black uppercase tracking-widest rounded-full mb-2">
+                  PROBLEM
+                </span>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-snug [word-break:keep-all]">
                   {lang === 'en' ? 'Exhausted after work?' : '퇴근 후 지친 몸으로 숙제 검사하기 힘드시죠?'}
                 </h3>
               </div>
+
+              {/* Solution Badge & Text */}
+              <div className="mb-6 bg-brand/5 dark:bg-brand/10 border border-brand/15 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 bg-brand text-white text-[9px] font-black uppercase tracking-widest rounded-full">
+                    SOLUTION
+                  </span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">
+                    {lang === 'en' ? 'Zero-Clutter Reveal UX' : '복잡함 없는 1초 화면'}
+                  </span>
+                </div>
+                <p className="text-xs md:text-sm text-slate-600 dark:text-white/80 leading-relaxed [word-break:keep-all]">
+                  {lang === 'en'
+                    ? 'No typing or prompting needed. Point your camera to instantly reveal answer keys and explanations without tired eye strain.'
+                    : '타이핑이나 어려운 입력 필요 없이 카메라만 가져다 대세요. 꼭 필요한 정답과 설명만 쏙 보여드려 피곤한 눈을 편안하게 해드려요.'}
+                </p>
+              </div>
             </div>
 
-            {/* Back Content (Revealed) */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-brand/5 dark:bg-brand/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-              <div className="w-12 h-12 rounded-full bg-brand/20 text-brand flex items-center justify-center mb-6">
-                <GraduationCap weight="fill" className="text-2xl" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
-                {lang === 'en' ? 'Zero Clutter UX' : '복잡함 없는 쉬운 화면'}
-              </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed [word-break:keep-all]">
-                {lang === 'en' ? 'No typing. No prompting. No endless scrolling. Our Reveal-Only interface hides all complex teaching instructions until you need them, saving your tired eyes and brain.' : '타이핑이나 어려운 입력 필요 없이 카메라만 가져다 대세요. 꼭 필요한 정답과 설명만 쏙 보여드려 피곤한 엄마의 눈과 마음을 편안하게 해드려요.'}
-              </p>
+            {/* Clean Image Container (No fake chrome dots or nested borders) */}
+            <div className="w-full h-48 sm:h-56 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-50 dark:bg-zinc-950/60 p-3">
+              <img
+                src={theme === 'light' ? '/assets/bento_light_reveal_only.png' : '/assets/bento_reveal_only.png'}
+                alt="Reveal only interface"
+                className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                loading="lazy"
+              />
             </div>
           </div>
 
-          {/* Card 2: Assistant */}
-          <div 
-            className="bento-card col-span-1 md:col-span-4 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col md:flex-row group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
-          >
-            {/* Front Content */}
-            <div className="flex flex-col md:flex-row h-full w-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="md:w-1/2 min-h-[140px] md:h-full px-5 py-6 md:py-10 flex flex-col justify-center order-2 md:order-1">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-2 [word-break:keep-all]">
-                  {lang === 'en' ? 'Only have a few minutes?' : '저녁 준비하느라 바쁜데 시간이 부족하신가요?'}
-                  <ArrowRight className="text-brand animate-pulse shrink-0" />
-                </h3>
-              </div>
-              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-3 sm:p-4">
-                <div className="w-full h-full p-2.5 sm:p-3 rounded-2xl border bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-zinc-900/90 dark:to-zinc-950/90 border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-xl ring-1 ring-black/[0.03] dark:ring-white/5 flex flex-col transition-all duration-300">
-                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
-                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
+          {/* Card 2: Speed vs Tutor Mode */}
+          <div className="bento-card col-span-1 md:col-span-4 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xl flex flex-col md:flex-row justify-between items-center gap-6 group hover:border-brand/40 transition-all duration-300 relative overflow-hidden">
+            {/* Left Content */}
+            <div className="flex-1 flex flex-col justify-between">
+              <div>
+                <div className="mb-4">
+                  <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest rounded-full mb-2">
+                    PROBLEM
+                  </span>
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-snug [word-break:keep-all]">
+                    {lang === 'en' ? 'Only have a few minutes before dinner?' : '저녁 준비하느라 바쁜데 시간이 부족하신가요?'}
+                  </h3>
+                </div>
+
+                <div className="bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/15 rounded-2xl p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2.5 py-0.5 bg-blue-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full">
+                      SOLUTION
+                    </span>
+                    <span className="text-base font-bold text-slate-900 dark:text-white">
+                      {lang === 'en' ? 'Speed vs. Tutor Mode' : '1초 채점 & AI 원어민 선생님'}
+                    </span>
                   </div>
-                  <div className="flex-1 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-2 flex items-center justify-center relative">
-                    <img src={theme === 'light' ? '/assets/bento_light_speed_mode.png' : '/assets/bento_speed_mode.png'} className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
-                  </div>
+                  <p className="text-xs md:text-sm text-slate-600 dark:text-white/80 leading-relaxed [word-break:keep-all]">
+                    {lang === 'en'
+                      ? 'Toggle Speed Mode for zero-tap instant worksheet grading. Switch to Tutor Mode when your child needs native audio explanations.'
+                      : '바쁜 저녁에는 "1초 채점 모드"로 눈으로 슥 채점하고, 아이가 모르는 문제가 생기면 "튜터 모드"로 전환해 다정한 원어민 AI 선생님에게 맡겨주세요.'}
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Back Content (Revealed) */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-blue-500/5 dark:bg-blue-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
-                {lang === 'en' ? 'Speed vs. Tutor Mode' : '바쁠 땐 1초 채점, 필요할 땐 AI 선생님'}
-              </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed max-w-lg [word-break:keep-all]">
-                {lang === 'en' ? 'Toggle "Speed Mode" to rapidly visually grade a 20-question worksheet with zero taps. Switch to "Tutor Mode" when your child is stuck, and let the native AI audio explain the concept for you.' : '바쁜 저녁에는 "1초 채점 모드"로 눈으로 슥 채점하고, 아이가 모르는 문제가 생기면 "튜터 모드"로 전환해 다정한 원어민 AI 선생님에게 맡겨주세요.'}
-              </p>
+            {/* Right Image Container */}
+            <div className="w-full md:w-1/2 h-52 sm:h-64 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-50 dark:bg-zinc-950/60 p-3">
+              <img
+                src={theme === 'light' ? '/assets/bento_light_speed_mode.png' : '/assets/bento_speed_mode.png'}
+                alt="Speed mode interface"
+                className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                loading="lazy"
+              />
             </div>
           </div>
 
           {/* Card 3: Dashboard */}
-          <div 
-            className="bento-card col-span-1 md:col-span-3 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
-          >
-            {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center p-3 sm:p-4">
-                <div className="w-full h-full p-2.5 sm:p-3 rounded-2xl border bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-zinc-900/90 dark:to-zinc-950/90 border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-xl ring-1 ring-black/[0.03] dark:ring-white/5 flex flex-col transition-all duration-300">
-                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
-                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
-                  </div>
-                  <div className="flex-1 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-2 flex items-center justify-center relative">
-                    <img src={theme === 'light' ? '/assets/bento_light_dashboard.png' : '/assets/onboarding_icon_dashboard_1782545238800.png'} className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
-                    <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-1.5 animate-pulse">
-                      <ArrowRight className="text-slate-800 dark:text-white" size={14} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]">
+          <div className="bento-card col-span-1 md:col-span-3 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xl flex flex-col justify-between group hover:border-brand/40 transition-all duration-300 relative overflow-hidden">
+            <div>
+              <div className="mb-4">
+                <span className="inline-block px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 text-[10px] font-black uppercase tracking-widest rounded-full mb-2">
+                  PROBLEM
+                </span>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-snug [word-break:keep-all]">
                   {lang === 'en' ? 'Anxious they might fall behind?' : '우리 아이만 학원에서 뒤쳐질까 봐 걱정되시나요?'}
                 </h3>
               </div>
+
+              <div className="mb-6 bg-orange-500/5 dark:bg-orange-500/10 border border-orange-500/15 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 bg-orange-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full">
+                    SOLUTION
+                  </span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">
+                    {lang === 'en' ? 'Mistake Tracking Dashboard' : '똑똑한 오답 정리 & 맞춤 케어'}
+                  </span>
+                </div>
+                <p className="text-xs md:text-sm text-slate-600 dark:text-white/80 leading-relaxed [word-break:keep-all]">
+                  {lang === 'en'
+                    ? 'Automatically compiles struggled vocabulary and grammar into an organized 24/7 diagnostic report.'
+                    : '비싼 과외 없이도 괜찮아요. 아이가 헷갈려했던 오답만 쏙쏙 모아 자동으로 정리해주니 약점을 꼼꼼하게 챙겨줄 수 있어요.'}
+                </p>
+              </div>
             </div>
 
-            {/* Back Content (Revealed) */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-orange-500/5 dark:bg-orange-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-              <div className="w-12 h-12 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center mb-6">
-                <ChartBar weight="fill" className="text-2xl" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
-                {lang === 'en' ? 'Mistake Tracking Dashboard' : '똑똑한 오답 정리 & 맞춤 케어'}
-              </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed [word-break:keep-all]">
-                {lang === 'en' ? 'Replace expensive homework tutors. Chekki automatically saves every struggled question into a stress-free dashboard, acting as a 24/7 private tutor.' : '비싼 과외 없이도 괜찮아요. 아이가 헷갈려했던 오답만 쏙쏙 모아 자동으로 정리해주니, 언제든 아이의 약점을 꼼꼼하게 챙겨줄 수 있어요.'}
-              </p>
+            <div className="w-full h-48 sm:h-56 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-50 dark:bg-zinc-950/60 p-3">
+              <img
+                src={theme === 'light' ? '/assets/bento_light_dashboard.png' : '/assets/onboarding_icon_dashboard_1782545238800.png'}
+                alt="Dashboard UI"
+                className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                loading="lazy"
+              />
             </div>
           </div>
 
           {/* Card 3.5: Grading Status */}
-          <div 
-            className="bento-card col-span-1 md:col-span-3 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
-          >
-            {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center p-3 sm:p-4">
-                <div className="w-full h-full p-2.5 sm:p-3 rounded-2xl border bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-zinc-900/90 dark:to-zinc-950/90 border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-xl ring-1 ring-black/[0.03] dark:ring-white/5 flex flex-col transition-all duration-300">
-                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
-                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
-                  </div>
-                  <div className="flex-1 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-2 flex items-center justify-center relative">
-                    <img src={theme === 'light' ? '/assets/bento_light_grading_status.png' : '/assets/onboarding_icon_grading_status.png'} className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
-                    <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-1.5 animate-pulse">
-                      <ArrowRight className="text-slate-800 dark:text-white" size={14} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]">
-                  {lang === 'en' ? 'Tired of checking every question?' : '틀린 문제를 일일이 찾기 번거로우신가요?'}
+          <div className="bento-card col-span-1 md:col-span-3 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xl flex flex-col justify-between group hover:border-brand/40 transition-all duration-300 relative overflow-hidden">
+            <div>
+              <div className="mb-4">
+                <span className="inline-block px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-500 dark:text-purple-400 text-[10px] font-black uppercase tracking-widest rounded-full mb-2">
+                  PROBLEM
+                </span>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-snug [word-break:keep-all]">
+                  {lang === 'en' ? 'Tired of checking every single question?' : '틀린 문제를 일일이 찾기 번거로우신가요?'}
                 </h3>
+              </div>
+
+              <div className="mb-6 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/15 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full">
+                    SOLUTION
+                  </span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">
+                    {lang === 'en' ? 'Grading Status at a Glance' : '직관적인 정·오답 테두리 표시'}
+                  </span>
+                </div>
+                <p className="text-xs md:text-sm text-slate-600 dark:text-white/80 leading-relaxed [word-break:keep-all]">
+                  {lang === 'en'
+                    ? 'Green and red box outlines reveal correct and incorrect answers right on the list view without opening cards.'
+                    : '학습지 리스트에서 초록(정답)과 빨간(오답) 테두리로 채점 결과를 한눈에 확인하세요. 오답을 찾으려 카드를 일일이 열어볼 필요가 없습니다.'}
+                </p>
               </div>
             </div>
 
-            {/* Back Content (Revealed) */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-6">
-                <CheckCircle weight="fill" className="text-2xl" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
-                {lang === 'en' ? 'Grading Status at a Glance' : '직관적인 정·오답 표시'}
-              </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed [word-break:keep-all]">
-                {lang === 'en' ? 'Spot correct and incorrect answers instantly on the list. Green and red box outlines show status at a glance, so you don\'t have to click each card.' : '학습지 리스트에서 초록색(정답)과 빨간색(오답) 테두리로 채점 결과를 한눈에 확인하세요. 이제 틀린 오답을 찾으려 카드를 일일이 열어볼 필요가 없습니다.'}
-              </p>
+            <div className="w-full h-48 sm:h-56 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-50 dark:bg-zinc-950/60 p-3">
+              <img
+                src={theme === 'light' ? '/assets/bento_light_grading_status.png' : '/assets/onboarding_icon_grading_status.png'}
+                alt="Grading status list UI"
+                className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                loading="lazy"
+              />
             </div>
+          </div>
           </div>
 
           {/* Card 4: Audio Practice Room */}
-          <div 
-            className="bento-card col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-3 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col group hover:border-brand/30 transition-colors duration-200 overflow-hidden relative"
-          >
-            {/* Front Content */}
-            <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-slate-100/60 dark:bg-[#050505] relative overflow-hidden flex items-center justify-center p-8">
-                {/* Animated voice mock UI */}
-                <div className="w-full max-w-[220px] flex flex-col items-center gap-4">
-                  <div className="bg-black/5 dark:bg-white/10 rounded-xl p-4 text-center w-full">
-                    <p className="text-sm font-bold text-slate-800 dark:text-white mb-2">{lang === 'en' ? '"She plays soccer."' : '"She plays soccer."'}</p>
-                    <div className="flex items-center justify-center gap-1 h-6">
-                      {[1, 2, 3, 4, 3, 2, 1].map((bar, i) => (
-                        <div key={i} className="w-1.5 bg-emerald-400 rounded-full animate-pulse" style={{ height: `${bar * 20}%`, animationDelay: `${i * 0.1}s` }} />
-                      ))}
-                    </div>
+          <div className="bento-card col-span-1 md:col-span-6 rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xl flex flex-col md:flex-row justify-between items-center gap-6 group hover:border-emerald-500/40 transition-all duration-300 relative overflow-hidden">
+            <div className="flex-1 flex flex-col justify-between">
+              <div>
+                <div className="mb-4">
+                  <span className="inline-block px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full mb-2">
+                    PROBLEM
+                  </span>
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-snug [word-break:keep-all]">
+                    {lang === "en" ? "Worried about teaching correct English pronunciation?" : "엄마표 영어 발음 지도, 자신 없으셨나요?"}
+                  </h3>
+                </div>
+
+                <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/15 rounded-2xl p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2.5 py-0.5 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full">
+                      SOLUTION
+                    </span>
+                    <span className="text-base font-bold text-slate-900 dark:text-white">
+                      {lang === "en" ? "Interactive Native Audio Practice" : "원어민 AI 실시간 발음 코칭"}
+                    </span>
                   </div>
+                  <p className="text-xs md:text-sm text-slate-600 dark:text-white/80 leading-relaxed [word-break:keep-all]">
+                    {lang === "en"
+                      ? "From paper to pronunciation. Chekki turns grammar mistakes into interactive speaking exercises, using native AI speech recognition to listen and encourage your child."
+                      : "종이로 풀던 오답을 말하기 연습으로 이어줍니다. 원어민 AI가 아이의 발음을 듣고 다정하게 교정해 주어 스스로 자신감이 붙어요."}
+                  </p>
                 </div>
-                <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
-                  <ArrowRight className="text-slate-800 dark:text-white" />
-                </div>
-              </div>
-              <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight flex items-center justify-between [word-break:keep-all]">
-                  {lang === 'en' ? 'Worried about pronunciation?' : '엄마표 영어 발음 지도, 자신 없으셨나요?'}
-                </h3>
               </div>
             </div>
 
-            {/* Back Content (Revealed) */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-center bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-2xl transition-all duration-200 opacity-0 translate-y-8 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-6">
-                <MicrophoneStage weight="fill" className="text-2xl" />
+            {/* Audio Mock Visual */}
+            <div className="w-full md:w-1/2 h-52 sm:h-60 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-50 dark:bg-zinc-950/60 p-4 relative">
+              <div className="w-full max-w-[260px] bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-slate-200/60 dark:border-white/10 shadow-md flex flex-col items-center gap-3 text-center">
+                <p className="text-xs font-bold text-slate-800 dark:text-white">"She plays soccer."</p>
+                <div className="flex items-center justify-center gap-1.5 h-7">
+                  {[1, 2, 4, 6, 4, 2, 5, 3, 1].map((bar, i) => (
+                    <div key={i} className="w-1 bg-emerald-500 rounded-full animate-pulse" style={{ height: `${bar * 15}%`, animationDelay: `${i * 0.12}s` }} />
+                  ))}
+                </div>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl px-3 py-1 text-xs font-bold">
+                  {lang === "en" ? "Native Accent Match 98%" : "원어민 발음 일치 98%"}
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 [word-break:keep-all]">
-                {lang === 'en' ? 'Interactive Audio Practice' : '자연스러운 원어민 발음 연습'}
-              </h3>
-              <p className="text-slate-600 dark:text-white/80 text-sm md:text-base leading-relaxed [word-break:keep-all]">
-                {lang === 'en' 
-                  ? "From paper to pronunciation. Chekki turns grammar mistakes into interactive speaking exercises, using native AI to evaluate their speech in real-time."
-                  : "종이로 풀던 오답을 말하기 연습으로 이어줍니다. AI가 다정하게 아이의 발음을 듣고 교정해 주어, 엄마가 대신 가르쳐주지 않아도 스스로 자신감이 붙어요."}
-              </p>
             </div>
           </div>
 
@@ -512,9 +514,11 @@ export default function Landing() {
                 <span>{lang === 'en' ? 'No Typing. Just Speaking.' : '엄마 대신 듣고 말해주는 AI'}</span>
               </div>
               <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-[1.25] mb-4 [word-break:keep-all]">
-                {lang === 'en' 
-                  ? <><span className="text-emerald-500">Speak it right,</span><br/>not just write it right.</>
-                  : <><span className="text-emerald-500">틀린 문법도 원어민 발음으로,</span><br/>아이가 스스로 재미있게 말하도록.</>}
+                {lang === "en" ? (
+                  <><span className="text-emerald-500">Speak it right,</span><br/>not just write it right.</>
+                ) : (
+                  <><span className="text-emerald-500">틀린 문법도 원어민 발음으로,</span><br/>아이가 스스로 재미있게 말하도록.</>
+                )}
               </h3>
               <p className="text-slate-600 dark:text-white/60 text-sm sm:text-base leading-relaxed max-w-lg mb-6 [word-break:keep-all]">
                 {lang === 'en'
@@ -552,7 +556,6 @@ export default function Landing() {
               </div>
             </div>
           </div>
-        </div>
       </section>
 
       {/* CHEKKI ECOSYSTEM SECTION */}
