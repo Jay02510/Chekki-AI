@@ -388,144 +388,243 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       <section className="py-16 md:py-24 px-4 md:px-8 max-w-7xl mx-auto w-full">
         <div className="mb-12 text-center">
           <h2 className={`font-display text-2xl sm:text-4xl font-black tracking-tight mb-4 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-            {isKo ? '학원 운영을 위해 설계된 핵심 기능' : 'Designed Specially for English Academies'}
+            {isKo ? '선생님의 대표적인 고충을 해결하는 AI 자동화 기능' : 'Solving Top Teacher Painpoints With AI Automation'}
           </h2>
+          <p className={`text-sm md:text-base max-w-2xl mx-auto ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+            {isKo 
+              ? '마우스를 올려 카드별 선생님의 고충과 채키의 명확한 해결책을 확인해보세요.' 
+              : 'Hover over any card below to see how Chekki solves top teacher painpoints.'}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Bento Cell 1: Curriculum Pre-seeding (Spans 2 columns) */}
-          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-300 ${
+          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-orange-500/40' 
-              : 'bg-white border-zinc-200/90 hover:border-orange-500/40 shadow-sm'
-          } group relative overflow-hidden`}>
+              ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-[#0F0814]' 
+              : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
+          } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
               <div className="flex-1">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-5">
-                  <GraduationCap size={20} weight="bold" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
+                    <GraduationCap size={20} weight="bold" />
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                    isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-700 border-orange-200'
+                  }`}>
+                    Hover Solution
+                  </span>
                 </div>
-                <h3 className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {isKo ? '주간 교재 키워드 등록 (99.9% AI 정밀 채점)' : 'Weekly Curriculum Seeding (99.9% AI Accuracy)'}
-                </h3>
-                <p className={`text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                  {isKo 
-                    ? '선생님이 학급별 주간 단어와 파닉스를 대시보드에 등록해 두면, 가정에서 학부모가 스캔한 오답 항목이 우리 학원 교재 정답 기준에 맞춰 99.9% 정확하게 분석됩니다.'
-                    : 'Seed your class active vocabulary lists and phonics targets once. Our AI evaluates home scans against your exact answer key with 99.9% accuracy, eliminating false OCR grading errors.'}
-                </p>
+
+                {/* Default View: Teacher Painpoint */}
+                <div className="transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">
+                  <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
+                  <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {isKo 
+                      ? '"매주 학급별 주간 단어, 파닉스, 정답지를 일일이 타이핑하느라 야근하시나요?"' 
+                      : '"Exhausted by manually typing weekly active vocabulary lists, phonics targets, and answer keys?"'}
+                  </h3>
+                  <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    {isKo 
+                      ? '수업 준비만으로도 바쁜데 정답지 입력에 매주 몇 시간씩 허비되는 대표적인 선생님 행정 스트레스.'
+                      : 'Teachers waste hours typing answer keys each week instead of focusing on student interactions.'}
+                  </p>
+                </div>
+
+                {/* Hover View: Chekki Solution */}
+                <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 absolute inset-x-6 top-16 md:w-1/2">
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                  <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
+                    {isKo ? '3초 교재 AI 자동 등록 (99.9% 정밀 채점)' : 'Weekly Curriculum Seeding (99.9% AI Accuracy)'}
+                  </h3>
+                  <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                    {isKo 
+                      ? '교재 PDF나 사진 한 장만 드롭하면 AI가 단어와 정답지를 3초 만에 자동 추출하여 99.9% 정확하게 분석합니다.'
+                      : 'Seed your class active vocabulary lists once. AI evaluates home scans against your exact answer key with 99.9% accuracy.'}
+                  </p>
+                </div>
               </div>
 
-              {/* Clean side image container: Semi-transparent by default -> Full opacity on hover */}
+              {/* Side image container */}
               <div className="w-full md:w-1/2 flex justify-center items-center overflow-hidden rounded-2xl p-2">
                 <img 
                   src={isNight ? "/assets/schools/schools_bento_curriculum.png" : "/assets/schools/schools_bento_curriculum_light.png"} 
                   alt="Curriculum seeding interface" 
-                  className="w-full h-auto object-cover rounded-xl opacity-60 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-300 ease-out filter drop-shadow-md" 
+                  className="w-full h-auto object-cover rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
                   loading="lazy" 
                 />
               </div>
             </div>
 
             <div className={`mt-6 pt-4 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-2 text-xs font-bold text-orange-500`}>
-              <span>{isKo ? '교재 기반 정답지로 환각 현상 0%' : 'Ground-truth answer keys eliminate AI hallucination'}</span>
+              <span>{isKo ? '교재 기반 정답지로 AI 환각 현상 100% 제거' : 'Ground-truth answer keys eliminate AI hallucination'}</span>
               <Sparkle size={12} weight="bold" />
             </div>
           </div>
 
           {/* Bento Cell 2: Roster approvals (1 column) */}
-          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-300 ${
+          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-purple-500/40' 
-              : 'bg-white border-zinc-200/90 hover:border-purple-500/40 shadow-sm'
-          } group relative overflow-hidden`}>
+              ? 'bg-[#050505] border-white/10 hover:border-purple-500/50 hover:bg-[#0F0814]' 
+              : 'bg-white border-zinc-200/90 hover:border-purple-500/50 hover:bg-purple-50/40 shadow-sm'
+          } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div>
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500 mb-5">
-                <Users size={20} weight="bold" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500">
+                  <Users size={20} weight="bold" />
+                </div>
+                <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                  isNight ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-purple-100 text-purple-700 border-purple-200'
+                }`}>
+                  Hover Solution
+                </span>
               </div>
-              <h3 className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '6자리 코드로 가정 숙제 자동 연동' : '6-Digit Join Code & Auto-Sync'}
-              </h3>
-              <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {isKo 
-                  ? '학부모가 앱에서 6자리 학급 코드를 입력하면 연동 완료. 집에서 스캔한 빨간 테두리 오답과 점수가 선생님 대시보드로 실시간 자동 전송됩니다.'
-                  : 'Parents enter a simple 6-letter class code once. Homework scans and red-bordered mistake data silently sync straight to your teacher dashboard.'}
-              </p>
+
+              {/* Default View: Teacher Painpoint */}
+              <div className="transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">
+                <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
+                <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo 
+                    ? '"매일 학생별 숙제 제출 여부를 일일이 확인하고 챙기느라 지치셨나요?"' 
+                    : '"Tired of chasing parents individually to track daily homework completion?"'}
+                </h3>
+              </div>
+
+              {/* Hover View: Chekki Solution */}
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 absolute inset-x-6 top-16">
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-purple-300' : 'text-purple-600'}`}>
+                  {isKo ? '6자리 코드로 가정 숙제 자동 연동' : '6-Digit Join Code & Auto-Sync'}
+                </h3>
+                <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  {isKo 
+                    ? '학부모가 6자리 학급 코드만 입력하면 끝. 집에서 스캔한 빨간 테 테두리 오답과 점수가 교사 대시보드로 실시간 자동 전송됩니다.'
+                    : 'Parents enter a 6-letter class code once. Homework scans & mistake data silently sync straight to your teacher dashboard.'}
+                </p>
+              </div>
             </div>
 
-            {/* Clean image container: Semi-transparent by default -> Full opacity on hover */}
+            {/* Clean image container */}
             <div className="mt-6 w-full flex justify-center items-center overflow-hidden rounded-2xl p-2">
               <img 
                 src={isNight ? "/assets/schools/schools_bento_join_code.png" : "/assets/schools/schools_bento_join_code_light.png"} 
                 alt="Class join code entry UI" 
-                className="w-full max-w-[280px] h-auto object-contain rounded-xl opacity-60 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-300 ease-out filter drop-shadow-md" 
+                className="w-full max-w-[280px] h-auto object-contain rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
                 loading="lazy" 
               />
             </div>
           </div>
 
           {/* Bento Cell 3: Analytics (1 column) */}
-          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-300 ${
+          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-orange-500/40' 
-              : 'bg-white border-zinc-200/90 hover:border-orange-500/40 shadow-sm'
-          } group relative overflow-hidden`}>
+              ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-[#0F0814]' 
+              : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
+          } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div>
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-5">
-                <ChartBar size={20} weight="bold" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
+                  <ChartBar size={20} weight="bold" />
+                </div>
+                <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                  isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-700 border-orange-200'
+                }`}>
+                  Hover Solution
+                </span>
               </div>
-              <h3 className={`font-display text-xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '교실 밖 학습 진단 (Visibility Beyond the Classroom)' : 'Visibility Beyond the Classroom'}
-              </h3>
-              <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {isKo 
-                  ? '선생님이 옆에 없을 때 아이들이 집에서 무엇을 어려워했는지 한눈에 확인하세요. 가정 스캔 데이터를 기반으로 다음 수업의 핵심 복습 포인트를 정확히 집어냅니다.'
-                  : "See how your students perform when you're not around. Chekki tracks home scan difficulty rates so you know the exact phonics rules and vocabulary items to reinforce in your next lesson."}
-              </p>
+
+              {/* Default View: Teacher Painpoint */}
+              <div className="transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">
+                <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
+                <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo 
+                    ? '"아이들이 집에서 혼자 숙제할 때 어떤 파닉스와 단어에서 막히는지 파악하기 어려우셨나요?"' 
+                    : '"Blind to where students struggle during home practice until test day?"'}
+                </h3>
+              </div>
+
+              {/* Hover View: Chekki Solution */}
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 absolute inset-x-6 top-16">
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
+                  {isKo ? '교실 밖 학습 진단 (Visibility Beyond Classroom)' : 'Visibility Beyond the Classroom'}
+                </h3>
+                <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  {isKo 
+                    ? '가정 스캔 취약 데이터를 분석하여 다음 수업 시간에 보강해야 할 핵심 파닉스 규칙과 단어를 사전에 파악합니다.'
+                    : 'Track home scan difficulty rates so you know the exact phonics rules and vocabulary items to reinforce in your next lesson.'}
+                </p>
+              </div>
             </div>
 
-            {/* Clean image container: Semi-transparent by default -> Full opacity on hover */}
+            {/* Clean image container */}
             <div className="mt-6 w-full flex justify-center items-center overflow-hidden rounded-2xl p-2">
               <img 
                 src={isNight ? "/assets/schools/schools_bento_diagnostics.png" : "/assets/schools/schools_bento_diagnostics_light.png"} 
                 alt="Classroom diagnostics dashboard" 
-                className="w-full max-w-[280px] h-auto object-contain rounded-xl opacity-60 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-300 ease-out filter drop-shadow-md" 
+                className="w-full max-w-[280px] h-auto object-contain rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
                 loading="lazy" 
               />
             </div>
           </div>
 
           {/* Bento Cell 4: Parent Sync (Spans 2 columns) */}
-          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl transition-all duration-300 ${
+          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl transition-all duration-500 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-pink-500/40' 
-              : 'bg-white border-zinc-200/90 hover:border-pink-500/40 shadow-sm'
-          } group relative overflow-hidden`}>
+              ? 'bg-[#050505] border-white/10 hover:border-pink-500/50 hover:bg-[#0F0814]' 
+              : 'bg-white border-zinc-200/90 hover:border-pink-500/50 hover:bg-pink-50/40 shadow-sm'
+          } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
               <div className="md:col-span-7 flex flex-col justify-between h-full">
                 <div>
-                  <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-500 mb-4">
-                    <Sparkle size={20} weight="bold" />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-500">
+                      <Sparkle size={20} weight="bold" />
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                      isNight ? 'bg-pink-500/20 text-pink-300 border-pink-500/30' : 'bg-pink-100 text-pink-700 border-pink-200'
+                    }`}>
+                      Hover Solution
+                    </span>
                   </div>
-                  <h3 className={`font-display text-xl md:text-2xl font-black mb-3 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo ? '1초 만에 자동 생성되는 학부모 칭찬 & 성장 리포트' : '1-Click Parent Growth & Progress Report Cards'}
-                  </h3>
-                  <p className={`text-sm leading-relaxed mb-4 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    {isKo 
-                      ? '매월 10시간 이상 걸리던 수동 평가서 작성을 대체합니다. 가정 스캔 데이터를 기반으로 아이의 긍정적 성장과 칭찬 포인트가 담긴 PDF 리포트를 1초 만에 학부모님께 발송하세요.'
-                      : 'Eliminate 5-10 hours a month of manual report writing. Chekki auto-compiles home scan data into encouraging, branded growth reports with 1 click.'}
-                  </p>
+
+                  {/* Default View: Teacher Painpoint */}
+                  <div className="transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">
+                    <span className="text-[10px] font-bold text-pink-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
+                    <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                      {isKo 
+                        ? '"매월 학부모 평가서 작성에 10시간 넘는 행정 시간을 쓰느라 스트레스 받으시나요?"' 
+                        : '"Dread spending 5-10+ hours every month writing manual parent evaluation report cards?"'}
+                    </h3>
+                  </div>
+
+                  {/* Hover View: Chekki Solution */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 absolute inset-x-6 top-16 md:w-1/2">
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                    <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-pink-400' : 'text-pink-600'}`}>
+                      {isKo ? '1초 만에 자동 생성되는 학부모 칭찬 & 성장 리포트' : '1-Click Parent Growth & Progress Report Cards'}
+                    </h3>
+                    <p className={`text-sm leading-relaxed mb-4 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                      {isKo 
+                        ? '가정 스캔 데이터를 기반으로 아이의 긍정적 성장과 칭찬 포인트가 담긴 PDF 리포트를 1초 만에 학부모님께 발송하세요.'
+                        : 'Eliminate 5-10 hours a month of manual report writing. Chekki auto-compiles home scan data into encouraging growth reports in 1 click.'}
+                    </p>
+                  </div>
                 </div>
-                <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-1.5 text-xs font-bold text-pink-500`}>
+
+                <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-1.5 text-xs font-bold text-pink-500 mt-6`}>
                   <CheckCircle size={14} weight="bold" />
                   <span>{isKo ? '선생님 행정 부담 90% 감소 & 재원율 증가' : 'Reduces teacher admin work by 90% & boosts retention'}</span>
                 </div>
               </div>
 
-              {/* Clean side image container: Semi-transparent by default -> Full opacity on hover */}
+              {/* Clean side image container */}
               <div className="md:col-span-5 flex items-center justify-center overflow-hidden rounded-2xl p-2">
                 <img 
                   src={isNight ? "/assets/schools/schools_bento_parent_care_dark.png" : "/assets/schools/schools_bento_parent_care_light.png"} 
                   alt="Parent homework report UI" 
-                  className="w-full max-w-[300px] h-auto object-contain rounded-xl opacity-60 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-300 ease-out filter drop-shadow-md" 
+                  className="w-full max-w-[300px] h-auto object-contain rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
                   loading="lazy" 
                 />
               </div>
