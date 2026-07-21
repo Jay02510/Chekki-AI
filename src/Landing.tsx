@@ -299,10 +299,19 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center p-6 md:p-8">
-                <img src={theme === 'light' ? '/assets/bento_light_reveal_only.png' : '/assets/bento_reveal_only.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
-                <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
-                  <ArrowRight className="text-slate-800 dark:text-white" />
+              <div className="flex-1 rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center p-3 sm:p-4">
+                <div className="w-full h-full p-2.5 sm:p-3 rounded-2xl border bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-zinc-900/90 dark:to-zinc-950/90 border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-xl ring-1 ring-black/[0.03] dark:ring-white/5 flex flex-col transition-all duration-300">
+                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
+                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
+                  </div>
+                  <div className="flex-1 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-2 flex items-center justify-center relative">
+                    <img src={theme === 'light' ? '/assets/bento_light_reveal_only.png' : '/assets/bento_reveal_only.png'} className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
+                    <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-1.5 animate-pulse">
+                      <ArrowRight className="text-slate-800 dark:text-white" size={14} />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
@@ -338,8 +347,17 @@ export default function Landing() {
                   <ArrowRight className="text-brand animate-pulse shrink-0" />
                 </h3>
               </div>
-              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-6 md:p-8">
-                <img src={theme === 'light' ? '/assets/bento_light_speed_mode.png' : '/assets/bento_speed_mode.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
+              <div className="md:w-1/2 flex-1 md:h-full rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center order-1 md:order-2 p-3 sm:p-4">
+                <div className="w-full h-full p-2.5 sm:p-3 rounded-2xl border bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-zinc-900/90 dark:to-zinc-950/90 border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-xl ring-1 ring-black/[0.03] dark:ring-white/5 flex flex-col transition-all duration-300">
+                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
+                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
+                  </div>
+                  <div className="flex-1 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-2 flex items-center justify-center relative">
+                    <img src={theme === 'light' ? '/assets/bento_light_speed_mode.png' : '/assets/bento_speed_mode.png'} className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-[1.02] transition-transform duration-700 ease-[var(--ease-premium)]" />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -360,10 +378,19 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center p-6 md:p-8">
-                <img src={theme === 'light' ? '/assets/bento_light_dashboard.png' : '/assets/onboarding_icon_dashboard_1782545238800.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
-                <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
-                  <ArrowRight className="text-slate-800 dark:text-white" />
+              <div className="flex-1 rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center p-3 sm:p-4">
+                <div className="w-full h-full p-2.5 sm:p-3 rounded-2xl border bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-zinc-900/90 dark:to-zinc-950/90 border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-xl ring-1 ring-black/[0.03] dark:ring-white/5 flex flex-col transition-all duration-300">
+                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
+                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
+                  </div>
+                  <div className="flex-1 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-2 flex items-center justify-center relative">
+                    <img src={theme === 'light' ? '/assets/bento_light_dashboard.png' : '/assets/onboarding_icon_dashboard_1782545238800.png'} className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
+                    <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-1.5 animate-pulse">
+                      <ArrowRight className="text-slate-800 dark:text-white" size={14} />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">
@@ -393,10 +420,19 @@ export default function Landing() {
           >
             {/* Front Content */}
             <div className="flex flex-col h-full transition-all duration-200 opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
-              <div className="flex-1 rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center p-6 md:p-8">
-                <img src={theme === 'light' ? '/assets/bento_light_grading_status.png' : '/assets/onboarding_icon_grading_status.png'} className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
-                <div className="absolute bottom-4 right-4 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-2 animate-pulse">
-                  <ArrowRight className="text-slate-800 dark:text-white" />
+              <div className="flex-1 rounded-[2rem] bg-transparent relative overflow-hidden flex items-center justify-center p-3 sm:p-4">
+                <div className="w-full h-full p-2.5 sm:p-3 rounded-2xl border bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-zinc-900/90 dark:to-zinc-950/90 border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-xl ring-1 ring-black/[0.03] dark:ring-white/5 flex flex-col transition-all duration-300">
+                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
+                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
+                  </div>
+                  <div className="flex-1 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-2 flex items-center justify-center relative">
+                    <img src={theme === 'light' ? '/assets/bento_light_grading_status.png' : '/assets/onboarding_icon_grading_status.png'} className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-700 ease-[var(--ease-premium)]" />
+                    <div className="absolute bottom-2 right-2 bg-slate-800/10 dark:bg-white/10 backdrop-blur-md rounded-full p-1.5 animate-pulse">
+                      <ArrowRight className="text-slate-800 dark:text-white" size={14} />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="min-h-[120px] px-5 py-6 flex flex-col justify-center">

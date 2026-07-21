@@ -164,63 +164,65 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       </div>
 
       {/* --- HERO SECTION --- */}
-      <section className="relative px-6 pt-16 md:pt-24 pb-12 text-center max-w-4xl mx-auto flex-1 flex flex-col justify-center">
-        {/* Eyebrow */}
-        <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-4 block">
-          {isKo ? '학원 맞춤형 숙제 분석 플랫폼' : 'AUTOMATED GRADING FOR ACADEMIES'}
-        </span>
+      <section className="relative px-6 pt-12 md:pt-20 pb-12 md:pb-16 max-w-7xl mx-auto w-full flex-1 flex flex-col-reverse md:flex-row items-center justify-between gap-10 md:gap-12">
+        {/* Text Side */}
+        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full z-10">
+          {/* Eyebrow */}
+          <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-4 block">
+            {isKo ? '학원 맞춤형 숙제 분석 플랫폼' : 'AUTOMATED GRADING FOR ACADEMIES'}
+          </span>
 
-        {/* Headline */}
-        <h1 className={`font-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08] mb-6 text-balance ${isNight ? 'text-white' : 'text-zinc-900'} break-keep`}>
-          {isKo ? (
-            <>선생님의 평가는 <span className="text-orange-500">더 섬세하게</span>,<br />학부모 피드백은 <span className="text-orange-500">더 정확하게</span>.</>
-          ) : (
-            <>Elevate Homework Grading.<br />Engage Parents with <span className="text-orange-500">AI Care</span>.</>
-          )}
-        </h1>
+          {/* Headline */}
+          <h1 className={`font-display text-3xl sm:text-5xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] mb-6 text-balance ${isNight ? 'text-white' : 'text-zinc-900'} break-keep`}>
+            {isKo ? (
+              <>선생님의 평가는 <span className="text-orange-500">더 섬세하게</span>,<br />학부모 피드백은 <span className="text-orange-500">더 정확하게</span>.</>
+            ) : (
+              <>Elevate Homework Grading.<br />Engage Parents with <span className="text-orange-500">AI Care</span>.</>
+            )}
+          </h1>
 
-        {/* Subtext */}
-        <p className={`text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'} break-keep`}>
-          {isKo 
-            ? '학원만의 매주 진도 교재와 어휘 단어장을 연동하여 단 3초 만에 원생 손글씨 숙제를 채점하고 오답 리포트를 학부모님께 자동 발송하세요.'
-            : 'Integrate your weekly textbooks, autograde student handwriting, and deliver detailed diagnostic reviews straight to parents instantly.'}
-        </p>
+          {/* Subtext */}
+          <p className={`text-base sm:text-lg max-w-xl leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'} break-keep`}>
+            {isKo 
+              ? '학원만의 매주 진도 교재와 어휘 단어장을 연동하여 단 3초 만에 원생 손글씨 숙제를 채점하고 오답 리포트를 학부모님께 자동 발송하세요.'
+              : 'Integrate your weekly textbooks, autograde student handwriting, and deliver detailed diagnostic reviews straight to parents instantly.'}
+          </p>
 
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <a
-            href="#demo"
-            className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg transition-all active:scale-[0.97] flex items-center justify-center gap-2 group"
-          >
-            <span>{isKo ? '학원 도입 및 제휴 신청하기' : 'Request Partnership'}</span>
-            <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
-          </a>
-          <a
-            href="/teacher"
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.href = '/teacher';
-            }}
-            className={`w-full sm:w-auto px-8 py-4 font-black text-sm rounded-3xl border transition-all active:scale-[0.97] ${
-              isNight 
-                ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white' 
-                : 'bg-white/80 border-zinc-300 hover:bg-white text-zinc-900 shadow-sm'
-            }`}
-          >
-            {isKo ? '교사용 로그인' : 'Teacher Login'}
-          </a>
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center md:justify-start items-center">
+            <a
+              href="#demo"
+              className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
+            >
+              <span>{isKo ? '학원 도입 및 제휴 신청하기' : 'Request Partnership'}</span>
+              <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
+            </a>
+            <a
+              href="/teacher"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = '/teacher';
+              }}
+              className={`w-full sm:w-auto px-8 py-4 font-black text-sm rounded-3xl border transition-all active:scale-[0.97] text-center ${
+                isNight 
+                  ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white' 
+                  : 'bg-white/80 border-zinc-300 hover:bg-white text-zinc-900 shadow-sm'
+              }`}
+            >
+              {isKo ? '교사용 로그인' : 'Teacher Login'}
+            </a>
+          </div>
         </div>
 
-        {/* Hero UI Image - Using main Chekki asset */}
-        <div className="mt-12 w-full max-w-2xl mx-auto">
-          <div className="relative flex justify-center items-center">
-            <img
-              src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png"
-              alt="Chekki AI Mascot & Dashboard"
-              className="w-full max-w-[480px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.25)]"
-              loading="lazy"
-            />
-          </div>
+        {/* Hero Image Side */}
+        <div className="flex-1 w-full flex justify-center md:justify-end relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[380px] md:max-w-[460px] aspect-square bg-orange-500/15 rounded-full blur-[90px] pointer-events-none" />
+          <img
+            src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png"
+            alt="Chekki AI Mascot & Dashboard"
+            className="w-full max-w-[360px] sm:max-w-[420px] md:max-w-[480px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.25)] relative z-10"
+            loading="lazy"
+          />
         </div>
       </section>
 
@@ -254,8 +256,19 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     : 'Seed your class active vocabulary lists and phonics targets once. Our AI evaluates home scans against your exact answer key with 99.9% accuracy, eliminating false OCR grading errors.'}
                 </p>
               </div>
-              <div className="w-full md:w-56 lg:w-64 flex-shrink-0 rounded-2xl overflow-hidden p-1 flex justify-center items-center">
-                <img src={isNight ? "/assets/schools/schools_bento_curriculum.png" : "/assets/schools/schools_bento_curriculum_light.png"} alt="Curriculum seeding interface" className="w-full h-auto object-contain filter drop-shadow-md" loading="lazy" />
+              <div className={`w-full md:w-64 lg:w-72 flex-shrink-0 p-2 sm:p-2.5 rounded-2xl border transition-all duration-300 ${
+                isNight 
+                  ? 'bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 border-white/10 ring-1 ring-white/5 shadow-xl' 
+                  : 'bg-gradient-to-b from-slate-50 to-slate-100/80 border-slate-200/90 ring-1 ring-black/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
+              }`}>
+                <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
+                  <div className="w-2 h-2 rounded-full bg-red-400/80" />
+                  <div className="w-2 h-2 rounded-full bg-amber-400/80" />
+                  <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
+                </div>
+                <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-1 flex justify-center items-center">
+                  <img src={isNight ? "/assets/schools/schools_bento_curriculum.png" : "/assets/schools/schools_bento_curriculum_light.png"} alt="Curriculum seeding interface" className="w-full h-auto object-contain filter drop-shadow-sm" loading="lazy" />
+                </div>
               </div>
             </div>
 
@@ -285,8 +298,19 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </p>
             </div>
 
-            <div className="mt-6 rounded-2xl overflow-hidden p-1 flex justify-center items-center">
-              <img src={isNight ? "/assets/schools/schools_bento_join_code.png" : "/assets/schools/schools_bento_join_code_light.png"} alt="Class join code entry UI" className="w-full max-w-[220px] h-auto object-contain filter drop-shadow-md" loading="lazy" />
+            <div className={`mt-6 p-2 sm:p-2.5 rounded-2xl border transition-all duration-300 ${
+              isNight 
+                ? 'bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 border-white/10 ring-1 ring-white/5 shadow-xl' 
+                : 'bg-gradient-to-b from-slate-50 to-slate-100/80 border-slate-200/90 ring-1 ring-black/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
+            }`}>
+              <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
+                <div className="w-2 h-2 rounded-full bg-red-400/80" />
+                <div className="w-2 h-2 rounded-full bg-amber-400/80" />
+                <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
+              </div>
+              <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-1 flex justify-center items-center">
+                <img src={isNight ? "/assets/schools/schools_bento_join_code.png" : "/assets/schools/schools_bento_join_code_light.png"} alt="Class join code entry UI" className="w-full max-w-[220px] h-auto object-contain filter drop-shadow-sm" loading="lazy" />
+              </div>
             </div>
           </div>
 
@@ -310,8 +334,19 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </p>
             </div>
 
-            <div className="mt-6 rounded-2xl overflow-hidden p-1 flex justify-center items-center">
-              <img src={isNight ? "/assets/schools/schools_bento_diagnostics.png" : "/assets/schools/schools_bento_diagnostics_light.png"} alt="Classroom diagnostics dashboard" className="w-full max-w-[220px] h-auto object-contain filter drop-shadow-md" loading="lazy" />
+            <div className={`mt-6 p-2 sm:p-2.5 rounded-2xl border transition-all duration-300 ${
+              isNight 
+                ? 'bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 border-white/10 ring-1 ring-white/5 shadow-xl' 
+                : 'bg-gradient-to-b from-slate-50 to-slate-100/80 border-slate-200/90 ring-1 ring-black/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
+            }`}>
+              <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
+                <div className="w-2 h-2 rounded-full bg-red-400/80" />
+                <div className="w-2 h-2 rounded-full bg-amber-400/80" />
+                <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
+              </div>
+              <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-1 flex justify-center items-center">
+                <img src={isNight ? "/assets/schools/schools_bento_diagnostics.png" : "/assets/schools/schools_bento_diagnostics_light.png"} alt="Classroom diagnostics dashboard" className="w-full max-w-[220px] h-auto object-contain filter drop-shadow-sm" loading="lazy" />
+              </div>
             </div>
           </div>
 
@@ -344,8 +379,19 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
 
               <div className="md:col-span-5 flex items-center justify-center">
-                <div className="w-full max-w-[240px] md:max-w-[260px] flex justify-center items-center">
-                  <img src={isNight ? "/assets/schools/schools_bento_parent_care_dark.png" : "/assets/schools/schools_bento_parent_care_light.png"} alt="Parent homework report UI" className="w-full h-auto object-contain filter drop-shadow-md" loading="lazy" />
+                <div className={`w-full max-w-[240px] md:max-w-[260px] p-2 sm:p-2.5 rounded-2xl border transition-all duration-300 ${
+                  isNight 
+                    ? 'bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 border-white/10 ring-1 ring-white/5 shadow-xl' 
+                    : 'bg-gradient-to-b from-slate-50 to-slate-100/80 border-slate-200/90 ring-1 ring-black/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
+                }`}>
+                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
+                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
+                  </div>
+                  <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-1 flex justify-center items-center">
+                    <img src={isNight ? "/assets/schools/schools_bento_parent_care_dark.png" : "/assets/schools/schools_bento_parent_care_light.png"} alt="Parent homework report UI" className="w-full h-auto object-contain filter drop-shadow-sm" loading="lazy" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -894,13 +940,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
                     <div className="space-y-1.5 text-xs">
                       <p className="text-zinc-400">{isKo ? '은행' : 'Bank'}: <strong className="text-white">신한은행 (Shinhan Bank)</strong></p>
-                      <p className="text-zinc-400">{isKo ? '예금주' : 'Holder'}: <strong className="text-white">(주)체키AI (Chekki AI Inc.)</strong></p>
+                      <p className="text-zinc-400">{isKo ? '예금주' : 'Holder'}: <strong className="text-white">BENJAMIN JASON</strong></p>
                       <div className="flex items-center justify-between gap-2 pt-2 border-t border-orange-500/20">
-                        <p className="font-mono text-lg font-black text-white select-all">110-524-889012</p>
+                        <p className="font-mono text-lg font-black text-white select-all">110-623-147138</p>
                         <button
                           type="button"
                           onClick={() => {
-                            navigator.clipboard.writeText('110-524-889012');
+                            navigator.clipboard.writeText('110-623-147138');
                             setCopiedBank(true);
                             setTimeout(() => setCopiedBank(false), 2000);
                           }}

@@ -3,7 +3,7 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
-const ADMIN_PASSCODE = 'ChecciAdmin2026!';
+const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'ChecciAdmin2026!';
 
 function initAdmin() {
   if (getApps().length > 0) return;
@@ -295,6 +295,60 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         generatedSchoolId: sanitizedSchoolId,
         generatedTeacherCode: teacherCode,
       });
+
+      // 3. Send automated activation email via Resend
+      const resendApiKey = process.env.RESEND_API_KEY || 're_M5DhPwyN_JpZFiMpUAt2sZoWd27zSKVfN';
+      if (resendApiKey && invoiceData.email) {
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${resendApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'Chekki AI <billing@chekkiai.com>',
+              to: [invoiceData.email],
+              subject: `🎉 [Chekki AI] ${invoiceData.academyName || '학원'} 입금 확인 및 교사 인증 코드 안내`,
+              html: `
+                <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
+                  <div style="text-align: center; margin-bottom: 24px;">
+                    <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
+                    <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #34d399; margin-top: 4px;">🎉 학원 계정 승인 완료</p>
+                  </div>
+
+                  <p style="font-size: 15px; color: #e4e4e7;">안녕하세요 <strong>${invoiceData.contactName || '선생님'}</strong> 님,</p>
+                  <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">
+                    입금이 정상적으로 확인되었습니다. <strong>${invoiceData.academyName || '학원'}</strong>의 교사 전용 인증 코드가 등록되었습니다.
+                  </p>
+
+                  <div style="background-color: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <p style="font-size: 12px; font-weight: bold; color: #34d399; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px;">🔑 교사 전용 인증 코드</p>
+                    <p style="font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 2px; margin: 8px 0; font-family: monospace;">${teacherCode}</p>
+                    <p style="font-size: 12px; color: #a1a1aa; margin: 4px 0 0 0;">(최대 등록 가능 교사: ${invoiceData.teacherCount || 5}명)</p>
+                  </div>
+
+                  <div style="background-color: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                    <h4 style="margin: 0 0 8px 0; color: #ffffff; font-size: 14px;">등록 방법:</h4>
+                    <ol style="margin: 0; padding-left: 20px; font-size: 13px; color: #a1a1aa; line-height: 1.8;">
+                      <li><a href="https://chekkiai.com/teacher" style="color: #f97316; font-weight: bold;">chekkiai.com/teacher</a> 에 접속합니다.</li>
+                      <li>교사 회원가입 후 위의 <strong>인증 코드</strong>를 입력합니다.</li>
+                      <li>즉시 Pro 교사 권한이 활성화되어 클래스 생성 및 학생 등록을 시작할 수 있습니다.</li>
+                    </ol>
+                  </div>
+
+                  <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
+                    문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.<br/>
+                    © 2026 Chekki AI Inc.
+                  </p>
+                </div>
+              `,
+            }),
+          });
+        } catch (emailErr) {
+          console.error('[admin:confirm_invoice] Failed to send email via Resend:', emailErr);
+        }
+      }
 
       return res.status(200).json({
         success: true,

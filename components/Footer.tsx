@@ -65,7 +65,7 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
                 <span className="text-zinc-600 font-bold">
                   {language === 'ko' ? '이메일:' : 'Email:'}
                 </span>{' '}
-                chekkihelp@gmail.com
+                support@chekkiai.com
               </p>
             </div>
           </div>

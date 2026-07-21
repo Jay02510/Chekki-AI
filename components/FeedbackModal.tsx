@@ -151,10 +151,10 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                       Or email us directly
                     </p>
                     <a
-                      href="mailto:chekkihelp@gmail.com"
+                      href="mailto:support@chekkiai.com"
                       className={`text-xs font-bold ${isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} transition-colors underline underline-offset-4`}
                     >
-                      chekkihelp@gmail.com
+                      support@chekkiai.com
                     </a>
                   </div>
                 </div>
