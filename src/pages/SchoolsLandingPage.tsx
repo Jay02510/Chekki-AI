@@ -121,7 +121,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     if (!academyName || !contactName || !email) return;
     setIsRequestingInvoice(true);
     const unitPrice = getPlanUnitPrice(selectedPlanId, billingCycle);
-    const totalAmount = unitPrice * teacherCount;
+    const months = billingCycle === 'yearly' ? 12 : 1;
+    const totalAmount = unitPrice * months * teacherCount;
     try {
       const res = await fetch('/api/request-school-invoice', {
         method: 'POST',
@@ -138,6 +139,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           studentCount,
           billingCycle,
           unitPrice,
+          months,
           totalAmount,
         }),
       });
@@ -149,6 +151,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         email: email,
         teacherCount: teacherCount,
         studentCount: studentCount,
+        billingCycle: billingCycle,
+        months: months,
         totalAmount: data.invoice?.totalAmount || totalAmount,
         invoiceId: data.invoice?.invoiceId || `INV-${Math.floor(100000 + Math.random() * 900000)}`
       });
@@ -507,8 +511,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </h2>
           <p className={`text-sm leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
             {isKo 
-              ? '프리랜서 1인 강사부터 대형 어학원까지 복잡한 스캔 건수 제한 없는 예측 가능한 월정액 플랜입니다. 모든 플랜에는 소속 학부모 전원 무료 Chekki Pro 앱 이용권(월 ₩9,900 상당)이 포함됩니다.'
-              : 'No usage-based line-item surprises. Simple per-teacher monthly tiers. Every school plan includes FREE Chekki Pro home accounts for all enrolled parents (₩9,900/mo value per family).'}
+              ? '프리랜서 1인 강사부터 대형 어학원까지 복잡한 스캔 건수 제한 없는 예측 가능한 월정액 플랜입니다. 연간 결제 시 20% 할인이 자동 적용됩니다.'
+              : 'No usage-based line-item surprises. Simple per-teacher monthly tiers. Save 20% when billed annually.'}
           </p>
 
           {/* Monthly / Yearly Billing Toggle with Theme Adaptation */}
@@ -590,13 +594,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '프리랜서 / 개인 튜터' : 'Freelancer & Solo Tutor'}
               </h3>
-              <div className="flex items-baseline gap-1 mb-3">
-                <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {formatPrice(getPlanUnitPrice('freelancer', billingCycle))}
-                </span>
-                <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
-                </span>
+              <div className="mb-3">
+                <div className="flex items-baseline gap-1">
+                  <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {formatPrice(getPlanUnitPrice('freelancer', billingCycle))}
+                  </span>
+                  <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                    {isKo ? '/월' : '/mo'}
+                  </span>
+                </div>
+                {billingCycle === 'yearly' ? (
+                  <p className="text-[11px] font-extrabold text-emerald-500 mt-1">
+                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('freelancer', 'yearly') * 12)} 일시 청구 (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('freelancer', 'yearly') * 12)}/yr`}
+                  </p>
+                ) : (
+                  <p className={`text-[11px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    {isKo ? '월간 정기 결제' : 'Billed monthly'}
+                  </p>
+                )}
               </div>
               <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
@@ -664,13 +679,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '소형 학원 & 공부방' : 'Small School & Study Room'}
               </h3>
-              <div className="flex items-baseline gap-1 mb-3">
-                <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {formatPrice(getPlanUnitPrice('small', billingCycle))}
-                </span>
-                <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인당)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
-                </span>
+              <div className="mb-3">
+                <div className="flex items-baseline gap-1">
+                  <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {formatPrice(getPlanUnitPrice('small', billingCycle))}
+                  </span>
+                  <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                    {isKo ? '/월 (강사 1인당)' : '/mo per teacher'}
+                  </span>
+                </div>
+                {billingCycle === 'yearly' ? (
+                  <p className="text-[11px] font-extrabold text-emerald-500 mt-1">
+                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('small', 'yearly') * 12)}/인 일시 청구 (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('small', 'yearly') * 12)}/yr per seat`}
+                  </p>
+                ) : (
+                  <p className={`text-[11px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    {isKo ? '월간 정기 결제' : 'Billed monthly'}
+                  </p>
+                )}
               </div>
               <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
@@ -741,13 +767,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '중형 어학원 플랜' : 'Medium Academy Plan'}
               </h3>
-              <div className="flex items-baseline gap-1 mb-3">
-                <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {formatPrice(getPlanUnitPrice('medium', billingCycle))}
-                </span>
-                <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인당)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
-                </span>
+              <div className="mb-3">
+                <div className="flex items-baseline gap-1">
+                  <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {formatPrice(getPlanUnitPrice('medium', billingCycle))}
+                  </span>
+                  <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                    {isKo ? '/월 (강사 1인당)' : '/mo per teacher'}
+                  </span>
+                </div>
+                {billingCycle === 'yearly' ? (
+                  <p className="text-[11px] font-extrabold text-emerald-500 mt-1">
+                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('medium', 'yearly') * 12)}/인 일시 청구 (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('medium', 'yearly') * 12)}/yr per seat`}
+                  </p>
+                ) : (
+                  <p className={`text-[11px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    {isKo ? '월간 정기 결제' : 'Billed monthly'}
+                  </p>
+                )}
               </div>
               <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
@@ -811,13 +848,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '대형 학원 / 프랜차이즈' : 'Large Academy & Franchise'}
               </h3>
-              <div className="flex items-baseline gap-1 mb-3">
-                <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {formatPrice(getPlanUnitPrice('large', billingCycle))}
-                </span>
-                <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인당)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
-                </span>
+              <div className="mb-3">
+                <div className="flex items-baseline gap-1">
+                  <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {formatPrice(getPlanUnitPrice('large', billingCycle))}
+                  </span>
+                  <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                    {isKo ? '/월 (강사 1인당)' : '/mo per teacher'}
+                  </span>
+                </div>
+                {billingCycle === 'yearly' ? (
+                  <p className="text-[11px] font-extrabold text-emerald-500 mt-1">
+                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('large', 'yearly') * 12)}/인 일시 청구 (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('large', 'yearly') * 12)}/yr per seat`}
+                  </p>
+                ) : (
+                  <p className={`text-[11px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    {isKo ? '월간 정기 결제' : 'Billed monthly'}
+                  </p>
+                )}
               </div>
               <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
@@ -978,6 +1026,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? activePlan.nameKo : activePlan.nameEn}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
+                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '결제 주기' : 'Billing Cycle'}:</span>
+                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                        {billingCycle === 'yearly' ? (isKo ? '연간 결제 (12개월, 20% 할인)' : 'Yearly (12 Months, 20% Off)') : (isKo ? '월간 결제' : 'Monthly')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
                       <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '신청 강사 수' : 'Teacher Seats'}:</span>
                       <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.teacherCount} {isKo ? '명' : 'seats'}</span>
                     </div>
@@ -994,7 +1048,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <div className={`flex justify-between items-center text-sm pt-2 border-t font-bold ${
                       isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-200 text-zinc-700'
                     }`}>
-                      <span>{isKo ? '총 입금 금액' : 'Total Amount'}:</span>
+                      <span>{isKo ? '총 청구 입금 금액' : 'Total Invoice Amount'}:</span>
                       <span className="text-xl font-black text-emerald-500 font-mono">
                         {formatPrice(invoiceResult.totalAmount || 0)}
                       </span>
@@ -1204,15 +1258,37 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   </div>
 
                   {getPlanUnitPrice(selectedPlanId, billingCycle) > 0 && (
-                    <div className={`p-4 border rounded-2xl flex justify-between items-center text-xs mt-2 ${
+                    <div className={`p-4 border rounded-2xl space-y-2 mt-2 ${
                       isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-100/70 border-zinc-200'
                     }`}>
-                      <span className={`font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '월 정액 청구 금액' : 'Total Monthly Amount'}:
-                      </span>
-                      <span className="text-lg font-black text-emerald-500 font-mono">
-                        {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle) * teacherCount)}
-                      </span>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
+                          {isKo ? '월 환산 청구 단가 (강사 1인)' : 'Monthly Effective Rate'}:
+                        </span>
+                        <span className="font-bold font-mono">
+                          {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle))} / {isKo ? '월' : 'mo'}
+                        </span>
+                      </div>
+                      {billingCycle === 'yearly' && (
+                        <div className="flex justify-between items-center text-xs">
+                          <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
+                            {isKo ? '결제 주기 (20% 할인)' : 'Billing Cycle (20% Off)'}:
+                          </span>
+                          <span className="font-bold text-emerald-500 font-mono">
+                            {isKo ? '연간 일시 결제 (12개월)' : 'Yearly (12 Months)'}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center text-xs pt-2 border-t border-zinc-200 dark:border-white/10">
+                        <span className={`font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                          {isKo 
+                            ? (billingCycle === 'yearly' ? '총 연간 청구 금액 (세금계산서)' : '총 월간 청구 금액') 
+                            : (billingCycle === 'yearly' ? 'Total Billed (1 Year)' : 'Total Billed (1 Month)')}:
+                        </span>
+                        <span className="text-lg font-black text-emerald-500 font-mono">
+                          {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle) * (billingCycle === 'yearly' ? 12 : 1) * teacherCount)}
+                        </span>
+                      </div>
                     </div>
                   )}
 
