@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   GraduationCap, 
   Sparkle, 
@@ -13,7 +13,8 @@ import {
   Bank,
   Copy,
   Receipt,
-  X
+  X,
+  List
 } from '@phosphor-icons/react';
 
 interface Props {
@@ -102,6 +103,15 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   };
 
   const isKo = language === 'ko';
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [mobileMenuOpen]);
 
   // State for form inputs
   const [academyName, setAcademyName] = useState('');
@@ -208,45 +218,49 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Floating Island Header */}
+      {/* Navigation - Floating Island Pill */}
       <div className="fixed top-6 left-0 w-full z-50 flex justify-center px-4">
-        <header className={`flex h-14 items-center justify-between gap-4 md:gap-8 px-6 backdrop-blur-2xl border rounded-full shadow-2xl transition-colors duration-500 max-w-7xl w-full ${
+        <header className={`flex h-14 items-center gap-4 md:gap-8 px-6 backdrop-blur-2xl border rounded-full shadow-2xl transition-colors duration-500 ${
           isNight 
-            ? 'bg-black/60 border-white/15 text-white shadow-black/40' 
+            ? 'bg-white/10 border-white/15 text-white shadow-black/40' 
             : 'bg-white/90 border-slate-200/90 text-slate-900 shadow-slate-200/60'
         }`}>
+          {/* Logo */}
           <a
             href="/"
             onClick={(e) => {
               e.preventDefault();
               window.location.href = isKo ? '/?lang=ko' : '/?lang=en';
             }}
-            className="flex items-center gap-[2px] text-xl font-bold tracking-tighter hover:opacity-80 transition-opacity cursor-pointer"
+            className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
             title={isKo ? '메인 랜딩페이지로 이동' : 'Back to Main Landing Page'}
           >
-            <span className={isNight ? 'text-white' : 'text-zinc-900'}>Chekki</span>
-            <span className="text-orange-500 font-extrabold">ai</span>
-            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ml-2 ${isNight ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-200/70 text-zinc-600'}`}>
-              {isKo ? '교육기관용' : 'Institutions'}
+            <span className="font-extrabold text-lg tracking-tight">
+              Chekki<span className="text-brand">AI</span>
+            </span>
+            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ml-1 ${isNight ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-200/70 text-zinc-600'}`}>
+              {isKo ? '교육기관용' : 'Schools'}
             </span>
           </a>
 
-          <div className="flex items-center gap-3">
-            {/* Language toggle */}
+          {/* Right Action Cluster */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* KO / EN LANGUAGE TOGGLE */}
             <button
               type="button"
               onClick={handleLangToggle}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
                 isNight 
                   ? 'bg-white/5 border-white/15 text-white/90 hover:bg-white/15' 
                   : 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200'
               }`}
+              title="Switch Language / 언어 변경"
             >
-              <Globe size={14} weight="bold" className="text-orange-500" />
+              <Globe size={14} weight="bold" className="text-brand" />
               <span>{language === 'ko' ? '한국어' : 'English'}</span>
             </button>
 
-            {/* Dark mode toggle */}
+            {/* Sun / Moon Theme Toggle */}
             <button
               type="button"
               onClick={() => setIsNight(!isNight)}
@@ -255,6 +269,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   ? 'border-white/10 hover:bg-white/10 text-white/70 hover:text-white' 
                   : 'border-slate-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900'
               }`}
+              title="Toggle Light / Dark Mode"
             >
               {isNight ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
             </button>
@@ -265,13 +280,46 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 e.preventDefault();
                 window.location.href = '/teacher';
               }}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-full transition-all active:scale-[0.97]"
+              className="group relative overflow-hidden items-center gap-2 px-4 py-1.5 bg-brand text-white font-bold rounded-full text-xs uppercase tracking-wider transition-transform duration-700 active:scale-[0.96] flex"
+            >
+              <span>{isKo ? '교사용 로그인' : 'Teacher Portal'}</span>
+            </a>
+          </div>
+
+          {/* Mobile Hamburger Morph */}
+          <button
+            className={`md:hidden relative w-9 h-9 flex items-center justify-center rounded-full outline-none ${
+              isNight ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900'
+            }`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={18} weight="bold" /> : <List size={18} weight="bold" />}
+          </button>
+        </header>
+      </div>
+
+      {/* Mobile Menu Modal */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-black/90 backdrop-blur-3xl flex flex-col items-center justify-center">
+          <nav className="flex flex-col items-center gap-6 text-xl font-bold text-white">
+            <button
+              type="button"
+              onClick={handleLangToggle}
+              className="px-4 py-2 rounded-full bg-brand text-white text-sm font-bold flex items-center gap-2 mb-4"
+            >
+              <Globe size={18} />
+              <span>{isKo ? '언어 변경 (Current: 한국어)' : 'Switch Language (Current: English)'}</span>
+            </button>
+            <a
+              href="/teacher"
+              onClick={() => setMobileMenuOpen(false)}
+              className="mt-4 px-8 py-3 rounded-full bg-brand text-white text-base font-bold shadow-lg"
             >
               {isKo ? '교사용 로그인' : 'Teacher Portal'}
             </a>
-          </div>
-        </header>
-      </div>
+          </nav>
+        </div>
+      )}
 
       {/* --- HERO SECTION (TEXT ON LEFT, IMAGE ON RIGHT FOR TEACHER LANDING) --- */}
       <section className="relative px-6 pt-28 md:pt-36 pb-12 md:pb-16 max-w-7xl mx-auto w-full flex-1 flex flex-col md:flex-row items-center justify-between gap-10 md:gap-12">
@@ -605,10 +653,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
               <div>
                 <h4 className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {isKo ? '1인 강사 14일 무제한 무료 체험' : '14-Day FREE Teacher Trial'}
+                  {isKo ? '강사 1인 + 원생 30명 14일 무제한 무료 체험' : '14-Day FREE Trial (1 Teacher + Up to 30 Students)'}
                 </h4>
                 <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                  {isKo ? '결제 수단 등록 없이 강사 1인 14일간 모든 채점 기능 체험' : 'No credit card required. Experience all AI autograding features.'}
+                  {isKo 
+                    ? '신용카드 등록 없이 14일간 무료. 학부모는 Chekki 모바일 앱(무료) 다운로드 후 6자리 코드로 연동됩니다.' 
+                    : 'No credit card required. 1 Teacher seat + 30 Students for 14 days. Parents download the free Chekki app to sync scans.'}
                 </p>
               </div>
             </div>
@@ -1169,13 +1219,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     </div>
                     <div>
                       <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block font-mono">
-                        {isKo ? '14일 무료 체험 신청 & 온보딩' : 'FREE TRIAL & ACADEMY SETUP'}
+                        {isKo ? '14일 무료 체험 신청 (신용카드 등록 X)' : '14-DAY FREE TRIAL (NO CREDIT CARD)'}
                       </span>
                       <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo ? '학원 정보 입력 & 14일 무료 시작' : '14-Day Free Trial & Academy Setup'}
+                        {isKo ? '강사 1인 + 원생 30명 14일 무료 시작' : '1 Teacher + 30 Students 14-Day Free Trial'}
                       </h3>
                       <p className="text-xs text-orange-500 font-bold">
-                        {isKo ? activePlan.nameKo : activePlan.nameEn}
+                        {isKo ? '학부모용 Chekki 모바일 앱 100% 무료 포함' : 'Includes 100% FREE Chekki Parent Mobile App'}
                       </p>
                     </div>
                   </div>

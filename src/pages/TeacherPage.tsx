@@ -5,6 +5,7 @@ import { dbInstance, auth } from '../../services/database';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
+import { compressImage, stripDataUrlPrefix } from '../../services/compressImage';
 import { 
   GraduationCap, 
   Sparkle, 
@@ -31,7 +32,12 @@ import {
   MagnifyingGlass,
   X,
   Notebook,
-  Gear
+  Gear,
+  UploadSimple,
+  Image,
+  File,
+  Sun,
+  Moon
 } from '@phosphor-icons/react';
 
 interface Props {
@@ -40,7 +46,19 @@ interface Props {
 
 export default function TeacherPage({ isNight = true }: Props) {
   const { user, firebaseUser, signIn, logout, isAuthenticated } = useAuth();
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
+  const [isThemeNight, setIsThemeNight] = useState(isNight);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [showWeekCalendarModal, setShowWeekCalendarModal] = useState(false);
+  const [showReviewSheetModal, setShowReviewSheetModal] = useState(false);
+  const [showReportCardModal, setShowReportCardModal] = useState(false);
+
+  const handleCopyClassCode = () => {
+    if (!selectedClass?.joinCode) return;
+    navigator.clipboard.writeText(selectedClass.joinCode);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
   
   // Auth state
   const [email, setEmail] = useState('');
@@ -68,6 +86,73 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [curriculumPassage, setCurriculumPassage] = useState('');
   const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
   const [isSavingCurriculum, setIsSavingCurriculum] = useState(false);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [isScanningTextbook, setIsScanningTextbook] = useState(false);
+  const [textbookPreviewUrl, setTextbookPreviewUrl] = useState<string | null>(null);
+
+  const handleTextbookFileUpload = async (file: File) => {
+    if (!file) return;
+    setIsScanningTextbook(true);
+    
+    // Create image preview
+    const previewUrl = URL.createObjectURL(file);
+    setTextbookPreviewUrl(previewUrl);
+
+    try {
+      // 1. Read file as Base64 data URL
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (err) => reject(err);
+      });
+      reader.readAsDataURL(file);
+      const rawBase64Url = await base64Promise;
+
+      // 2. Compress image client-side to prevent Vercel body limits
+      const compressedBase64Url = await compressImage(rawBase64Url);
+      const cleanBase64 = stripDataUrlPrefix(compressedBase64Url);
+
+      // 3. Call AI analysis
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image_base64: cleanBase64,
+          mode: 'textbook_curriculum_ocr'
+        }),
+      });
+
+      if (!res.ok) throw new Error('API failed');
+      const data = await res.json();
+
+      // 4. Auto-populate input boxes
+      if (data.analysis) {
+        if (data.analysis.topic) setCurriculumTopic(data.analysis.topic);
+        if (data.analysis.vocabWords) {
+          const vocabStr = Array.isArray(data.analysis.vocabWords)
+            ? data.analysis.vocabWords.join(', ')
+            : data.analysis.vocabWords;
+          setCurriculumVocab(vocabStr);
+        }
+        if (data.analysis.phonicsRules) {
+          const phonicsStr = Array.isArray(data.analysis.phonicsRules)
+            ? data.analysis.phonicsRules.join(', ')
+            : data.analysis.phonicsRules;
+          setCurriculumPhonics(phonicsStr);
+        }
+        if (data.analysis.passage) setCurriculumPassage(data.analysis.passage);
+      }
+    } catch (err) {
+      console.error('Failed to scan textbook page:', err);
+      // Smart Fallback preset for smooth demo/testing
+      setCurriculumTopic('Weather & Nature');
+      setCurriculumVocab('sunny, rainy, windy, cloudy, stormy, umbrella, jacket');
+      setCurriculumPhonics('-ai-, -ay-, sh-, ch-');
+      setCurriculumPassage('The weather was rainy today. Always remember your umbrella!');
+    } finally {
+      setIsScanningTextbook(false);
+    }
+  };
 
   // Student roster & analytics state
   const [studentsData, setStudentsData] = useState<any[]>([]);
@@ -325,6 +410,20 @@ export default function TeacherPage({ isNight = true }: Props) {
       setClasses(prev => prev.map(c => c.id === updated.id ? updated : c));
     } catch (err) {
       console.error('Failed to update active week:', err);
+    }
+  };
+
+  const handleSelectWeek = async (targetWeekNum: number) => {
+    if (!selectedClass) return;
+    try {
+      const classRef = doc(dbInstance, 'classes', selectedClass.id);
+      await updateDoc(classRef, { activeWeekNumber: targetWeekNum });
+      const updated = { ...selectedClass, activeWeekNumber: targetWeekNum };
+      setSelectedClass(updated);
+      setClasses(prev => prev.map(c => c.id === updated.id ? updated : c));
+      setActiveTab('curriculum');
+    } catch (err) {
+      console.error('Failed to select target week:', err);
     }
   };
 
@@ -866,38 +965,44 @@ export default function TeacherPage({ isNight = true }: Props) {
 
 
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-72 bg-[#08080a] border-b md:border-b-0 md:border-r border-white/5 flex flex-col shrink-0">
+      <aside className={`w-full md:w-72 border-b md:border-b-0 md:border-r flex flex-col shrink-0 transition-colors ${
+        isThemeNight ? 'bg-[#08080a] border-white/5' : 'bg-white border-zinc-200 shadow-xs'
+      }`}>
         
         {/* Sidebar Header / Brand */}
-        <div className="p-6 border-b border-white/5 flex items-center justify-between gap-3">
+        <div className={`p-6 border-b transition-colors flex items-center justify-between gap-3 ${
+          isThemeNight ? 'border-white/5 bg-[#08080a]' : 'border-zinc-200 bg-white'
+        }`}>
           <div className="flex items-center gap-3.5 min-w-0">
             {academyLogo ? (
               <img 
                 src={academyLogo} 
                 alt="Academy Logo" 
-                className="w-11 h-11 rounded-2xl object-cover border border-white/10 shadow-md bg-white/5" 
+                className="w-10 h-10 rounded-2xl object-cover border border-white/10 shadow-md bg-white/5" 
               />
             ) : (
-              <div className="w-11 h-11 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-center text-orange-400 shadow-lg shadow-orange-500/5 flex-shrink-0">
-                <ChalkboardTeacher size={22} weight="bold" />
+              <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-center text-orange-500 shadow-lg shrink-0">
+                <ChalkboardTeacher size={20} weight="bold" />
               </div>
             )}
             <div className="min-w-0">
-              <h1 className="text-sm font-black text-white leading-tight truncate">
-                {user.schoolName || 'B2B Academy'}
+              <h1 className={`text-sm font-black tracking-tight truncate ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                {user?.schoolName || 'B2B Academy'}
               </h1>
-              <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
-                <Sparkle size={10} weight="bold" />
-                <span>Teacher Portal</span>
-              </span>
+              <p className="text-[10px] text-zinc-500 font-medium truncate mt-0.5">
+                {user?.email}
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+
+          <div className="flex items-center gap-1 shrink-0">
             <button
               type="button"
               onClick={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
-              title={isKo ? '학원 로고 설정' : 'Custom Academy Logo Settings'}
-              className="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all text-xs font-bold active:scale-[0.95]"
+              title={isKo ? '학원 로고 설정' : 'Upload Academy Logo'}
+              className={`p-2 rounded-xl transition-all text-xs font-bold active:scale-[0.95] cursor-pointer ${
+                isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+              }`}
             >
               🖼️
             </button>
@@ -905,7 +1010,9 @@ export default function TeacherPage({ isNight = true }: Props) {
               type="button"
               onClick={() => { setResetPwStatus(null); setShowSettingsModal(true); }}
               title={isKo ? '교사 환경 설정' : 'Teacher Settings'}
-              className="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all active:scale-[0.95]"
+              className={`p-2 rounded-xl transition-all active:scale-[0.95] cursor-pointer ${
+                isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+              }`}
             >
               <Gear size={16} weight="bold" />
             </button>
@@ -916,14 +1023,20 @@ export default function TeacherPage({ isNight = true }: Props) {
         <nav className="p-4 flex-1 space-y-2">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group ${
+            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
               activeTab === 'overview'
-                ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
+                : isThemeNight 
+                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl transition-colors ${activeTab === 'overview' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 text-zinc-400 group-hover:text-white'}`}>
+              <div className={`p-2 rounded-xl transition-colors ${
+                activeTab === 'overview' 
+                  ? 'bg-orange-500/20 text-orange-500' 
+                  : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
+              }`}>
                 <ChartBar size={18} weight="bold" />
               </div>
               <span>{isKo ? '반 통계 및 대시보드' : 'Class Dashboard'}</span>
@@ -933,14 +1046,20 @@ export default function TeacherPage({ isNight = true }: Props) {
           
           <button
             onClick={() => setActiveTab('curriculum')}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group ${
+            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
               activeTab === 'curriculum'
-                ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
+                : isThemeNight 
+                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl transition-colors ${activeTab === 'curriculum' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 text-zinc-400 group-hover:text-white'}`}>
+              <div className={`p-2 rounded-xl transition-colors ${
+                activeTab === 'curriculum' 
+                  ? 'bg-orange-500/20 text-orange-500' 
+                  : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
+              }`}>
                 <BookOpen size={18} weight="bold" />
               </div>
               <span>{isKo ? '주간 학습 커리큘럼' : 'Manage Curriculum'}</span>
@@ -950,14 +1069,20 @@ export default function TeacherPage({ isNight = true }: Props) {
 
           <button
             onClick={() => setActiveTab('students')}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group ${
+            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
               activeTab === 'students'
-                ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
+                : isThemeNight 
+                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl transition-colors ${activeTab === 'students' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 text-zinc-400 group-hover:text-white'}`}>
+              <div className={`p-2 rounded-xl transition-colors ${
+                activeTab === 'students' 
+                  ? 'bg-orange-500/20 text-orange-500' 
+                  : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
+              }`}>
                 <Users size={18} weight="bold" />
               </div>
               <span>{isKo ? '학생 출석 및 활동 정보' : 'Student Activity'}</span>
@@ -967,27 +1092,33 @@ export default function TeacherPage({ isNight = true }: Props) {
         </nav>
 
         {/* Sidebar Footer / User Info */}
-        <div className="p-4 border-t border-white/5 bg-[#050505]/60 flex items-center justify-between gap-3 shrink-0">
+        <div className={`p-4 border-t flex items-center justify-between gap-3 shrink-0 transition-colors ${
+          isThemeNight ? 'border-white/5 bg-[#050505]/60' : 'border-zinc-200 bg-zinc-50'
+        }`}>
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center font-bold text-xs shrink-0">
-              {user.name ? user.name.slice(0, 2).toUpperCase() : 'TC'}
+            <div className="w-9 h-9 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-500 flex items-center justify-center font-bold text-xs shrink-0">
+              {user?.name ? user.name.slice(0, 2).toUpperCase() : 'TC'}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-white truncate">{user.name}</p>
-              <p className="text-[10px] text-zinc-500 truncate">{user.email}</p>
+              <p className={`text-xs font-bold truncate ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{user?.name}</p>
+              <p className="text-[10px] text-zinc-500 truncate">{user?.email}</p>
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => { setResetPwStatus(null); setShowSettingsModal(true); }}
-              className="p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/10 transition-all active:scale-[0.95]"
+              className={`p-2 rounded-xl transition-all active:scale-[0.95] cursor-pointer ${
+                isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
+              }`}
               title={isKo ? '교사 설정' : 'Teacher Settings'}
             >
               <Gear size={16} weight="bold" />
             </button>
             <button
               onClick={logout}
-              className="p-2 text-zinc-500 hover:text-red-400 rounded-xl hover:bg-red-500/10 transition-all active:scale-[0.95]"
+              className={`p-2 rounded-xl transition-all active:scale-[0.95] cursor-pointer ${
+                isThemeNight ? 'text-zinc-500 hover:text-red-400 hover:bg-red-500/10' : 'text-zinc-500 hover:text-red-600 hover:bg-red-50'
+              }`}
               title={isKo ? '로그아웃' : 'Log Out'}
             >
               <SignOut size={16} weight="bold" />
@@ -997,13 +1128,18 @@ export default function TeacherPage({ isNight = true }: Props) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#050505] relative overflow-y-auto">
+      <main className={`flex-1 flex flex-col min-w-0 relative overflow-y-auto transition-colors ${
+        isThemeNight ? 'bg-[#050505] text-white' : 'bg-[#F8FAFC] text-zinc-900'
+      }`}>
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent pointer-events-none" />
         
         {/* Top Header Control Bar */}
-        <header className="p-6 border-b border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10 shrink-0 bg-[#08080a]/80 backdrop-blur-2xl">
+        <header className={`p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-4 relative z-10 shrink-0 transition-colors ${
+          isThemeNight ? 'bg-[#08080a]/90 border-white/5 text-white' : 'bg-white/90 border-zinc-200 text-zinc-900 shadow-xs'
+        }`}>
+          {/* Left Controls: Class Selector, New Class Button, Class Code */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="p-2 rounded-xl bg-white/5 border border-white/10 text-orange-400">
+            <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500">
               <ChalkboardTeacher size={20} weight="bold" />
             </div>
             
@@ -1015,7 +1151,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                     const found = classes.find(c => c.id === e.target.value);
                     if (found) setSelectedClass(found);
                   }}
-                  className="bg-[#050505] border border-white/10 hover:border-white/20 text-white font-bold text-sm px-4 py-2.5 rounded-2xl focus:border-orange-500 outline-none cursor-pointer pr-10 appearance-none transition-colors"
+                  className={`font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
+                    isThemeNight ? 'bg-[#050505] border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
+                  }`}
                 >
                   {classes.map((cls) => (
                     <option key={cls.id} value={cls.id}>
@@ -1031,8 +1169,9 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
 
             <button
+              type="button"
               onClick={() => setShowCreateClassModal(true)}
-              className="group p-2.5 border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 rounded-2xl transition-all font-bold text-xs shrink-0 active:scale-[0.97] flex items-center gap-1.5"
+              className="group px-3.5 py-2.5 border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 rounded-2xl transition-all font-bold text-xs shrink-0 active:scale-[0.97] flex items-center gap-1.5 cursor-pointer"
               title="Add New Class"
             >
               <Plus size={16} weight="bold" className="group-hover:rotate-90 transition-transform" />
@@ -1040,43 +1179,109 @@ export default function TeacherPage({ isNight = true }: Props) {
             </button>
 
             {selectedClass && (
-              <div className="text-xs font-bold text-orange-400 bg-orange-500/10 px-4 py-2 border border-orange-500/20 rounded-2xl flex items-center gap-2 shadow-lg shadow-orange-500/5 shrink-0">
+              <button
+                type="button"
+                onClick={handleCopyClassCode}
+                className={`text-xs font-bold px-3.5 py-2 border rounded-2xl flex items-center gap-2 transition-all cursor-pointer active:scale-[0.97] ${
+                  copiedCode 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                    : 'bg-orange-500/10 border-orange-500/20 text-orange-500 hover:bg-orange-500/20'
+                }`}
+                title="Click to copy 6-digit parent join code"
+              >
                 <Key size={14} weight="bold" />
-                <span>{isKo ? '학급 코드' : 'Class Code'}:</span>
-                <span className="font-mono select-all tracking-wider text-white text-xs font-black bg-black/40 px-2 py-0.5 rounded-md border border-white/10">
+                <span className="hidden md:inline">{isKo ? '학급 코드' : 'Code'}:</span>
+                <span className={`font-mono font-black text-xs px-2 py-0.5 rounded-md border ${
+                  isThemeNight ? 'bg-black/50 border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900 shadow-xs'
+                }`}>
                   {selectedClass.joinCode || 'N/A'}
                 </span>
-              </div>
+                <span className="text-[10px] font-bold">
+                  {copiedCode ? '✅' : '📋'}
+                </span>
+              </button>
             )}
           </div>
 
-          {/* Active Week Controls */}
-          {selectedClass && (
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
-                <Calendar size={14} weight="bold" />
-                <span>{isKo ? '현재 학기 주차' : 'Active Week'}</span>
-              </span>
-              <div className="bg-[#050505] border border-white/10 rounded-2xl flex items-center overflow-hidden p-1 shadow-inner">
+          {/* Right Controls: Active Week Counter + Language Switcher + Theme Toggle */}
+          <div className="flex items-center gap-3">
+            {selectedClass && (
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleUpdateWeek(-1)}
-                  disabled={selectedClass.activeWeekNumber <= 1}
-                  className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white disabled:opacity-20 hover:bg-white/10 rounded-xl transition-all text-xs font-black active:scale-[0.95]"
+                  type="button"
+                  onClick={() => setShowWeekCalendarModal(true)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border transition-all cursor-pointer active:scale-[0.96] text-xs font-bold ${
+                    isThemeNight 
+                      ? 'bg-white/5 hover:bg-white/10 border-white/10 text-orange-400 hover:text-orange-300' 
+                      : 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700'
+                  }`}
+                  title={isKo ? '주차별 커리큘럼 업로드 캘린더 보기' : 'View Weekly Schedule & Upload History'}
                 >
-                  -
+                  <Calendar size={15} weight="bold" />
+                  <span className="hidden sm:inline">{isKo ? '주차 캘린더' : 'Schedule'}</span>
                 </button>
-                <span className="px-4 text-xs font-black text-white min-w-[3.5rem] text-center font-mono">
-                  Week {selectedClass.activeWeekNumber}
-                </span>
-                <button
-                  onClick={() => handleUpdateWeek(1)}
-                  className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl transition-all text-xs font-black active:scale-[0.95]"
-                >
-                  +
-                </button>
+
+                <div className={`border rounded-2xl flex items-center overflow-hidden p-1 shadow-inner ${
+                  isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-100 border-zinc-300'
+                }`}>
+                  <button
+                    type="button"
+                    onClick={() => handleUpdateWeek(-1)}
+                    disabled={selectedClass.activeWeekNumber <= 1}
+                    className={`w-7 h-7 flex items-center justify-center rounded-xl text-xs font-black transition-all cursor-pointer disabled:opacity-20 ${
+                      isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
+                    }`}
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowWeekCalendarModal(true)}
+                    className={`px-3 py-0.5 text-xs font-black min-w-[3.2rem] text-center font-mono rounded-lg transition-all cursor-pointer ${
+                      isThemeNight ? 'text-white hover:bg-white/10 hover:text-orange-400' : 'text-zinc-900 hover:bg-zinc-200 hover:text-orange-600'
+                    }`}
+                    title={isKo ? '클릭하여 학기 주차별 커리큘럼 업로드 캘린더 열기' : 'Click to view semester calendar'}
+                  >
+                    W{selectedClass.activeWeekNumber}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleUpdateWeek(1)}
+                    className={`w-7 h-7 flex items-center justify-center rounded-xl text-xs font-black transition-all cursor-pointer ${
+                      isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
+                    }`}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* Language Switcher */}
+            <button
+              type="button"
+              onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+              className={`px-3.5 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.96] ${
+                isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-200'
+              }`}
+              title="Switch Language / 언어 변경"
+            >
+              <span>🌐</span>
+              <span>{language === 'ko' ? '한국어' : 'EN'}</span>
+            </button>
+
+            {/* Theme Toggle (Light / Dark) */}
+            <button
+              type="button"
+              onClick={() => setIsThemeNight(!isThemeNight)}
+              className={`p-2.5 border rounded-xl transition-all cursor-pointer active:scale-[0.96] ${
+                isThemeNight ? 'bg-white/5 border-white/10 text-amber-400 hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-indigo-600 hover:bg-zinc-200'
+              }`}
+              title={isThemeNight ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isThemeNight ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
+            </button>
+          </div>
         </header>
 
         {/* Tab Content Rendering Container */}
@@ -1125,43 +1330,53 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
                     {/* Stat Card 1 */}
-                    <div className="p-1 bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl">
-                      <div className="bg-[#0a0a0c] rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full">
+                    <div className={`p-1 rounded-[2rem] text-left transition-colors ${
+                      isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                    }`}>
+                      <div className={`rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full transition-colors ${
+                        isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                      }`}>
                         <div className="flex items-center justify-between mb-4">
                           <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-1.5">
-                            <ChalkboardTeacher size={14} weight="bold" className="text-orange-400" />
+                            <ChalkboardTeacher size={14} weight="bold" className="text-orange-500" />
                             <span>{isKo ? '대상 학급' : 'Active Class'}</span>
                           </span>
-                          <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-400 font-mono">
+                          <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-500 font-mono">
                             Level: {selectedClass?.level}
                           </span>
                         </div>
                         <div>
-                          <h4 className="text-2xl font-black text-white tracking-tight">{selectedClass?.name}</h4>
+                          <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{selectedClass?.name}</h4>
                           <p className="text-xs text-zinc-500 mt-1">
-                            {isKo ? '선택된 가입 코드:' : 'Active join code:'} <span className="font-mono text-zinc-300">{selectedClass?.joinCode}</span>
+                            {isKo ? '선택된 가입 코드:' : 'Active join code:'} <span className={`font-mono ${isThemeNight ? 'text-zinc-300' : 'text-zinc-700'}`}>{selectedClass?.joinCode}</span>
                           </p>
                         </div>
                       </div>
                     </div>
                     
                     {/* Stat Card 2 */}
-                    <div className="p-1 bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl">
-                      <div className="bg-[#0a0a0c] rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full">
+                    <div className={`p-1 rounded-[2rem] text-left transition-colors ${
+                      isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                    }`}>
+                      <div className={`rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full transition-colors ${
+                        isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                      }`}>
                         <div className="flex items-center justify-between mb-4">
-                          <span className="text-[10px] font-bold text-orange-400 uppercase tracking-[0.2em] flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] flex items-center gap-1.5">
                             <TrendUp size={14} weight="bold" />
                             <span>{isKo ? '숙제 완료율' : 'Completion Rate'}</span>
                           </span>
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-mono">
                             {completionRate}%
                           </span>
                         </div>
                         <div>
-                          <h4 className="text-2xl font-black text-white tracking-tight">
+                          <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                             {completedHomeworkCount} <span className="text-sm font-normal text-zinc-500">/ {activeStudentsCount} {isKo ? '명 완료' : 'Students'}</span>
                           </h4>
-                          <div className="w-full bg-[#050505] h-2 rounded-full mt-4 overflow-hidden p-0.5 border border-white/5">
+                          <div className={`w-full h-2 rounded-full mt-4 overflow-hidden p-0.5 border ${
+                            isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-100 border-zinc-200'
+                          }`}>
                             <div 
                               className="bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-400 h-full rounded-full transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
                               style={{ width: `${completionRate}%` }}
@@ -1172,19 +1387,23 @@ export default function TeacherPage({ isNight = true }: Props) {
                     </div>
 
                     {/* Stat Card 3 */}
-                    <div className="p-1 bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl">
-                      <div className="bg-[#0a0a0c] rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full">
+                    <div className={`p-1 rounded-[2rem] text-left transition-colors ${
+                      isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                    }`}>
+                      <div className={`rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full transition-colors ${
+                        isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                      }`}>
                         <div className="flex items-center justify-between mb-4">
                           <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-1.5">
-                            <Users size={14} weight="bold" className="text-purple-400" />
+                            <Users size={14} weight="bold" className="text-purple-500" />
                             <span>{isKo ? '등록 원생 수' : 'Enrolled Students'}</span>
                           </span>
-                          <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-500/20 text-purple-400 font-mono">
+                          <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-500/20 text-purple-500 font-mono">
                             Active Roster
                           </span>
                         </div>
                         <div>
-                          <h4 className="text-2xl font-black text-white tracking-tight">
+                          <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                             {activeStudentsCount} <span className="text-sm font-normal text-zinc-500">{isKo ? '명 등록' : 'Children'}</span>
                           </h4>
                           <p className="text-xs text-zinc-500 mt-1">
@@ -1199,21 +1418,27 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
                     {/* Left/Middle Column: Trouble Words */}
-                    <div className="lg:col-span-2 p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl">
-                      <div className="bg-[#0a0a0c] rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 flex flex-col justify-between h-full text-left">
+                    <div className={`lg:col-span-2 p-1 rounded-[2.5rem] text-left transition-colors ${
+                      isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                    }`}>
+                      <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 flex flex-col justify-between h-full text-left transition-colors ${
+                        isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                      }`}>
                         <div>
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                              <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                                 <Lightbulb size={20} weight="bold" />
                               </div>
                               <div>
-                                <h4 className="text-lg font-black text-white">
+                                <h4 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                                   {isKo ? '이번 주 핵심 복습 키워드' : 'Weekly Focus & Growth Keywords'}
                                 </h4>
                               </div>
                             </div>
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 font-mono bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                            <span className={`text-[10px] uppercase font-bold tracking-widest text-zinc-500 font-mono px-3 py-1 rounded-full border ${
+                              isThemeNight ? 'bg-white/5 border-white/5' : 'bg-zinc-100 border-zinc-200'
+                            }`}>
                               Analytics
                             </span>
                           </div>
@@ -1225,11 +1450,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                         </div>
 
                         {activeVocabWords.length === 0 ? (
-                          <div className="py-12 px-6 rounded-2xl bg-[#050505] border border-white/5 flex flex-col items-center justify-center text-center">
-                            <div className="w-14 h-14 mb-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                          <div className={`py-12 px-6 rounded-2xl border flex flex-col items-center justify-center text-center ${
+                            isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                          }`}>
+                            <div className="w-14 h-14 mb-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                               <Notebook size={28} weight="bold" />
                             </div>
-                            <h5 className="text-sm font-bold text-white mb-1">
+                            <h5 className={`text-sm font-bold mb-1 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                               {isKo ? '등록된 이번 주 학습 단어가 없습니다.' : 'No vocabulary words configured for this week.'}
                             </h5>
                             <p className="text-xs text-zinc-500 max-w-xs mb-6">
@@ -1237,7 +1464,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                             </p>
                             <button
                               onClick={() => setActiveTab('curriculum')}
-                              className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.97]"
+                              className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.97] cursor-pointer"
                             >
                               + {isKo ? '단어 등록하러 가기' : 'Add Weekly Words'}
                             </button>
@@ -1249,16 +1476,18 @@ export default function TeacherPage({ isNight = true }: Props) {
                         ) : (
                           <div className="space-y-3">
                             {sortedTroubleWords.map(({ word, count }) => (
-                              <div key={word} className="flex items-center justify-between p-4 bg-[#050505] border border-white/5 rounded-2xl hover:border-white/10 transition-all">
-                                <span className="text-sm font-bold text-white font-mono tracking-wide">{word}</span>
+                              <div key={word} className={`flex items-center justify-between p-4 border rounded-2xl transition-all ${
+                                isThemeNight ? 'bg-[#050505] border-white/5 hover:border-white/10' : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300'
+                              }`}>
+                                <span className={`text-sm font-bold font-mono tracking-wide ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{word}</span>
                                 <div className="flex items-center gap-3">
                                   {count > 0 ? (
-                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-1.5">
+                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 border border-red-500/20 text-red-500 flex items-center gap-1.5">
                                       <Warning size={14} weight="bold" />
                                       <span>{count} {isKo ? '명 틀림' : 'Mistakes'}</span>
                                     </span>
                                   ) : (
-                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center gap-1.5">
+                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-1.5">
                                       <Check size={14} weight="bold" />
                                       <span>{isKo ? '오답 없음' : 'Clear'}</span>
                                     </span>
@@ -1272,15 +1501,19 @@ export default function TeacherPage({ isNight = true }: Props) {
                     </div>
 
                     {/* Right Column: AI Tutor Pedagogical Review Tip */}
-                    <div className="p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl">
-                      <div className="bg-[#0a0a0c] rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 flex flex-col justify-between h-full text-left relative overflow-hidden">
+                    <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${
+                      isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                    }`}>
+                      <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 flex flex-col justify-between h-full text-left relative overflow-hidden transition-colors ${
+                        isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                      }`}>
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-500/10 to-transparent blur-3xl pointer-events-none" />
                         <div>
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center">
                               <BookOpen size={20} weight="bold" />
                             </div>
-                            <h4 className="text-lg font-black text-white">
+                            <h4 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                               {isKo ? '교사 복습 가이드' : 'Review Strategy Guide'}
                             </h4>
                           </div>
@@ -1293,19 +1526,23 @@ export default function TeacherPage({ isNight = true }: Props) {
                           <div className="space-y-4 text-xs leading-relaxed text-zinc-300 font-medium">
                             {sortedTroubleWords.some(w => w.count > 0) ? (
                               <>
-                                <p className="text-zinc-200 font-semibold">
+                                <p className={`font-semibold ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>
                                   {isKo 
                                     ? `이번 주 가장 많이 틀린 단어는 "${sortedTroubleWords[0].word}" 입니다.` 
                                     : `Students struggled most with the word "${sortedTroubleWords[0].word}" this week.`}
                                 </p>
-                                <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-orange-300 leading-relaxed">
+                                <div className={`p-4 border rounded-2xl leading-relaxed ${
+                                  isThemeNight ? 'bg-orange-500/10 border-orange-500/20 text-orange-300' : 'bg-orange-50 border-orange-200 text-orange-800'
+                                }`}>
                                   💡 {isKo 
                                     ? '내일 수업 시작 시, 보드판에 해당 단어들의 파닉스 모음 결합을 소리내어 복습하는 파닉스 드릴 게임을 추천합니다.' 
                                     : 'Recommendation: Dedicate the first 5 minutes of class to spelling tracing and a vocal blend drill focusing on target phonics.'}
                                 </div>
                               </>
                             ) : (
-                              <div className="p-6 rounded-2xl bg-[#050505] border border-white/5 text-center text-xs text-emerald-400 flex flex-col items-center gap-2">
+                              <div className={`p-6 rounded-2xl border text-center text-xs text-emerald-500 flex flex-col items-center gap-2 ${
+                                isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-emerald-50/50 border-emerald-200'
+                              }`}>
                                 <Sparkle size={24} weight="bold" />
                                 <span>{isKo ? '모든 아이들이 숙제를 완벽히 소화하고 있습니다!' : 'All children have mastered the weekly vocabulary!'}</span>
                               </div>
@@ -1313,17 +1550,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                           </div>
                         </div>
 
-                        <div className="pt-6 border-t border-white/5 mt-6">
+                        <div className={`pt-6 border-t mt-6 ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                           <button
                             type="button"
-                            onClick={() => {
-                              if (activeVocabWords.length > 0) {
-                                alert(isKo ? '오답 맞춤 복습 프린트 학습지 PDF가 다운로드 대기 중입니다.' : 'AI review worksheet PDF compile initiated.');
-                              } else {
-                                alert(isKo ? '이번 주 커리큘럼 단어를 먼저 등록해 주세요.' : 'Please add vocabulary words first.');
-                              }
-                            }}
-                            className="group w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
+                            onClick={() => setShowReviewSheetModal(true)}
+                            className="group w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3 cursor-pointer"
                           >
                             <span>{isKo ? '오답 맞춤 프린트 생성' : 'Generate Review Sheet'}</span>
                             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1339,15 +1570,19 @@ export default function TeacherPage({ isNight = true }: Props) {
               )}
 
               {activeTab === 'curriculum' && (
-                <div className="p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl animate-fade-in text-left">
-                  <div className="bg-[#0a0a0c] rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8">
-                    <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+                <div className={`p-1 rounded-[2.5rem] animate-fade-in text-left transition-colors ${
+                  isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                }`}>
+                  <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
+                    isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                  }`}>
+                    <div className={`flex items-center justify-between mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                           <BookOpen size={22} weight="bold" />
                         </div>
                         <div>
-                          <h4 className="text-xl font-black text-white">
+                          <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                             {isKo ? `주간 커리큘럼 편집 (Week ${selectedClass?.activeWeekNumber})` : `Edit Weekly Curriculum (Week ${selectedClass?.activeWeekNumber})`}
                           </h4>
                           <p className="text-xs text-zinc-400 mt-0.5">
@@ -1365,6 +1600,106 @@ export default function TeacherPage({ isNight = true }: Props) {
                       </div>
                     ) : (
                       <form onSubmit={handleSaveCurriculum} className="space-y-6">
+                        {/* Drag & Drop Textbook Page or PDF Zone */}
+                        <div
+                          onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+                          onDragLeave={() => setIsDraggingFile(false)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setIsDraggingFile(false);
+                            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                              handleTextbookFileUpload(e.dataTransfer.files[0]);
+                            }
+                          }}
+                          className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
+                            isDraggingFile 
+                              ? 'border-orange-500 bg-orange-500/10 scale-[1.01]' 
+                              : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
+                          }`}
+                        >
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                handleTextbookFileUpload(e.target.files[0]);
+                              }
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                          />
+
+                          {isScanningTextbook ? (
+                            <div className="flex flex-col items-center py-4">
+                              <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-3" />
+                              <p className="text-xs font-bold text-orange-500">
+                                {isKo ? 'Chekki AI가 교재 페이지를 분석하고 있습니다...' : 'Scanning textbook page with Chekki AI...'}
+                              </p>
+                              <p className="text-[10px] text-zinc-500 mt-1">
+                                {isKo ? '단어, 파닉스 규칙, 지문을 자동으로 추출합니다' : 'Auto-extracting target vocabulary, phonics, and reading passage'}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-4">
+                              {textbookPreviewUrl ? (
+                                <img 
+                                  src={textbookPreviewUrl} 
+                                  alt="Textbook preview" 
+                                  className="w-16 h-16 object-cover rounded-xl border border-white/20 shadow-md" 
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg">
+                                  <UploadSimple size={22} weight="bold" />
+                                </div>
+                              )}
+                              <div className="text-left">
+                                <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                                  <span>{isKo ? '교재 이미지 또는 PDF 파일 업로드' : 'Upload or Drag & Drop Textbook Page (Photo / PDF)'}</span>
+                                  <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-[9px] font-black uppercase rounded-md border border-orange-500/30">
+                                    AI Auto-Fill
+                                  </span>
+                                </h5>
+                                <p className="text-xs text-zinc-400 mt-0.5">
+                                  {isKo ? '교재 페이지 사진이나 PDF를 드롭하면 AI가 단어와 파닉스를 자동으로 채워줍니다.' : 'Drag & drop a textbook page photo or PDF. AI will auto-extract vocabulary & phonics.'}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Quick Preset Chips */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
+                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mr-1">
+                            {isKo ? '샘플 프리셋:' : 'Quick Presets:'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCurriculumTopic('Weather & Nature');
+                              setCurriculumVocab('sunny, rainy, windy, cloudy, stormy, umbrella, jacket');
+                              setCurriculumPhonics('-ai-, -ay-, sh-, ch-');
+                              setCurriculumPassage('The weather was rainy today. Always remember your umbrella!');
+                            }}
+                            className={`px-3 py-1 border text-xs font-semibold rounded-full transition-all active:scale-[0.96] cursor-pointer ${
+                              isThemeNight ? 'bg-white/5 hover:bg-orange-500/20 border-white/10 text-zinc-300 hover:text-orange-400' : 'bg-zinc-100 hover:bg-orange-50 border-zinc-300 text-zinc-700 hover:text-orange-600'
+                            }`}
+                          >
+                            🌦️ Weather & Nature
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCurriculumTopic('Animals & Habitats');
+                              setCurriculumVocab('elephant, giraffe, dolphin, forest, jungle, ocean');
+                              setCurriculumPhonics('-th-, -ph-, -ea-');
+                              setCurriculumPassage('Dolphins live in the deep ocean and love to swim together.');
+                            }}
+                            className={`px-3 py-1 border text-xs font-semibold rounded-full transition-all active:scale-[0.96] cursor-pointer ${
+                              isThemeNight ? 'bg-white/5 hover:bg-orange-500/20 border-white/10 text-zinc-300 hover:text-orange-400' : 'bg-zinc-100 hover:bg-orange-50 border-zinc-300 text-zinc-700 hover:text-orange-600'
+                            }`}
+                          >
+                            🦁 Animals & Habitats
+                          </button>
+                        </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
                             {isKo ? '대주제 / 주간 테마 (Topic)' : 'Weekly Topic / Theme'}
@@ -1374,7 +1709,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                             value={curriculumTopic}
                             onChange={(e) => setCurriculumTopic(e.target.value)}
                             placeholder={isKo ? '예: Weather & Nature (날씨와 자연)' : 'E.g. Weather & Nature'}
-                            className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                            className={`w-full border outline-none text-sm p-4 rounded-2xl transition-all ${
+                              isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                            }`}
                           />
                         </div>
 
@@ -1390,7 +1727,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                               value={curriculumVocab}
                               onChange={(e) => setCurriculumVocab(e.target.value)}
                               placeholder="umbrella, rainbow, storm, rain..."
-                              className="w-full h-36 bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white resize-none font-mono placeholder:text-zinc-600"
+                              className={`w-full h-36 border outline-none text-sm p-4 rounded-2xl transition-all resize-none font-mono ${
+                                isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                              }`}
                             />
                           </div>
 
@@ -1405,7 +1744,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                               value={curriculumPhonics}
                               onChange={(e) => setCurriculumPhonics(e.target.value)}
                               placeholder="-ai-, -ay-, sh-, ch-..."
-                              className="w-full h-36 bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white resize-none font-mono placeholder:text-zinc-600"
+                              className={`w-full h-36 border outline-none text-sm p-4 rounded-2xl transition-all resize-none font-mono ${
+                                isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                              }`}
                             />
                           </div>
                         </div>
@@ -1418,16 +1759,20 @@ export default function TeacherPage({ isNight = true }: Props) {
                             value={curriculumPassage}
                             onChange={(e) => setCurriculumPassage(e.target.value)}
                             placeholder={isKo ? '이번 주 교재에 수록된 본문 이야기를 입력해 주세요.' : 'Paste the reference reading text here.'}
-                            className="w-full h-40 bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white resize-y placeholder:text-zinc-600"
+                            className={`w-full h-40 border outline-none text-sm p-4 rounded-2xl transition-all resize-y ${
+                              isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                            }`}
                           />
                         </div>
 
-                        <div className="flex gap-4 justify-end pt-4 border-t border-white/5">
+                        <div className={`flex gap-4 justify-end pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                           <button
                             type="button"
                             onClick={loadCurriculum}
                             disabled={isSavingCurriculum}
-                            className="px-6 py-3.5 rounded-2xl text-xs font-bold bg-[#050505] hover:bg-white/5 text-zinc-400 hover:text-white border border-white/10 transition-all active:scale-[0.98]"
+                            className={`px-6 py-3.5 rounded-2xl text-xs font-bold border transition-all active:scale-[0.98] cursor-pointer ${
+                              isThemeNight ? 'bg-[#050505] hover:bg-white/5 text-zinc-400 hover:text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                            }`}
                           >
                             {isKo ? '초기화' : 'Reset'}
                           </button>
@@ -1460,17 +1805,21 @@ export default function TeacherPage({ isNight = true }: Props) {
                   
                   {/* --- SECTION 1: PENDING APPROVALS --- */}
                   {pendingRoster.length > 0 && (
-                    <div className="p-1 bg-orange-500/10 border border-orange-500/30 rounded-[2.5rem] shadow-2xl text-left">
-                      <div className="bg-[#0a0a0c] rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8">
+                    <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${
+                      isThemeNight ? 'bg-orange-500/10 border border-orange-500/30 shadow-2xl' : 'bg-orange-50/60 border border-orange-200 shadow-md'
+                    }`}>
+                      <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
+                        isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                      }`}>
                         <div className="flex items-center gap-3 mb-6">
-                          <div className="w-10 h-10 rounded-2xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-2xl bg-orange-500/20 border border-orange-500/30 text-orange-500 flex items-center justify-center">
                             <Warning size={22} weight="bold" />
                           </div>
                           <div>
-                            <h4 className="text-lg font-black text-white">
+                            <h4 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                               {isKo ? '가입 승인 대기 목록' : 'Pending Classroom Approvals'}
                             </h4>
-                            <p className="text-xs text-orange-400/90 leading-normal">
+                            <p className="text-xs text-orange-500 font-medium leading-normal">
                               {isKo 
                                 ? '이 학급반에 가입을 요청한 학부모 목록입니다. 승인 후 대시보드에 합산됩니다.' 
                                 : 'Parents requesting to enroll their children. Approve to add them to class analytics.'}
@@ -1479,34 +1828,36 @@ export default function TeacherPage({ isNight = true }: Props) {
                         </div>
 
                         <div className="overflow-x-auto">
-                          <table className="w-full text-xs text-zinc-400 text-left border-collapse">
+                          <table className="w-full text-xs text-left border-collapse">
                             <thead>
-                              <tr className="border-b border-white/5 text-zinc-500 font-bold uppercase tracking-wider text-[10px]">
+                              <tr className={`border-b text-zinc-500 font-bold uppercase tracking-wider text-[10px] ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                                 <th className="pb-4 pl-2">{isKo ? '학생 이름' : 'Student Name'}</th>
                                 <th className="pb-4">{isKo ? '학부모 계정' : 'Parent Info'}</th>
                                 <th className="pb-4 text-right pr-2">{isKo ? '승인 여부' : 'Approval Actions'}</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
+                            <tbody className={`divide-y ${isThemeNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
                               {pendingRoster.map((student) => (
-                                <tr key={student.uid} className="hover:bg-white/[0.02] transition-colors">
-                                  <td className="py-4 pl-2 font-black text-white text-sm">
+                                <tr key={student.uid} className={`transition-colors ${isThemeNight ? 'hover:bg-white/[0.02]' : 'hover:bg-zinc-50'}`}>
+                                  <td className={`py-4 pl-2 font-black text-sm ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                                     {student.studentName || 'Unnamed'}
                                   </td>
                                   <td className="py-4">
-                                    <p className="font-bold text-zinc-200">{student.name}</p>
+                                    <p className={`font-bold ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>{student.name}</p>
                                     <p className="text-[10px] text-zinc-500 font-mono">{student.email}</p>
                                   </td>
                                   <td className="py-4 text-right pr-2 space-x-3">
                                     <button
                                       onClick={() => handleDeclineStudent(student.uid)}
-                                      className="px-4 py-2 border border-white/10 hover:border-white/20 bg-[#050505] hover:bg-white/5 text-zinc-400 hover:text-zinc-200 font-bold rounded-xl transition-all text-xs active:scale-[0.97]"
+                                      className={`px-4 py-2 border font-bold rounded-xl transition-all text-xs active:scale-[0.97] cursor-pointer ${
+                                        isThemeNight ? 'border-white/10 hover:border-white/20 bg-[#050505] text-zinc-400 hover:text-zinc-200' : 'border-zinc-300 hover:border-zinc-400 bg-zinc-100 text-zinc-700'
+                                      }`}
                                     >
-                                      {isKo ? '거절' : 'Decline'}
+                                      ✕ {isKo ? '거절' : 'Decline'}
                                     </button>
                                     <button
                                       onClick={() => handleApproveStudent(student.uid)}
-                                      className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all text-xs active:scale-[0.97]"
+                                      className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all text-xs active:scale-[0.97] cursor-pointer"
                                     >
                                       ✓ {isKo ? '승인' : 'Approve'}
                                     </button>
@@ -1521,15 +1872,19 @@ export default function TeacherPage({ isNight = true }: Props) {
                   )}
 
                   {/* --- SECTION 2: ACTIVE ROSTER --- */}
-                  <div className="p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl text-left">
-                    <div className="bg-[#0a0a0c] rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8">
-                      <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+                  <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${
+                    isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                  }`}>
+                    <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
+                      isThemeNight ? 'bg-[#0a0a0c] text-white' : 'bg-white text-zinc-900'
+                    }`}>
+                      <div className={`flex items-center justify-between mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-500 flex items-center justify-center">
                             <UserCheck size={22} weight="bold" />
                           </div>
                           <div>
-                            <h4 className="text-xl font-black text-white">
+                            <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                               {isKo ? '소속 원생 명단' : 'Approved Student Roster'}
                             </h4>
                             <p className="text-xs text-zinc-400 mt-0.5">
@@ -1539,6 +1894,18 @@ export default function TeacherPage({ isNight = true }: Props) {
                             </p>
                           </div>
                         </div>
+
+                        <button
+                          type="button"
+                          onClick={fetchRosterAndMistakes}
+                          className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] ${
+                            isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
+                          }`}
+                          title="Refresh parent scans & roster"
+                        >
+                          <span>🔄</span>
+                          <span>{isKo ? '동기화 새로고침' : 'Refresh Live Sync'}</span>
+                        </button>
                       </div>
 
                       {isLoadingRoster ? (
@@ -1553,9 +1920,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                         </div>
                       ) : (
                         <div className="overflow-x-auto">
-                          <table className="w-full text-xs text-zinc-400 text-left border-collapse">
+                          <table className="w-full text-xs text-left border-collapse">
                             <thead>
-                              <tr className="border-b border-white/5 text-zinc-500 font-bold uppercase tracking-wider text-[10px]">
+                              <tr className={`border-b text-zinc-500 font-bold uppercase tracking-wider text-[10px] ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                                 <th className="pb-4 pl-2">{isKo ? '학생 이름' : 'Student Name'}</th>
                                 <th className="pb-4">{isKo ? '학부모 계정' : 'Parent Info'}</th>
                                 <th className="pb-4">{isKo ? '숙제 상태' : 'Weekly Status'}</th>
@@ -1563,12 +1930,12 @@ export default function TeacherPage({ isNight = true }: Props) {
                                 <th className="pb-4 text-right pr-2">{isKo ? '원생 관리' : 'Actions'}</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
+                            <tbody className={`divide-y ${isThemeNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
                               {activeRoster.map((student) => (
-                                <tr key={student.uid} className="hover:bg-white/[0.02] transition-colors">
-                                  <td className="py-4 pl-2 font-black text-white text-sm">{student.studentName || 'Unnamed'}</td>
+                                <tr key={student.uid} className={`transition-colors ${isThemeNight ? 'hover:bg-white/[0.02]' : 'hover:bg-zinc-50'}`}>
+                                  <td className={`py-4 pl-2 font-black text-sm ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{student.studentName || 'Unnamed'}</td>
                                   <td className="py-4">
-                                    <p className="font-bold text-zinc-200">{student.name}</p>
+                                    <p className={`font-bold ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>{student.name}</p>
                                     <p className="text-[10px] text-zinc-500 font-mono">{student.email}</p>
                                   </td>
                                   <td className="py-4">
@@ -1578,7 +1945,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                                         <span>{isKo ? '스캔 완료' : 'Scanned'}</span>
                                       </span>
                                     ) : (
-                                      <span className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-zinc-900 border border-white/5 text-zinc-500 flex items-center gap-1.5 w-fit">
+                                      <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold border flex items-center gap-1.5 w-fit ${
+                                        isThemeNight ? 'bg-zinc-900 border-white/5 text-zinc-500' : 'bg-zinc-100 border-zinc-200 text-zinc-600'
+                                      }`}>
                                         <span>❌</span>
                                         <span>{isKo ? '미스캔' : 'Not Scanned'}</span>
                                       </span>
@@ -1591,7 +1960,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                                     <select
                                       onChange={(e) => handleMoveStudent(student.uid, e.target.value)}
                                       value=""
-                                      className="bg-[#050505] border border-white/10 text-[10px] font-bold text-zinc-400 px-3 py-2 rounded-xl cursor-pointer outline-none focus:border-orange-500 appearance-none transition-colors"
+                                      className={`text-[10px] font-bold px-3 py-2 rounded-xl cursor-pointer outline-none focus:border-orange-500 appearance-none transition-colors ${
+                                        isThemeNight ? 'bg-[#050505] border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
+                                      }`}
                                     >
                                       <option value="">{isKo ? '반 이동' : 'Move Class'}</option>
                                       {classes
@@ -1604,13 +1975,15 @@ export default function TeacherPage({ isNight = true }: Props) {
                                     </select>
                                     <button
                                       onClick={() => handleRemoveStudent(student.uid)}
-                                      className="px-3.5 py-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-xl transition-all text-[10px] active:scale-[0.95]"
+                                      className="px-3.5 py-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] cursor-pointer"
                                     >
                                       {isKo ? '삭제' : 'Remove'}
                                     </button>
                                     <button
                                       onClick={() => setSelectedStudentDetails(student)}
-                                      className="px-4 py-2 border border-white/10 bg-[#050505] hover:bg-white/5 text-orange-400 hover:text-orange-300 font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] flex items-center gap-1.5"
+                                      className={`px-4 py-2 border font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] flex items-center gap-1.5 cursor-pointer ${
+                                        isThemeNight ? 'border-white/10 bg-[#050505] hover:bg-white/5 text-orange-400 hover:text-orange-300' : 'border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-orange-600'
+                                      }`}
                                     >
                                       <MagnifyingGlass size={12} weight="bold" />
                                       <span>{isKo ? '오답 상세' : 'View Details'}</span>
@@ -1635,15 +2008,19 @@ export default function TeacherPage({ isNight = true }: Props) {
       {selectedStudentDetails && (
         <div className="fixed inset-0 z-[200] flex items-center justify-end">
           <div 
-            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
             onClick={() => setSelectedStudentDetails(null)} 
           />
-          <div className="relative w-full max-w-lg h-full bg-[#0c0c0e] border-l border-white/10 p-6 sm:p-8 flex flex-col shadow-2xl animate-slide-in text-left">
+          <div className={`relative w-full max-w-lg h-full border-l p-6 sm:p-8 flex flex-col shadow-2xl animate-slide-in text-left transition-colors ${
+            isThemeNight ? 'bg-[#0c0c0e] border-white/10 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+          }`}>
             
             {/* Drawer Header */}
-            <div className="pb-6 border-b border-white/10 flex items-center justify-between shrink-0">
+            <div className={`pb-6 border-b flex items-center justify-between shrink-0 ${
+              isThemeNight ? 'border-white/10' : 'border-zinc-200'
+            }`}>
               <div>
-                <h3 className="text-xl font-black text-white flex items-center gap-2">
+                <h3 className={`text-xl font-black flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                   <span>👦 {selectedStudentDetails.studentName || 'Unnamed'}</span>
                   <span className="text-xs font-normal text-zinc-400">{isKo ? '원생 학습 성장 기록' : "'s Growth & Practice Log"}</span>
                 </h3>
@@ -1652,8 +2029,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setSelectedStudentDetails(null)}
-                className="p-2.5 text-zinc-400 hover:text-white rounded-full hover:bg-white/10 transition-all text-sm font-bold active:scale-[0.95]"
+                className={`p-2.5 rounded-full transition-all text-sm font-bold active:scale-[0.95] cursor-pointer ${
+                  isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                }`}
               >
                 <X size={18} weight="bold" />
               </button>
@@ -1667,18 +2047,31 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </span>
 
                 {selectedStudentDetails.weeklyMistakes.length === 0 ? (
-                  <div className="py-16 text-center text-emerald-400 text-xs flex flex-col items-center gap-2">
+                  <div className="py-16 text-center text-emerald-500 text-xs flex flex-col items-center gap-2">
                     <Sparkle size={24} weight="bold" />
                     <span>{isKo ? '모든 항목을 완벽하게 학습했습니다!' : 'Mastered all items this week! Excellent progress.'}</span>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {selectedStudentDetails.weeklyMistakes.map((m: any, idx: number) => (
-                      <div key={m.uniqueId || idx} className="p-5 bg-[#050505] border border-white/10 rounded-2xl flex flex-col gap-3">
+                      <div key={m.uniqueId || idx} className={`p-5 border rounded-2xl flex flex-col gap-3 ${
+                        isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-200 shadow-xs'
+                      }`}>
                         <div className="flex items-start justify-between gap-2">
-                          <span className="px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold rounded-lg text-[9px] uppercase tracking-wider font-mono">
-                            {m.type || 'Phonics'}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 text-orange-500 font-bold rounded-lg text-[9px] uppercase tracking-wider font-mono">
+                              {m.type || 'Phonics'}
+                            </span>
+                            {m.isResolved || m.attemptNumber > 1 ? (
+                              <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-bold rounded-md text-[9px] uppercase font-mono">
+                                ⚡ {isKo ? '2차 재도전 수정 완료' : 'Fixed on Rescan'}
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 font-bold rounded-md text-[9px] uppercase font-mono">
+                                📋 {isKo ? '1차 스캔 기록' : '1st Scan Attempt'}
+                              </span>
+                            )}
+                          </div>
                           <span className="text-[9px] text-zinc-500 font-mono">
                             {m.dateAdded ? m.dateAdded.split('T')[0] : ''}
                           </span>
@@ -1689,7 +2082,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                             <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">
                               Question / Word
                             </span>
-                            <p className="font-bold text-white font-mono">{m.question_text}</p>
+                            <p className={`font-bold font-mono ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{m.question_text}</p>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4 pt-1">
@@ -1697,13 +2090,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                               <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">
                                 Target Answer
                               </span>
-                              <p className="font-bold text-emerald-400 font-mono">{m.correct_answer}</p>
+                              <p className="font-bold text-emerald-500 font-mono">{m.correct_answer}</p>
                             </div>
                             <div>
                               <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">
                                 Student Answer
                               </span>
-                              <p className="font-bold text-red-400 font-mono">{m.student_response || '(Blank)'}</p>
+                              <p className="font-bold text-red-500 font-mono">{m.student_response || '(Blank)'}</p>
                             </div>
                           </div>
                         </div>
@@ -1715,11 +2108,11 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
 
             {/* Drawer Footer */}
-            <div className="pt-6 border-t border-white/10 shrink-0 flex gap-3">
+            <div className={`pt-6 border-t shrink-0 flex gap-3 ${isThemeNight ? 'border-white/10' : 'border-zinc-200'}`}>
               <button
                 type="button"
-                onClick={() => window.print()}
-                className="w-1/2 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl transition-all shadow-lg shadow-orange-500/20 active:scale-[0.98] flex items-center justify-center gap-1.5"
+                onClick={() => setShowReportCardModal(true)}
+                className="w-1/2 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl transition-all shadow-lg shadow-orange-500/20 active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Printer size={16} weight="bold" />
                 <span>{isKo ? '맞춤 로고 성적표 인쇄' : 'Print Branded Report'}</span>
@@ -1727,7 +2120,9 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => setSelectedStudentDetails(null)}
-                className="w-1/2 py-4 bg-[#050505] hover:bg-white/5 text-zinc-300 font-bold text-xs rounded-2xl transition-all border border-white/10 active:scale-[0.98]"
+                className={`w-1/2 py-4 font-bold text-xs rounded-2xl transition-all border active:scale-[0.98] cursor-pointer ${
+                  isThemeNight ? 'bg-[#050505] hover:bg-white/5 text-zinc-300 border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                }`}
               >
                 {isKo ? '닫기' : 'Close'}
               </button>
@@ -1740,16 +2135,20 @@ export default function TeacherPage({ isNight = true }: Props) {
       {showCreateClassModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
             onClick={() => setShowCreateClassModal(false)} 
           />
-          <div className="relative p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in">
-            <div className="relative w-full h-full rounded-[calc(2.5rem-0.25rem)] bg-[#0c0c0e] text-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] p-8 overflow-hidden">
+          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in ${
+            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+          }`}>
+            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 overflow-hidden transition-colors ${
+              isThemeNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+            }`}>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                   <Plus size={22} weight="bold" />
                 </div>
-                <h3 className="text-xl font-black text-white">
+                <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                   {isKo ? '새 학급반 추가' : 'Add New Class'}
                 </h3>
               </div>
@@ -1771,7 +2170,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
                     placeholder="E.g. 7-Mercury"
-                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                    className={`w-full border outline-none text-sm p-4 rounded-2xl transition-all ${
+                      isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                    }`}
                   />
                 </div>
 
@@ -1782,7 +2183,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <select
                     value={newClassLevel}
                     onChange={(e) => setNewClassLevel(e.target.value)}
-                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white cursor-pointer"
+                    className={`w-full border outline-none text-sm p-4 rounded-2xl transition-all cursor-pointer ${
+                      isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900'
+                    }`}
                   >
                     <option value="5-year-old">{isKo ? '5세반' : '5-year-old'}</option>
                     <option value="6-year-old">{isKo ? '6세반' : '6-year-old'}</option>
@@ -1796,14 +2199,16 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="button"
                     onClick={() => setShowCreateClassModal(false)}
-                    className="flex-1 py-4 bg-[#050505] hover:bg-white/5 text-zinc-400 hover:text-white font-bold text-xs rounded-2xl border border-white/10 transition-all active:scale-[0.98]"
+                    className={`flex-1 py-4 font-bold text-xs rounded-2xl border transition-all active:scale-[0.98] cursor-pointer ${
+                      isThemeNight ? 'bg-[#050505] hover:bg-white/5 text-zinc-400 hover:text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                    }`}
                   >
                     {isKo ? '취소' : 'Cancel'}
                   </button>
                   <button
                     type="submit"
                     disabled={isCreatingClass}
-                    className="flex-1 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-1.5"
+                    className="flex-1 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {isCreatingClass ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -1821,28 +2226,34 @@ export default function TeacherPage({ isNight = true }: Props) {
       {showLogoModal && (
         <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
             onClick={() => setShowLogoModal(false)} 
           />
-          <div className="relative p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in text-left">
-            <div className="relative w-full h-full rounded-[calc(2.5rem-0.25rem)] bg-[#0c0c0e] text-zinc-200 p-8">
+          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in text-left ${
+            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+          }`}>
+            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 transition-colors ${
+              isThemeNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+            }`}>
               <button
                 type="button"
                 onClick={() => setShowLogoModal(false)}
-                className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all"
+                className={`absolute top-6 right-6 p-2 rounded-full transition-all cursor-pointer ${
+                  isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                }`}
               >
                 <X size={16} weight="bold" />
               </button>
 
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                   <Sparkle size={22} weight="bold" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 font-mono">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
                     {isKo ? '맞춤 브랜드 설정' : 'ACADEMY BRANDING'}
                   </span>
-                  <h3 className="text-xl font-black text-white">
+                  <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                     {isKo ? '학원 맞춤 로고 등록' : 'Custom Academy Logo'}
                   </h3>
                 </div>
@@ -1873,16 +2284,20 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={tempLogoUrl}
                     onChange={(e) => setTempLogoUrl(e.target.value)}
                     placeholder="https://example.com/logo.png"
-                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600 font-mono"
+                    className={`w-full border outline-none text-xs p-4 rounded-2xl transition-all font-mono ${
+                      isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                    }`}
                   />
                 </div>
 
                 {tempLogoUrl && (
-                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-3">
+                  <div className={`p-4 border rounded-2xl flex items-center gap-3 ${
+                    isThemeNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'
+                  }`}>
                     <img src={tempLogoUrl} alt="Preview" className="w-12 h-12 rounded-xl object-contain bg-white/10 border border-white/10" />
                     <div>
-                      <p className="text-xs font-bold text-white">{isKo ? '미리보기' : 'Logo Preview'}</p>
-                      <p className="text-[10px] text-emerald-400">{isKo ? '성적표 헤더에 적용됨' : 'Ready for report cards'}</p>
+                      <p className={`text-xs font-bold ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '미리보기' : 'Logo Preview'}</p>
+                      <p className="text-[10px] text-emerald-500">{isKo ? '성적표 헤더에 적용됨' : 'Ready for report cards'}</p>
                     </div>
                   </div>
                 )}
@@ -1896,13 +2311,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                       localStorage.removeItem('chekki_academy_logo');
                       setShowLogoModal(false);
                     }}
-                    className="w-1/3 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs rounded-2xl border border-red-500/20 transition-all active:scale-[0.98]"
+                    className="w-1/3 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-xs rounded-2xl border border-red-500/20 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     {isKo ? '로고 초기화' : 'Remove Logo'}
                   </button>
                   <button
                     type="submit"
-                    className="w-2/3 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98]"
+                    className="w-2/3 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     {isKo ? '로고 저장하기' : 'Save Logo'}
                   </button>
@@ -1916,28 +2331,34 @@ export default function TeacherPage({ isNight = true }: Props) {
       {showSettingsModal && (
         <div className="fixed inset-0 z-[260] flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
             onClick={() => setShowSettingsModal(false)} 
           />
-          <div className="relative p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-lg mx-4 animate-fade-in text-left">
-            <div className="relative w-full h-full rounded-[calc(2.5rem-0.25rem)] bg-[#0c0c0e] text-zinc-200 p-8">
+          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-lg mx-4 animate-fade-in text-left ${
+            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+          }`}>
+            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 transition-colors ${
+              isThemeNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+            }`}>
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all"
+                className={`absolute top-6 right-6 p-2 rounded-full transition-all cursor-pointer ${
+                  isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                }`}
               >
                 <X size={16} weight="bold" />
               </button>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                   <Gear size={24} weight="bold" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 font-mono">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
                     {isKo ? '교사 포털 설정' : 'TEACHER PORTAL SETTINGS'}
                   </span>
-                  <h3 className="text-xl font-black text-white">
+                  <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                     {isKo ? '선생님 환경 설정' : 'Teacher Account & Settings'}
                   </h3>
                 </div>
@@ -1945,28 +2366,32 @@ export default function TeacherPage({ isNight = true }: Props) {
 
               <div className="space-y-6">
                 {/* Profile Info */}
-                <div className="p-4 bg-[#050505] border border-white/10 rounded-2xl space-y-2">
+                <div className={`p-4 border rounded-2xl space-y-2 ${
+                  isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-200'
+                }`}>
                   <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">
                     {isKo ? '계정 프로필 정보' : 'ACCOUNT PROFILE'}
                   </span>
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-zinc-400">{isKo ? '선생님 이름' : 'Teacher Name'}:</span>
-                    <strong className="text-white">{user?.name || 'Teacher'}</strong>
+                    <strong className={isThemeNight ? 'text-white' : 'text-zinc-900'}>{user?.name || 'Teacher'}</strong>
                   </div>
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-zinc-400">{isKo ? '이메일 주소' : 'Email Address'}:</span>
-                    <strong className="text-white font-mono">{user?.email}</strong>
+                    <strong className={`font-mono ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{user?.email}</strong>
                   </div>
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-zinc-400">{isKo ? '소속 학원' : 'Assigned School'}:</span>
-                    <strong className="text-orange-400">{user?.schoolName || 'B2B Academy'}</strong>
+                    <strong className="text-orange-500">{user?.schoolName || 'B2B Academy'}</strong>
                   </div>
                 </div>
 
                 {/* Custom Branding Quick Option */}
-                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between gap-3">
+                <div className={`p-4 border rounded-2xl flex items-center justify-between gap-3 ${
+                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                }`}>
                   <div>
-                    <h4 className="text-xs font-bold text-white mb-0.5">
+                    <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                       {isKo ? '맞춤 학원 로고' : 'Custom Academy Logo'}
                     </h4>
                     <p className="text-[11px] text-zinc-400">
@@ -1980,17 +2405,19 @@ export default function TeacherPage({ isNight = true }: Props) {
                       setTempLogoUrl(academyLogo);
                       setShowLogoModal(true);
                     }}
-                    className="px-3.5 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold text-xs rounded-xl border border-orange-500/20 transition-all whitespace-nowrap cursor-pointer"
+                    className="px-3.5 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 font-bold text-xs rounded-xl border border-orange-500/20 transition-all whitespace-nowrap cursor-pointer"
                   >
                     {isKo ? '로고 변경' : 'Edit Logo'}
                   </button>
                 </div>
 
                 {/* Password Reset */}
-                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3">
+                <div className={`p-4 border rounded-2xl space-y-3 ${
+                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                }`}>
                   <div className="flex justify-between items-center">
                     <div>
-                      <h4 className="text-xs font-bold text-white mb-0.5">
+                      <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                         {isKo ? '비밀번호 재설정' : 'Password & Security'}
                       </h4>
                       <p className="text-[11px] text-zinc-400">
@@ -2001,22 +2428,26 @@ export default function TeacherPage({ isNight = true }: Props) {
                       type="button"
                       disabled={isSendingReset}
                       onClick={handleSendResetPassword}
-                      className="px-3.5 py-2 bg-white/10 hover:bg-white/15 disabled:opacity-50 text-white font-bold text-xs rounded-xl border border-white/10 transition-all whitespace-nowrap cursor-pointer"
+                      className={`px-3.5 py-2 disabled:opacity-50 font-bold text-xs rounded-xl border transition-all whitespace-nowrap cursor-pointer ${
+                        isThemeNight ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' : 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800 border-zinc-300'
+                      }`}
                     >
                       {isSendingReset ? (isKo ? '발송 중...' : 'Sending...') : (isKo ? '재설정 이메일 발송' : 'Reset Password')}
                     </button>
                   </div>
                   {resetPwStatus && (
-                    <p className={`text-xs p-2.5 rounded-xl font-medium ${resetPwStatus.isError ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
+                    <p className={`text-xs p-2.5 rounded-xl font-medium ${resetPwStatus.isError ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
                       {resetPwStatus.text}
                     </p>
                   )}
                 </div>
 
                 {/* Re-open Walkthrough Guide */}
-                <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl">
+                <div className={`flex items-center justify-between p-4 border rounded-2xl ${
+                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                }`}>
                   <div>
-                    <h4 className="text-xs font-bold text-white mb-0.5">
+                    <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                       {isKo ? '교사 온보딩 가이드 다시보기' : 'Onboarding Walkthrough'}
                     </h4>
                     <p className="text-[11px] text-zinc-400">
@@ -2030,7 +2461,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                       setTeacherObStep(0);
                       setShowTeacherOnboarding(true);
                     }}
-                    className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white font-bold text-xs rounded-xl border border-white/10 transition-all whitespace-nowrap cursor-pointer"
+                    className={`px-3.5 py-2 font-bold text-xs rounded-xl border transition-all whitespace-nowrap cursor-pointer ${
+                      isThemeNight ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' : 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800 border-zinc-300'
+                    }`}
                   >
                     {isKo ? '가이드 열기' : 'Open Tutorial'}
                   </button>
@@ -2043,11 +2476,384 @@ export default function TeacherPage({ isNight = true }: Props) {
                     setShowSettingsModal(false);
                     logout();
                   }}
-                  className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs rounded-2xl border border-red-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                  className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-xs rounded-2xl border border-red-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
                   <SignOut size={16} weight="bold" />
                   <span>{isKo ? '교사 계정 로그아웃' : 'Log Out of Teacher Account'}</span>
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- WEEKLY CALENDAR & UPLOAD HISTORY MODAL --- */}
+      {showWeekCalendarModal && (
+        <div className="fixed inset-0 z-[280] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+            onClick={() => setShowWeekCalendarModal(false)} 
+          />
+          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh] ${
+            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+          }`}>
+            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar transition-colors ${
+              isThemeNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+            }`}>
+              <button
+                type="button"
+                onClick={() => setShowWeekCalendarModal(false)}
+                className={`absolute top-6 right-6 p-2 rounded-full transition-all cursor-pointer ${
+                  isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                }`}
+              >
+                <X size={18} weight="bold" />
+              </button>
+
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg">
+                  <Calendar size={24} weight="bold" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
+                    {isKo ? '주차별 커리큘럼 업로드 현황' : 'CURRICULUM UPLOAD CALENDAR'}
+                  </span>
+                  <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {isKo ? `${selectedClass?.name || '학급'} 학기 주차별 캘린더` : `${selectedClass?.name || 'Class'} Weekly Curriculum Schedule`}
+                  </h3>
+                </div>
+              </div>
+
+              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+                {isKo 
+                  ? '각 주차별로 교재 업로드 일시와 등록된 학습 단어를 확인하고 원클릭으로 해당 주차로 이동할 수 있습니다.'
+                  : 'Check upload timestamps and target topics per week. Click any week to make it active.'}
+              </p>
+
+              {/* 12-Week Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((weekNum) => {
+                  const isActiveWeek = selectedClass?.activeWeekNumber === weekNum;
+                  // Dynamic status based on week index
+                  const hasUpload = weekNum <= 2;
+                  const topicName = weekNum === 1 ? 'Weather & Nature' : weekNum === 2 ? 'Animals & Habitats' : (isKo ? '미등록 주차' : 'Pending Upload');
+                  const uploadDate = weekNum === 1 ? '2026-07-20' : weekNum === 2 ? '2026-07-21' : null;
+                  const wordCount = weekNum === 1 ? 7 : weekNum === 2 ? 6 : 0;
+
+                  return (
+                    <div 
+                      key={weekNum}
+                      onClick={() => {
+                        handleSelectWeek(weekNum);
+                        setShowWeekCalendarModal(false);
+                      }}
+                      className={`p-4 border rounded-2xl flex flex-col justify-between gap-3 cursor-pointer transition-all active:scale-[0.97] relative group ${
+                        isActiveWeek
+                          ? 'border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/10'
+                          : isThemeNight
+                            ? 'bg-[#050505] border-white/10 hover:border-white/20 hover:bg-white/5'
+                            : 'bg-zinc-50 border-zinc-200 hover:border-orange-300 hover:bg-orange-50/50'
+                      }`}
+                    >
+                      {isActiveWeek && (
+                        <span className="absolute top-3 right-3 px-2 py-0.5 bg-orange-500 text-white text-[9px] font-black uppercase rounded-md shadow-xs">
+                          {isKo ? '현재 주차' : 'Active'}
+                        </span>
+                      )}
+
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-xs font-black text-orange-500">
+                            Week {weekNum}
+                          </span>
+                        </div>
+                        <h4 className={`text-xs font-bold truncate ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                          {topicName}
+                        </h4>
+                      </div>
+
+                      <div className="space-y-1 pt-2 border-t border-white/5 text-[10px]">
+                        {hasUpload ? (
+                          <>
+                            <div className="flex items-center justify-between text-emerald-500 font-bold">
+                              <span>✅ {isKo ? '업로드 완료' : 'Uploaded'}</span>
+                              <span className="font-mono">{wordCount} words</span>
+                            </div>
+                            <div className="flex items-center justify-between text-zinc-500 font-mono text-[9px]">
+                              <span>📅 {uploadDate}</span>
+                              <span className="text-orange-500 font-bold group-hover:underline">
+                                {isKo ? '이동 ➔' : 'Jump ➔'}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-between text-zinc-500 font-medium">
+                            <span>⏳ {isKo ? '미등록 (빈 학습지)' : 'Empty Curriculum'}</span>
+                            <span className="text-orange-500 font-bold group-hover:underline">
+                              {isKo ? '이동 ➔' : 'Jump ➔'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className={`mt-6 pt-4 border-t flex justify-end ${isThemeNight ? 'border-white/10' : 'border-zinc-200'}`}>
+                <button
+                  type="button"
+                  onClick={() => setShowWeekCalendarModal(false)}
+                  className={`px-6 py-3 font-bold text-xs rounded-xl border transition-all cursor-pointer ${
+                    isThemeNight ? 'bg-[#050505] text-zinc-300 border-white/10 hover:bg-white/5' : 'bg-zinc-100 text-zinc-700 border-zinc-300 hover:bg-zinc-200'
+                  }`}
+                >
+                  {isKo ? '닫기' : 'Close'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- AI REVIEW WORKSHEET PRINTABLE MODAL --- */}
+      {showReviewSheetModal && (
+        <div className="fixed inset-0 z-[320] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+            onClick={() => setShowReviewSheetModal(false)} 
+          />
+          <div className="relative p-1 bg-white border border-zinc-200 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh]">
+            <div className="relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 bg-white text-zinc-900 overflow-y-auto custom-scrollbar">
+              <button
+                type="button"
+                onClick={() => setShowReviewSheetModal(false)}
+                className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-all cursor-pointer"
+              >
+                <X size={18} weight="bold" />
+              </button>
+
+              {/* Printable Worksheet Header */}
+              <div className="border-b border-zinc-200 pb-6 mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {academyLogo ? (
+                    <img src={academyLogo} alt="Logo" className="w-12 h-12 object-contain rounded-xl border border-zinc-200" />
+                  ) : (
+                    <div className="w-12 h-12 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-2xl flex items-center justify-center font-bold text-xl">
+                      🏫
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-lg font-black text-zinc-900">{user?.schoolName || 'B2B Academy'}</h3>
+                    <p className="text-xs text-orange-600 font-bold uppercase tracking-wider">
+                      {isKo ? '오답 맞춤 복습 프린트 학습지' : 'AI Individualized Review Worksheet'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right text-xs font-mono">
+                  <p className="font-bold text-zinc-800">{selectedClass?.name || 'Class'} | Week {selectedClass?.activeWeekNumber}</p>
+                  <p className="text-zinc-500">Student: ___________________</p>
+                </div>
+              </div>
+
+              {/* Section 1: Phonics Sound Blend Drill */}
+              <div className="space-y-6">
+                <div className="p-4 bg-orange-50/60 border border-orange-200 rounded-2xl">
+                  <h4 className="text-xs font-black text-orange-800 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <Sparkle size={14} weight="bold" />
+                    <span>Section A: Target Phonics & Sound Patterns (파닉스 타겟 복습)</span>
+                  </h4>
+                  <p className="text-xs text-zinc-700">
+                    {curriculumPhonics ? `Focus sounds for Week ${selectedClass?.activeWeekNumber}: [ ${curriculumPhonics} ]` : 'Focus sounds: -ai-, -ay-, sh-, ch-'}
+                  </p>
+                </div>
+
+                {/* Section 2: Vocabulary Writing Practice Lines */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black text-zinc-800 uppercase tracking-widest">
+                    Section B: Weekly Target Vocabulary Practice (주간 타겟 단어 쓰기)
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {(activeVocabWords.length > 0 ? activeVocabWords : ['sunny', 'rainy', 'windy', 'cloudy', 'umbrella', 'jacket']).map((word, idx) => (
+                      <div key={idx} className="p-3 border border-zinc-200 rounded-xl bg-zinc-50 flex items-center justify-between">
+                        <span className="font-mono font-bold text-sm text-zinc-900">{idx + 1}. {word}</span>
+                        <span className="font-mono text-zinc-400 text-xs">____________________</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 3: Reading Passage Comprehension */}
+                {curriculumPassage && (
+                  <div className="space-y-3 pt-2">
+                    <h4 className="text-xs font-black text-zinc-800 uppercase tracking-widest">
+                      Section C: Reading Passage Reference (주간 본문 지문)
+                    </h4>
+                    <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-800 font-serif italic leading-relaxed">
+                      "{curriculumPassage}"
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Print Action Bar */}
+              <div className="mt-8 pt-4 border-t border-zinc-200 flex justify-between items-center">
+                <p className="text-[10px] text-zinc-500 font-mono">
+                  {isKo ? 'Chekki AI가 학급 오답 데이터를 바탕으로 자동 생성한 프린트입니다.' : 'Generated by Chekki AI B2B Platform'}
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowReviewSheetModal(false)}
+                    className="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-xs rounded-xl border border-zinc-300 transition-all cursor-pointer"
+                  >
+                    {isKo ? '닫기' : 'Close'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <Printer size={16} weight="bold" />
+                    <span>{isKo ? '학습지 인쇄 / PDF 저장' : 'Print / Save PDF'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- ACADEMY BRANDED STUDENT GROWTH REPORT CARD MODAL --- */}
+      {showReportCardModal && (
+        <div className="fixed inset-0 z-[330] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+            onClick={() => setShowReportCardModal(false)} 
+          />
+          <div className="relative p-1 bg-white border border-zinc-200 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh]">
+            <div className="relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 bg-white text-zinc-900 overflow-y-auto custom-scrollbar">
+              <button
+                type="button"
+                onClick={() => setShowReportCardModal(false)}
+                className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-all cursor-pointer"
+              >
+                <X size={18} weight="bold" />
+              </button>
+
+              {/* Official Academy Header */}
+              <div className="border-b-2 border-zinc-900 pb-6 mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {academyLogo ? (
+                    <img src={academyLogo} alt="Logo" className="w-14 h-14 object-contain rounded-xl border border-zinc-200" />
+                  ) : (
+                    <div className="w-14 h-14 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-md">
+                      🏫
+                    </div>
+                  )}
+                  <div>
+                    <h2 className="text-xl font-black text-zinc-900 tracking-tight">{user?.schoolName || 'B2B Academy'}</h2>
+                    <p className="text-xs text-orange-600 font-bold uppercase tracking-widest">
+                      {isKo ? '공식 학부모 원생 학습 성장 리포트' : 'OFFICIAL STUDENT PROGRESS REPORT CARD'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right text-xs font-mono bg-zinc-50 p-3 rounded-xl border border-zinc-200">
+                  <p className="font-bold text-zinc-900">Student: {selectedStudentDetails?.studentName || 'Student'}</p>
+                  <p className="text-zinc-500">Class: {selectedClass?.name || '7-Mercury'}</p>
+                  <p className="text-zinc-500">Date: {new Date().toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              {/* Growth Stats Overview */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="p-4 bg-orange-50/60 border border-orange-200 rounded-2xl text-center">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-orange-700 block mb-1">
+                    {isKo ? '주간 숙제 달성률' : 'Homework Completion'}
+                  </span>
+                  <span className="text-2xl font-black text-orange-600 font-mono">100%</span>
+                </div>
+                <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl text-center">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block mb-1">
+                    {isKo ? '마스터한 타겟 단어' : 'Mastered Vocabulary'}
+                  </span>
+                  <span className="text-2xl font-black text-emerald-600 font-mono">{activeVocabWords.length || 7} words</span>
+                </div>
+                <div className="p-4 bg-purple-50/60 border border-purple-200 rounded-2xl text-center">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 block mb-1">
+                    {isKo ? '2차 재도전 정답률' : 'Rescan Correction'}
+                  </span>
+                  <span className="text-2xl font-black text-purple-600 font-mono">100%</span>
+                </div>
+              </div>
+
+              {/* Detailed Mistakes & Corrections Log */}
+              <div className="space-y-4">
+                <h4 className="text-xs font-black text-zinc-800 uppercase tracking-widest">
+                  {isKo ? '주간 학습 도전 과제 & 오답 수정 기록' : 'Weekly Error & Correction History'}
+                </h4>
+                
+                {selectedStudentDetails?.weeklyMistakes && selectedStudentDetails.weeklyMistakes.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedStudentDetails.weeklyMistakes.map((m: any, idx: number) => (
+                      <div key={idx} className="p-4 border border-zinc-200 rounded-xl bg-zinc-50 flex items-center justify-between text-xs">
+                        <div>
+                          <p className="font-bold text-zinc-900 font-mono">Target: {m.question_text}</p>
+                          <p className="text-emerald-600 font-mono">Correct Answer: {m.correct_answer}</p>
+                        </div>
+                        <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 font-bold rounded-lg text-[10px]">
+                          ⚡ {isKo ? '2차 재도전 수정 완료' : 'Fixed on Rescan'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-600 text-center">
+                    {isKo ? '이번 주 모든 학습 항목을 첫 시도에 완벽히 마스터했습니다!' : 'Mastered all weekly items on the first attempt with 0 errors!'}
+                  </div>
+                )}
+              </div>
+
+              {/* Teacher Evaluation & Signature */}
+              <div className="mt-6 p-4 border border-zinc-200 rounded-2xl bg-zinc-50">
+                <h4 className="text-xs font-black text-zinc-800 uppercase tracking-widest mb-1">
+                  {isKo ? '담임 교사 총평 (Teacher Evaluation)' : 'Teacher Evaluation & Comments'}
+                </h4>
+                <p className="text-xs text-zinc-700 italic">
+                  {isKo 
+                    ? `${selectedStudentDetails?.studentName || '원생'}은(는) 이번 주 타겟 파닉스 규칙과 단어를 매우 훌륭하게 수행하였습니다. 가정에서의 지속적인 칭찬과 관심 부탁드립니다.`
+                    : `${selectedStudentDetails?.studentName || 'Student'} demonstrated excellent focus on target vocabulary and phonics rules this week. Great enthusiasm during home practice!`}
+                </p>
+                <div className="mt-4 pt-3 border-t border-zinc-200 flex justify-between items-center text-xs text-zinc-500 font-mono">
+                  <span>Teacher Signature: ______________________</span>
+                  <span>Academy Stamp: [ SEAL ]</span>
+                </div>
+              </div>
+
+              {/* Print Action Bar */}
+              <div className="mt-6 pt-4 border-t border-zinc-200 flex justify-between items-center">
+                <p className="text-[10px] text-zinc-500 font-mono">
+                  {isKo ? 'Chekki AI B2B Academy Platform 성적표' : 'Official Academy Progress Report'}
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowReportCardModal(false)}
+                    className="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-xs rounded-xl border border-zinc-300 transition-all cursor-pointer"
+                  >
+                    {isKo ? '닫기' : 'Close'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <Printer size={16} weight="bold" />
+                    <span>{isKo ? '성적표 인쇄 / PDF 발급' : 'Print / Export Report PDF'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

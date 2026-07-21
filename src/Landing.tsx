@@ -128,14 +128,6 @@ export default function Home() {
         }`}>
           {/* Logo */}
           <a href="#" className="flex items-center gap-2 shrink-0">
-            <img 
-              src="/chekki-logo.png" 
-              alt="ChekkiAI Logo" 
-              className="h-6 w-auto object-contain"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
             <span className="font-extrabold text-lg tracking-tight">
               Chekki<span className="text-brand">AI</span>
             </span>
