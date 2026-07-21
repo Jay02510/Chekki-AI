@@ -8,25 +8,50 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Chekki | The Homework Helper for Korean Parents',
+  title: 'Chekki AI | AI Homework Helper & Academy Grading for Korean Families',
   description:
-    "Empower your child's education. A homework helper tailored for Korean parents, plus resources for educators.",
+    'Chekki AI is the leading bilingual English homework assistant for Korean parents and academies. Instant handwriting OCR grading, parent guidance scripts, phonics audio coaching, and automated diagnostic reports.',
+  keywords: [
+    'Chekki AI',
+    '영어유치원 숙제 채점',
+    '엄마표 영어',
+    '영문법 오답노트',
+    '파닉스 발음 교정',
+    '학원 자동 채점 AI',
+    '학부모 리포트 자동 생성',
+    'Poly GATE PSA homework',
+    'Korean ESL homework helper',
+    'AI handwriting OCR grading',
+    'bilingual AI tutor',
+  ],
+  authors: [{ name: 'Chekki AI Team' }],
+  metadataBase: new URL('https://chekkiai.com'),
+  alternates: {
+    canonical: 'https://chekkiai.com',
+  },
   openGraph: {
-    title: 'Chekki | The Homework Helper for Korean Parents',
+    title: 'Chekki AI | AI Homework Helper & Academy Grading for Korean Families',
     description:
-      "Empower your child's education. A homework helper tailored for Korean parents, plus resources for educators.",
-    url: 'https://chekki-ai.vercel.app',
-    siteName: 'Chekki',
+      'Turn homework battles into bonding moments. Instant handwriting AI OCR, textbook answer key integration, and parent diagnostic reviews.',
+    url: 'https://chekkiai.com',
+    siteName: 'Chekki AI',
     images: [
       {
-        url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1771381888/Chekki_Splash_1_nrpzaj.png',
+        url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1773201056/Link_Card_Preview_Image_-_1200x628_qdhohw.png',
         width: 1200,
         height: 630,
-        alt: 'Chekki App Splash Screen',
+        alt: 'Chekki AI Platform Preview',
       },
     ],
     locale: 'en_US',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Chekki AI | AI Homework Helper & Academy Grading for Korean Families',
+    description:
+      'Instant handwriting AI OCR grading for English workbooks, phonics coaching, and parent scripts.',
+    images: ['https://res.cloudinary.com/dginphpy4/image/upload/v1773201056/Link_Card_Preview_Image_-_1200x628_qdhohw.png'],
   },
   icons: {
     icon: '/favicon.ico',
@@ -85,12 +110,34 @@ export default function RootLayout({
     ],
   };
 
+  const appSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Chekki AI',
+    operatingSystem: 'Web, iOS, Android',
+    applicationCategory: 'EducationalApplication',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      ratingCount: '1280',
+    },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+  };
+
   return (
     <html lang="en" className="dark">
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
         />
       </head>
       <body
