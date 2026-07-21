@@ -328,7 +328,9 @@ export default function Landing() {
               <img
                 src={theme === 'light' ? '/assets/bento_light_reveal_only.png' : '/assets/bento_reveal_only.png'}
                 alt="Reveal only interface"
-                className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                className={`w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out ${
+                  theme === 'light' ? 'mix-blend-multiply' : ''
+                }`}
                 loading="lazy"
               />
             </div>
@@ -371,7 +373,9 @@ export default function Landing() {
               <img
                 src={theme === 'light' ? '/assets/bento_light_speed_mode.png' : '/assets/bento_speed_mode.png'}
                 alt="Speed mode interface"
-                className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                className={`w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out ${
+                  theme === 'light' ? 'mix-blend-multiply' : ''
+                }`}
                 loading="lazy"
               />
             </div>
@@ -410,7 +414,9 @@ export default function Landing() {
               <img
                 src={theme === 'light' ? '/assets/bento_light_dashboard.png' : '/assets/onboarding_icon_dashboard_1782545238800.png'}
                 alt="Dashboard UI"
-                className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                className={`w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out ${
+                  theme === 'light' ? 'mix-blend-multiply' : ''
+                }`}
                 loading="lazy"
               />
             </div>
@@ -449,7 +455,9 @@ export default function Landing() {
               <img
                 src={theme === 'light' ? '/assets/bento_light_grading_status.png' : '/assets/onboarding_icon_grading_status.png'}
                 alt="Grading status list UI"
-                className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                className={`w-full h-full object-contain filter drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 ease-out ${
+                  theme === 'light' ? 'mix-blend-multiply' : ''
+                }`}
                 loading="lazy"
               />
             </div>
