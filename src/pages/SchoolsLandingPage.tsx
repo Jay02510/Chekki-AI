@@ -273,20 +273,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </header>
       </div>
 
-      {/* --- HERO SECTION (IMAGE ON LEFT, TEXT ON RIGHT FOR TEACHER LANDING) --- */}
+      {/* --- HERO SECTION (TEXT ON LEFT, IMAGE ON RIGHT FOR TEACHER LANDING) --- */}
       <section className="relative px-6 pt-28 md:pt-36 pb-12 md:pb-16 max-w-7xl mx-auto w-full flex-1 flex flex-col md:flex-row items-center justify-between gap-10 md:gap-12">
-        {/* Left: Teacher Mascot Image Side (Holding Tablet) */}
-        <div className="flex-1 w-full flex justify-center md:justify-start relative z-10">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[380px] md:max-w-[460px] aspect-square bg-orange-500/15 rounded-full blur-[90px] pointer-events-none" />
-          <img
-            src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png"
-            alt="Chekki AI Mascot & Dashboard"
-            className="w-full max-w-[340px] sm:max-w-[400px] md:max-w-[440px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.3)] relative z-10 hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          />
-        </div>
-
-        {/* Right: Text Side */}
+        {/* Left: Text Side */}
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full z-10">
           {/* Eyebrow */}
           <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-4 block">
@@ -333,6 +322,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               {isKo ? '교사용 로그인' : 'Teacher Login'}
             </a>
           </div>
+        </div>
+
+        {/* Right: Teacher Mascot Image Side (Holding Laptop) */}
+        <div className="flex-1 w-full flex justify-center md:justify-end relative z-10">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[380px] md:max-w-[460px] aspect-square bg-orange-500/15 rounded-full blur-[90px] pointer-events-none" />
+          <img
+            src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1784647907/Chekki_Holding_Laptop_2_vhwcgy.jpg"
+            alt="Chekki AI Mascot holding laptop"
+            className="w-full max-w-[340px] sm:max-w-[400px] md:max-w-[440px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.3)] relative z-10 hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
         </div>
       </section>
 
