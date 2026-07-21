@@ -109,13 +109,19 @@ export const Header: React.FC<Props> = ({
             </div>
 
             <div className="flex items-center gap-1.5 md:gap-4 h-full flex-shrink-0">
-              {/* Back to Home Button */}
-              <button
-                onClick={onReset}
-                className={`flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full transition-all duration-200 ${isNight ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' : 'bg-black/5 hover:bg-black/10 text-zinc-900 border border-black/5'}`}
+              {/* Back to Landing Page Button */}
+              <a
+                href="/"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+                  isNight 
+                    ? 'bg-white/10 hover:bg-white/20 text-white border border-white/10' 
+                    : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200'
+                }`}
+                title={language === 'ko' ? '메인 랜딩페이지로 이동' : 'Back to Main Landing Page'}
               >
-                <House weight="bold" className="text-sm md:text-base" />
-              </button>
+                <House weight="bold" size={14} />
+                <span>{language === 'ko' ? '메인으로' : 'Home'}</span>
+              </a>
 
               <div className="flex items-center gap-2 md:gap-4">
                 <div
