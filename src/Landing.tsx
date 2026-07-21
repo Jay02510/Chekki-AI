@@ -1,60 +1,51 @@
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useReducedMotion } from "framer-motion";
-import ChekkiAiBentoGrid from "./components/ChekkiAiBentoGrid";
-import { 
-  PlayCircle, 
-  GraduationCap, 
-  ArrowRight, 
-  List, 
+import { useEffect, useRef, useState } from 'react';
+import ChekkiAiBentoGrid from './components/ChekkiAiBentoGrid';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReducedMotion } from 'framer-motion';
+import {
+  PlayCircle,
+  GraduationCap,
+  ArrowRight,
+  List,
   X,
   Storefront,
   SpotifyLogo,
   FilePdf,
   UserCircle,
   InstagramLogo,
-  DownloadSimple,
-  Moon,
-  Sun,
   TiktokLogo,
-  GameController,
-  ShareNetwork,
-  ChartBar,
-  MicrophoneStage,
-  CheckCircle
-} from "@phosphor-icons/react";
+  DownloadSimple,
+  Sun,
+  Moon,
+  Globe,
+  Buildings,
+} from '@phosphor-icons/react';
 
-export default function Landing() {
+export default function Home() {
   const reduce = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const textRevealRef = useRef<HTMLHeadingElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [isNight, setIsNight] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [lang, setLang] = useState<'en' | 'ko'>('en');
-  
-  // Initialize theme
+  const [isKo, setIsKo] = useState<boolean>(true);
+
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme === 'dark' || (!savedTheme && prefersDark) ? 'dark' : 'light';
-    setTheme(initialTheme);
-    
-    if (initialTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('chekki_lang');
+      if (saved) {
+        setIsKo(saved === 'ko');
+      }
     }
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+  const toggleLanguage = () => {
+    const next = !isKo;
+    setIsKo(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('chekki_lang', next ? 'ko' : 'en');
     }
   };
 
@@ -63,324 +54,576 @@ export default function Landing() {
     if (reduce) return;
 
     const ctx = gsap.context(() => {
-      // Hero animations
-      gsap.from(".hero-element", {
-        y: 40,
+      // Artistic Entrance
+      gsap.from('.hero-text', {
+        y: 60,
         opacity: 0,
         duration: 1.2,
-        stagger: 0.1,
-        ease: "power3.out",
-        delay: 0.1
+        stagger: 0.15,
+        ease: 'power3.out',
       });
 
-      // Trust Text Reveal
+      gsap.from('.hero-mascot', {
+        scale: 0.9,
+        opacity: 0,
+        duration: 1.5,
+        delay: 0.2,
+        ease: 'power3.out',
+      });
+
+      // Scrubbing Text Reveal
       if (textRevealRef.current) {
-        const words = textRevealRef.current.querySelectorAll(".reveal-word");
-        gsap.fromTo(words, 
-          { opacity: 0.2 },
+        const words = textRevealRef.current.querySelectorAll('.reveal-word');
+        gsap.fromTo(
+          words,
+          { opacity: 0.1 },
           {
             opacity: 1,
-            ease: "none",
+            ease: 'none',
             stagger: 0.1,
             scrollTrigger: {
               trigger: textRevealRef.current,
-              start: "top 80%",
-              end: "bottom 50%",
-              scrub: true
-            }
+              start: 'top 80%',
+              end: 'bottom 50%',
+              scrub: true,
+            },
           }
         );
       }
-
-      // Bento Cards Scroll Animation
-      gsap.fromTo(
-        ".bento-card",
-        { y: 30, opacity: 0.8 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: "#features",
-            start: "top 95%",
-          }
-        }
-      );
     });
+
     return () => ctx.revert();
   }, [reduce]);
 
+  // Handle Mobile Menu Scroll Lock
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [mobileMenuOpen]);
+
   return (
-    <main className="overflow-x-hidden w-full max-w-full bg-[#F3F4F6] dark:bg-[#050505] min-h-screen text-slate-900 dark:text-slate-50 transition-colors duration-200 selection:bg-brand selection:text-white">
-      {/* Global Noise */}
+    <main className={`overflow-x-hidden w-full max-w-full min-h-screen transition-colors duration-500 selection:bg-brand selection:text-white ${
+      isNight ? 'bg-[#050505] text-slate-50' : 'bg-slate-50 text-slate-900'
+    }`}>
+      {/* Accessibility: Skip to Content */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[9999] bg-brand text-white px-4 py-2 rounded-full font-bold outline-none focus-visible:ring-2 focus-visible:ring-white"
+      >
+        Skip to content
+      </a>
+
+      {/* Global Noise Overlay */}
       <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.03] bg-noise mix-blend-overlay" />
 
-      {/* Navigation */}
+      {/* Navigation - Floating Island Pill */}
       <div className="fixed top-6 left-0 w-full z-50 flex justify-center px-4">
-        <header className="relative flex h-14 items-center justify-between px-6 max-w-4xl w-full mx-auto bg-white/80 dark:bg-white/5 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-2xl transition-colors duration-200">
-          <div className="flex items-center gap-[2px] text-2xl tracking-tighter cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <span className="font-bold text-slate-900 dark:text-white leading-none">Chekki</span>
-            <span className="font-extrabold text-brand leading-none">ai</span>
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="/app" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">
-              {lang === 'en' ? 'Web App' : '웹 앱'}
-            </a>
-            <a href="/schools" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">
-              {lang === 'en' ? 'For Schools' : '교육기관용'}
-            </a>
-            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">
-              {lang === 'en' ? 'Features' : '주요 기능'}
-            </a>
-            <a href="#ecosystem" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm">
-              {lang === 'en' ? 'Ecosystem' : '생태계'}
+        <header className={`flex h-14 items-center gap-4 md:gap-8 px-6 backdrop-blur-2xl border rounded-full shadow-2xl transition-colors duration-500 ${
+          isNight 
+            ? 'bg-white/10 border-white/15 text-white shadow-black/40' 
+            : 'bg-white/90 border-slate-200/90 text-slate-900 shadow-slate-200/60'
+        }`}>
+          {/* Logo */}
+          <a href="#" className="flex items-center gap-2 shrink-0">
+            <img 
+              src="/chekki-logo.png" 
+              alt="ChekkiAI Logo" 
+              className="h-6 w-auto object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            <span className="font-extrabold text-lg tracking-tight">
+              Chekki<span className="text-brand">AI</span>
+            </span>
+          </a>
+
+          {/* Desktop Nav Links */}
+          <nav className="hidden md:flex items-center gap-6">
+            <a
+              href={isKo ? '/schools?lang=ko' : '/schools?lang=en'}
+              className={`text-sm font-medium transition-colors ${
+                isNight ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {isKo ? '학원/교사 안내' : 'For Schools'}
             </a>
           </nav>
-          
-          <div className="hidden md:flex items-center gap-4">
-            <button 
-              onClick={() => setLang(lang === 'en' ? 'ko' : 'en')}
-              className="text-slate-500 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors h-8 px-2 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-xs font-bold"
-              aria-label="Toggle language"
+
+          {/* Right Action Cluster */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* KO / EN LANGUAGE TOGGLE */}
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
+                isNight 
+                  ? 'bg-white/5 border-white/15 text-white/90 hover:bg-white/15' 
+                  : 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200'
+              }`}
+              title="Switch Language / 언어 변경"
             >
-              {lang === 'en' ? 'KO' : 'EN'}
+              <Globe size={14} weight="bold" className="text-brand" />
+              <span>{isKo ? '한국어' : 'English'}</span>
             </button>
-            <button 
-              onClick={toggleTheme}
-              className="text-slate-500 hover:text-slate-900 dark:text-white/60 dark:hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10"
-              aria-label="Toggle theme"
+
+            {/* Sun / Moon Theme Toggle */}
+            <button
+              type="button"
+              onClick={() => setIsNight(!isNight)}
+              className={`p-2 rounded-full border transition-colors cursor-pointer ${
+                isNight 
+                  ? 'border-white/10 hover:bg-white/10 text-white/70 hover:text-white' 
+                  : 'border-slate-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900'
+              }`}
+              title="Toggle Light / Dark Mode"
             >
-              {theme === 'light' ? <Moon size={20} weight="bold" /> : <Sun size={20} weight="bold" />}
+              {isNight ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
             </button>
-            <a href="/app" className="group relative overflow-hidden items-center gap-3 px-4 py-1.5 bg-brand text-white font-semibold rounded-full text-xs uppercase tracking-wider transition-transform duration-700 ease-[var(--ease-premium)] active:scale-[0.96] flex outline-none focus-visible:ring-2 focus-visible:ring-brand">
-              <span>{lang === 'en' ? 'Open App' : '앱 실행'}</span>
+
+            <a
+              href="https://chekki-ai.vercel.app/app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative overflow-hidden items-center gap-2 px-4 py-1.5 bg-brand text-white font-bold rounded-full text-xs uppercase tracking-wider transition-transform duration-700 active:scale-[0.96] flex"
+            >
+              <span>{isKo ? '앱 열기' : 'Open App'}</span>
             </a>
           </div>
 
-          {/* Mobile menu */}
-          <button 
-            className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white"
+          {/* Mobile Hamburger Morph */}
+          <button
+            className={`md:hidden relative w-9 h-9 flex items-center justify-center rounded-full outline-none ${
+              isNight ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900'
+            }`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X size={20} weight="bold" /> : <List size={20} weight="bold" />}
+            {mobileMenuOpen ? <X size={18} weight="bold" /> : <List size={18} weight="bold" />}
           </button>
-
-          {/* Mobile dropdown menu */}
-          {mobileMenuOpen && (
-            <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 w-full bg-white/95 dark:bg-[#111]/95 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:hidden z-50 origin-top animate-fade-in-up">
-              <div className="flex flex-col p-2 gap-1">
-                <a href="/app" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                  {lang === 'en' ? 'Web App' : '웹 앱'}
-                </a>
-                <a href="/schools" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                  {lang === 'en' ? 'For Schools' : '교육기관용'}
-                </a>
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                  {lang === 'en' ? 'Features' : '주요 기능'}
-                </a>
-                <a href="#ecosystem" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-bold text-slate-900 dark:text-white rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                  {lang === 'en' ? 'Ecosystem' : '생태계'}
-                </a>
-              </div>
-            </div>
-          )}
         </header>
       </div>
 
-      {/* ATTENTION: Hero Section - Artistic Asymmetry */}
-      <section id="main-content" ref={heroRef} className="relative py-32 md:py-40 px-4 md:px-8 max-w-7xl mx-auto w-full flex flex-col-reverse md:flex-row items-center justify-between gap-12 md:gap-8 min-h-[80dvh]">
+      {/* Mobile Menu Modal */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-black/90 backdrop-blur-3xl flex flex-col items-center justify-center">
+          <nav className="flex flex-col items-center gap-6 text-xl font-bold text-white">
+            <button
+              type="button"
+              onClick={() => setIsKo(!isKo)}
+              className="px-4 py-2 rounded-full bg-brand text-white text-sm font-bold flex items-center gap-2 mb-4"
+            >
+              <Globe size={18} />
+              <span>{isKo ? '언어 변경 (Current: 한국어)' : 'Switch Language (Current: English)'}</span>
+            </button>
+
+            <a
+              href="https://chekki-ai.vercel.app/app"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="hover:text-brand transition-colors"
+            >
+              {isKo ? '웹앱 시작하기' : 'Web App'}
+            </a>
+            
+            <a
+              href="/schools"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-brand font-black hover:scale-105 transition-transform"
+            >
+              {isKo ? '🏫 학원/교사 전용 안내 (Schools)' : '🏫 For Schools & Teachers'}
+            </a>
+
+            <a
+              href="https://urlgeni.us/chekki"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="hover:text-brand transition-colors"
+            >
+              {isKo ? '모바일 앱 다운로드' : 'Download App'}
+            </a>
+          </nav>
+        </div>
+      )}
+
+      {/* HERO SECTION */}
+      <section
+        id="main-content"
+        ref={heroRef}
+        className="relative pt-32 md:pt-40 pb-32 md:pb-48 px-4 md:px-8 max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-12 md:gap-8 min-h-[100dvh]"
+      >
         <div className="flex-1 flex flex-col items-start z-10 w-full">
-          <div className="hero-element mb-6 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-600 dark:text-white/70">
-            {lang === 'en' ? 'For Parents & Educators' : '아이와 엄마를 위한 영어 학습 파트너'}
+          <div className={`hero-text mb-6 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold border ${
+            isNight ? 'bg-white/5 border-white/10 text-white/70' : 'bg-slate-200/60 border-slate-300 text-slate-700'
+          }`}>
+            {isKo ? '학부모 & 교사를 위한 AI 서비스' : 'For Parents & Educators'}
           </div>
-          <h1 className="text-balance hero-element text-[clamp(2.5rem,5.5vw,6rem)] font-bold tracking-tighter leading-[1.05] text-slate-900 dark:text-white w-full max-w-4xl [word-break:keep-all]">
-            {lang === 'en' ? (
-              <>Homework tracking, <br />made <span className="text-brand">transparent.</span></>
+
+          <h1 className={`hero-text text-[clamp(2.5rem,5.5vw,5.5rem)] font-bold tracking-tighter leading-[1.05] w-full max-w-4xl ${
+            isNight ? 'text-white' : 'text-slate-900'
+          }`}>
+            {isKo ? (
+              <>숙제 검사는 스마트하게, <br />채점은 <span className="text-brand">투명하게.</span></>
             ) : (
-              <>매일 밤 힘들었던 영어 숙제, <br /><span className="text-brand">이제 엄마도 마음 편하게.</span></>
+              <>Homework tracking, <br />made <span className="text-brand">transparent.</span></>
             )}
           </h1>
-          <p className="hero-element mt-8 text-lg md:text-xl text-slate-600 dark:text-white/60 leading-relaxed max-w-xl [word-break:keep-all]">
-            {lang === 'en' 
-              ? "End the daily homework battle. Chekki instantly auto-grades English worksheets, tracks mistakes, and acts as a 24/7 private tutor. No typing. No prompting. Just answers."
-              : "퇴근 후 지친 저녁, 아이 영어 숙제 봐주느라 더 이상 애태우지 마세요. 체키가 사진 한 장으로 1초 만에 채점하고 오답을 챙겨주는 든든한 AI 튜터가 되어드릴게요."}
+
+          <p className={`hero-text mt-8 text-lg md:text-xl leading-relaxed max-w-xl ${
+            isNight ? 'text-white/60' : 'text-slate-600'
+          }`}>
+            {isKo 
+              ? '복잡하고 스트레스 받는 숙제 채점, 이제 체키가 대신합니다. 원어민 교재 답안과 손글씨 AI 스캔으로 학부모와 학원 모두에게 최상의 학습 경험을 제공합니다.'
+              : 'Empower your child\'s education. Chekki helps Korean parents stay connected to their child\'s daily assignments without the stress.'}
           </p>
-          <div className="hero-element mt-12 flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
-            {/* Primary Magnetic CTA */}
-            <a href="/app" className="group relative w-full sm:w-auto overflow-hidden pl-8 pr-2 py-2 bg-brand text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 ease-[var(--ease-premium)] active:scale-[0.98] shadow-2xl shadow-brand/20 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#050505]">
-              <span className="relative z-10">{lang === 'en' ? 'Open Web App' : '웹 앱 시작하기'}</span>
-              <div className="w-12 h-12 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
+
+          {/* Clean 2-CTA layout in Hero (Open Web App + Download App) */}
+          <div className="hero-text mt-12 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            <a
+              href="https://chekki-ai.vercel.app/app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative w-full sm:w-auto overflow-hidden pl-8 pr-2 py-2 bg-brand text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 active:scale-[0.98] shadow-2xl shadow-brand/20"
+            >
+              <span className="relative z-10">{isKo ? '웹앱 시작하기' : 'Open Web App'}</span>
+              <div className="w-12 h-12 rounded-full bg-black/20 flex items-center justify-center transition-transform group-hover:translate-x-1">
                 <ArrowRight weight="bold" />
               </div>
             </a>
-            
-            {/* Secondary Magnetic CTA */}
-            <a href="https://urlgeni.us/chekki" target="_blank" rel="noopener noreferrer" className="group relative w-full sm:w-auto overflow-hidden pl-8 pr-2 py-2 bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 border border-black/10 dark:border-white/10 transition-transform duration-700 ease-[var(--ease-premium)] active:scale-[0.98] hover:bg-black/10 dark:hover:bg-white/10 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#050505]">
-              <span className="relative z-10">{lang === 'en' ? 'Download App' : '앱 다운로드'}</span>
-              <div className="w-12 h-12 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-[1.02] group-hover:-translate-y-[2px]">
+
+            <a
+              href="https://urlgeni.us/chekki"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`group relative w-full sm:w-auto overflow-hidden pl-8 pr-2 py-2 font-bold rounded-full text-lg flex items-center justify-between gap-8 border transition-all active:scale-[0.98] ${
+                isNight 
+                  ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' 
+                  : 'bg-white border-slate-300 text-slate-900 hover:bg-slate-100 shadow-sm'
+              }`}
+            >
+              <span className="relative z-10">{isKo ? '앱 다운로드' : 'Download App'}</span>
+              <div className="w-12 h-12 rounded-full bg-slate-500/10 flex items-center justify-center">
                 <DownloadSimple weight="bold" />
               </div>
             </a>
           </div>
         </div>
-        
-        {/* Overlapping Artistic Asset */}
-        <div className="hero-element flex-1 w-full relative h-[350px] md:h-[700px] flex justify-center md:justify-end">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[350px] md:max-w-[500px] aspect-square bg-brand/20 rounded-full blur-[100px] md:blur-[120px]" />
+
+        {/* Hero Transparent Mascot Image */}
+        <div className="hero-mascot flex-1 w-full relative h-[400px] md:h-[650px] flex justify-center md:justify-end items-center">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[480px] aspect-square bg-brand/20 rounded-full blur-[120px]" />
           <img
             src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png"
-            alt="Chekki App Graphic"
-            className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.3)] z-10"
+            alt="Chekki Mascot"
+            className="w-full max-w-[440px] md:max-w-[500px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.3)] relative z-10 group-hover:scale-105 transition-transform duration-700"
           />
         </div>
       </section>
 
-      {/* DESIRE: GSAP Scrubbing Text Reveal with Video Background */}
-      <section className="py-16 md:py-20 px-4 bg-[#F3F4F6] dark:bg-[#050505] border-y border-black/5 dark:border-white/5 relative overflow-hidden flex flex-col items-center justify-center">
+      {/* GSAP Scrubbing Text Reveal with Video Background + FOR SCHOOLS BUTTON IN SECOND SECTION */}
+      <section className={`py-32 md:py-48 px-4 border-y relative overflow-hidden flex flex-col items-center justify-center min-h-[100dvh] ${
+        isNight ? 'bg-[#050505] border-white/5' : 'bg-slate-100 border-slate-200'
+      }`}>
         {/* Cinematic Video Background */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[#F3F4F6]/90 dark:bg-[#050505]/80 z-10" />
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline 
-            className={`w-full h-full object-cover opacity-30 dark:opacity-20 ${theme === 'light' ? 'mix-blend-multiply' : 'mix-blend-screen'}`}
+          <div className={`absolute inset-0 z-10 ${isNight ? 'bg-[#050505]/80' : 'bg-slate-100/80'}`} />
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-20 mix-blend-screen"
           >
-            <source src="/chekki-hero.mp4" type="video/mp4" />
+            <source
+              src="https://res.cloudinary.com/dginphpy4/video/upload/v1765769964/chekki-intro_y7hj7c.mp4"
+              type="video/mp4"
+            />
           </video>
         </div>
 
-        <div className="max-w-5xl mx-auto text-center relative z-20 flex flex-col items-center">
-          <h2 ref={textRevealRef} className="text-balance text-[clamp(2rem,4.5vw,4.5rem)] font-bold leading-[1.2] text-slate-900 dark:text-white tracking-tight [word-break:keep-all]">
-            {(lang === 'en' ? `Bridging the cultural gap between school and home.` : `학원 숙제 고민부터 집에서의 영어 공부까지, 엄마의 마음으로 함께합니다.`).split(" ").map((word, i) => (
-              <span key={i} className="reveal-word inline-block mr-[0.3em]">{word}</span>
+        <div className="max-w-5xl mx-auto text-center relative z-20">
+          <h2
+            ref={textRevealRef}
+            className={`text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[1.2] tracking-tight ${
+              isNight ? 'text-white' : 'text-slate-900'
+            }`}
+          >
+            {(isKo 
+              ? '학교와 가정, 학원 사이의 문화적 장벽을 연결합니다.' 
+              : 'Bridging the cultural gap between school and home.'
+            ).split(' ').map((word, i) => (
+              <span key={i} className="reveal-word inline-block mr-[0.3em]">
+                {word}
+              </span>
             ))}
           </h2>
 
-          <div className="mt-8">
+          {/* FOR SCHOOLS CTA BUTTON IN THE SECOND SECTION (PER USER REQUEST) */}
+          <div className="mt-12 flex justify-center">
             <a
               href="/schools"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-brand hover:bg-brand-hover text-white font-bold text-base rounded-full shadow-xl shadow-brand/20 transition-all duration-300 active:scale-[0.97] group"
+              className="group relative overflow-hidden px-8 py-4 bg-brand hover:bg-brand/90 text-white font-bold rounded-full text-lg flex items-center gap-3 transition-transform duration-500 active:scale-95 shadow-2xl shadow-brand/30"
             >
-              <span>{lang === 'en' ? 'Chekki for English Academies' : '학원·교육기관 전용 체키 보러가기'}</span>
-              <ArrowRight size={20} weight="bold" className="group-hover:translate-x-1 transition-transform" />
+              <Buildings size={22} weight="fill" />
+              <span>{isKo ? '학원 및 교사 전용 안내 페이지' : 'Explore Chekki For Schools & Educators'}</span>
+              <ArrowRight weight="bold" className="group-hover:translate-x-1 transition-transform" />
             </a>
           </div>
         </div>
       </section>
 
-      {/* NEW BENTO GRID FEATURES */}
-      <ChekkiAiBentoGrid isNight={theme === 'dark'} isKo={lang === 'ko'} />
+      {/* PROMPT-PAL STYLE AI BENTO GRID WITH PAIN-POINT TO SOLUTION EXPLANATIONS */}
+      <ChekkiAiBentoGrid isNight={isNight} isKo={isKo} />
 
-      {/* CHEKKI ECOSYSTEM SECTION */}
-      <section id="ecosystem" className="py-24 px-4 md:px-8 max-w-7xl mx-auto w-full border-t border-black/5 dark:border-white/5 mt-8">
-        <div className="mb-16 flex flex-col items-center text-center">
-          <div className="mb-4 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-600 dark:text-white/70">
-            Chekki Ecosystem
-          </div>
-          <h2 className="text-balance text-[clamp(2.5rem,5vw,4rem)] font-bold tracking-tight text-slate-900 dark:text-white mb-6">
-            Beyond the app
+      {/* BEYOND THE APP - EDUCATOR HUB */}
+      <section id="educators" className="py-32 md:py-48 px-4 md:px-8 max-w-7xl mx-auto w-full">
+        <div className="mb-24 flex flex-col items-start md:items-center md:text-center">
+          <h2 className={`text-[clamp(3rem,5vw,4.5rem)] font-bold tracking-tight mb-6 ${
+            isNight ? 'text-white' : 'text-slate-900'
+          }`}>
+            {isKo ? '앱을 넘어선 교육 생태계.' : 'Beyond the app.'}
           </h2>
-          <p className="text-xl text-slate-600 dark:text-white/60 max-w-2xl mx-auto">
-            Explore our YouTube channel, podcast, Etsy shop, and free educational resources.
+          <p className={`text-xl max-w-2xl ${isNight ? 'text-white/60' : 'text-slate-600'}`}>
+            {isKo 
+              ? '체키는 교육자와 학부모를 위한 고품질 학습 자료와 커리큘럼 인사이트를 제공합니다.' 
+              : 'Chekki provides high-quality educational materials and insights for modern teaching, beautifully integrated into your workflow.'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a href="https://www.youtube.com/@ChekkiAI" target="_blank" rel="noopener noreferrer" className="rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-8 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex items-center gap-6 group hover:border-brand/50 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <PlayCircle weight="fill" className="text-4xl" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">YouTube Channel</h3>
-              <p className="text-slate-600 dark:text-white/60 text-sm">Watch our latest guides and educational content.</p>
-            </div>
-          </a>
+        {/* 4x3 Dense Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 auto-rows-[250px] md:auto-rows-[300px] gap-4 md:gap-6 grid-flow-dense">
           
-          <a href="https://open.spotify.com/show/2onH0XU5yky37cBxdqKaY8" target="_blank" rel="noopener noreferrer" className="rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-8 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex items-center gap-6 group hover:border-green-500/50 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <SpotifyLogo weight="fill" className="text-4xl" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Podcast</h3>
-              <p className="text-slate-600 dark:text-white/60 text-sm">Listen to insights on bilingual education and AI.</p>
-            </div>
-          </a>
-
-          <a href="https://www.etsy.com/shop/ChekkiAI?dd_referrer=" target="_blank" rel="noopener noreferrer" className="rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-8 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex items-center gap-6 group hover:border-brand/50 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <Storefront weight="fill" className="text-4xl" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Etsy Shop</h3>
-              <p className="text-slate-600 dark:text-white/60 text-sm">Get premium digital resources and templates.</p>
-            </div>
-          </a>
-
-          <a href="https://www.teacherspayteachers.com/store/chekki-ai" target="_blank" rel="noopener noreferrer" className="rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-8 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex items-center gap-6 group hover:border-blue-500/50 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <Storefront weight="fill" className="text-4xl" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">TPT Store</h3>
-              <p className="text-slate-600 dark:text-white/60 text-sm">Download educational resources for your classroom.</p>
+          {/* 1. YouTube */}
+          <a
+            href="https://www.youtube.com/@ChekkiAI"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`md:col-span-2 md:row-span-2 rounded-[2.5rem] p-2 shadow-2xl group block outline-none border transition-all ${
+              isNight ? 'bg-white/[0.02] border-white/5 hover:border-brand/40' : 'bg-white border-slate-300 hover:border-brand/60 shadow-slate-200'
+            }`}
+          >
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col justify-end p-8 md:p-12 text-white">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/youtube_bg.png')] bg-cover bg-center mix-blend-screen" />
+              <div className="relative z-20">
+                <PlayCircle weight="fill" className="text-6xl text-brand mb-6 drop-shadow-xl" />
+                <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">YouTube Channel</h3>
+                <p className="text-white/70 text-lg max-w-md mb-8 hidden md:block">
+                  {isKo ? '이중언어 교육 및 학습 습관 형성을 위한 매주 업데이트' : 'Weekly insights on bilingual education, study habits, and classroom strategies.'}
+                </p>
+                <div className="relative inline-flex items-center gap-4 text-white font-semibold">
+                  <span>{isKo ? '영상 시청하기' : 'Watch latest video'}</span>
+                  <ArrowRight className="transition-transform duration-500 group-hover:translate-x-1 text-brand" />
+                </div>
+              </div>
             </div>
           </a>
 
-          <a href="https://www.tiktok.com/@chekkiai" target="_blank" rel="noopener noreferrer" className="rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-8 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex items-center gap-6 group hover:border-pink-500/50 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <TiktokLogo weight="fill" className="text-4xl" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">TikTok</h3>
-              <p className="text-slate-600 dark:text-white/60 text-sm">Follow us for quick tips and community highlights.</p>
+          {/* 2. TPT Store */}
+          <a
+            href="https://www.teacherspayteachers.com/store/chekki-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`md:col-span-1 md:row-span-2 rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
+              isNight ? 'bg-white/[0.02] border-white/5 hover:border-brand/40' : 'bg-white border-slate-300 hover:border-brand/60 shadow-slate-200'
+            }`}
+          >
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col justify-between p-8 text-white">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('https://res.cloudinary.com/dginphpy4/image/upload/v1771381888/Chekki_Splash_1_nrpzaj.png')] bg-cover bg-center mix-blend-screen" />
+
+              <div className="relative z-20 flex justify-between items-start">
+                <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-md">
+                  <GraduationCap weight="fill" className="text-2xl text-blue-400" />
+                </div>
+              </div>
+              <div className="relative z-20">
+                <h3 className="text-2xl font-bold text-white mb-2">TPT Store</h3>
+                <p className="text-white/70 text-sm mb-6">
+                  {isKo ? '출력 가능한 영유 교재 및 워크시트' : 'Downloadable worksheets & lesson plans.'}
+                </p>
+                <div className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center transition-transform duration-700 group-hover:bg-brand group-hover:text-white">
+                  <ArrowRight weight="bold" />
+                </div>
+              </div>
             </div>
           </a>
 
-          <a href="https://chekkiai.netlify.app/" target="_blank" rel="noopener noreferrer" className="rounded-3xl bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/10 p-8 shadow-xl dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex items-center gap-6 group hover:border-red-500/50 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <FilePdf weight="fill" className="text-4xl" />
+          {/* 3. Spotify */}
+          <a
+            href="https://open.spotify.com/show/2onH0XU5yky37cBxdqKaY8"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="md:col-span-1 md:row-span-1 rounded-[2.5rem] bg-green-500/10 border border-green-500/30 p-2 shadow-xl group block outline-none"
+          >
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col justify-between p-6 md:p-8 text-white">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 rounded-full blur-[50px] group-hover:bg-green-500/30 transition-colors z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/spotify_bg.png')] bg-cover bg-center mix-blend-screen" />
+              <div className="relative z-20">
+                <SpotifyLogo weight="fill" className="text-4xl text-green-400 mb-4" />
+                <h3 className="text-xl font-bold text-white">Podcast</h3>
+              </div>
+              <div className="relative z-20 text-sm font-medium flex items-center gap-2 text-white/70 group-hover:text-green-400 transition-colors">
+                Listen on Spotify <ArrowRight />
+              </div>
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Free Educational Resources</h3>
-              <p className="text-slate-600 dark:text-white/60 text-sm">Download our Top 100 Grammar Mistakes guide.</p>
+          </a>
+
+          {/* 4. Etsy Shop */}
+          <a
+            href="https://www.etsy.com/shop/ChekkiAI?dd_referrer="
+            target="_blank"
+            rel="noopener noreferrer"
+            className="md:col-span-1 md:row-span-1 rounded-[2.5rem] bg-brand/10 border border-brand/30 p-2 shadow-xl group block outline-none"
+          >
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col justify-between p-6 md:p-8 text-white">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/20 rounded-full blur-[50px] group-hover:bg-brand/30 transition-colors z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/etsy_bg.png')] bg-cover bg-center mix-blend-screen" />
+              <div className="relative z-20">
+                <Storefront weight="fill" className="text-4xl text-brand mb-4" />
+                <h3 className="text-xl font-bold text-white">Etsy Shop</h3>
+              </div>
+              <div className="relative z-20 text-sm font-medium flex items-center gap-2 text-white/70 group-hover:text-brand transition-colors">
+                Shop merch <ArrowRight />
+              </div>
+            </div>
+          </a>
+
+          {/* 5. Free Grammar PPT */}
+          <a
+            href="https://chekkiai.netlify.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`md:col-span-2 md:row-span-1 rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
+              isNight ? 'bg-white/[0.02] border-white/5 hover:border-red-500/40' : 'bg-white border-slate-300 hover:border-red-500/50 shadow-slate-200'
+            }`}
+          >
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 shadow-inner text-white">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#090a10] via-[#090a10]/70 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/grammar_bg.png')] bg-cover bg-center mix-blend-screen" />
+
+              <div className="relative z-20 flex items-center gap-6">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md border bg-white/10 border-white/20">
+                  <FilePdf weight="fill" className="text-3xl text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Top Grammar Mistakes</h3>
+                  <p className="text-sm max-w-sm text-white/70">
+                    {isKo ? '한국 학생들이 가장 많이 틀리는 영문법 정리 무료 PPT' : 'A free PPT explaining the top grammar mistakes Korean students struggle with.'}
+                  </p>
+                </div>
+              </div>
+              <div className="relative z-20 mt-6 md:mt-0 w-12 h-12 rounded-full bg-red-500 text-white flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                <ArrowRight weight="bold" />
+              </div>
+            </div>
+          </a>
+
+          {/* 6. Creator Portfolio */}
+          <a
+            href="https://jason-portfolio.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`md:col-span-2 md:row-span-1 rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
+              isNight ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/40' : 'bg-white border-slate-300 hover:border-indigo-500/50 shadow-slate-200'
+            }`}
+          >
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 shadow-inner text-white">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#090a10] via-[#090a10]/70 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/portfolio_bg.png')] bg-cover bg-center mix-blend-screen" />
+
+              <div className="relative z-20 flex items-center gap-6">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md border bg-white/10 border-white/20">
+                  <UserCircle weight="fill" className="text-3xl text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Creator Portfolio</h3>
+                  <p className="text-sm text-white/70">
+                    {isKo ? '체키를 만든 빌더 포트폴리오' : 'Discover the builder behind Chekki.'}
+                  </p>
+                </div>
+              </div>
+              <div className="relative z-20 mt-6 md:mt-0 w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                <ArrowRight weight="bold" />
+              </div>
             </div>
           </a>
         </div>
       </section>
 
-      {/* CTA FOOTER - DEEP DARK MODE */}
-      <footer className="py-32 md:py-48 px-4 md:px-8 bg-[#020617] text-white flex flex-col items-center justify-center text-center relative overflow-hidden border-t-8 border-brand">
+      {/* FOOTER CTA */}
+      <footer className={`py-32 md:py-48 px-4 md:px-8 border-t flex flex-col items-center justify-center text-center relative overflow-hidden transition-colors duration-500 ${
+        isNight ? 'bg-[#020617] border-white/5' : 'bg-slate-900 border-slate-800 text-white'
+      }`}>
         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.05] bg-noise mix-blend-overlay" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] aspect-square bg-brand/10 rounded-full blur-[150px] pointer-events-none" />
-        
-        <h2 className="text-balance relative z-10 text-[clamp(3.5rem,6vw,6rem)] font-bold tracking-tight max-w-4xl leading-[1.05] mb-16 [word-break:keep-all]">
-          {lang === 'en' ? <>Ready to end the <br /> homework fights?</> : <>매일 밤 힘들었던 영어 숙제, <br /> 이제 마음 편히 끝내볼까요?</>}
+
+        <h2 className="relative z-10 text-[clamp(3rem,6vw,6rem)] font-bold tracking-tight text-white max-w-4xl leading-[1.05] mb-16">
+          {isKo ? (
+            <>스마트한 숙제 관리, <br />지금 시작하세요.</>
+          ) : (
+            <>Ready to simplify <br /> homework?</>
+          )}
         </h2>
-        
-        <div className="bento-card relative z-10 flex flex-col items-center gap-6">
-          <a href="/app" className="group relative overflow-hidden px-10 py-5 bg-gradient-to-b from-slate-700 to-slate-900 border border-slate-500 rounded-full text-xl flex items-center justify-center gap-4 transition-transform duration-700 ease-[var(--ease-premium)] active:scale-[0.98] shadow-[0_0_40px_rgba(234,88,12,0.3)] hover:shadow-[0_0_60px_rgba(234,88,12,0.5)] outline-none focus-visible:ring-2 focus-visible:ring-brand ring-1 ring-white/10">
-            <span className="relative z-20 font-bold tracking-wide">Get Started Now</span>
+
+        <div className="relative z-10 flex flex-col sm:flex-row gap-6">
+          <a
+            href="https://chekki-ai.vercel.app/app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative overflow-hidden pl-10 pr-3 py-3 bg-brand text-white font-bold rounded-full text-xl flex items-center justify-between gap-8 transition-transform duration-700 active:scale-[0.98] shadow-2xl shadow-brand/20"
+          >
+            <span className="relative z-20 tracking-wide">{isKo ? '체키 시작하기' : 'Start Using Chekki'}</span>
+            <div className="relative z-20 w-14 h-14 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 group-hover:scale-105 group-hover:translate-x-1">
+              <ArrowRight weight="bold" className="text-2xl" />
+            </div>
           </a>
-          <a href="#features" className="text-white/60 hover:text-white underline underline-offset-4 decoration-white/20 transition-colors">
-            or learn more about our AI-powered features
+
+          <a
+            href="/schools"
+            className="group relative overflow-hidden pl-10 pr-3 py-3 bg-orange-500/20 border border-orange-500/40 text-orange-300 font-bold rounded-full text-xl flex items-center justify-between gap-8 transition-transform duration-700 active:scale-[0.98] shadow-2xl hover:bg-orange-500/30"
+          >
+            <span className="relative z-20 tracking-wide">{isKo ? '학원/교사 안내' : 'For Schools'}</span>
+            <div className="relative z-20 w-14 h-14 rounded-full bg-orange-500/30 flex items-center justify-center">
+              <Buildings weight="fill" className="text-2xl text-orange-400" />
+            </div>
           </a>
         </div>
-        
-        <div className="bento-card relative z-10 mt-32 flex flex-col items-center gap-6">
+
+        <div className="relative z-10 mt-24 flex flex-col items-center gap-6">
           <div className="flex items-center gap-6 text-white/50 text-sm font-medium mb-4">
-            <a href="/schools" className="hover:text-white transition-colors">{lang === 'en' ? 'For Schools' : '교육기관용'}</a>
-            <a href="/privacy.html" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="/terms.html" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="/privacy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </a>
+            <a href="/terms" className="hover:text-white transition-colors">
+              Terms of Service
+            </a>
           </div>
-          <a href="https://www.instagram.com/chekki__ai" target="_blank" rel="noopener noreferrer" className="text-brand hover:text-brand-hover transition-colors">
-            <InstagramLogo size={32} weight="fill" />
-          </a>
-          <p className="text-white/40 font-medium text-sm">
+          <div className="flex items-center gap-4">
+            <a
+              href="https://www.instagram.com/chekki__ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-16 h-16 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500"
+            >
+              <InstagramLogo size={32} weight="fill" />
+            </a>
+            <a
+              href="https://www.tiktok.com/@chekkiai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-16 h-16 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500"
+            >
+              <TiktokLogo size={32} weight="fill" />
+            </a>
+          </div>
+          <p className="text-white/60 font-medium">
             © {new Date().getFullYear()} Chekki. Designed for parents & educators.
           </p>
         </div>
