@@ -21,27 +21,75 @@ interface Props {
   setIsNight: (val: boolean) => void;
 }
 
+const PRICING_TIERS = {
+  trial: {
+    id: 'trial',
+    nameEn: '14-Day Free Teacher Trial',
+    nameKo: '강사 1인 14일 무료 체험',
+    monthly: { krw: 0, usd: 0 },
+    yearly: { krw: 0, usd: 0 },
+    minSeats: 1,
+    defaultTeachers: 1
+  },
+  freelancer: {
+    id: 'freelancer',
+    nameEn: 'Freelancer & Solo Tutor Plan (1 Teacher)',
+    nameKo: '프리랜서 & 개인 튜터 플랜 (1인 강사)',
+    monthly: { krw: 35000, usd: 25 },
+    yearly: { krw: 28000, usd: 20 },
+    minSeats: 1,
+    defaultTeachers: 1
+  },
+  small: {
+    id: 'small',
+    nameEn: 'Small School Plan (1-2 Teachers)',
+    nameKo: '소형 학원 플랜 (1~2인 강사)',
+    monthly: { krw: 49000, usd: 35 },
+    yearly: { krw: 39000, usd: 28 },
+    minSeats: 1,
+    defaultTeachers: 2
+  },
+  medium: {
+    id: 'medium',
+    nameEn: 'Medium Academy Plan (3-5 Teachers)',
+    nameKo: '중형 학원 플랜 (3~5인 강사)',
+    monthly: { krw: 39000, usd: 28 },
+    yearly: { krw: 31000, usd: 22 },
+    minSeats: 3,
+    defaultTeachers: 3
+  },
+  large: {
+    id: 'large',
+    nameEn: 'Large Academy Plan (6+ Teachers)',
+    nameKo: '대형 학원 플랜 (6인 이상)',
+    monthly: { krw: 29000, usd: 22 },
+    yearly: { krw: 23000, usd: 17 },
+    minSeats: 6,
+    defaultTeachers: 6
+  },
+  custom: {
+    id: 'custom',
+    nameEn: 'Custom Academy Setup',
+    nameKo: '맞춤 학원 도입 상담',
+    monthly: { krw: 0, usd: 0 },
+    yearly: { krw: 0, usd: 0 },
+    minSeats: 1,
+    defaultTeachers: 1
+  }
+};
+
 const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const { language, setLanguage } = useLanguage();
   const isKo = language === 'ko';
 
-  // Demo request state
+  // State for form inputs
   const [academyName, setAcademyName] = useState('');
   const [contactName, setContactName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [showBankModal, setShowBankModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<{ id: string; nameEn: string; nameKo: string; price: number; minSeats?: number }>({
-    id: 'medium',
-    nameEn: 'Medium Academy Plan (3-5 Teachers)',
-    nameKo: '중형 학원 플랜 (3~5인 강사)',
-    price: 39000,
-    minSeats: 3
-  });
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('medium');
   const [teacherCount, setTeacherCount] = useState(3);
   const [studentCount, setStudentCount] = useState('');
   const [bizRegNumber, setBizRegNumber] = useState('');
@@ -49,8 +97,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [isRequestingInvoice, setIsRequestingInvoice] = useState(false);
   const [copiedBank, setCopiedBank] = useState(false);
 
-  const openPlanModal = (planId: string, nameEn: string, nameKo: string, price: number, defaultTeachers: number, minSeats: number = 1) => {
-    setSelectedPlan({ id: planId, nameEn, nameKo, price, minSeats });
+  const activePlan = PRICING_TIERS[selectedPlanId as keyof typeof PRICING_TIERS] || PRICING_TIERS.medium;
+
+  const getPlanUnitPrice = (planId: string, cycle: 'monthly' | 'yearly') => {
+    const tier = PRICING_TIERS[planId as keyof typeof PRICING_TIERS];
+    if (!tier) return 0;
+    return isKo ? tier[cycle].krw : tier[cycle].usd;
+  };
+
+  const formatPrice = (price: number) => {
+    return isKo ? `₩${price.toLocaleString()}` : `$${price}`;
+  };
+
+  const openPlanModal = (planId: string, defaultTeachers: number, minSeats: number = 1) => {
+    setSelectedPlanId(planId);
     setTeacherCount(defaultTeachers);
     setInvoiceResult(null);
     setShowBankModal(true);
@@ -60,6 +120,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     e.preventDefault();
     if (!academyName || !contactName || !email) return;
     setIsRequestingInvoice(true);
+    const unitPrice = getPlanUnitPrice(selectedPlanId, billingCycle);
+    const totalAmount = unitPrice * teacherCount;
     try {
       const res = await fetch('/api/request-school-invoice', {
         method: 'POST',
@@ -70,16 +132,26 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           email,
           phone,
           bizRegNumber,
-          planId: selectedPlan.id,
-          planName: isKo ? selectedPlan.nameKo : selectedPlan.nameEn,
+          planId: selectedPlanId,
+          planName: isKo ? activePlan.nameKo : activePlan.nameEn,
           teacherCount,
           studentCount,
           billingCycle,
+          unitPrice,
+          totalAmount,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Invoice request failed');
-      setInvoiceResult(data.invoice);
+      setInvoiceResult({
+        ...data.invoice,
+        academyName: academyName,
+        email: email,
+        teacherCount: teacherCount,
+        studentCount: studentCount,
+        totalAmount: data.invoice?.totalAmount || totalAmount,
+        invoiceId: data.invoice?.invoiceId || `INV-${Math.floor(100000 + Math.random() * 900000)}`
+      });
     } catch (err: any) {
       alert(err.message || (isKo ? '요청 처리 실패. 다시 시도해주세요.' : 'Request failed. Please try again.'));
     } finally {
@@ -87,27 +159,14 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!academyName || !contactName || !email) return;
-    // Trigger the official bank invoice generation modal directly with the entered details
-    openPlanModal(
-      selectedPlan.id || 'medium',
-      selectedPlan.nameEn || 'Medium Academy Plan (3-5 Teachers)',
-      selectedPlan.nameKo || '중형 학원 플랜 (3~5인 강사)',
-      selectedPlan.price || 39000,
-      teacherCount || 3
-    );
-  };
-
   return (
-    <div className={`min-h-screen ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#F3F4F6] text-zinc-900'} font-sans transition-colors duration-200 relative overflow-hidden flex flex-col`}>
+    <div className={`min-h-screen ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#F8FAFC] text-zinc-900'} font-sans transition-colors duration-200 relative overflow-hidden flex flex-col`}>
       {/* Background radial glows */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Mini top bar */}
-      <div className={`border-b ${isNight ? 'border-white/5 bg-black/10' : 'border-zinc-200/60 bg-white/60'} py-3 px-6 backdrop-blur-md sticky top-0 z-50`}>
+      <div className={`border-b ${isNight ? 'border-white/5 bg-black/20' : 'border-zinc-200/80 bg-white/80'} py-3 px-6 backdrop-blur-md sticky top-0 z-50 transition-colors`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <a
             href="/"
@@ -128,10 +187,10 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             {/* Language toggle */}
             <button
               onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-              className={`px-3 py-1.5 rounded-full text-[10px] font-black border tracking-wider transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-[10px] font-black border tracking-wider transition-colors cursor-pointer ${
                 isNight 
                   ? 'border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white' 
-                  : 'border-zinc-300 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900'
+                  : 'border-zinc-300 hover:bg-zinc-100 text-zinc-700 hover:text-zinc-900'
               }`}
             >
               {language === 'ko' ? 'ENGLISH' : '한국어'}
@@ -140,10 +199,10 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             {/* Dark mode toggle */}
             <button
               onClick={() => setIsNight(!isNight)}
-              className={`p-2 rounded-full border transition-colors ${
+              className={`p-2 rounded-full border transition-colors cursor-pointer ${
                 isNight 
                   ? 'border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white' 
-                  : 'border-zinc-300 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900'
+                  : 'border-zinc-300 hover:bg-zinc-100 text-zinc-700 hover:text-zinc-900'
               }`}
             >
               {isNight ? <Sun size={14} weight="bold" /> : <Moon size={14} weight="bold" />}
@@ -194,7 +253,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               href="#demo"
               className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
             >
-              <span>{isKo ? '학원 도입 및 제휴 신청하기' : 'Request Partnership'}</span>
+              <span>{isKo ? '지금 시작하기' : 'Start Now'}</span>
               <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
             </a>
             <a
@@ -206,7 +265,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               className={`w-full sm:w-auto px-8 py-4 font-black text-sm rounded-3xl border transition-all active:scale-[0.97] text-center ${
                 isNight 
                   ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white' 
-                  : 'bg-white/80 border-zinc-300 hover:bg-white text-zinc-900 shadow-sm'
+                  : 'bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-900 shadow-sm'
               }`}
             >
               {isKo ? '교사용 로그인' : 'Teacher Login'}
@@ -235,13 +294,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Bento Cell 1: Curriculum Pre-seeding (Large block, spans 2 columns) */}
-          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
+          {/* Bento Cell 1: Curriculum Pre-seeding (Spans 2 columns) */}
+          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-300 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
-              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
-          } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
-
+              ? 'bg-[#050505] border-white/10 hover:border-orange-500/40' 
+              : 'bg-white border-zinc-200/90 hover:border-orange-500/40 shadow-sm'
+          } group relative overflow-hidden`}>
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
               <div className="flex-1">
                 <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-5">
@@ -256,34 +314,30 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     : 'Seed your class active vocabulary lists and phonics targets once. Our AI evaluates home scans against your exact answer key with 99.9% accuracy, eliminating false OCR grading errors.'}
                 </p>
               </div>
-              <div className={`w-full md:w-64 lg:w-72 flex-shrink-0 p-2 sm:p-2.5 rounded-2xl border transition-all duration-300 ${
-                isNight 
-                  ? 'bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 border-white/10 ring-1 ring-white/5 shadow-xl' 
-                  : 'bg-gradient-to-b from-slate-50 to-slate-100/80 border-slate-200/90 ring-1 ring-black/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
-              }`}>
-                <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
-                  <div className="w-2 h-2 rounded-full bg-red-400/80" />
-                  <div className="w-2 h-2 rounded-full bg-amber-400/80" />
-                  <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
-                </div>
-                <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-1 flex justify-center items-center">
-                  <img src={isNight ? "/assets/schools/schools_bento_curriculum.png" : "/assets/schools/schools_bento_curriculum_light.png"} alt="Curriculum seeding interface" className="w-full h-auto object-contain filter drop-shadow-sm" loading="lazy" />
-                </div>
+
+              {/* Clean side image container: Semi-transparent by default -> Full opacity on hover */}
+              <div className="w-full md:w-1/2 flex justify-center items-center overflow-hidden rounded-2xl p-2">
+                <img 
+                  src={isNight ? "/assets/schools/schools_bento_curriculum.png" : "/assets/schools/schools_bento_curriculum_light.png"} 
+                  alt="Curriculum seeding interface" 
+                  className="w-full h-auto object-cover rounded-xl opacity-60 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-300 ease-out filter drop-shadow-md" 
+                  loading="lazy" 
+                />
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-zinc-200/60 dark:border-white/10 flex items-center gap-2 text-xs font-bold text-orange-500">
+            <div className={`mt-6 pt-4 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-2 text-xs font-bold text-orange-500`}>
               <span>{isKo ? '교재 기반 정답지로 환각 현상 0%' : 'Ground-truth answer keys eliminate AI hallucination'}</span>
               <Sparkle size={12} weight="bold" />
             </div>
           </div>
 
           {/* Bento Cell 2: Roster approvals (1 column) */}
-          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
+          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-300 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
-              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
-          } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
+              ? 'bg-[#050505] border-white/10 hover:border-purple-500/40' 
+              : 'bg-white border-zinc-200/90 hover:border-purple-500/40 shadow-sm'
+          } group relative overflow-hidden`}>
             <div>
               <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500 mb-5">
                 <Users size={20} weight="bold" />
@@ -298,28 +352,23 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </p>
             </div>
 
-            <div className={`mt-6 p-2 sm:p-2.5 rounded-2xl border transition-all duration-300 ${
-              isNight 
-                ? 'bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 border-white/10 ring-1 ring-white/5 shadow-xl' 
-                : 'bg-gradient-to-b from-slate-50 to-slate-100/80 border-slate-200/90 ring-1 ring-black/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
-            }`}>
-              <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
-                <div className="w-2 h-2 rounded-full bg-red-400/80" />
-                <div className="w-2 h-2 rounded-full bg-amber-400/80" />
-                <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
-              </div>
-              <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-1 flex justify-center items-center">
-                <img src={isNight ? "/assets/schools/schools_bento_join_code.png" : "/assets/schools/schools_bento_join_code_light.png"} alt="Class join code entry UI" className="w-full max-w-[220px] h-auto object-contain filter drop-shadow-sm" loading="lazy" />
-              </div>
+            {/* Clean image container: Semi-transparent by default -> Full opacity on hover */}
+            <div className="mt-6 w-full flex justify-center items-center overflow-hidden rounded-2xl p-2">
+              <img 
+                src={isNight ? "/assets/schools/schools_bento_join_code.png" : "/assets/schools/schools_bento_join_code_light.png"} 
+                alt="Class join code entry UI" 
+                className="w-full max-w-[280px] h-auto object-contain rounded-xl opacity-60 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-300 ease-out filter drop-shadow-md" 
+                loading="lazy" 
+              />
             </div>
           </div>
 
           {/* Bento Cell 3: Analytics (1 column) */}
-          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all ${
+          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-300 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
-              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
-          } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
+              ? 'bg-[#050505] border-white/10 hover:border-orange-500/40' 
+              : 'bg-white border-zinc-200/90 hover:border-orange-500/40 shadow-sm'
+          } group relative overflow-hidden`}>
             <div>
               <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-5">
                 <ChartBar size={20} weight="bold" />
@@ -334,29 +383,23 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </p>
             </div>
 
-            <div className={`mt-6 p-2 sm:p-2.5 rounded-2xl border transition-all duration-300 ${
-              isNight 
-                ? 'bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 border-white/10 ring-1 ring-white/5 shadow-xl' 
-                : 'bg-gradient-to-b from-slate-50 to-slate-100/80 border-slate-200/90 ring-1 ring-black/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
-            }`}>
-              <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
-                <div className="w-2 h-2 rounded-full bg-red-400/80" />
-                <div className="w-2 h-2 rounded-full bg-amber-400/80" />
-                <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
-              </div>
-              <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-1 flex justify-center items-center">
-                <img src={isNight ? "/assets/schools/schools_bento_diagnostics.png" : "/assets/schools/schools_bento_diagnostics_light.png"} alt="Classroom diagnostics dashboard" className="w-full max-w-[220px] h-auto object-contain filter drop-shadow-sm" loading="lazy" />
-              </div>
+            {/* Clean image container: Semi-transparent by default -> Full opacity on hover */}
+            <div className="mt-6 w-full flex justify-center items-center overflow-hidden rounded-2xl p-2">
+              <img 
+                src={isNight ? "/assets/schools/schools_bento_diagnostics.png" : "/assets/schools/schools_bento_diagnostics_light.png"} 
+                alt="Classroom diagnostics dashboard" 
+                className="w-full max-w-[280px] h-auto object-contain rounded-xl opacity-60 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-300 ease-out filter drop-shadow-md" 
+                loading="lazy" 
+              />
             </div>
           </div>
 
-          {/* Bento Cell 4: Parent Sync (Large block, spans 2 columns) */}
-          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl transition-all ${
+          {/* Bento Cell 4: Parent Sync (Spans 2 columns) */}
+          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl transition-all duration-300 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-white/20' 
-              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm'
-          } hover:-translate-y-0.5 duration-200 relative overflow-hidden group`}>
-
+              ? 'bg-[#050505] border-white/10 hover:border-pink-500/40' 
+              : 'bg-white border-zinc-200/90 hover:border-pink-500/40 shadow-sm'
+          } group relative overflow-hidden`}>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
               <div className="md:col-span-7 flex flex-col justify-between h-full">
                 <div>
@@ -372,27 +415,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       : 'Eliminate 5-10 hours a month of manual report writing. Chekki auto-compiles home scan data into encouraging, branded growth reports with 1 click.'}
                   </p>
                 </div>
-                <div className="pt-3 border-t border-zinc-200/60 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold text-pink-500">
+                <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-1.5 text-xs font-bold text-pink-500`}>
                   <CheckCircle size={14} weight="bold" />
                   <span>{isKo ? '선생님 행정 부담 90% 감소 & 재원율 증가' : 'Reduces teacher admin work by 90% & boosts retention'}</span>
                 </div>
               </div>
 
-              <div className="md:col-span-5 flex items-center justify-center">
-                <div className={`w-full max-w-[240px] md:max-w-[260px] p-2 sm:p-2.5 rounded-2xl border transition-all duration-300 ${
-                  isNight 
-                    ? 'bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 border-white/10 ring-1 ring-white/5 shadow-xl' 
-                    : 'bg-gradient-to-b from-slate-50 to-slate-100/80 border-slate-200/90 ring-1 ring-black/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
-                }`}>
-                  <div className="flex items-center gap-1.5 px-2 pb-1.5 border-b border-slate-200/50 dark:border-white/5 mb-1.5">
-                    <div className="w-2 h-2 rounded-full bg-red-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-amber-400/80" />
-                    <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
-                  </div>
-                  <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-950 p-1 flex justify-center items-center">
-                    <img src={isNight ? "/assets/schools/schools_bento_parent_care_dark.png" : "/assets/schools/schools_bento_parent_care_light.png"} alt="Parent homework report UI" className="w-full h-auto object-contain filter drop-shadow-sm" loading="lazy" />
-                  </div>
-                </div>
+              {/* Clean side image container: Semi-transparent by default -> Full opacity on hover */}
+              <div className="md:col-span-5 flex items-center justify-center overflow-hidden rounded-2xl p-2">
+                <img 
+                  src={isNight ? "/assets/schools/schools_bento_parent_care_dark.png" : "/assets/schools/schools_bento_parent_care_light.png"} 
+                  alt="Parent homework report UI" 
+                  className="w-full max-w-[300px] h-auto object-contain rounded-xl opacity-60 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-300 ease-out filter drop-shadow-md" 
+                  loading="lazy" 
+                />
               </div>
             </div>
           </div>
@@ -400,16 +436,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       </section>
 
       {/* --- REVIEWS / TESTIMONIALS --- */}
-      <section className={`py-20 border-t border-b ${isNight ? 'border-white/5 bg-white/[0.01]' : 'border-zinc-200 bg-zinc-50/50'}`}>
+      <section className={`py-20 border-t border-b transition-colors ${
+        isNight ? 'border-white/5 bg-white/[0.01]' : 'border-zinc-200/80 bg-zinc-100/50'
+      }`}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className={`font-display text-2xl sm:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-              {isKo ? '원장님들과 영어 강사들의 실사용 리뷰' : 'Proven to save hours for teachers weekly'}
+              {isKo ? '원장님들과 영어 강사들의 실사용 리뷰' : 'Proven to Save Hours for Teachers Weekly'}
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className={`p-6 rounded-2xl border ${isNight ? 'bg-zinc-950/80 border-white/5' : 'bg-white border-zinc-200'}`}>
+            <div className={`p-6 rounded-2xl border transition-colors ${
+              isNight ? 'bg-zinc-950/80 border-white/5' : 'bg-white border-zinc-200/80 shadow-sm'
+            }`}>
               <p className={`text-sm leading-relaxed mb-6 font-medium italic ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 {isKo 
                   ? '"매달 나가는 종이 오답노트 작성 시간이 90% 이상 줄어들었습니다. 아이들의 취약 어휘 통계가 자동으로 모이니 보강 준비가 훨씬 수월해졌고 학부모님들의 피드백 만족도가 정말 대단해요."'
@@ -423,14 +463,16 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <h4 className={`font-display text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {isKo ? '정유선 원장' : 'Yuseon Jeong'}
                   </h4>
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isNight ? 'text-zinc-500' : 'text-zinc-500'}`}>
                     {isKo ? '강남 대형 어학원 초등부 원장' : 'Director of Elementary Division'}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className={`p-6 rounded-2xl border ${isNight ? 'bg-zinc-950/80 border-white/5' : 'bg-white border-zinc-200'}`}>
+            <div className={`p-6 rounded-2xl border transition-colors ${
+              isNight ? 'bg-zinc-950/80 border-white/5' : 'bg-white border-zinc-200/80 shadow-sm'
+            }`}>
               <p className={`text-sm leading-relaxed mb-6 font-medium italic ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 {isKo 
                   ? '"숙제 검사에 걸리던 잡무가 완전히 사라졌습니다. 학부모님들께서 스스로 아이의 주간 진도를 앱에서 확인하시고, 승인 처리도 학급 코드로 깔끔하게 끝나서 원생 관리가 편해졌습니다."'
@@ -444,7 +486,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <h4 className={`font-display text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {isKo ? 'Kelly Kim 강사' : 'Kelly Kim'}
                   </h4>
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isNight ? 'text-zinc-500' : 'text-zinc-500'}`}>
                     {isKo ? '초등 영어 파닉스반 담임 교사' : 'Phonics Lead Teacher'}
                   </p>
                 </div>
@@ -455,7 +497,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       </section>
 
       {/* --- PRICING SECTION --- */}
-      <section id="pricing" className={`py-20 px-4 md:px-8 max-w-7xl mx-auto w-full ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+      <section id="pricing" className={`py-20 px-4 md:px-8 max-w-7xl mx-auto w-full transition-colors ${isNight ? 'text-white' : 'text-zinc-900'}`}>
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">
             {isKo ? '투명한 요금 정책' : 'PREDICTABLE SCHOOL PRICING'}
@@ -469,15 +511,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               : 'No usage-based line-item surprises. Simple per-teacher monthly tiers. Every school plan includes FREE Chekki Pro home accounts for all enrolled parents (₩9,900/mo value per family).'}
           </p>
 
-          {/* Monthly / Yearly Billing Toggle */}
-          <div className="inline-flex items-center p-1.5 bg-[#0a0a0c] border border-white/10 rounded-full shadow-inner mb-10">
+          {/* Monthly / Yearly Billing Toggle with Theme Adaptation */}
+          <div className={`inline-flex items-center p-1.5 border rounded-full shadow-inner mb-10 transition-colors ${
+            isNight ? 'bg-[#0a0a0c] border-white/10' : 'bg-zinc-200/70 border-zinc-300/80'
+          }`}>
             <button
               type="button"
               onClick={() => setBillingCycle('monthly')}
               className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 billingCycle === 'monthly'
                   ? 'bg-orange-500 text-white shadow-md'
-                  : 'text-zinc-400 hover:text-white'
+                  : isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
               {isKo ? '월간 결제' : 'Monthly Billing'}
@@ -488,7 +532,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               className={`px-5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 billingCycle === 'yearly'
                   ? 'bg-orange-500 text-white shadow-md'
-                  : 'text-zinc-400 hover:text-white'
+                  : isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
               <span>{isKo ? '연간 결제' : 'Yearly Billing'}</span>
@@ -498,27 +542,31 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </button>
           </div>
 
-          {/* 14-Day Free Teacher Trial Banner */}
-          <div className="max-w-2xl mx-auto p-4 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border border-orange-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
+          {/* 14-Day Free Teacher Trial Banner with Theme Adaptation */}
+          <div className={`max-w-2xl mx-auto p-4 border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left transition-colors ${
+            isNight 
+              ? 'bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border-orange-500/30' 
+              : 'bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 border-orange-200 shadow-sm'
+          }`}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-lg flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-lg flex-shrink-0">
                 🎁
               </div>
               <div>
-                <h4 className="text-sm font-black text-white">
+                <h4 className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                   {isKo ? '1인 강사 14일 무제한 무료 체험' : '14-Day FREE Teacher Trial'}
                 </h4>
-                <p className="text-xs text-zinc-400">
+                <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {isKo ? '결제 수단 등록 없이 강사 1인 14일간 모든 채점 기능 체험' : 'No credit card required. Experience all AI autograding features.'}
                 </p>
               </div>
             </div>
             <button
               type="button"
-              onClick={() => openPlanModal('trial', '14-Day Free Teacher Trial', '강사 1인 14일 무료 체험', 0, 1, 1)}
+              onClick={() => openPlanModal('trial', 1, 1)}
               className="w-full sm:w-auto px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-xl transition-all shadow-md active:scale-[0.97] whitespace-nowrap cursor-pointer"
             >
-              {isKo ? '무료 체험 신청하기' : 'Start Free Trial'}
+              {isKo ? '지금 무료 시작하기' : 'Start Free Trial'}
             </button>
           </div>
         </div>
@@ -526,7 +574,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto items-stretch">
           {/* Card 1: Freelancer & Solo Tutor */}
           <div 
-            onClick={() => openPlanModal('freelancer', 'Freelancer & Solo Tutor Plan (1 Teacher)', '프리랜서 & 개인 튜터 플랜 (1인 강사)', billingCycle === 'yearly' ? 28000 : 35000, 1, 1)}
+            onClick={() => openPlanModal('freelancer', 1, 1)}
             className={`p-6 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
               isNight 
                 ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
@@ -544,7 +592,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </h3>
               <div className="flex items-baseline gap-1 mb-3">
                 <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {isKo ? (billingCycle === 'yearly' ? '₩28,000' : '₩35,000') : (billingCycle === 'yearly' ? '$20' : '$25')}
+                  {formatPrice(getPlanUnitPrice('freelancer', billingCycle))}
                 </span>
                 <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
                   {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
@@ -586,7 +634,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                openPlanModal('freelancer', 'Freelancer & Solo Tutor Plan (1 Teacher)', '프리랜서 & 개인 튜터 플랜 (1인 강사)', billingCycle === 'yearly' ? 28000 : 35000, 1, 1);
+                openPlanModal('freelancer', 1, 1);
               }}
               className={`w-full py-3 font-bold text-xs rounded-2xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
                 isNight 
@@ -594,13 +642,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
               }`}
             >
-              {isKo ? '청구서 발행 신청' : 'Get Bank Invoice'}
+              {isKo ? '지금 시작하기' : 'Start Now'}
             </button>
           </div>
 
           {/* Card 2: Small School (1–2 Teachers) */}
           <div 
-            onClick={() => openPlanModal('small', 'Small School Plan (1-2 Teachers)', '소형 학원 플랜 (1~2인 강사)', billingCycle === 'yearly' ? 39000 : 49000, 2, 1)}
+            onClick={() => openPlanModal('small', 2, 1)}
             className={`p-6 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
               isNight 
                 ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
@@ -618,7 +666,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </h3>
               <div className="flex items-baseline gap-1 mb-3">
                 <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {isKo ? (billingCycle === 'yearly' ? '₩39,000' : '₩49,000') : (billingCycle === 'yearly' ? '$28' : '$35')}
+                  {formatPrice(getPlanUnitPrice('small', billingCycle))}
                 </span>
                 <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
                   {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인당)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
@@ -660,7 +708,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                openPlanModal('small', 'Small School Plan (1-2 Teachers)', '소형 학원 플랜 (1~2인 강사)', billingCycle === 'yearly' ? 39000 : 49000, 2, 1);
+                openPlanModal('small', 2, 1);
               }}
               className={`w-full py-3 font-bold text-xs rounded-2xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
                 isNight 
@@ -668,62 +716,66 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
               }`}
             >
-              {isKo ? '청구서 발행 신청' : 'Get Bank Invoice'}
+              {isKo ? '지금 시작하기' : 'Start Now'}
             </button>
           </div>
 
-          {/* Card 3: Medium School (3–5 Teachers) [MOST POPULAR] */}
+          {/* Card 3: Medium School (3–5 Teachers) [MOST POPULAR] - Theme Adaptive */}
           <div 
-            onClick={() => openPlanModal('medium', 'Medium Academy Plan (3-5 Teachers)', '중형 학원 플랜 (3~5인 강사)', billingCycle === 'yearly' ? 31000 : 39000, 3, 3)}
-            className="p-6 border border-orange-500/60 bg-[#0a0705] rounded-3xl flex flex-col justify-between transition-all relative shadow-2xl shadow-orange-500/10 scale-[1.02] cursor-pointer group hover:border-orange-500"
+            onClick={() => openPlanModal('medium', 3, 3)}
+            className={`p-6 border rounded-3xl flex flex-col justify-between transition-all relative scale-[1.02] cursor-pointer group ${
+              isNight 
+                ? 'bg-[#0a0705] border-orange-500/80 text-white shadow-2xl shadow-orange-500/10 hover:border-orange-500' 
+                : 'bg-gradient-to-b from-orange-500/[0.08] to-white border-2 border-orange-500 text-zinc-900 shadow-xl hover:border-orange-600'
+            }`}
           >
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-orange-500 text-white text-[9px] font-black tracking-widest uppercase rounded-full shadow-lg">
               {isKo ? '가장 인기 있는 플랜' : 'MOST POPULAR'}
             </div>
             <div>
               <div className="flex justify-between items-center mb-3 pt-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-orange-400">
+                <span className="text-[10px] font-black uppercase tracking-wider text-orange-500">
                   {isKo ? '중형 학원 (3~5인 강사)' : '3–5 TEACHERS'}
                 </span>
               </div>
-              <h3 className="text-base font-black mb-1 text-white">
+              <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '중형 어학원 플랜' : 'Medium Academy Plan'}
               </h3>
               <div className="flex items-baseline gap-1 mb-3">
-                <span className="font-display text-3xl font-black text-white">
-                  {isKo ? (billingCycle === 'yearly' ? '₩31,000' : '₩39,000') : (billingCycle === 'yearly' ? '$22' : '$28')}
+                <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {formatPrice(getPlanUnitPrice('medium', billingCycle))}
                 </span>
-                <span className="text-[11px] text-zinc-400 font-bold">
+                <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
                   {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인당)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
                 </span>
               </div>
-              <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
+              <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
                   ? '🎯 대상: 체계적인 멀티 강사 수강 관리 및 학부모 소통이 필요한 중형 학원 (최대 200인 원생)' 
                   : '🎯 Target: Established growing academies needing multi-teacher roster management (up to 200 students).'}
               </p>
-              <ul className="space-y-2.5 text-xs text-zinc-300 mb-6 border-t border-white/10 pt-4">
+              <ul className={`space-y-2.5 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/10 text-zinc-300' : 'border-zinc-200 text-zinc-700'}`}>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400 flex-shrink-0" />
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
                   <span>{isKo ? '소형 플랜의 모든 기능 포함' : 'Includes all Small School features'}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400 flex-shrink-0" />
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
                   <span>{isKo ? '강사 3~5인 포털 계정 (최대 200인 원생)' : '3–5 Teacher Seats (Up to 200 students)'}</span>
                 </li>
-                <li className="flex items-center gap-2 font-bold text-orange-400">
+                <li className="flex items-center gap-2 font-bold text-orange-500">
                   <Sparkle size={14} weight="bold" className="flex-shrink-0" />
                   <span>{isKo ? '맞춤 학원 로고 & PDF 성적표 브랜드' : 'Custom Academy Logo on PDF Reports'}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400 flex-shrink-0" />
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
                   <span>{isKo ? '중앙 반별 학급 관리 시스템' : 'Centralized Class Roster Management'}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle size={14} weight="bold" className="text-emerald-400 flex-shrink-0" />
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
                   <span>{isKo ? '우선 기술 지원 & 온보딩 가이드' : 'Priority Technical Support & Onboarding'}</span>
                 </li>
-                <li className="flex items-center gap-2 font-bold text-orange-400">
+                <li className="flex items-center gap-2 font-bold text-orange-500">
                   <Sparkle size={14} weight="bold" className="flex-shrink-0" />
                   <span>{isKo ? '소속 학부모 Chekki Pro 앱 무료' : 'FREE Chekki Pro App for Parents'}</span>
                 </li>
@@ -733,17 +785,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                openPlanModal('medium', 'Medium Academy Plan (3-5 Teachers)', '중형 학원 플랜 (3~5인 강사)', billingCycle === 'yearly' ? 31000 : 39000, 3, 3);
+                openPlanModal('medium', 3, 3);
               }}
               className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
             >
-              {isKo ? '청구서 발행 신청' : 'Get Bank Invoice'}
+              {isKo ? '지금 시작하기' : 'Start Now'}
             </button>
           </div>
 
           {/* Card 4: Large School & Franchise (6+ Teachers) */}
           <div 
-            onClick={() => openPlanModal('large', 'Large Academy Plan (6+ Teachers)', '대형 학원 플랜 (6인 이상)', billingCycle === 'yearly' ? 23000 : 29000, 6, 6)}
+            onClick={() => openPlanModal('large', 6, 6)}
             className={`p-6 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
               isNight 
                 ? 'bg-[#050505] border-white/10 hover:border-purple-500/50 hover:bg-zinc-900/30' 
@@ -761,7 +813,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </h3>
               <div className="flex items-baseline gap-1 mb-3">
                 <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {isKo ? (billingCycle === 'yearly' ? '₩23,000' : '₩29,000') : (billingCycle === 'yearly' ? '$17' : '$22')}
+                  {formatPrice(getPlanUnitPrice('large', billingCycle))}
                 </span>
                 <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
                   {isKo ? (billingCycle === 'yearly' ? '/월 (연간 결제)' : '/월 (강사 1인당)') : (billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo per teacher')}
@@ -803,19 +855,19 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                openPlanModal('large', 'Large Academy Plan (6+ Teachers)', '대형 학원 플랜 (6인 이상)', billingCycle === 'yearly' ? 23000 : 29000, 6, 6);
+                openPlanModal('large', 6, 6);
               }}
               className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-2xl text-center transition-all active:scale-[0.98] shadow-md cursor-pointer"
             >
-              {isKo ? '청구서 발행 신청' : 'Get Bank Invoice'}
+              {isKo ? '지금 시작하기' : 'Start Now'}
             </button>
           </div>
         </div>
       </section>
 
       {/* --- GET IN TOUCH & CONSULTATION SECTION --- */}
-      <section id="demo" className={`py-20 px-6 max-w-4xl mx-auto w-full text-center rounded-3xl my-12 border ${
-        isNight ? 'bg-gradient-to-b from-zinc-950 to-[#050505] border-white/10' : 'bg-gradient-to-b from-orange-50/50 to-white border-zinc-200 shadow-md'
+      <section id="demo" className={`py-20 px-6 max-w-4xl mx-auto w-full text-center rounded-3xl my-12 border transition-colors ${
+        isNight ? 'bg-gradient-to-b from-zinc-950 to-[#050505] border-white/10' : 'bg-gradient-to-b from-orange-50/70 to-white border-zinc-200 shadow-md'
       }`}>
         <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">
           {isKo ? '학원 도입 & 맞춤 상담' : 'CUSTOM ONBOARDING & CONSULTATION'}
@@ -835,16 +887,16 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             onClick={() => {
               const pricingEl = document.getElementById('pricing');
               if (pricingEl) pricingEl.scrollIntoView({ behavior: 'smooth' });
-              else openPlanModal('medium', 'Medium Academy Plan (3-5 Teachers)', '중형 학원 플랜 (3~5인 강사)', 39000, 3, 3);
+              else openPlanModal('medium', 3, 3);
             }}
             className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>{isKo ? '요금제 플랜 선택하기' : 'Select a Plan'}</span>
+            <span>{isKo ? '지금 시작하기' : 'Start Now'}</span>
             <ArrowRight size={16} weight="bold" />
           </button>
           <button
             type="button"
-            onClick={() => openPlanModal('custom', 'Custom Academy Setup', '맞춤 학원 도입 상담', 0, 1, 1)}
+            onClick={() => openPlanModal('custom', 1, 1)}
             className={`w-full sm:w-auto px-8 py-4 font-bold text-sm rounded-2xl border transition-all active:scale-[0.97] cursor-pointer ${
               isNight 
                 ? 'bg-white/5 hover:bg-white/10 text-white border-white/10' 
@@ -856,18 +908,26 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
-      {/* --- CORPORATE BANK TRANSFER & TAX INVOICE MODAL --- */}
+      {/* --- CORPORATE BANK TRANSFER & TAX INVOICE MODAL WITH FULL THEME SUPPORT --- */}
       {showBankModal && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 overflow-y-auto">
           <div 
-            className="fixed inset-0 bg-black/85 backdrop-blur-md" 
+            className={`fixed inset-0 backdrop-blur-md transition-opacity ${isNight ? 'bg-black/85' : 'bg-zinc-900/60'}`} 
             onClick={() => setShowBankModal(false)} 
           />
-          <div className="relative w-full max-w-lg p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8">
-            <div className="bg-[#0c0c0e] rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 text-zinc-200">
+          <div className={`relative w-full max-w-lg p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
+            isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
+          }`}>
+            <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
+              isNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+            }`}>
               <button
                 onClick={() => setShowBankModal(false)}
-                className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all active:scale-[0.95]"
+                className={`absolute top-6 right-6 p-2 rounded-full transition-all active:scale-[0.95] ${
+                  isNight 
+                    ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' 
+                    : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                }`}
               >
                 <X size={18} weight="bold" />
               </button>
@@ -880,69 +940,87 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       <Receipt size={24} weight="bold" />
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 font-mono">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 font-mono">
                         {isKo ? '신청 접수 완료' : 'APPLICATION SUBMITTED'}
                       </span>
-                      <h3 className="text-xl font-black text-white">
+                      <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                         {isKo ? '학원 정보 접수 & 청구서 발송' : 'Invoice & Onboarding Requested'}
                       </h3>
                     </div>
                   </div>
 
-                  <p className="text-xs text-zinc-300 leading-relaxed bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-xl">
+                  <p className={`text-xs leading-relaxed p-3.5 rounded-xl border ${
+                    isNight 
+                      ? 'text-zinc-300 bg-emerald-500/10 border-emerald-500/20' 
+                      : 'text-zinc-700 bg-emerald-50 border-emerald-200'
+                  }`}>
                     {isKo 
                       ? `✅ 학원 등록 정보가 Chekki AI 운영팀에 전달되었습니다! 아래 입금 계좌로 수강료를 입금해 주시면, 24시간 이내에 입력해주신 이메일(${invoiceResult.email})로 국세청 전자 세금계산서와 교사 인증 코드가 자동 발송됩니다.`
                       : `✅ Your academy details have been registered with Chekki AI! A confirmation & tax invoice email has been sent to ${invoiceResult.email}. Please refer to the bank account details below to complete your payment.`}
                   </p>
 
                   {/* Summary Card */}
-                  <div className="p-5 bg-[#050505] border border-white/10 rounded-2xl space-y-3">
-                    <div className="flex justify-between items-center text-xs pb-3 border-b border-white/5 font-mono">
-                      <span className="text-zinc-500">{isKo ? '청구 코드' : 'Invoice ID'}:</span>
-                      <span className="font-bold text-orange-400">{invoiceResult.invoiceId}</span>
+                  <div className={`p-5 border rounded-2xl space-y-3 ${
+                    isNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-200'
+                  }`}>
+                    <div className={`flex justify-between items-center text-xs pb-3 border-b font-mono ${
+                      isNight ? 'border-white/5' : 'border-zinc-200'
+                    }`}>
+                      <span className={isNight ? 'text-zinc-500' : 'text-zinc-500'}>{isKo ? '청구 코드' : 'Invoice ID'}:</span>
+                      <span className="font-bold text-orange-500">{invoiceResult.invoiceId}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-zinc-400">{isKo ? '학원 / 기관명' : 'Academy Name'}:</span>
-                      <span className="font-bold text-white">{invoiceResult.academyName}</span>
+                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '학원 / 기관명' : 'Academy Name'}:</span>
+                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.academyName}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-zinc-400">{isKo ? '선택 플랜' : 'Selected Plan'}:</span>
-                      <span className="font-bold text-white">{isKo ? selectedPlan.nameKo : selectedPlan.nameEn}</span>
+                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '선택 플랜' : 'Selected Plan'}:</span>
+                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? activePlan.nameKo : activePlan.nameEn}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-zinc-400">{isKo ? '신청 강사 수' : 'Teacher Seats'}:</span>
-                      <span className="font-bold text-white">{invoiceResult.teacherCount} {isKo ? '명' : 'seats'}</span>
+                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '신청 강사 수' : 'Teacher Seats'}:</span>
+                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.teacherCount} {isKo ? '명' : 'seats'}</span>
                     </div>
                     {invoiceResult.studentCount && (
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-zinc-400">{isKo ? '추정 재원생 수' : 'Enrolled Students'}:</span>
-                        <span className="font-bold text-white">{invoiceResult.studentCount} {isKo ? '명' : 'students'}</span>
+                        <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '추정 재원생 수' : 'Enrolled Students'}:</span>
+                        <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.studentCount} {isKo ? '명' : 'students'}</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-zinc-400">{isKo ? '수신 이메일' : 'Tax Invoice Email'}:</span>
-                      <span className="font-bold text-white font-mono">{invoiceResult.email}</span>
+                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '수신 이메일' : 'Tax Invoice Email'}:</span>
+                      <span className={`font-bold font-mono ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.email}</span>
                     </div>
-                    <div className="flex justify-between items-center text-sm pt-2 border-t border-white/5 font-bold">
-                      <span className="text-zinc-300">{isKo ? '총 입금 금액' : 'Total Amount'}:</span>
-                      <span className="text-xl font-black text-emerald-400 font-mono">
-                        ₩{(invoiceResult.totalAmount || 0).toLocaleString()}
+                    <div className={`flex justify-between items-center text-sm pt-2 border-t font-bold ${
+                      isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-200 text-zinc-700'
+                    }`}>
+                      <span>{isKo ? '총 입금 금액' : 'Total Amount'}:</span>
+                      <span className="text-xl font-black text-emerald-500 font-mono">
+                        {formatPrice(invoiceResult.totalAmount || 0)}
                       </span>
                     </div>
                   </div>
 
                   {/* Corporate Bank Account Details */}
-                  <div className="p-5 bg-orange-500/10 border border-orange-500/30 rounded-2xl space-y-3">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 flex items-center gap-1.5 font-mono">
+                  <div className={`p-5 border rounded-2xl space-y-3 ${
+                    isNight ? 'bg-orange-500/10 border-orange-500/30' : 'bg-orange-50 border-orange-200'
+                  }`}>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 flex items-center gap-1.5 font-mono">
                       <Bank size={14} weight="bold" />
                       <span>{isKo ? '체키AI 법인 계좌 정보' : 'Chekki AI Corporate Bank Account'}</span>
                     </span>
 
                     <div className="space-y-1.5 text-xs">
-                      <p className="text-zinc-400">{isKo ? '은행' : 'Bank'}: <strong className="text-white">신한은행 (Shinhan Bank)</strong></p>
-                      <p className="text-zinc-400">{isKo ? '예금주' : 'Holder'}: <strong className="text-white">BENJAMIN JASON</strong></p>
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-orange-500/20">
-                        <p className="font-mono text-lg font-black text-white select-all">110-623-147138</p>
+                      <p className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
+                        {isKo ? '은행' : 'Bank'}: <strong className={isNight ? 'text-white' : 'text-zinc-900'}>신한은행 (Shinhan Bank)</strong>
+                      </p>
+                      <p className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
+                        {isKo ? '예금주' : 'Holder'}: <strong className={isNight ? 'text-white' : 'text-zinc-900'}>BENJAMIN JASON</strong>
+                      </p>
+                      <div className={`flex items-center justify-between gap-2 pt-2 border-t ${
+                        isNight ? 'border-orange-500/20' : 'border-orange-200'
+                      }`}>
+                        <p className={`font-mono text-lg font-black select-all ${isNight ? 'text-white' : 'text-zinc-900'}`}>110-623-147138</p>
                         <button
                           type="button"
                           onClick={() => {
@@ -963,7 +1041,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <button
                       type="button"
                       onClick={() => window.print()}
-                      className="w-1/3 py-3.5 bg-white/10 hover:bg-white/15 text-white font-bold text-xs rounded-2xl border border-white/10 transition-all active:scale-[0.98] cursor-pointer"
+                      className={`w-1/3 py-3.5 font-bold text-xs rounded-2xl border transition-all active:scale-[0.98] cursor-pointer ${
+                        isNight ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-200'
+                      }`}
                     >
                       {isKo ? '청구서 인쇄' : 'Print Invoice'}
                     </button>
@@ -977,27 +1057,27 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   </div>
                 </div>
               ) : (
-                /* Bank Transfer Request Form */
+                /* Bank Transfer & Onboarding Form */
                 <form onSubmit={handleRequestBankInvoice} className="space-y-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center flex-shrink-0">
                       <Bank size={20} weight="bold" />
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest block font-mono">
-                        {isKo ? '학원 정보 입력 & 청구서 신청' : 'ACADEMY DETAILS & INVOICE'}
+                      <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block font-mono">
+                        {isKo ? '학원 정보 입력 & 지금 시작' : 'SCHOOL SETUP & ONBOARDING'}
                       </span>
-                      <h3 className="text-xl font-black text-white">
-                        {isKo ? '학원 정보 입력 및 세금계산서 신청' : 'School Details & Bank Invoice'}
+                      <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                        {isKo ? '학원 정보 입력 및 서비스 시작' : 'School Details & Setup'}
                       </h3>
-                      <p className="text-xs text-zinc-400 font-bold">
-                        {isKo ? selectedPlan.nameKo : selectedPlan.nameEn}
+                      <p className="text-xs text-orange-500 font-bold">
+                        {isKo ? activePlan.nameKo : activePlan.nameEn}
                       </p>
                     </div>
                   </div>
 
                   <div className="space-y-1 text-left">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                    <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                       {isKo ? '교육기관명 / 학원명 *' : 'Academy / Organization Name *'}
                     </label>
                     <input
@@ -1006,13 +1086,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       value={academyName}
                       onChange={(e) => setAcademyName(e.target.value)}
                       placeholder="E.g. POLY Seocho / Chekki English Studio"
-                      className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                      className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
+                        isNight 
+                          ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
+                          : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
+                      }`}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1 text-left">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                         {isKo ? '담당자 성함 *' : 'Contact Name *'}
                       </label>
                       <input
@@ -1021,28 +1105,36 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         value={contactName}
                         onChange={(e) => setContactName(e.target.value)}
                         placeholder="John Doe"
-                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
+                          isNight 
+                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
+                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
+                        }`}
                       />
                     </div>
                     <div className="space-y-1 text-left">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                         {isKo ? '필요 강사 수 *' : 'Teacher Seats *'}
                       </label>
                       <input
                         type="number"
-                        min={selectedPlan.minSeats || 1}
-                        disabled={selectedPlan.id === 'freelancer'}
+                        min={activePlan.minSeats || 1}
+                        disabled={selectedPlanId === 'freelancer' || selectedPlanId === 'trial'}
                         required
                         value={teacherCount}
-                        onChange={(e) => setTeacherCount(Math.max(selectedPlan.minSeats || 1, Number(e.target.value)))}
-                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white font-mono disabled:opacity-60"
+                        onChange={(e) => setTeacherCount(Math.max(activePlan.minSeats || 1, Number(e.target.value)))}
+                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all font-mono disabled:opacity-60 ${
+                          isNight 
+                            ? 'bg-[#050505] border-white/10 text-white' 
+                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 focus:bg-white'
+                        }`}
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1 text-left">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                         {isKo ? '세금계산서 수신 이메일 *' : 'Tax Invoice Email *'}
                       </label>
                       <input
@@ -1051,11 +1143,15 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="billing@academy.com"
-                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
+                          isNight 
+                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
+                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
+                        }`}
                       />
                     </div>
                     <div className="space-y-1 text-left">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                         {isKo ? '재원생 수 (선택)' : 'Enrolled Students'}
                       </label>
                       <input
@@ -1063,14 +1159,18 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         value={studentCount}
                         onChange={(e) => setStudentCount(e.target.value)}
                         placeholder="E.g. 50"
-                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
+                          isNight 
+                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
+                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
+                        }`}
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1 text-left">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                         {isKo ? '사업자등록번호 (선택)' : 'Biz Reg Number (Optional)'}
                       </label>
                       <input
@@ -1078,11 +1178,15 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         value={bizRegNumber}
                         onChange={(e) => setBizRegNumber(e.target.value)}
                         placeholder="123-45-67890"
-                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white font-mono"
+                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all font-mono ${
+                          isNight 
+                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
+                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
+                        }`}
                       />
                     </div>
                     <div className="space-y-1 text-left">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                         {isKo ? '연락처 (선택)' : 'Phone Number'}
                       </label>
                       <input
@@ -1090,16 +1194,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="010-0000-0000"
-                        className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all text-white"
+                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
+                          isNight 
+                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
+                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
+                        }`}
                       />
                     </div>
                   </div>
 
-                  {selectedPlan.price > 0 && (
-                    <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center text-xs mt-2">
-                      <span className="text-zinc-400 font-bold">{isKo ? '월 정액 청구 금액' : 'Total Monthly Amount'}:</span>
-                      <span className="text-lg font-black text-emerald-400 font-mono">
-                        ₩{(selectedPlan.price * teacherCount).toLocaleString()}
+                  {getPlanUnitPrice(selectedPlanId, billingCycle) > 0 && (
+                    <div className={`p-4 border rounded-2xl flex justify-between items-center text-xs mt-2 ${
+                      isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-100/70 border-zinc-200'
+                    }`}>
+                      <span className={`font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                        {isKo ? '월 정액 청구 금액' : 'Total Monthly Amount'}:
+                      </span>
+                      <span className="text-lg font-black text-emerald-500 font-mono">
+                        {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle) * teacherCount)}
                       </span>
                     </div>
                   )}
@@ -1113,7 +1225,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        <span>{isKo ? '신청서 제출 및 청구서 발송 요청' : 'Submit Request & Get Bank Invoice'}</span>
+                        <span>{isKo ? '지금 바로 시작하기' : 'Start Now & Get Invoice'}</span>
                         <ArrowRight size={14} weight="bold" />
                       </>
                     )}
@@ -1126,7 +1238,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       )}
 
       {/* --- FOOTER --- */}
-      <footer className={`py-12 border-t ${isNight ? 'border-white/5 bg-black/30' : 'border-zinc-200 bg-white'} px-6 text-center`}>
+      <footer className={`py-12 border-t ${isNight ? 'border-white/5 bg-black/30' : 'border-zinc-200 bg-white'} px-6 text-center transition-colors`}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-xs text-zinc-500 font-medium">
             © {new Date().getFullYear()} ChekkiAI. All rights reserved.
@@ -1143,7 +1255,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             >
               {isKo ? '메인 서비스로 이동' : 'Main Service'}
             </a>
-            <span className="text-zinc-800">|</span>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
             <a
               href="/teacher"
               onClick={(e) => {
