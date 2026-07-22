@@ -615,13 +615,15 @@ Extract the core teaching components from this textbook page image:
 - "vocabWords": Target vocabulary words printed on the page as an array of strings.
 - "phonicsRules": Phonics sounds or letter blend patterns highlighted as an array of strings (e.g. ["-ai-", "-ay-", "sh-"]).
 - "passage": Target reading passage text or story paragraph on the page.
+- "other": Any additional curriculum notes, extra grammar rules, teacher instructions, or homework guidelines on the page directly related to learning English (e.g. "Speaking: Practice reading the word umbrella 3 times."). Filter out any inappropriate or non-educational content.
 
 Return ONLY valid JSON matching this schema:
 {
   "topic": string,
   "vocabWords": string[],
   "phonicsRules": string[],
-  "passage": string
+  "passage": string,
+  "other": string
 }`
               },
               {
@@ -647,7 +649,8 @@ Return ONLY valid JSON matching this schema:
             topic: 'Weather & Nature',
             vocabWords: ['sunny', 'rainy', 'windy', 'cloudy', 'umbrella', 'storm'],
             phonicsRules: ['-ai-', '-ay-', 'sh-'],
-            passage: 'The weather was rainy today. Always remember your umbrella!'
+            passage: 'The weather was rainy today. Always remember your umbrella!',
+            other: 'Homework: Practice spelling target vocabulary twice and read page 24 out loud.'
           }
         });
       }

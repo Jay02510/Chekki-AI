@@ -89,6 +89,15 @@ service cloud.firestore {
       return qValid && aValid;
     }
 
+    // Helper to validate curriculum pre-seeding documents including the 'other' field
+    function isValidCurriculum() {
+      let data = request.resource.data;
+      let topicValid = !data.keys().hasAny(['topic']) || (data.topic is string && data.topic.size() <= 2000);
+      let passageValid = !data.keys().hasAny(['passage']) || (data.passage is string && data.passage.size() <= 10000);
+      let otherValid = !data.keys().hasAny(['other']) || (data.other is string && data.other.size() <= 10000);
+      return topicValid && passageValid && otherValid;
+    }
+
     // Mistakes: Strict ownership check & authorized teacher analytics access.
     match /mistakes/{mistakeId} {
       allow get, list: if request.auth != null && (
@@ -232,12 +241,12 @@ service cloud.firestore {
         isClassTeacher(request.resource.data.classId) ||
         (request.resource.data.teacherUid != null && request.resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
-      );
+      ) && isValidCurriculum();
       allow update: if request.auth != null && (
         (isClassTeacher(resource.data.classId) && isClassTeacher(request.resource.data.classId)) ||
         (resource.data.teacherUid == request.auth.uid && request.resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
-      );
+      ) && isValidCurriculum();
       allow delete: if request.auth != null && (
         isClassTeacher(resource.data.classId) ||
         (resource.data.teacherUid != null && resource.data.teacherUid == request.auth.uid) ||

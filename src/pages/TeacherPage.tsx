@@ -37,7 +37,8 @@ import {
   Image,
   File,
   Sun,
-  Moon
+  Moon,
+  Info
 } from '@phosphor-icons/react';
 
 interface Props {
@@ -87,6 +88,8 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [curriculumVocab, setCurriculumVocab] = useState('');
   const [curriculumPhonics, setCurriculumPhonics] = useState('');
   const [curriculumPassage, setCurriculumPassage] = useState('');
+  const [curriculumOther, setCurriculumOther] = useState('');
+  const [curriculumSlideIndex, setCurriculumSlideIndex] = useState(0);
   const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
   const [isSavingCurriculum, setIsSavingCurriculum] = useState(false);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -144,6 +147,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           setCurriculumPhonics(phonicsStr);
         }
         if (data.analysis.passage) setCurriculumPassage(data.analysis.passage);
+        if (data.analysis.other) setCurriculumOther(data.analysis.other);
       }
     } catch (err) {
       console.error('Failed to scan textbook page:', err);
@@ -152,6 +156,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       setCurriculumVocab('sunny, rainy, windy, cloudy, stormy, umbrella, jacket');
       setCurriculumPhonics('-ai-, -ay-, sh-, ch-');
       setCurriculumPassage('The weather was rainy today. Always remember your umbrella!');
+      setCurriculumOther('Homework: Read page 24 twice out loud & practice spelling words.');
     } finally {
       setIsScanningTextbook(false);
     }
@@ -514,11 +519,13 @@ export default function TeacherPage({ isNight = true }: Props) {
         setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : data.vocabWords || '');
         setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : data.phonicsRules || '');
         setCurriculumPassage(data.passage || '');
+        setCurriculumOther(data.other || '');
       } else {
         setCurriculumTopic('');
         setCurriculumVocab('');
         setCurriculumPhonics('');
         setCurriculumPassage('');
+        setCurriculumOther('');
       }
     } catch (e) {
       console.warn('LocalStorage curriculum load error:', e);
@@ -534,6 +541,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : data.vocabWords || '');
         setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : data.phonicsRules || '');
         setCurriculumPassage(data.passage || '');
+        setCurriculumOther(data.other || '');
         try {
           localStorage.setItem(localKey, JSON.stringify(data));
         } catch (e) {}
@@ -548,6 +556,36 @@ export default function TeacherPage({ isNight = true }: Props) {
   const handleSaveCurriculum = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedClass) return;
+
+    // --- GUARDRAIL VALIDATION FOR "OTHER" FIELD ---
+    const otherText = curriculumOther.trim();
+    if (otherText) {
+      const lower = otherText.toLowerCase();
+      const restrictedWords = [
+        'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'crap', 'dick', 'pussy', 'slut', 'whore',
+        '씨발', '개새끼', '병신', '지랄', '존나', '좆', '꺼져', '미친년', '미친놈'
+      ];
+      for (const badWord of restrictedWords) {
+        if (lower.includes(badWord)) {
+          alert(isKo 
+            ? `[보안 경고] 부적절한 단어("${badWord}")가 포함되어 있습니다. 학습에 적합한 언어를 사용해 주세요.` 
+            : `[Security Warning] Inappropriate term detected ("${badWord}"). Please use appropriate educational content.`
+          );
+          return;
+        }
+      }
+
+      // Check for English learning relevance (must contain English letters or educational keywords)
+      const hasEnglishText = /[a-zA-Z]/.test(otherText);
+      if (!hasEnglishText) {
+        alert(isKo 
+          ? '[작성 안내] 기타 필드에는 영어 학습 관련 지침(예: "Speaking: Practice reading the word umbrella 3 times.")이 포함되어야 합니다.' 
+          : '[Content Notice] The Other field must include English instruction (e.g. "Speaking: Practice reading the word umbrella 3 times.").'
+        );
+        return;
+      }
+    }
+
     setIsSavingCurriculum(true);
     const currDocId = `${selectedClass.id}_week_${selectedClass.activeWeekNumber || 1}`;
     const localKey = `curriculum_${currDocId}`;
@@ -564,6 +602,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         vocabWords: vocabList,
         phonicsRules: phonicsList,
         passage: curriculumPassage.trim(),
+        other: curriculumOther.trim(),
         updatedAt: new Date().toISOString()
       };
 
@@ -1390,10 +1429,24 @@ export default function TeacherPage({ isNight = true }: Props) {
             )}
           </div>
 
-          {/* Right Controls: Active Week Counter + Language Switcher + Theme Toggle */}
+          {/* Right Controls: Active Week Counter + Report Generator + Language Switcher + Theme Toggle */}
           <div className="flex items-center gap-3">
             {selectedClass && (
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReportCardModal(true)}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl border transition-all cursor-pointer active:scale-[0.96] text-xs font-bold ${
+                    isThemeNight
+                      ? 'bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/30 text-orange-400'
+                      : 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700 shadow-sm'
+                  }`}
+                  title={isKo ? '1초 학부모 성적표 및 성장 리포트 생성기 열기' : 'Open 1-Click Parent Progress Report Generator'}
+                >
+                  <Printer size={15} weight="bold" />
+                  <span>{isKo ? '성적표 생성기' : 'Report Generator'}</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setShowWeekCalendarModal(true)}
@@ -1604,7 +1657,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   {/* Main Overview Grid */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Left/Middle Column: Trouble Words */}
+                    {/* Left/Middle Column: Weekly Focus & Curriculum Targets (Slide Switcher) */}
                     <div className={`lg:col-span-2 p-1 rounded-[2.5rem] text-left transition-colors ${
                       isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
                     }`}>
@@ -1612,82 +1665,284 @@ export default function TeacherPage({ isNight = true }: Props) {
                         isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
                       }`}>
                         <div>
-                          <div className="flex items-center justify-between mb-3">
+                          {/* Header: Title + Slide Nav Controls */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
-                                <Lightbulb size={20} weight="bold" />
+                              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center font-bold">
+                                {curriculumSlideIndex === 0 && <Lightbulb size={20} weight="bold" />}
+                                {curriculumSlideIndex === 1 && <Sparkle size={20} weight="bold" />}
+                                {curriculumSlideIndex === 2 && <Notebook size={20} weight="bold" />}
+                                {curriculumSlideIndex === 3 && <BookOpen size={20} weight="bold" />}
+                                {curriculumSlideIndex === 4 && <FileText size={20} weight="bold" />}
                               </div>
                               <div>
                                 <h4 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                                  {isKo ? '이번 주 핵심 복습 키워드' : 'Weekly Focus & Growth Keywords'}
+                                  {isKo ? '주간 AI 커리큘럼 & 오답 분석' : 'Weekly AI Curriculum & Insights'}
                                 </h4>
+                                <p className="text-[11px] text-zinc-400 font-medium">
+                                  {isKo ? 'AI가 추출한 이번 주 학습 목표와 오답 현황' : 'AI-extracted weekly learning targets & student statistics'}
+                                </p>
                               </div>
                             </div>
-                            <span className={`text-[10px] uppercase font-bold tracking-widest text-zinc-500 font-mono px-3 py-1 rounded-full border ${
-                              isThemeNight ? 'bg-white/5 border-white/5' : 'bg-zinc-100 border-zinc-200'
-                            }`}>
-                              Analytics
-                            </span>
+
+                            {/* Slide Prev/Next Controls */}
+                            <div className="flex items-center gap-2 self-start sm:self-auto">
+                              <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-full border ${
+                                isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-600'
+                              }`}>
+                                {curriculumSlideIndex + 1} / 5
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setCurriculumSlideIndex((prev) => (prev === 0 ? 4 : prev - 1))}
+                                  className={`w-8 h-8 rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+                                    isThemeNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
+                                  }`}
+                                  title="Previous Slide"
+                                >
+                                  ◀
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setCurriculumSlideIndex((prev) => (prev === 4 ? 0 : prev + 1))}
+                                  className={`w-8 h-8 rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+                                    isThemeNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
+                                  }`}
+                                  title="Next Slide"
+                                >
+                                  ▶
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                            {isKo 
-                              ? '아이들이 이번 주 더 자신감을 가질 수 있도록 수업 시간에 함께 다뤄볼 복습 키워드입니다.' 
-                              : "Key vocabulary and phonics targets to reinforce in class to build every student's confidence."}
-                          </p>
+
+                          {/* Slide Pill Tabs Bar */}
+                          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-6 custom-scrollbar">
+                            {[
+                              { id: 0, labelEn: 'Words', labelKo: '복습 단어', icon: '🔤' },
+                              { id: 1, labelEn: 'Week Theme', labelKo: '주간 테마', icon: '🎯' },
+                              { id: 2, labelEn: 'Phonics', labelKo: '파닉스 규칙', icon: '🔊' },
+                              { id: 3, labelEn: 'Reading Passage', labelKo: '본문 지문', icon: '📖' },
+                              { id: 4, labelEn: 'Other Notes', labelKo: '기타 참고', icon: '📝' },
+                            ].map((slide) => (
+                              <button
+                                key={slide.id}
+                                type="button"
+                                onClick={() => setCurriculumSlideIndex(slide.id)}
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                                  curriculumSlideIndex === slide.id
+                                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                                    : isThemeNight
+                                      ? 'bg-white/5 hover:bg-white/10 text-zinc-400 border border-white/5'
+                                      : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600 border border-zinc-200'
+                                }`}
+                              >
+                                <span>{slide.icon}</span>
+                                <span>{isKo ? slide.labelKo : slide.labelEn}</span>
+                              </button>
+                            ))}
+                          </div>
                         </div>
 
-                        {activeVocabWords.length === 0 ? (
-                          <div className={`py-12 px-6 rounded-2xl border flex flex-col items-center justify-center text-center ${
-                            isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
-                          }`}>
-                            <div className="w-14 h-14 mb-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
-                              <Notebook size={28} weight="bold" />
-                            </div>
-                            <h5 className={`text-sm font-bold mb-1 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                              {isKo ? '등록된 이번 주 학습 단어가 없습니다.' : 'No vocabulary words configured for this week.'}
-                            </h5>
-                            <p className="text-xs text-zinc-500 max-w-xs mb-6">
-                              {isKo ? '주간 학습 커리큘럼 탭에서 이번 주 단어를 등록해 주세요.' : 'Go to the Curriculum tab to add target vocabulary words.'}
-                            </p>
-                            <button
-                              onClick={() => setActiveTab('curriculum')}
-                              className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.97] cursor-pointer"
-                            >
-                              + {isKo ? '단어 등록하러 가기' : 'Add Weekly Words'}
-                            </button>
-                          </div>
-                        ) : isLoadingRoster ? (
-                          <div className="flex items-center justify-center py-12">
-                            <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            {sortedTroubleWords.map(({ word, count }) => (
-                              <div key={word} className={`flex items-center justify-between p-4 border rounded-2xl transition-all ${
-                                isThemeNight ? 'bg-[#050505] border-white/5 hover:border-white/10' : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300'
+                        {/* SLIDE 0: Key Vocabulary & Error Analytics */}
+                        {curriculumSlideIndex === 0 && (
+                          <div className="animate-fade-in">
+                            {activeVocabWords.length === 0 ? (
+                              <div className={`py-12 px-6 rounded-2xl border flex flex-col items-center justify-center text-center ${
+                                isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
                               }`}>
-                                <span className={`text-sm font-bold font-mono tracking-wide ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{word}</span>
-                                <div className="flex items-center gap-3">
-                                  {count > 0 ? (
-                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 border border-red-500/20 text-red-500 flex items-center gap-1.5">
-                                      <Warning size={14} weight="bold" />
-                                      <span>{count} {isKo ? '명 틀림' : 'Mistakes'}</span>
+                                <div className="w-14 h-14 mb-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
+                                  <Notebook size={28} weight="bold" />
+                                </div>
+                                <h5 className={`text-sm font-bold mb-1 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                                  {isKo ? '등록된 이번 주 학습 단어가 없습니다.' : 'No vocabulary words configured for this week.'}
+                                </h5>
+                                <p className="text-xs text-zinc-500 max-w-xs mb-6">
+                                  {isKo ? '주간 학습 커리큘럼 탭에서 이번 주 단어를 등록해 주세요.' : 'Go to the Curriculum tab to add target vocabulary words.'}
+                                </p>
+                                <button
+                                  onClick={() => setActiveTab('curriculum')}
+                                  className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.97] cursor-pointer"
+                                >
+                                  + {isKo ? '단어 등록하러 가기' : 'Add Weekly Words'}
+                                </button>
+                              </div>
+                            ) : isLoadingRoster ? (
+                              <div className="flex items-center justify-center py-12">
+                                <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                              </div>
+                            ) : (
+                              <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
+                                {sortedTroubleWords.map(({ word, count }) => (
+                                  <div key={word} className={`flex items-center justify-between p-4 border rounded-2xl transition-all ${
+                                    isThemeNight ? 'bg-[#050505] border-white/5 hover:border-white/10' : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300'
+                                  }`}>
+                                    <span className={`text-sm font-bold font-mono tracking-wide ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{word}</span>
+                                    <div className="flex items-center gap-3">
+                                      {count > 0 ? (
+                                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 border border-red-500/20 text-red-500 flex items-center gap-1.5">
+                                          <Warning size={14} weight="bold" />
+                                          <span>{count} {isKo ? '명 틀림' : 'Mistakes'}</span>
+                                        </span>
+                                      ) : (
+                                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-1.5">
+                                          <Check size={14} weight="bold" />
+                                          <span>{isKo ? '오답 없음' : 'Clear'}</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* SLIDE 1: Week Theme / Topic */}
+                        {curriculumSlideIndex === 1 && (
+                          <div className="animate-fade-in">
+                            <div className={`p-6 rounded-2xl border text-left flex flex-col justify-between min-h-[220px] ${
+                              isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-orange-50/40 border-orange-200/60'
+                            }`}>
+                              <div>
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-[10px] uppercase font-bold tracking-widest text-orange-500 font-mono">
+                                    {isKo ? 'Week ' + (selectedClass?.activeWeekNumber || 1) + ' 대주제' : 'Week ' + (selectedClass?.activeWeekNumber || 1) + ' Target Topic'}
+                                  </span>
+                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                                    🎯 {isKo ? '주간 학습 테마' : 'Active Unit'}
+                                  </span>
+                                </div>
+                                <h3 className={`text-2xl font-black mb-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                                  {curriculumTopic || (isKo ? '미설정 (Weather & Nature)' : 'Weather & Nature')}
+                                </h3>
+                                <p className="text-xs text-zinc-400 leading-relaxed">
+                                  {isKo
+                                    ? '이번 주 교재에서 집중적으로 다루는 핵심 주제입니다. 수업 시간 및 가정 학습 시 스토리텔링 가이드로 활용할 수 있습니다.'
+                                    : 'The primary contextual theme extracted for this week. Use as a storytelling framework during instruction.'}
+                                </p>
+                              </div>
+                              <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-zinc-500">
+                                <span>{isKo ? '설정 상태: 정상 반영됨' : 'Status: Ready for class'}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveTab('curriculum')}
+                                  className="text-orange-500 hover:underline font-bold"
+                                >
+                                  {isKo ? '주제 수정하기 →' : 'Edit Theme →'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* SLIDE 2: Phonics Rules */}
+                        {curriculumSlideIndex === 2 && (
+                          <div className="animate-fade-in">
+                            <div className={`p-6 rounded-2xl border text-left min-h-[220px] flex flex-col justify-between ${
+                              isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-indigo-50/40 border-indigo-200/60'
+                            }`}>
+                              <div>
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400 font-mono">
+                                    {isKo ? '타겟 음가 & 조합 규칙' : 'Phonics Sound Blends'}
+                                  </span>
+                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                                    🔊 {isKo ? '발음 드릴' : 'Phonics Target'}
+                                  </span>
+                                </div>
+                                <h4 className={`text-base font-bold mb-4 ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                                  {isKo ? '이번 주 집중 연습 파닉스 규칙:' : 'Focus Phonics & Letter Sounds:'}
+                                </h4>
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                  {(curriculumPhonics ? curriculumPhonics.split(/[,\n]/) : ['-ai-', '-ay-', 'sh-', 'ch-']).map((rule, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="px-4 py-2 bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono font-bold text-sm rounded-xl"
+                                    >
+                                      {rule.trim()}
                                     </span>
-                                  ) : (
-                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-1.5">
-                                      <Check size={14} weight="bold" />
-                                      <span>{isKo ? '오답 없음' : 'Clear'}</span>
-                                    </span>
-                                  )}
+                                  ))}
                                 </div>
                               </div>
-                            ))}
+                              <p className="text-xs text-zinc-400 leading-relaxed border-t border-white/5 pt-3">
+                                {isKo
+                                  ? '단어 읽기 및 소리내어 쓰기 연습 시 학생들이 이중모음 및 소리 결합을 파악할 수 있도록 훈련합니다.'
+                                  : 'Target letter patterns to emphasize during vocal repetition and spelling exercises.'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* SLIDE 3: Reading Passage */}
+                        {curriculumSlideIndex === 3 && (
+                          <div className="animate-fade-in">
+                            <div className={`p-6 rounded-2xl border text-left min-h-[220px] flex flex-col justify-between ${
+                              isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-emerald-50/40 border-emerald-200/60'
+                            }`}>
+                              <div>
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-500 font-mono">
+                                    {isKo ? '본문 읽기 지문' : 'Target Reading Passage'}
+                                  </span>
+                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                    📖 {isKo ? '독해 지문' : 'Reading Text'}
+                                  </span>
+                                </div>
+                                <div className={`p-4 rounded-xl border italic font-serif text-sm leading-relaxed ${
+                                  isThemeNight ? 'bg-white/5 border-white/10 text-zinc-200' : 'bg-white border-emerald-200 text-zinc-800'
+                                }`}>
+                                  "{curriculumPassage || (isKo ? 'The weather was rainy today. Always remember your umbrella!' : 'The weather was rainy today. Always remember your umbrella!')}"
+                                </div>
+                              </div>
+                              <p className="text-[11px] text-zinc-400 mt-3">
+                                {isKo ? '교재 본문 문장 기반 리딩 연습 지문입니다.' : 'Passage for reading comprehension practice and homework verification.'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* SLIDE 4: Other Supplementary Notes */}
+                        {curriculumSlideIndex === 4 && (
+                          <div className="animate-fade-in">
+                            <div className={`p-6 rounded-2xl border text-left min-h-[220px] flex flex-col justify-between ${
+                              isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-purple-50/40 border-purple-200/60'
+                            }`}>
+                              <div>
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-[10px] uppercase font-bold tracking-widest text-purple-400 font-mono">
+                                    {isKo ? '기타 학습 참고 사항 (Other)' : 'Supplementary Notes (Other)'}
+                                  </span>
+                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                    📝 {isKo ? '추가 지침' : 'Custom Field'}
+                                  </span>
+                                </div>
+                                <div className={`p-4 rounded-xl border text-xs leading-relaxed ${
+                                  isThemeNight ? 'bg-white/5 border-white/10 text-zinc-200' : 'bg-white border-purple-200 text-zinc-800'
+                                }`}>
+                                  {curriculumOther || (isKo 
+                                    ? '등록된 기타 참고 사항이 없습니다. (커리큘럼 탭에서 숙제 가이드, 문법 노트를 추가할 수 있습니다.)' 
+                                    : 'No additional notes added for this week. Add grammar points or homework rules in the Curriculum tab.')}
+                                </div>
+                              </div>
+                              <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-zinc-500">
+                                <span>{isKo ? '교사 추가 커스텀 필드' : 'Custom teacher notes field'}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveTab('curriculum')}
+                                  className="text-purple-400 hover:underline font-bold"
+                                >
+                                  {isKo ? '내용 편집하기 →' : 'Edit Other Field →'}
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Right Column: AI Tutor Pedagogical Review Tip */}
+                    {/* Right Column: AI Tutor Pedagogical Review Tip & Report Generator Action */}
                     <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${
                       isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
                     }`}>
@@ -1701,13 +1956,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                               <BookOpen size={20} weight="bold" />
                             </div>
                             <h4 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                              {isKo ? '교사 복습 가이드' : 'Review Strategy Guide'}
+                              {isKo ? '교사 복습 가이드 & 성적표' : 'Review & Report Generator'}
                             </h4>
                           </div>
                           <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
                             {isKo 
-                              ? '오답 통계를 기반으로 추천하는 다음 수업 복습 가이드입니다.' 
-                              : 'AI-generated instruction guide based on current weekly error statistics.'}
+                              ? '오답 통계 기반 맞춤 복습 프린트 및 학부모 1초 리포트를 즉시 발행하세요.' 
+                              : 'AI-generated instruction guide and instant 1-click parent progress report generator.'}
                           </p>
                           
                           <div className="space-y-4 text-xs leading-relaxed text-zinc-300 font-medium">
@@ -1722,8 +1977,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                                   isThemeNight ? 'bg-orange-500/10 border-orange-500/20 text-orange-300' : 'bg-orange-50 border-orange-200 text-orange-800'
                                 }`}>
                                   💡 {isKo 
-                                    ? '내일 수업 시작 시, 보드판에 해당 단어들의 파닉스 모음 결합을 소리내어 복습하는 파닉스 드릴 게임을 추천합니다.' 
-                                    : 'Recommendation: Dedicate the first 5 minutes of class to spelling tracing and a vocal blend drill focusing on target phonics.'}
+                                    ? '수업 시작 시 해당 단어들의 파닉스 모음 결합을 소리내어 복습하는 파닉스 드릴을 추천합니다.' 
+                                    : 'Recommendation: Dedicate the first 5 minutes of class to spelling tracing and a vocal blend drill.'}
                                 </div>
                               </>
                             ) : (
@@ -1737,20 +1992,32 @@ export default function TeacherPage({ isNight = true }: Props) {
                           </div>
                         </div>
 
-                        <div className={`pt-6 border-t mt-6 ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
+                        {/* Dual Action Buttons: Review Sheet + Report Card Generator */}
+                        <div className={`pt-6 border-t mt-6 space-y-3 ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
+                          <button
+                            type="button"
+                            onClick={() => setShowReportCardModal(true)}
+                            className="group w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2.5 cursor-pointer"
+                          >
+                            <Printer size={16} weight="bold" />
+                            <span>{isKo ? '📊 학부모 1초 성적표 발급 (Report Generator)' : '📊 Open Report Generator'}</span>
+                          </button>
+
                           <button
                             type="button"
                             onClick={() => setShowReviewSheetModal(true)}
-                            className="group w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3 cursor-pointer"
+                            className={`group w-full py-3 border font-bold text-xs rounded-2xl transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer ${
+                              isThemeNight
+                                ? 'bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300'
+                                : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-300 text-zinc-800'
+                            }`}
                           >
-                            <span>{isKo ? '오답 맞춤 프린트 생성' : 'Generate Review Sheet'}</span>
-                            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                              <Printer size={14} weight="bold" />
-                            </div>
+                            <span>{isKo ? '🖨️ 오답 맞춤 복습 프린트 생성' : '🖨️ Generate Review Sheet'}</span>
                           </button>
                         </div>
                       </div>
                     </div>
+
 
                   </div>
                 </div>
@@ -1946,11 +2213,57 @@ export default function TeacherPage({ isNight = true }: Props) {
                             value={curriculumPassage}
                             onChange={(e) => setCurriculumPassage(e.target.value)}
                             placeholder={isKo ? '이번 주 교재에 수록된 본문 이야기를 입력해 주세요.' : 'Paste the reference reading text here.'}
-                            className={`w-full h-40 border outline-none text-sm p-4 rounded-2xl transition-all resize-y ${
+                            className={`w-full h-36 border outline-none text-sm p-4 rounded-2xl transition-all resize-y ${
                               isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
                             }`}
                           />
                         </div>
+
+                        {/* NEW: Other Field with Guardrails & Educational Tooltip */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between pl-1">
+                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                              <Notebook size={14} weight="bold" className="text-purple-400" />
+                              <span>{isKo ? '기타 추가 학습 내용 및 숙제 가이드 (Other)' : 'Other Supplementary Notes & Rules (Other)'}</span>
+                            </label>
+                            <span className="text-[9px] text-purple-400 font-bold px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-full">
+                              🛡️ {isKo ? '영어 학습 보조 전용' : 'English Instruction Only'}
+                            </span>
+                          </div>
+
+                          {/* Recommended Format Tooltip Box */}
+                          <div className={`p-3.5 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
+                            isThemeNight ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' : 'bg-purple-50 border-purple-200 text-purple-900'
+                          }`}>
+                            <Info size={18} weight="bold" className="shrink-0 text-purple-400 mt-0.5" />
+                            <div className="space-y-1">
+                              <span className="font-bold block text-xs">
+                                {isKo ? '💡 추천 작성 형태 (영어 학습 지침):' : '💡 Recommended Format (English Learning Focus):'}
+                              </span>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <code className="px-2.5 py-1 rounded-xl bg-purple-500/20 border border-purple-500/30 text-[11px] font-mono font-bold text-purple-300">
+                                  "Speaking: Practice reading the word umbrella 3 times."
+                                </code>
+                              </div>
+                              <p className="text-[11px] text-purple-400 leading-normal">
+                                {isKo
+                                  ? '원생들의 영어 학습에 직결되는 안내만 입력 가능하며, 부적절한 단어나 무관한 텍스트는 자동으로 차단됩니다.'
+                                  : 'Must focus on English practice (speaking, phonics, reading). Inappropriate or non-educational text will be blocked.'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <textarea
+                            value={curriculumOther}
+                            onChange={(e) => setCurriculumOther(e.target.value)}
+                            placeholder={isKo ? '예: Speaking: Practice reading the word umbrella 3 times.' : 'E.g. Speaking: Practice reading the word umbrella 3 times.'}
+                            className={`w-full h-32 border outline-none text-sm p-4 rounded-2xl transition-all resize-y ${
+                              isThemeNight ? 'bg-[#050505] border-white/10 focus:border-purple-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-purple-500 text-zinc-900 placeholder:text-zinc-400'
+                            }`}
+                          />
+                        </div>
+
+
 
                         <div className={`flex gap-4 justify-end pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                           <button
@@ -2929,6 +3242,33 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <X size={18} weight="bold" />
               </button>
 
+              {/* Student Selector Bar */}
+              {activeRoster.length > 0 && (
+                <div className="mb-6 p-3 bg-orange-50/50 border border-orange-200 rounded-2xl flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-orange-700">{isKo ? '성적표 대상 원생 선택:' : 'Select Student for Report Card:'}</span>
+                    <select
+                      value={selectedStudentDetails?.uid || ''}
+                      onChange={(e) => {
+                        const target = activeRoster.find((s) => s.uid === e.target.value);
+                        if (target) setSelectedStudentDetails(target);
+                      }}
+                      className="px-3 py-1.5 bg-white border border-orange-300 rounded-xl text-xs font-bold text-zinc-900 outline-none cursor-pointer shadow-xs"
+                    >
+                      <option value="">-- {isKo ? '원생 선택' : 'Select Student'} --</option>
+                      {activeRoster.map((s) => (
+                        <option key={s.uid} value={s.uid}>
+                          {s.studentName || s.name} ({s.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-orange-600">
+                    Week {selectedClass?.activeWeekNumber || 1} Report Card
+                  </span>
+                </div>
+              )}
+
               {/* Official Academy Header */}
               <div className="border-b-2 border-zinc-900 pb-6 mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -2951,6 +3291,36 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <p className="font-bold text-zinc-900">Student: {selectedStudentDetails?.studentName || 'Student'}</p>
                   <p className="text-zinc-500">Class: {selectedClass?.name || '7-Mercury'}</p>
                   <p className="text-zinc-500">Date: {new Date().toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              {/* Weekly Curriculum Summary Section */}
+              <div className="mb-6 p-4 border border-zinc-200 rounded-2xl bg-zinc-50/80 text-xs space-y-3">
+                <h4 className="font-black text-zinc-900 uppercase tracking-widest text-[11px] flex items-center gap-1.5">
+                  <span>📚</span>
+                  <span>{isKo ? '이번 주 학습 커리큘럼 요약' : 'Weekly Curriculum Summary'}</span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-zinc-700">
+                  <div>
+                    <span className="font-bold text-zinc-900 block">{isKo ? '주간 주제 (Topic):' : 'Topic / Theme:'}</span>
+                    <p className="text-zinc-600">{curriculumTopic || 'Weather & Nature'}</p>
+                  </div>
+                  <div>
+                    <span className="font-bold text-zinc-900 block">{isKo ? '파닉스 규칙 (Phonics):' : 'Phonics Targets:'}</span>
+                    <p className="text-indigo-600 font-mono font-bold">{curriculumPhonics || '-ai-, -ay-, sh-, ch-'}</p>
+                  </div>
+                  {curriculumPassage && (
+                    <div className="sm:col-span-2">
+                      <span className="font-bold text-zinc-900 block">{isKo ? '본문 지문 (Passage):' : 'Reading Story:'}</span>
+                      <p className="text-zinc-700 italic">"{curriculumPassage}"</p>
+                    </div>
+                  )}
+                  {curriculumOther && (
+                    <div className="sm:col-span-2 pt-1 border-t border-zinc-200">
+                      <span className="font-bold text-purple-700 block">{isKo ? '기타 추가 학습 지침 (Other Notes):' : 'Supplementary Notes (Other):'}</span>
+                      <p className="text-purple-900 font-medium">{curriculumOther}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -3018,6 +3388,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <span>Academy Stamp: [ SEAL ]</span>
                 </div>
               </div>
+
 
               {/* Print Action Bar */}
               <div className="mt-6 pt-4 border-t border-zinc-200 flex justify-between items-center">
