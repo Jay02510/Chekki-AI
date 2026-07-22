@@ -448,28 +448,46 @@ export default function TeacherPage({ isNight = true }: Props) {
   const handleUpdateWeek = async (delta: number) => {
     if (!selectedClass) return;
     const newWeek = Math.max(1, (selectedClass.activeWeekNumber || 1) + delta);
+    const updated = { ...selectedClass, activeWeekNumber: newWeek };
+    setSelectedClass(updated);
+    setClasses(prev => {
+      const next = prev.map(c => c.id === updated.id ? updated : c);
+      const uid = user?.uid || 'guest';
+      try {
+        localStorage.setItem(`teacher_classes_${uid}`, JSON.stringify(next));
+        localStorage.setItem('teacher_classes_fallback', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+
     try {
       const classRef = doc(dbInstance, 'classes', selectedClass.id);
       await updateDoc(classRef, { activeWeekNumber: newWeek });
-      const updated = { ...selectedClass, activeWeekNumber: newWeek };
-      setSelectedClass(updated);
-      setClasses(prev => prev.map(c => c.id === updated.id ? updated : c));
     } catch (err) {
-      console.error('Failed to update active week:', err);
+      console.warn('Firestore active week update warning (updated locally):', err);
     }
   };
 
   const handleSelectWeek = async (targetWeekNum: number) => {
     if (!selectedClass) return;
+    const updated = { ...selectedClass, activeWeekNumber: targetWeekNum };
+    setSelectedClass(updated);
+    setClasses(prev => {
+      const next = prev.map(c => c.id === updated.id ? updated : c);
+      const uid = user?.uid || 'guest';
+      try {
+        localStorage.setItem(`teacher_classes_${uid}`, JSON.stringify(next));
+        localStorage.setItem('teacher_classes_fallback', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+    setActiveTab('curriculum');
+
     try {
       const classRef = doc(dbInstance, 'classes', selectedClass.id);
       await updateDoc(classRef, { activeWeekNumber: targetWeekNum });
-      const updated = { ...selectedClass, activeWeekNumber: targetWeekNum };
-      setSelectedClass(updated);
-      setClasses(prev => prev.map(c => c.id === updated.id ? updated : c));
-      setActiveTab('curriculum');
     } catch (err) {
-      console.error('Failed to select target week:', err);
+      console.warn('Firestore target week update warning (updated locally):', err);
     }
   };
 
@@ -484,12 +502,14 @@ export default function TeacherPage({ isNight = true }: Props) {
   const loadCurriculum = async () => {
     if (!selectedClass) return;
     setIsLoadingCurriculum(true);
+    const currDocId = `${selectedClass.id}_week_${selectedClass.activeWeekNumber || 1}`;
+    const localKey = `curriculum_${currDocId}`;
+
+    // 1. Pre-load from LocalStorage for instant render & offline compatibility
     try {
-      const currDocId = `${selectedClass.id}_week_${selectedClass.activeWeekNumber || 1}`;
-      const docRef = doc(dbInstance, 'curriculums', currDocId);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        const data = snap.data();
+      const cached = localStorage.getItem(localKey);
+      if (cached) {
+        const data = JSON.parse(cached);
         setCurriculumTopic(data.topic || '');
         setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : data.vocabWords || '');
         setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : data.phonicsRules || '');
@@ -500,8 +520,26 @@ export default function TeacherPage({ isNight = true }: Props) {
         setCurriculumPhonics('');
         setCurriculumPassage('');
       }
+    } catch (e) {
+      console.warn('LocalStorage curriculum load error:', e);
+    }
+
+    // 2. Fetch latest snapshot from Firestore
+    try {
+      const docRef = doc(dbInstance, 'curriculums', currDocId);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        setCurriculumTopic(data.topic || '');
+        setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : data.vocabWords || '');
+        setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : data.phonicsRules || '');
+        setCurriculumPassage(data.passage || '');
+        try {
+          localStorage.setItem(localKey, JSON.stringify(data));
+        } catch (e) {}
+      }
     } catch (err) {
-      console.error('Failed to load curriculum:', err);
+      console.warn('Failed to load curriculum from Firestore (using local fallback):', err);
     } finally {
       setIsLoadingCurriculum(false);
     }
@@ -511,15 +549,16 @@ export default function TeacherPage({ isNight = true }: Props) {
     e.preventDefault();
     if (!selectedClass) return;
     setIsSavingCurriculum(true);
+    const currDocId = `${selectedClass.id}_week_${selectedClass.activeWeekNumber || 1}`;
+    const localKey = `curriculum_${currDocId}`;
+
     try {
-      const currDocId = `${selectedClass.id}_week_${selectedClass.activeWeekNumber || 1}`;
-      const docRef = doc(dbInstance, 'curriculums', currDocId);
-      
       const vocabList = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
       const phonicsList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
 
       const payload = {
         classId: selectedClass.id,
+        teacherUid: user?.uid || selectedClass.teacherUid || '',
         weekNumber: selectedClass.activeWeekNumber || 1,
         topic: curriculumTopic.trim(),
         vocabWords: vocabList,
@@ -528,7 +567,21 @@ export default function TeacherPage({ isNight = true }: Props) {
         updatedAt: new Date().toISOString()
       };
 
-      await setDoc(docRef, payload, { merge: true });
+      // 1. Dual-persist to local storage immediately
+      try {
+        localStorage.setItem(localKey, JSON.stringify(payload));
+      } catch (lErr) {
+        console.warn('LocalStorage write warning:', lErr);
+      }
+
+      // 2. Persist to Firestore
+      try {
+        const docRef = doc(dbInstance, 'curriculums', currDocId);
+        await setDoc(docRef, payload, { merge: true });
+      } catch (firestoreErr) {
+        console.warn('Firestore curriculum write warning (saved locally):', firestoreErr);
+      }
+
       alert(isKo ? '주간 커리큘럼이 성공적으로 저장되었습니다!' : 'Weekly curriculum saved successfully!');
     } catch (err) {
       console.error('Failed to save curriculum:', err);

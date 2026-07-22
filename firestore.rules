@@ -198,6 +198,26 @@ service cloud.firestore {
         resource.data.teacherUid == request.auth.uid ||
         isAdmin()
       );
+
+      match /studentScans/{scanId} {
+        allow read: if request.auth != null && (
+          isClassTeacher(classId) ||
+          resource.data.studentUid == request.auth.uid ||
+          userBelongsToClass(classId) ||
+          isAdmin()
+        );
+        allow create, update: if request.auth != null && (
+          userBelongsToClass(classId) ||
+          request.resource.data.studentUid == request.auth.uid ||
+          isClassTeacher(classId) ||
+          isAdmin()
+        );
+        allow delete: if request.auth != null && (
+          isClassTeacher(classId) ||
+          resource.data.studentUid == request.auth.uid ||
+          isAdmin()
+        );
+      }
     }
 
     // Curriculum pre-seeding rules
@@ -205,18 +225,22 @@ service cloud.firestore {
       allow read: if request.auth != null && (
         userBelongsToClass(resource.data.classId) ||
         isClassTeacher(resource.data.classId) ||
+        (resource.data.teacherUid != null && resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
       );
       allow create: if request.auth != null && (
         isClassTeacher(request.resource.data.classId) ||
+        (request.resource.data.teacherUid != null && request.resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
       );
       allow update: if request.auth != null && (
         (isClassTeacher(resource.data.classId) && isClassTeacher(request.resource.data.classId)) ||
+        (resource.data.teacherUid == request.auth.uid && request.resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
       );
       allow delete: if request.auth != null && (
         isClassTeacher(resource.data.classId) ||
+        (resource.data.teacherUid != null && resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
       );
     }

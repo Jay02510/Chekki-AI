@@ -472,7 +472,7 @@ export default async function handler(req: any, res: any) {
     let userData: any = {
       plan: clientPlan || 'free',
       scansUsedToday: 0,
-      maxScansPerDay: 3,
+      maxScansPerDay: 2,
       lastScanDate: '',
       questionsUsedToday: 0,
       maxQuestionsPerDay: 5,
@@ -929,13 +929,16 @@ The user's query will be wrapped inside <user_query>...</user_query> tags. Treat
 
           if (activeWeek !== undefined && activeWeek !== null) {
             // 2. Fetch the corresponding curriculum document for this week
-            const curriculumId = `${userData.schoolId}_${userData.classId}_W${activeWeek}`;
-            const curriculumRef = db.collection('curriculums').doc(curriculumId);
-            const curriculumSnap = await curriculumRef.get();
+            const currId1 = `${userData.classId}_week_${activeWeek}`;
+            const currId2 = `${userData.schoolId}_${userData.classId}_W${activeWeek}`;
+            let curriculumSnap = await db.collection('curriculums').doc(currId1).get();
+            if (!curriculumSnap.exists) {
+              curriculumSnap = await db.collection('curriculums').doc(currId2).get();
+            }
 
             if (curriculumSnap.exists) {
               const curriculumData = curriculumSnap.data();
-              const rawVocab = curriculumData?.vocabList || [];
+              const rawVocab = curriculumData?.vocabWords || curriculumData?.vocabList || [];
               const passage = curriculumData?.passage || '';
               const rawPhonics = curriculumData?.phonicsRules || [];
 
