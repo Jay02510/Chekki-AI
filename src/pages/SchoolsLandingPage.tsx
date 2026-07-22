@@ -1341,35 +1341,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     </div>
                   </div>
 
-                  <div className="space-y-1 text-left">
-                    <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                      {isKo ? '교육기관명 / 학원명 *' : 'Academy / Organization Name *'}
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={academyName}
-                      onChange={(e) => setAcademyName(e.target.value)}
-                      placeholder="E.g. POLY Seocho / Chekki English Studio"
-                      className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
-                        isNight 
-                          ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
-                          : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
-                      }`}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1 text-left">
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '담당자 성함 *' : 'Contact Name *'}
+                  <div className="space-y-3 text-left">
+                    <div>
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 block mb-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                        {isKo ? '교육기관명 / 학원명 *' : 'Academy / Organization Name *'}
                       </label>
                       <input
                         type="text"
                         required
-                        value={contactName}
-                        onChange={(e) => setContactName(e.target.value)}
-                        placeholder="John Doe"
+                        value={academyName}
+                        onChange={(e) => setAcademyName(e.target.value)}
+                        placeholder={isKo ? '예: 대치 POLY / 영어유치원 서초점' : 'E.g. POLY Seocho / Chekki English Academy'}
                         className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
                           isNight 
                             ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
@@ -1377,76 +1359,54 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         }`}
                       />
                     </div>
-                    <div className="space-y-1 text-left">
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 flex items-center justify-between ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        <span>{isKo ? '필요 강사 수 *' : 'Teacher Seats *'}</span>
-                        <span className="text-[9px] text-orange-500 font-normal">
-                          {teacherCount <= 2 ? (isKo ? '소형 플랜' : 'Small Plan') : teacherCount <= 5 ? (isKo ? '중형 플랜' : 'Medium Plan') : (isKo ? '대형 플랜' : 'Large Plan')}
-                        </span>
-                      </label>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => handleTeacherCountChange(teacherCount - 1)}
-                          disabled={teacherCount <= 1}
-                          className={`w-10 h-10 rounded-xl border flex items-center justify-center text-sm font-bold transition-all disabled:opacity-30 cursor-pointer ${
-                            isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
-                          }`}
-                        >
-                          -
-                        </button>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 block mb-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                          {isKo ? '담당자 성함 *' : 'Contact Name *'}
+                        </label>
                         <input
-                          type="number"
-                          min={1}
+                          type="text"
                           required
-                          value={teacherCount}
-                          onChange={(e) => handleTeacherCountChange(Number(e.target.value))}
-                          className={`w-full border focus:border-orange-500 outline-none text-xs p-3 rounded-xl transition-all font-mono font-bold text-center ${
+                          value={contactName}
+                          onChange={(e) => setContactName(e.target.value)}
+                          placeholder={isKo ? '김민지 원장/선생님' : 'Jane Doe'}
+                          className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
                             isNight 
-                              ? 'bg-[#050505] border-white/10 text-white' 
-                              : 'bg-zinc-50 border-zinc-300 text-zinc-900 focus:bg-white'
+                              ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
+                              : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
                           }`}
                         />
-                        <button
-                          type="button"
-                          onClick={() => handleTeacherCountChange(teacherCount + 1)}
-                          className={`w-10 h-10 rounded-xl border flex items-center justify-center text-sm font-bold transition-all cursor-pointer ${
-                            isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
+                      </div>
+                      <div>
+                        <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 block mb-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                          {isKo ? '연락처 (핸드폰) *' : 'Phone Number *'}
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="010-0000-0000"
+                          className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
+                            isNight 
+                              ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
+                              : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
                           }`}
-                        >
-                          +
-                        </button>
+                        />
                       </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1 text-left">
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '세금계산서 수신 이메일 *' : 'Tax Invoice Email *'}
+                    <div>
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 block mb-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                        {isKo ? '이메일 (체험 승인 및 안내용) *' : 'Contact Email (For Trial Activation) *'}
                       </label>
                       <input
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="billing@academy.com"
-                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
-                          isNight 
-                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
-                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
-                        }`}
-                      />
-                    </div>
-                    <div className="space-y-1 text-left">
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '재원생 수 (선택)' : 'Enrolled Students'}
-                      </label>
-                      <input
-                        type="text"
-                        value={studentCount}
-                        onChange={(e) => setStudentCount(e.target.value)}
-                        placeholder="E.g. 50"
+                        placeholder="teacher@academy.com"
                         className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
                           isNight 
                             ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
@@ -1456,40 +1416,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1 text-left">
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '사업자등록번호 (선택)' : 'Biz Reg Number (Optional)'}
-                      </label>
-                      <input
-                        type="text"
-                        value={bizRegNumber}
-                        onChange={(e) => setBizRegNumber(e.target.value)}
-                        placeholder="123-45-67890"
-                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all font-mono ${
-                          isNight 
-                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
-                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
-                        }`}
-                      />
-                    </div>
-                    <div className="space-y-1 text-left">
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '연락처 (선택)' : 'Phone Number'}
-                      </label>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="010-0000-0000"
-                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
-                          isNight 
-                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
-                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
-                        }`}
-                      />
-                    </div>
-                  </div>
+                  <p className="text-[10px] text-zinc-500 text-center font-mono">
+                    {isKo ? '💡 신청 후 1시간 내 이메일/문자로 14일 무료 체험 코드가 발급됩니다.' : 'Trial access code will be emailed within 1 hour after request.'}
+                  </p>
 
                   {getPlanUnitPrice(selectedPlanId, billingCycle) > 0 && (
                     <div className={`p-4 border rounded-2xl space-y-2 mt-2 ${
