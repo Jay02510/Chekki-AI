@@ -45,7 +45,7 @@ interface Props {
 }
 
 export default function TeacherPage({ isNight = true }: Props) {
-  const { user, firebaseUser, signIn, logout, isAuthenticated } = useAuth();
+  const { user, firebaseUser, signIn, signUp, logout, isAuthenticated } = useAuth();
   const { language, setLanguage } = useLanguage();
   const [isThemeNight, setIsThemeNight] = useState(isNight);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -61,8 +61,11 @@ export default function TeacherPage({ isNight = true }: Props) {
   };
   
   // Auth state
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [teacherCode, setTeacherCode] = useState('');
   const [authError, setAuthError] = useState('');
   const [isActivating, setIsActivating] = useState(false);
@@ -302,9 +305,52 @@ export default function TeacherPage({ isNight = true }: Props) {
     setAuthError('');
     setIsSigningIn(true);
     try {
-      await signIn(email, password);
+      if (authMode === 'signup') {
+        if (!name.trim()) {
+          throw new Error(isKo ? '선생님 이름을 입력해 주세요.' : 'Please enter your name.');
+        }
+        if (password.length < 6) {
+          throw new Error(isKo ? '비밀번호는 최소 6자 이상이어야 합니다.' : 'Password must be at least 6 characters.');
+        }
+        if (password !== confirmPassword) {
+          throw new Error(isKo ? '비밀번호가 일치하지 않습니다.' : 'Passwords do not match.');
+        }
+
+        await signUp(name, email, password);
+
+        // Auto-redeem teacher authorization code if provided during signup (1-click setup)
+        if (teacherCode.trim()) {
+          try {
+            // Wait brief moment for auth state listener to update token
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+              const idToken = await currentUser.getIdToken(true);
+              const res = await fetch('/api/redeem-teacher-code', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ teacherCode: teacherCode.trim() }),
+              });
+              if (res.ok) {
+                // Instantly refresh window so role update takes effect
+                window.location.reload();
+              }
+            }
+          } catch (codeErr) {
+            console.warn('Auto code activation failed during sign up:', codeErr);
+          }
+        }
+      } else {
+        await signIn(email, password);
+      }
     } catch (err: any) {
-      setAuthError(err.message || 'Login failed. Please check your credentials.');
+      let msg = err.message;
+      if (err.code === 'auth/user-not-found') msg = isKo ? '등록되지 않은 이메일입니다.' : 'No account found with this email.';
+      if (err.code === 'auth/wrong-password') msg = isKo ? '비밀번호가 올바르지 않습니다.' : 'Incorrect password.';
+      if (err.code === 'auth/email-already-in-use') msg = isKo ? '이미 가입된 이메일입니다. 로그인해 주세요.' : 'Email already registered. Please log in.';
+      setAuthError(msg || (authMode === 'signup' ? 'Sign up failed.' : 'Login failed. Please check your credentials.'));
     } finally {
       setIsSigningIn(false);
     }
@@ -735,7 +781,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     .map(word => ({ word, count: vocabMistakeCounts[word] }))
     .sort((a, b) => b.count - a.count);
 
-  // --- RENDER LOGIN VIEW ---
+  // --- RENDER AUTH (LOGIN / SIGN UP) VIEW ---
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#050505] text-zinc-200 flex items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
@@ -751,16 +797,60 @@ export default function TeacherPage({ isNight = true }: Props) {
               <span>{isKo ? '교사 전용 포털' : 'Teacher Access Portal'}</span>
             </div>
 
+            {/* Auth Mode Toggle (Login vs Sign Up) */}
+            <div className="w-full flex bg-[#050505] p-1 rounded-2xl border border-white/10 mb-6">
+              <button
+                type="button"
+                onClick={() => { setAuthMode('login'); setAuthError(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+                  authMode === 'login'
+                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                {isKo ? '로그인' : 'Log In'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAuthMode('signup'); setAuthError(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+                  authMode === 'signup'
+                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                {isKo ? '회원가입' : 'Sign Up'}
+              </button>
+            </div>
+
             <h2 className="text-2xl font-black tracking-tight text-white mb-2 font-display">
-              {isKo ? '교사 포털 로그인' : 'Teacher Portal Login'}
+              {authMode === 'login'
+                ? (isKo ? '교사 포털 로그인' : 'Teacher Portal Login')
+                : (isKo ? '교사 계정 생성' : 'Create Teacher Account')}
             </h2>
-            <p className="text-zinc-400 text-xs mb-8 text-center leading-relaxed max-w-xs">
-              {isKo 
-                ? '학습지 관리 및 분석을 위해 교사 계정으로 로그인해 주세요.'
-                : 'Log in with your teacher credentials to manage curricula and rosters.'}
+            <p className="text-zinc-400 text-xs mb-6 text-center leading-relaxed max-w-xs">
+              {authMode === 'login'
+                ? (isKo ? '학습지 관리 및 분석을 위해 교사 계정으로 로그인해 주세요.' : 'Log in with your teacher credentials to access your dashboard.')
+                : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.')}
             </p>
 
             <form onSubmit={handleSignIn} className="w-full space-y-4">
+              {authMode === 'signup' && (
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                    {isKo ? '선생님 성함' : 'Teacher Full Name'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={isKo ? "김철수 선생님" : "Jane Doe"}
+                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                  />
+                </div>
+              )}
+
               <div className="space-y-1.5 text-left">
                 <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
                   Email
@@ -789,6 +879,46 @@ export default function TeacherPage({ isNight = true }: Props) {
                 />
               </div>
 
+              {authMode === 'signup' && (
+                <>
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                      {isKo ? '비밀번호 확인' : 'Confirm Password'}
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 text-left pt-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-bold text-orange-400 uppercase tracking-widest pl-1 flex items-center gap-1">
+                        <Key size={12} weight="bold" />
+                        <span>{isKo ? '교사 인증 코드' : 'Teacher Code'}</span>
+                      </label>
+                      <span className="text-[10px] text-zinc-500 font-medium">({isKo ? '1-Click 즉시 승인' : 'Instant 1-Click Access'})</span>
+                    </div>
+                    <input
+                      type="text"
+                      value={teacherCode}
+                      onChange={(e) => setTeacherCode(e.target.value)}
+                      placeholder="E.g. POLY10-TEACHER"
+                      className="w-full bg-[#050505] border border-orange-500/30 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white uppercase font-mono tracking-wider placeholder:text-zinc-600"
+                    />
+                    <p className="text-[10px] text-zinc-500 pl-1 leading-normal">
+                      {isKo 
+                        ? '💡 입금 확인 이메일로 받은 교사 인증 코드를 입력하시면 가입 즉시 대시보드가 열립니다.' 
+                        : '💡 Entering your authorization code now will activate your teacher account in 1 click.'}
+                    </p>
+                  </div>
+                </>
+              )}
+
               {authError && (
                 <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold rounded-2xl text-center flex items-center justify-center gap-2">
                   <Warning size={16} weight="bold" />
@@ -805,7 +935,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span>{isKo ? '로그인' : 'Log In'}</span>
+                    <span>
+                      {authMode === 'login'
+                        ? (isKo ? '로그인' : 'Log In')
+                        : (isKo ? '1-Click 교사 가입 및 시작' : '1-Click Sign Up & Start')}
+                    </span>
                     <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
                       <ArrowRight size={14} weight="bold" />
                     </div>

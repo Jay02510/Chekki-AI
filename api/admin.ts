@@ -311,35 +311,87 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               to: [invoiceData.email],
               subject: `🎉 [Chekki AI] ${invoiceData.academyName || '학원'} 입금 확인 및 교사 인증 코드 안내`,
               html: `
-                <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
-                  <div style="text-align: center; margin-bottom: 24px;">
-                    <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
-                    <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #34d399; margin-top: 4px;">🎉 학원 계정 승인 완료</p>
+                <div style="font-family: 'Apple SD Gothic Neo', -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 28px; background-color: #030305; color: #f4f4f5; border-radius: 20px; border: 1px solid #27272a;">
+                  <!-- Header -->
+                  <div style="text-align: center; margin-bottom: 28px;">
+                    <h1 style="font-size: 32px; font-weight: 900; margin: 0; color: #ffffff; letter-spacing: -0.5px;">Chekki<span style="color: #f97316;">ai</span></h1>
+                    <div style="display: inline-block; background-color: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 9999px; padding: 4px 14px; margin-top: 8px;">
+                      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #34d399;">🎉 학원 계정 승인 완료</span>
+                    </div>
                   </div>
 
-                  <p style="font-size: 15px; color: #e4e4e7;">안녕하세요 <strong>${invoiceData.contactName || '선생님'}</strong> 님,</p>
-                  <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">
-                    입금이 정상적으로 확인되었습니다. <strong>${invoiceData.academyName || '학원'}</strong>의 교사 전용 인증 코드가 등록되었습니다.
+                  <p style="font-size: 15px; color: #e4e4e7; margin-bottom: 8px;">안녕하세요 <strong>${invoiceData.contactName || '선생님'}</strong> 님,</p>
+                  <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6; margin-bottom: 24px;">
+                    입금이 정상 확인되었습니다. <strong>${invoiceData.academyName || '학원'}</strong>의 교사 전용 인증 코드가 등록되었습니다.
                   </p>
 
-                  <div style="background-color: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
-                    <p style="font-size: 12px; font-weight: bold; color: #34d399; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px;">🔑 교사 전용 인증 코드</p>
-                    <p style="font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 2px; margin: 8px 0; font-family: monospace;">${teacherCode}</p>
-                    <p style="font-size: 12px; color: #a1a1aa; margin: 4px 0 0 0;">(최대 등록 가능 교사: ${invoiceData.teacherCount || 5}명)</p>
+                  <!-- Teacher Code Card -->
+                  <div style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.12) 0%, rgba(249, 115, 22, 0.04) 100%); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 16px; padding: 22px; margin-bottom: 24px; text-align: center;">
+                    <p style="font-size: 11px; font-weight: 800; color: #fb923c; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 1.5px;">🔑 교사 전용 인증 코드</p>
+                    <p style="font-size: 28px; font-weight: 900; color: #ffffff; letter-spacing: 3px; margin: 8px 0; font-family: monospace; text-shadow: 0 2px 10px rgba(249, 115, 22, 0.3);">${teacherCode}</p>
+                    <p style="font-size: 12px; color: #a1a1aa; margin: 6px 0 0 0;">(최대 등록 가능 교사: ${invoiceData.teacherCount || 5}명)</p>
                   </div>
 
-                  <div style="background-color: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-                    <h4 style="margin: 0 0 8px 0; color: #ffffff; font-size: 14px;">등록 방법:</h4>
+                  <!-- Teacher Instructions -->
+                  <div style="background-color: #121215; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+                    <h3 style="margin: 0 0 12px 0; color: #ffffff; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                      👨‍🏫 교사 계정 시작 방법
+                    </h3>
                     <ol style="margin: 0; padding-left: 20px; font-size: 13px; color: #a1a1aa; line-height: 1.8;">
-                      <li><a href="https://chekkiai.com/teacher" style="color: #f97316; font-weight: bold;">chekkiai.com/teacher</a> 에 접속합니다.</li>
-                      <li>교사 회원가입 후 위의 <strong>인증 코드</strong>를 입력합니다.</li>
-                      <li>즉시 Pro 교사 권한이 활성화되어 클래스 생성 및 학생 등록을 시작할 수 있습니다.</li>
+                      <li><a href="https://chekkiai.com/teacher" style="color: #f97316; font-weight: bold; text-decoration: underline;">chekkiai.com/teacher</a> 에 접속합니다.</li>
+                      <li>계정이 없으신 경우 <strong>회원가입</strong>, 계정이 있으신 경우 <strong>로그인</strong>을 완료합니다.</li>
+                      <li>로그인 후 나타나는 인증창에 위 <strong>교사 인증 코드</strong>를 입력합니다.</li>
+                      <li>Pro 교사 권한이 활성화되면 학급을 생성하고 6자리 <strong>학급 Join 코드</strong>를 발급받으세요.</li>
                     </ol>
                   </div>
 
-                  <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
-                    문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.<br/>
-                    © 2026 Chekki AI Inc.
+                  <!-- Parent App Download & QR Code Section -->
+                  <div style="background-color: #121215; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 24px; text-align: center;">
+                    <h3 style="margin: 0 0 8px 0; color: #ffffff; font-size: 15px; font-weight: 700;">
+                      📲 학부모 앱 설치 안내 (iOS / Android 공용)
+                    </h3>
+                    <p style="font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 16px;">
+                      학부모님이 스마트폰에서 Chekki AI 앱을 설치하면 숙제 검출 및 오답 데이터가 교사 대시보드와 자동 연동됩니다.
+                    </p>
+
+                    <div style="margin: 16px 0;">
+                      <a href="https://urlgeni.us/chekki" target="_blank" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 800; font-size: 14px; text-decoration: none; padding: 14px 28px; border-radius: 12px; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);">
+                        📲 Chekki 앱 다운로드 받기 (App Store / Google Play)
+                      </a>
+                    </div>
+
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #27272a;">
+                      <p style="font-size: 11px; color: #71717a; margin-bottom: 8px;">PC/모니터로 확인 중이신 경우 스마트폰 카메라로 아래 QR 코드를 스캔하세요:</p>
+                      <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://urlgeni.us/chekki" alt="Chekki App Download QR Code" style="border-radius: 8px; border: 2px solid #27272a; width: 130px; height: 130px; margin: 0 auto;" />
+                    </div>
+                  </div>
+
+                  <!-- Copy-Paste Notice Template for Parents -->
+                  <div style="background-color: #18181c; border: 1px dashed rgba(249, 115, 22, 0.4); border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+                    <p style="font-size: 12px; font-weight: 800; color: #f97316; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px;">
+                      📋 [학부모 단톡방 / 카카오톡 전송용 안내 문구]
+                    </p>
+                    <p style="font-size: 11px; color: #71717a; margin-bottom: 12px;">아래 문구를 복사하여 학부모 단체 카카오톡/밴드/문자로 전송해 주세요:</p>
+                    
+                    <div style="background-color: #09090b; border: 1px solid #27272a; border-radius: 10px; padding: 14px; font-size: 12px; color: #d4d4d8; line-height: 1.7; font-family: monospace; white-space: pre-wrap;">[${invoiceData.academyName || '학원명'}] Chekki AI 학부모 앱 설치 안내
+
+안녕하세요 학부모님! 
+우리 학원에서는 학생들의 체계적인 학습 관리 및 오답 분석을 위해 Chekki AI 시스템을 도입하였습니다.
+
+아래 링크를 통해 스마트폰에 Chekki 앱을 설치해 주세요!
+
+📲 Chekki 앱 다운로드:
+https://urlgeni.us/chekki
+
+앱 설치 후 로그인하여 학원에서 안내드리는 6자리 학급 코드를 입력해주시면 가정 숙제 검수 데이터가 선생님과 자동 연동됩니다.
+
+감사합니다.</div>
+                  </div>
+
+                  <!-- Footer -->
+                  <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px; line-height: 1.6;">
+                    문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316; text-decoration: underline;">support@chekkiai.com</a> 로 언제든 연락해 주세요.<br/>
+                    © 2026 Chekki AI Inc. All rights reserved.
                   </p>
                 </div>
               `,
