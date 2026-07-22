@@ -1506,6 +1506,18 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             >
               {isKo ? '교사용 포털' : 'Teacher Portal'}
             </a>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <a
+              href="/faq"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState({}, '', '/faq');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-orange-500 transition-colors font-bold text-orange-500"
+            >
+              {isKo ? '자주 묻는 질문 (FAQ)' : 'FAQ'}
+            </a>
           </div>
         </div>
       </footer>

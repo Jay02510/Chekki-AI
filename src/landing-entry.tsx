@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import SchoolsLandingPage from './pages/SchoolsLandingPage';
+import FaqPage from './pages/FaqPage';
 import Landing from './Landing';
 import App from '../App';
 import '../landing.css';
@@ -14,6 +15,11 @@ function LandingRoot() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Dedicated FAQ Page route: chekkiai.com/faq
+  if (pathname === '/faq' || pathname.startsWith('/faq')) {
+    return <FaqPage isNight={isNight} setIsNight={setIsNight} />;
+  }
 
   // Web App route: chekkiai.com/app (also teacher portal, admin, subscribe)
   if (
