@@ -100,64 +100,197 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [isScanningTextbook, setIsScanningTextbook] = useState(false);
   const [textbookPreviewUrl, setTextbookPreviewUrl] = useState<string | null>(null);
 
-  const handleTextbookFileUpload = async (file: File) => {
-    if (!file) return;
+  // Scanned AI Worksheet Modal & Selection state
+  const [showScannedModal, setShowScannedModal] = useState(false);
+  const [scannedData, setScannedData] = useState<any>(null);
+  const [uploadedFileType, setUploadedFileType] = useState<'image' | 'pdf'>('image');
+  const [uploadedFileName, setUploadedFileName] = useState<string>('');
+  const [textbookPreviewUrls, setTextbookPreviewUrls] = useState<string[]>([]);
+  const [selectedPageIndex, setSelectedPageIndex] = useState<number | 'all'>('all');
+  
+  // Pick & Choose Selection State inside Scanned AI Modal
+  const [selectedScannedTopic, setSelectedScannedTopic] = useState(true);
+  const [selectedScannedPassage, setSelectedScannedPassage] = useState(true);
+  const [selectedScannedOther, setSelectedScannedOther] = useState(true);
+  const [selectedScannedVocab, setSelectedScannedVocab] = useState<string[]>([]);
+  const [selectedScannedPhonics, setSelectedScannedPhonics] = useState<string[]>([]);
+  const [activeScannedTab, setActiveScannedTab] = useState<'parentView' | 'picker'>('picker');
+  const [scanStatusMessage, setScanStatusMessage] = useState<string | null>(null);
+
+  // New Chip Input state
+  const [newVocabInput, setNewVocabInput] = useState('');
+  const [newPhonicsInput, setNewPhonicsInput] = useState('');
+
+  // Vocab Chip helpers
+  const handleAddVocabWord = (wordToAdd?: string) => {
+    const word = (wordToAdd !== undefined ? wordToAdd : newVocabInput).trim();
+    if (!word) return;
+    const currentList = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+    if (!currentList.map(w => w.toLowerCase()).includes(word.toLowerCase())) {
+      const updated = [...currentList, word];
+      setCurriculumVocab(updated.join(', '));
+    }
+    if (wordToAdd === undefined) setNewVocabInput('');
+  };
+
+  const handleRemoveVocabWord = (indexToRemove: number) => {
+    const currentList = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+    const updated = currentList.filter((_, idx) => idx !== indexToRemove);
+    setCurriculumVocab(updated.join(', '));
+  };
+
+  // Phonics Chip helpers
+  const handleAddPhonicsRule = (ruleToAdd?: string) => {
+    const rule = (ruleToAdd !== undefined ? ruleToAdd : newPhonicsInput).trim();
+    if (!rule) return;
+    const currentList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+    if (!currentList.map(r => r.toLowerCase()).includes(rule.toLowerCase())) {
+      const updated = [...currentList, rule];
+      setCurriculumPhonics(updated.join(', '));
+    }
+    if (ruleToAdd === undefined) setNewPhonicsInput('');
+  };
+
+  const handleRemovePhonicsRule = (indexToRemove: number) => {
+    const currentList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+    const updated = currentList.filter((_, idx) => idx !== indexToRemove);
+    setCurriculumPhonics(updated.join(', '));
+  };
+
+  const handleTextbookFileUpload = async (inputFiles: FileList | File[] | File) => {
+    const fileList: File[] = inputFiles instanceof FileList 
+      ? Array.from(inputFiles) 
+      : Array.isArray(inputFiles) 
+        ? inputFiles 
+        : [inputFiles];
+
+    if (!fileList || fileList.length === 0) return;
+
+    // Cap at 5 files max per scan batch
+    const selectedFiles = fileList.slice(0, 5);
+
+    const hasLargeFile = selectedFiles.some(f => f.size > 15 * 1024 * 1024);
+    if (hasLargeFile) {
+      alert(isKo 
+        ? '💡 15MB 이상 파일이 포함되어 있습니다. 빠른 AI 분석 및 정확도를 위해 단원별(1~5페이지) PDF나 교재 사진 업로드를 권장합니다.' 
+        : '💡 Large file detected. For fastest scanning & best AI accuracy, we recommend uploading single unit sections or 1–5 page PDFs.'
+      );
+    }
+
     setIsScanningTextbook(true);
-    
-    // Create image preview
-    const previewUrl = URL.createObjectURL(file);
-    setTextbookPreviewUrl(previewUrl);
+    setScanStatusMessage(null);
+    setSelectedPageIndex('all');
+
+    const firstFile = selectedFiles[0];
+    const isPdf = firstFile.type === 'application/pdf' || firstFile.name.toLowerCase().endsWith('.pdf');
+    setUploadedFileType(isPdf ? 'pdf' : 'image');
+    setUploadedFileName(
+      selectedFiles.length === 1 
+        ? firstFile.name 
+        : (isKo ? `${firstFile.name} 외 ${selectedFiles.length - 1}개 파일` : `${firstFile.name} + ${selectedFiles.length - 1} more`)
+    );
 
     try {
-      // 1. Read file as Base64 data URL
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = (err) => reject(err);
-      });
-      reader.readAsDataURL(file);
-      const rawBase64Url = await base64Promise;
+      const cleanBase64List: string[] = [];
+      const previewList: string[] = [];
 
-      // 2. Compress image client-side to prevent Vercel body limits
-      const compressedBase64Url = await compressImage(rawBase64Url);
-      const cleanBase64 = stripDataUrlPrefix(compressedBase64Url);
+      for (const file of selectedFiles) {
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (err) => reject(err);
+        });
+        reader.readAsDataURL(file);
+        const rawBase64Url = await base64Promise;
 
-      // 3. Call AI analysis
+        if (!isPdf) {
+          const compressed = await compressImage(rawBase64Url);
+          previewList.push(compressed);
+          cleanBase64List.push(stripDataUrlPrefix(compressed));
+        } else {
+          cleanBase64List.push(stripDataUrlPrefix(rawBase64Url));
+        }
+      }
+
+      setTextbookPreviewUrls(previewList);
+      if (previewList.length > 0) {
+        setTextbookPreviewUrl(previewList[0]);
+      } else {
+        setTextbookPreviewUrl(null);
+      }
+
+      // Call AI analysis with images_base64 list
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          image_base64: cleanBase64,
-          mode: 'textbook_curriculum_ocr'
+          images_base64: cleanBase64List,
+          mode: 'textbook_curriculum_ocr',
+          mimeType: isPdf ? 'application/pdf' : 'image/jpeg'
         }),
       });
 
       if (!res.ok) throw new Error('API failed');
       const data = await res.json();
 
-      // 4. Auto-populate input boxes
       if (data.analysis) {
+        setScannedData(data.analysis);
+
+        const words = Array.isArray(data.analysis.vocabWords)
+          ? data.analysis.vocabWords
+          : (data.analysis.vocabWords || '').split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean);
+        setSelectedScannedVocab(words);
+
+        const sounds = Array.isArray(data.analysis.phonicsRules)
+          ? data.analysis.phonicsRules
+          : (data.analysis.phonicsRules || '').split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean);
+        setSelectedScannedPhonics(sounds);
+
+        setSelectedScannedTopic(Boolean(data.analysis.topic));
+        setSelectedScannedPassage(Boolean(data.analysis.passage));
+        setSelectedScannedOther(Boolean(data.analysis.other));
+
+        // Auto-fill into curriculum state
         if (data.analysis.topic) setCurriculumTopic(data.analysis.topic);
-        if (data.analysis.vocabWords) {
-          const vocabStr = Array.isArray(data.analysis.vocabWords)
-            ? data.analysis.vocabWords.join(', ')
-            : data.analysis.vocabWords;
-          setCurriculumVocab(vocabStr);
-        }
-        if (data.analysis.phonicsRules) {
-          const phonicsStr = Array.isArray(data.analysis.phonicsRules)
-            ? data.analysis.phonicsRules.join(', ')
-            : data.analysis.phonicsRules;
-          setCurriculumPhonics(phonicsStr);
-        }
+        if (words.length > 0) setCurriculumVocab(words.join(', '));
+        if (sounds.length > 0) setCurriculumPhonics(sounds.join(', '));
         if (data.analysis.passage) setCurriculumPassage(data.analysis.passage);
         if (data.analysis.other) setCurriculumOther(data.analysis.other);
+
+        setShowScannedModal(true);
+        setScanStatusMessage(
+          isKo 
+            ? `총 ${selectedFiles.length}개 페이지/파일 분석 완료! 파닉스, 단어, 정답 가이드가 추출되었습니다.` 
+            : `Successfully scanned ${selectedFiles.length} page(s)! Phonics, vocabulary & parent answer keys extracted.`
+        );
       }
     } catch (err) {
-      console.error('Failed to scan textbook page:', err);
+      console.error('Failed to scan textbook pages:', err);
+      alert(isKo ? '파일 분석 중 오류가 발생했습니다. 다시 시도해 주세요.' : 'Failed to analyze worksheet files. Please try again.');
     } finally {
       setIsScanningTextbook(false);
     }
+  };
+
+  const applyScannedSelectionToCurriculum = () => {
+    if (!scannedData) return;
+    if (selectedScannedTopic && scannedData.topic) {
+      setCurriculumTopic(scannedData.topic);
+    }
+    if (selectedScannedVocab.length > 0) {
+      setCurriculumVocab(selectedScannedVocab.join(', '));
+    }
+    if (selectedScannedPhonics.length > 0) {
+      setCurriculumPhonics(selectedScannedPhonics.join(', '));
+    }
+    if (selectedScannedPassage && scannedData.passage) {
+      setCurriculumPassage(scannedData.passage);
+    }
+    if (selectedScannedOther && scannedData.other) {
+      setCurriculumOther(scannedData.other);
+    }
+    setShowScannedModal(false);
+    setScanStatusMessage(isKo ? '선택한 학급 커리큘럼 항목이 성공적으로 적용되었습니다!' : 'Selected items successfully applied to your weekly curriculum!');
   };
 
   // Student roster & analytics state
@@ -573,16 +706,14 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   // Load curriculum whenever selected class or week changes
   useEffect(() => {
-    if (selectedClass) {
-      loadCurriculum();
-      fetchRosterAndMistakes();
-    }
-  }, [selectedClass, selectedClass?.activeWeekNumber]);
+    loadCurriculum();
+    fetchRosterAndMistakes();
+  }, [selectedClass?.id, selectedClass?.activeWeekNumber]);
 
   const loadCurriculum = async () => {
-    if (!selectedClass) return;
+    const targetClass = selectedClass || fallbackDemoClass;
     setIsLoadingCurriculum(true);
-    const currDocId = `${selectedClass.id}_week_${selectedClass.activeWeekNumber || 1}`;
+    const currDocId = `${targetClass.id}_week_${targetClass.activeWeekNumber || 1}`;
     const localKey = `curriculum_${currDocId}`;
 
     // 1. Pre-load from LocalStorage for instant render & offline compatibility
@@ -630,7 +761,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const handleSaveCurriculum = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedClass) return;
+    const targetClass = selectedClass || fallbackDemoClass;
 
     // --- GUARDRAIL VALIDATION FOR "OTHER" FIELD ---
     const otherText = curriculumOther.trim();
@@ -662,7 +793,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
 
     setIsSavingCurriculum(true);
-    const currDocId = `${selectedClass.id}_week_${selectedClass.activeWeekNumber || 1}`;
+    const currDocId = `${targetClass.id}_week_${targetClass.activeWeekNumber || 1}`;
     const localKey = `curriculum_${currDocId}`;
 
     try {
@@ -670,9 +801,9 @@ export default function TeacherPage({ isNight = true }: Props) {
       const phonicsList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
 
       const payload = {
-        classId: selectedClass.id,
-        teacherUid: user?.uid || selectedClass.teacherUid || '',
-        weekNumber: selectedClass.activeWeekNumber || 1,
+        classId: targetClass.id,
+        teacherUid: user?.uid || targetClass.teacherUid || '',
+        weekNumber: targetClass.activeWeekNumber || 1,
         topic: curriculumTopic.trim(),
         vocabWords: vocabList,
         phonicsRules: phonicsList,
@@ -706,7 +837,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   };
 
   const fetchRosterAndMistakes = async () => {
-    if (!selectedClass) return;
+    const targetClass = selectedClass || fallbackDemoClass;
     setIsLoadingRoster(true);
     try {
       // 1. Fetch dual-persisted class scans from LocalStorage
@@ -2187,7 +2318,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                       </div>
                     </div>
 
-
                   </div>
                 </div>
               )}
@@ -2206,7 +2336,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                         </div>
                         <div>
                           <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                            {isKo ? `주간 커리큘럼 편집 (Week ${selectedClass?.activeWeekNumber})` : `Edit Weekly Curriculum (Week ${selectedClass?.activeWeekNumber})`}
+                            {isKo ? `주간 커리큘럼 편집 (Week ${selectedClass?.activeWeekNumber || 1})` : `Edit Weekly Curriculum (Week ${selectedClass?.activeWeekNumber || 1})`}
                           </h4>
                           <p className="text-xs text-zinc-400 mt-0.5">
                             {isKo 
@@ -2223,6 +2353,27 @@ export default function TeacherPage({ isNight = true }: Props) {
                       </div>
                     ) : (
                       <form onSubmit={handleSaveCurriculum} className="space-y-6">
+                        {/* Scan status feedback banner */}
+                        {scanStatusMessage && (
+                          <div className={`p-4 rounded-2xl border flex items-center justify-between transition-all ${
+                            isThemeNight ? 'bg-orange-500/10 border-orange-500/30 text-orange-300' : 'bg-orange-50 border-orange-200 text-orange-900'
+                          }`}>
+                            <div className="flex items-center gap-3">
+                              <Sparkle size={20} weight="bold" className="text-orange-500 shrink-0" />
+                              <p className="text-xs font-semibold">{scanStatusMessage}</p>
+                            </div>
+                            {scannedData && (
+                              <button
+                                type="button"
+                                onClick={() => setShowScannedModal(true)}
+                                className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
+                              >
+                                🎯 {isKo ? '스캔 결과 & 답안 확인' : 'View Scanned Answers'}
+                              </button>
+                            )}
+                          </div>
+                        )}
+
                         {/* Drag & Drop Textbook Page or PDF Zone */}
                         <div
                           onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
@@ -2230,8 +2381,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                           onDrop={(e) => {
                             e.preventDefault();
                             setIsDraggingFile(false);
-                            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                              handleTextbookFileUpload(e.dataTransfer.files[0]);
+                            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                              handleTextbookFileUpload(e.dataTransfer.files);
                             }
                           }}
                           className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
@@ -2242,10 +2393,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                         >
                           <input
                             type="file"
+                            multiple
                             accept="image/*,.pdf"
                             onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                handleTextbookFileUpload(e.target.files[0]);
+                              if (e.target.files && e.target.files.length > 0) {
+                                handleTextbookFileUpload(e.target.files);
                               }
                             }}
                             className="absolute inset-0 opacity-0 cursor-pointer z-20"
@@ -2258,33 +2410,65 @@ export default function TeacherPage({ isNight = true }: Props) {
                                 {isKo ? 'Chekki AI가 교재 페이지를 분석하고 있습니다...' : 'Scanning textbook page with Chekki AI...'}
                               </p>
                               <p className="text-[10px] text-zinc-500 mt-1">
-                                {isKo ? '단어, 파닉스 규칙, 지문을 자동으로 추출합니다' : 'Auto-extracting target vocabulary, phonics, and reading passage'}
+                                {isKo ? '단어, 파닉스 규칙, 학부모용 정답 가이드를 추출합니다' : 'Extracting vocabulary, phonics, and parent answer key'}
                               </p>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-4">
-                              {textbookPreviewUrl ? (
-                                <img 
-                                  src={textbookPreviewUrl} 
-                                  alt="Textbook preview" 
-                                  className="w-16 h-16 object-cover rounded-xl border border-white/20 shadow-md" 
-                                />
-                              ) : (
-                                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg">
-                                  <UploadSimple size={22} weight="bold" />
+                            <div className="flex items-center gap-4 w-full justify-between px-2">
+                              <div className="flex items-center gap-4">
+                                {uploadedFileType === 'pdf' ? (
+                                  <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-500 flex flex-col items-center justify-center shadow-lg shrink-0">
+                                    <FileText size={24} weight="bold" />
+                                    <span className="text-[9px] font-black uppercase tracking-wider">PDF</span>
+                                  </div>
+                                ) : textbookPreviewUrl ? (
+                                  <img 
+                                    src={textbookPreviewUrl} 
+                                    alt="Worksheet preview" 
+                                    className="w-16 h-16 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0" 
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).style.display = 'none';
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg shrink-0">
+                                    <UploadSimple size={22} weight="bold" />
+                                  </div>
+                                )}
+                                <div className="text-left">
+                                  <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                                    <span>
+                                      {uploadedFileName 
+                                        ? (uploadedFileName.length > 28 ? uploadedFileName.substring(0, 25) + '...' : uploadedFileName) 
+                                        : (isKo ? '교재 이미지 또는 PDF 파일 업로드' : 'Upload or Drag & Drop Textbook Page (Photo / PDF)')}
+                                    </span>
+                                    <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-[9px] font-black uppercase rounded-md border border-orange-500/30">
+                                      AI Auto-Fill
+                                    </span>
+                                  </h5>
+                                  <p className="text-xs text-zinc-400 mt-0.5">
+                                    {uploadedFileName 
+                                      ? (isKo ? '새로운 파일로 변경하려면 클릭하거나 드래그해 주세요.' : 'Click or drop a new file to rescan.') 
+                                      : (isKo ? '교재 페이지 사진이나 PDF를 드롭하면 AI가 단어와 파닉스, 정답 가이드를 추출합니다.' : 'Drag & drop a textbook page photo or PDF. AI will auto-extract vocabulary & phonics.')}
+                                  </p>
+                                  <p className="text-[11px] text-orange-400/90 font-medium mt-1">
+                                    💡 {isKo 
+                                      ? '최적의 AI 분석을 위해 단원별 1~5페이지 분량의 교재 사진이나 핵심 PDF 업로드를 권장합니다.'
+                                      : 'Works best with 1–5 page unit sections or worksheet photos for instant, highly accurate AI extraction.'}
+                                  </p>
                                 </div>
-                              )}
-                              <div className="text-left">
-                                <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                                  <span>{isKo ? '교재 이미지 또는 PDF 파일 업로드' : 'Upload or Drag & Drop Textbook Page (Photo / PDF)'}</span>
-                                  <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-[9px] font-black uppercase rounded-md border border-orange-500/30">
-                                    AI Auto-Fill
-                                  </span>
-                                </h5>
-                                <p className="text-xs text-zinc-400 mt-0.5">
-                                  {isKo ? '교재 페이지 사진이나 PDF를 드롭하면 AI가 단어와 파닉스를 자동으로 채워줍니다.' : 'Drag & drop a textbook page photo or PDF. AI will auto-extract vocabulary & phonics.'}
-                                </p>
                               </div>
+
+                              {scannedData && (
+                                <button
+                                  type="button"
+                                  onClick={() => setShowScannedModal(true)}
+                                  className="z-30 px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 shrink-0"
+                                >
+                                  <Sparkle size={14} weight="bold" />
+                                  <span>{isKo ? '답안 & 항목 선택' : 'Review AI Items'}</span>
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
@@ -2323,6 +2507,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                             🦁 Animals & Habitats
                           </button>
                         </div>
+
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
                             {isKo ? '대주제 / 주간 테마 (Topic)' : 'Weekly Topic / Theme'}
@@ -2338,38 +2523,151 @@ export default function TeacherPage({ isNight = true }: Props) {
                           />
                         </div>
 
+                        {/* Interactive Chips & Fast Input for Vocabulary and Phonics */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1 flex items-center justify-between">
-                              <span>{isKo ? '주간 학습 단어 (Vocabulary)' : 'Target Vocabulary'}</span>
-                              <span className="text-[9px] text-zinc-500 font-normal">
-                                ({isKo ? '쉼표로 구분' : 'separated by commas'})
+                          {/* Target Vocabulary */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between pl-1">
+                              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                {isKo ? '주간 학습 단어 (Target Vocabulary)' : 'Target Vocabulary'}
+                              </label>
+                              <span className="text-[10px] font-mono font-bold text-orange-500">
+                                {curriculumVocab.split(/[,\n]/).filter(s => s.trim()).length} {isKo ? '개 단어' : 'words'}
                               </span>
-                            </label>
+                            </div>
+
+                            {/* Chip Badges Container */}
+                            <div className={`p-3.5 rounded-2xl border min-h-[90px] flex flex-wrap gap-2 items-center transition-all ${
+                              isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-300'
+                            }`}>
+                              {curriculumVocab.split(/[,\n]/).filter(s => s.trim()).length === 0 ? (
+                                <p className="text-xs text-zinc-500 italic p-1">
+                                  {isKo ? '등록된 단어가 없습니다. 아래에서 단어를 추가하거나 워크시트를 스캔하세요.' : 'No vocabulary words yet. Type below or scan a worksheet.'}
+                                </p>
+                              ) : (
+                                curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean).map((word, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/15 border border-orange-500/30 text-orange-400 font-mono font-bold text-xs rounded-xl shadow-sm group transition-all"
+                                  >
+                                    <span>{word}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveVocabWord(idx)}
+                                      className="p-0.5 hover:bg-orange-500/30 rounded-full transition-colors cursor-pointer text-orange-400 hover:text-white"
+                                      title={isKo ? '단어 삭제' : 'Delete word'}
+                                    >
+                                      <X size={12} weight="bold" />
+                                    </button>
+                                  </span>
+                                ))
+                              )}
+                            </div>
+
+                            {/* Add Word Input */}
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={newVocabInput}
+                                onChange={(e) => setNewVocabInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAddVocabWord();
+                                  }
+                                }}
+                                placeholder={isKo ? '새 단어 입력 후 Enter...' : 'Type a word & press Enter...'}
+                                className={`flex-1 border outline-none text-xs p-3.5 rounded-xl transition-all ${
+                                  isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                                }`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleAddVocabWord()}
+                                className="px-4 py-3.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                              >
+                                + {isKo ? '추가' : 'Add'}
+                              </button>
+                            </div>
+
                             <textarea
                               value={curriculumVocab}
                               onChange={(e) => setCurriculumVocab(e.target.value)}
-                              placeholder="umbrella, rainbow, storm, rain..."
-                              className={`w-full h-36 border outline-none text-sm p-4 rounded-2xl transition-all resize-none font-mono ${
-                                isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
-                              }`}
+                              placeholder="umbrella, rainbow, storm..."
+                              className="hidden"
                             />
                           </div>
 
-                          <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1 flex items-center justify-between">
-                              <span>{isKo ? '주간 타겟 파닉스 / 문법 (Phonics)' : 'Target Phonics Rules / Sounds'}</span>
-                              <span className="text-[9px] text-zinc-500 font-normal">
-                                ({isKo ? '쉼표로 구분' : 'separated by commas'})
+                          {/* Target Phonics Rules */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between pl-1">
+                              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                {isKo ? '주간 타겟 파닉스 / 음가 (Phonics Sounds)' : 'Target Phonics Rules / Sounds'}
+                              </label>
+                              <span className="text-[10px] font-mono font-bold text-indigo-400">
+                                {curriculumPhonics.split(/[,\n]/).filter(s => s.trim()).length} {isKo ? '개 음가' : 'sounds'}
                               </span>
-                            </label>
+                            </div>
+
+                            {/* Chip Badges Container */}
+                            <div className={`p-3.5 rounded-2xl border min-h-[90px] flex flex-wrap gap-2 items-center transition-all ${
+                              isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-300'
+                            }`}>
+                              {curriculumPhonics.split(/[,\n]/).filter(s => s.trim()).length === 0 ? (
+                                <p className="text-xs text-zinc-500 italic p-1">
+                                  {isKo ? '등록된 파닉스 규칙이 없습니다. 아래에서 음가를 추가하거나 스캔하세요.' : 'No phonics rules yet. Type below or scan a worksheet.'}
+                                </p>
+                              ) : (
+                                curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean).map((rule, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono font-bold text-xs rounded-xl shadow-sm group transition-all"
+                                  >
+                                    <span>{rule}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemovePhonicsRule(idx)}
+                                      className="p-0.5 hover:bg-indigo-500/30 rounded-full transition-colors cursor-pointer text-indigo-400 hover:text-white"
+                                      title={isKo ? '파닉스 규칙 삭제' : 'Delete sound rule'}
+                                    >
+                                      <X size={12} weight="bold" />
+                                    </button>
+                                  </span>
+                                ))
+                              )}
+                            </div>
+
+                            {/* Add Phonics Sound Input */}
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={newPhonicsInput}
+                                onChange={(e) => setNewPhonicsInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAddPhonicsRule();
+                                  }
+                                }}
+                                placeholder={isKo ? '파닉스 입력 (예: -ai-) 후 Enter...' : 'Type a sound (e.g. -ai-) & press Enter...'}
+                                className={`flex-1 border outline-none text-xs p-3.5 rounded-xl transition-all ${
+                                  isThemeNight ? 'bg-[#050505] border-white/10 focus:border-indigo-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-indigo-500 text-zinc-900 placeholder:text-zinc-400'
+                                }`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleAddPhonicsRule()}
+                                className="px-4 py-3.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                              >
+                                + {isKo ? '추가' : 'Add'}
+                              </button>
+                            </div>
+
                             <textarea
                               value={curriculumPhonics}
                               onChange={(e) => setCurriculumPhonics(e.target.value)}
-                              placeholder="-ai-, -ay-, sh-, ch-..."
-                              className={`w-full h-36 border outline-none text-sm p-4 rounded-2xl transition-all resize-none font-mono ${
-                                isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
-                              }`}
+                              placeholder="-ai-, -ay-..."
+                              className="hidden"
                             />
                           </div>
                         </div>
@@ -3597,6 +3895,357 @@ export default function TeacherPage({ isNight = true }: Props) {
                     <span>{isKo ? '성적표 인쇄 / PDF 발급' : 'Print / Export Report PDF'}</span>
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- SCANNED AI WORKSHEET & PICK-AND-CHOOSE MODAL --- */}
+      {showScannedModal && (
+        <div className="fixed inset-0 z-[350] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+            onClick={() => setShowScannedModal(false)} 
+          />
+          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh] ${
+            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+          }`}>
+            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar ${
+              isThemeNight ? 'bg-[#0c0c0e] text-zinc-100' : 'bg-white text-zinc-900'
+            }`}>
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
+                    <Sparkle size={22} weight="bold" />
+                  </div>
+                  <div>
+                    <h3 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                      {isKo ? 'AI 워크시트 스캔 분석 & 항목 선택' : 'Scanned Worksheet AI Analysis & Selection'}
+                    </h3>
+                    <p className="text-xs text-zinc-400">
+                      {isKo ? '추출된 학부모 정답 가이드와 커리큘럼 항목을 선택하세요.' : 'Review parent answer keys & select items to add to curriculum.'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowScannedModal(false)}
+                  className={`p-2 rounded-full transition-all cursor-pointer ${
+                    isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                  }`}
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+
+              {/* Tabs: Parent Answer Key vs Pick & Choose */}
+              <div className="flex gap-2 mb-6 p-1 bg-white/5 border border-white/10 rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() => setActiveScannedTab('picker')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    activeScannedTab === 'picker'
+                      ? 'bg-orange-500 text-white shadow-md'
+                      : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                  }`}
+                >
+                  <CheckCircle size={16} weight="bold" />
+                  <span>{isKo ? '🎯 커리큘럼 항목 선택 (Pick & Choose)' : '🎯 Pick & Choose Items'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveScannedTab('parentView')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    activeScannedTab === 'parentView'
+                      ? 'bg-orange-500 text-white shadow-md'
+                      : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                  }`}
+                >
+                  <Users size={16} weight="bold" />
+                  <span>{isKo ? '👨‍👩‍👧‍👦 학부모용 정답 보기 (Parent View)' : '👨‍👩‍👧‍👦 Parent Answer Key'}</span>
+                </button>
+              </div>
+
+              {/* Page Selector Pill Bar for Multi-Page Extractions */}
+              {scannedData?.pages && scannedData.pages.length > 0 && (
+                <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 custom-scrollbar">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mr-1 shrink-0">
+                    {isKo ? '페이지 선택:' : 'Select Page:'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPageIndex('all')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                      selectedPageIndex === 'all'
+                        ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                        : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700'
+                    }`}
+                  >
+                    <span>📚</span>
+                    <span>{isKo ? '전체 통합 (All Combined)' : 'All Pages'}</span>
+                  </button>
+                  {scannedData.pages.map((pObj: any, idx: number) => {
+                    const pageNum = pObj.pageIndex || idx + 1;
+                    const isActive = selectedPageIndex === pageNum;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedPageIndex(pageNum)}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                          isActive
+                            ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                            : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700'
+                        }`}
+                      >
+                        <span>📄</span>
+                        <span>{pObj.pageTitle || (isKo ? `페이지 ${pageNum}` : `Page ${pageNum}`)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Dynamic Active Display Object based on page selection */}
+              {(() => {
+                const activeDisplayObj = selectedPageIndex === 'all' || !scannedData?.pages
+                  ? scannedData
+                  : (scannedData.pages.find((p: any) => (p.pageIndex || p.pageNumber) === selectedPageIndex) || scannedData);
+
+                return (
+                  <>
+                    {/* Tab Content 1: Pick and Choose */}
+                    {activeScannedTab === 'picker' && (
+                      <div className="space-y-6">
+                        {/* Topic selection */}
+                        {activeDisplayObj?.topic && (
+                          <div className={`p-4 rounded-2xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                            <label className="flex items-center justify-between cursor-pointer">
+                              <span className="text-xs font-bold text-orange-500 uppercase tracking-widest">
+                                {isKo ? '추출된 대주제 / 테마 (Topic)' : 'Extracted Topic / Theme'}
+                              </span>
+                              <input
+                                type="checkbox"
+                                checked={selectedScannedTopic}
+                                onChange={(e) => setSelectedScannedTopic(e.target.checked)}
+                                className="w-4 h-4 accent-orange-500 cursor-pointer"
+                              />
+                            </label>
+                            <p className={`text-base font-bold mt-1 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                              {activeDisplayObj.topic}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Vocabulary Selection */}
+                        {activeDisplayObj?.vocabWords && (Array.isArray(activeDisplayObj.vocabWords) ? activeDisplayObj.vocabWords.length > 0 : Boolean(activeDisplayObj.vocabWords)) && (
+                          <div className={`p-4 rounded-2xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-xs font-bold text-orange-500 uppercase tracking-widest">
+                                {isKo ? '추출된 학습 단어 (Select Vocabulary Words)' : 'Extracted Target Vocabulary'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const pageWords = Array.isArray(activeDisplayObj.vocabWords)
+                                    ? activeDisplayObj.vocabWords
+                                    : activeDisplayObj.vocabWords.split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean);
+                                  
+                                  const allSelected = pageWords.every((w: string) => selectedScannedVocab.includes(w));
+                                  if (allSelected) {
+                                    setSelectedScannedVocab(prev => prev.filter(w => !pageWords.includes(w)));
+                                  } else {
+                                    setSelectedScannedVocab(prev => Array.from(new Set([...prev, ...pageWords])));
+                                  }
+                                }}
+                                className="text-[11px] font-bold text-orange-500 hover:underline cursor-pointer"
+                              >
+                                {isKo ? '이 페이지 단어 전체 선택 / 해제' : 'Toggle Page Words'}
+                              </button>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                              {(Array.isArray(activeDisplayObj.vocabWords) ? activeDisplayObj.vocabWords : activeDisplayObj.vocabWords.split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean)).map((word: string) => {
+                                const isSelected = selectedScannedVocab.includes(word);
+                                return (
+                                  <button
+                                    type="button"
+                                    key={word}
+                                    onClick={() => {
+                                      if (isSelected) {
+                                        setSelectedScannedVocab(prev => prev.filter(w => w !== word));
+                                      } else {
+                                        setSelectedScannedVocab(prev => [...prev, word]);
+                                      }
+                                    }}
+                                    className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                                      isSelected
+                                        ? 'bg-orange-500 border-orange-500 text-white shadow-md scale-[1.02]'
+                                        : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700'
+                                    }`}
+                                  >
+                                    <span>{word}</span>
+                                    {isSelected ? <Check size={12} weight="bold" /> : <Plus size={12} weight="bold" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Phonics Selection */}
+                        {activeDisplayObj?.phonicsRules && (Array.isArray(activeDisplayObj.phonicsRules) ? activeDisplayObj.phonicsRules.length > 0 : Boolean(activeDisplayObj.phonicsRules)) && (
+                          <div className={`p-4 rounded-2xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
+                                {isKo ? '추출된 파닉스 음가 (Select Phonics Sounds)' : 'Extracted Phonics Rules'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const pageSounds = Array.isArray(activeDisplayObj.phonicsRules)
+                                    ? activeDisplayObj.phonicsRules
+                                    : activeDisplayObj.phonicsRules.split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean);
+                                  
+                                  const allSelected = pageSounds.every((s: string) => selectedScannedPhonics.includes(s));
+                                  if (allSelected) {
+                                    setSelectedScannedPhonics(prev => prev.filter(s => !pageSounds.includes(s)));
+                                  } else {
+                                    setSelectedScannedPhonics(prev => Array.from(new Set([...prev, ...pageSounds])));
+                                  }
+                                }}
+                                className="text-[11px] font-bold text-indigo-400 hover:underline cursor-pointer"
+                              >
+                                {isKo ? '이 페이지 파닉스 전체 선택 / 해제' : 'Toggle Page Phonics'}
+                              </button>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                              {(Array.isArray(activeDisplayObj.phonicsRules) ? activeDisplayObj.phonicsRules : activeDisplayObj.phonicsRules.split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean)).map((sound: string) => {
+                                const isSelected = selectedScannedPhonics.includes(sound);
+                                return (
+                                  <button
+                                    type="button"
+                                    key={sound}
+                                    onClick={() => {
+                                      if (isSelected) {
+                                        setSelectedScannedPhonics(prev => prev.filter(s => s !== sound));
+                                      } else {
+                                        setSelectedScannedPhonics(prev => [...prev, sound]);
+                                      }
+                                    }}
+                                    className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                                      isSelected
+                                        ? 'bg-indigo-500 border-indigo-500 text-white shadow-md scale-[1.02]'
+                                        : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700'
+                                    }`}
+                                  >
+                                    <span>{sound}</span>
+                                    {isSelected ? <Check size={12} weight="bold" /> : <Plus size={12} weight="bold" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Reading Passage Selection */}
+                        {activeDisplayObj?.passage && (
+                          <div className={`p-4 rounded-2xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                            <label className="flex items-center justify-between cursor-pointer mb-2">
+                              <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">
+                                {isKo ? '추출된 본문 지문 (Reading Passage)' : 'Extracted Reading Passage'}
+                              </span>
+                              <input
+                                type="checkbox"
+                                checked={selectedScannedPassage}
+                                onChange={(e) => setSelectedScannedPassage(e.target.checked)}
+                                className="w-4 h-4 accent-purple-500 cursor-pointer"
+                              />
+                            </label>
+                            <p className={`text-xs leading-relaxed p-3 rounded-xl border font-serif ${
+                              isThemeNight ? 'bg-[#050505] border-white/5 text-zinc-300' : 'bg-white border-zinc-200 text-zinc-800'
+                            }`}>
+                              "{activeDisplayObj.passage}"
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tab Content 2: Parent View */}
+                    {activeScannedTab === 'parentView' && (
+                      <div className="space-y-4">
+                        <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400 flex items-center gap-3">
+                          <Info size={20} weight="bold" className="shrink-0" />
+                          <p>
+                            {isKo 
+                              ? '학부모가 스마트폰으로 워크시트를 찍었을 때 화면에 정답 잉크로 오버레이되는 가이드 내용입니다.' 
+                              : 'This is the exact answer key overlaid on parents\' screens when they scan their child\'s physical worksheet.'}
+                          </p>
+                        </div>
+
+                        {activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0 ? (
+                          <div className="space-y-3">
+                            {activeDisplayObj.detectedAnswers.map((item: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className={`p-4 rounded-2xl border transition-all text-left ${
+                                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                                    Question #{item.questionNumber || idx + 1}
+                                  </span>
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                                    {item.category || 'Vocabulary'}
+                                  </span>
+                                </div>
+                                <p className={`text-xs font-semibold mb-2 ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                                  {item.questionText || item.question}
+                                </p>
+                                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs">
+                                  <span className="text-emerald-400 font-bold">{isKo ? '부모님용 정답 오버레이:' : 'Correct Answer Ink:'}</span>
+                                  <span className="font-mono font-black text-emerald-400 text-sm">{item.answer}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="p-8 text-center border rounded-2xl border-dashed border-white/10 text-xs text-zinc-500">
+                            {isKo ? '워크시트에서 추출된 개별 정답 문항이 표시됩니다.' : 'Worksheet question answer keys will appear here after scanning.'}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+
+              {/* Modal Footer Actions */}
+              <div className="mt-8 pt-4 border-t border-white/10 flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={() => setShowScannedModal(false)}
+                  className={`px-5 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                    isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-400 border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                  }`}
+                >
+                  {isKo ? '닫기' : 'Close'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={applyScannedSelectionToCurriculum}
+                  className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <CheckCircle size={16} weight="bold" />
+                  <span>{isKo ? '선택 항목을 주간 커리큘럼에 적용' : 'Apply Selected to Curriculum'}</span>
+                </button>
               </div>
             </div>
           </div>

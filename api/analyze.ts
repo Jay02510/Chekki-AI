@@ -622,14 +622,66 @@ export default async function handler(req: any, res: any) {
 
     const mode = body?.mode;
 
-    // Handle Textbook Curriculum OCR extraction for Teacher Dashboard
+    // Handle Textbook Curriculum OCR extraction for Teacher Dashboard (supports single or multi-page uploads)
     if (mode === 'textbook_curriculum_ocr') {
-      const base64Image = body?.image_base64 || body?.image;
-      if (!base64Image) {
+      const rawImageList: string[] = Array.isArray(body?.images_base64) && body.images_base64.length > 0
+        ? body.images_base64
+        : (body?.image_base64 || body?.image ? [body.image_base64 || body.image] : []);
+
+      if (rawImageList.length === 0) {
         return res.status(400).json({ error: 'MISSING_IMAGE' });
       }
 
-      const mimeType = body?.mimeType || (base64Image.startsWith('JVBERi0') ? 'application/pdf' : 'image/jpeg');
+      const defaultMime = body?.mimeType || (rawImageList[0].startsWith('JVBERi0') ? 'application/pdf' : 'image/jpeg');
+
+      const imageParts = rawImageList.map((imgBase64) => ({
+        inlineData: {
+          mimeType: defaultMime,
+          data: imgBase64
+        }
+      }));
+
+      const promptText = `You are an expert curriculum parser for English Kindergarten & Elementary textbooks and worksheets.
+Extract the core teaching components and parent answer key from the provided textbook/worksheet page image(s).
+You are analyzing ${rawImageList.length} page(s)/image(s).
+
+Provide both an overall aggregated unit summary AND a page-by-page breakdown for each page uploaded.
+
+Return ONLY valid JSON matching this schema:
+{
+  "topic": string (overall unit title/theme),
+  "vocabWords": string[] (all target vocabulary words across pages),
+  "phonicsRules": string[] (all target phonics rules across pages),
+  "passage": string (target reading story/passage),
+  "other": string (supplementary homework or speaking instructions),
+  "detectedAnswers": [
+    {
+      "questionNumber": string,
+      "questionText": string,
+      "answer": string,
+      "category": string
+    }
+  ],
+  "pages": [
+    {
+      "pageIndex": number (1-based index: 1, 2, 3...),
+      "pageTitle": string (e.g. "Page 1 - Vocabulary"),
+      "topic": string,
+      "vocabWords": string[],
+      "phonicsRules": string[],
+      "passage": string,
+      "other": string,
+      "detectedAnswers": [
+        {
+          "questionNumber": string,
+          "questionText": string,
+          "answer": string,
+          "category": string
+        }
+      ]
+    }
+  ]
+}`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
@@ -637,30 +689,8 @@ export default async function handler(req: any, res: any) {
           {
             role: 'user',
             parts: [
-              {
-                text: `You are an expert curriculum parser for English Kindergarten & Elementary textbooks.
-Extract the core teaching components from this textbook page image:
-- "topic": Unit title, story header, or theme (e.g., "Weather & Nature").
-- "vocabWords": Target vocabulary words printed on the page as an array of strings.
-- "phonicsRules": Phonics sounds or letter blend patterns highlighted as an array of strings (e.g. ["-ai-", "-ay-", "sh-"]).
-- "passage": Target reading passage text or story paragraph on the page.
-- "other": Any additional curriculum notes, extra grammar rules, teacher instructions, or homework guidelines on the page directly related to learning English (e.g. "Speaking: Practice reading the word umbrella 3 times."). Filter out any inappropriate or non-educational content.
-
-Return ONLY valid JSON matching this schema:
-{
-  "topic": string,
-  "vocabWords": string[],
-  "phonicsRules": string[],
-  "passage": string,
-  "other": string
-}`
-              },
-              {
-                inlineData: {
-                  mimeType: mimeType,
-                  data: base64Image
-                }
-              }
+              { text: promptText },
+              ...imageParts
             ]
           }
         ],
@@ -679,7 +709,27 @@ Return ONLY valid JSON matching this schema:
             vocabWords: ['sunny', 'rainy', 'windy', 'cloudy', 'umbrella', 'storm'],
             phonicsRules: ['-ai-', '-ay-', 'sh-'],
             passage: 'The weather was rainy today. Always remember your umbrella!',
-            other: 'Homework: Practice spelling target vocabulary twice and read page 24 out loud.'
+            other: 'Homework: Practice spelling target vocabulary twice and read page 24 out loud.',
+            detectedAnswers: [
+              { questionNumber: '1', questionText: 'Look at the picture. What is the weather like?', answer: 'rainy', category: 'Vocabulary' },
+              { questionNumber: '2', questionText: 'Fill in the missing letters: r _ _ n', answer: 'rain (-ai-)', category: 'Phonics' },
+              { questionNumber: '3', questionText: 'What item do you carry when it rains?', answer: 'umbrella', category: 'Reading' }
+            ],
+            pages: [
+              {
+                pageIndex: 1,
+                pageTitle: 'Page 1 - Vocabulary & Phonics',
+                topic: 'Weather & Nature',
+                vocabWords: ['sunny', 'rainy', 'windy', 'cloudy', 'umbrella', 'storm'],
+                phonicsRules: ['-ai-', '-ay-', 'sh-'],
+                passage: '',
+                other: '',
+                detectedAnswers: [
+                  { questionNumber: '1', questionText: 'Look at the picture. What is the weather like?', answer: 'rainy', category: 'Vocabulary' },
+                  { questionNumber: '2', questionText: 'Fill in the missing letters: r _ _ n', answer: 'rain (-ai-)', category: 'Phonics' }
+                ]
+              }
+            ]
           }
         });
       }
