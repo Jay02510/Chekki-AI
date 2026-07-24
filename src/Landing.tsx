@@ -136,6 +136,19 @@ export default function Home() {
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-6">
             <a
+              href="/faq"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState({}, '', '/faq');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className={`text-sm font-medium transition-colors ${
+                isNight ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {isKo ? '자주 묻는 질문 (FAQ)' : 'FAQ'}
+            </a>
+            <a
               href={isKo ? '/schools?lang=ko' : '/schools?lang=en'}
               className={`text-sm font-medium transition-colors ${
                 isNight ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900'
@@ -221,6 +234,19 @@ export default function Home() {
               {isKo ? '웹앱 시작하기' : 'Web App'}
             </a>
             
+            <a
+              href="/faq"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                window.history.pushState({}, '', '/faq');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-brand transition-colors"
+            >
+              {isKo ? '❓ 자주 묻는 질문 (FAQ)' : '❓ FAQ'}
+            </a>
+
             <a
               href="/schools"
               onClick={() => setMobileMenuOpen(false)}
@@ -590,6 +616,17 @@ export default function Home() {
 
         <div className="relative z-10 mt-24 flex flex-col items-center gap-6">
           <div className="flex items-center gap-6 text-white/50 text-sm font-medium mb-4">
+            <a
+              href="/faq"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState({}, '', '/faq');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-white transition-colors"
+            >
+              FAQ
+            </a>
             <a href="/privacy" className="hover:text-white transition-colors">
               Privacy Policy
             </a>

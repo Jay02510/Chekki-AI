@@ -10,9 +10,9 @@ export default function TermsPage() {
         </div>
 
         <section className="space-y-8">
-          <div className="bg-white/5 p-8 rounded-2xl border border-white/10">
-            <h3 className="font-black text-xl mb-6 border-b border-white/10 pb-4">[KR] 이용약관</h3>
-            <div className="text-white/70 leading-loose space-y-6">
+          <div className="bg-slate-900/60 p-8 rounded-2xl border border-slate-800">
+            <h3 className="font-black text-xl mb-6 border-b border-slate-800 pb-4">[KR] 이용약관</h3>
+            <div className="text-zinc-200 leading-loose space-y-6">
               <p>
                 <strong>
                   본 서비스는 전자상거래 등에서의 소비자보호에 관한 법률을 준수합니다.
@@ -55,11 +55,11 @@ export default function TermsPage() {
             </div>
           </div>
 
-          <div className="bg-white/5 p-8 rounded-2xl border border-white/10">
-            <h3 className="font-black text-xl mb-6 border-b border-white/10 pb-4">
+          <div className="bg-slate-900/60 p-8 rounded-2xl border border-slate-800">
+            <h3 className="font-black text-xl mb-6 border-b border-slate-800 pb-4">
               [EN] Terms of Service
             </h3>
-            <div className="text-white/70 leading-loose space-y-6">
+            <div className="text-zinc-200 leading-loose space-y-6">
               <p>
                 <strong>
                   This service complies with the Korean Act on Consumer Protection in Electronic

@@ -12,11 +12,11 @@ export default function PrivacyPage() {
         </div>
 
         <section className="space-y-8">
-          <div className="bg-white/5 p-8 rounded-2xl border border-white/10">
-            <h3 className="font-black text-xl mb-6 border-b border-white/10 pb-4">
+          <div className="bg-slate-900/60 p-8 rounded-2xl border border-slate-800">
+            <h3 className="font-black text-xl mb-6 border-b border-slate-800 pb-4">
               [KR] 개인정보처리방침
             </h3>
-            <div className="text-white/70 leading-loose space-y-6">
+            <div className="text-zinc-200 leading-loose space-y-6">
               <p>
                 <strong className="text-white block mb-2 text-lg">
                   1. 개인정보의 수집 항목 및 목적
@@ -60,11 +60,11 @@ export default function PrivacyPage() {
             </div>
           </div>
 
-          <div className="bg-white/5 p-8 rounded-2xl border border-white/10">
-            <h3 className="font-black text-xl mb-6 border-b border-white/10 pb-4">
+          <div className="bg-slate-900/60 p-8 rounded-2xl border border-slate-800">
+            <h3 className="font-black text-xl mb-6 border-b border-slate-800 pb-4">
               [EN] Privacy Policy
             </h3>
-            <div className="text-white/70 leading-loose space-y-6">
+            <div className="text-zinc-200 leading-loose space-y-6">
               <p>
                 <strong className="text-white block mb-2 text-lg">
                   1. Collected Data & Purpose

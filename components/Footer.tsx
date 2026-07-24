@@ -76,6 +76,17 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
           © 2026 CHEKKI AI. ALL RIGHTS RESERVED.
         </p>
         <div className="flex gap-4 md:gap-6">
+          <a
+            href="/faq"
+            onClick={(e) => {
+              e.preventDefault();
+              window.history.pushState({}, '', '/faq');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
+            className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors"
+          >
+            FAQ
+          </a>
           <button
             onClick={() => onLegalClick('privacy')}
             className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors"
