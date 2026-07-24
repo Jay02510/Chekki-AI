@@ -19,7 +19,7 @@
 ## ⚡ 3-Step Quick Start Guide for Teachers (5-Second Setup)
 
 ### Step 1: Log Into Teacher Portal
-- Open browser and navigate to: **[https://chekki.app/teacher](https://chekki.app/teacher)**
+- Open browser and navigate to: **[https://chekkiai.com/teacher](https://chekkiai.com/teacher)**
 - Click **Sign Up** (or log in with Google / Email).
 
 ### Step 2: Redeem Your 14-Day Pilot Code
@@ -35,5 +35,5 @@
 ## 📞 Teacher Help & Support
 
 If you need any assistance seeding your weekly curriculum or configuring class rosters:
-- **Instant Support Email**: [support@chekki.app]
-- **Web Guide**: [https://chekki.app/schools](https://chekki.app/schools)
+- **Instant Support Email**: [support@chekkiai.com]
+- **Web Guide**: [https://chekkiai.com/schools](https://chekkiai.com/schools)

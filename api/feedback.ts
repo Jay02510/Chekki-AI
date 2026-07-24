@@ -8,6 +8,8 @@ export default async function handler(req: any, res: any) {
   const allowedOrigins = [
     'capacitor://localhost',
     'http://localhost',
+    'https://chekkiai.com',
+    'https://www.chekkiai.com',
     'https://chekki-ai.vercel.app',
   ];
 

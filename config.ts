@@ -28,8 +28,8 @@ const getApiBaseUrl = () => {
   }
 
   // Default production URL for native platforms
-  return 'https://chekki-ai.vercel.app';
+  return 'https://chekkiai.com';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
-export const PUBLIC_APP_URL = 'https://chekki-ai.vercel.app';
+export const PUBLIC_APP_URL = 'https://chekkiai.com';

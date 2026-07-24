@@ -54,7 +54,7 @@ By integrating your academy’s weekly textbook curriculum and target vocabulary
 
 ## 🚀 Contact & 14-Day Free Pilot
 
-- **Website**: [https://chekki.app/schools](https://chekki.app/schools)  
-- **Email**: [support@chekki.app]  
+- **Website**: [https://chekkiai.com/schools](https://chekkiai.com/schools)  
+- **Email**: [support@chekkiai.com]  
 - **Phone**: [02-XXX-XXXX]  
 - **Free Trial**: Request a zero-risk 14-day pilot for 1 class with your existing curriculum.
