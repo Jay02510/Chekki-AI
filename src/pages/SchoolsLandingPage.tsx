@@ -438,12 +438,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
                     <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
                     <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                      {isKo ? '3초 교재 AI 자동 등록 (99.9% 정밀 채점)' : 'Zero-Typing Answer Keys (99.9% AI Accuracy)'}
+                      {isKo ? '다중 교재 AI 스캔 & 페이지별 픽앤치즈 (99.9% 정밀 채점)' : 'Multi-Page AI Unit Scan & Page Picker (99.9% Accuracy)'}
                     </h3>
                     <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                       {isKo 
-                        ? '교재 PDF나 사진 한 장만 드롭하면 AI가 단어와 정답지를 3초 만에 자동 추출하여 99.9% 정확하게 분석합니다.'
-                        : 'Seed your class active vocabulary lists once. AI evaluates home scans against your exact answer key with 99.9% accuracy.'}
+                        ? '단원 전체 사진이나 PDF(최대 5장)를 한 번에 드롭하세요! AI가 페이지별로 단어, 파닉스, 정답 가이드를 추출하며 픽앤치즈 서랍에서 원하는 항목만 1클릭 적용합니다.'
+                        : 'Drop up to 5 textbook photos or unit PDFs at once. Gemini AI extracts vocabulary, phonics rules, and parent answer keys page-by-page with interactive 1-click chip controls.'}
                     </p>
                   </div>
                 </div>
@@ -461,7 +461,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </div>
 
             <div className={`mt-6 pt-4 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-2 text-xs font-bold text-orange-500`}>
-              <span>{isKo ? '교재 기반 정답지로 AI 환각 현상 100% 제거' : 'Ground-truth answer keys eliminate AI hallucination'}</span>
+              <span>{isKo ? '다중 페이지 AI 스캔 & 1클릭 칩 조작으로 교인 작성 시간 95% 단축' : 'Multi-page AI unit scans cut curriculum setup time by 95%'}</span>
               <Sparkle size={12} weight="bold" />
             </div>
           </div>

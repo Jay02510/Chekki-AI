@@ -86,12 +86,12 @@ const FAQ_DATA: FaqItem[] = [
   {
     id: 't1',
     category: 'teacher',
-    tagKo: '3초 AI 자동 등록',
-    tagEn: '3-Sec AI Auto-Fill',
+    tagKo: '다중 페이지 AI 스캔',
+    tagEn: 'Multi-Page AI Scan',
     questionKo: '매주 학급 주간 단어와 정답지를 일일이 타이핑해야 하나요?',
     questionEn: 'Do teachers have to manually type weekly vocabulary words and answer keys?',
-    answerKo: '아닙니다! 교재 페이지 사진이나 PDF 파일 한 장만 드롭하면 AI가 단어, 파닉스 패턴, 읽기 지문을 3초 만에 자동으로 추출하여 대시보드에 등록해 줍니다.',
-    answerEn: 'No! Simply drop a photo or PDF of a textbook page. AI extracts target words, phonics rules, and reading stories into your dashboard in 3 seconds.'
+    answerKo: '아닙니다! 교재 사진이나 PDF 파일을 한 번에 최대 5장까지 드롭하면 AI가 단어, 파닉스 패턴, 읽기 지문, 학부모용 정답 가이드를 3초 만에 자동으로 추출하여 대시보드에 등록해 줍니다. 1클릭 칩 삭제/추가 기능으로 원하는 항목만 자유롭게 편집하실 수 있습니다.',
+    answerEn: 'No! Simply drop up to 5 textbook photos or multi-page PDFs at once. AI extracts target words, phonics rules, reading stories, and parent answer keys into your dashboard in seconds. You can easily add or delete items with 1-click interactive chips.'
   },
   {
     id: 't2',
@@ -132,6 +132,16 @@ const FAQ_DATA: FaqItem[] = [
     questionEn: 'Are there concerns about AI OCR hallucinations misgrading student handwriting?',
     answerKo: '체키는 학원 교재의 정답지 데이터(Ground-Truth)를 채점 기준으로 1차 대조하기 때문에, 일반 AI 파운데이션 모델의 환각 오류 없이 99.9% 정밀한 채점 기준을 유지합니다.',
     answerEn: 'Chekki cross-references scans against your academy\'s ground-truth answer key, achieving 99.9% precision and completely eliminating false AI grading hallucinations.'
+  },
+  {
+    id: 't6',
+    category: 'teacher',
+    tagKo: '페이지별 항목 선택',
+    tagEn: 'Page-by-Page Picker',
+    questionKo: '단원 전체 교재 페이지를 스캔한 후 원하는 항목만 골라서 커리큘럼에 넣을 수 있나요?',
+    questionEn: 'Can I scan a multi-page textbook unit and selectively pick items for each category?',
+    answerKo: '네, 가능합니다! 다중 스캔 후 제공되는 "🎯 Pick & Choose 서랍"에서 1페이지, 2페이지 등 페이지별 탭을 오가며 파닉스 규칙, 단어, 본문 지문을 선택적으로 체크하여 학급 주간 커리큘럼에 바로 반영할 수 있습니다.',
+    answerEn: 'Yes! After scanning multiple pages, Chekki provides a "🎯 Pick & Choose Drawer". Easily toggle between Page 1, Page 2, etc., and selectively pick vocabulary, phonics rules, and reading passages into your weekly curriculum.'
   }
 ];
 

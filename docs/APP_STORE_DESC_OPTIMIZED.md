@@ -6,6 +6,7 @@ Here is the polished and optimized App Store description. It includes emojis for
 
 ## 🚀 WHAT'S NEW
 
+• **Multi-Page AI Unit Scan:** Teachers & parents can now upload up to 5 textbook photos or multi-page PDFs at once! AI parses each page, offering an interactive "🎯 Pick & Choose Drawer" to assign vocabulary, phonics rules, and parent answer key overlays.
 • **Easier Login:** You can now sign in instantly with Kakao, Google, or Apple accounts on all devices.
 • **Ask Chekki Anywhere:** Got a tricky grammar question? You can now chat directly with our AI Tutor right from the Dashboard to get instant, preschooler-friendly explanations!
 • **Upgraded Speaking Coach:** We've made our pronunciation checks even more accurate. Plus, when your child gets it right, they'll be rewarded with a satisfying success chime and haptic feedback!

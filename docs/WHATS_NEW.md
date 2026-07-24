@@ -2,6 +2,12 @@ What's New in Chekki AI
 
 English
 
+Multi-Page Worksheet AI Scanning & Page Picker
+Teachers can now drag and drop up to 5 textbook unit photos or multi-page PDFs at once! Chekki's Gemini AI scans all pages simultaneously and opens an interactive "🎯 Pick & Choose Drawer". Easily toggle between Page 1, Page 2, and Page 3 tabs to selectively assign target vocabulary words, phonics rules, reading passages, and parent answer keys directly to your weekly curriculum.
+
+Interactive Chip Management
+Effortlessly add or delete target vocabulary and phonics rules with 1-click interactive chip tags. Type new words and hit Enter or click "+ Add" for instantaneous updates.
+
 Massive UI Overhaul
 We've completely redesigned the app with a premium, state-of-the-art look. Enjoy vibrant colors, sleek glassmorphism effects, and smooth micro-animations that make your learning experience feel alive and modern.
 
@@ -28,6 +34,12 @@ Added a clear explanation for microphone access to ensure transparency and secur
 채키 AI 업데이트 소식
 
 한국어
+
+다중 페이지 교재 AI 스캔 & 페이지별 픽앤치즈 서랍
+선생님들께서 이제 단원 전체 교재 사진이나 PDF 파일(최대 5장)을 한 번에 드롭하여 스캔할 수 있습니다! AI가 모든 페이지를 동시에 분석하여 "🎯 Pick & Choose 서랍"을 제공합니다. 1페이지, 2페이지, 3페이지 탭을 오가며 추출된 학습 단어, 파닉스 규칙, 읽기 지문, 학부모용 정답 가이드를 선택적으로 주간 커리큘럼에 바로 반영해보세요.
+
+대화형 칩(Chip) 관리 기능
+학습 단어와 파닉스 음가를 1클릭 ✕ 버튼으로 손쉽게 삭제하거나, 텍스트 입력 후 Enter 또는 "+ 추가" 버튼으로 단어와 음가를 즉시 추가할 수 있습니다.
 
 대규모 UI 개편
 앱 전체를 프리미엄 디자인으로 새롭게 단장했습니다. 생동감 넘치는 컬러와 세련된 글래스모피즘 효과, 그리고 매끄러운 마이크로 애니메이션을 통해 더욱 생생하고 현대적인 학습 경험을 제공합니다.
