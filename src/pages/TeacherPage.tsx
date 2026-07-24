@@ -1198,9 +1198,18 @@ export default function TeacherPage({ isNight = true }: Props) {
     );
   }
 
+  const fallbackDemoClass = {
+    id: 'demo',
+    name: isKo ? '7세반 (샘플)' : 'Sample Class (7-year-old)',
+    level: '7-year-old',
+    joinCode: 'DEMO01',
+    activeWeekNumber: 1,
+  };
+  const activeClass = selectedClass || fallbackDemoClass;
+
   // --- RENDER CORE DASHBOARD LAYOUT SHELL ---
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-100 flex flex-col md:flex-row selection:bg-orange-500 selection:text-white">
+    <div className={`min-h-screen ${isThemeNight ? 'bg-[#050505] text-zinc-100' : 'bg-[#f8fafc] text-zinc-900'} flex flex-col md:flex-row selection:bg-orange-500 selection:text-white`}>
 
       {/* Teacher Onboarding Modal */}
       {showTeacherOnboarding && (() => {
@@ -1209,23 +1218,31 @@ export default function TeacherPage({ isNight = true }: Props) {
         return (
           <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/85 backdrop-blur-2xl" onClick={dismissTeacherOnboarding} />
-            <div className="relative w-full max-w-[420px] p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl">
-              <div className="bg-[#0c0c0e] rounded-[calc(2.5rem-0.25rem)] p-8 flex flex-col items-center text-center">
+            <div className={`relative w-full max-w-[420px] p-1 border rounded-[2.5rem] shadow-2xl ${
+              isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+            }`}>
+              <div className={`rounded-[calc(2.5rem-0.25rem)] p-8 flex flex-col items-center text-center ${
+                isThemeNight ? 'bg-[#0c0c0e] text-white' : 'bg-white text-zinc-900'
+              }`}>
                 <button
                   onClick={dismissTeacherOnboarding}
-                  className="absolute top-5 right-5 text-zinc-400 hover:text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 transition-all active:scale-[0.97]"
+                  className={`absolute top-5 right-5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full transition-all active:scale-[0.97] cursor-pointer ${
+                    isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                  }`}
                 >
                   {isKo ? '건너뛰기' : 'Skip'}
                 </button>
 
-                <div className="w-44 h-44 mb-6 rounded-3xl overflow-hidden bg-black/40 border border-white/10 p-2 shadow-[0_20px_40px_rgba(249,115,22,0.15)] flex items-center justify-center">
+                <div className={`w-44 h-44 mb-6 rounded-3xl overflow-hidden p-2 flex items-center justify-center shadow-xl ${
+                  isThemeNight ? 'bg-black/40 border border-white/10 shadow-[0_20px_40px_rgba(249,115,22,0.15)]' : 'bg-[#0a0a0c] border border-zinc-300/80 shadow-orange-500/10'
+                }`}>
                   <img src={step.img} alt="" className="w-full h-full object-contain" />
                 </div>
 
-                <h3 className="text-2xl font-black text-white tracking-tight mb-3">
+                <h3 className={`text-2xl font-black tracking-tight mb-3 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                   {isKo ? step.titleKo : step.titleEn}
                 </h3>
-                <p className="text-sm text-zinc-400 leading-relaxed max-w-[300px] mb-8">
+                <p className={`text-sm leading-relaxed max-w-[300px] mb-8 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {isKo ? step.descKo : step.descEn}
                 </p>
 
@@ -1582,73 +1599,79 @@ export default function TeacherPage({ isNight = true }: Props) {
 
         {/* Tab Content Rendering Container */}
         <section className="p-6 md:p-8 flex-1 relative z-10">
-          {classes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-52 h-52 mb-6 mx-auto">
-                <img
-                  src="/assets/teacher_ob_empty_state.png"
-                  alt="Create your first class"
-                  className="w-full h-full object-contain filter drop-shadow-[0_20px_50px_rgba(249,115,22,0.2)]"
-                />
+          {classes.length === 0 && (
+            <div className={`p-5 rounded-3xl border mb-6 flex flex-wrap items-center justify-between gap-4 transition-all shadow-sm ${
+              isThemeNight
+                ? 'bg-orange-500/10 border-orange-500/30 text-orange-200'
+                : 'bg-orange-50/90 border-orange-200 text-orange-950 shadow-orange-500/5'
+            }`}>
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-orange-500/30">
+                  ✨
+                </div>
+                <div>
+                  <h4 className="text-sm font-black tracking-tight">
+                    {isKo ? '대시보드 미리보기 모드' : 'Dashboard Preview Mode'}
+                  </h4>
+                  <p className={`text-xs mt-0.5 ${isThemeNight ? 'text-orange-300/80' : 'text-orange-800'}`}>
+                    {isKo 
+                      ? '등록된 학급이 없어도 대시보드, 커리큘럼 관리, 원생 활동 화면을 둘러보실 수 있습니다.' 
+                      : 'You can explore the dashboard, curriculum manager, and student views before creating a class.'}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-2xl font-black text-white mb-2">
-                {isKo ? '등록된 반이 없습니다' : 'No Classes Registered Yet'}
-              </h3>
-              <p className="text-zinc-400 text-xs font-medium max-w-sm mb-8 leading-relaxed">
-                {isKo 
-                  ? '교사 대시보드를 사용하려면 첫 번째 학급반을 먼저 만들어 주세요.' 
-                  : 'Start by creating your first class to manage student rosters and homework curricula.'}
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-4">
+              <div className="flex items-center gap-2.5">
                 <button
-                  onClick={() => setShowCreateClassModal(true)}
-                  className="group px-7 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center gap-3"
+                  type="button"
+                  onClick={() => { setShowTeacherOnboarding(true); setTeacherObStep(0); }}
+                  className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
+                    isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-white border-zinc-300 text-zinc-700 hover:bg-zinc-100 shadow-xs'
+                  }`}
                 >
-                  <span>{isKo ? '새 학급반 만들기' : 'Create Class Now'}</span>
-                  <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                    <ArrowRight size={12} weight="bold" />
-                  </div>
+                  {isKo ? '가이드 보기' : 'View Guide'}
                 </button>
                 <button
-                  onClick={() => { setShowTeacherOnboarding(true); setTeacherObStep(0); }}
-                  className="px-6 py-4 bg-[#08080a] hover:bg-white/5 border border-white/10 text-zinc-300 hover:text-white font-bold text-xs rounded-2xl transition-all active:scale-[0.97]"
+                  type="button"
+                  onClick={() => setShowCreateClassModal(true)}
+                  className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] shrink-0 cursor-pointer"
                 >
-                  {isKo ? '사용 가이드 보기' : 'View Guide'}
+                  + {isKo ? '새 학급반 만들기' : 'Create Class Now'}
                 </button>
               </div>
             </div>
-          ) : (
-            <div className="animate-fade-in">
-              {activeTab === 'overview' && (
-                <div className="space-y-8 animate-fade-in">
+          )}
+
+          <div className="animate-fade-in">
+            {activeTab === 'overview' && (
+              <div className="space-y-8 animate-fade-in">
+                
+                {/* Top Double-Bezel Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   
-                  {/* Top Double-Bezel Stats Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    
-                    {/* Stat Card 1 */}
-                    <div className={`p-1 rounded-[2rem] text-left transition-colors ${
-                      isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                  {/* Stat Card 1 */}
+                  <div className={`p-1 rounded-[2rem] text-left transition-colors ${
+                    isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                  }`}>
+                    <div className={`rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full transition-colors ${
+                      isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
                     }`}>
-                      <div className={`rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full transition-colors ${
-                        isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
-                      }`}>
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-1.5">
-                            <ChalkboardTeacher size={14} weight="bold" className="text-orange-500" />
-                            <span>{isKo ? '대상 학급' : 'Active Class'}</span>
-                          </span>
-                          <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-500 font-mono">
-                            Level: {selectedClass?.level}
-                          </span>
-                        </div>
-                        <div>
-                          <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{selectedClass?.name}</h4>
-                          <p className="text-xs text-zinc-500 mt-1">
-                            {isKo ? '선택된 가입 코드:' : 'Active join code:'} <span className={`font-mono ${isThemeNight ? 'text-zinc-300' : 'text-zinc-700'}`}>{selectedClass?.joinCode}</span>
-                          </p>
-                        </div>
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-1.5">
+                          <ChalkboardTeacher size={14} weight="bold" className="text-orange-500" />
+                          <span>{isKo ? '대상 학급' : 'Active Class'}</span>
+                        </span>
+                        <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-500 font-mono">
+                          Level: {activeClass.level}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{activeClass.name}</h4>
+                        <p className="text-xs text-zinc-500 mt-1">
+                          {isKo ? '선택된 가입 코드:' : 'Active join code:'} <span className={`font-mono ${isThemeNight ? 'text-zinc-300' : 'text-zinc-700'}`}>{activeClass.joinCode}</span>
+                        </p>
                       </div>
                     </div>
+                  </div>
                     
                     {/* Stat Card 2 */}
                     <div className={`p-1 rounded-[2rem] text-left transition-colors ${
@@ -2646,7 +2669,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </div>
               )}
             </div>
-          )}
         </section>
       </main>
 
