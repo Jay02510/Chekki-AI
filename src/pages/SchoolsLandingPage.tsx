@@ -327,23 +327,23 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full z-10">
           {/* Eyebrow */}
           <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-4 block">
-            {isKo ? '학원 맞춤형 숙제 분석 플랫폼' : 'AUTOMATED GRADING FOR ACADEMIES'}
+            {isKo ? '전국 어학원·영유 전용 AI 자동 채점 & 학부모 리포트 플랫폼' : 'AUTOMATED ACADEMY GRADING & PARENT CARE'}
           </span>
 
           {/* Headline */}
           <h1 className={`font-display text-3xl sm:text-5xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] mb-6 text-balance ${isNight ? 'text-white' : 'text-zinc-900'} break-keep`}>
             {isKo ? (
-              <>선생님의 평가는 <span className="text-orange-500">더 섬세하게</span>,<br />학부모 피드백은 <span className="text-orange-500">더 정확하게</span>.</>
+              <>강사 행정 업무 <span className="text-orange-500">90% 감축</span>,<br />학부모 피드백 만족도 <span className="text-orange-500">200% 상승</span>.</>
             ) : (
-              <>Elevate Homework Grading.<br />Engage Parents with <span className="text-orange-500">AI Care</span>.</>
+              <>Cut Grading Admin by <span className="text-orange-500">90%</span>.<br />Delight Parents with <span className="text-orange-500">Instant AI Reports</span>.</>
             )}
           </h1>
 
           {/* Subtext */}
           <p className={`text-base sm:text-lg max-w-xl leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'} break-keep`}>
             {isKo 
-              ? '학원만의 매주 진도 교재와 어휘 단어장을 연동하여 단 3초 만에 원생 손글씨 숙제를 채점하고 오답 리포트를 학부모님께 자동 발송하세요.'
-              : 'Integrate your weekly textbooks, autograde student handwriting, and deliver detailed diagnostic reviews straight to parents instantly.'}
+              ? '교재 PDF/이미지 등록 한 번으로 끝. 3초 원생 손글씨 채점부터 매월 칭찬 성장 리포트 자동 발송까지, 선생님의 단순 채점·행정 업무를 완벽히 자동화하세요.'
+              : 'Upload weekly textbooks once, autograde student handwriting in 3 seconds, and deliver encouraging progress reports to parents in 1 click.'}
           </p>
 
           {/* CTAs */}
@@ -352,7 +352,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               href="#demo"
               className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
             >
-              <span>{isKo ? '지금 시작하기' : 'Start Now'}</span>
+              <span>{isKo ? '14일 무료 원장님 체험 시작하기' : 'Start 14-Day Free Academy Trial'}</span>
               <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
             </a>
             <a
@@ -367,7 +367,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   : 'bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-900 shadow-sm'
               }`}
             >
-              {isKo ? '교사용 로그인' : 'Teacher Login'}
+              {isKo ? '교사 전용 대시보드 둘러보기' : 'Try Live Teacher Portal'}
             </a>
           </div>
         </div>
@@ -438,7 +438,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
                     <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
                     <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                      {isKo ? '3초 교재 AI 자동 등록 (99.9% 정밀 채점)' : 'Weekly Curriculum Seeding (99.9% AI Accuracy)'}
+                      {isKo ? '3초 교재 AI 자동 등록 (99.9% 정밀 채점)' : 'Zero-Typing Answer Keys (99.9% AI Accuracy)'}
                     </h3>
                     <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                       {isKo 

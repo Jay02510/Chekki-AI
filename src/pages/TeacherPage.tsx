@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { dbInstance, auth } from '../../services/database';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
 import { compressImage, stripDataUrlPrefix } from '../../services/compressImage';
 import { 
@@ -38,7 +38,8 @@ import {
   File,
   Sun,
   Moon,
-  Info
+  Info,
+  Trash
 } from '@phosphor-icons/react';
 
 interface Props {
@@ -46,7 +47,7 @@ interface Props {
 }
 
 export default function TeacherPage({ isNight = true }: Props) {
-  const { user, firebaseUser, signIn, signUp, logout, isAuthenticated } = useAuth();
+  const { user, firebaseUser, signIn, signUp, logout, deleteAccount, isAuthenticated } = useAuth();
   const { language, setLanguage } = useLanguage();
   const [isThemeNight, setIsThemeNight] = useState(isNight);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -79,6 +80,9 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [newClassName, setNewClassName] = useState('');
   const [newClassLevel, setNewClassLevel] = useState('7-year-old');
   const [isCreatingClass, setIsCreatingClass] = useState(false);
+  const [isLoadingClasses, setIsLoadingClasses] = useState(true);
+  const [isDeletingClass, setIsDeletingClass] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   // Tab navigation
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'students'>('overview');
@@ -205,18 +209,27 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   // Show teacher onboarding once when first authenticated with no classes
   useEffect(() => {
-    if (
-      isAuthenticated &&
-      user?.role === 'teacher' &&
-      classes.length === 0 &&
-      !localStorage.getItem('chekki_teacher_ob_done')
-    ) {
-      setShowTeacherOnboarding(true);
+    const uid = user?.uid || 'guest';
+    if (!isLoadingClasses && isAuthenticated && user?.role === 'teacher') {
+      if (classes.length === 0) {
+        const obDone =
+          localStorage.getItem('chekki_teacher_ob_done') ||
+          localStorage.getItem(`chekki_teacher_ob_done_${uid}`) ||
+          localStorage.getItem(`teacher_ob_done_${uid}`);
+        if (!obDone) {
+          setShowTeacherOnboarding(true);
+        }
+      } else {
+        setShowTeacherOnboarding(false);
+      }
     }
-  }, [isAuthenticated, user, classes]);
+  }, [isAuthenticated, user, classes, isLoadingClasses]);
 
   const dismissTeacherOnboarding = () => {
+    const uid = user?.uid || 'guest';
     localStorage.setItem('chekki_teacher_ob_done', '1');
+    localStorage.setItem(`chekki_teacher_ob_done_${uid}`, '1');
+    localStorage.setItem(`teacher_ob_done_${uid}`, 'true');
     setShowTeacherOnboarding(false);
   };
 
@@ -225,23 +238,23 @@ export default function TeacherPage({ isNight = true }: Props) {
     {
       img: '/assets/teacher_ob_create_class.png',
       titleEn: 'Create Class & Share Code',
-      titleKo: '학급을 개설하고 6자리 코드를 공유하세요',
-      descEn: 'Give your class a name and level. Share the 6-digit join code with parents so home scans link automatically.',
-      descKo: '학급을 개설하고 6자리 코드를 학부모님께 전달하세요. 가정에서 스캔한 숙제가 자동 연동됩니다.',
+      titleKo: '학급 개설 & 6자리 학부모 코드 전달',
+      descEn: 'Set up your class in 5 seconds and share the 6-digit join code with parents for instant home homework sync.',
+      descKo: '5초 만에 학급을 개설하고 6자리 코드를 학부모님께 전달하세요. 가정에서 스캔한 오답과 점수가 실시간 연동됩니다.',
     },
     {
       img: '/assets/teacher_ob_seed_curriculum.png',
-      titleEn: 'Seed Weekly Curriculum',
-      titleKo: '주간 커리큘럼 키워드 등록',
-      descEn: "Enter this week's target vocabulary and phonics. Chekki's AI evaluates home scans against your exact answer key with 99.9% accuracy.",
-      descKo: '이번 주 단어와 파닉스를 등록하세요. Chekki AI가 교재 기준에 맞춰 가정 스캔 항목을 정확히 자동 분석합니다.',
+      titleEn: 'Zero-Typing Curriculum Upload',
+      titleKo: '3초 교재 AI 자동 등록 (0타이핑 정답지)',
+      descEn: 'Drop your textbook photo or PDF. Chekki AI automatically extracts target vocabulary and answer keys with 99.9% precision.',
+      descKo: '교재 사진이나 PDF 한 장만 드롭하면 끝. Chekki AI가 주간 어휘와 정답지를 3초 만에 99.9% 정확도로 자동 생성합니다.',
     },
     {
       img: '/assets/teacher_ob_share_code.png',
       titleEn: 'Zero-Prep Insights & 1-Click Reports',
-      titleKo: '실시간 취약점 분석 & 1초 리포트 발송',
-      descEn: 'View auto-synced red-bordered mistakes scanned by parents at home before class starts, and export 1-click progress reports without manual writing.',
-      descKo: '학부모님이 스캔한 오답(빨간 테두리 항목)을 수업 전 자동 확인하고, 작성 부담 없이 1초 만에 학부모 리포트를 발송하세요.',
+      titleKo: '실시간 취약점 분석 & 1초 학부모 성장 리포트',
+      descEn: 'View auto-synced home mistake patterns before class starts, and export encouraging 1-click progress reports without manual writing.',
+      descKo: '가정 스캔 오답(빨간 테두리 항목)을 수업 전 미리 확인하고, 작성 부담 없이 1초 만에 학부모 성장 리포트를 발송하세요.',
     },
   ];
 
@@ -267,9 +280,10 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const fetchClasses = async () => {
     const uid = user?.uid || 'guest';
+    setIsLoadingClasses(true);
     let fetchedFromFirestore: any[] = [];
-    if (user?.uid) {
-      try {
+    try {
+      if (user?.uid) {
         const q = query(
           collection(dbInstance, 'classes'),
           where('teacherUid', '==', user.uid)
@@ -278,24 +292,25 @@ export default function TeacherPage({ isNight = true }: Props) {
         querySnapshot.forEach((doc) => {
           fetchedFromFirestore.push({ id: doc.id, ...doc.data() });
         });
-      } catch (err) {
-        console.warn('Firestore fetch warning (falling back to local storage):', err);
       }
-    }
+    } catch (err) {
+      console.warn('Firestore fetch warning (falling back to local storage):', err);
+    } finally {
+      const localKey = `teacher_classes_${uid}`;
+      const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
+      const globalSaved = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
 
-    const localKey = `teacher_classes_${uid}`;
-    const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
-    const globalSaved = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
+      const map = new Map();
+      fetchedFromFirestore.forEach(c => map.set(c.id, c));
+      localSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
+      globalSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
 
-    const map = new Map();
-    fetchedFromFirestore.forEach(c => map.set(c.id, c));
-    localSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
-    globalSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
-
-    const combined = Array.from(map.values());
-    setClasses(combined);
-    if (combined.length > 0) {
-      setSelectedClass((prev: any) => (prev && combined.some((c: any) => c.id === prev.id)) ? prev : combined[0]);
+      const combined = Array.from(map.values());
+      setClasses(combined);
+      if (combined.length > 0) {
+        setSelectedClass((prev: any) => (prev && combined.some((c: any) => c.id === prev.id)) ? prev : combined[0]);
+      }
+      setIsLoadingClasses(false);
     }
   };
 
@@ -425,6 +440,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       const updatedGlobal = [newClass, ...existingGlobal.filter((c: any) => c.id !== newClass.id)];
       localStorage.setItem('teacher_classes_fallback', JSON.stringify(updatedGlobal));
 
+      localStorage.setItem('chekki_teacher_ob_done', '1');
+      localStorage.setItem(`chekki_teacher_ob_done_${uid}`, '1');
       localStorage.setItem(`teacher_ob_done_${uid}`, 'true');
       setShowTeacherOnboarding(false);
       
@@ -441,6 +458,70 @@ export default function TeacherPage({ isNight = true }: Props) {
       alert(isKo ? '학급 개설 중 오류가 발생했습니다. 다시 시도해 주세요.' : `Failed to create class: ${err?.message || 'Please try again.'}`);
     } finally {
       setIsCreatingClass(false);
+    }
+  };
+
+  const handleDeleteClass = async (classIdToDelete?: string) => {
+    const targetId = classIdToDelete || selectedClass?.id;
+    if (!targetId) return;
+
+    const classToDelete = classes.find((c) => c.id === targetId);
+    if (!classToDelete) return;
+
+    const confirmMsg = isKo
+      ? `'${classToDelete.name}' 학급을 정말 삭제하시겠습니까? 삭제된 학급 정보는 복구할 수 없습니다.`
+      : `Are you sure you want to delete class '${classToDelete.name}'? This action cannot be undone.`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    setIsDeletingClass(true);
+    const uid = user?.uid || 'guest';
+
+    try {
+      if (user?.uid) {
+        try {
+          await deleteDoc(doc(dbInstance, 'classes', targetId));
+        } catch (fsErr) {
+          console.warn('Firestore delete class warning:', fsErr);
+        }
+      }
+
+      const updatedClasses = classes.filter((c) => c.id !== targetId);
+      setClasses(updatedClasses);
+
+      if (selectedClass?.id === targetId) {
+        setSelectedClass(updatedClasses.length > 0 ? updatedClasses[0] : null);
+      }
+
+      const localKey = `teacher_classes_${uid}`;
+      localStorage.setItem(localKey, JSON.stringify(updatedClasses));
+
+      const existingGlobal = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
+      const updatedGlobal = existingGlobal.filter((c: any) => c.id !== targetId);
+      localStorage.setItem('teacher_classes_fallback', JSON.stringify(updatedGlobal));
+    } catch (err: any) {
+      console.error('Failed to delete class:', err);
+      alert(isKo ? '학급 삭제 중 오류가 발생했습니다.' : `Failed to delete class: ${err?.message || 'Please try again.'}`);
+    } finally {
+      setIsDeletingClass(false);
+    }
+  };
+
+  const handleDeleteTeacherAccount = async () => {
+    const confirmMsg = isKo
+      ? '정말로 선생님 계정을 영구 삭제하시겠습니까? 이 작업은 복구할 수 없으며 모든 정보가 삭제됩니다.'
+      : 'Are you sure you want to permanently delete your teacher account? This action cannot be undone.';
+    if (!window.confirm(confirmMsg)) return;
+
+    setIsDeletingAccount(true);
+    try {
+      await deleteAccount();
+      setShowSettingsModal(false);
+    } catch (err: any) {
+      console.error('Failed to delete teacher account:', err);
+      alert(err.message || (isKo ? '계정 삭제 중 오류가 발생했습니다.' : 'Failed to delete account.'));
+    } finally {
+      setIsDeletingAccount(false);
     }
   };
 
@@ -1411,6 +1492,23 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </span>
               </button>
             )}
+
+            {selectedClass && (
+              <button
+                type="button"
+                onClick={() => handleDeleteClass(selectedClass.id)}
+                disabled={isDeletingClass}
+                className={`text-xs font-bold px-3 py-2 border rounded-2xl flex items-center gap-1.5 transition-all cursor-pointer active:scale-[0.97] disabled:opacity-50 ${
+                  isThemeNight 
+                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' 
+                    : 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
+                }`}
+                title={isKo ? '현재 선택된 학급 삭제' : 'Delete selected class'}
+              >
+                <Trash size={14} weight="bold" />
+                <span className="hidden lg:inline">{isKo ? '학급 삭제' : 'Delete'}</span>
+              </button>
+            )}
           </div>
 
           {/* Right Controls: Active Week Counter + Language Switcher + Theme Toggle */}
@@ -1424,16 +1522,17 @@ export default function TeacherPage({ isNight = true }: Props) {
                     type="button"
                     onClick={() => handleUpdateWeek(-1)}
                     disabled={selectedClass.activeWeekNumber <= 1}
-                    className={`w-7 h-7 flex items-center justify-center rounded-xl text-xs font-black transition-all cursor-pointer disabled:opacity-20 ${
+                    className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-black transition-all cursor-pointer disabled:opacity-20 active:scale-95 ${
                       isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
                     }`}
+                    title={isKo ? '이전 주차' : 'Previous week'}
                   >
                     -
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowWeekCalendarModal(true)}
-                    className={`px-3 py-0.5 text-xs font-black min-w-[3.2rem] text-center font-mono rounded-lg transition-all cursor-pointer ${
+                    className={`px-3 py-1 text-xs font-black min-w-[3.4rem] text-center font-mono rounded-lg transition-all cursor-pointer ${
                       isThemeNight ? 'text-white hover:bg-white/10 hover:text-orange-400' : 'text-zinc-900 hover:bg-zinc-200 hover:text-orange-600'
                     }`}
                     title={isKo ? '클릭하여 학기 주차별 커리큘럼 업로드 캘린더 열기' : 'Click to view semester calendar'}
@@ -1443,9 +1542,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="button"
                     onClick={() => handleUpdateWeek(1)}
-                    className={`w-7 h-7 flex items-center justify-center rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-black transition-all cursor-pointer active:scale-95 ${
                       isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
                     }`}
+                    title={isKo ? '다음 주차' : 'Next week'}
                   >
                     +
                   </button>
@@ -3015,18 +3115,32 @@ export default function TeacherPage({ isNight = true }: Props) {
                   </button>
                 </div>
 
-                {/* Log Out Action */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSettingsModal(false);
-                    logout();
-                  }}
-                  className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-xs rounded-2xl border border-red-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                >
-                  <SignOut size={16} weight="bold" />
-                  <span>{isKo ? '교사 계정 로그아웃' : 'Log Out of Teacher Account'}</span>
-                </button>
+                {/* Account Actions: Delete Account & Log Out */}
+                <div className="pt-2 flex flex-col gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleDeleteTeacherAccount}
+                    disabled={isDeletingAccount}
+                    className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-xs rounded-2xl border border-red-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50"
+                  >
+                    <Trash size={16} weight="bold" />
+                    <span>{isDeletingAccount ? (isKo ? '계정 삭제 중...' : 'Deleting Account...') : (isKo ? '선생님 계정 영구 삭제' : 'Permanently Delete Account')}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSettingsModal(false);
+                      logout();
+                    }}
+                    className={`w-full py-3 font-bold text-xs rounded-2xl border transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
+                      isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-300 border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                    }`}
+                  >
+                    <SignOut size={16} weight="bold" />
+                    <span>{isKo ? '교사 계정 로그아웃' : 'Log Out of Teacher Account'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

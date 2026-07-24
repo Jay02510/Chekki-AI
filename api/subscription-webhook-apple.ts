@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import crypto from 'crypto';
 
 /**
  * Robust Firebase Admin Initialization
@@ -32,6 +33,20 @@ const adminDb = getFirestore();
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  // Optional Secret Webhook Auth check using constant-time timingSafeEqual to prevent side-channel timing attacks
+  const secret = process.env.APPLE_WEBHOOK_SECRET;
+  if (secret) {
+    const authHeader = (req.headers.authorization || '').trim();
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+    const secretBuf = Buffer.from(secret);
+    const tokenBuf = Buffer.from(token);
+    
+    if (secretBuf.length !== tokenBuf.length || !crypto.timingSafeEqual(secretBuf, tokenBuf)) {
+      console.warn('[webhook-apple] Unauthorized webhook verification failed');
+      return res.status(401).json({ error: 'Unauthorized webhook request' });
+    }
+  }
 
   try {
     const payload = req.body;

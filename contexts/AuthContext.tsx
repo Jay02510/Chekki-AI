@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProfile, SubscriptionRecord, SubscriptionPlatform } from '../types';
 import { auth, db, dbInstance } from '../services/database';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, increment, arrayRemove } from 'firebase/firestore';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -229,6 +229,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: 'test@example.com',
         name: 'Reviewer',
         plan: 'pro',
+        role: finalProfile?.role || 'teacher',
         maxScansPerDay: 9999,
         maxQuestionsPerDay: 9999,
       };
@@ -937,6 +938,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteAccount = async () => {
     if (!firebaseUser) return;
     try {
+      if (userProfile?.schoolId) {
+        try {
+          const schoolRef = doc(dbInstance, 'schools', userProfile.schoolId);
+          await updateDoc(schoolRef, {
+            usedByUids: arrayRemove(firebaseUser.uid),
+          });
+        } catch (sErr) {
+          console.warn('Failed to remove user UID from school doc during account deletion:', sErr);
+        }
+      }
+
       await db.deleteUserDoc(firebaseUser.uid);
       await deleteUser(firebaseUser);
 

@@ -29,6 +29,25 @@ const ratelimit = redis
     })
   : null;
 
+// Sliding-window in-memory fallback rate limiter for preview / non-Redis environments
+const memoryRateLimitMap = new Map<string, number[]>();
+const MEMORY_LIMIT = 10;
+const MEMORY_WINDOW_MS = 10000;
+
+function checkMemoryRateLimit(identifier: string): { success: boolean; remaining: number } {
+  const now = Date.now();
+  const windowStart = now - MEMORY_WINDOW_MS;
+  const timestamps = (memoryRateLimitMap.get(identifier) || []).filter((t) => t > windowStart);
+
+  if (timestamps.length >= MEMORY_LIMIT) {
+    return { success: false, remaining: 0 };
+  }
+
+  timestamps.push(now);
+  memoryRateLimitMap.set(identifier, timestamps);
+  return { success: true, remaining: MEMORY_LIMIT - timestamps.length };
+}
+
 function getAdminApp() {
   if (!process.env.GOOGLE_CLOUD_PROJECT) {
     process.env.GOOGLE_CLOUD_PROJECT = 'homework-assistant-c00b9';
@@ -327,14 +346,12 @@ export default async function handler(req: any, res: any) {
   }
   // --- END SECURITY CHECK ---
 
-  // --- UPSTASH RATE LIMITING ---
-  if (ratelimit) {
-    // Identify user by UID if logged in, otherwise use IP address
-    const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anonymous';
-    // For Vercel, x-forwarded-for might be an array or string. Safely grab the first one.
-    const ipString = Array.isArray(ip) ? ip[0] : ip;
-    const identifier = decodedToken?.uid || ipString;
+  // --- RATE LIMITING ---
+  const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anonymous';
+  const ipString = Array.isArray(ip) ? ip[0] : ip;
+  const identifier = decodedToken?.uid || ipString;
 
+  if (ratelimit) {
     const { success, limit, reset, remaining } = await ratelimit.limit(identifier);
     res.setHeader('X-RateLimit-Limit', limit.toString());
     res.setHeader('X-RateLimit-Remaining', remaining.toString());
@@ -342,6 +359,18 @@ export default async function handler(req: any, res: any) {
 
     if (!success) {
       console.warn(`[analyze.ts] Rate limit exceeded for identifier: ${identifier}`);
+      return res.status(429).json({
+        error: 'Too Many Requests',
+        message: 'You have exceeded the rate limit. Please try again later.',
+      });
+    }
+  } else {
+    const { success, remaining } = checkMemoryRateLimit(identifier);
+    res.setHeader('X-RateLimit-Limit', MEMORY_LIMIT.toString());
+    res.setHeader('X-RateLimit-Remaining', remaining.toString());
+
+    if (!success) {
+      console.warn(`[analyze.ts] Memory rate limit exceeded for identifier: ${identifier}`);
       return res.status(429).json({
         error: 'Too Many Requests',
         message: 'You have exceeded the rate limit. Please try again later.',
