@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sparkle,
   Copy,
@@ -33,9 +33,14 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
   const [lang, setLang] = useState<'ko' | 'en'>('ko');
   const [selectedReportId, setSelectedReportId] = useState<string>(SAMPLE_REPORTS[0].id);
   const [customInput, setCustomInput] = useState<string>(SAMPLE_REPORTS[0].rawInput);
+  const [customAcademyName, setCustomAcademyName] = useState<string>('POLY Academy (Seocho)');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
 
   // ROI Calculator State
   const [ftCount, setFtCount] = useState<number>(3);
@@ -431,6 +436,25 @@ ${activeReport.parentScriptKo.closing}`.trim();
             {/* Left Controls (5 cols) */}
             <div className="lg:col-span-5 space-y-6">
               
+              {/* Live Academy Co-Branding Simulator */}
+              <div className="space-y-2 p-4 rounded-2xl border bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30">
+                <label className="text-xs font-black uppercase tracking-wider text-orange-500 block font-mono flex items-center justify-between">
+                  <span>{lang === 'ko' ? '🏫 학원명 입혀보기 (라이브 브랜딩)' : '🏫 Test Your Academy Brand'}</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">Live Preview</span>
+                </label>
+                <input
+                  type="text"
+                  value={customAcademyName}
+                  onChange={(e) => setCustomAcademyName(e.target.value)}
+                  placeholder={lang === 'ko' ? '예: POLY 서초 어학원' : 'e.g. POLY Seocho Academy'}
+                  className={`w-full p-3.5 rounded-xl border text-xs sm:text-sm font-bold focus:outline-none transition-all font-mono ${
+                    isNight
+                      ? 'bg-[#050505] border-white/10 text-orange-400 focus:border-orange-500'
+                      : 'bg-white border-zinc-300 text-orange-600 focus:border-orange-500 shadow-sm'
+                  }`}
+                />
+              </div>
+
               {/* Preset Selector */}
               <div className="space-y-3">
                 <label className="text-xs font-black uppercase tracking-wider text-orange-500 block font-mono flex items-center justify-between">
@@ -532,6 +556,12 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 }`}
               >
                 <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                      {customAcademyName || 'B2B Academy'}
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold">1-Click Live AI Report</span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <UserCheck size={20} className="text-orange-500" weight="bold" />
                     <h3 className={`font-black text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>
