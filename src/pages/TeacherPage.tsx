@@ -312,6 +312,14 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const isKo = language === 'ko';
 
+  const fallbackDemoClass = {
+    id: 'demo',
+    name: isKo ? '7세반 (샘플)' : 'Sample Class (7-year-old)',
+    level: '7-year-old',
+    joinCode: 'DEMO01',
+    activeWeekNumber: 1,
+  };
+
   const handleSendResetPassword = async () => {
     if (!user?.email) return;
     setIsSendingReset(true);
@@ -1329,14 +1337,8 @@ export default function TeacherPage({ isNight = true }: Props) {
     );
   }
 
-  const fallbackDemoClass = {
-    id: 'demo',
-    name: isKo ? '7세반 (샘플)' : 'Sample Class (7-year-old)',
-    level: '7-year-old',
-    joinCode: 'DEMO01',
-    activeWeekNumber: 1,
-  };
   const activeClass = selectedClass || fallbackDemoClass;
+
 
   // --- RENDER CORE DASHBOARD LAYOUT SHELL ---
   return (

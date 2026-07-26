@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sparkle,
   CaretDown,
@@ -150,6 +150,10 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
   const [openFaqId, setOpenFaqId] = useState<string | null>('p1');
   const [searchQuery, setSearchQuery] = useState('');
   const [isKo, setIsKo] = useState(true);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
 
   const toggleFaq = (id: string) => {
     setOpenFaqId(prev => (prev === id ? null : id));

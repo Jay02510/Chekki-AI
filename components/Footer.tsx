@@ -80,6 +80,7 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
             href="/faq"
             onClick={(e) => {
               e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'instant' });
               window.history.pushState({}, '', '/faq');
               window.dispatchEvent(new PopStateEvent('popstate'));
             }}

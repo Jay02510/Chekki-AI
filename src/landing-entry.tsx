@@ -21,12 +21,19 @@ function LandingRoot() {
     return <FaqPage isNight={isNight} setIsNight={setIsNight} />;
   }
 
-  // Web App route: chekkiai.com/app (also teacher portal, admin, subscribe)
+  // Web App route: chekkiai.com/app (also teacher portal, admin, subscribe, legal, report studio)
   if (
     pathname.startsWith('/app') || 
     pathname.startsWith('/teacher') || 
     pathname.startsWith('/admin') || 
-    pathname.startsWith('/subscribe')
+    pathname.startsWith('/subscribe') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/refund') ||
+    pathname.startsWith('/youth') ||
+    pathname.startsWith('/support') ||
+    pathname.startsWith('/reports') ||
+    pathname.startsWith('/report-studio')
   ) {
     return <App />;
   }

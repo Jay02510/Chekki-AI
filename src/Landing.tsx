@@ -516,6 +516,7 @@ export default function Home() {
               href="/faq"
               onClick={(e) => {
                 e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
                 window.history.pushState({}, '', '/faq');
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
@@ -523,10 +524,28 @@ export default function Home() {
             >
               FAQ
             </a>
-            <a href="/privacy" className="hover:text-white transition-colors">
+            <a
+              href="/privacy"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/privacy');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-white transition-colors"
+            >
               Privacy Policy
             </a>
-            <a href="/terms" className="hover:text-white transition-colors">
+            <a
+              href="/terms"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/terms');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-white transition-colors"
+            >
               Terms of Service
             </a>
           </div>

@@ -225,9 +225,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <span className="font-extrabold text-lg tracking-tight">
               Chekki<span className="text-brand">AI</span>
             </span>
-            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ml-1 ${isNight ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-200/70 text-zinc-600'}`}>
-              {isKo ? '교육기관용' : 'Schools'}
-            </span>
           </a>
 
           {/* Right Action Cluster */}
@@ -1369,11 +1366,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           <p className="text-xs text-zinc-500 font-medium">
             © {new Date().getFullYear()} ChekkiAI. All rights reserved.
           </p>
-          <div className="flex gap-6 text-xs text-zinc-500 font-black tracking-wider uppercase">
+          <div className="flex flex-wrap justify-center md:justify-end items-center gap-4 md:gap-6 text-xs text-zinc-500 font-black tracking-wider uppercase">
             <a
               href="/"
               onClick={(e) => {
                 e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
                 window.history.pushState({}, '', '/');
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
@@ -1386,6 +1384,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               href="/teacher"
               onClick={(e) => {
                 e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
                 window.history.pushState({}, '', '/teacher');
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
@@ -1398,12 +1397,39 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               href="/faq"
               onClick={(e) => {
                 e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
                 window.history.pushState({}, '', '/faq');
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
               className="hover:text-orange-500 transition-colors font-bold text-orange-500"
             >
               {isKo ? '자주 묻는 질문 (FAQ)' : 'FAQ'}
+            </a>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <a
+              href="/privacy"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/privacy');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-orange-500 transition-colors"
+            >
+              {isKo ? '개인정보처리방침' : 'Privacy Policy'}
+            </a>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <a
+              href="/terms"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/terms');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-orange-500 transition-colors"
+            >
+              {isKo ? '이용약관' : 'Terms of Service'}
             </a>
           </div>
         </div>
