@@ -22,6 +22,7 @@ import SubscribePage from './src/pages/SubscribePage';
 import AdminPage from './src/pages/AdminPage';
 import TeacherPage from './src/pages/TeacherPage';
 import SchoolsLandingPage from './src/pages/SchoolsLandingPage';
+import ReportStudioPage from './src/pages/ReportStudioPage';
 import { AnalysisState, LegalType } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -174,6 +175,7 @@ function AppContent() {
   const [showAdminPage, setShowAdminPage] = useState(false);
   const [showTeacherPage, setShowTeacherPage] = useState(false);
   const [showSchoolsPage, setShowSchoolsPage] = useState(false);
+  const [showReportStudioPage, setShowReportStudioPage] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const platform = Capacitor.getPlatform();
 
@@ -207,6 +209,7 @@ function AppContent() {
       setShowAdminPage(path === '/admin');
       setShowTeacherPage(path === '/teacher');
       setShowSchoolsPage(path === '/schools' || path === '/for-schools');
+      setShowReportStudioPage(path === '/reports' || path === '/report-studio');
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -467,6 +470,8 @@ function AppContent() {
   if (showTeacherPage && platform === 'web') return <TeacherPage isNight={isNight} />;
   if (showSchoolsPage && platform === 'web')
     return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
+  if (showReportStudioPage && platform === 'web')
+    return <ReportStudioPage isNight={isNight} setIsNight={setIsNight} />;
 
   return (
     <ErrorBoundary>

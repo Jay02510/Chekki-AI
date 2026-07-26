@@ -388,29 +388,29 @@ export default function Home() {
           </p>
         </div>
 
-        {/* 4x3 Dense Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 auto-rows-[250px] md:auto-rows-[300px] gap-4 md:gap-6 grid-flow-dense">
+        {/* Clean 3-Card High-Impact Educator Hub */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* 1. YouTube */}
           <a
             href="https://www.youtube.com/@ChekkiAI"
             target="_blank"
             rel="noopener noreferrer"
-            className={`md:col-span-2 md:row-span-2 rounded-[2.5rem] p-2 shadow-2xl group block outline-none border transition-all ${
+            className={`rounded-[2.5rem] p-2 shadow-2xl group block outline-none border transition-all ${
               isNight ? 'bg-white/[0.02] border-white/5 hover:border-brand/40' : 'bg-white border-slate-300 hover:border-brand/60 shadow-slate-200'
             }`}
           >
-            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col justify-end p-8 md:p-12 text-white">
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-[320px] flex flex-col justify-end p-8 text-white">
               <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/youtube_bg.png')] bg-cover bg-center mix-blend-screen" />
               <div className="relative z-20">
-                <PlayCircle weight="fill" className="text-6xl text-brand mb-6 drop-shadow-xl" />
-                <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">YouTube Channel</h3>
-                <p className="text-white/70 text-lg max-w-md mb-8 hidden md:block">
-                  {isKo ? '이중언어 교육 및 학습 습관 형성을 위한 매주 업데이트' : 'Weekly insights on bilingual education, study habits, and classroom strategies.'}
+                <PlayCircle weight="fill" className="text-5xl text-brand mb-4 drop-shadow-xl" />
+                <h3 className="text-2xl font-bold text-white mb-2">YouTube Channel</h3>
+                <p className="text-white/70 text-sm mb-6 leading-relaxed">
+                  {isKo ? '이중언어 교육 및 학습 습관 형성을 위한 매주 업데이트' : 'Weekly insights on bilingual education & study habits.'}
                 </p>
-                <div className="relative inline-flex items-center gap-4 text-white font-semibold">
-                  <span>{isKo ? '영상 시청하기' : 'Watch latest video'}</span>
+                <div className="relative inline-flex items-center gap-3 text-sm text-white font-semibold">
+                  <span>{isKo ? '영상 시청하기' : 'Watch videos'}</span>
                   <ArrowRight className="transition-transform duration-500 group-hover:translate-x-1 text-brand" />
                 </div>
               </div>
@@ -422,129 +422,49 @@ export default function Home() {
             href="https://www.teacherspayteachers.com/store/chekki-ai"
             target="_blank"
             rel="noopener noreferrer"
-            className={`md:col-span-1 md:row-span-2 rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
+            className={`rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
               isNight ? 'bg-white/[0.02] border-white/5 hover:border-brand/40' : 'bg-white border-slate-300 hover:border-brand/60 shadow-slate-200'
             }`}
           >
-            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col justify-between p-8 text-white">
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-[320px] flex flex-col justify-end p-8 text-white">
               <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('https://res.cloudinary.com/dginphpy4/image/upload/v1771381888/Chekki_Splash_1_nrpzaj.png')] bg-cover bg-center mix-blend-screen" />
-
-              <div className="relative z-20 flex justify-between items-start">
-                <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-md">
-                  <GraduationCap weight="fill" className="text-2xl text-blue-400" />
-                </div>
-              </div>
               <div className="relative z-20">
+                <GraduationCap weight="fill" className="text-5xl text-blue-400 mb-4 drop-shadow-xl" />
                 <h3 className="text-2xl font-bold text-white mb-2">TPT Store</h3>
-                <p className="text-white/70 text-sm mb-6">
-                  {isKo ? '출력 가능한 영유 교재 및 워크시트' : 'Downloadable worksheets & lesson plans.'}
+                <p className="text-white/70 text-sm mb-6 leading-relaxed">
+                  {isKo ? '출력 가능한 영유 교재 및 워크시트 자료' : 'Downloadable worksheets & lesson plan resources.'}
                 </p>
-                <div className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center transition-transform duration-700 group-hover:bg-brand group-hover:text-white">
-                  <ArrowRight weight="bold" />
+                <div className="relative inline-flex items-center gap-3 text-sm text-white font-semibold">
+                  <span>{isKo ? '교재 둘러보기' : 'Browse worksheets'}</span>
+                  <ArrowRight className="transition-transform duration-500 group-hover:translate-x-1 text-blue-400" />
                 </div>
               </div>
             </div>
           </a>
 
-          {/* 3. Spotify */}
-          <a
-            href="https://open.spotify.com/show/2onH0XU5yky37cBxdqKaY8"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="md:col-span-1 md:row-span-1 rounded-[2.5rem] bg-green-500/10 border border-green-500/30 p-2 shadow-xl group block outline-none"
-          >
-            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col justify-between p-6 md:p-8 text-white">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 rounded-full blur-[50px] group-hover:bg-green-500/30 transition-colors z-10" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/spotify_bg.png')] bg-cover bg-center mix-blend-screen" />
-              <div className="relative z-20">
-                <SpotifyLogo weight="fill" className="text-4xl text-green-400 mb-4" />
-                <h3 className="text-xl font-bold text-white">Podcast</h3>
-              </div>
-              <div className="relative z-20 text-sm font-medium flex items-center gap-2 text-white/70 group-hover:text-green-400 transition-colors">
-                Listen on Spotify <ArrowRight />
-              </div>
-            </div>
-          </a>
-
-          {/* 4. Etsy Shop */}
-          <a
-            href="https://www.etsy.com/shop/ChekkiAI?dd_referrer="
-            target="_blank"
-            rel="noopener noreferrer"
-            className="md:col-span-1 md:row-span-1 rounded-[2.5rem] bg-brand/10 border border-brand/30 p-2 shadow-xl group block outline-none"
-          >
-            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col justify-between p-6 md:p-8 text-white">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/20 rounded-full blur-[50px] group-hover:bg-brand/30 transition-colors z-10" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/etsy_bg.png')] bg-cover bg-center mix-blend-screen" />
-              <div className="relative z-20">
-                <Storefront weight="fill" className="text-4xl text-brand mb-4" />
-                <h3 className="text-xl font-bold text-white">Etsy Shop</h3>
-              </div>
-              <div className="relative z-20 text-sm font-medium flex items-center gap-2 text-white/70 group-hover:text-brand transition-colors">
-                Shop merch <ArrowRight />
-              </div>
-            </div>
-          </a>
-
-          {/* 5. Free Grammar PPT */}
+          {/* 3. Free Grammar PPT */}
           <a
             href="https://chekkiai.netlify.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className={`md:col-span-2 md:row-span-1 rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
+            className={`rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
               isNight ? 'bg-white/[0.02] border-white/5 hover:border-red-500/40' : 'bg-white border-slate-300 hover:border-red-500/50 shadow-slate-200'
             }`}
           >
-            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 shadow-inner text-white">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#090a10] via-[#090a10]/70 to-transparent z-10 pointer-events-none" />
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-[320px] flex flex-col justify-end p-8 text-white">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/grammar_bg.png')] bg-cover bg-center mix-blend-screen" />
-
-              <div className="relative z-20 flex items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md border bg-white/10 border-white/20">
-                  <FilePdf weight="fill" className="text-3xl text-red-500" />
+              <div className="relative z-20">
+                <FilePdf weight="fill" className="text-5xl text-red-500 mb-4 drop-shadow-xl" />
+                <h3 className="text-2xl font-bold text-white mb-2">Top Grammar PPT</h3>
+                <p className="text-white/70 text-sm mb-6 leading-relaxed">
+                  {isKo ? '한국 학생들이 가장 많이 틀리는 영문법 무료 정리 PPT' : 'Free downloadable PPT on top grammar mistakes.'}
+                </p>
+                <div className="relative inline-flex items-center gap-3 text-sm text-white font-semibold">
+                  <span>{isKo ? '무료 자료 받기' : 'Download free PPT'}</span>
+                  <ArrowRight className="transition-transform duration-500 group-hover:translate-x-1 text-red-400" />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Top Grammar Mistakes</h3>
-                  <p className="text-sm max-w-sm text-white/70">
-                    {isKo ? '한국 학생들이 가장 많이 틀리는 영문법 정리 무료 PPT' : 'A free PPT explaining the top grammar mistakes Korean students struggle with.'}
-                  </p>
-                </div>
-              </div>
-              <div className="relative z-20 mt-6 md:mt-0 w-12 h-12 rounded-full bg-red-500 text-white flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                <ArrowRight weight="bold" />
-              </div>
-            </div>
-          </a>
-
-          {/* 6. Creator Portfolio */}
-          <a
-            href="https://jason-portfolio.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`md:col-span-2 md:row-span-1 rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
-              isNight ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/40' : 'bg-white border-slate-300 hover:border-indigo-500/50 shadow-slate-200'
-            }`}
-          >
-            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-full flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 shadow-inner text-white">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#090a10] via-[#090a10]/70 to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/portfolio_bg.png')] bg-cover bg-center mix-blend-screen" />
-
-              <div className="relative z-20 flex items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md border bg-white/10 border-white/20">
-                  <UserCircle weight="fill" className="text-3xl text-indigo-400" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Creator Portfolio</h3>
-                  <p className="text-sm text-white/70">
-                    {isKo ? '체키를 만든 빌더 포트폴리오' : 'Discover the builder behind Chekki.'}
-                  </p>
-                </div>
-              </div>
-              <div className="relative z-20 mt-6 md:mt-0 w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                <ArrowRight weight="bold" />
               </div>
             </div>
           </a>
