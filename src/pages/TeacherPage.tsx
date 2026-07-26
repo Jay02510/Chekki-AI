@@ -1530,6 +1530,31 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
             <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
           </button>
+
+          <a
+            href="/reports"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'instant' });
+              window.history.pushState({}, '', '/reports');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
+            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+              isThemeNight 
+                ? 'bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30 text-orange-400 hover:border-orange-500/50' 
+                : 'bg-gradient-to-r from-orange-50 to-pink-50 border-orange-300 text-orange-600 hover:border-orange-400'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
+                <Sparkle size={18} weight="fill" className="animate-pulse" />
+              </div>
+              <span>{isKo ? 'AI 성적표 스튜디오' : 'AI Report Studio'}</span>
+            </div>
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
+              NEW
+            </span>
+          </a>
         </nav>
 
         {/* Sidebar Footer / User Info */}

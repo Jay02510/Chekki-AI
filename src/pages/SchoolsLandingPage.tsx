@@ -259,6 +259,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </button>
 
             <a
+              href="/reports"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/reports');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="px-3.5 py-1.5 bg-gradient-to-r from-orange-500/20 to-pink-500/20 hover:from-orange-500/30 hover:to-pink-500/30 border border-orange-500/40 text-orange-400 font-bold rounded-full text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.03] active:scale-[0.97]"
+            >
+              <Sparkle size={14} weight="fill" className="text-orange-400 animate-pulse" />
+              <span>{isKo ? '성적표 스튜디오 체험' : 'Report Studio Demo'}</span>
+            </a>
+
+            <a
               href="/teacher"
               onClick={(e) => {
                 e.preventDefault();
@@ -623,6 +637,100 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   className="w-full max-w-[300px] h-auto object-contain rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
                   loading="lazy" 
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- REPORT STUDIO FEATURE SHOWCASE & LIVE DEMO CTA --- */}
+      <section className="relative px-6 py-16 max-w-7xl mx-auto w-full">
+        <div className={`p-8 md:p-12 border rounded-3xl relative overflow-hidden transition-all duration-500 shadow-2xl ${
+          isNight 
+            ? 'bg-gradient-to-br from-zinc-950 via-zinc-900 to-orange-950/40 border-orange-500/30' 
+            : 'bg-gradient-to-br from-white via-orange-50/50 to-pink-50/40 border-orange-200'
+        }`}>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-black uppercase tracking-widest">
+                <Sparkle size={14} weight="fill" className="animate-pulse" />
+                <span>{isKo ? '원장님 전용 1클릭 성적표 스튜디오' : 'Interactive Report Studio'}</span>
+              </div>
+
+              <h2 className={`font-display text-2xl sm:text-4xl font-black tracking-tight leading-snug ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {isKo ? (
+                  <>학원 브랜드 로고가 담긴 <span className="text-orange-500">1초 AI 성장 성적표</span>를 직접 체험해보세요.</>
+                ) : (
+                  <>Experience <span className="text-orange-500">Instant AI Report Cards</span> Co-Branded for Your Academy.</>
+                )}
+              </h2>
+
+              <p className={`text-sm sm:text-base leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                {isKo 
+                  ? '타이핑 0번. 가정 스캔 데이터를 기반으로 원생별 어휘 성장 그래프, 파닉스 완성도, 학부모 맞춤 칭찬 가이드가 1초 만에 자동 생성됩니다. 직접 학원명을 입력하고 성적표 스튜디오를 라이브로 체험해보세요!'
+                  : 'Zero manual typing. Auto-compiles vocabulary growth, phonics radar charts, and encouraging parent guidance in 1 click. Try the interactive live studio demo now!'}
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                <div className={`p-4 rounded-2xl border ${isNight ? 'bg-zinc-900/60 border-white/10' : 'bg-white border-zinc-200'}`}>
+                  <div className="text-xl mb-1">🖼️</div>
+                  <h4 className="text-xs font-bold text-orange-500 uppercase tracking-wider">{isKo ? '학원 맞춤 브랜딩' : 'Academy Branding'}</h4>
+                  <p className={`text-[11px] mt-1 ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>{isKo ? '학원명 & 로고 자동 입혀짐' : 'Custom academy name & logo'}</p>
+                </div>
+                <div className={`p-4 rounded-2xl border ${isNight ? 'bg-zinc-900/60 border-white/10' : 'bg-white border-zinc-200'}`}>
+                  <div className="text-xl mb-1">⚡</div>
+                  <h4 className="text-xs font-bold text-orange-500 uppercase tracking-wider">{isKo ? '0타이핑 자동 생성' : 'Zero Typing'}</h4>
+                  <p className={`text-[11px] mt-1 ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>{isKo ? '가정 스캔 데이터 100% 연동' : 'Auto-synced from home scans'}</p>
+                </div>
+                <div className={`p-4 rounded-2xl border ${isNight ? 'bg-zinc-900/60 border-white/10' : 'bg-white border-zinc-200'}`}>
+                  <div className="text-xl mb-1">💬</div>
+                  <h4 className="text-xs font-bold text-orange-500 uppercase tracking-wider">{isKo ? '한/영 이중 언어' : 'Bilingual Support'}</h4>
+                  <p className={`text-[11px] mt-1 ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>{isKo ? '알림톡 / PDF 1클릭 전송' : 'KakaoTalk link & print PDF'}</p>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-4">
+                <a
+                  href="/reports"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                    window.history.pushState({}, '', '/reports');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer group"
+                >
+                  <Sparkle size={18} weight="fill" className="group-hover:rotate-12 transition-transform" />
+                  <span>{isKo ? '✨ 성적표 스튜디오 라이브 체험하기 →' : '✨ Try Live Report Studio Demo →'}</span>
+                </a>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 flex justify-center items-center">
+              <div className={`w-full p-4 rounded-2xl border ${isNight ? 'bg-zinc-900/80 border-white/10' : 'bg-white border-zinc-200'} shadow-xl text-center space-y-4`}>
+                <div className="flex items-center justify-between border-b pb-3 border-white/10">
+                  <span className="text-xs font-bold text-orange-400">POLY Academy (Sample)</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">LIVE REPORT CARD</span>
+                </div>
+                <div className="h-40 rounded-xl bg-gradient-to-br from-orange-500/20 via-purple-500/20 to-pink-500/20 flex flex-col items-center justify-center p-4 border border-white/10">
+                  <span className="text-3xl mb-1">📊</span>
+                  <span className="text-xs font-black text-white">English Phonics & Vocab Mastery Report</span>
+                  <span className="text-[10px] text-zinc-400 mt-1">Vocabulary Growth: +34 Words | Accuracy: 96.5%</span>
+                </div>
+                <a
+                  href="/reports"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                    window.history.pushState({}, '', '/reports');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-xl block transition-all text-center cursor-pointer"
+                >
+                  {isKo ? '대화형 성적표 편집기 열기' : 'Open Interactive Studio'}
+                </a>
               </div>
             </div>
           </div>

@@ -13,8 +13,8 @@
       "destination": "/app.html"
     },
     {
-      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher|school|schools|for-schools|faq)",
-      "destination": "/app.html"
+      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher|school|schools|for-schools|faq|reports|report-studio)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
