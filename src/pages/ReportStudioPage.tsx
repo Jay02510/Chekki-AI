@@ -24,6 +24,98 @@ import {
 import { SAMPLE_REPORTS, SampleReport } from '../data/sampleReports';
 import { REPORT_TRANSLATIONS } from '../data/reportTranslations';
 
+interface SystemScreenshot {
+  id: string;
+  url: string;
+  category: 'form' | 'automation' | 'database' | 'dashboard';
+  titleEn: string;
+  titleKo: string;
+  subtitleEn: string;
+  subtitleKo: string;
+  descEn: string;
+  descKo: string;
+}
+
+const SYSTEM_SCREENSHOTS: SystemScreenshot[] = [
+  {
+    id: 'fillout-form',
+    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757946/Screenshot_2026-06-03_at_5.35.38_PM_wywtjr.png',
+    category: 'form',
+    titleEn: 'FT Fillout Form',
+    titleKo: 'FT Fillout 양식',
+    subtitleEn: 'Dynamic Assessment Form',
+    subtitleKo: '설문 취합 및 평가 템플릿',
+    descEn: 'Foreign teachers log daily class observations, student engagement, and homework status in 45 seconds on mobile or laptop.',
+    descKo: '원어민 교사가 모바일이나 노트북에서 45초 만에 일일 수업 평가, 학습 태도, 숙제 현황을 제출하는 스마트 폼입니다.'
+  },
+  {
+    id: 'make-scenario-1',
+    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757338/Screenshot_2026-06-06_at_11.10.34_PM_eij0wx.png',
+    category: 'automation',
+    titleEn: 'Make.com Report Generator Engine',
+    titleKo: '성적 보고서 빌드 메커니즘 (Make.com)',
+    subtitleEn: 'Report Generator Scenario',
+    subtitleKo: 'Make.com 자동 생성 시나리오',
+    descEn: 'Automated Make.com scenario triggers AI normalization instantly when FT submits logs.',
+    descKo: '원어민 입력 제출 즉시 백엔드 Make.com 시나리오가 실행되어 AI 이중언어 보고서를 정교하게 생성합니다.'
+  },
+  {
+    id: 'make-scenario-2',
+    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757338/Screenshot_2026-06-06_at_11.13.31_PM_nkcfga.png',
+    category: 'automation',
+    titleEn: 'Make.com Consultation Router',
+    titleKo: '대화형 분석 전송 오퍼레이터 (Make.com)',
+    subtitleEn: 'Automated Consult Routing',
+    subtitleKo: 'Make.com 상담 지원 워크플로우',
+    descEn: 'Routes flagged student exception cases to counselors with ready-to-use phone scripts.',
+    descKo: '학습 및 주의 필요 학생 이슈를 감지하여 상담 실장님께 맞춤 전화 대본을 자동으로 라우팅합니다.'
+  },
+  {
+    id: 'airtable-db',
+    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757340/Screenshot_2026-06-06_at_11.35.34_PM_susvx4.png',
+    category: 'database',
+    titleEn: 'Airtable Relational Database',
+    titleKo: 'Airtable 데이터베이스',
+    subtitleEn: 'Relational Database Backend',
+    subtitleKo: '관계형 데이터 백엔드',
+    descEn: 'Centralized database linking student records, teacher logs, and generated bilingual scripts.',
+    descKo: '원생 정보, 강사 평가 기록, 생성된 이중언어 상담 대본이 안전하게 통합 관리되는 관계형 DB입니다.'
+  },
+  {
+    id: 'softr-admin',
+    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757340/Screenshot_2026-06-06_at_11.34.00_PM_atnp3r.png',
+    category: 'dashboard',
+    titleEn: 'Director Admin Portal (Softr)',
+    titleKo: '원장 대시보드 오버뷰 (Softr)',
+    subtitleEn: 'Softr Administration Portal',
+    subtitleKo: 'Softr 최고 관리자 어드민 포털',
+    descEn: 'High-level administration portal for directors to monitor all classes, FT logs, and report status.',
+    descKo: '원장님이 전 학급 원어민 강사 코멘트 제출 현황 및 학부모 리포트를 한눈에 파악하는 통합 어드민 포털입니다.'
+  },
+  {
+    id: 'kt-dashboard-main',
+    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757340/Screenshot_2026-06-06_at_11.32.00_PM_tnqzky.png',
+    category: 'dashboard',
+    titleEn: 'Bilingual Parent Dashboard (Main)',
+    titleKo: '학부모 대시보드 메인',
+    subtitleEn: 'Bilingual Progress View',
+    subtitleKo: '이중언어 맞춤 종합 도표',
+    descEn: 'Parent-facing digital report showing student progress graphs and teacher evaluations.',
+    descKo: '학부모님이 원생의 어휘 성취도 그래프와 이중언어 평가를 간편하게 확인하는 반응형 웹 대시보드입니다.'
+  },
+  {
+    id: 'kt-dashboard-detail',
+    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757340/Screenshot_2026-06-06_at_11.32.40_PM_frctym.png',
+    category: 'dashboard',
+    titleEn: 'Detailed Observation Report',
+    titleKo: '학부모 대시보드 상세',
+    subtitleEn: 'Detailed Observation Cards',
+    subtitleKo: '정성 관찰 상세 리포트',
+    descEn: 'Detailed qualitative observations detailing specific vocabulary items, behavior, and teacher advice.',
+    descKo: '원생의 세부 타겟 어휘, 파닉스 완성도, 수업 태도 및 가정 연계 지침을 상세히 제공하는 리포트입니다.'
+  }
+];
+
 interface Props {
   isNight?: boolean;
   setIsNight?: (val: boolean) => void;
@@ -37,6 +129,11 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
+  
+  // Interactive Screenshots & Lightbox State
+  const [activeLightboxImg, setActiveLightboxImg] = useState<{ url: string; title: string; desc: string } | null>(null);
+  const [studioOutputView, setStudioOutputView] = useState<'script' | 'dashboard'>('script');
+  const [selectedArchCategory, setSelectedArchCategory] = useState<'all' | 'form' | 'automation' | 'database' | 'dashboard'>('all');
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -58,6 +155,7 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
   const [submitted, setSubmitted] = useState(false);
 
   const t = REPORT_TRANSLATIONS[lang];
+  const isKo = lang === 'ko';
   const demoT = t.interactiveDemo;
   const activeReport = SAMPLE_REPORTS.find((r) => r.id === selectedReportId) || SAMPLE_REPORTS[0];
 
@@ -576,28 +674,112 @@ ${activeReport.parentScriptKo.closing}`.trim();
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleCopyKakaoScript}
-                  className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                    copied
-                      ? 'bg-emerald-600 text-white shadow-lg'
-                      : 'bg-orange-500 hover:bg-orange-600 text-white shadow-md active:scale-95'
-                  }`}
-                >
-                  {copied ? (
-                    <>
-                      <CheckCircle size={16} weight="bold" />
-                      <span>{demoT.copiedText}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={16} weight="bold" />
-                      <span>{demoT.copyScriptBtn}</span>
-                    </>
-                  )}
-                </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                  {/* View Mode Toggle Pill */}
+                  <div className={`p-1 rounded-xl border flex items-center gap-1 text-[11px] font-bold ${
+                    isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-200'
+                  }`}>
+                    <button
+                      type="button"
+                      onClick={() => setStudioOutputView('script')}
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        studioOutputView === 'script'
+                          ? 'bg-orange-500 text-white font-black shadow-sm'
+                          : isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                      }`}
+                    >
+                      💬 KakaoTalk Script
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStudioOutputView('dashboard')}
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        studioOutputView === 'dashboard'
+                          ? 'bg-orange-500 text-white font-black shadow-sm'
+                          : isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                      }`}
+                    >
+                      📊 Softr Dashboard Preview
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleCopyKakaoScript}
+                    className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      copied
+                        ? 'bg-emerald-600 text-white shadow-lg'
+                        : 'bg-orange-500 hover:bg-orange-600 text-white shadow-md active:scale-95'
+                    }`}
+                  >
+                    {copied ? (
+                      <>
+                        <CheckCircle size={15} weight="bold" />
+                        <span>{demoT.copiedText}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={15} weight="bold" />
+                        <span>{demoT.copyScriptBtn}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
+
+              {/* Conditional View Rendering: Softr Production Dashboard Screenshot Preview */}
+              {studioOutputView === 'dashboard' ? (
+                <div className={`p-6 rounded-3xl border space-y-6 ${
+                  isNight ? 'bg-[#050505] border-white/10' : 'bg-white border-zinc-200 shadow-sm'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 font-mono">
+                      LIVE SOFTR PARENT DASHBOARD PREVIEW
+                    </span>
+                    <span className="text-[10px] text-zinc-400 font-mono">Click screenshot to inspect</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div
+                      onClick={() => setActiveLightboxImg({
+                        url: SYSTEM_SCREENSHOTS.find(s => s.id === 'kt-dashboard-main')!.url,
+                        title: isKo ? '학부모 대시보드 (메인)' : 'Bilingual Parent Dashboard (Main)',
+                        desc: isKo ? '원생별 어휘 성취도 그래프 및 월간 이중언어 평가 대시보드' : 'Parent-facing digital report showing student progress graphs and teacher evaluations.'
+                      })}
+                      className="group relative rounded-2xl overflow-hidden border border-white/10 cursor-pointer shadow-lg hover:border-orange-500 transition-all"
+                    >
+                      <img
+                        src={SYSTEM_SCREENSHOTS.find(s => s.id === 'kt-dashboard-main')!.url}
+                        alt="Parent Dashboard Main"
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                        <span className="text-xs font-black text-white">{isKo ? '📊 학부모 대시보드 (메인)' : '📊 Bilingual Parent Dashboard (Main)'}</span>
+                        <span className="text-[10px] text-orange-400 font-mono">{isKo ? '이중언어 종합 도표 🔍' : 'Bilingual Progress View 🔍'}</span>
+                      </div>
+                    </div>
+
+                    <div
+                      onClick={() => setActiveLightboxImg({
+                        url: SYSTEM_SCREENSHOTS.find(s => s.id === 'kt-dashboard-detail')!.url,
+                        title: isKo ? '학부모 대시보드 (상세)' : 'Detailed Observation Report',
+                        desc: isKo ? '원생의 정성 관찰 및 교사 종합 권고안 상세 대시보드' : 'Detailed qualitative observations detailing specific vocabulary items, behavior, and teacher advice.'
+                      })}
+                      className="group relative rounded-2xl overflow-hidden border border-white/10 cursor-pointer shadow-lg hover:border-orange-500 transition-all"
+                    >
+                      <img
+                        src={SYSTEM_SCREENSHOTS.find(s => s.id === 'kt-dashboard-detail')!.url}
+                        alt="Parent Dashboard Detail"
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                        <span className="text-xs font-black text-white">{isKo ? '📝 정성 관찰 상세 리포트' : '📝 Detailed Observation Report'}</span>
+                        <span className="text-[10px] text-emerald-400 font-mono">{isKo ? '상세 레포트 보기 🔍' : 'Detailed Report View 🔍'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
 
               {/* Branch A: Normalized Academic Summary (Airtable DB) */}
               <div
@@ -961,11 +1143,14 @@ ${activeReport.parentScriptKo.closing}`.trim();
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. 4-STEP PIPELINE OVERVIEW */}
+        {/* 6. REAL PRODUCTION SYSTEM ARCHITECTURE & SCREENSHOT GALLERY */}
         {/* ========================================================================= */}
         <section className="space-y-8 pt-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight mb-4">
+          <div className="text-center max-w-3xl mx-auto space-y-2">
+            <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block font-mono">
+              REAL PRODUCTION ARCHITECTURE & SCREENSHOTS
+            </span>
+            <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight">
               {t.howItWorks.heading}
             </h2>
             <p className={`text-sm sm:text-base ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
@@ -973,54 +1158,75 @@ ${activeReport.parentScriptKo.closing}`.trim();
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className={`p-6 rounded-3xl border space-y-3 ${isNight ? 'bg-[#050505] border-white/10' : 'bg-white border-zinc-200'}`}>
-              <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-500 flex items-center justify-center font-black">
-                1
-              </div>
-              <h3 className={`font-black text-base ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {t.howItWorks.step1Title}
-              </h3>
-              <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {t.howItWorks.step1Desc}
-              </p>
-            </div>
+          {/* Architecture Filter Tabs */}
+          <div className="flex flex-wrap justify-center items-center gap-2">
+            {[
+              { id: 'all', label: isKo ? '전체 보기 (7)' : 'All Systems (7)' },
+              { id: 'form', label: isKo ? '1. FT Fillout 양식' : '1. FT Fillout Form' },
+              { id: 'automation', label: isKo ? '2. Make.com 워크플로우' : '2. Make.com Engine' },
+              { id: 'database', label: isKo ? '3. Airtable 관계형 DB' : '3. Airtable Backend' },
+              { id: 'dashboard', label: isKo ? '4. Softr 학부모 포털' : '4. Softr Parent Portal' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setSelectedArchCategory(tab.id as any)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                  selectedArchCategory === tab.id
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                    : isNight
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-            <div className={`p-6 rounded-3xl border space-y-3 ${isNight ? 'bg-[#050505] border-white/10' : 'bg-white border-zinc-200'}`}>
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black">
-                2
-              </div>
-              <h3 className={`font-black text-base ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {t.howItWorks.step2Title}
-              </h3>
-              <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {t.howItWorks.step2Desc}
-              </p>
-            </div>
+          {/* Grid of Production Screenshots */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {SYSTEM_SCREENSHOTS.filter(s => selectedArchCategory === 'all' || s.category === selectedArchCategory).map((shot) => (
+              <div
+                key={shot.id}
+                onClick={() => setActiveLightboxImg({
+                  url: shot.url,
+                  title: isKo ? shot.titleKo : shot.titleEn,
+                  desc: isKo ? shot.descKo : shot.descEn
+                })}
+                className={`group rounded-3xl border overflow-hidden transition-all duration-300 cursor-pointer hover:scale-[1.02] shadow-xl ${
+                  isNight ? 'bg-[#060608] border-white/10 hover:border-orange-500/50' : 'bg-white border-zinc-200 hover:border-orange-500'
+                }`}
+              >
+                <div className="relative aspect-video overflow-hidden bg-black/40">
+                  <img
+                    src={shot.url}
+                    alt={shot.titleEn}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono text-orange-400 font-bold border border-white/10">
+                    🔍 {isKo ? '확대보기' : 'Inspect UI'}
+                  </div>
+                </div>
 
-            <div className={`p-6 rounded-3xl border space-y-3 ${isNight ? 'bg-[#050505] border-white/10' : 'bg-white border-zinc-200'}`}>
-              <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-black">
-                3
-              </div>
-              <h3 className={`font-black text-base ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {t.howItWorks.step3Title}
-              </h3>
-              <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {t.howItWorks.step3Desc}
-              </p>
-            </div>
+                <div className="p-5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-500">
+                      {isKo ? shot.subtitleKo : shot.subtitleEn}
+                    </span>
+                    <span className="text-[10px] text-zinc-500 font-mono">Real Production</span>
+                  </div>
 
-            <div className={`p-6 rounded-3xl border space-y-3 ${isNight ? 'bg-[#050505] border-white/10' : 'bg-white border-zinc-200'}`}>
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black">
-                4
+                  <h3 className={`font-black text-base ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {isKo ? shot.titleKo : shot.titleEn}
+                  </h3>
+
+                  <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    {isKo ? shot.descKo : shot.descEn}
+                  </p>
+                </div>
               </div>
-              <h3 className={`font-black text-base ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {t.howItWorks.step4Title}
-              </h3>
-              <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {t.howItWorks.step4Desc}
-              </p>
-            </div>
+            ))}
           </div>
         </section>
 
@@ -1264,6 +1470,53 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 </button>
               </form>
             )}
+          </div>
+        </div>
+      )}
+      {/* High-Resolution System Screenshot Lightbox Modal */}
+      {activeLightboxImg && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 md:p-8 animate-fadeIn cursor-pointer"
+          onClick={() => setActiveLightboxImg(null)}
+        >
+          <div
+            className="relative max-w-6xl w-full bg-zinc-950 border border-white/15 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-4 md:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-400 block mb-1">
+                  CHEKKIAI PRODUCTION SYSTEM INSPECTOR
+                </span>
+                <h3 className="text-lg md:text-xl font-black text-white">{activeLightboxImg.title}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveLightboxImg(null)}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              >
+                <X size={20} weight="bold" />
+              </button>
+            </div>
+
+            <div className="relative rounded-2xl overflow-hidden bg-black max-h-[75vh] flex items-center justify-center">
+              <img
+                src={activeLightboxImg.url}
+                alt={activeLightboxImg.title}
+                className="max-h-[75vh] w-auto object-contain rounded-xl"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-2">
+              <p className="text-xs text-zinc-300 max-w-3xl leading-relaxed">{activeLightboxImg.desc}</p>
+              <button
+                type="button"
+                onClick={() => setActiveLightboxImg(null)}
+                className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shrink-0 transition-all cursor-pointer"
+              >
+                {lang === 'ko' ? '닫기 (Close)' : 'Close'}
+              </button>
+            </div>
           </div>
         </div>
       )}
