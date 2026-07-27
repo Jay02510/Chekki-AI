@@ -7,6 +7,7 @@ export const REPORT_TRANSLATIONS = {
       demo: '1-Min Video Demo',
       interactive: 'Live Generator',
       calculator: 'ROI Calculator',
+      pricing: 'Pricing',
       onboarding: 'Custom Setup',
       language: '한국어'
     },
@@ -17,6 +18,49 @@ export const REPORT_TRANSLATIONS = {
       primaryCta: 'Request Custom Academy Setup',
       secondaryCta: 'Watch 1-Minute Video Demo',
       badge: 'Dedicated system for elementary & middle school academies employing native English teachers'
+    },
+    pricing: {
+      heading: 'Simple, Transparent Academy Pricing',
+      subheading: 'No setup fees. Zero long-term lock-in. Scale as your academy grows.',
+      starterTitle: 'Solo Tutor / Starter',
+      starterPrice: '₩0',
+      starterPeriod: '/ 14-Day Free Trial',
+      starterDesc: 'Perfect for testing AI progress reports & KakaoTalk script generation.',
+      starterFeatures: [
+        'Up to 15 Monthly AI Progress Reports',
+        'Standard KakaoTalk Script Generator',
+        'Standard Student Progress Cards',
+        'Email Support'
+      ],
+      starterCta: 'Start 14-Day Free Trial',
+
+      proTitle: 'Academy Pro',
+      proPrice: '₩35,000',
+      proPeriod: '/ month (₩28,000 yearly)',
+      proBadge: 'MOST POPULAR',
+      proDesc: 'Full AI report generator with live custom academy logo branding.',
+      proFeatures: [
+        'Unlimited Monthly AI Progress Reports',
+        'Custom Academy Logo & Co-Branding',
+        'Bilingual (EN + KO) KakaoTalk & PDF Export',
+        'Phonics & Vocabulary Radar Mastery Graphs',
+        'Auto-Sync from Student Homework Scans',
+        'Priority Support'
+      ],
+      proCta: 'Choose Academy Pro',
+
+      enterpriseTitle: 'Large Academy & Franchise',
+      enterprisePrice: '₩99,000',
+      enterprisePeriod: '/ month',
+      enterpriseDesc: 'Multi-teacher dashboard, multi-branch management & custom workflow integration.',
+      enterpriseFeatures: [
+        'Everything in Academy Pro',
+        'Unlimited Foreign Teacher Seats',
+        'Multi-Branch & Franchise Sync',
+        'Custom Fillout & Make.com Automation Setup',
+        'Dedicated Account Manager'
+      ],
+      enterpriseCta: 'Request Custom Setup'
     },
     videoDemo: {
       tagline: '1-MINUTE PLATFORM WALKTHROUGH',
@@ -146,6 +190,7 @@ export const REPORT_TRANSLATIONS = {
       demo: '1분 데모 영상',
       interactive: '실시간 생성기',
       calculator: '절감 비용 계산기',
+      pricing: '요금 안내',
       onboarding: '맞춤 구축 신청',
       language: 'English'
     },
@@ -156,6 +201,49 @@ export const REPORT_TRANSLATIONS = {
       primaryCta: '맞춤 학원 구축 & 온보딩 신청',
       secondaryCta: '1분 시연 데모 영상 보기',
       badge: '원어민 강사를 보유한 초등·중등 어학원 및 영유 전용 전용 시스템'
+    },
+    pricing: {
+      heading: '투명하고 합리적인 학원 요금제',
+      subheading: '초기 구축 비용 0원. 언제든지 해지 가능. 학원 성장에 맞춰 선택하세요.',
+      starterTitle: '1인 공부방 / 스타터',
+      starterPrice: '₩0',
+      starterPeriod: '/ 14일 무료 체험',
+      starterDesc: 'AI 성적표 및 알림톡 대본 생성을 무료로 체험해보세요.',
+      starterFeatures: [
+        '월 최대 15회 AI 성적표 생성',
+        '기본 학부모 상담 알림톡 대본',
+        '원생별 기본 성취도 카드',
+        '이메일 고객 지원'
+      ],
+      starterCta: '14일 무료 체험 시작하기',
+
+      proTitle: '어학원 / 공부방 프로',
+      proPrice: '₩35,000',
+      proPeriod: '/ 월 (연간 결제 시 ₩28,000)',
+      proBadge: '가장 인기 있는 플랜',
+      proDesc: '학원 로고 맞춤 브랜딩 및 무제한 AI 성적표 생성.',
+      proFeatures: [
+        '무제한 AI 성적표 & 알림톡 생성',
+        '학원 명칭 & 로고 자동 브랜딩',
+        '한/영 이중 언어 알림톡 & PDF 출력',
+        '파닉스 & 어휘 레이더 종합 그래프',
+        '가정 오답 스캔 데이터 100% 연동',
+        '우선 고객 지원'
+      ],
+      proCta: '어학원 프로 시작하기',
+
+      enterpriseTitle: '대형 학원 & 프랜차이즈',
+      enterprisePrice: '₩99,000',
+      enterprisePeriod: '/ 월',
+      enterpriseDesc: '다수 강사 대시보드, 직영/가맹점 통합 관리 및 맞춤 자동화 파이프라인.',
+      enterpriseFeatures: [
+        '어학원 프로의 모든 기능 포함',
+        '원어민 강사 계정 무제한',
+        '다중 지점 / 가맹점 데이터 동기화',
+        '맞춤형 Fillout & Make.com 연동 구도',
+        '전담 매니저 1:1 온보딩 지원'
+      ],
+      enterpriseCta: '맞춤 도입 상담 신청'
     },
     videoDemo: {
       tagline: '1분 플랫폼 시연 데모 영상',
