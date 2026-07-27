@@ -13,8 +13,8 @@ export const REPORT_TRANSLATIONS = {
     },
     hero: {
       tagline: 'ACADEMY OPERATIONAL AUTOMATION SYSTEM',
-      headline: 'Automate Foreign Teacher Management & Eliminate 100% of K-Teacher Translation Workload.',
-      subheadline: 'ChekkiAI instantly transforms 45-second Fillout teacher logs into highly sophisticated, bilingual parent consultation scripts ready for phone calls and KakaoTalk.',
+      headline: 'Save Hours on Foreign Teacher Logs & Korean Parent Updates.',
+      subheadline: 'Chekki turns 30-second Foreign Teacher logs into clear Korean KakaoTalk updates ready for parents.',
       primaryCta: 'Request Custom Academy Setup',
       secondaryCta: 'Watch 1-Minute Video Demo',
       badge: 'Dedicated system for elementary & middle school academies employing native English teachers'
@@ -68,7 +68,7 @@ export const REPORT_TRANSLATIONS = {
     },
     painVsDream: {
       heading: 'Stop Wasting Korean Staff Hours on Manual Report Translation',
-      subheading: 'Compare traditional fragmented workflows with ChekkiAI standardized automation.',
+      subheading: 'Compare traditional manual workflows with Chekki automated updates.',
       bottleneckTitle: 'Traditional Manual Workflow',
       bottleneckSubtitle: 'High friction, translation backlogs, and delayed parent updates.',
       bottleneckAlert: 'Average academy loss: 15+ hours per week spent on manual translation before parent calls.',
