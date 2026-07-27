@@ -20,48 +20,46 @@ export const REPORT_TRANSLATIONS = {
       badge: 'Dedicated system for elementary & middle school academies employing native English teachers'
     },
     pricing: {
-      heading: 'Simple, Transparent Academy Pricing',
-      subheading: 'No setup fees. Zero long-term lock-in. Scale as your academy grows.',
-      starterTitle: 'Solo Tutor / Starter',
+      heading: 'Simple Monthly Academy Pricing',
+      subheading: 'No hidden setup fees. Scale easily as your campus grows.',
+      starterTitle: '14-Day Free Trial',
       starterPrice: '₩0',
-      starterPeriod: '/ 14-Day Free Trial',
-      starterDesc: 'Perfect for testing AI progress reports & KakaoTalk script generation.',
+      starterPeriod: '/ 14-Day Trial',
+      starterDesc: 'Test progress reports and KakaoTalk script generation for free.',
       starterFeatures: [
-        'Up to 15 Monthly AI Progress Reports',
+        'Up to 15 Progress Reports',
         'Standard KakaoTalk Script Generator',
-        'Standard Student Progress Cards',
+        'Student Progress Cards',
         'Email Support'
       ],
-      starterCta: 'Start 14-Day Free Trial',
+      starterCta: 'Start Free Trial',
 
-      proTitle: 'Report Studio Standalone (Product A)',
+      proTitle: 'Report Studio',
       proPrice: '₩35,000',
       proPeriod: '/ month per campus',
-      proBadge: 'MOST POPULAR (PRODUCT A)',
-      proDesc: 'Standalone AI report generator with live Korean Teacher review & edit workspace.',
+      proBadge: 'MOST POPULAR',
+      proDesc: 'Report generator with live Korean Teacher review & edit workspace.',
       proFeatures: [
         '30-Second Foreign Teacher Mobile Log Form',
-        'Built-in Chekki AI Engine (Sub-second speed)',
-        'Bilingual (KO + EN) KakaoTalk Script Generator',
-        'Live Editable Textarea for KT Review & Copying',
-        '3-Stage Review Status Pipeline (Pending ➔ Edited ➔ Sent)',
-        'Flagged Student Exception Phone Call Prep Drawer'
+        'Bilingual (Korean + English) KakaoTalk Script Generator',
+        'Live Editable Textarea for Korean Teacher Review',
+        '3-Stage Review Status Bar (Pending ➔ Edited ➔ Sent)',
+        'Student Praise & Support Call Preparation'
       ],
-      proCta: 'Choose Report Studio (Product A)',
+      proCta: 'Choose Report Studio',
 
-      enterpriseTitle: 'Chekki School Pro (Product B)',
+      enterpriseTitle: 'Chekki School Pro',
       enterprisePrice: '₩69,000',
       enterprisePeriod: '/ month per campus',
-      enterpriseDesc: 'Report Studio + Automated Textbook Scope & Sequence Pre-seeding & Roster Sync.',
+      enterpriseDesc: 'Report Studio + Automated Textbook Syllabus Pre-seeding & Homework Sync.',
       enterpriseFeatures: [
-        'Everything in Report Studio (Product A)',
+        'Everything in Report Studio',
         '1-Click Textbook Syllabus Pre-seeding & Vocabulary Auto-Sync',
-        'Verified Curriculum Vocabulary Accuracy',
+        'Daily Homework Scanning & Auto-Grading',
         'Multi-Teacher & Multi-Class Roster Management',
-        'Parent AI Diagnostic Insight Dashboard',
-        'Dedicated 1:1 Director Onboarding'
+        'Dedicated 1:1 Director Setup & Support'
       ],
-      enterpriseCta: 'Choose Chekki School Pro (Product B)'
+      enterpriseCta: 'Choose Chekki School Pro'
     },
     videoDemo: {
       tagline: '1-MINUTE PLATFORM WALKTHROUGH',
@@ -204,48 +202,46 @@ export const REPORT_TRANSLATIONS = {
       badge: '원어민 강사를 보유한 초등·중등 어학원 및 영유 전용 전용 시스템'
     },
     pricing: {
-      heading: '투명하고 합리적인 학원 요금제',
-      subheading: '초기 구축 비용 0원. 언제든지 해지 가능. 학원 성장에 맞춰 선택하세요.',
-      starterTitle: '1인 공부방 / 스타터',
+      heading: '월별 합리적인 학원 요금제',
+      subheading: '추가 개설비 무료. 캠퍼스 성장 규모에 맞춰 자유롭게 선택하세요.',
+      starterTitle: '14일 무료 체험',
       starterPrice: '₩0',
-      starterPeriod: '/ 14일 무료 체험',
-      starterDesc: 'AI 성적표 및 알림톡 대본 생성을 무료로 체험해보세요.',
+      starterPeriod: '/ 14일 체험',
+      starterDesc: '알림톡 대본 및 성적표 생성을 무료로 체험해보세요.',
       starterFeatures: [
-        '월 최대 15회 AI 성적표 생성',
-        '기본 학부모 상담 알림톡 대본',
+        '월 최대 15회 리포트 생성',
+        '학부모 상담 알림톡 대본 생성',
         '원생별 기본 성취도 카드',
         '이메일 고객 지원'
       ],
-      starterCta: '14일 무료 체험 시작하기',
+      starterCta: '무료 체험 시작하기',
 
-      proTitle: '리포트 스튜디오 단독형 (Product A)',
+      proTitle: '리포트 스튜디오',
       proPrice: '₩35,000',
       proPeriod: '/ 월 (캠퍼스당)',
-      proBadge: '가장 인기 있는 플랜 (Product A)',
-      proDesc: '독립형 AI 알림톡 대본 생성기 및 한국인 교사 수동 검수/수정 워크스페이스.',
+      proBadge: '가장 인기 있는 플랜',
+      proDesc: '알림톡 대본 자동 생성 및 한국인 교사 검수/수정 워크스페이스.',
       proFeatures: [
         '30초 원어민 강사 모바일 평가 폼',
-        '체키 AI 엔진 직접 탑재 (초고속 자동 생성)',
-        '한/영 이중언어 알림톡 대본 자동 생성',
-        '실시간 편집 가능한 KT 검수 & 1클릭 복사 워크스페이스',
-        '3단계 검수 상태 파이프라인 (검수대기 ➔ 수정완료 ➔ 발송완료)',
-        '주의/칭찬 학생 전용 전화 상담 대본 드로어'
+        '한/영 이중언어 알림톡 대본 생성',
+        '실시간 편집 가능한 한국인 교사 검수 워크스페이스',
+        '3단계 검수 상태 확인 (검수대기 ➔ 수정완료 ➔ 발송완료)',
+        '학생 칭찬 및 주의사항 전화 상담 가이드'
       ],
-      proCta: '리포트 스튜디오 선택하기 (Product A)',
+      proCta: '리포트 스튜디오 선택하기',
 
-      enterpriseTitle: '체키 스쿨 프로 (Product B)',
+      enterpriseTitle: '체키 스쿨 프로',
       enterprisePrice: '₩69,000',
       enterprisePeriod: '/ 월 (캠퍼스당)',
-      enterpriseDesc: '리포트 스튜디오 + 교재 목차 자동 선제 탑재 (어휘 동기화) & 원생 명단 연동.',
+      enterpriseDesc: '리포트 스튜디오 + 교재 목차 자동 선제 탑재 & 숙제 채점 연동.',
       enterpriseFeatures: [
-        '리포트 스튜디오 (Product A) 모든 기능 포함',
+        '리포트 스튜디오 모든 기능 포함',
         '1클릭 교재 목차 사진 스캔 & 타겟 어휘 자동 탑재',
-        '검증된 커리큘럼 타겟 어휘 100% 연동',
-        '강사별 반 배정 및 원생 명단 일괄 관리 (CSV 업로드)',
-        '학부모 1클릭 AI 진단 인사이트 대시보드',
+        '매일 숙제 스캔 & 100% 정밀 채점',
+        '강사별 반 배정 및 원생 명단 일괄 관리',
         '전담 매니저 1:1 맞춤 온보딩 지원'
       ],
-      enterpriseCta: '체키 스쿨 프로 선택하기 (Product B)'
+      enterpriseCta: '체키 스쿨 프로 선택하기'
     },
     videoDemo: {
       tagline: '1분 플랫폼 시연 데모 영상',

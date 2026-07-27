@@ -640,21 +640,21 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <div className="space-y-4 max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20 text-xs font-black uppercase tracking-widest">
                 <Sparkle size={14} weight="fill" />
-                <span>{isKo ? '원장님 전용 1클릭 AI 성적표' : '1-Click Parent Progress Reports'}</span>
+                <span>{isKo ? '학부모 상담 알림톡 리포트' : 'Bilingual Parent Updates'}</span>
               </div>
 
               <h2 className={`font-display text-2xl sm:text-3xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? (
-                  <>학원 로고가 담긴 <span className="text-orange-500">AI 성적표 스튜디오</span>를 체험해보세요.</>
+                  <>학부모 상담 <span className="text-orange-500">알림톡 대본 리포트</span>를 체험해보세요.</>
                 ) : (
-                  <>Test the <span className="text-orange-500">Co-Branded AI Report Studio</span> Live.</>
+                  <>Try <span className="text-orange-500">Chekki Report Generator</span>.</>
                 )}
               </h2>
 
               <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '타이핑 0번. 가정 스캔 오답 데이터를 바탕으로 원생별 어휘 성취도 그래프와 학부모 피드백 리포트가 1초 만에 자동 생성됩니다.'
-                  : 'Zero manual typing. Auto-compiles vocabulary growth and parent guidance from home scan data in 1 click.'}
+                  ? '원어민 강사 코멘트를 30초 만에 정갈한 학부모 상담 알림톡 대본으로 변환해보세요.'
+                  : 'Turn Foreign Teacher class logs into polished Korean KakaoTalk updates in seconds.'}
               </p>
             </div>
 
@@ -670,7 +670,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 className="w-full md:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer group"
               >
                 <Sparkle size={16} weight="fill" className="group-hover:rotate-12 transition-transform" />
-                <span>{isKo ? '성적표 스튜디오 체험하기 →' : 'Try Report Studio Demo →'}</span>
+                <span>{isKo ? '리포트 생성기 체험하기 →' : 'Try Report Generator →'}</span>
               </a>
             </div>
           </div>
@@ -742,15 +742,15 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       <section id="pricing" className={`py-20 px-4 md:px-8 max-w-7xl mx-auto w-full transition-colors ${isNight ? 'text-white' : 'text-zinc-900'}`}>
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">
-            {isKo ? '투명한 요금 정책' : 'PREDICTABLE SCHOOL PRICING'}
+            {isKo ? '합리적인 학원 요금 정책' : 'ACADEMY PRICING'}
           </span>
           <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight mb-4">
-            {isKo ? '교사 수에 맞춘 합리적인 월정액 요금제' : 'Transparent Monthly Teacher Tiers'}
+            {isKo ? '교사 수에 맞춘 합리적인 월정액 요금제' : 'Simple Monthly Teacher Tiers'}
           </h2>
           <p className={`text-sm leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
             {isKo 
-              ? '프리랜서 1인 강사부터 대형 어학원까지 복잡한 스캔 건수 제한 없는 예측 가능한 월정액 플랜입니다. 연간 결제 시 20% 할인이 자동 적용됩니다.'
-              : 'No usage-based line-item surprises. Simple per-teacher monthly tiers. Save 20% when billed annually.'}
+              ? '추가 개설비 없이 복잡한 스캔 건수 제한 없는 월정액 플랜입니다. 연간 결제 시 20% 할인이 자동 적용됩니다.'
+              : 'No hidden setup fees. Simple per-teacher monthly tiers. Save 20% when billed annually.'}
           </p>
 
           {/* Monthly / Yearly Billing Toggle with Theme Adaptation */}
