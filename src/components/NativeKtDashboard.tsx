@@ -61,7 +61,21 @@ ${editedKoreanSummary}
 [Original Teacher Note]
 ${englishSummary}`.trim();
 
-    navigator.clipboard.writeText(fullText);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(fullText);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = fullText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+    } catch (e) {
+      console.warn('Clipboard write fallback executed:', e);
+    }
+
     setCopied(true);
     setReportStatus('copied_sent');
     setTimeout(() => setCopied(false), 2500);

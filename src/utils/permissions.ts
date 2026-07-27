@@ -8,10 +8,12 @@ export interface UserPermissions {
   canAccessDirectorAdmin: boolean;
   canEditReports: boolean;
   canManageSchoolRoster: boolean;
+  hasCurriculumPreseeding: boolean; // Product B (School Pro) Feature
+  productTier: 'standalone_studio' | 'school_pro' | 'enterprise';
 }
 
 /**
- * Evaluates fine-grained user permissions based on user role and plan
+ * Evaluates fine-grained user permissions and product tier entitlement
  */
 export function getPermissionsForUser(profile: UserProfile | null | undefined): UserPermissions {
   if (!profile) {
@@ -22,11 +24,14 @@ export function getPermissionsForUser(profile: UserProfile | null | undefined): 
       canAccessDirectorAdmin: false,
       canEditReports: true,
       canManageSchoolRoster: false,
+      hasCurriculumPreseeding: true, // Enabled for interactive demo
+      productTier: 'standalone_studio',
     };
   }
 
   const role = (profile.role || 'teacher') as UserRole;
   const isAdmin = role === 'admin' || role === 'director';
+  const isProPlan = profile.plan === 'pro' || profile.schoolId != null;
 
   return {
     canAccessTeacherLog: isAdmin || role === 'teacher' || role === 'foreign_teacher',
@@ -34,5 +39,7 @@ export function getPermissionsForUser(profile: UserProfile | null | undefined): 
     canAccessDirectorAdmin: isAdmin,
     canEditReports: isAdmin || role === 'teacher' || role === 'korean_teacher',
     canManageSchoolRoster: isAdmin,
+    hasCurriculumPreseeding: isAdmin || isProPlan,
+    productTier: isProPlan ? 'school_pro' : 'standalone_studio',
   };
 }
