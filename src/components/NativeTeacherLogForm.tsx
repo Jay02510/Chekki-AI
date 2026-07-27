@@ -1,0 +1,367 @@
+import React, { useState } from 'react';
+import { Sparkle, Plus, X, Check, UserPlus } from '@phosphor-icons/react';
+import { ClassLogPayload } from '../services/aiGenerator';
+
+interface Props {
+  isNight?: boolean;
+  onSubmitLog: (payload: ClassLogPayload) => void;
+  isSubmitting?: boolean;
+}
+
+export const NativeTeacherLogForm: React.FC<Props> = ({
+  isNight = true,
+  onSubmitLog,
+  isSubmitting = false,
+}) => {
+  const [className, setClassName] = useState('POLY Seocho 7A');
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [lessonTopic, setLessonTopic] = useState('Unit 4: Photosynthesis & Plant Growth');
+  const [textbook, setTextbook] = useState('Bricks Reading 150 (Book 1)');
+  const [energyLevel, setEnergyLevel] = useState<string>('High Energy and Engaged');
+  const [activities, setActivities] = useState<string[]>(['Reading', 'Speaking', 'Worksheet']);
+  const [generalComments, setGeneralComments] = useState(
+    'Students engaged very enthusiastically with the new plant vocabulary drill. Everyone read aloud clearly.'
+  );
+
+  // Student Exception Modal State
+  const [exceptions, setExceptions] = useState<Array<{ studentName: string; details: string }>>([
+    {
+      studentName: 'Min-jun (민준)',
+      details: 'Struggled with the target pronunciation of "Chloroplast" and was slightly distracted during writing drill.',
+    },
+  ]);
+  const [showExceptionModal, setShowExceptionModal] = useState(false);
+  const [modalStudentName, setModalStudentName] = useState('Ji-woo (지우)');
+  const [modalDetails, setModalDetails] = useState('');
+
+  const energyOptions = [
+    'High Energy and Engaged',
+    'Focused and Quiet',
+    'A bit distracted',
+  ];
+
+  const activityOptions = ['Reading', 'Speaking', 'Writing', 'Worksheet', 'Game', 'Test'];
+
+  const toggleActivity = (act: string) => {
+    setActivities((prev) =>
+      prev.includes(act) ? prev.filter((a) => a !== act) : [...prev, act]
+    );
+  };
+
+  const handleAddException = () => {
+    if (!modalStudentName || !modalDetails) return;
+    setExceptions((prev) => [...prev, { studentName: modalStudentName, details: modalDetails }]);
+    setModalDetails('');
+    setShowExceptionModal(false);
+  };
+
+  const handleRemoveException = (idx: number) => {
+    setExceptions((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmitLog({
+      className,
+      date,
+      lessonTopic,
+      textbook,
+      energyLevel,
+      activities,
+      generalComments,
+      exceptions,
+    });
+  };
+
+  return (
+    <div
+      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl transition-all max-w-3xl mx-auto w-full ${
+        isNight ? 'bg-[#060608] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+      }`}
+    >
+      <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 font-mono block">
+            FOREIGN TEACHER DAILY LOG FORM
+          </span>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+            Daily Classroom & Student Assessment Log
+          </h2>
+        </div>
+        <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-mono font-bold">
+          ⚡ 30s Quick Fill
+        </span>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Class & Date */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-zinc-400 block font-mono">Class Name *</label>
+            <select
+              value={className}
+              onChange={(e) => setClassName(e.target.value)}
+              className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
+                isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+              }`}
+            >
+              <option value="POLY Seocho 7A">POLY Seocho 7A (Kindergarten 7yo)</option>
+              <option value="POLY Seocho 6B">POLY Seocho 6B (Kindergarten 6yo)</option>
+              <option value="POLY Seocho 5C">POLY Seocho 5C (Kindergarten 5yo)</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-zinc-400 block font-mono">Date *</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
+                isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+              }`}
+            />
+          </div>
+        </div>
+
+        {/* Lesson Topic & Textbook */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-zinc-400 block font-mono">Lesson Topic *</label>
+            <input
+              type="text"
+              required
+              value={lessonTopic}
+              onChange={(e) => setLessonTopic(e.target.value)}
+              placeholder="e.g. Unit 4: Photosynthesis"
+              className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
+                isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+              }`}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-zinc-400 block font-mono">Textbook *</label>
+            <input
+              type="text"
+              required
+              value={textbook}
+              onChange={(e) => setTextbook(e.target.value)}
+              placeholder="e.g. Bricks Reading 150"
+              className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
+                isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+              }`}
+            />
+          </div>
+        </div>
+
+        {/* Class Energy Level */}
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-zinc-400 block font-mono">Class Energy Level *</label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {energyOptions.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setEnergyLevel(opt)}
+                className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center justify-between cursor-pointer ${
+                  energyLevel === opt
+                    ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-md'
+                    : isNight
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                    : 'bg-zinc-50 border-zinc-300 text-zinc-700 hover:text-zinc-900'
+                }`}
+              >
+                <span>{opt}</span>
+                {energyLevel === opt && <Check size={16} weight="bold" className="text-orange-500 shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Daily Activities Multi-Select */}
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-zinc-400 block font-mono">Daily Activities (Multi-Select) *</label>
+          <div className="flex flex-wrap gap-2">
+            {activityOptions.map((act) => {
+              const active = activities.includes(act);
+              return (
+                <button
+                  key={act}
+                  type="button"
+                  onClick={() => toggleActivity(act)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5 ${
+                    active
+                      ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                      : isNight
+                      ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                      : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
+                  }`}
+                >
+                  {active && <Check size={14} weight="bold" />}
+                  <span>{act}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* General Class Comments */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-zinc-400 block font-mono">General Class Comments</label>
+          <textarea
+            value={generalComments}
+            onChange={(e) => setGeneralComments(e.target.value)}
+            rows={3}
+            className={`w-full p-3.5 rounded-xl border text-xs leading-relaxed focus:outline-none focus:border-orange-500 font-mono ${
+              isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+            }`}
+            placeholder="Type general class notes here..."
+          />
+        </div>
+
+        {/* Student Exceptions Section */}
+        <div className="space-y-3 pt-2 border-t border-white/10">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-xs font-bold text-orange-400 uppercase font-mono block">
+                Student Exceptions (Path 2 Trigger)
+              </label>
+              <span className="text-[11px] text-zinc-500 font-mono">Flag specific students needing tailored parent updates</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowExceptionModal(true)}
+              className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-md active:scale-95"
+            >
+              <Plus size={14} weight="bold" />
+              <span>+ Add A Student</span>
+            </button>
+          </div>
+
+          {/* List of Flagged Exceptions */}
+          {exceptions.length === 0 ? (
+            <p className="text-xs text-zinc-500 italic py-2 font-mono">No student exceptions added for this class session.</p>
+          ) : (
+            <div className="space-y-2">
+              {exceptions.map((ex, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3 rounded-xl border flex items-start justify-between gap-3 text-xs ${
+                    isNight ? 'bg-amber-500/10 border-amber-500/30 text-amber-200' : 'bg-amber-50 border-amber-200 text-amber-900'
+                  }`}
+                >
+                  <div>
+                    <span className="font-black text-amber-400 block font-mono">⚠️ {ex.studentName}</span>
+                    <p className="text-xs leading-relaxed mt-0.5 opacity-90">{ex.details}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveException(idx)}
+                    className="p-1 rounded bg-black/20 hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <Sparkle size={18} className="animate-spin" />
+              <span>Processing & Generating Reports...</span>
+            </>
+          ) : (
+            <>
+              <Sparkle size={18} weight="fill" />
+              <span>Submit Class Log & Trigger Dual-Branch AI</span>
+            </>
+          )}
+        </button>
+      </form>
+
+      {/* Student Exception Pop-up Modal (Exact match to Screenshot 5) */}
+      {showExceptionModal && (
+        <div className="fixed inset-0 z-[400] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div
+            className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 ${
+              isNight ? 'bg-[#0a0a0c] border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+            }`}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <UserPlus size={20} className="text-orange-500" weight="bold" />
+                <h3 className="font-black text-base">Flag Student Exception</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowExceptionModal(false)}
+                className="p-1 rounded bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-zinc-400 block font-mono">Student *</label>
+                <select
+                  value={modalStudentName}
+                  onChange={(e) => setModalStudentName(e.target.value)}
+                  className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
+                    isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                  }`}
+                >
+                  <option value="Ji-woo (지우)">Ji-woo (지우)</option>
+                  <option value="Min-jun (민준)">Min-jun (민준)</option>
+                  <option value="Chloe (클로이)">Chloe (클로이)</option>
+                  <option value="Seo-yun (서윤)">Seo-yun (서윤)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-zinc-400 block font-mono">Exception Details *</label>
+                <textarea
+                  value={modalDetails}
+                  onChange={(e) => setModalDetails(e.target.value)}
+                  rows={4}
+                  required
+                  placeholder="Explain issue (e.g. missing homework, tardy, hesitant during speaking drill)..."
+                  className={`w-full p-3 rounded-xl border text-xs leading-relaxed focus:outline-none font-mono ${
+                    isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowExceptionModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAddException}
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md"
+              >
+                Add Exception
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

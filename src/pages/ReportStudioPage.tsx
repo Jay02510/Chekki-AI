@@ -29,6 +29,15 @@ import {
 } from '@phosphor-icons/react';
 import { SAMPLE_REPORTS, SampleReport } from '../data/sampleReports';
 import { REPORT_TRANSLATIONS } from '../data/reportTranslations';
+import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
+import { NativeKtDashboard } from '../components/NativeKtDashboard';
+import {
+  generateGeneralClassSummary,
+  generateStudentExceptionReport,
+  generatePhoneConsultationPrep,
+  ClassLogPayload,
+  GeneratedReportOutput,
+} from '../services/aiGenerator';
 
 interface SystemScreenshot {
   id: string;
@@ -144,6 +153,49 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
 
   const [studioOutputView, setStudioOutputView] = useState<'script' | 'dashboard'>('script');
   const [selectedArchCategory, setSelectedArchCategory] = useState<'all' | 'form' | 'automation' | 'database' | 'dashboard'>('all');
+
+  // Native Engine Demo States
+  const [nativeDemoTab, setNativeDemoTab] = useState<'ft-form' | 'kt-dashboard' | 'preset-generator'>('ft-form');
+  const [isSubmittingNativeLog, setIsSubmittingNativeLog] = useState(false);
+  const [nativeOutput, setNativeOutput] = useState<GeneratedReportOutput | null>(null);
+
+  const handleNativeLogSubmit = async (payload: ClassLogPayload) => {
+    setIsSubmittingNativeLog(true);
+    try {
+      // 1. Generate General Summary (Gemini Prompt #1)
+      const summary = await generateGeneralClassSummary(payload);
+
+      // 2. Generate Student Exceptions & Phone Prep (Gemini Prompts #2 & #3)
+      const studentReports = await Promise.all(
+        payload.exceptions.map(async (ex) => {
+          const updateText = await generateStudentExceptionReport(
+            ex.studentName,
+            payload.lessonTopic,
+            payload.textbook,
+            ex.details
+          );
+          const points = await generatePhoneConsultationPrep(ex.studentName, ex.details);
+          return {
+            studentName: ex.studentName,
+            koreanUpdate: updateText,
+            phoneTalkingPoints: points,
+          };
+        })
+      );
+
+      setNativeOutput({
+        bilingualClassSummary: summary,
+        studentReports,
+      });
+
+      // Switch tab to KT Dashboard to show reviewed editing workspace
+      setNativeDemoTab('kt-dashboard');
+    } catch (err) {
+      console.error('Native AI generation error:', err);
+    } finally {
+      setIsSubmittingNativeLog(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -560,19 +612,83 @@ ${activeReport.parentScriptKo.closing}`.trim();
         {/* 4. INTERACTIVE REPORT GENERATOR DEMO WORKSPACE (#interactive) */}
         {/* ========================================================================= */}
         <section id="interactive" className="space-y-8 pt-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block font-mono mb-2">
-              LIVE INTERACTIVE GENERATOR
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block font-mono">
+              UNIFIED NATIVE ENGINE DEMO
             </span>
-            <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight mb-4">
+            <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight">
               {demoT.heading}
             </h2>
             <p className={`text-sm sm:text-base ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
               {demoT.subheading}
             </p>
+
+            {/* Native Workspace Tab Switcher */}
+            <div className="flex flex-wrap justify-center items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setNativeDemoTab('ft-form')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                  nativeDemoTab === 'ft-form'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-md scale-[1.02]'
+                    : isNight
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                }`}
+              >
+                ⚡ 1. FT Daily Log Form (&lt;30s)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setNativeDemoTab('kt-dashboard')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                  nativeDemoTab === 'kt-dashboard'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-md scale-[1.02]'
+                    : isNight
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                }`}
+              >
+                💬 2. KT Review & Live Copy Workspace (Human-in-the-Loop)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setNativeDemoTab('preset-generator')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                  nativeDemoTab === 'preset-generator'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-md scale-[1.02]'
+                    : isNight
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                }`}
+              >
+                🏫 3. Sample Case Simulator
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Conditional View Rendering based on Native Demo Tab */}
+          {nativeDemoTab === 'ft-form' && (
+            <NativeTeacherLogForm
+              isNight={isNight}
+              onSubmitLog={handleNativeLogSubmit}
+              isSubmitting={isSubmittingNativeLog}
+            />
+          )}
+
+          {nativeDemoTab === 'kt-dashboard' && (
+            <NativeKtDashboard
+              isNight={isNight}
+              generatedOutput={nativeOutput}
+              className="POLY Seocho 7A"
+              academyName={customAcademyName}
+            />
+          )}
+
+          {nativeDemoTab === 'preset-generator' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             {/* Left Controls (5 cols) */}
             <div className="lg:col-span-5 space-y-6">
@@ -903,7 +1019,8 @@ ${activeReport.parentScriptKo.closing}`.trim();
               </div>
             </div>
           </div>
-        </section>
+        )}
+      </section>
 
         {/* Sticky Mobile Copy Bar */}
         <div className="sm:hidden fixed bottom-4 left-4 right-4 z-40">
