@@ -517,47 +517,47 @@ ${activeReport.parentScriptKo.closing}`.trim();
             </p>
 
             {/* Native Workspace Tab Switcher */}
-            <div className="flex flex-wrap justify-center items-center gap-2 pt-2">
+            <div className="flex flex-wrap justify-center items-center gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => setNativeDemoTab('ft-form')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
                   nativeDemoTab === 'ft-form'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-md scale-[1.02]'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-xl shadow-orange-500/20 scale-[1.02]'
                     : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
                     : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
                 }`}
               >
-                ⚡ 1. FT Daily Log Form (&lt;30s)
+                <span>📱 1. Foreign Teacher Log Form (&lt;30s)</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setNativeDemoTab('kt-dashboard')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
                   nativeDemoTab === 'kt-dashboard'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-md scale-[1.02]'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-xl shadow-orange-500/20 scale-[1.02]'
                     : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
                     : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
                 }`}
               >
-                💬 2. KT Review & Live Copy Workspace (Human-in-the-Loop)
+                <span>💬 2. Director & Korean Teacher Review Dashboard</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setNativeDemoTab('preset-generator')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
                   nativeDemoTab === 'preset-generator'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-md scale-[1.02]'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-xl shadow-orange-500/20 scale-[1.02]'
                     : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
                     : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
                 }`}
               >
-                🏫 3. Sample Case Simulator
+                <span>🏫 3. Sample Case Simulator</span>
               </button>
             </div>
           </div>
