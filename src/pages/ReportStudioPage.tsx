@@ -31,6 +31,7 @@ import { SAMPLE_REPORTS, SampleReport } from '../data/sampleReports';
 import { REPORT_TRANSLATIONS } from '../data/reportTranslations';
 import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
+import { NativeArchitecturePipeline } from '../components/NativeArchitecturePipeline';
 import {
   generateGeneralClassSummary,
   generateStudentExceptionReport,
@@ -1358,6 +1359,9 @@ ${activeReport.parentScriptKo.closing}`.trim();
               </button>
             </div>
           </div>
+
+          {/* Interactive Native Data Pipeline Visualizer */}
+          <NativeArchitecturePipeline isNight={isNight} />
 
           {galleryDisplayMode === 'carousel' ? (
             /* =================================================================== */
