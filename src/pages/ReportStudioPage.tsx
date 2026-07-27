@@ -61,8 +61,8 @@ const SYSTEM_SCREENSHOTS: SystemScreenshot[] = [
     titleKo: '원어민 평가 폼 & AI 알림톡 대본 워크플로우',
     subtitleEn: '<30s Mobile Input to Bilingual Script',
     subtitleKo: '30초 모바일 입력부터 이중언어 알림톡까지',
-    descEn: 'Foreign teachers log daily class energy and activities on mobile, while Gemini 2.5 Flash AI generates bilingual parent KakaoTalk scripts instantly.',
-    descKo: '원어민 강사가 모바일에서 30초 만에 수업 현황을 제출하면 Gemini AI가 한/영 이중언어 알림톡 대본을 즉시 작성합니다.'
+    descEn: 'Foreign teachers log daily class energy and activities on mobile, while Chekki AI generates bilingual parent KakaoTalk scripts instantly.',
+    descKo: '원어민 강사가 모바일에서 30초 만에 수업 현황을 제출하면 Chekki AI가 한/영 이중언어 알림톡 대본을 즉시 작성합니다.'
   },
   {
     id: 'native-bento-features',
@@ -74,83 +74,6 @@ const SYSTEM_SCREENSHOTS: SystemScreenshot[] = [
     subtitleKo: '한국인 교사 수동 검수 및 1클릭 복사',
     descEn: 'Track report status from Pending to Sent. Flagged student exceptions open structured 3-part phone consultation talking points.',
     descKo: '검수대기 ➔ 수정완료 ➔ 발송완료 3단계 상태를 추적하고, 주의 필요 학생의 3단계 전화 상담 대본을 즉시 확인합니다.'
-  },
-  {
-    id: 'fillout-form',
-    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757946/Screenshot_2026-06-03_at_5.35.38_PM_wywtjr.png',
-    category: 'form',
-    titleEn: 'FT Fillout Form',
-    titleKo: 'FT Fillout 양식',
-    subtitleEn: 'Dynamic Assessment Form',
-    subtitleKo: '설문 취합 및 평가 템플릿',
-    descEn: 'Foreign teachers log daily class observations, student engagement, and homework status in 45 seconds on mobile or laptop.',
-    descKo: '원어민 교사가 모바일이나 노트북에서 45초 만에 일일 수업 평가, 학습 태도, 숙제 현황을 제출하는 스마트 폼입니다.'
-  },
-  {
-    id: 'make-scenario-1',
-    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757338/Screenshot_2026-06-06_at_11.10.34_PM_eij0wx.png',
-    category: 'automation',
-    titleEn: 'Make.com Report Generator Engine',
-    titleKo: '성적 보고서 빌드 메커니즘 (Make.com)',
-    subtitleEn: 'Report Generator Scenario',
-    subtitleKo: 'Make.com 자동 생성 시나리오',
-    descEn: 'Automated Make.com scenario triggers AI normalization instantly when FT submits logs.',
-    descKo: '원어민 입력 제출 즉시 백엔드 Make.com 시나리오가 실행되어 AI 이중언어 보고서를 정교하게 생성합니다.'
-  },
-  {
-    id: 'make-scenario-2',
-    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757338/Screenshot_2026-06-06_at_11.13.31_PM_nkcfga.png',
-    category: 'automation',
-    titleEn: 'Make.com Consultation Router',
-    titleKo: '대화형 분석 전송 오퍼레이터 (Make.com)',
-    subtitleEn: 'Automated Consult Routing',
-    subtitleKo: 'Make.com 상담 지원 워크플로우',
-    descEn: 'Routes flagged student exception cases to counselors with ready-to-use phone scripts.',
-    descKo: '학습 및 주의 필요 학생 이슈를 감지하여 상담 실장님께 맞춤 전화 대본을 자동으로 라우팅합니다.'
-  },
-  {
-    id: 'airtable-db',
-    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757340/Screenshot_2026-06-06_at_11.35.34_PM_susvx4.png',
-    category: 'database',
-    titleEn: 'Airtable Relational Database',
-    titleKo: 'Airtable 데이터베이스',
-    subtitleEn: 'Relational Database Backend',
-    subtitleKo: '관계형 데이터 백엔드',
-    descEn: 'Centralized database linking student records, teacher logs, and generated bilingual scripts.',
-    descKo: '원생 정보, 강사 평가 기록, 생성된 이중언어 상담 대본이 안전하게 통합 관리되는 관계형 DB입니다.'
-  },
-  {
-    id: 'softr-admin',
-    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757340/Screenshot_2026-06-06_at_11.34.00_PM_atnp3r.png',
-    category: 'dashboard',
-    titleEn: 'Director Admin Portal (Softr)',
-    titleKo: '원장 대시보드 오버뷰 (Softr)',
-    subtitleEn: 'Softr Administration Portal',
-    subtitleKo: 'Softr 최고 관리자 어드민 포털',
-    descEn: 'High-level administration portal for directors to monitor all classes, FT logs, and report status.',
-    descKo: '원장님이 전 학급 원어민 강사 코멘트 제출 현황 및 학부모 리포트를 한눈에 파악하는 통합 어드민 포털입니다.'
-  },
-  {
-    id: 'kt-dashboard-main',
-    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757340/Screenshot_2026-06-06_at_11.32.00_PM_tnqzky.png',
-    category: 'dashboard',
-    titleEn: 'Bilingual Parent Dashboard (Main)',
-    titleKo: '학부모 대시보드 메인',
-    subtitleEn: 'Bilingual Progress View',
-    subtitleKo: '이중언어 맞춤 종합 도표',
-    descEn: 'Parent-facing digital report showing student progress graphs and teacher evaluations.',
-    descKo: '학부모님이 원생의 어휘 성취도 그래프와 이중언어 평가를 간편하게 확인하는 반응형 웹 대시보드입니다.'
-  },
-  {
-    id: 'kt-dashboard-detail',
-    url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757340/Screenshot_2026-06-06_at_11.32.40_PM_frctym.png',
-    category: 'dashboard',
-    titleEn: 'Detailed Observation Report',
-    titleKo: '학부모 대시보드 상세',
-    subtitleEn: 'Detailed Observation Cards',
-    subtitleKo: '정성 관찰 상세 리포트',
-    descEn: 'Detailed qualitative observations detailing specific vocabulary items, behavior, and teacher advice.',
-    descKo: '원생의 세부 타겟 어휘, 파닉스 완성도, 수업 태도 및 가정 연계 지침을 상세히 제공하는 리포트입니다.'
   }
 ];
 
@@ -466,16 +389,16 @@ ${activeReport.parentScriptKo.closing}`.trim();
               </div>
             </button>
             <a
-              href="#video-demo"
+              href="#interactive"
               className={`w-full sm:w-auto pl-7 pr-4 py-3.5 font-black text-sm rounded-full border transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] text-center flex items-center justify-center gap-3 group ${
                 isNight
                   ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
                   : 'bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-900 shadow-sm'
               }`}
             >
-              <span>{t.hero.secondaryCta}</span>
+              <span>{isKo ? '⚡ 1분 실시간 생성기 체험' : '⚡ Try Live Generator'}</span>
               <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0 transition-transform duration-200 ease-out group-hover:scale-110">
-                <PlayCircle size={18} weight="fill" className="text-orange-500" />
+                <Sparkle size={18} weight="fill" className="text-orange-500" />
               </div>
             </a>
           </div>
@@ -484,63 +407,6 @@ ${activeReport.parentScriptKo.closing}`.trim();
           <p className={`text-xs ${isNight ? 'text-zinc-500' : 'text-zinc-400'} pt-2 font-mono`}>
             🔒 {t.hero.badge}
           </p>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 2. 1-MINUTE DEMO VIDEO SHOWCASE FRAME (#video-demo) */}
-        {/* ========================================================================= */}
-        <section id="video-demo" className="space-y-6 max-w-5xl mx-auto w-full pt-4">
-          <div className="text-center space-y-2">
-            <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block font-mono">
-              {t.videoDemo.tagline}
-            </span>
-            <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight">
-              {t.videoDemo.heading}
-            </h2>
-            <p className={`text-xs sm:text-sm max-w-xl mx-auto ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-              {t.videoDemo.subheading}
-            </p>
-          </div>
-
-          {/* High-End HTML5 Video Player */}
-          <div
-            className={`rounded-3xl border p-3 md:p-4 shadow-2xl relative overflow-hidden transition-all ${
-              isNight
-                ? 'bg-[#050505] border-white/15 shadow-orange-500/10'
-                : 'bg-white border-zinc-300 shadow-xl'
-            }`}
-          >
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-inner flex items-center justify-center">
-              <video
-                controls
-                playsInline
-                preload="metadata"
-                poster="https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757946/Screenshot_2026-06-03_at_5.35.38_PM_wywtjr.png"
-                className="w-full h-full object-cover rounded-2xl"
-              >
-                <source
-                  src="https://res.cloudinary.com/dginphpy4/video/upload/v1765769964/chekki-intro_y7hj7c.mp4"
-                  type="video/mp4"
-                />
-                Your browser does not support HTML5 video playback.
-              </video>
-            </div>
-
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 px-2 text-xs">
-              <span className={`font-mono text-[11px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                📹 1-Minute ChekkiAI Platform Workflow Demo
-              </span>
-              <a
-                href="https://embed.app.guidde.com/playbooks/fXwhH7ayipdTFcXASDJx5K"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-orange-500 hover:text-orange-400 font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>{isKo ? '🔗 Guidde 대화형 가이드 새 창에서 보기' : '🔗 Open Guidde Interactive Playbook'}</span>
-                <ArrowRight size={14} weight="bold" />
-              </a>
-            </div>
-          </div>
         </section>
 
         {/* ========================================================================= */}
