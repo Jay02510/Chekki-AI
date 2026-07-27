@@ -644,13 +644,30 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 <textarea
                   value={customInput}
                   onChange={(e) => setCustomInput(e.target.value)}
-                  rows={5}
+                  rows={4}
                   className={`w-full p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed focus:outline-none transition-colors font-mono ${
                     isNight
                       ? 'bg-[#050505] border-white/10 text-zinc-100 focus:border-orange-500'
                       : 'bg-white border-zinc-200 text-zinc-900 focus:border-orange-500 shadow-inner'
                   }`}
                   placeholder={demoT.inputPlaceholder}
+                />
+              </div>
+
+              {/* Micro-Note / Custom Nuance Field */}
+              <div className="space-y-1.5 p-3.5 rounded-2xl border bg-orange-500/5 border-orange-500/20">
+                <label className="text-[11px] font-bold text-orange-400 block font-mono flex items-center justify-between">
+                  <span>💡 {lang === 'ko' ? '커스텀 단어 / 마이크로 메모 (AI 문장 중복 방지)' : 'Micro Keyword (Guarantees Unique AI Phrasing)'}</span>
+                  <span className="text-[10px] text-zinc-500">Optional ⚡</span>
+                </label>
+                <input
+                  type="text"
+                  value={customAcademyName.includes('POLY') ? 'Phonics p.14 & Photosynthesis Vocab' : 'Lesson Unit 3 Review'}
+                  onChange={(e) => {}}
+                  className={`w-full p-2.5 rounded-xl border text-xs font-mono focus:outline-none ${
+                    isNight ? 'bg-[#050505] border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
+                  }`}
+                  placeholder="e.g. Phonics p.14 or Vocab: Stomata"
                 />
               </div>
 
