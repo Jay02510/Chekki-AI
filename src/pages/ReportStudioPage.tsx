@@ -453,26 +453,30 @@ ${activeReport.parentScriptKo.closing}`.trim();
             {t.hero.subheadline}
           </p>
 
-          {/* Dual CTAs */}
+          {/* Dual CTAs - Button-in-Button Architecture & Emil Kowalski Scale Physics */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <button
               type="button"
               onClick={openOnboardingModal}
-              className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer group"
+              className="w-full sm:w-auto pl-7 pr-4 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-full shadow-xl shadow-orange-500/25 transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] flex items-center justify-center gap-3 cursor-pointer group"
             >
               <span>{t.hero.primaryCta}</span>
-              <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-1">
+                <ArrowRight size={14} weight="bold" />
+              </div>
             </button>
             <a
               href="#video-demo"
-              className={`w-full sm:w-auto px-8 py-4 font-black text-sm rounded-2xl border transition-all active:scale-[0.97] text-center flex items-center justify-center gap-2 ${
+              className={`w-full sm:w-auto pl-7 pr-4 py-3.5 font-black text-sm rounded-full border transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] text-center flex items-center justify-center gap-3 group ${
                 isNight
                   ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
                   : 'bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-900 shadow-sm'
               }`}
             >
-              <PlayCircle size={18} weight="fill" className="text-orange-500" />
               <span>{t.hero.secondaryCta}</span>
+              <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0 transition-transform duration-200 ease-out group-hover:scale-110">
+                <PlayCircle size={18} weight="fill" className="text-orange-500" />
+              </div>
             </a>
           </div>
 
