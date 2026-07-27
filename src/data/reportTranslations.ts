@@ -41,7 +41,7 @@ export const REPORT_TRANSLATIONS = {
       proDesc: 'Standalone AI report generator with live Korean Teacher review & edit workspace.',
       proFeatures: [
         '30-Second Foreign Teacher Mobile Log Form',
-        'Direct Gemini 2.5 Flash AI Engine (Zero Make.com fees)',
+        'Built-in Chekki AI Engine (Sub-second speed)',
         'Bilingual (KO + EN) KakaoTalk Script Generator',
         'Live Editable Textarea for KT Review & Copying',
         '3-Stage Review Status Pipeline (Pending ➔ Edited ➔ Sent)',
@@ -52,11 +52,11 @@ export const REPORT_TRANSLATIONS = {
       enterpriseTitle: 'Chekki School Pro (Product B)',
       enterprisePrice: '₩69,000',
       enterprisePeriod: '/ month per campus',
-      enterpriseDesc: 'Report Studio + Automated Textbook Scope & Sequence OCR Pre-seeding & Roster Sync.',
+      enterpriseDesc: 'Report Studio + Automated Textbook Scope & Sequence Pre-seeding & Roster Sync.',
       enterpriseFeatures: [
         'Everything in Report Studio (Product A)',
-        '1-Click Textbook Syllabus OCR Pre-seeding (RAG Engine)',
-        'Zero-Hallucination Curriculum Vocabulary Lock',
+        '1-Click Textbook Syllabus Pre-seeding & Vocabulary Auto-Sync',
+        'Verified Curriculum Vocabulary Accuracy',
         'Multi-Teacher & Multi-Class Roster Management',
         'Parent AI Diagnostic Insight Dashboard',
         'Dedicated 1:1 Director Onboarding'
@@ -225,22 +225,22 @@ export const REPORT_TRANSLATIONS = {
       proDesc: '독립형 AI 알림톡 대본 생성기 및 한국인 교사 수동 검수/수정 워크스페이스.',
       proFeatures: [
         '30초 원어민 강사 모바일 평가 폼',
-        'Gemini 2.5 Flash AI 엔진 직접 연동 (Make.com 수수료 0원)',
+        '체키 AI 엔진 직접 탑재 (초고속 자동 생성)',
         '한/영 이중언어 알림톡 대본 자동 생성',
         '실시간 편집 가능한 KT 검수 & 1클릭 복사 워크스페이스',
         '3단계 검수 상태 파이프라인 (검수대기 ➔ 수정완료 ➔ 발송완료)',
-        '주의 필요 학생 전용 전화 상담 대본 드로어'
+        '주의/칭찬 학생 전용 전화 상담 대본 드로어'
       ],
       proCta: '리포트 스튜디오 선택하기 (Product A)',
 
       enterpriseTitle: '체키 스쿨 프로 (Product B)',
       enterprisePrice: '₩69,000',
       enterprisePeriod: '/ 월 (캠퍼스당)',
-      enterpriseDesc: '리포트 스튜디오 + 교재 목차 자동 OCR 선제 탑재 (RAG 엔진) & 원생 명단 연동.',
+      enterpriseDesc: '리포트 스튜디오 + 교재 목차 자동 선제 탑재 (어휘 동기화) & 원생 명단 연동.',
       enterpriseFeatures: [
         '리포트 스튜디오 (Product A) 모든 기능 포함',
-        '1클릭 교재 목차 OCR 선제 탑재 (커리큘럼 RAG 엔진)',
-        '할루시네이션 0% 교재 타겟 어휘 자동 로킹',
+        '1클릭 교재 목차 사진 스캔 & 타겟 어휘 자동 탑재',
+        '검증된 커리큘럼 타겟 어휘 100% 연동',
         '강사별 반 배정 및 원생 명단 일괄 관리 (CSV 업로드)',
         '학부모 1클릭 AI 진단 인사이트 대시보드',
         '전담 매니저 1:1 맞춤 온보딩 지원'

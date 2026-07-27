@@ -74,7 +74,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
               PRODUCT B (SCHOOL PRO FEATURE)
             </span>
             <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
-              Zero-Hallucination RAG Engine
+              Verified Textbook Vocabulary Sync
             </span>
           </div>
           <h3 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
@@ -89,20 +89,20 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Preset Textbooks & Syllabus OCR Upload (5 cols) */}
+        {/* Left Column: Preset Textbooks & Syllabus Photo Upload (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          {/* 1. OCR Syllabus Scanner Box */}
+          {/* 1. Photo Syllabus Scanner Box */}
           <div className={`p-5 rounded-2xl border space-y-4 ${isNight ? 'bg-[#08080c] border-orange-500/30' : 'bg-orange-50/50 border-orange-200'}`}>
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider font-mono text-orange-500 flex items-center gap-1.5">
                 <UploadSimple size={16} />
-                <span>1-Click Syllabus Scan (OCR)</span>
+                <span>1-Photo Syllabus Scanner</span>
               </span>
-              <span className="text-[10px] font-mono font-bold text-emerald-400">Scan 1 Page PDF</span>
+              <span className="text-[10px] font-mono font-bold text-emerald-400">Photo / PDF Upload</span>
             </div>
 
             <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-              Upload or take a photo of your textbook syllabus. Chekki AI automatically extracts all units, topics, and target vocabulary.
+              Upload or snap a photo of your textbook syllabus. Chekki AI automatically extracts all units, topics, and target vocabulary.
             </p>
 
             <button
@@ -114,12 +114,12 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
               {isScanningOcr ? (
                 <>
                   <ArrowsClockwise size={16} className="animate-spin text-white" />
-                  <span>Scanning Syllabus Page & Extracting Units...</span>
+                  <span>Reading Syllabus Page & Extracting Units...</span>
                 </>
               ) : (
                 <>
                   <Sparkle size={16} weight="fill" />
-                  <span>Simulate 1-Click Syllabus Scan</span>
+                  <span>Scan 1-Page Syllabus Photo</span>
                 </>
               )}
             </button>
