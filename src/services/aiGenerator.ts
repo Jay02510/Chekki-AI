@@ -19,6 +19,8 @@ export interface ClassLogPayload {
 }
 
 export interface GeneratedReportOutput {
+  status?: 'pending_review' | 'edited_by_kt' | 'copied_sent';
+  lastEditedAt?: string;
   bilingualClassSummary: {
     korean: string;
     english: string;
@@ -28,6 +30,32 @@ export interface GeneratedReportOutput {
     koreanUpdate: string;
     phoneTalkingPoints: string[];
   }>;
+}
+
+// Offline Draft Cache Utilities
+const DRAFT_CACHE_KEY = 'chekki_offline_log_draft';
+
+export function saveOfflineDraft(payload: ClassLogPayload): void {
+  try {
+    localStorage.setItem(DRAFT_CACHE_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.warn('Failed to save offline draft:', e);
+  }
+}
+
+export function getOfflineDraft(): ClassLogPayload | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function clearOfflineDraft(): void {
+  try {
+    localStorage.removeItem(DRAFT_CACHE_KEY);
+  } catch (e) {}
 }
 
 /**

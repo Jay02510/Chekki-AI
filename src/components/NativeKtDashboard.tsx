@@ -31,6 +31,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
       'Today in 7A, students actively practiced Unit 4 Photosynthesis vocabulary. Everyone participated attentively during the reading drill.'
   );
 
+  // 3-Stage Report Status State
+  const [reportStatus, setReportStatus] = useState<'pending_review' | 'edited_by_kt' | 'copied_sent'>(
+    generatedOutput?.status || 'pending_review'
+  );
+
   const [copied, setCopied] = useState(false);
 
   // Phone Consultation Drawer State
@@ -38,6 +43,13 @@ export const NativeKtDashboard: React.FC<Props> = ({
     name: string;
     talkingPoints: string[];
   } | null>(null);
+
+  const handleTextChange = (val: string) => {
+    setEditedKoreanSummary(val);
+    if (reportStatus === 'pending_review') {
+      setReportStatus('edited_by_kt');
+    }
+  };
 
   const handleCopyKakaoScript = () => {
     const fullText = `[${academyName} 학부모 알림톡]
@@ -51,6 +63,7 @@ ${englishSummary}`.trim();
 
     navigator.clipboard.writeText(fullText);
     setCopied(true);
+    setReportStatus('copied_sent');
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -85,6 +98,48 @@ ${englishSummary}`.trim();
           {copied ? <CheckCircle size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
           <span>{copied ? 'Copied Edited Script! ✅' : '1-Click Copy Edited KakaoTalk'}</span>
         </button>
+      </div>
+
+      {/* 3-Stage Report Status Badge Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 rounded-2xl border bg-white/[0.02] border-white/10 font-mono text-xs">
+        <span className="font-bold text-zinc-400">Report Review Status:</span>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setReportStatus('pending_review')}
+            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+              reportStatus === 'pending_review'
+                ? 'bg-red-500/20 border-red-500 text-red-400 shadow-sm'
+                : 'bg-white/5 border-white/10 text-zinc-500'
+            }`}
+          >
+            🔴 PENDING REVIEW
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setReportStatus('edited_by_kt')}
+            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+              reportStatus === 'edited_by_kt'
+                ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm'
+                : 'bg-white/5 border-white/10 text-zinc-500'
+            }`}
+          >
+            🟡 EDITED BY KT
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setReportStatus('copied_sent')}
+            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+              reportStatus === 'copied_sent'
+                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm'
+                : 'bg-white/5 border-white/10 text-zinc-500'
+            }`}
+          >
+            🟢 COPIED & SENT
+          </button>
+        </div>
       </div>
 
       {/* Editable Korean Summary Section */}

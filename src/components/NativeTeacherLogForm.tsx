@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Sparkle, Plus, X, Check, UserPlus, Lock } from '@phosphor-icons/react';
-import { ClassLogPayload } from '../services/aiGenerator';
+import React, { useState, useEffect } from 'react';
+import { Sparkle, Plus, X, Check, UserPlus, Lock, FloppyDisk } from '@phosphor-icons/react';
+import { ClassLogPayload, saveOfflineDraft, getOfflineDraft, clearOfflineDraft } from '../services/aiGenerator';
 import { UserProfile } from '../../types';
 import { getPermissionsForUser } from '../utils/permissions';
 
@@ -28,6 +28,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
     'Students engaged very enthusiastically with the new plant vocabulary drill. Everyone read aloud clearly.'
   );
 
+  // Offline Draft Notification State
+  const [hasDraftRestored, setHasDraftRestored] = useState(false);
+
   // Student Exception Modal State
   const [exceptions, setExceptions] = useState<Array<{ studentName: string; details: string }>>([
     {
@@ -37,7 +40,23 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   ]);
   const [showExceptionModal, setShowExceptionModal] = useState(false);
   const [modalStudentName, setModalStudentName] = useState('Ji-woo (지우)');
+  const [isCustomStudentName, setIsCustomStudentName] = useState(false);
+  const [customStudentInput, setCustomStudentInput] = useState('');
   const [modalDetails, setModalDetails] = useState('');
+
+  // Auto-save offline draft to localStorage on change
+  useEffect(() => {
+    saveOfflineDraft({
+      className,
+      date,
+      lessonTopic,
+      textbook,
+      energyLevel,
+      activities,
+      generalComments,
+      exceptions,
+    });
+  }, [className, date, lessonTopic, textbook, energyLevel, activities, generalComments, exceptions]);
 
   const energyOptions = [
     'High Energy and Engaged',
@@ -54,9 +73,12 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   };
 
   const handleAddException = () => {
-    if (!modalStudentName || !modalDetails) return;
-    setExceptions((prev) => [...prev, { studentName: modalStudentName, details: modalDetails }]);
+    const finalStudentName = isCustomStudentName ? customStudentInput.trim() : modalStudentName;
+    if (!finalStudentName || !modalDetails) return;
+    setExceptions((prev) => [...prev, { studentName: finalStudentName, details: modalDetails }]);
     setModalDetails('');
+    setCustomStudentInput('');
+    setIsCustomStudentName(false);
     setShowExceptionModal(false);
   };
 
@@ -66,6 +88,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    clearOfflineDraft();
     onSubmitLog({
       className,
       date,
@@ -317,20 +340,42 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             </div>
 
             <div className="space-y-3">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-400 block font-mono">Student *</label>
-                <select
-                  value={modalStudentName}
-                  onChange={(e) => setModalStudentName(e.target.value)}
-                  className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
-                    isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                  }`}
-                >
-                  <option value="Ji-woo (지우)">Ji-woo (지우)</option>
-                  <option value="Min-jun (민준)">Min-jun (민준)</option>
-                  <option value="Chloe (클로이)">Chloe (클로이)</option>
-                  <option value="Seo-yun (서윤)">Seo-yun (서윤)</option>
-                </select>
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs font-bold text-zinc-400 font-mono">
+                  <span>Student *</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomStudentName(!isCustomStudentName)}
+                    className="text-orange-400 text-[10px] underline hover:text-orange-300"
+                  >
+                    {isCustomStudentName ? 'Select from Roster' : '+ Type Custom Name'}
+                  </button>
+                </div>
+
+                {isCustomStudentName ? (
+                  <input
+                    type="text"
+                    value={customStudentInput}
+                    onChange={(e) => setCustomStudentInput(e.target.value)}
+                    placeholder="Enter student name (e.g. David / 김다윗)..."
+                    className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
+                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                    }`}
+                  />
+                ) : (
+                  <select
+                    value={modalStudentName}
+                    onChange={(e) => setModalStudentName(e.target.value)}
+                    className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
+                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                    }`}
+                  >
+                    <option value="Ji-woo (지우)">Ji-woo (지우)</option>
+                    <option value="Min-jun (민준)">Min-jun (민준)</option>
+                    <option value="Chloe (클로이)">Chloe (클로이)</option>
+                    <option value="Seo-yun (서윤)">Seo-yun (서윤)</option>
+                  </select>
+                )}
               </div>
 
               <div className="space-y-1">
