@@ -31,15 +31,22 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   // Offline Draft Notification State
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
 
-  // Student Exception Modal State
-  const [exceptions, setExceptions] = useState<Array<{ studentName: string; details: string }>>([
+  // Student Spotlight & Exception Modal State (Praise & Attention)
+  const [exceptions, setExceptions] = useState<Array<{ studentName: string; details: string; type?: 'praise' | 'attention' }>>([
+    {
+      studentName: 'Seo-yeon (서연)',
+      details: '⭐ Outstanding participation! Led the vocabulary team quiz and helped classmates with pronunciation.',
+      type: 'praise',
+    },
     {
       studentName: 'Min-jun (민준)',
-      details: 'Struggled with the target pronunciation of "Chloroplast" and was slightly distracted during writing drill.',
+      details: '⚠️ Struggled with target word "Chloroplast" and needs 5-minute review at home.',
+      type: 'attention',
     },
   ]);
   const [showExceptionModal, setShowExceptionModal] = useState(false);
   const [modalStudentName, setModalStudentName] = useState('Ji-woo (지우)');
+  const [modalCategory, setModalCategory] = useState<'praise' | 'attention'>('praise');
   const [isCustomStudentName, setIsCustomStudentName] = useState(false);
   const [customStudentInput, setCustomStudentInput] = useState('');
   const [modalDetails, setModalDetails] = useState('');
@@ -340,6 +347,36 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             </div>
 
             <div className="space-y-3">
+              {/* Praise vs Attention Category Toggle */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-zinc-400 font-mono block">Update Category *</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setModalCategory('praise')}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      modalCategory === 'praise'
+                        ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 font-black'
+                        : 'bg-white/5 border-white/10 text-zinc-400'
+                    }`}
+                  >
+                    <span>⭐ Positive Praise</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setModalCategory('attention')}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      modalCategory === 'attention'
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-black'
+                        : 'bg-white/5 border-white/10 text-zinc-400'
+                    }`}
+                  >
+                    <span>⚠️ Attention Needed</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center text-xs font-bold text-zinc-400 font-mono">
                   <span>Student *</span>
@@ -379,35 +416,51 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-400 block font-mono">Exception Details *</label>
+                <label className="text-xs font-bold text-zinc-400 block font-mono">Details *</label>
                 <textarea
                   value={modalDetails}
                   onChange={(e) => setModalDetails(e.target.value)}
                   rows={4}
                   required
-                  placeholder="Explain issue (e.g. missing homework, tardy, hesitant during speaking drill)..."
-                  className={`w-full p-3 rounded-xl border text-xs leading-relaxed focus:outline-none font-mono ${
+                  placeholder={
+                    modalCategory === 'praise'
+                      ? 'Describe positive milestone (e.g. 100% quiz score, excellent pronunciation, helped classmates)...'
+                      : 'Explain focus issue (e.g. missing homework, tardy, hesitant during speaking drill)...'
+                  }
+                  className={`w-full p-3 rounded-xl border text-xs font-medium focus:outline-none ${
                     isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                   }`}
                 />
               </div>
-            </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowExceptionModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleAddException}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md"
-              >
-                Add Exception
-              </button>
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowExceptionModal(false)}
+                  className="w-1/2 py-2.5 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 text-zinc-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const chosenName = isCustomStudentName ? customStudentInput : modalStudentName;
+                    if (chosenName && modalDetails) {
+                      const prefix = modalCategory === 'praise' ? '⭐ ' : '⚠️ ';
+                      setExceptions([
+                        ...exceptions,
+                        { studentName: chosenName, details: prefix + modalDetails, type: modalCategory },
+                      ]);
+                      setModalDetails('');
+                      setCustomStudentInput('');
+                      setShowExceptionModal(false);
+                    }
+                  }}
+                  className="w-1/2 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+                >
+                  Save Highlight
+                </button>
+              </div>
             </div>
           </div>
         </div>

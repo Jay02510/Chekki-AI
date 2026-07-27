@@ -33,6 +33,7 @@ import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeArchitecturePipeline } from '../components/NativeArchitecturePipeline';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
+import { NativeAcademyOnboarding } from '../components/NativeAcademyOnboarding';
 import {
   generateGeneralClassSummary,
   generateStudentExceptionReport,
@@ -1840,6 +1841,13 @@ ${activeReport.parentScriptKo.closing}`.trim();
           </div>
         </div>
       )}
+
+      {/* Guided 1-Click Campus Onboarding Wizard Modal */}
+      <NativeAcademyOnboarding
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        isNight={isNight}
+      />
     </div>
   );
 }
