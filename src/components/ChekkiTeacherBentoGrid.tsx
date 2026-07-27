@@ -129,7 +129,7 @@ export default function ChekkiTeacherBentoGrid({ isNight = true, isKo = true }: 
               <div className={`pt-4 border-t flex items-center justify-between text-xs font-mono mt-4 relative z-10 ${
                 isNight ? 'border-white/5 text-zinc-500' : 'border-zinc-100 text-zinc-400'
               }`}>
-                <span>Sync Protocol</span>
+                <span>Auto-Sync</span>
                 <span className="text-purple-500 font-semibold flex items-center gap-1">
                   Instant Auto-Sync <ArrowRight size={12} />
                 </span>
@@ -137,7 +137,7 @@ export default function ChekkiTeacherBentoGrid({ isNight = true, isKo = true }: 
             </div>
           </div>
 
-          {/* 2. Instant OCR & Ground Truth Key (Teacher Painpoint 2) */}
+          {/* 2. Instant Answer Keys (Teacher Painpoint 2) */}
           <div className={`rounded-[2.25rem] p-1.5 backdrop-blur-xl group transition-all duration-500 cursor-pointer ${
             isNight 
               ? 'bg-white/[0.03] border border-white/10 shadow-2xl hover:border-orange-500/50' 
@@ -154,7 +154,7 @@ export default function ChekkiTeacherBentoGrid({ isNight = true, isKo = true }: 
                   isNight ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border-emerald-200'
                 }`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Hover Solution
+                  Chekki Feature
                 </span>
               </div>
 
@@ -162,11 +162,11 @@ export default function ChekkiTeacherBentoGrid({ isNight = true, isKo = true }: 
               <div className="grid grid-cols-1 grid-rows-1 my-2 relative z-10">
                 {/* Default Teacher Painpoint */}
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
-                  <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
+                  <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block mb-1">Teacher Problem</span>
                   <h3 className={`text-sm sm:text-base font-bold leading-snug ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {activeTab === 'korean'
-                      ? '"일반 AI 오답 환각 오류로 학부모 항의를 받으실까 걱정되시나요?"'
-                      : '"Worried about AI OCR hallucinations misgrading student handwriting and upsetting parents?"'}
+                      ? '"일반 AI 오답 판정 오류로 학부모 항의를 받으실까 걱정되시나요?"'
+                      : '"Worried about automated tools misgrading student handwriting and upsetting parents?"'}
                   </h3>
                 </div>
 
@@ -174,19 +174,19 @@ export default function ChekkiTeacherBentoGrid({ isNight = true, isKo = true }: 
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
                   <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
                   <h3 className={`text-sm sm:text-base font-bold mb-1 leading-snug ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                    {activeTab === 'korean' ? '교재 정답지 연동으로 AI 환각 100% 제거' : 'Ground-Truth Answer Keys (99.9% Precision)'}
+                    {activeTab === 'korean' ? '교재 정답지 연동으로 100% 정밀 채점' : 'Verified Answer Keys (100% Precision)'}
                   </h3>
                   <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {activeTab === 'korean'
-                      ? '학원 교재 정답 데이터와 연동하여 오답 판별 오류 없는 99.9% 정밀 채점 기준을 제공합니다.'
-                      : 'Evaluates scans against your exact answer key, completely eliminating false OCR errors and building trust.'}
+                      ? '학원 교재 정답 데이터와 연동하여 채점 오류 없는 100% 정밀 기준을 제공합니다.'
+                      : 'Evaluates scans against your exact textbook answer keys, ensuring 100% grading accuracy.'}
                   </p>
                 </div>
               </div>
 
               <div className="mt-4 p-3.5 rounded-2xl bg-orange-500/15 border-2 border-orange-500/40 text-orange-400 font-black text-xs sm:text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-orange-500/10 relative z-10">
                 <Sparkle size={20} weight="fill" className="text-orange-400 shrink-0 animate-pulse" />
-                <span>{activeTab === 'korean' ? '교재 정답지 연동으로 AI 환각 100% 제거' : 'Ground-truth answer keys eliminate AI hallucination'}</span>
+                <span>{activeTab === 'korean' ? '교재 정답지 연동으로 100% 정밀 채점' : 'Verified answer keys ensure 100% accurate grading'}</span>
               </div>
             </div>
           </div>

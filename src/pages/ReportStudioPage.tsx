@@ -560,7 +560,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                     : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
                 }`}
               >
-                <span>🏢 3. Director Admin Portal (Roster & Exceptions)</span>
+                <span>🏢 3. Director Admin Portal (Roster & Spotlights)</span>
               </button>
 
               <button
@@ -574,7 +574,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                     : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
                 }`}
               >
-                <span>📚 4. Curriculum Pre-Seeding Hub (School Pro)</span>
+                <span>📚 4. Textbook Vocabulary Auto-Sync (School Pro)</span>
               </button>
 
               <button
@@ -588,7 +588,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                     : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
                 }`}
               >
-                <span>🏫 5. Sample Case Simulator</span>
+                <span>🏫 5. Live Example Walkthrough</span>
               </button>
             </div>
           </div>

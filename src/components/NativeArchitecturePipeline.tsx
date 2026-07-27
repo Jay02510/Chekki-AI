@@ -61,7 +61,7 @@ export const NativeArchitecturePipeline: React.FC<Props> = ({ isNight = true }) 
       id: 'step-kt',
       stepNum: '04',
       title: 'Korean Teacher Dashboard',
-      subtitle: 'Human-in-the-Loop Edit & Copy',
+      subtitle: 'Teacher Review & 1-Click Copy',
       icon: ChatsCircle,
       color: 'from-pink-500 to-rose-500',
       borderColor: 'border-pink-500',
