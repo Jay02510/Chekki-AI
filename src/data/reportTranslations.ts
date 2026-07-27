@@ -34,33 +34,34 @@ export const REPORT_TRANSLATIONS = {
       ],
       starterCta: 'Start 14-Day Free Trial',
 
-      proTitle: 'Academy Pro',
+      proTitle: 'Report Studio Standalone (Product A)',
       proPrice: '₩35,000',
-      proPeriod: '/ month (₩28,000 yearly)',
-      proBadge: 'MOST POPULAR',
-      proDesc: 'Full AI report generator with live custom academy logo branding.',
+      proPeriod: '/ month per campus',
+      proBadge: 'MOST POPULAR (PRODUCT A)',
+      proDesc: 'Standalone AI report generator with live Korean Teacher review & edit workspace.',
       proFeatures: [
-        'Unlimited Monthly AI Progress Reports',
-        'Custom Academy Logo & Co-Branding',
-        'Bilingual (EN + KO) KakaoTalk & PDF Export',
-        'Phonics & Vocabulary Radar Mastery Graphs',
-        'Auto-Sync from Student Homework Scans',
-        'Priority Support'
+        '30-Second Foreign Teacher Mobile Log Form',
+        'Direct Gemini 2.5 Flash AI Engine (Zero Make.com fees)',
+        'Bilingual (KO + EN) KakaoTalk Script Generator',
+        'Live Editable Textarea for KT Review & Copying',
+        '3-Stage Review Status Pipeline (Pending ➔ Edited ➔ Sent)',
+        'Flagged Student Exception Phone Call Prep Drawer'
       ],
-      proCta: 'Choose Academy Pro',
+      proCta: 'Choose Report Studio (Product A)',
 
-      enterpriseTitle: 'Large Academy & Franchise',
-      enterprisePrice: '₩99,000',
-      enterprisePeriod: '/ month',
-      enterpriseDesc: 'Multi-teacher dashboard, multi-branch management & custom workflow integration.',
+      enterpriseTitle: 'Chekki School Pro (Product B)',
+      enterprisePrice: '₩69,000',
+      enterprisePeriod: '/ month per campus',
+      enterpriseDesc: 'Report Studio + Automated Textbook Scope & Sequence OCR Pre-seeding & Roster Sync.',
       enterpriseFeatures: [
-        'Everything in Academy Pro',
-        'Unlimited Foreign Teacher Seats',
-        'Multi-Branch & Franchise Sync',
-        'Custom Fillout & Make.com Automation Setup',
-        'Dedicated Account Manager'
+        'Everything in Report Studio (Product A)',
+        '1-Click Textbook Syllabus OCR Pre-seeding (RAG Engine)',
+        'Zero-Hallucination Curriculum Vocabulary Lock',
+        'Multi-Teacher & Multi-Class Roster Management',
+        'Parent AI Diagnostic Insight Dashboard',
+        'Dedicated 1:1 Director Onboarding'
       ],
-      enterpriseCta: 'Request Custom Setup'
+      enterpriseCta: 'Choose Chekki School Pro (Product B)'
     },
     videoDemo: {
       tagline: '1-MINUTE PLATFORM WALKTHROUGH',
@@ -217,33 +218,34 @@ export const REPORT_TRANSLATIONS = {
       ],
       starterCta: '14일 무료 체험 시작하기',
 
-      proTitle: '어학원 / 공부방 프로',
+      proTitle: '리포트 스튜디오 단독형 (Product A)',
       proPrice: '₩35,000',
-      proPeriod: '/ 월 (연간 결제 시 ₩28,000)',
-      proBadge: '가장 인기 있는 플랜',
-      proDesc: '학원 로고 맞춤 브랜딩 및 무제한 AI 성적표 생성.',
+      proPeriod: '/ 월 (캠퍼스당)',
+      proBadge: '가장 인기 있는 플랜 (Product A)',
+      proDesc: '독립형 AI 알림톡 대본 생성기 및 한국인 교사 수동 검수/수정 워크스페이스.',
       proFeatures: [
-        '무제한 AI 성적표 & 알림톡 생성',
-        '학원 명칭 & 로고 자동 브랜딩',
-        '한/영 이중 언어 알림톡 & PDF 출력',
-        '파닉스 & 어휘 레이더 종합 그래프',
-        '가정 오답 스캔 데이터 100% 연동',
-        '우선 고객 지원'
+        '30초 원어민 강사 모바일 평가 폼',
+        'Gemini 2.5 Flash AI 엔진 직접 연동 (Make.com 수수료 0원)',
+        '한/영 이중언어 알림톡 대본 자동 생성',
+        '실시간 편집 가능한 KT 검수 & 1클릭 복사 워크스페이스',
+        '3단계 검수 상태 파이프라인 (검수대기 ➔ 수정완료 ➔ 발송완료)',
+        '주의 필요 학생 전용 전화 상담 대본 드로어'
       ],
-      proCta: '어학원 프로 시작하기',
+      proCta: '리포트 스튜디오 선택하기 (Product A)',
 
-      enterpriseTitle: '대형 학원 & 프랜차이즈',
-      enterprisePrice: '₩99,000',
-      enterprisePeriod: '/ 월',
-      enterpriseDesc: '다수 강사 대시보드, 직영/가맹점 통합 관리 및 맞춤 자동화 파이프라인.',
+      enterpriseTitle: '체키 스쿨 프로 (Product B)',
+      enterprisePrice: '₩69,000',
+      enterprisePeriod: '/ 월 (캠퍼스당)',
+      enterpriseDesc: '리포트 스튜디오 + 교재 목차 자동 OCR 선제 탑재 (RAG 엔진) & 원생 명단 연동.',
       enterpriseFeatures: [
-        '어학원 프로의 모든 기능 포함',
-        '원어민 강사 계정 무제한',
-        '다중 지점 / 가맹점 데이터 동기화',
-        '맞춤형 Fillout & Make.com 연동 구도',
-        '전담 매니저 1:1 온보딩 지원'
+        '리포트 스튜디오 (Product A) 모든 기능 포함',
+        '1클릭 교재 목차 OCR 선제 탑재 (커리큘럼 RAG 엔진)',
+        '할루시네이션 0% 교재 타겟 어휘 자동 로킹',
+        '강사별 반 배정 및 원생 명단 일괄 관리 (CSV 업로드)',
+        '학부모 1클릭 AI 진단 인사이트 대시보드',
+        '전담 매니저 1:1 맞춤 온보딩 지원'
       ],
-      enterpriseCta: '맞춤 도입 상담 신청'
+      enterpriseCta: '체키 스쿨 프로 선택하기 (Product B)'
     },
     videoDemo: {
       tagline: '1분 플랫폼 시연 데모 영상',
