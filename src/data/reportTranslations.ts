@@ -65,8 +65,8 @@ export const REPORT_TRANSLATIONS = {
     },
     videoDemo: {
       tagline: '1-MINUTE PLATFORM WALKTHROUGH',
-      heading: 'See How ChekkiAI Transforms Raw FT Logs Into Phone-Ready Parent Scripts',
-      subheading: 'Watch how simple 45-second Fillout inputs flow through Make AI into a polished Softr bilingual dashboard.'
+      heading: 'See How Chekki AI Transforms Raw FT Logs Into Phone-Ready Parent Scripts',
+      subheading: 'Watch how simple 30-second mobile logs generate polished bilingual parent updates.'
     },
     painVsDream: {
       heading: 'Stop Wasting Korean Staff Hours on Manual Report Translation',
