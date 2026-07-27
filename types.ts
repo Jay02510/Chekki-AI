@@ -53,7 +53,7 @@ export interface UserProfile {
   childAge?: string;
   childEnglishLevel?: string;
   parentEnglishLevel?: string;
-  role?: 'parent' | 'teacher' | 'admin';
+  role?: 'parent' | 'teacher' | 'admin' | 'director' | 'foreign_teacher' | 'korean_teacher';
   classId?: string | null;
   studentName?: string | null;
   classStatus?: 'pending' | 'active' | null;

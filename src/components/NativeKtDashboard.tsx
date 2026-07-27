@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Copy, CheckCircle, PhoneCall, Sparkle, UserCheck, X } from '@phosphor-icons/react';
+import { Copy, CheckCircle, PhoneCall, Sparkle, UserCheck, X, Lock } from '@phosphor-icons/react';
 import { GeneratedReportOutput } from '../services/aiGenerator';
+import { UserProfile } from '../../types';
+import { getPermissionsForUser } from '../utils/permissions';
 
 interface Props {
   isNight?: boolean;
   generatedOutput: GeneratedReportOutput | null;
   className?: string;
   academyName?: string;
+  userProfile?: UserProfile | null;
 }
 
 export const NativeKtDashboard: React.FC<Props> = ({
@@ -14,7 +17,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
   generatedOutput,
   className = 'POLY Seocho 7A',
   academyName = 'POLY Academy (Seocho)',
+  userProfile,
 }) => {
+  const permissions = getPermissionsForUser(userProfile);
   // Live Editable State for Korean Teacher Review
   const [editedKoreanSummary, setEditedKoreanSummary] = useState(
     generatedOutput?.bilingualClassSummary.korean ||
@@ -93,17 +98,25 @@ ${englishSummary}`.trim();
 
         <textarea
           value={editedKoreanSummary}
-          onChange={(e) => setEditedKoreanSummary(e.target.value)}
+          onChange={(e) => permissions.canEditReports && setEditedKoreanSummary(e.target.value)}
+          disabled={!permissions.canEditReports}
           rows={4}
           className={`w-full p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed focus:outline-none transition-all font-sans ${
+            !permissions.canEditReports ? 'opacity-60 cursor-not-allowed' : ''
+          } ${
             isNight
               ? 'bg-[#030305] border-orange-500/30 text-white focus:border-orange-500'
               : 'bg-orange-50/50 border-orange-200 text-zinc-900 focus:border-orange-500'
           }`}
         />
-        <p className="text-[11px] text-zinc-500 font-mono italic">
-          ℹ️ KT can edit any sentence above directly. Clicking copy will copy your edited version.
-        </p>
+        <div className="flex justify-between items-center text-[11px] text-zinc-500 font-mono italic">
+          <span>ℹ️ KT can edit any sentence above directly. Clicking copy will copy your edited version.</span>
+          {!permissions.canEditReports && (
+            <span className="text-amber-400 font-bold flex items-center gap-1">
+              <Lock size={12} /> Read-only Permission
+            </span>
+          )}
+        </div>
       </div>
 
       {/* English Original Reference */}

@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
-import { Sparkle, Plus, X, Check, UserPlus } from '@phosphor-icons/react';
+import { Sparkle, Plus, X, Check, UserPlus, Lock } from '@phosphor-icons/react';
 import { ClassLogPayload } from '../services/aiGenerator';
+import { UserProfile } from '../../types';
+import { getPermissionsForUser } from '../utils/permissions';
 
 interface Props {
   isNight?: boolean;
   onSubmitLog: (payload: ClassLogPayload) => void;
   isSubmitting?: boolean;
+  userProfile?: UserProfile | null;
 }
 
 export const NativeTeacherLogForm: React.FC<Props> = ({
   isNight = true,
   onSubmitLog,
   isSubmitting = false,
+  userProfile,
 }) => {
+  const permissions = getPermissionsForUser(userProfile);
   const [className, setClassName] = useState('POLY Seocho 7A');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [lessonTopic, setLessonTopic] = useState('Unit 4: Photosynthesis & Plant Growth');
