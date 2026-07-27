@@ -54,6 +54,28 @@ interface SystemScreenshot {
 
 const SYSTEM_SCREENSHOTS: SystemScreenshot[] = [
   {
+    id: 'native-hero-ui',
+    url: '/images/report_studio_hero_ui.png',
+    category: 'form',
+    titleEn: 'Native FT Log & AI Script Workflow',
+    titleKo: '원어민 평가 폼 & AI 알림톡 대본 워크플로우',
+    subtitleEn: '<30s Mobile Input to Bilingual Script',
+    subtitleKo: '30초 모바일 입력부터 이중언어 알림톡까지',
+    descEn: 'Foreign teachers log daily class energy and activities on mobile, while Gemini 2.5 Flash AI generates bilingual parent KakaoTalk scripts instantly.',
+    descKo: '원어민 강사가 모바일에서 30초 만에 수업 현황을 제출하면 Gemini AI가 한/영 이중언어 알림톡 대본을 즉시 작성합니다.'
+  },
+  {
+    id: 'native-bento-features',
+    url: '/images/report_studio_bento_features.png',
+    category: 'dashboard',
+    titleEn: '3-Stage Status & Phone Call Prep Drawer',
+    titleKo: '3단계 검수 파이프라인 & 전화 상담 준비 드로어',
+    subtitleEn: 'Human-in-the-Loop Review Pipeline',
+    subtitleKo: '한국인 교사 수동 검수 및 1클릭 복사',
+    descEn: 'Track report status from Pending to Sent. Flagged student exceptions open structured 3-part phone consultation talking points.',
+    descKo: '검수대기 ➔ 수정완료 ➔ 발송완료 3단계 상태를 추적하고, 주의 필요 학생의 3단계 전화 상담 대본을 즉시 확인합니다.'
+  },
+  {
     id: 'fillout-form',
     url: 'https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757946/Screenshot_2026-06-03_at_5.35.38_PM_wywtjr.png',
     category: 'form',
