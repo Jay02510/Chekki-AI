@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Sparkle,
   Copy,
@@ -11,6 +11,7 @@ import {
   UserCheck,
   Lightning,
   ShareNetwork,
+  CaretLeft,
   CaretRight,
   ListChecks,
   WarningCircle,
@@ -20,6 +21,11 @@ import {
   Buildings,
   X,
   PlayCircle,
+  Play,
+  Pause,
+  MagnifyingGlassPlus,
+  Slideshow,
+  SquaresFour
 } from '@phosphor-icons/react';
 import { SAMPLE_REPORTS, SampleReport } from '../data/sampleReports';
 import { REPORT_TRANSLATIONS } from '../data/reportTranslations';
@@ -130,14 +136,44 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
   const [copied, setCopied] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   
-  // Interactive Screenshots & Lightbox State
-  const [activeLightboxImg, setActiveLightboxImg] = useState<{ url: string; title: string; desc: string } | null>(null);
+  // Interactive Screenshots, Gallery & Lightbox State
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [activeCarouselIdx, setActiveCarouselIdx] = useState<number>(0);
+  const [galleryDisplayMode, setGalleryDisplayMode] = useState<'carousel' | 'grid'>('carousel');
+  const [autoPlayCarousel, setAutoPlayCarousel] = useState<boolean>(false);
+
   const [studioOutputView, setStudioOutputView] = useState<'script' | 'dashboard'>('script');
   const [selectedArchCategory, setSelectedArchCategory] = useState<'all' | 'form' | 'automation' | 'database' | 'dashboard'>('all');
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
+
+  // Auto-play timer for Carousel mode
+  useEffect(() => {
+    if (!autoPlayCarousel || galleryDisplayMode !== 'carousel') return;
+    const timer = setInterval(() => {
+      setActiveCarouselIdx((prev) => (prev + 1) % SYSTEM_SCREENSHOTS.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [autoPlayCarousel, galleryDisplayMode]);
+
+  // Lightbox keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (lightboxIdx !== null) {
+      if (e.key === 'Escape') setLightboxIdx(null);
+      if (e.key === 'ArrowRight') setLightboxIdx((prev) => (prev !== null ? (prev + 1) % SYSTEM_SCREENSHOTS.length : 0));
+      if (e.key === 'ArrowLeft') setLightboxIdx((prev) => (prev !== null ? (prev - 1 + SYSTEM_SCREENSHOTS.length) % SYSTEM_SCREENSHOTS.length : 0));
+    } else if (galleryDisplayMode === 'carousel') {
+      if (e.key === 'ArrowRight') setActiveCarouselIdx((prev) => (prev + 1) % SYSTEM_SCREENSHOTS.length);
+      if (e.key === 'ArrowLeft') setActiveCarouselIdx((prev) => (prev - 1 + SYSTEM_SCREENSHOTS.length) % SYSTEM_SCREENSHOTS.length);
+    }
+  }, [lightboxIdx, galleryDisplayMode]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   // ROI Calculator State
   const [ftCount, setFtCount] = useState<number>(3);
@@ -257,21 +293,22 @@ ${activeReport.parentScriptKo.closing}`.trim();
               : 'bg-white/90 border-slate-200/90 text-slate-900 shadow-slate-200/60'
           }`}
         >
-          {/* Logo */}
-          <a href="/" className="flex items-center gap-2 shrink-0">
+          {/* Logo - Matching exact landing page style without B2B badge */}
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = isKo ? '/?lang=ko' : '/?lang=en';
+            }}
+            className="flex items-center gap-2 shrink-0 hover:opacity-85 transition-opacity cursor-pointer"
+            title={isKo ? '메인 랜딩페이지로 이동' : 'Back to Main Landing Page'}
+          >
             <span className="font-extrabold text-lg tracking-tight">
               Chekki<span className="text-orange-500">AI</span>
             </span>
-            <span
-              className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ml-1 ${
-                isNight ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-orange-100 text-orange-700'
-              }`}
-            >
-              B2B System
-            </span>
           </a>
 
-          {/* Desktop Nav Links (Streamlined to 3 core items) */}
+          {/* Desktop Nav Links (Streamlined to core items) */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-bold">
             <a href="#interactive" className="hover:text-orange-500 transition-colors">
               {t.nav.interactive}
@@ -333,15 +370,6 @@ ${activeReport.parentScriptKo.closing}`.trim();
         {/* 1. HERO SECTION */}
         {/* ========================================================================= */}
         <section className="text-center max-w-4xl mx-auto space-y-6 pt-6">
-          <div
-            className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-black tracking-widest uppercase border font-mono ${
-              isNight ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' : 'bg-orange-100 border-orange-200 text-orange-700'
-            }`}
-          >
-            <Sparkle size={14} weight="fill" className="text-orange-500" />
-            <span>{t.hero.tagline}</span>
-          </div>
-
           <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] break-keep">
             {t.hero.headline}
           </h1>
@@ -380,7 +408,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
         </section>
 
         {/* ========================================================================= */}
-        {/* 2. 1-MINUTE GUIDDE VIDEO SHOWCASE FRAME (#video-demo) */}
+        {/* 2. 1-MINUTE DEMO VIDEO SHOWCASE FRAME (#video-demo) */}
         {/* ========================================================================= */}
         <section id="video-demo" className="space-y-6 max-w-5xl mx-auto w-full pt-4">
           <div className="text-center space-y-2">
@@ -395,7 +423,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
             </p>
           </div>
 
-          {/* Responsive Embedded Video Frame */}
+          {/* High-End HTML5 Video Player */}
           <div
             className={`rounded-3xl border p-3 md:p-4 shadow-2xl relative overflow-hidden transition-all ${
               isNight
@@ -403,14 +431,35 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 : 'bg-white border-zinc-300 shadow-xl'
             }`}
           >
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-inner">
-              <iframe
-                src="https://embed.app.guidde.com/playbooks/fXwhH7ayipdTFcXASDJx5K?mode=videoOnly"
-                title="ChekkiAI 1-Minute Demo"
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-inner flex items-center justify-center">
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                poster="https://res.cloudinary.com/dec04iaht/image/upload/q_auto/f_auto/v1780757946/Screenshot_2026-06-03_at_5.35.38_PM_wywtjr.png"
+                className="w-full h-full object-cover rounded-2xl"
+              >
+                <source
+                  src="https://res.cloudinary.com/dginphpy4/video/upload/v1765769964/chekki-intro_y7hj7c.mp4"
+                  type="video/mp4"
+                />
+                Your browser does not support HTML5 video playback.
+              </video>
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 px-2 text-xs">
+              <span className={`font-mono text-[11px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                📹 1-Minute ChekkiAI Platform Workflow Demo
+              </span>
+              <a
+                href="https://embed.app.guidde.com/playbooks/fXwhH7ayipdTFcXASDJx5K"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-500 hover:text-orange-400 font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>{isKo ? '🔗 Guidde 대화형 가이드 새 창에서 보기' : '🔗 Open Guidde Interactive Playbook'}</span>
+                <ArrowRight size={14} weight="bold" />
+              </a>
             </div>
           </div>
         </section>
@@ -732,11 +781,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div
-                      onClick={() => setActiveLightboxImg({
-                        url: SYSTEM_SCREENSHOTS.find(s => s.id === 'kt-dashboard-main')!.url,
-                        title: isKo ? '학부모 대시보드 (메인)' : 'Bilingual Parent Dashboard (Main)',
-                        desc: isKo ? '원생별 어휘 성취도 그래프 및 월간 이중언어 평가 대시보드' : 'Parent-facing digital report showing student progress graphs and teacher evaluations.'
-                      })}
+                      onClick={() => setLightboxIdx(5)}
                       className="group relative rounded-2xl overflow-hidden border border-white/10 cursor-pointer shadow-lg hover:border-orange-500 transition-all"
                     >
                       <img
@@ -751,11 +796,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                     </div>
 
                     <div
-                      onClick={() => setActiveLightboxImg({
-                        url: SYSTEM_SCREENSHOTS.find(s => s.id === 'kt-dashboard-detail')!.url,
-                        title: isKo ? '학부모 대시보드 (상세)' : 'Detailed Observation Report',
-                        desc: isKo ? '원생의 정성 관찰 및 교사 종합 권고안 상세 대시보드' : 'Detailed qualitative observations detailing specific vocabulary items, behavior, and teacher advice.'
-                      })}
+                      onClick={() => setLightboxIdx(6)}
                       className="group relative rounded-2xl overflow-hidden border border-white/10 cursor-pointer shadow-lg hover:border-orange-500 transition-all"
                     >
                       <img
@@ -1134,91 +1175,295 @@ ${activeReport.parentScriptKo.closing}`.trim();
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. REAL PRODUCTION SYSTEM ARCHITECTURE & SCREENSHOT GALLERY */}
+        {/* 6. REAL PRODUCTION SYSTEM ARCHITECTURE & HIGH-END SCREENSHOT SHOWCASE */}
         {/* ========================================================================= */}
         <section className="space-y-8 pt-8">
-          <div className="text-center max-w-3xl mx-auto space-y-2">
-            <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block font-mono">
-              REAL PRODUCTION ARCHITECTURE & SCREENSHOTS
-            </span>
-            <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight">
-              {t.howItWorks.heading}
-            </h2>
-            <p className={`text-sm sm:text-base ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-              {t.howItWorks.subheading}
-            </p>
-          </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
+            <div className="space-y-2">
+              <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block font-mono">
+                REAL PRODUCTION ARCHITECTURE & UI SHOWCASE
+              </span>
+              <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight">
+                {t.howItWorks.heading}
+              </h2>
+              <p className={`text-xs sm:text-sm ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {t.howItWorks.subheading}
+              </p>
+            </div>
 
-          {/* Architecture Filter Tabs */}
-          <div className="flex flex-wrap justify-center items-center gap-2">
-            {[
-              { id: 'all', label: isKo ? '전체 보기 (7)' : 'All Systems (7)' },
-              { id: 'form', label: isKo ? '1. FT Fillout 양식' : '1. FT Fillout Form' },
-              { id: 'automation', label: isKo ? '2. Make.com 워크플로우' : '2. Make.com Engine' },
-              { id: 'database', label: isKo ? '3. Airtable 관계형 DB' : '3. Airtable Backend' },
-              { id: 'dashboard', label: isKo ? '4. Softr 학부모 포털' : '4. Softr Parent Portal' },
-            ].map((tab) => (
+            {/* Display Mode Switcher */}
+            <div className="flex items-center gap-2 shrink-0 self-start md:self-auto">
               <button
-                key={tab.id}
                 type="button"
-                onClick={() => setSelectedArchCategory(tab.id as any)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                  selectedArchCategory === tab.id
+                onClick={() => setGalleryDisplayMode('carousel')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                  galleryDisplayMode === 'carousel'
                     ? 'bg-orange-500 border-orange-500 text-white shadow-md'
                     : isNight
                     ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
                     : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
                 }`}
               >
-                {tab.label}
+                <Slideshow size={16} weight="bold" />
+                <span>{isKo ? '🎠 슬라이드쇼 뷰' : 'Carousel View'}</span>
               </button>
-            ))}
-          </div>
 
-          {/* Grid of Production Screenshots */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SYSTEM_SCREENSHOTS.filter(s => selectedArchCategory === 'all' || s.category === selectedArchCategory).map((shot) => (
-              <div
-                key={shot.id}
-                onClick={() => setActiveLightboxImg({
-                  url: shot.url,
-                  title: isKo ? shot.titleKo : shot.titleEn,
-                  desc: isKo ? shot.descKo : shot.descEn
-                })}
-                className={`group rounded-3xl border overflow-hidden transition-all duration-300 cursor-pointer hover:scale-[1.02] shadow-xl ${
-                  isNight ? 'bg-[#060608] border-white/10 hover:border-orange-500/50' : 'bg-white border-zinc-200 hover:border-orange-500'
+              <button
+                type="button"
+                onClick={() => setGalleryDisplayMode('grid')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                  galleryDisplayMode === 'grid'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                    : isNight
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
                 }`}
               >
-                <div className="relative aspect-video overflow-hidden bg-black/40">
-                  <img
-                    src={shot.url}
-                    alt={shot.titleEn}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono text-orange-400 font-bold border border-white/10">
-                    🔍 {isKo ? '확대보기' : 'Inspect UI'}
+                <SquaresFour size={16} weight="bold" />
+                <span>{isKo ? '📱 그리드 뷰' : 'Grid View'}</span>
+              </button>
+            </div>
+          </div>
+
+          {galleryDisplayMode === 'carousel' ? (
+            /* =================================================================== */
+            /* MODE A: HIGH-END INTERACTIVE CAROUSEL SHOWCASE */
+            /* =================================================================== */
+            <div className="space-y-6">
+              {/* Step Navigation Ribbon */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                {SYSTEM_SCREENSHOTS.map((shot, idx) => (
+                  <button
+                    key={shot.id}
+                    type="button"
+                    onClick={() => setActiveCarouselIdx(idx)}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer border flex items-center gap-2 ${
+                      activeCarouselIdx === idx
+                        ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-md scale-[1.02]'
+                        : isNight
+                        ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                        : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900'
+                    }`}
+                  >
+                    <span className="w-5 h-5 rounded-full bg-orange-500/30 text-orange-400 text-[10px] font-mono flex items-center justify-center font-black">
+                      {idx + 1}
+                    </span>
+                    <span>{isKo ? shot.titleKo : shot.titleEn}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Main Showcase Hero Window (Browser Mockup Frame) */}
+              <div
+                className={`rounded-3xl border overflow-hidden shadow-2xl relative transition-all ${
+                  isNight
+                    ? 'bg-[#050507] border-white/15 shadow-orange-500/10'
+                    : 'bg-white border-zinc-300 shadow-xl'
+                }`}
+              >
+                {/* Browser Frame Header */}
+                <div className={`px-4 py-3 border-b flex items-center justify-between font-mono text-xs ${
+                  isNight ? 'bg-black/60 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-600'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1.5">
+                      <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
+                      <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
+                      <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
+                    </div>
+                    <span className="text-[11px] opacity-70 ml-2 font-mono hidden sm:inline">
+                      chekki.ai/production/architecture#{SYSTEM_SCREENSHOTS[activeCarouselIdx].id}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setAutoPlayCarousel(!autoPlayCarousel)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors flex items-center gap-1 cursor-pointer ${
+                        autoPlayCarousel
+                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                          : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      {autoPlayCarousel ? <Pause size={12} weight="bold" /> : <Play size={12} weight="bold" />}
+                      <span>{autoPlayCarousel ? (isKo ? '자동 슬라이드 중' : 'Auto ON') : (isKo ? '자동 재생' : 'Auto Play')}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setLightboxIdx(activeCarouselIdx)}
+                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-orange-500 hover:bg-orange-600 text-white transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <MagnifyingGlassPlus size={14} weight="bold" />
+                      <span>{isKo ? '크게보기' : 'Inspect HD'}</span>
+                    </button>
                   </div>
                 </div>
 
-                <div className="p-5 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-500">
-                      {isKo ? shot.subtitleKo : shot.subtitleEn}
-                    </span>
-                    <span className="text-[10px] text-zinc-500 font-mono">Real Production</span>
+                {/* Main Screenshot Container */}
+                <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full bg-black/90 group overflow-hidden">
+                  <img
+                    src={SYSTEM_SCREENSHOTS[activeCarouselIdx].url}
+                    alt={SYSTEM_SCREENSHOTS[activeCarouselIdx].titleEn}
+                    className="w-full h-full object-contain transition-opacity duration-300"
+                  />
+
+                  {/* Left Carousel Arrow */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveCarouselIdx((prev) => (prev - 1 + SYSTEM_SCREENSHOTS.length) % SYSTEM_SCREENSHOTS.length)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/70 border border-white/20 text-white backdrop-blur-md hover:bg-orange-500 transition-all cursor-pointer shadow-lg active:scale-90"
+                    title={isKo ? '이전 이미지 (←)' : 'Previous Image'}
+                  >
+                    <CaretLeft size={20} weight="bold" />
+                  </button>
+
+                  {/* Right Carousel Arrow */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveCarouselIdx((prev) => (prev + 1) % SYSTEM_SCREENSHOTS.length)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/70 border border-white/20 text-white backdrop-blur-md hover:bg-orange-500 transition-all cursor-pointer shadow-lg active:scale-90"
+                    title={isKo ? '다음 이미지 (→)' : 'Next Image'}
+                  >
+                    <CaretRight size={20} weight="bold" />
+                  </button>
+
+                  {/* Caption Bar Overlay inside Container */}
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/80 to-transparent p-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+                    <div className="space-y-1 max-w-2xl">
+                      <div className="flex items-center gap-2 font-mono">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-orange-500 text-white">
+                          STEP {activeCarouselIdx + 1} / {SYSTEM_SCREENSHOTS.length}
+                        </span>
+                        <span className="text-[11px] text-orange-400 font-bold uppercase tracking-wider">
+                          {isKo ? SYSTEM_SCREENSHOTS[activeCarouselIdx].subtitleKo : SYSTEM_SCREENSHOTS[activeCarouselIdx].subtitleEn}
+                        </span>
+                      </div>
+
+                      <h3 className="font-black text-xl sm:text-2xl text-white">
+                        {isKo ? SYSTEM_SCREENSHOTS[activeCarouselIdx].titleKo : SYSTEM_SCREENSHOTS[activeCarouselIdx].titleEn}
+                      </h3>
+
+                      <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                        {isKo ? SYSTEM_SCREENSHOTS[activeCarouselIdx].descKo : SYSTEM_SCREENSHOTS[activeCarouselIdx].descEn}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setLightboxIdx(activeCarouselIdx)}
+                      className="px-5 py-2.5 rounded-xl font-bold text-xs bg-white text-zinc-900 hover:bg-orange-500 hover:text-white transition-all shadow-xl shrink-0 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <MagnifyingGlassPlus size={16} weight="bold" />
+                      <span>{isKo ? '전체화면 감상' : 'Full Screen'}</span>
+                    </button>
                   </div>
-
-                  <h3 className={`font-black text-base ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo ? shot.titleKo : shot.titleEn}
-                  </h3>
-
-                  <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    {isKo ? shot.descKo : shot.descEn}
-                  </p>
                 </div>
               </div>
-            ))}
-          </div>
+
+              {/* Bottom Thumbnail Strip */}
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-3 pt-2">
+                {SYSTEM_SCREENSHOTS.map((shot, idx) => (
+                  <button
+                    key={shot.id}
+                    type="button"
+                    onClick={() => setActiveCarouselIdx(idx)}
+                    className={`relative rounded-xl overflow-hidden aspect-video border transition-all cursor-pointer group ${
+                      activeCarouselIdx === idx
+                        ? 'border-orange-500 ring-2 ring-orange-500/50 scale-105 shadow-lg'
+                        : 'border-white/10 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={shot.url}
+                      alt={shot.titleEn}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] font-black text-white font-mono">
+                      {idx + 1}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            /* =================================================================== */
+            /* MODE B: BENTO GRID VIEW WITH CATEGORY FILTERS */
+            /* =================================================================== */
+            <div className="space-y-6">
+              {/* Category Filters */}
+              <div className="flex flex-wrap justify-center items-center gap-2">
+                {[
+                  { id: 'all', label: isKo ? '전체 보기 (7)' : 'All Systems (7)' },
+                  { id: 'form', label: isKo ? '1. FT Fillout 양식' : '1. FT Fillout Form' },
+                  { id: 'automation', label: isKo ? '2. Make.com 워크플로우' : '2. Make.com Engine' },
+                  { id: 'database', label: isKo ? '3. Airtable 관계형 DB' : '3. Airtable Backend' },
+                  { id: 'dashboard', label: isKo ? '4. Softr 학부모 포털' : '4. Softr Parent Portal' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setSelectedArchCategory(tab.id as any)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                      selectedArchCategory === tab.id
+                        ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                        : isNight
+                        ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                        : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Grid of Production Screenshots */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {SYSTEM_SCREENSHOTS.filter(s => selectedArchCategory === 'all' || s.category === selectedArchCategory).map((shot) => {
+                  const globalIdx = SYSTEM_SCREENSHOTS.findIndex(s => s.id === shot.id);
+                  return (
+                    <div
+                      key={shot.id}
+                      onClick={() => setLightboxIdx(globalIdx)}
+                      className={`group rounded-3xl border overflow-hidden transition-all duration-300 cursor-pointer hover:scale-[1.02] shadow-xl ${
+                        isNight ? 'bg-[#060608] border-white/10 hover:border-orange-500/50' : 'bg-white border-zinc-200 hover:border-orange-500'
+                      }`}
+                    >
+                      <div className="relative aspect-video overflow-hidden bg-black/40">
+                        <img
+                          src={shot.url}
+                          alt={shot.titleEn}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
+                        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono text-orange-400 font-bold border border-white/10 flex items-center gap-1">
+                          <MagnifyingGlassPlus size={12} weight="bold" />
+                          <span>{isKo ? '확대보기' : 'Inspect UI'}</span>
+                        </div>
+                      </div>
+
+                      <div className="p-5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-500">
+                            {isKo ? shot.subtitleKo : shot.subtitleEn}
+                          </span>
+                          <span className="text-[10px] text-zinc-500 font-mono">Real Production</span>
+                        </div>
+
+                        <h3 className={`font-black text-base ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                          {isKo ? shot.titleKo : shot.titleEn}
+                        </h3>
+
+                        <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                          {isKo ? shot.descKo : shot.descEn}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </section>
 
         {/* ========================================================================= */}
@@ -1464,49 +1709,81 @@ ${activeReport.parentScriptKo.closing}`.trim();
           </div>
         </div>
       )}
-      {/* High-Resolution System Screenshot Lightbox Modal */}
-      {activeLightboxImg && (
+      {/* High-Resolution Multi-Slide System Screenshot Lightbox Inspector */}
+      {lightboxIdx !== null && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 md:p-8 animate-fadeIn cursor-pointer"
-          onClick={() => setActiveLightboxImg(null)}
+          className="fixed inset-0 z-[500] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 md:p-8 animate-fadeIn cursor-pointer"
+          onClick={() => setLightboxIdx(null)}
         >
           <div
-            className="relative max-w-6xl w-full bg-zinc-950 border border-white/15 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-4 md:p-6"
+            className="relative max-w-7xl w-full bg-zinc-950 border border-white/15 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-4 md:p-6"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Lightbox Header */}
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-400 block mb-1">
-                  CHEKKIAI PRODUCTION SYSTEM INSPECTOR
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1 rounded-full bg-orange-500 text-white font-mono text-xs font-black">
+                  {lightboxIdx + 1} / {SYSTEM_SCREENSHOTS.length}
                 </span>
-                <h3 className="text-lg md:text-xl font-black text-white">{activeLightboxImg.title}</h3>
+                <div>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-400 block">
+                    CHEKKIAI PRODUCTION SYSTEM INSPECTOR
+                  </span>
+                  <h3 className="text-base md:text-lg font-black text-white">
+                    {isKo ? SYSTEM_SCREENSHOTS[lightboxIdx].titleKo : SYSTEM_SCREENSHOTS[lightboxIdx].titleEn}
+                  </h3>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setActiveLightboxImg(null)}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-              >
-                <X size={20} weight="bold" />
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLightboxIdx((prev) => (prev !== null ? (prev - 1 + SYSTEM_SCREENSHOTS.length) % SYSTEM_SCREENSHOTS.length : 0))}
+                  className="p-2.5 rounded-full bg-white/10 hover:bg-orange-500 text-white transition-colors cursor-pointer"
+                  title={isKo ? '이전 이미지 (Left Arrow)' : 'Previous Image'}
+                >
+                  <CaretLeft size={18} weight="bold" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLightboxIdx((prev) => (prev !== null ? (prev + 1) % SYSTEM_SCREENSHOTS.length : 0))}
+                  className="p-2.5 rounded-full bg-white/10 hover:bg-orange-500 text-white transition-colors cursor-pointer"
+                  title={isKo ? '다음 이미지 (Right Arrow)' : 'Next Image'}
+                >
+                  <CaretRight size={18} weight="bold" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLightboxIdx(null)}
+                  className="p-2.5 rounded-full bg-white/10 hover:bg-red-500 text-white transition-colors cursor-pointer ml-2"
+                  title={isKo ? '닫기 (Esc)' : 'Close'}
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden bg-black max-h-[75vh] flex items-center justify-center">
+            {/* Lightbox Image Stage */}
+            <div className="relative rounded-2xl overflow-hidden bg-black max-h-[72vh] flex items-center justify-center">
               <img
-                src={activeLightboxImg.url}
-                alt={activeLightboxImg.title}
-                className="max-h-[75vh] w-auto object-contain rounded-xl"
+                src={SYSTEM_SCREENSHOTS[lightboxIdx].url}
+                alt={SYSTEM_SCREENSHOTS[lightboxIdx].titleEn}
+                className="max-h-[72vh] w-auto object-contain rounded-xl shadow-2xl"
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-2">
-              <p className="text-xs text-zinc-300 max-w-3xl leading-relaxed">{activeLightboxImg.desc}</p>
-              <button
-                type="button"
-                onClick={() => setActiveLightboxImg(null)}
-                className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shrink-0 transition-all cursor-pointer"
-              >
-                {lang === 'ko' ? '닫기 (Close)' : 'Close'}
-              </button>
+            {/* Lightbox Footer Caption */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-2 border-t border-white/10">
+              <p className="text-xs text-zinc-300 max-w-4xl leading-relaxed">
+                <span className="text-orange-400 font-bold font-mono mr-2">
+                  [{isKo ? SYSTEM_SCREENSHOTS[lightboxIdx].subtitleKo : SYSTEM_SCREENSHOTS[lightboxIdx].subtitleEn}]
+                </span>
+                {isKo ? SYSTEM_SCREENSHOTS[lightboxIdx].descKo : SYSTEM_SCREENSHOTS[lightboxIdx].descEn}
+              </p>
+
+              <div className="flex items-center gap-2 shrink-0 font-mono text-[11px] text-zinc-500">
+                <span>Use ← → Arrow Keys to Navigate</span>
+              </div>
             </div>
           </div>
         </div>
