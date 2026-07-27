@@ -34,6 +34,7 @@ import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeArchitecturePipeline } from '../components/NativeArchitecturePipeline';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeAcademyOnboarding } from '../components/NativeAcademyOnboarding';
+import { NativeCurriculumPreseed } from '../components/NativeCurriculumPreseed';
 import {
   generateGeneralClassSummary,
   generateStudentExceptionReport,
@@ -103,7 +104,7 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
   const [selectedArchCategory, setSelectedArchCategory] = useState<'all' | 'form' | 'automation' | 'database' | 'dashboard'>('all');
 
   // Native Engine Demo States
-  const [nativeDemoTab, setNativeDemoTab] = useState<'ft-form' | 'kt-dashboard' | 'director-portal' | 'preset-generator'>('ft-form');
+  const [nativeDemoTab, setNativeDemoTab] = useState<'ft-form' | 'kt-dashboard' | 'director-portal' | 'curriculum-preseed' | 'preset-generator'>('ft-form');
   const [isSubmittingNativeLog, setIsSubmittingNativeLog] = useState(false);
   const [nativeOutput, setNativeOutput] = useState<GeneratedReportOutput | null>(null);
 
@@ -564,6 +565,20 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
               <button
                 type="button"
+                onClick={() => setNativeDemoTab('curriculum-preseed')}
+                className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
+                  nativeDemoTab === 'curriculum-preseed'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-xl shadow-orange-500/20 scale-[1.02]'
+                    : isNight
+                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
+                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                }`}
+              >
+                <span>📚 4. Curriculum Pre-Seeding Hub (School Pro)</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setNativeDemoTab('preset-generator')}
                 className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
                   nativeDemoTab === 'preset-generator'
@@ -573,7 +588,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                     : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
                 }`}
               >
-                <span>🏫 4. Sample Case Simulator</span>
+                <span>🏫 5. Sample Case Simulator</span>
               </button>
             </div>
           </div>
@@ -600,6 +615,12 @@ ${activeReport.parentScriptKo.closing}`.trim();
             <NativeDirectorPortal
               isNight={isNight}
               academyName={customAcademyName}
+            />
+          )}
+
+          {nativeDemoTab === 'curriculum-preseed' && (
+            <NativeCurriculumPreseed
+              isNight={isNight}
             />
           )}
 
