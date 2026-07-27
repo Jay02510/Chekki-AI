@@ -271,25 +271,16 @@ ${activeReport.parentScriptKo.closing}`.trim();
             </span>
           </a>
 
-          {/* Desktop Nav Links */}
+          {/* Desktop Nav Links (Streamlined to 3 core items) */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-bold">
-            <a href="#video-demo" className="hover:text-orange-500 transition-colors">
-              {t.nav.demo}
-            </a>
-            <a href="#features" className="hover:text-orange-500 transition-colors">
-              {t.nav.features}
-            </a>
             <a href="#interactive" className="hover:text-orange-500 transition-colors">
               {t.nav.interactive}
-            </a>
-            <a href="#calculator" className="hover:text-orange-500 transition-colors">
-              {t.nav.calculator}
             </a>
             <a href="#pricing" className="hover:text-orange-500 transition-colors">
               {t.nav.pricing}
             </a>
-            <a href="#onboarding-form" className="hover:text-orange-500 transition-colors">
-              {t.nav.onboarding}
+            <a href="#calculator" className="hover:text-orange-500 transition-colors">
+              {t.nav.calculator}
             </a>
           </nav>
 
