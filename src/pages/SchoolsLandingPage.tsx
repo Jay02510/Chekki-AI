@@ -796,12 +796,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
               <div>
                 <h4 className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {isKo ? '강사 1인 + 원생 30명 14일 무제한 무료 체험' : '14-Day FREE Trial (1 Teacher + Up to 30 Students)'}
+                  {isKo ? '강사 1인 + 원생 30명 7일 무제한 무료 체험' : '7-Day FREE Trial (1 Teacher + Up to 30 Students)'}
                 </h4>
                 <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {isKo 
-                    ? '신용카드 등록 없이 14일간 무료. 학부모는 Chekki 모바일 앱(무료) 다운로드 후 6자리 코드로 연동됩니다.' 
-                    : 'No credit card required. 1 Teacher seat + 30 Students for 14 days. Parents download the free Chekki app to sync scans.'}
+                    ? '신용카드 등록 없이 7일간 무료. 학부모는 Chekki 모바일 앱(무료) 다운로드 후 6자리 코드로 연동됩니다.' 
+                    : 'No credit card required. 1 Teacher seat + 30 Students for 7 days. Parents download the free Chekki app to sync scans.'}
                 </p>
               </div>
             </div>

@@ -22,9 +22,9 @@ export const REPORT_TRANSLATIONS = {
     pricing: {
       heading: 'Simple Monthly Academy Pricing',
       subheading: 'No hidden setup fees. Scale easily as your campus grows.',
-      starterTitle: '14-Day Free Trial',
+      starterTitle: '7-Day Free Trial',
       starterPrice: '₩0',
-      starterPeriod: '/ 14-Day Trial',
+      starterPeriod: '/ 7-Day Trial',
       starterDesc: 'Test progress reports and KakaoTalk script generation for free.',
       starterFeatures: [
         'Up to 15 Progress Reports',
@@ -206,9 +206,9 @@ export const REPORT_TRANSLATIONS = {
     pricing: {
       heading: '월별 합리적인 학원 요금제',
       subheading: '추가 개설비 무료. 캠퍼스 성장 규모에 맞춰 자유롭게 선택하세요.',
-      starterTitle: '14일 무료 체험',
+      starterTitle: '7일 무료 체험',
       starterPrice: '₩0',
-      starterPeriod: '/ 14일 체험',
+      starterPeriod: '/ 7일 체험',
       starterDesc: '알림톡 대본 및 성적표 생성을 무료로 체험해보세요.',
       starterFeatures: [
         '월 최대 15회 리포트 생성',

@@ -116,12 +116,12 @@ const FAQ_DATA: FaqItem[] = [
   {
     id: 't4',
     category: 'teacher',
-    tagKo: '14일 무료 체험',
-    tagEn: '14-Day Free Trial',
-    questionKo: '학원용 14일 무료 체험 신청 조건 및 승인 절차는 어떻게 되나요?',
-    questionEn: 'What is required for the 14-Day Academy Free Trial?',
-    answerKo: '학원명, 담당자 성함, 이메일/연락처 3가지 필수 정보만 입력하시면 즉시 신청됩니다. 신용카드 등록이나 사업자번호 없이 신청 후 1시간 내 14일 전용 교사 승인 코드가 발급됩니다.',
-    answerEn: 'Only 3 basic fields are required: Academy Name, Contact Name, and Email/Phone. No credit card or tax documents required. Your 14-day access code is issued within 1 hour.'
+    tagKo: '7일 무료 체험',
+    tagEn: '7-Day Free Trial',
+    questionKo: '학원용 7일 무료 체험 신청 조건 및 승인 절차는 어떻게 되나요?',
+    questionEn: 'What is required for the 7-Day Academy Free Trial?',
+    answerKo: '학원명, 담당자 성함, 이메일/연락처 3가지 필수 정보만 입력하시면 즉시 신청됩니다. 신용카드 등록이나 사업자번호 없이 신청 후 1시간 내 7일 전용 교사 승인 코드가 발급됩니다.',
+    answerEn: 'Only 3 basic fields are required: Academy Name, Contact Name, and Email/Phone. No credit card or tax documents required. Your 7-day access code is issued within 1 hour.'
   },
   {
     id: 't5',
