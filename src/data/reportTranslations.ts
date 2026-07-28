@@ -246,11 +246,11 @@ export const REPORT_TRANSLATIONS = {
     videoDemo: {
       tagline: '1분 플랫폼 시연 데모 영상',
       heading: '원어민 코멘트 입력부터 이중언어 상담 대본까지 1분 만에 확인하세요',
-      subheading: 'Fillout 입력 폼부터 Make AI 프로세싱, Softr 대시보드 이중언어 보고서 생성 과정을 직접 확인해보세요.'
+      subheading: '30초 원어민 강사 입력부터 정갈한 이중언어 상담 대본 생성까지 확인해보세요.'
     },
     painVsDream: {
-      heading: '수동 리포트 번역에 낭비되는 K-Teacher의 업무 시간을 멈추세요',
-      subheading: '기존 비효율적인 수동 업무 방식과 체키AI의 자동화 파이프라인을 비교해보세요.',
+      heading: '수동 리포트 번역에 낭비되는 한국인 교사의 업무 시간을 아껴드립니다',
+      subheading: '기존 수동 번역 방식과 체키의 자동화 솔루션을 비교해보세요.',
       bottleneckTitle: '기존 수동 업무 방식',
       bottleneckSubtitle: '높은 업무 피로도, 번역 지연, 일관성 없는 상담 퀄리티.',
       bottleneckAlert: '어학원 평균 손실: 주당 15시간 이상이 학부모 상담 전 수동 번역에 소비됩니다.',
