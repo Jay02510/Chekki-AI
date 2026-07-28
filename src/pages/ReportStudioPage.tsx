@@ -86,7 +86,21 @@ interface Props {
 }
 
 export default function ReportStudioPage({ isNight = true, setIsNight }: Props) {
-  const [lang, setLang] = useState<'ko' | 'en'>('ko');
+  const [lang, setLang] = useState<'ko' | 'en'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('chekki_lang');
+      if (saved === 'en' || saved === 'ko') return saved;
+    }
+    return 'ko';
+  });
+
+  const handleLangToggle = () => {
+    const next = lang === 'ko' ? 'en' : 'ko';
+    setLang(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('chekki_lang', next);
+    }
+  };
   const [selectedReportId, setSelectedReportId] = useState<string>(SAMPLE_REPORTS[0].id);
   const [customInput, setCustomInput] = useState<string>(SAMPLE_REPORTS[0].rawInput);
   const [customAcademyName, setCustomAcademyName] = useState<string>('POLY Academy (Seocho)');
@@ -309,25 +323,12 @@ ${activeReport.parentScriptKo.closing}`.trim();
             </span>
           </a>
 
-          {/* Desktop Nav Links (Streamlined to core items) */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-bold">
-            <a href="#interactive" className="hover:text-orange-500 transition-colors">
-              {t.nav.interactive}
-            </a>
-            <a href="#pricing" className="hover:text-orange-500 transition-colors">
-              {t.nav.pricing}
-            </a>
-            <a href="#calculator" className="hover:text-orange-500 transition-colors">
-              {t.nav.calculator}
-            </a>
-          </nav>
-
           {/* Right Actions */}
           <div className="flex items-center gap-3 ml-auto">
             {/* Language Toggle */}
             <button
               type="button"
-              onClick={() => setLang(lang === 'ko' ? 'en' : 'ko')}
+              onClick={handleLangToggle}
               className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
                 isNight
                   ? 'bg-white/5 border-white/15 text-white/90 hover:bg-white/15'
