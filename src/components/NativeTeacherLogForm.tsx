@@ -444,17 +444,16 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    const chosenName = isCustomStudentName ? customStudentInput : modalStudentName;
-                    if (chosenName && modalDetails) {
-                      const prefix = modalCategory === 'praise' ? '⭐ ' : '⚠️ ';
-                      setExceptions([
-                        ...exceptions,
-                        { studentName: chosenName, details: prefix + modalDetails, type: modalCategory },
-                      ]);
-                      setModalDetails('');
-                      setCustomStudentInput('');
-                      setShowExceptionModal(false);
-                    }
+                    const chosenName = (isCustomStudentName ? customStudentInput : modalStudentName) || 'Student';
+                    const detailText = modalDetails.trim() || (modalCategory === 'praise' ? 'Great focus and enthusiastic participation!' : 'Needs extra review on target vocabulary.');
+                    const prefix = modalCategory === 'praise' ? '⭐ ' : '⚠️ ';
+                    setExceptions([
+                      ...exceptions,
+                      { studentName: chosenName, details: prefix + detailText, type: modalCategory },
+                    ]);
+                    setModalDetails('');
+                    setCustomStudentInput('');
+                    setShowExceptionModal(false);
                   }}
                   className="w-1/2 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
                 >

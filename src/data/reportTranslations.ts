@@ -69,65 +69,57 @@ export const REPORT_TRANSLATIONS = {
       subheading: 'Watch how simple 30-second mobile logs generate polished bilingual parent updates.'
     },
     painVsDream: {
-      heading: 'Stop Wasting Korean Staff Hours on Manual Report Translation',
-      subheading: 'Compare traditional manual workflows with Chekki automated updates.',
+      heading: 'Traditional Manual Workflows vs. Chekki Automated Solution',
+      subheading: 'Eliminate hours of manual translation and give parents clear, encouraging updates.',
       bottleneckTitle: 'Traditional Manual Workflow',
       bottleneckSubtitle: 'High friction, translation backlogs, and delayed parent updates.',
       bottleneckAlert: 'Average academy loss: 15+ hours per week spent on manual translation before parent calls.',
       bottleneckPoints: [
         {
-          title: 'Constant Chasing for Comments',
-          desc: 'Directors and staff spend hours every Friday reminding foreign teachers to turn in weekly feedback.'
+          title: 'Constant Chasing for Notes',
+          desc: 'Staff spend hours every Friday reminding foreign teachers to turn in weekly class logs.'
         },
         {
-          title: 'Time-Consuming Translation Workload',
-          desc: 'Korean staff spend 12–15 hours translating raw English notes into polite Korean honorifics (존댓말) before phone calls.'
-        },
-        {
-          title: 'Inconsistent Consultation Quality',
-          desc: 'Vague notes like "He did okay" force counselors to improvise during delicate parent consultations.'
+          title: '15+ Hours Spent Translating',
+          desc: 'Korean staff waste 12–15 hours rewriting raw English notes into polite Korean honorifics (존댓말).'
         },
         {
           title: 'Delayed Exception Updates',
           desc: 'Missing homework, tardiness, or speaking hesitancy get buried in spreadsheets until parents complain.'
         }
       ],
-      standardTitle: 'ChekkiAI Automated Pipeline',
-      standardSubtitle: 'Standardized data, zero translation delay, phone-ready scripts.',
-      standardResult: 'ChekkiAI impact: 90% reduction in translation workload and 100% standardized parent call readiness.',
+      standardTitle: 'Chekki Automated Solution',
+      standardSubtitle: 'Standardized data, zero translation delay, ready-to-copy scripts.',
+      standardResult: 'Chekki Impact: 90% reduction in translation workload and 100% parent call readiness.',
       standardPoints: [
         {
-          title: 'Frictionless 45-Second FT Input (Fillout)',
-          desc: 'Foreign teachers log daily class data and student exceptions in seconds on any mobile device or laptop.'
+          title: '30-Second Mobile FT Log',
+          desc: 'Foreign teachers log daily class progress and student highlights in seconds from any phone.'
         },
         {
-          title: 'Instant Bilingual Normalization (Make & AI)',
-          desc: 'Backend AI converts observations into natural, highly polite Korean (존댓말) consultation scripts instantly.'
+          title: 'Ready-to-Copy KakaoTalk Scripts',
+          desc: 'AI converts teacher notes into polite Korean (존댓말) KakaoTalk updates in seconds.'
         },
         {
-          title: 'Structured Talk Tracks for Counselors (Softr)',
-          desc: 'Korean counseling staff receive clear, line-by-line talking points with greeting, progress, and action items.'
-        },
-        {
-          title: 'Automated Exception Flagging',
-          desc: 'Missing homework or behavioral issues are flagged immediately for proactive parent updates.'
+          title: '1-Click Parent Care',
+          desc: 'Korean teachers review drafts and 1-click copy formatted updates directly into KakaoTalk.'
         }
       ]
     },
     howItWorks: {
-      heading: 'From Raw Teacher Observations to Polished Parent Scripts in Seconds',
-      subheading: 'A standardized 4-step pipeline designed specifically for South Korean English Academies.',
-      step1Title: '1. Foreign Teacher Fillout Form',
-      step1Desc: 'Native teachers log daily progress, vocabulary, and student observations using a 45-second Fillout form.',
-      step2Title: '2. Make.com & Claude AI Engine',
-      step2Desc: 'Automation engine normalizes English notes into formal Korean honorific scripts with zero delay.',
-      step3Title: '3. Airtable & Softr Dashboard',
-      step3Desc: 'Directors & Korean teachers review side-by-side student cards on a clean Softr dashboard.',
-      step4Title: '4. 1-Click KakaoTalk Parent Care',
+      heading: 'From 30-Second FT Log to Ready-to-Copy KakaoTalk Message',
+      subheading: 'A simple 3-step pipeline designed specifically for Korean English Academies.',
+      step1Title: '1. Foreign Teacher 30s Log',
+      step1Desc: 'Native teachers submit quiz scores and student highlights in 30 seconds on mobile.',
+      step2Title: '2. Bilingual Script Generator',
+      step2Desc: 'AI converts raw English notes into formal Korean honorific scripts with zero delay.',
+      step3Title: '3. KT Review & 1-Click KakaoTalk Copy',
+      step3Desc: 'Korean teachers review drafts and 1-click copy formatted updates directly into KakaoTalk.',
+      step4Title: '4. 1-Click Parent Care',
       step4Desc: '1-click copy formatted Korean consultation scripts directly into KakaoTalk or phone logs.'
     },
     interactiveDemo: {
-      heading: 'Test ChekkiAI Parent Report Generation in Real-Time',
+      heading: 'Test Chekki Parent Report Generation in Real-Time',
       subheading: 'Select a sample student scenario or type custom foreign teacher notes to generate a bilingual parent script.',
       selectPreset: 'Select Sample Student Case:',
       customInputLabel: 'Foreign Teacher Notes (English):',
@@ -253,48 +245,40 @@ export const REPORT_TRANSLATIONS = {
       subheading: '30초 원어민 강사 입력부터 정갈한 이중언어 상담 대본 생성까지 확인해보세요.'
     },
     painVsDream: {
-      heading: '수동 리포트 번역에 낭비되는 한국인 교사의 업무 시간을 아껴드립니다',
-      subheading: '기존 수동 번역 방식과 체키의 자동화 솔루션을 비교해보세요.',
+      heading: '기존 수동 업무 방식 vs. 체키 자동화 솔루션',
+      subheading: '수동 번역 시간을 아끼고 학부모 만족도를 높이세요.',
       bottleneckTitle: '기존 수동 업무 방식',
       bottleneckSubtitle: '높은 업무 피로도, 번역 지연, 일관성 없는 상담 퀄리티.',
       bottleneckAlert: '어학원 평균 손실: 주당 15시간 이상이 학부모 상담 전 수동 번역에 소비됩니다.',
       bottleneckPoints: [
         {
-          title: '매주 금요일 코멘트 독촉 스트레스',
-          desc: '원장님과 상담 실장님이 매주 원어민 교사에게 주간 피드백 제출을 독촉하느라 시간이 허비됩니다.'
+          title: '코멘트 수집 독촉 스트레스',
+          desc: '매주 금요일마다 원어민 강사에게 주간 코멘트 제출을 독촉하는 비효율.'
         },
         {
-          title: '과도한 한국인 강사 번역 업무',
-          desc: '한국인 교사들이 전화 상담 전 영문 메모를 존댓말 한국어로 번역하는 데 주당 12~15시간을 씁니다.'
+          title: '주당 15시간 수동 번역 지연',
+          desc: '원어민 영어 코멘트를 학부모 상담용 정갈한 존댓말 문장으로 일일이 번역.'
         },
         {
-          title: '일관성 없는 상담 대본 퀄리티',
-          desc: '"He did okay" 같은 단편적인 코멘트 때문에 학부모 상담 전화 시 즉흥적으로 대답해야 합니다.'
-        },
-        {
-          title: '이슈 발생 시 늦장 대응',
-          desc: '숙제 미제출, 지각, 발표 태도 저하 등 주의 이슈가 엑셀에 묻혀 학부모 항의 후 대응하게 됩니다.'
+          title: '학부모 알림톡 발송 지연',
+          desc: '원생별 칭찬이나 주의사항이 엑셀에 묻혀 상담 타이밍을 놓침.'
         }
       ],
-      standardTitle: '체키AI 자동화 파이프라인',
-      standardSubtitle: '표준화된 데이터, 번역 지연 0초, 전화 상담 준비 완료 대본.',
-      standardResult: '체키AI 도입 효과: 번역 업무 90% 감축 및 학부모 상담 준비도 100% 완료.',
+      standardTitle: '체키 자동화 솔루션',
+      standardSubtitle: '표준화된 데이터, 번역 지연 0초, 1클릭 발송 대본.',
+      standardResult: '체키 도입 효과: 번역 업무 90% 감축 및 학부모 상담 준비도 100% 완료.',
       standardPoints: [
         {
-          title: '45초 간편 모바일 입력 (Fillout)',
-          desc: '원어민 강사들이 단 몇 번의 클릭만으로 오늘의 수업 데이터와 진도를 정확하게 기록합니다.'
+          title: '30초 원어민 모바일 작성',
+          desc: '원어민 강사가 모바일에서 30초 만에 출석 및 원생 스포트라이트 제출.'
         },
         {
-          title: '실시간 이중언어 정제 엔진 (Make & Claude AI)',
-          desc: '제출 즉시 백엔드 AI 시스템이 작동하여 복잡한 가이드라인에 맞춘 보고서를 즉각 생성합니다.'
+          title: '정갈한 존댓말 알림톡 자동 생성',
+          desc: '원어민 코멘트가 1초 만에 학부모 상담용 알림톡 대본으로 변환.'
         },
         {
-          title: '상담 교사를 위한 5단계 구조화 대본 (Softr)',
-          desc: '완성된 대시보드에서는 학부모 상담에 바로 활용할 수 있는 정교한 이중언어 보고서를 한눈에 확인합니다.'
-        },
-        {
-          title: '특이사항 자동 감지 알림',
-          desc: '숙제 미제출, 지각 등 주의 이슈가 즉시 깃발로 표시되어 선제적 학부모 케어가 가능합니다.'
+          title: '1클릭 카카오톡 복사 발송',
+          desc: '한국인 담임 교사가 검수 후 클릭 한 번으로 카카오톡 발송.'
         }
       ]
     },
