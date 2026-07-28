@@ -177,10 +177,14 @@ export default function Home() {
             </button>
 
             <a
-              href="https://chekki-ai.vercel.app/app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative overflow-hidden items-center gap-2 px-4 py-1.5 bg-brand text-white font-bold rounded-full text-xs uppercase tracking-wider transition-transform duration-700 active:scale-[0.96] flex"
+              href="/app"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/app');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="group relative overflow-hidden items-center gap-2 px-4 py-1.5 bg-brand text-white font-bold rounded-full text-xs uppercase tracking-wider transition-transform duration-700 active:scale-[0.96] flex cursor-pointer"
             >
               <span>{isKo ? '앱 열기' : 'Open App'}</span>
             </a>
@@ -212,11 +216,15 @@ export default function Home() {
             </button>
 
             <a
-              href="https://chekki-ai.vercel.app/app"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setMobileMenuOpen(false)}
-              className="hover:text-brand transition-colors"
+              href="/app"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/app');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-brand transition-colors cursor-pointer"
             >
               {isKo ? '웹앱 시작하기' : 'Web App'}
             </a>
@@ -278,10 +286,14 @@ export default function Home() {
           {/* Clean 2-CTA layout in Hero (Open Web App + Download App) */}
           <div className="hero-text mt-12 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
             <a
-              href="https://chekki-ai.vercel.app/app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative w-full sm:w-auto overflow-hidden pl-8 pr-2 py-2 bg-brand text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 active:scale-[0.98] shadow-2xl shadow-brand/20"
+              href="/app"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/app');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="group relative w-full sm:w-auto overflow-hidden pl-8 pr-2 py-2 bg-brand text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 active:scale-[0.98] shadow-2xl shadow-brand/20 cursor-pointer"
             >
               <span className="relative z-10">{isKo ? '웹앱 시작하기' : 'Open Web App'}</span>
               <div className="w-12 h-12 rounded-full bg-black/20 flex items-center justify-center transition-transform group-hover:translate-x-1">
@@ -488,10 +500,14 @@ export default function Home() {
 
         <div className="relative z-10 flex flex-col sm:flex-row gap-6">
           <a
-            href="https://chekki-ai.vercel.app/app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative overflow-hidden pl-10 pr-3 py-3 bg-brand text-white font-bold rounded-full text-xl flex items-center justify-between gap-8 transition-transform duration-700 active:scale-[0.98] shadow-2xl shadow-brand/20"
+            href="/app"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'instant' });
+              window.history.pushState({}, '', '/app');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
+            className="group relative overflow-hidden pl-10 pr-3 py-3 bg-brand text-white font-bold rounded-full text-xl flex items-center justify-between gap-8 transition-transform duration-700 active:scale-[0.98] shadow-2xl shadow-brand/40 hover:bg-brand/90 cursor-pointer"
           >
             <span className="relative z-20 tracking-wide">{isKo ? '체키 시작하기' : 'Start Using Chekki'}</span>
             <div className="relative z-20 w-14 h-14 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 group-hover:scale-105 group-hover:translate-x-1">
