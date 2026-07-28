@@ -34,10 +34,10 @@ export const REPORT_TRANSLATIONS = {
       ],
       starterCta: 'Start Free Trial',
 
-      proTitle: 'Report Studio',
+      proTitle: 'Report Studio (Report Only)',
       proPrice: '₩35,000',
       proPeriod: '/ month per campus',
-      proBadge: 'MOST POPULAR',
+      proBadge: 'STANDARD PLAN',
       proDesc: 'Report generator with live Korean Teacher review & edit workspace.',
       proFeatures: [
         '30-Second Foreign Teacher Mobile Log Form',
@@ -48,15 +48,17 @@ export const REPORT_TRANSLATIONS = {
       ],
       proCta: 'Choose Report Studio',
 
-      enterpriseTitle: 'Chekki School Pro',
+      enterpriseTitle: 'Chekki School Pro (All-in-One Bundle)',
       enterprisePrice: '₩69,000',
       enterprisePeriod: '/ month per campus',
+      enterpriseBadge: 'MOST POPULAR (COMPLETE CAMPUS BUNDLE)',
       enterpriseDesc: 'Report Studio + Automated Textbook Syllabus Pre-seeding & Homework Sync.',
       enterpriseFeatures: [
         'Everything in Report Studio',
         '1-Click Textbook Syllabus Pre-seeding & Vocabulary Auto-Sync',
         'Daily Homework Scanning & Auto-Grading',
         'Multi-Teacher & Multi-Class Roster Management',
+        'FREE Chekki Pro App for All Parents (via 6-digit code)',
         'Dedicated 1:1 Director Setup & Support'
       ],
       enterpriseCta: 'Choose Chekki School Pro'
@@ -216,10 +218,10 @@ export const REPORT_TRANSLATIONS = {
       ],
       starterCta: '무료 체험 시작하기',
 
-      proTitle: '리포트 스튜디오',
+      proTitle: '리포트 스튜디오 (알림톡 단독)',
       proPrice: '₩35,000',
       proPeriod: '/ 월 (캠퍼스당)',
-      proBadge: '가장 인기 있는 플랜',
+      proBadge: '기본 알림톡 요금제',
       proDesc: '알림톡 대본 자동 생성 및 한국인 교사 검수/수정 워크스페이스.',
       proFeatures: [
         '30초 원어민 강사 모바일 평가 폼',
@@ -230,15 +232,17 @@ export const REPORT_TRANSLATIONS = {
       ],
       proCta: '리포트 스튜디오 선택하기',
 
-      enterpriseTitle: '체키 스쿨 프로',
+      enterpriseTitle: '체키 스쿨 프로 (완전 통합 패키지)',
       enterprisePrice: '₩69,000',
       enterprisePeriod: '/ 월 (캠퍼스당)',
+      enterpriseBadge: '가장 인기 있는 플랜 (완전 통합 패키지)',
       enterpriseDesc: '리포트 스튜디오 + 교재 목차 자동 선제 탑재 & 숙제 채점 연동.',
       enterpriseFeatures: [
         '리포트 스튜디오 모든 기능 포함',
         '1클릭 교재 목차 사진 스캔 & 타겟 어휘 자동 탑재',
         '매일 숙제 스캔 & 100% 정밀 채점',
         '강사별 반 배정 및 원생 명단 일괄 관리',
+        '학부모 Chekki Pro 앱 무제한 무료 제공 (6자리 코드 연동)',
         '전담 매니저 1:1 맞춤 온보딩 지원'
       ],
       enterpriseCta: '체키 스쿨 프로 선택하기'
