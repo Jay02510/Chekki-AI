@@ -129,11 +129,15 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
             }`}>
               <div>
                 <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block mb-2">
-                  IMAGE / PDF UPLOADER
+                  {isKo ? '교재 이미지 / PDF 업로더' : 'IMAGE / PDF UPLOADER'}
                 </span>
-                <h4 className="font-bold text-base mb-2">Scan Textbook Syllabus or Unit Page</h4>
+                <h4 className="font-bold text-base mb-2">
+                  {isKo ? '교재 목차 또는 과제 페이지 스캔' : 'Scan Textbook Syllabus or Unit Page'}
+                </h4>
                 <p className={`text-xs mb-6 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                  Snap 1 photo of your textbook contents page. Chekki AI Vision extracts all topics, target vocabulary, and answer key structures automatically.
+                  {isKo 
+                    ? '교재 목차 사진 1장을 찍어 업로드하면 체키 AI 비전이 단원별 주제, 타겟 어휘, 정답지 구조를 자동 추출합니다.'
+                    : 'Snap 1 photo of your textbook contents page. Chekki AI Vision extracts all topics, target vocabulary, and answer key structures automatically.'}
                 </p>
 
                 <div className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
@@ -142,12 +146,16 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                   {isScanning ? (
                     <div className="py-4 space-y-2">
                       <Sparkle size={32} className="mx-auto text-orange-500 animate-spin" />
-                      <p className="text-xs font-bold text-orange-400">AI Vision Extracting Vocabulary & Answer Keys...</p>
+                      <p className="text-xs font-bold text-orange-400">
+                        {isKo ? 'AI 비전이 핵심 어휘 & 정답지 구조를 추출 중입니다...' : 'AI Vision Extracting Vocabulary & Answer Keys...'}
+                      </p>
                     </div>
                   ) : (
                     <div className="py-4 space-y-3">
                       <BookOpen size={36} className="mx-auto text-orange-500" />
-                      <p className="text-xs font-bold">Uploaded: Bricks Reading 150 (Book 1) Syllabus.pdf</p>
+                      <p className="text-xs font-bold">
+                        {isKo ? '업로드됨: Bricks Reading 150 (Book 1) 목차.pdf' : 'Uploaded: Bricks Reading 150 (Book 1) Syllabus.pdf'}
+                      </p>
                       <button
                         type="button"
                         onClick={() => {
@@ -159,7 +167,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                         className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer inline-flex items-center gap-1.5"
                       >
                         <Lightning size={14} weight="fill" />
-                        <span>Re-Scan Syllabus Photo</span>
+                        <span>{isKo ? '⚡ 목차 사진 다시 스캔하기' : 'Re-Scan Syllabus Photo'}</span>
                       </button>
                     </div>
                   )}
@@ -169,9 +177,9 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
               <div className="pt-4 flex items-center justify-between text-[11px] text-emerald-400 font-mono">
                 <span className="flex items-center gap-1">
                   <CheckCircle size={14} weight="fill" />
-                  <span>OCR Accuracy: 99.9%</span>
+                  <span>{isKo ? 'OCR 정밀도: 99.9%' : 'OCR Accuracy: 99.9%'}</span>
                 </span>
-                <span>Auto-categorized into 4 Units</span>
+                <span>{isKo ? '총 4개 단원 자동 분류 완료' : 'Auto-categorized into 4 Units'}</span>
               </div>
             </div>
 
@@ -182,22 +190,24 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div>
                   <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">
-                    AI EXTRACTED CATEGORIES
+                    {isKo ? 'AI 자동 추출 학습 카테고리' : 'AI EXTRACTED CATEGORIES'}
                   </span>
-                  <h4 className="font-bold text-sm">Unit 4: Photosynthesis & Plants</h4>
+                  <h4 className="font-bold text-sm">
+                    {isKo ? '4단원: 광합성과 식물 (Unit 4: Photosynthesis)' : 'Unit 4: Photosynthesis & Plants'}
+                  </h4>
                 </div>
                 <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded text-[10px] font-bold">
-                  Ready to Sync
+                  {isKo ? '연동 준비 완료' : 'Ready to Sync'}
                 </span>
               </div>
 
               {/* Category 1: Target Vocabulary */}
               <div className={`p-3 rounded-xl border space-y-1.5 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
                 <span className="text-[10px] font-bold font-mono text-orange-400 uppercase tracking-wider block">
-                  🔤 Target Vocabulary Chips (RAG Pre-seeded)
+                  {isKo ? '🔤 타겟 핵심 어휘 (자동 선제 탑재)' : '🔤 Target Vocabulary Chips (RAG Pre-seeded)'}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
-                  {['Chloroplast', 'Stomata', 'Glucose', 'Carbon Dioxide', 'Sunlight'].map((word) => (
+                  {['Chloroplast (엽록체)', 'Stomata (기공)', 'Glucose (포도당)', 'Carbon Dioxide', 'Sunlight'].map((word) => (
                     <span key={word} className={`px-2 py-1 rounded-md text-xs font-bold border ${
                       isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-800 border-orange-200'
                     }`}>
@@ -210,17 +220,21 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
               {/* Category 2: Phonics & Grammar Rules */}
               <div className={`p-3 rounded-xl border space-y-1.5 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
                 <span className="text-[10px] font-bold font-mono text-purple-400 uppercase tracking-wider block">
-                  🔠 Phonics & Grammar Focus
+                  {isKo ? '🔠 파닉스 & 주요 문법 카테고리' : '🔠 Phonics & Grammar Focus'}
                 </span>
-                <p className="text-xs font-semibold">Scientific Term Suffixes (-synthesis, -phyll) • Present Tense Science Verbs</p>
+                <p className="text-xs font-semibold">
+                  {isKo ? '과학 전문 용어 접미사 (-synthesis, -phyll) • 과학 시제 동사' : 'Scientific Term Suffixes (-synthesis, -phyll) • Present Tense Science Verbs'}
+                </p>
               </div>
 
               {/* Category 3: Answer Key Mapping */}
               <div className={`p-3 rounded-xl border space-y-1.5 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
                 <span className="text-[10px] font-bold font-mono text-cyan-400 uppercase tracking-wider block">
-                  📖 Answer Key & Comprehension Checks
+                  {isKo ? '📖 정답 매핑 & 독해 이해도 점검' : '📖 Answer Key & Comprehension Checks'}
                 </span>
-                <p className="text-xs font-mono text-zinc-400">Q1: Sunlight energy | Q2: Oxygen release | Q3: Root absorption</p>
+                <p className="text-xs font-mono text-zinc-400">
+                  {isKo ? 'Q1: 태양 에너지 | Q2: 산소 방출 | Q3: 뿌리 수분 흡수' : 'Q1: Sunlight energy | Q2: Oxygen release | Q3: Root absorption'}
+                </p>
               </div>
 
               <div className="pt-2 flex justify-end">
@@ -229,7 +243,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                   onClick={() => setActiveStep(2)}
                   className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>Populate Teacher Dashboard →</span>
+                  <span>{isKo ? '교사 대시보드로 데이터 반영하기 →' : 'Populate Teacher Dashboard →'}</span>
                 </button>
               </div>
             </div>
@@ -246,10 +260,12 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
-                    LIVE TEACHER DASHBOARD
+                    {isKo ? '실시간 교사 대시보드' : 'LIVE TEACHER DASHBOARD'}
                   </span>
                 </div>
-                <h4 className="font-extrabold text-base sm:text-lg">Class 7A Sunshine • Bricks Reading 150</h4>
+                <h4 className="font-extrabold text-base sm:text-lg">
+                  {isKo ? '햇살반 7A • Bricks Reading 150 (교재)' : 'Class 7A Sunshine • Bricks Reading 150'}
+                </h4>
               </div>
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4].map((unit) => (
@@ -263,7 +279,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                         : isNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-300 text-zinc-700'
                     }`}
                   >
-                    Unit {unit}
+                    {isKo ? `${unit}단원` : `Unit ${unit}`}
                   </button>
                 ))}
               </div>
@@ -271,55 +287,57 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Dashboard Col 1: Auto-populated Vocabulary */}
-              <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
+              <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-[#050508] border-white/10' : 'bg-white border-zinc-200'}`}>
                 <span className="text-[10px] font-bold text-orange-400 uppercase font-mono tracking-wider block">
-                  📚 Auto-Populated Unit {selectedUnit} Vocab
+                  {isKo ? `📚 ${selectedUnit}단원 선제 탑재 어휘` : `📚 Auto-Populated Unit ${selectedUnit} Vocab`}
                 </span>
                 <ul className="text-xs space-y-1.5 font-bold">
                   <li className="flex justify-between items-center p-2 rounded bg-white/5">
                     <span>Chloroplast</span>
-                    <span className="text-[10px] text-emerald-400 font-mono">100% Pre-Seeded</span>
+                    <span className="text-[10px] text-emerald-400 font-mono">{isKo ? '100% 자동 탑재' : '100% Pre-Seeded'}</span>
                   </li>
                   <li className="flex justify-between items-center p-2 rounded bg-white/5">
                     <span>Stomata</span>
-                    <span className="text-[10px] text-emerald-400 font-mono">100% Pre-Seeded</span>
+                    <span className="text-[10px] text-emerald-400 font-mono">{isKo ? '100% 자동 탑재' : '100% Pre-Seeded'}</span>
                   </li>
                   <li className="flex justify-between items-center p-2 rounded bg-white/5">
                     <span>Glucose</span>
-                    <span className="text-[10px] text-emerald-400 font-mono">100% Pre-Seeded</span>
+                    <span className="text-[10px] text-emerald-400 font-mono">{isKo ? '100% 자동 탑재' : '100% Pre-Seeded'}</span>
                   </li>
                 </ul>
               </div>
 
               {/* Dashboard Col 2: Class Student Roster Status */}
-              <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
+              <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-[#050508] border-white/10' : 'bg-white border-zinc-200'}`}>
                 <span className="text-[10px] font-bold text-purple-400 uppercase font-mono tracking-wider block">
-                  👥 Class Roster & Sync Status
+                  {isKo ? '👥 학급 명단 & 숙제 연동 상태' : '👥 Class Roster & Sync Status'}
                 </span>
                 <ul className="text-xs space-y-1.5 font-medium">
                   <li className="flex justify-between items-center p-2 rounded bg-white/5">
-                    <span>Min-jun Kim (김민준)</span>
-                    <span className="text-[10px] font-bold text-emerald-400">Synced (100%)</span>
+                    <span>김민준 (Min-jun Kim)</span>
+                    <span className="text-[10px] font-bold text-emerald-400">{isKo ? '연동 완료 (100점)' : 'Synced (100%)'}</span>
                   </li>
                   <li className="flex justify-between items-center p-2 rounded bg-white/5">
-                    <span>Ji-hoo Lee (이지후)</span>
-                    <span className="text-[10px] font-bold text-amber-400">1 Error Flagged</span>
+                    <span>이지후 (Ji-hoo Lee)</span>
+                    <span className="text-[10px] font-bold text-amber-400">{isKo ? '오답 감지 (88점)' : '1 Error Flagged'}</span>
                   </li>
                   <li className="flex justify-between items-center p-2 rounded bg-white/5">
-                    <span>Seo-yeon Park (박서연)</span>
-                    <span className="text-[10px] font-bold text-emerald-400">Synced (95%)</span>
+                    <span>박서연 (Seo-yeon Park)</span>
+                    <span className="text-[10px] font-bold text-emerald-400">{isKo ? '연동 완료 (95점)' : 'Synced (95%)'}</span>
                   </li>
                 </ul>
               </div>
 
               {/* Dashboard Col 3: Teacher Quick Action */}
-              <div className={`p-4 rounded-xl border space-y-3 flex flex-col justify-between ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
+              <div className={`p-4 rounded-xl border space-y-3 flex flex-col justify-between ${isNight ? 'bg-[#050508] border-white/10' : 'bg-white border-zinc-200'}`}>
                 <div>
                   <span className="text-[10px] font-bold text-cyan-400 uppercase font-mono tracking-wider block mb-1">
-                    ⚡ Teacher Control
+                    {isKo ? '⚡ 교사 관리 패널' : '⚡ Teacher Control'}
                   </span>
-                  <p className="text-xs text-zinc-400">
-                    Syllabus data is auto-linked to all 12 student accounts via 6-digit class code: <strong className="text-orange-400 font-mono">7A-SEOCHO</strong>.
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    {isKo 
+                      ? '교재 데이터가 학급 6자리 코드를 통해 12명 원생 학부모 앱에 자동 동기화되었습니다:' 
+                      : 'Syllabus data is auto-linked to all 12 student accounts via 6-digit class code:'} <strong className="text-orange-400 font-mono">7A-SEOCHO</strong>
                   </p>
                 </div>
                 <button
@@ -327,7 +345,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                   onClick={() => setActiveStep(3)}
                   className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <span>View Student Mistake Radar →</span>
+                  <span>{isKo ? '학부모 앱 오답 수집 레이더 확인 →' : 'View Student Mistake Radar →'}</span>
                 </button>
               </div>
             </div>
@@ -342,9 +360,11 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
               <div>
                 <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">
-                  MOM APP HOMEWORK MISTAKE RADAR
+                  {isKo ? '학부모 앱 오답 수집 레이더' : 'MOM APP HOMEWORK MISTAKE RADAR'}
                 </span>
-                <h4 className="font-extrabold text-base sm:text-lg">Real-Time Student Homework Scans</h4>
+                <h4 className="font-extrabold text-base sm:text-lg">
+                  {isKo ? '실시간 원생 숙제 스캔 현황' : 'Real-Time Student Homework Scans'}
+                </h4>
               </div>
 
               <div className="flex items-center gap-2">
@@ -355,7 +375,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                     selectedStudent === 'jihoo' ? 'bg-amber-500 text-black border-amber-500' : 'bg-white/5 border-white/10 text-zinc-400'
                   }`}
                 >
-                  Ji-hoo Lee (Flagged Error)
+                  {isKo ? '이지후 (오답 빨간상자 감지)' : 'Ji-hoo Lee (Flagged Error)'}
                 </button>
                 <button
                   type="button"
@@ -364,7 +384,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                     selectedStudent === 'minjun' ? 'bg-emerald-500 text-black border-emerald-500' : 'bg-white/5 border-white/10 text-zinc-400'
                   }`}
                 >
-                  Min-jun Kim (100%)
+                  {isKo ? '김민준 (100점 마스터)' : 'Min-jun Kim (100%)'}
                 </button>
               </div>
             </div>
@@ -376,28 +396,28 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
               }`}>
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono font-bold text-zinc-400">
-                    Mom App Scan: {selectedStudent === 'jihoo' ? 'Ji-hoo Lee (이지후)' : 'Min-jun Kim (김민준)'}
+                    {isKo ? '학부모 앱 스캔:' : 'Mom App Scan:'} {selectedStudent === 'jihoo' ? '이지후 (Ji-hoo Lee)' : '김민준 (Min-jun Kim)'}
                   </span>
                   <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
                     selectedStudent === 'jihoo' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400'
                   }`}>
-                    {selectedStudent === 'jihoo' ? '88/100 • 2nd Rescan Pending' : '100/100 • Mastered'}
+                    {selectedStudent === 'jihoo' ? (isKo ? '88점 • 2차 재도전 대기 중' : '88/100 • 2nd Rescan Pending') : (isKo ? '100점 • 학습 완료' : '100/100 • Mastered')}
                   </span>
                 </div>
 
                 {/* Simulated Scanned Sheet */}
                 <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono space-y-3 relative">
                   <div>
-                    <p className="text-zinc-500">Unit 4: Photosynthesis Question 1</p>
-                    <p className="text-zinc-200">Q: What organelle absorbs sunlight in plant leaves?</p>
+                    <p className="text-zinc-500">{isKo ? '4단원: 광합성 1번 문제' : 'Unit 4: Photosynthesis Question 1'}</p>
+                    <p className="text-zinc-200">{isKo ? 'Q: 식물 잎에서 태양 빛을 흡수하는 소기관은?' : 'Q: What organelle absorbs sunlight in plant leaves?'}</p>
                     {selectedStudent === 'jihoo' ? (
                       <div className="mt-1 p-2 rounded border border-amber-500/50 bg-amber-500/10 text-amber-300 flex items-center justify-between">
-                        <span>Student wrote: <strong className="line-through">Cloroplast</strong> ➔ Correction: <strong>Chloroplast</strong></span>
+                        <span>{isKo ? '원생 손글씨:' : 'Student wrote:'} <strong className="line-through">Cloroplast</strong> ➔ {isKo ? '정답:' : 'Correction:'} <strong>Chloroplast</strong></span>
                         <WarningCircle size={16} className="text-amber-400 flex-shrink-0" />
                       </div>
                     ) : (
                       <div className="mt-1 p-2 rounded border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 flex items-center justify-between">
-                        <span>Student wrote: <strong>Chloroplast</strong></span>
+                        <span>{isKo ? '원생 손글씨:' : 'Student wrote:'} <strong>Chloroplast</strong></span>
                         <CheckCircle size={16} className="text-emerald-400 flex-shrink-0" />
                       </div>
                     )}
@@ -409,21 +429,23 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
               <div className="space-y-4">
                 <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
                   <span className="text-[10px] font-mono font-bold text-orange-400 uppercase tracking-wider block">
-                    💬 Synchronized Parent Coaching Tip
+                    💬 {isKo ? '학부모 동기화 칭찬 코칭 팁' : 'Synchronized Parent Coaching Tip'}
                   </span>
-                  <p className="text-xs text-zinc-300 italic">
+                  <p className="text-xs text-zinc-300 italic leading-relaxed">
                     "{selectedStudent === 'jihoo' 
-                      ? '지후가 Chloroplast의 h 철자를 살짝 놓쳤어요! 엄마가 "지후야 5초만 같이 읽어볼까?" 하고 칭찬 후 2차 재도전 올려주시면 바로 100점으로 업데이트됩니다.' 
-                      : '민준이가 Unit 4 핵심 어휘 5개를 모두 정확히 작성했습니다! 최고의 집중력입니다.'}"
+                      ? (isKo ? '지후가 Chloroplast의 h 철자를 살짝 놓쳤어요! 엄마가 "지후야 5초만 같이 읽어볼까?" 하고 칭찬 후 2차 재도전 올려주시면 바로 100점으로 업데이트됩니다.' : 'Ji-hoo missed the "h" in Chloroplast! Warmly encourage him to rescan.')
+                      : (isKo ? '민준이가 4단원 핵심 어휘 5개를 모두 정확히 작성했습니다! 최고의 집중력입니다.' : 'Min-jun spelled all Unit 4 words correctly!')}"
                   </p>
                 </div>
 
                 <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
                   <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider block">
-                    📞 Teacher 1:1 Consultation Note
+                    📞 {isKo ? '교사 1:1 상담 알림 노출' : 'Teacher 1:1 Consultation Note'}
                   </span>
-                  <p className="text-xs text-zinc-400">
-                    Auto-flagged for phone consultation prep if 2nd rescan is missed. 1-Click copy available for KakaoTalk.
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    {isKo 
+                      ? '2차 재도전이 미완료될 경우 전화 상담 리포트에 자동 반영됩니다. 카카오톡 대본으로 1클릭 복사가 가능합니다.'
+                      : 'Auto-flagged for phone consultation prep if 2nd rescan is missed. 1-Click copy available for KakaoTalk.'}
                   </p>
                 </div>
               </div>
