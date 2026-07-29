@@ -510,7 +510,7 @@ export default function Home() {
           }`}>
             <div>
               <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase rounded-full font-mono">
-                {isKo ? '학원 6자리 코드 회원' : 'SCHOOL CODE USER'}
+                {isKo ? '학원 6자리 코드 연동' : 'SCHOOL CODE USER'}
               </span>
               <h3 className="text-xl font-black text-white mt-4 mb-2">
                 {isKo ? '학원 연동 무제한 무료' : 'School Code Free Access'}
@@ -521,25 +521,29 @@ export default function Home() {
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mb-6">
                 {isKo 
-                  ? '아이가 다니는 어학원/공부방 원장님이 체키 스쿨 프로를 도입하면 학급 코드로 100% 무료 개방됩니다.'
+                  ? '아이가 다니는 어학원/공부방 원장님이 체키 스쿨 프로를 도입하면 6자리 학급 코드로 100% 무료 전면 개방됩니다.'
                   : '100% FREE if your child\'s English academy uses Chekki School Pro. Simply enter your 6-digit class code.'}
               </p>
               <ul className="space-y-3 text-xs text-zinc-300 border-t border-white/10 pt-4">
-                <li className="flex items-center gap-2">
-                  <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
-                  <span>{isKo ? '6자리 학급 코드로 10초 자동 연동' : 'Instant 6-Digit Class Code Sync'}</span>
+                <li className="flex items-center gap-2 font-bold text-emerald-400">
+                  <CheckCircle size={16} weight="fill" className="flex-shrink-0" />
+                  <span>{isKo ? '📸 프롬프트 작성 0회 • 사진 1장 즉시 채점' : '📸 No Typing Needed • Just Snap 1 Photo'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
-                  <span>{isKo ? '매일 숙제 스캔 & 10초 AI 정밀 채점' : 'Daily 10-Second AI Autograding'}</span>
+                  <span>{isKo ? '🎙️ 원어민 100% 풀 음성 지원 (정답 & 지문 읽기)' : '🎙️ Fully Voiced Answers & Native Audio'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
-                  <span>{isKo ? '엄마용 5초 한국어 칭찬 가이드' : 'Warm 5-Second Parent Coaching Tips'}</span>
+                  <span>{isKo ? '✍️ 99.9% AI 손글씨 정밀 오답 빨간상자 표시' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
-                  <span>{isKo ? '⚡ 2차 재도전 스캔으로 100점 마스터' : '⚡ 2nd Rescan Loop to 100% Mastery'}</span>
+                  <span>{isKo ? '🇰🇷 엄마용 5초 한국어 칭찬 & 답변 코칭 가이드' : '🇰🇷 5-Second Warm Korean Parent Coaching Tips'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
+                  <span>{isKo ? '⚡ 2차 재도전 스캔으로 100점 학습 마스터' : '⚡ 2nd Rescan Loop to 100% Mastery'}</span>
                 </li>
               </ul>
             </div>
@@ -569,21 +573,25 @@ export default function Home() {
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mb-6">
                 {isKo 
-                  ? '집에서 엄마표 영어를 진행하며 매일 10초 AI 채점과 한국어 칭찬 가이드가 필요한 학부모님용.'
-                  : 'Designed for parents managing homework at home needing daily 10-second AI grading & coaching.'}
+                  ? '집에서 프롬프트 입력 없이 사진 한 장으로 10초 채점과 원어민 음성 답변을 이용하는 월간 요금제.'
+                  : 'Zero prompts or typing required. Instant photo-based autograding & native voice answers.'}
               </p>
               <ul className="space-y-3 text-xs text-zinc-300 border-t border-white/10 pt-4">
-                <li className="flex items-center gap-2">
-                  <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
-                  <span>{isKo ? '모든 영어 교재 무제한 숙제 스캔' : 'Unlimited Scans Across All Textbooks'}</span>
+                <li className="flex items-center gap-2 font-bold text-orange-400">
+                  <CheckCircle size={16} weight="fill" className="flex-shrink-0" />
+                  <span>{isKo ? '📸 프롬프트 작성 0회 • 모든 교재 무제한 스캔' : '📸 No Prompts Required • Unlimited Scans'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
-                  <span>{isKo ? '10초 AI 손글씨 자동 채점 & 원어민 음성' : '10s AI Autograding & Native Audio'}</span>
+                  <span>{isKo ? '🎙️ 원어민 100% 풀 음성 (단어, 지문 & 정답)' : '🎙️ Fully Voiced Native Audio (Words & Answers)'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
-                  <span>{isKo ? '엄마용 5초 한국어 칭찬 가이드' : '5-Second Warm Korean Coaching Tips'}</span>
+                  <span>{isKo ? '✍️ 99.9% AI 손글씨 자동 채점 & 오답 박스' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
+                  <span>{isKo ? '🇰🇷 엄마용 5초 한국어 칭찬 가이드' : '🇰🇷 5-Second Warm Korean Coaching Tips'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
@@ -606,7 +614,7 @@ export default function Home() {
           <div className={`p-8 border-2 rounded-3xl flex flex-col justify-between transition-all relative scale-[1.02] ${
             isNight ? 'bg-[#0f0904] border-orange-500 shadow-2xl shadow-orange-500/20' : 'bg-orange-50 border-orange-500'
           }`}>
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-md font-mono">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-orange-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-md font-mono">
               {isKo ? '최고의 가치 • 17% 할인' : 'BEST VALUE • SAVE 17%'}
             </div>
             <div>
@@ -622,25 +630,29 @@ export default function Home() {
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mb-6">
                 {isKo 
-                  ? '1년 내내 숙제 실랑이 없이 완벽한 영어 학습 습관을 다지고 싶은 현명한 학부모님용.'
-                  : 'For parents looking to build lasting homework habits for the full school year.'}
+                  ? '1년 내내 숙제 실랑이 없이 완벽한 영어 습관을 형성하는 가장 경제적인 연간 요금제.'
+                  : 'Best value annual pass for building lasting English homework habits all year long.'}
               </p>
               <ul className="space-y-3 text-xs text-zinc-200 border-t border-white/10 pt-4">
                 <li className="flex items-center gap-2 font-bold text-orange-400">
                   <Sparkle size={16} weight="fill" className="flex-shrink-0" />
-                  <span>{isKo ? '연간 2만원 특별 할인혜택' : 'Includes Annual Discount Savings'}</span>
+                  <span>{isKo ? '📸 프롬프트 작성 0회 • 모든 교재 무제한 스캔' : '📸 Zero Typing/Prompts Needed • Unlimited Scans'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-orange-400">
+                  <Sparkle size={16} weight="fill" className="flex-shrink-0" />
+                  <span>{isKo ? '🎙️ 원어민 100% 풀 음성 지원 (정답 & 음성 드릴)' : '🎙️ Fully Voiced Native Audio & Phonics Drills'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
-                  <span>{isKo ? '모든 영어 교재 무제한 숙제 스캔' : 'Unlimited Scans Across All Textbooks'}</span>
+                  <span>{isKo ? '✍️ 99.9% AI 손글씨 정밀 오답 빨간상자 표시' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
-                  <span>{isKo ? '10초 AI 손글씨 자동 채점 & 원어민 음성' : '10s AI Autograding & Native Audio'}</span>
+                  <span>{isKo ? '🇰🇷 엄마용 5초 한국어 칭찬 가이드' : '🇰🇷 5-Second Warm Korean Parent Coaching Tips'}</span>
                 </li>
                 <li className="flex items-center gap-2 font-bold text-emerald-400">
                   <CheckCircle size={16} weight="fill" className="flex-shrink-0" />
-                  <span>{isKo ? '우선 전담 지원 & 신규 기능 선공개' : 'Priority Parent Support & Early Access'}</span>
+                  <span>{isKo ? '⚡ 2차 재도전 스캔으로 100점 마스터' : '⚡ 2nd Rescan Loop to 100% Mastery'}</span>
                 </li>
               </ul>
             </div>
