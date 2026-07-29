@@ -480,15 +480,34 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           </div>
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               const inviteText = language === 'ko'
                 ? '안녕하세요 원장님! 저희 아이 영자신문 및 숙제 검토에 Chekki AI 앱을 활용 중입니다. 어학원 연동 및 전원 ₩0원 무료 혜택(Chekki School Pro)을 확인해보세요: https://chekki.ai/schools'
                 : 'Hello Director! Our family is using Chekki AI for daily homework scans. Check out Chekki School Pro for ₩0 free student access: https://chekki.ai/schools';
-              
+
+              // 1. If mobile Web Share API is available, trigger native 1-click KakaoTalk / SMS share sheet
+              if (navigator.share) {
+                try {
+                  await navigator.share({
+                    title: language === 'ko' ? 'Chekki 어학원 원장님 초대' : 'Chekki Academy Director Invite',
+                    text: inviteText,
+                    url: 'https://chekki.ai/schools'
+                  });
+                  showToast({
+                    message: language === 'ko' ? '원장님 추천 초대장 전달 완료!' : 'Invitation shared successfully!',
+                    type: 'success'
+                  });
+                  return;
+                } catch (err) {
+                  // User cancelled share sheet; fallback to clipboard copy
+                }
+              }
+
+              // 2. Fallback: Copy to Clipboard
               if (navigator.clipboard) {
                 navigator.clipboard.writeText(inviteText);
                 showToast({
-                  message: language === 'ko' ? '원장님 추천 초대 문구가 복사되었습니다!' : 'Academy invitation link copied to clipboard!',
+                  message: language === 'ko' ? '원장님 추천 초대 문구가 복사되었습니다! 카카오톡이나 이메일에 붙여넣어 주세요.' : 'Academy invitation link copied to clipboard! Paste into KakaoTalk or Email.',
                   type: 'success'
                 });
               }
@@ -496,7 +515,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95"
           >
             <span>✨</span>
-            <span>{language === 'ko' ? '원장님 초대 문구 복사' : 'Copy Director Invite Link'}</span>
+            <span>{language === 'ko' ? '원장님 초대장 전송 / 복사' : 'Share / Copy Director Invite'}</span>
           </button>
         </div>
 
