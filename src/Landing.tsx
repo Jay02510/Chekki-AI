@@ -604,9 +604,12 @@ export default function Home() {
               onClick={() => {
                 window.location.href = '/subscribe';
               }}
-              className="w-full mt-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-black text-xs rounded-2xl border border-white/20 transition-all cursor-pointer"
+              className="w-full mt-6 py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-black text-xs rounded-2xl border border-white/20 transition-all cursor-pointer flex items-center justify-between group active:scale-95"
             >
-              {isKo ? '월간 구독 시작하기' : 'Subscribe Monthly (₩9,900)'}
+              <span>{isKo ? '월간 구독 시작하기' : 'Subscribe Monthly (₩9,900)'}</span>
+              <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
+                <ArrowRight size={14} weight="bold" />
+              </span>
             </button>
           </div>
 
@@ -661,9 +664,12 @@ export default function Home() {
               onClick={() => {
                 window.location.href = '/subscribe';
               }}
-              className="w-full mt-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl shadow-xl shadow-orange-500/30 transition-all cursor-pointer active:scale-95"
+              className="w-full mt-6 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl shadow-xl shadow-orange-500/30 transition-all cursor-pointer flex items-center justify-between group active:scale-95"
             >
-              {isKo ? '연간 패스 선택하기 (₩99,000)' : 'Subscribe Yearly (₩99,000)'}
+              <span>{isKo ? '연간 패스 선택하기 (₩99,000)' : 'Subscribe Yearly (₩99,000)'}</span>
+              <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
+                <ArrowRight size={14} weight="bold" />
+              </span>
             </button>
           </div>
         </div>
