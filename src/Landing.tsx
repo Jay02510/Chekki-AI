@@ -32,6 +32,8 @@ export default function Home() {
   const [isNight, setIsNight] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isKo, setIsKo] = useState<boolean>(true);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [copiedInvite, setCopiedInvite] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -519,8 +521,8 @@ export default function Home() {
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mb-6">
                 {isKo 
-                  ? '🎯 대상: 아이가 다니는 어학원/공부방 원장님이 체키 스쿨 프로를 도입한 경우 학급 코드로 100% 무료 전면 개방!'
-                  : '🎯 Target: 100% FREE if your child\'s English academy uses Chekki School Pro. Simply enter your 6-digit class code.'}
+                  ? '아이가 다니는 어학원/공부방 원장님이 체키 스쿨 프로를 도입하면 학급 코드로 100% 무료 개방됩니다.'
+                  : '100% FREE if your child\'s English academy uses Chekki School Pro. Simply enter your 6-digit class code.'}
               </p>
               <ul className="space-y-3 text-xs text-zinc-300 border-t border-white/10 pt-4">
                 <li className="flex items-center gap-2">
@@ -543,12 +545,10 @@ export default function Home() {
             </div>
             <button
               type="button"
-              onClick={() => {
-                window.location.href = '/app';
-              }}
-              className="w-full mt-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs rounded-2xl transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
+              onClick={() => setShowInviteModal(true)}
+              className="w-full mt-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs rounded-2xl transition-all cursor-pointer shadow-lg shadow-emerald-500/20 active:scale-95"
             >
-              {isKo ? '6자리 코드로 무료 시작' : 'Sync 6-Digit Class Code'}
+              {isKo ? '💌 원장님께 체키 추천/초대하기' : '💌 Invite School Director'}
             </button>
           </div>
 
@@ -569,8 +569,8 @@ export default function Home() {
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mb-6">
                 {isKo 
-                  ? '🎯 대상: 집에서 엄마표 영어를 진행하며 매일 10초 AI 채점과 한국어 칭찬 가이드가 필요한 학부모님'
-                  : '🎯 Target: Parents managing homework at home needing daily 10-second AI grading & coaching.'}
+                  ? '집에서 엄마표 영어를 진행하며 매일 10초 AI 채점과 한국어 칭찬 가이드가 필요한 학부모님용.'
+                  : 'Designed for parents managing homework at home needing daily 10-second AI grading & coaching.'}
               </p>
               <ul className="space-y-3 text-xs text-zinc-300 border-t border-white/10 pt-4">
                 <li className="flex items-center gap-2">
@@ -622,8 +622,8 @@ export default function Home() {
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mb-6">
                 {isKo 
-                  ? '🎯 대상: 1년 내내 숙제 실실랑이 없이 완벽한 영어 학습 습관을 다지고 싶은 현명한 학부모님'
-                  : '🎯 Target: Parents looking to build lasting homework habits for the full school year.'}
+                  ? '1년 내내 숙제 실랑이 없이 완벽한 영어 학습 습관을 다지고 싶은 현명한 학부모님용.'
+                  : 'For parents looking to build lasting homework habits for the full school year.'}
               </p>
               <ul className="space-y-3 text-xs text-zinc-200 border-t border-white/10 pt-4">
                 <li className="flex items-center gap-2 font-bold text-orange-400">
@@ -762,6 +762,84 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* INVITE DIRECTOR MODAL */}
+      {showInviteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-zinc-900 border border-emerald-500/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full text-zinc-100 shadow-2xl relative space-y-6">
+            <button
+              type="button"
+              onClick={() => setShowInviteModal(false)}
+              className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+            >
+              <X size={20} weight="bold" />
+            </button>
+
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl mx-auto border border-emerald-500/30">
+                💌
+              </div>
+              <h3 className="text-xl font-black text-white">
+                {isKo ? '원장님께 체키 스쿨 프로 추천하기' : 'Invite Your School Director'}
+              </h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                {isKo 
+                  ? '원장님이 체키 스쿨 프로를 도입하면 학원 수강생 학부모님은 100% 무료로 6자리 코드가 제공됩니다.'
+                  : 'If your academy director adopts Chekki School Pro, all parents get 100% free access via class code!'}
+              </p>
+            </div>
+
+            {/* Invite Message Box */}
+            <div className="bg-zinc-950 border border-white/10 rounded-2xl p-4 space-y-2">
+              <p className="text-[10px] font-mono font-bold uppercase text-emerald-400 tracking-wider">
+                {isKo ? '📋 추천 카카오톡 / 문자 메시지' : '📋 PREVIEW INVITATION MESSAGE'}
+              </p>
+              <p className="text-xs text-zinc-300 leading-relaxed font-sans">
+                {isKo 
+                  ? '안녕하세요 원장님! 우리 학원 교재 목차 자동 등록 및 AI 정밀 숙제 채점 시스템 "체키 스쿨 프로" 도입을 추천드려요. 학원도 편해지고 학부모 앱 6자리 무료 코드도 제공됩니다! https://chekki.app/schools'
+                  : 'Hello Director! I recommend implementing "Chekki School Pro" for textbook syllabus auto-seeding and AI autograding. Check out https://chekki.app/schools'}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const inviteMsg = isKo
+                    ? '안녕하세요 원장님! 우리 학원 교재 목차 자동 등록 및 AI 정밀 숙제 채점 시스템 "체키 스쿨 프로" 도입을 추천드려요. 학원도 편해지고 학부모 앱 6자리 무료 코드도 제공됩니다! https://chekki.app/schools'
+                    : 'Hello Director! Check out Chekki School Pro for textbook syllabus auto-seeding and AI autograding: https://chekki.app/schools';
+                  navigator.clipboard.writeText(inviteMsg);
+                  setCopiedInvite(true);
+                  setTimeout(() => setCopiedInvite(false), 2500);
+                }}
+                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs rounded-2xl shadow-lg shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+              >
+                {copiedInvite ? (
+                  <>
+                    <CheckCircle size={18} weight="fill" />
+                    <span>{isKo ? '추천 메시지가 복사되었습니다!' : 'Invitation Copied!'}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{isKo ? '✨ 1초 추천 메시지 복사하기' : '✨ Copy Invitation Text'}</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = '/schools';
+                }}
+                className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs rounded-2xl transition-all cursor-pointer text-center"
+              >
+                {isKo ? '🏫 학원용 안내 페이지 직접 둘러보기 (/schools)' : '🏫 View School Features (/schools)'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

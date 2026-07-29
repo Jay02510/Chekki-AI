@@ -863,8 +863,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
               <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '🎯 대상: 원어민/한국인 교사 모바일 평가 폼 & 카카오톡 알림톡 자동 생성을 원하는 학원' 
-                  : '🎯 Target: Academies that only need automated teacher logs & KakaoTalk report generation.'}
+                  ? '원어민/한국인 교사 모바일 평가 폼 & 카카오톡 알림톡 자동 생성을 위한 단독 플랜.' 
+                  : 'Streamlined teacher logs & KakaoTalk report generation for foreign & Korean teachers.'}
               </p>
               <ul className={`space-y-3 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
                 <li className="flex items-center gap-2">
@@ -947,8 +947,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
               <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '🎯 대상: 교재 목차 선제 탑재, 99.9% 손글씨 채점 & 학부모 앱 연동까지 완벽 통합을 원하는 학원' 
-                  : '🎯 Target: Complete academy package with textbook pre-seeding, homework autograding & parent app.'}
+                  ? '교재 목차 선제 탑재, 99.9% 손글씨 AI 채점 & 학부모 앱 연동까지 완벽하게 통합된 학원용 풀 패키지.' 
+                  : 'Complete academy package featuring textbook pre-seeding, homework autograding & parent app sync.'}
               </p>
               <ul className={`space-y-2.5 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/10 text-zinc-300' : 'border-zinc-200 text-zinc-700'}`}>
                 <li className="flex items-center gap-2">
@@ -1024,8 +1024,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
               <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '🎯 대상: 여러 직영/가맹 캠퍼스를 보유하고 맞춤 LMS/API 연동이 필요한 대형 학원 및 프랜차이즈' 
-                  : '🎯 Target: Large multi-branch campuses & franchise networks needing custom LMS & API sync.'}
+                  ? '여러 직영/가맹 캠퍼스를 보유하고 맞춤 LMS 및 원생 관리 API 연동이 필요한 대형 브랜드용.' 
+                  : 'Tailored for large multi-branch campuses & franchise networks needing custom LMS & API sync.'}
               </p>
               <ul className={`space-y-2.5 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
                 <li className="flex items-center gap-2">
