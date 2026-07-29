@@ -149,11 +149,26 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
   const [activeCategory, setActiveCategory] = useState<'all' | 'parent' | 'teacher'>('all');
   const [openFaqId, setOpenFaqId] = useState<string | null>('p1');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isKo, setIsKo] = useState(true);
+  const [isKo, setIsKo] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('chekki_lang');
+      if (saved === 'en') return false;
+      if (saved === 'ko') return true;
+    }
+    return true;
+  });
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
+
+  const handleLangToggle = () => {
+    const next = !isKo;
+    setIsKo(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('chekki_lang', next ? 'ko' : 'en');
+    }
+  };
 
   const toggleFaq = (id: string) => {
     setOpenFaqId(prev => (prev === id ? null : id));
@@ -207,7 +222,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
             {/* Language Switcher */}
             <button
               type="button"
-              onClick={() => setIsKo(!isKo)}
+              onClick={handleLangToggle}
               className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                 isNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900'
               }`}
@@ -386,22 +401,21 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
               : 'Our support team is ready to assist you with free trial setup and questions.'}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => navigateTo('/schools')}
+            <a
+              href="mailto:chekkihelp@gmail.com?subject=[Chekki%20Support]%20Customer%20Inquiry"
               className="px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.97] cursor-pointer flex items-center gap-2"
             >
-              <Lightning size={16} weight="fill" />
-              <span>{isKo ? '학원 14일 무료 체험 신청하기' : 'Request Academy Free Trial'}</span>
-            </button>
+              <span>💬</span>
+              <span>{isKo ? '고객 지원 1:1 이메일 문의' : 'Contact Customer Support'}</span>
+            </a>
             <button
               type="button"
-              onClick={() => navigateTo('/teacher')}
+              onClick={() => navigateTo('/')}
               className={`px-6 py-3.5 font-bold text-xs rounded-2xl border transition-all active:scale-[0.97] cursor-pointer ${
                 isNight ? 'bg-white/5 hover:bg-white/10 text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300'
               }`}
             >
-              {isKo ? '교사용 포털 둘러보기' : 'Explore Teacher Portal'}
+              {isKo ? '🏠 메인 랜딩으로 이동' : 'Back to Main Landing'}
             </button>
           </div>
         </div>

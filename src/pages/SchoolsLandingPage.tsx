@@ -19,6 +19,7 @@ import {
 import { NativeCurriculumPreseed } from '../components/NativeCurriculumPreseed';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
+import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 
 interface Props {
   isNight: boolean;
@@ -98,7 +99,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
   const isKo = language === 'ko';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [schoolDemoTab, setSchoolDemoTab] = useState<'syllabus' | 'director' | 'kt-review'>('syllabus');
+  const [schoolDemoTab, setSchoolDemoTab] = useState<'syllabus' | 'ft-log' | 'director'>('syllabus');
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -419,6 +420,32 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* STEP 2 */}
           <button
             type="button"
+            onClick={() => setSchoolDemoTab('ft-log')}
+            className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
+              schoolDemoTab === 'ft-log'
+                ? 'bg-orange-500/15 border-orange-500 shadow-xl shadow-orange-500/10 scale-[1.02]'
+                : isNight
+                ? 'bg-white/5 border-white/10 hover:bg-white/10'
+                : 'bg-white border-zinc-200 hover:bg-zinc-50 shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
+                schoolDemoTab === 'ft-log' ? 'bg-orange-500 text-white' : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
+              }`}>
+                STEP 02
+              </span>
+              <span className="text-xs">📱</span>
+            </div>
+            <h4 className={`font-bold text-xs sm:text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Teacher 30s Classroom Log</h4>
+            <p className={`text-[11px] leading-normal ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              {isKo ? '원어민 강사가 모바일에서 30초 만에 출석 & 수업 이슈 제출' : 'Teachers submit quick 30s mobile checkmark assessment'}
+            </p>
+          </button>
+
+          {/* STEP 3 */}
+          <button
+            type="button"
             onClick={() => setSchoolDemoTab('director')}
             className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
               schoolDemoTab === 'director'
@@ -432,7 +459,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
                 schoolDemoTab === 'director' ? 'bg-orange-500 text-white' : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
               }`}>
-                STEP 02
+                STEP 03
               </span>
               <span className="text-xs">🏢</span>
             </div>
@@ -441,39 +468,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               {isKo ? '원장님 전용 반별 원생 명단 관리, 6자리 코드 & 전화 상담 가이드' : 'Campus rosters, 6-digit class codes & flagged student radar'}
             </p>
           </button>
-
-          {/* STEP 3 */}
-          <button
-            type="button"
-            onClick={() => setSchoolDemoTab('kt-review')}
-            className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
-              schoolDemoTab === 'kt-review'
-                ? 'bg-orange-500/15 border-orange-500 shadow-xl shadow-orange-500/10 scale-[1.02]'
-                : isNight
-                ? 'bg-white/5 border-white/10 hover:bg-white/10'
-                : 'bg-white border-zinc-200 hover:bg-zinc-50 shadow-sm'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
-                schoolDemoTab === 'kt-review' ? 'bg-orange-500 text-white' : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
-              }`}>
-                STEP 03
-              </span>
-              <span className="text-xs">💬</span>
-            </div>
-            <h4 className={`font-bold text-xs sm:text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>KT Review & 1-Click Copy</h4>
-            <p className={`text-[11px] leading-normal ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-              {isKo ? '한국인 교사 알림톡 대본 검수 후 클릭 한 번으로 카카오톡 전송' : 'KT reviews AI notes and 1-click copies into KakaoTalk'}
-            </p>
-          </button>
         </div>
 
         {/* Active Step Workspace Container */}
         <div className="max-w-6xl mx-auto pt-4">
           {schoolDemoTab === 'syllabus' && <NativeCurriculumPreseed isNight={isNight} />}
+          {schoolDemoTab === 'ft-log' && <NativeTeacherLogForm isNight={isNight} onSubmitLog={() => setSchoolDemoTab('director')} isSubmitting={false} />}
           {schoolDemoTab === 'director' && <NativeDirectorPortal isNight={isNight} academyName="Apex English Academy (Seocho)" />}
-          {schoolDemoTab === 'kt-review' && <NativeKtDashboard isNight={isNight} academyName="Apex English Academy" className="Class 7A Sunshine" generatedOutput={null} />}
         </div>
       </section>
 
@@ -1371,10 +1372,10 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     </div>
                     <div>
                       <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block font-mono">
-                        {isKo ? '14일 무료 체험 신청 (신용카드 등록 X)' : '14-DAY FREE TRIAL (NO CREDIT CARD)'}
+                        {isKo ? '7일 무료 체험 신청 (신용카드 등록 X)' : '7-DAY FREE TRIAL (NO CREDIT CARD)'}
                       </span>
                       <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo ? '강사 1인 + 원생 30명 14일 무료 시작' : '1 Teacher + 30 Students 14-Day Free Trial'}
+                        {isKo ? '강사 1인 + 원생 30명 7일 무료 시작' : '1 Teacher + 30 Students 7-Day Free Trial'}
                       </h3>
                       <p className="text-xs text-orange-500 font-bold">
                         {isKo ? '학부모용 Chekki 모바일 앱 100% 무료 포함' : 'Includes 100% FREE Chekki Parent Mobile App'}
