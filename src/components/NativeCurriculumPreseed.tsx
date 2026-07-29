@@ -215,17 +215,45 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
 
               <h4 className="text-base font-black text-white">{currentUnitObj.title}</h4>
 
-              <div className="space-y-2 pt-2 border-t border-white/5">
-                <span className="text-xs font-bold text-zinc-400 block font-mono">Pre-Seeded Target Vocabulary Words:</span>
+              <div className="space-y-3 pt-2 border-t border-white/5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-zinc-400 block font-mono">Pre-Seeded Target Vocabulary Words:</span>
+                  <span className="text-[10px] font-bold text-orange-400 font-mono">✏️ Human-in-the-Loop Editable</span>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {currentUnitObj.vocab.map((w, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-bold font-mono"
+                      className="px-3 py-1.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-bold font-mono flex items-center gap-1.5"
                     >
-                      {w}
+                      <span>{w}</span>
+                      <button
+                        type="button"
+                        title="Remove word"
+                        onClick={() => {
+                          const updated = currentUnitObj.vocab.filter((_, i) => i !== idx);
+                          currentUnitObj.vocab = updated;
+                          setSelectedUnit(selectedUnit); // force trigger re-render
+                        }}
+                        className="text-orange-500/60 hover:text-orange-400 font-bold ml-1 cursor-pointer"
+                      >
+                        ×
+                      </button>
                     </span>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newWord = prompt('Enter custom vocabulary word to add:', 'Photosynthesis');
+                      if (newWord && newWord.trim()) {
+                        currentUnitObj.vocab.push(newWord.trim());
+                        setSelectedUnit(selectedUnit);
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 border border-dashed border-white/20 text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <span>+ Add Custom Word</span>
+                  </button>
                 </div>
               </div>
             </div>
