@@ -461,6 +461,45 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         className="relative z-10 px-4 md:px-12 pb-24 max-w-[1400px] mx-auto animate-fade-in-up"
         style={{ animationDelay: '200ms' }}
       >
+        {/* B2B Customer Acquisition Banner: Invite Academy Director */}
+        <div className="mb-6 p-4 md:p-5 rounded-2xl bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-purple-500/15 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center shrink-0">
+              <span className="text-xl">🏫</span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white tracking-tight">
+                {language === 'ko' ? '우리 아이 어학원에 Chekki 무료 도입 추천하기' : 'Invite Child\'s Academy for ₩0 Free Access'}
+              </h3>
+              <p className="text-xs text-zinc-400 leading-normal">
+                {language === 'ko'
+                  ? '원장님이 Chekki School Pro를 승인하면 학부모님은 ₩0원에 프리미엄 서비스를 이용하실 수 있습니다.'
+                  : 'When your director activates Chekki School Pro, parents get ₩0 free unlimited access.'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const inviteText = language === 'ko'
+                ? '안녕하세요 원장님! 저희 아이 영자신문 및 숙제 검토에 Chekki AI 앱을 활용 중입니다. 어학원 연동 및 전원 ₩0원 무료 혜택(Chekki School Pro)을 확인해보세요: https://chekki.ai/schools'
+                : 'Hello Director! Our family is using Chekki AI for daily homework scans. Check out Chekki School Pro for ₩0 free student access: https://chekki.ai/schools';
+              
+              if (navigator.clipboard) {
+                navigator.clipboard.writeText(inviteText);
+                showToast({
+                  message: language === 'ko' ? '원장님 추천 초대 문구가 복사되었습니다!' : 'Academy invitation link copied to clipboard!',
+                  type: 'success'
+                });
+              }
+            }}
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95"
+          >
+            <span>✨</span>
+            <span>{language === 'ko' ? '원장님 초대 문구 복사' : 'Copy Director Invite Link'}</span>
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
           <div
             className={`md:col-span-8 md:row-span-2 ${cardShellClasses} flex flex-col min-h-[350px] md:min-h-[450px]`}
