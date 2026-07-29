@@ -100,18 +100,30 @@ ${englishSummary}`.trim();
           </h2>
         </div>
 
-        <button
-          type="button"
-          onClick={handleCopyKakaoScript}
-          className={`px-5 py-2.5 rounded-2xl font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 ${
-            copied
-              ? 'bg-emerald-600 text-white'
-              : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
-          }`}
-        >
-          {copied ? <CheckCircle size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
-          <span>{copied ? 'Copied Edited Script! ✅' : '1-Click Copy Edited KakaoTalk'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="px-4 py-2.5 rounded-2xl font-bold text-xs bg-white/10 hover:bg-white/15 border border-white/15 text-white flex items-center justify-center gap-2 transition-all cursor-pointer"
+            title="Download/Print PDF Report with Custom Academy Logo Header"
+          >
+            <span>📄</span>
+            <span>Print Custom Logo PDF Report</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCopyKakaoScript}
+            className={`px-5 py-2.5 rounded-2xl font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 ${
+              copied
+                ? 'bg-emerald-600 text-white'
+                : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
+            }`}
+          >
+            {copied ? <CheckCircle size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
+            <span>{copied ? 'Copied Edited Script! ✅' : '1-Click Copy KakaoTalk'}</span>
+          </button>
+        </div>
       </div>
 
       {/* 3-Stage Report Status Badge Bar */}
