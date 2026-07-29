@@ -106,7 +106,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [contactName, setContactName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [currency, setCurrency] = useState<'KRW' | 'USD'>('KRW');
   const [showBankModal, setShowBankModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('school_pro');
@@ -244,7 +244,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             {/* Sun / Moon Theme Toggle */}
             <button
               type="button"
-              onClick={() => setIsNight(!isNight)}
+              onClick={() => {
+                const next = !isNight;
+                setIsNight(next);
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('chekki_theme', next ? 'dark' : 'light');
+                }
+              }}
               className={`p-2 rounded-full border transition-colors cursor-pointer ${
                 isNight 
                   ? 'border-white/10 hover:bg-white/10 text-white/70 hover:text-white' 
@@ -367,7 +373,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
       {/* --- CHEKKI SCHOOL PACKAGE 3-STEP FLOW INTERACTIVE PREVIEW --- */}
       <section id="demo" className="py-12 md:py-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
-        <NativeSchoolPackageFlow isNight={isNight} />
+        <NativeSchoolPackageFlow isNight={isNight} isKo={isKo} />
       </section>
 
       {/* --- BENTO GRID FEATURES --- */}

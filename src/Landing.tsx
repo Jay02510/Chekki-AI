@@ -20,6 +20,8 @@ import {
   Moon,
   Globe,
   Buildings,
+  CheckCircle,
+  Sparkle,
 } from '@phosphor-icons/react';
 
 export default function Home() {
@@ -480,6 +482,178 @@ export default function Home() {
               </div>
             </div>
           </a>
+        </div>
+      </section>
+
+      {/* --- B2C PARENT MOBILE APP PRICING SECTION --- */}
+      <section id="pricing" className="py-24 px-4 md:px-8 max-w-7xl mx-auto w-full relative z-10">
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+          <span className="px-3 py-1 bg-brand/10 border border-brand/30 text-brand text-xs font-mono font-black uppercase tracking-widest rounded-full inline-block">
+            {isKo ? '학부모용 모바일 구독 안내' : 'CHEKKI PARENT MOBILE APP PRICING'}
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+            {isKo ? '엄마표 영어 숙제 지도, 부담 없는 구독 플랜' : 'Simple & Flexible Parent Subscriptions'}
+          </h2>
+          <p className="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto">
+            {isKo 
+              ? 'iOS App Store & Google Play Store 구독 또는 다니는 학원의 6자리 코드로 100% 무료 이용이 가능합니다.'
+              : 'Available via iOS App Store & Google Play Store subscriptions, or 100% FREE with your school code.'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
+          {/* Tier 1: School Director Code (FREE) */}
+          <div className={`p-8 border rounded-3xl flex flex-col justify-between transition-all relative ${
+            isNight ? 'bg-white/5 border-emerald-500/30' : 'bg-white border-zinc-200'
+          }`}>
+            <div>
+              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase rounded-full font-mono">
+                {isKo ? '학원 6자리 코드 회원' : 'SCHOOL CODE USER'}
+              </span>
+              <h3 className="text-xl font-black text-white mt-4 mb-2">
+                {isKo ? '학원 연동 무제한 무료' : 'School Code Free Access'}
+              </h3>
+              <div className="mb-4">
+                <span className="text-4xl font-black text-emerald-400 font-mono">₩0</span>
+                <span className="text-xs text-zinc-400 ml-2">{isKo ? '/평생 무료' : '/Forever Free'}</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+                {isKo 
+                  ? '🎯 대상: 아이가 다니는 어학원/공부방 원장님이 체키 스쿨 프로를 도입한 경우 학급 코드로 100% 무료 전면 개방!'
+                  : '🎯 Target: 100% FREE if your child\'s English academy uses Chekki School Pro. Simply enter your 6-digit class code.'}
+              </p>
+              <ul className="space-y-3 text-xs text-zinc-300 border-t border-white/10 pt-4">
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
+                  <span>{isKo ? '6자리 학급 코드로 10초 자동 연동' : 'Instant 6-Digit Class Code Sync'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
+                  <span>{isKo ? '매일 숙제 스캔 & 10초 AI 정밀 채점' : 'Daily 10-Second AI Autograding'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
+                  <span>{isKo ? '엄마용 5초 한국어 칭찬 가이드' : 'Warm 5-Second Parent Coaching Tips'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
+                  <span>{isKo ? '⚡ 2차 재도전 스캔으로 100점 마스터' : '⚡ 2nd Rescan Loop to 100% Mastery'}</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = '/app';
+              }}
+              className="w-full mt-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs rounded-2xl transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
+            >
+              {isKo ? '6자리 코드로 무료 시작' : 'Sync 6-Digit Class Code'}
+            </button>
+          </div>
+
+          {/* Tier 2: Monthly Parent Subscription */}
+          <div className={`p-8 border rounded-3xl flex flex-col justify-between transition-all relative ${
+            isNight ? 'bg-white/5 border-white/10 hover:border-orange-500/50' : 'bg-white border-zinc-200'
+          }`}>
+            <div>
+              <span className="px-3 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[10px] font-black uppercase rounded-full font-mono">
+                {isKo ? 'App Store / Play Store 월간' : 'MONTHLY PARENT PASS'}
+              </span>
+              <h3 className="text-xl font-black text-white mt-4 mb-2">
+                {isKo ? '월간 학부모 패스' : 'Monthly Parent Pass'}
+              </h3>
+              <div className="mb-4">
+                <span className="text-4xl font-black text-white font-mono">₩9,900</span>
+                <span className="text-xs text-zinc-400 ml-2">{isKo ? '/월 (월간 정기결제)' : '/month'}</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+                {isKo 
+                  ? '🎯 대상: 집에서 엄마표 영어를 진행하며 매일 10초 AI 채점과 한국어 칭찬 가이드가 필요한 학부모님'
+                  : '🎯 Target: Parents managing homework at home needing daily 10-second AI grading & coaching.'}
+              </p>
+              <ul className="space-y-3 text-xs text-zinc-300 border-t border-white/10 pt-4">
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
+                  <span>{isKo ? '모든 영어 교재 무제한 숙제 스캔' : 'Unlimited Scans Across All Textbooks'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
+                  <span>{isKo ? '10초 AI 손글씨 자동 채점 & 원어민 음성' : '10s AI Autograding & Native Audio'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
+                  <span>{isKo ? '엄마용 5초 한국어 칭찬 가이드' : '5-Second Warm Korean Coaching Tips'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
+                  <span>{isKo ? '언제든 앱스토어에서 1클릭 해지 가능' : 'Cancel Anytime in App Store'}</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = '/subscribe';
+              }}
+              className="w-full mt-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-black text-xs rounded-2xl border border-white/20 transition-all cursor-pointer"
+            >
+              {isKo ? '월간 구독 시작하기' : 'Subscribe Monthly (₩9,900)'}
+            </button>
+          </div>
+
+          {/* Tier 3: Yearly Parent Subscription (Best Value) */}
+          <div className={`p-8 border-2 rounded-3xl flex flex-col justify-between transition-all relative scale-[1.02] ${
+            isNight ? 'bg-[#0f0904] border-orange-500 shadow-2xl shadow-orange-500/20' : 'bg-orange-50 border-orange-500'
+          }`}>
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-md font-mono">
+              {isKo ? '최고의 가치 • 17% 할인' : 'BEST VALUE • SAVE 17%'}
+            </div>
+            <div>
+              <span className="px-3 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[10px] font-black uppercase rounded-full font-mono mt-2 inline-block">
+                {isKo ? 'App Store / Play Store 연간' : 'ANNUAL PARENT PASS'}
+              </span>
+              <h3 className="text-xl font-black text-white mt-4 mb-2">
+                {isKo ? '연간 학부모 패스 (BEST)' : 'Annual Parent Pass'}
+              </h3>
+              <div className="mb-4">
+                <span className="text-4xl font-black text-orange-400 font-mono">₩99,000</span>
+                <span className="text-xs text-zinc-400 ml-2">{isKo ? '/연 (월 8,250원 꼴)' : '/year (₩8,250/mo)'}</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+                {isKo 
+                  ? '🎯 대상: 1년 내내 숙제 실실랑이 없이 완벽한 영어 학습 습관을 다지고 싶은 현명한 학부모님'
+                  : '🎯 Target: Parents looking to build lasting homework habits for the full school year.'}
+              </p>
+              <ul className="space-y-3 text-xs text-zinc-200 border-t border-white/10 pt-4">
+                <li className="flex items-center gap-2 font-bold text-orange-400">
+                  <Sparkle size={16} weight="fill" className="flex-shrink-0" />
+                  <span>{isKo ? '연간 2만원 특별 할인혜택' : 'Includes Annual Discount Savings'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
+                  <span>{isKo ? '모든 영어 교재 무제한 숙제 스캔' : 'Unlimited Scans Across All Textbooks'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
+                  <span>{isKo ? '10초 AI 손글씨 자동 채점 & 원어민 음성' : '10s AI Autograding & Native Audio'}</span>
+                </li>
+                <li className="flex items-center gap-2 font-bold text-emerald-400">
+                  <CheckCircle size={16} weight="fill" className="flex-shrink-0" />
+                  <span>{isKo ? '우선 전담 지원 & 신규 기능 선공개' : 'Priority Parent Support & Early Access'}</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = '/subscribe';
+              }}
+              className="w-full mt-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl shadow-xl shadow-orange-500/30 transition-all cursor-pointer active:scale-95"
+            >
+              {isKo ? '연간 패스 선택하기 (₩99,000)' : 'Subscribe Yearly (₩99,000)'}
+            </button>
+          </div>
         </div>
       </section>
 

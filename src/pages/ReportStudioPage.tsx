@@ -343,12 +343,19 @@ ${activeReport.parentScriptKo.closing}`.trim();
             {setIsNight && (
               <button
                 type="button"
-                onClick={() => setIsNight(!isNight)}
+                onClick={() => {
+                  const next = !isNight;
+                  setIsNight(next);
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('chekki_theme', next ? 'dark' : 'light');
+                  }
+                }}
                 className={`p-2 rounded-full border transition-colors cursor-pointer ${
                   isNight
                     ? 'border-white/10 hover:bg-white/10 text-white/70 hover:text-white'
                     : 'border-slate-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900'
                 }`}
+                title="Toggle Light / Dark Mode"
               >
                 {isNight ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
               </button>

@@ -9,9 +9,10 @@ import {
 
 interface Props {
   isNight?: boolean;
+  isKo?: boolean;
 }
 
-export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true }) => {
+export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo = true }) => {
   const [activeStep, setActiveStep] = useState<1 | 2 | 3>(1);
 
   // Step 1 State: Upload & AI Categorization
@@ -30,13 +31,15 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true }) => 
       {/* HEADER & STEP WIZARD NAVIGATION */}
       <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
         <span className="px-3 py-1 bg-orange-500/10 border border-orange-500/30 text-orange-500 text-[10px] font-mono font-black uppercase tracking-widest rounded-full inline-block">
-          CHEKKI SCHOOL PACKAGE • 3-STEP FLOW
+          {isKo ? '체키 스쿨 프로 • 3단계 워크플로우' : 'CHEKKI SCHOOL PACKAGE • 3-STEP FLOW'}
         </span>
         <h3 className={`font-display text-xl sm:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-          Textbook Seeding ➔ Teacher Dashboard ➔ Mom App Mistake Radar
+          {isKo ? '교재 목차 선제 탑재 ➔ 교사 대시보드 ➔ 학부모 앱 오답 레이더' : 'Textbook Seeding ➔ Teacher Dashboard ➔ Mom App Mistake Radar'}
         </h3>
         <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-          Click any step below to see how syllabus uploads, teacher dashboard auto-population, and mom app mistake callouts work together.
+          {isKo 
+            ? '아래 3개 단계를 클릭하여 교재 목차 탑재, 교사 대시보드 자동 채우기, 학부모 앱 오답 수집을 실시간으로 체험해보세요.' 
+            : 'Click any step below to see how syllabus uploads, teacher dashboard auto-population, and mom app mistake callouts work together.'}
         </p>
       </div>
 
@@ -60,9 +63,9 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true }) => 
             </span>
             <span className="text-sm">📸</span>
           </div>
-          <h4 className="font-bold text-xs sm:text-sm">1. Syllabus & Homework AI Scan</h4>
+          <h4 className="font-bold text-xs sm:text-sm">{isKo ? '1. 교재 목차 & 숙제 AI 스캔' : '1. Syllabus & Homework AI Scan'}</h4>
           <p className={`text-[11px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-            Teachers upload syllabus/homework; AI populates vocab & answer keys.
+            {isKo ? '교재 목차 스캔 시 AI가 타겟 어휘 & 정답지를 선제 탑재' : 'Teachers upload syllabus/homework; AI populates vocab & answer keys.'}
           </p>
         </button>
 
@@ -84,9 +87,9 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true }) => 
             </span>
             <span className="text-sm">📊</span>
           </div>
-          <h4 className="font-bold text-xs sm:text-sm">2. Teacher Dashboard Sync</h4>
+          <h4 className="font-bold text-xs sm:text-sm">{isKo ? '2. 교사 대시보드 자동 채우기' : '2. Teacher Dashboard Sync'}</h4>
           <p className={`text-[11px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-            Pre-seeded data automatically fills class rosters & active unit keys.
+            {isKo ? '선제 탑재된 어휘 데이터가 학급 대시보드에 자동 반영' : 'Pre-seeded data automatically fills class rosters & active unit keys.'}
           </p>
         </button>
 
@@ -108,9 +111,9 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true }) => 
             </span>
             <span className="text-sm">🚨</span>
           </div>
-          <h4 className="font-bold text-xs sm:text-sm">3. Mom App Mistake Sync</h4>
+          <h4 className="font-bold text-xs sm:text-sm">{isKo ? '3. 학부모 앱 오답 수집 레이더' : '3. Mom App Mistake Sync'}</h4>
           <p className={`text-[11px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-            Teachers view student homework mistakes highlighted from Mom App.
+            {isKo ? '학부모 앱에서 스캔된 오답을 선생님 레이더에서 실시간 확인' : 'Teachers view student homework mistakes highlighted from Mom App.'}
           </p>
         </button>
       </div>

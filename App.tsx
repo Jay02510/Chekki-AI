@@ -291,9 +291,10 @@ function AppContent() {
     const scheduleNextTransition = () => {
       const delay = msUntilNextTransition();
       themeTimer = setTimeout(() => {
-        // At boundary: clear any manual override and apply time-based theme
-        localStorage.removeItem('chekki_theme');
-        setIsNight(isNightTime());
+        // At boundary: only apply time-based theme if user hasn't explicitly set a preference
+        if (!localStorage.getItem('chekki_theme')) {
+          setIsNight(isNightTime());
+        }
         scheduleNextTransition(); // chain to next transition
       }, delay);
     };
