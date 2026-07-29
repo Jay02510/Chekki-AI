@@ -25,14 +25,22 @@ export const NativeAcademyOnboarding: React.FC<Props> = ({
   isNight = true
 }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [campusName, setCampusName] = useState('Apex English Academy (Seocho)');
-  const [directorEmail, setDirectorEmail] = useState('director@apex-seocho.edu');
-  const [ftEmail, setFtEmail] = useState('sarah.teacher@apex-seocho.edu');
-  const [ktEmail, setKtEmail] = useState('jiyoung.kt@apex-seocho.edu');
-  const [rawRosterText, setRawRosterText] = useState(
-    `Class 7A Sunshine, Min-jun Kim, 김민준\nClass 7A Sunshine, Seo-yeon Park, 박서연\nClass 8B Excellence, Ji-hoo Lee, 이지후`
-  );
+  const [campusName, setCampusName] = useState('');
+  const [directorEmail, setDirectorEmail] = useState('');
+  const [ftEmail, setFtEmail] = useState('');
+  const [ktEmail, setKtEmail] = useState('');
+  const [rawRosterText, setRawRosterText] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleFillSampleData = () => {
+    setCampusName('Apex English Academy (Seocho)');
+    setDirectorEmail('director@apex-seocho.edu');
+    setFtEmail('sarah.teacher@apex-seocho.edu');
+    setKtEmail('jiyoung.kt@apex-seocho.edu');
+    setRawRosterText(
+      `Class 7A Sunshine, Min-jun Kim, 김민준\nClass 7A Sunshine, Seo-yeon Park, 박서연\nClass 8B Excellence, Ji-hoo Lee, 이지후`
+    );
+  };
 
   if (!isOpen) return null;
 
@@ -123,7 +131,16 @@ export const NativeAcademyOnboarding: React.FC<Props> = ({
               />
             </div>
 
-            <div className="pt-4 flex justify-end">
+            <div className="pt-4 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={handleFillSampleData}
+                className="px-3 py-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                <span>⚡</span>
+                <span>Auto-Fill Sample Data</span>
+              </button>
+
               <button
                 type="submit"
                 className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer flex items-center gap-2"

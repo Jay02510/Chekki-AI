@@ -16,6 +16,9 @@ import {
   X,
   List
 } from '@phosphor-icons/react';
+import { NativeCurriculumPreseed } from '../components/NativeCurriculumPreseed';
+import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
+import { NativeKtDashboard } from '../components/NativeKtDashboard';
 
 interface Props {
   isNight: boolean;
@@ -95,6 +98,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
   const isKo = language === 'ko';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [schoolDemoTab, setSchoolDemoTab] = useState<'syllabus' | 'director' | 'kt-review'>('syllabus');
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -365,6 +369,111 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             className="w-full max-w-[340px] sm:max-w-[400px] md:max-w-[460px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.3)] relative z-10 hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
+        </div>
+      </section>
+
+      {/* --- INTERACTIVE GUIDED SCHOOL ONBOARDING DEMO --- */}
+      <section id="demo" className="py-12 md:py-16 px-4 md:px-8 max-w-7xl mx-auto w-full space-y-6">
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.25em] font-mono block">
+            {isKo ? '원장님·교사 전용 3단계 실시간 시뮬레이션' : '3-STEP INTERACTIVE SCHOOL WORKSPACE PREVIEW'}
+          </span>
+          <h2 className={`font-display text-2xl sm:text-4xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+            {isKo ? '어학원 커리큘럼 선제 탑재부터 원장님 대시보드까지 1클릭 체험' : 'Experience School Automation in Real Time'}
+          </h2>
+          <p className={`text-xs sm:text-sm ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+            {isKo 
+              ? '아래 3개 단계를 클릭하여 교재 목차 탑재, 원장님 총괄 대시보드, 한국인 교사 검수 워크스페이스를 실시간으로 확인해보세요.'
+              : 'Click any step below to see textbook syllabus pre-seeding, director oversight, and Korean teacher report reviews.'}
+          </p>
+        </div>
+
+        {/* 3-Step Wizard Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-5xl mx-auto font-sans">
+          {/* STEP 1 */}
+          <button
+            type="button"
+            onClick={() => setSchoolDemoTab('syllabus')}
+            className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
+              schoolDemoTab === 'syllabus'
+                ? 'bg-orange-500/15 border-orange-500 shadow-xl shadow-orange-500/10 scale-[1.02]'
+                : isNight
+                ? 'bg-white/5 border-white/10 hover:bg-white/10'
+                : 'bg-white border-zinc-200 hover:bg-zinc-50 shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
+                schoolDemoTab === 'syllabus' ? 'bg-orange-500 text-white' : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
+              }`}>
+                STEP 01
+              </span>
+              <span className="text-xs">📚</span>
+            </div>
+            <h4 className={`font-bold text-xs sm:text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Textbook Syllabus Pre-Seeding</h4>
+            <p className={`text-[11px] leading-normal ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              {isKo ? '교재 목차 사진 1장 스캔으로 타겟 어휘 & 정답지 선제 탑재' : '1-Click scan of textbook syllabus extracting target vocab & keys'}
+            </p>
+          </button>
+
+          {/* STEP 2 */}
+          <button
+            type="button"
+            onClick={() => setSchoolDemoTab('director')}
+            className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
+              schoolDemoTab === 'director'
+                ? 'bg-orange-500/15 border-orange-500 shadow-xl shadow-orange-500/10 scale-[1.02]'
+                : isNight
+                ? 'bg-white/5 border-white/10 hover:bg-white/10'
+                : 'bg-white border-zinc-200 hover:bg-zinc-50 shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
+                schoolDemoTab === 'director' ? 'bg-orange-500 text-white' : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
+              }`}>
+                STEP 02
+              </span>
+              <span className="text-xs">🏢</span>
+            </div>
+            <h4 className={`font-bold text-xs sm:text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Director Admin Overview</h4>
+            <p className={`text-[11px] leading-normal ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              {isKo ? '원장님 전용 반별 원생 명단 관리, 6자리 코드 & 전화 상담 가이드' : 'Campus rosters, 6-digit class codes & flagged student radar'}
+            </p>
+          </button>
+
+          {/* STEP 3 */}
+          <button
+            type="button"
+            onClick={() => setSchoolDemoTab('kt-review')}
+            className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
+              schoolDemoTab === 'kt-review'
+                ? 'bg-orange-500/15 border-orange-500 shadow-xl shadow-orange-500/10 scale-[1.02]'
+                : isNight
+                ? 'bg-white/5 border-white/10 hover:bg-white/10'
+                : 'bg-white border-zinc-200 hover:bg-zinc-50 shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
+                schoolDemoTab === 'kt-review' ? 'bg-orange-500 text-white' : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
+              }`}>
+                STEP 03
+              </span>
+              <span className="text-xs">💬</span>
+            </div>
+            <h4 className={`font-bold text-xs sm:text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>KT Review & 1-Click Copy</h4>
+            <p className={`text-[11px] leading-normal ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              {isKo ? '한국인 교사 알림톡 대본 검수 후 클릭 한 번으로 카카오톡 전송' : 'KT reviews AI notes and 1-click copies into KakaoTalk'}
+            </p>
+          </button>
+        </div>
+
+        {/* Active Step Workspace Container */}
+        <div className="max-w-6xl mx-auto pt-4">
+          {schoolDemoTab === 'syllabus' && <NativeCurriculumPreseed isNight={isNight} />}
+          {schoolDemoTab === 'director' && <NativeDirectorPortal isNight={isNight} academyName="Apex English Academy (Seocho)" />}
+          {schoolDemoTab === 'kt-review' && <NativeKtDashboard isNight={isNight} academyName="Apex English Academy" className="Class 7A Sunshine" generatedOutput={null} />}
         </div>
       </section>
 

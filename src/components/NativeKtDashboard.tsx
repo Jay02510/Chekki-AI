@@ -6,7 +6,7 @@ import { getPermissionsForUser } from '../utils/permissions';
 
 interface Props {
   isNight?: boolean;
-  generatedOutput: GeneratedReportOutput | null;
+  generatedOutput?: GeneratedReportOutput | null;
   className?: string;
   academyName?: string;
   userProfile?: UserProfile | null;
