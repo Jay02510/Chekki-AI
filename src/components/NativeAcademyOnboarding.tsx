@@ -25,10 +25,10 @@ export const NativeAcademyOnboarding: React.FC<Props> = ({
   isNight = true
 }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [campusName, setCampusName] = useState('POLY Academy (Seocho)');
-  const [directorEmail, setDirectorEmail] = useState('director@poly-seocho.edu');
-  const [ftEmail, setFtEmail] = useState('sarah.teacher@poly-seocho.edu');
-  const [ktEmail, setKtEmail] = useState('jiyoung.kt@poly-seocho.edu');
+  const [campusName, setCampusName] = useState('Apex English Academy (Seocho)');
+  const [directorEmail, setDirectorEmail] = useState('director@apex-seocho.edu');
+  const [ftEmail, setFtEmail] = useState('sarah.teacher@apex-seocho.edu');
+  const [ktEmail, setKtEmail] = useState('jiyoung.kt@apex-seocho.edu');
   const [rawRosterText, setRawRosterText] = useState(
     `Class 7A Sunshine, Min-jun Kim, 김민준\nClass 7A Sunshine, Seo-yeon Park, 박서연\nClass 8B Excellence, Ji-hoo Lee, 이지후`
   );
@@ -52,62 +52,57 @@ export const NativeAcademyOnboarding: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
       <div
-        className={`w-full max-w-2xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col space-y-6 p-6 sm:p-8 relative ${
-          isNight ? 'bg-[#0a0a0f] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+        className={`relative p-6 sm:p-8 rounded-3xl border shadow-2xl w-full max-w-xl animate-fade-in text-left ${
+          isNight ? 'bg-[#0a0a0e] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
         }`}
       >
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-full border border-white/10 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-        >
-          <X size={18} />
-        </button>
-
-        {/* Wizard Header & Progress Bar */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 font-mono">
-              1-CLICK CAMPUS ONBOARDING WIZARD
-            </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
-              Step {currentStep} of 3
-            </span>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-lg border border-orange-500/30">
+              🏫
+            </div>
+            <div>
+              <h3 className="font-black text-lg sm:text-xl">Chekki School Pro Onboarding</h3>
+              <p className="text-xs text-zinc-400">Set up your campus workspace in under 60 seconds.</p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
 
-          <h3 className="text-xl sm:text-2xl font-black tracking-tight">
-            {currentStep === 1 && '🏫 Step 1: Campus Branding & Director Info'}
-            {currentStep === 2 && '👥 Step 2: Staff Emails & Class Rosters'}
-            {currentStep === 3 && '🚀 Step 3: Workspace Live & Teacher Logins Active!'}
-          </h3>
-
-          {/* Step Progress Dots */}
-          <div className="flex items-center gap-2">
-            {[1, 2, 3].map((step) => (
-              <div
-                key={step}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  currentStep >= step ? 'w-1/3 bg-orange-500' : 'w-1/3 bg-white/10'
-                }`}
-              />
-            ))}
+        {/* Step Wizard Progress Pills */}
+        <div className="grid grid-cols-3 gap-2 mb-6 font-mono text-[10px] font-bold">
+          <div className={`p-2 rounded-xl border text-center ${currentStep === 1 ? 'bg-orange-500/20 border-orange-500 text-orange-400' : 'bg-white/5 border-white/10 text-zinc-500'}`}>
+            1. CAMPUS INFO
+          </div>
+          <div className={`p-2 rounded-xl border text-center ${currentStep === 2 ? 'bg-orange-500/20 border-orange-500 text-orange-400' : 'bg-white/5 border-white/10 text-zinc-500'}`}>
+            2. STAFF & ROSTER
+          </div>
+          <div className={`p-2 rounded-xl border text-center ${currentStep === 3 ? 'bg-orange-500/20 border-orange-500 text-orange-400' : 'bg-white/5 border-white/10 text-zinc-500'}`}>
+            3. CLASS CODE
           </div>
         </div>
 
-        {/* Step 1: Branding Info */}
+        {/* Step 1: Campus Setup */}
         {currentStep === 1 && (
           <form onSubmit={handleNext} className="space-y-4 text-xs font-medium">
             <div className="space-y-1">
-              <label className="block text-zinc-400 font-mono">Official Campus / Academy Name *</label>
+              <label className="block text-zinc-400 font-mono">Academy Campus Name *</label>
               <input
                 type="text"
                 required
                 value={campusName}
                 onChange={(e) => setCampusName(e.target.value)}
-                placeholder="e.g. POLY Academy (Seocho) / 청담어학원 분당"
+                placeholder="e.g. Apex English Academy (Seocho) / Chekki Language Institute"
                 className={`w-full p-3.5 rounded-xl border font-bold ${
                   isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                 }`}
@@ -121,7 +116,7 @@ export const NativeAcademyOnboarding: React.FC<Props> = ({
                 required
                 value={directorEmail}
                 onChange={(e) => setDirectorEmail(e.target.value)}
-                placeholder="e.g. director@poly.edu"
+                placeholder="e.g. director@apex-seocho.edu"
                 className={`w-full p-3.5 rounded-xl border font-bold ${
                   isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                 }`}
@@ -150,7 +145,7 @@ export const NativeAcademyOnboarding: React.FC<Props> = ({
                   type="email"
                   value={ftEmail}
                   onChange={(e) => setFtEmail(e.target.value)}
-                  placeholder="sarah.teacher@poly.edu"
+                  placeholder="sarah.teacher@apex-seocho.edu"
                   className={`w-full p-3 rounded-xl border font-bold ${
                     isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                   }`}
@@ -163,7 +158,7 @@ export const NativeAcademyOnboarding: React.FC<Props> = ({
                   type="email"
                   value={ktEmail}
                   onChange={(e) => setKtEmail(e.target.value)}
-                  placeholder="jiyoung.kt@poly.edu"
+                  placeholder="jiyoung.kt@apex-seocho.edu"
                   className={`w-full p-3 rounded-xl border font-bold ${
                     isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                   }`}

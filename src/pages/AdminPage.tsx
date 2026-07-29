@@ -908,7 +908,7 @@ export default function AdminPage() {
                           <input
                             type="text"
                             required
-                            placeholder="e.g. POLY10"
+                            placeholder="e.g. APEX10"
                             value={schoolIdInput}
                             onChange={(e) => setSchoolIdInput(e.target.value)}
                             className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-bold uppercase tracking-wider"
@@ -921,7 +921,7 @@ export default function AdminPage() {
                           <input
                             type="text"
                             required
-                            placeholder="e.g. POLY Seocho"
+                            placeholder="e.g. Apex Seocho"
                             value={schoolNameInput}
                             onChange={(e) => setSchoolNameInput(e.target.value)}
                             className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium"
@@ -934,7 +934,7 @@ export default function AdminPage() {
                           <input
                             type="text"
                             required
-                            placeholder="e.g. POLY10-TEACHER"
+                            placeholder="e.g. APEX10-TEACHER"
                             value={schoolTeacherCodeInput}
                             onChange={(e) => setSchoolTeacherCodeInput(e.target.value)}
                             className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-bold uppercase tracking-wider"

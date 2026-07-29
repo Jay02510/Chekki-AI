@@ -1247,7 +1247,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                       type="text"
                       value={teacherCode}
                       onChange={(e) => setTeacherCode(e.target.value)}
-                      placeholder="E.g. POLY10-TEACHER"
+                      placeholder="E.g. APEX10-TEACHER"
                       className="w-full bg-[#050505] border border-orange-500/30 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white uppercase font-mono tracking-wider placeholder:text-zinc-600"
                     />
                     <p className="text-[10px] text-zinc-500 pl-1 leading-normal">
@@ -1328,7 +1328,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   required
                   value={teacherCode}
                   onChange={(e) => setTeacherCode(e.target.value)}
-                  placeholder="E.g. POLY10-TEACHER"
+                  placeholder="E.g. APEX10-TEACHER"
                   className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white uppercase tracking-wider font-mono placeholder:text-zinc-600"
                 />
               </div>

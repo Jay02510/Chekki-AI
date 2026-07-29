@@ -47,7 +47,7 @@ interface Props {
 
 export const NativeDirectorPortal: React.FC<Props> = ({
   isNight = true,
-  academyName = 'POLY Academy (Seocho)'
+  academyName = 'Apex English Academy (Seocho)'
 }) => {
   const [activeTab, setActiveTab] = useState<'roster' | 'exceptions' | 'teachers'>('roster');
 
@@ -101,21 +101,21 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       id: 't-1',
       name: 'Sarah Miller',
       role: 'foreign_teacher',
-      email: 'sarah.miller@poly.edu',
+      email: 'sarah.miller@apex.edu',
       assignedClasses: ['7A Sunshine', '7B Star']
     },
     {
       id: 't-2',
       name: 'Mark Davis',
       role: 'foreign_teacher',
-      email: 'mark.davis@poly.edu',
+      email: 'mark.davis@apex.edu',
       assignedClasses: ['8B Excellence']
     },
     {
       id: 't-3',
       name: 'Ji-young Kang (강지영)',
       role: 'korean_teacher',
-      email: 'jiyoung.kang@poly.edu',
+      email: 'jiyoung.kang@apex.edu',
       assignedClasses: ['7A Sunshine', '8B Excellence']
     }
   ]);

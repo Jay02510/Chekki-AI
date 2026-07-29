@@ -103,7 +103,7 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
   };
   const [selectedReportId, setSelectedReportId] = useState<string>(SAMPLE_REPORTS[0].id);
   const [customInput, setCustomInput] = useState<string>(SAMPLE_REPORTS[0].rawInput);
-  const [customAcademyName, setCustomAcademyName] = useState<string>('POLY Academy (Seocho)');
+  const [customAcademyName, setCustomAcademyName] = useState<string>('Apex English Academy (Seocho)');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -607,7 +607,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
             <NativeKtDashboard
               isNight={isNight}
               generatedOutput={nativeOutput}
-              className="POLY Seocho 7A"
+              className="Apex Seocho 7A"
               academyName={customAcademyName}
             />
           )}

@@ -456,7 +456,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                     {activeTab === 'korean' ? '"우리 아이 맞춤 복습 프린트를 매번 찾아헤매시나요?"' : '"Searching endlessly for extra practice worksheets for weak phonics?"'}
                   </h4>
                   <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    {activeTab === 'korean' ? 'Poly, GATE, PSA 등 주요 어학원 숙제 오답 연동' : 'EK & Elementary curriculum templates (Poly, GATE, PSA ready).'}
+                    {activeTab === 'korean' ? '주요 영어 어학원 및 영유 커리큘럼 오답 완벽 연동' : 'EK & Elementary curriculum templates (Pre-K to Grade 6 ready).'}
                   </p>
                 </div>
 
@@ -469,7 +469,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                   <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {activeTab === 'korean'
                       ? '아이의 오답 패턴을 기반으로 즉시 인쇄 가능한 맞춤형 PDF 파닉스 학습지를 자동 생성합니다.'
-                      : 'Instantly export clean Poly, GATE, PSA ready phonics & mistake review worksheets for home practice.'}
+                      : 'Instantly export clean, academy-ready phonics & mistake review worksheets for home practice.'}
                   </p>
                 </div>
               </div>

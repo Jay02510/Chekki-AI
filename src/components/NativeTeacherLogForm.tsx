@@ -18,7 +18,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   userProfile,
 }) => {
   const permissions = getPermissionsForUser(userProfile);
-  const [className, setClassName] = useState('POLY Seocho 7A');
+  const [className, setClassName] = useState('Apex Seocho 7A');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [lessonTopic, setLessonTopic] = useState('Unit 4: Photosynthesis & Plant Growth');
   const [textbook, setTextbook] = useState('Bricks Reading 150 (Book 1)');
@@ -140,9 +140,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
               }`}
             >
-              <option value="POLY Seocho 7A">POLY Seocho 7A (Kindergarten 7yo)</option>
-              <option value="POLY Seocho 6B">POLY Seocho 6B (Kindergarten 6yo)</option>
-              <option value="POLY Seocho 5C">POLY Seocho 5C (Kindergarten 5yo)</option>
+              <option value="Apex Seocho 7A">Apex Seocho 7A (Kindergarten 7yo)</option>
+              <option value="Apex Seocho 6B">Apex Seocho 6B (Kindergarten 6yo)</option>
+              <option value="Apex Seocho 5C">Apex Seocho 5C (Kindergarten 5yo)</option>
             </select>
           </div>
 

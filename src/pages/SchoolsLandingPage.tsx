@@ -1283,7 +1283,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         required
                         value={academyName}
                         onChange={(e) => setAcademyName(e.target.value)}
-                        placeholder={isKo ? '예: 대치 POLY / 영어유치원 서초점' : 'E.g. POLY Seocho / Chekki English Academy'}
+                        placeholder={isKo ? '예: 대치 럭스 어학원 / 영어유치원 서초점' : 'E.g. Apex Seocho / Chekki English Academy'}
                         className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
                           isNight 
                             ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
