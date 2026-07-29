@@ -87,7 +87,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                       ? 'bg-orange-500/20 text-orange-300 border-orange-500/30 group-hover:bg-orange-500/40' 
                       : 'bg-orange-100 text-orange-700 border-orange-200 group-hover:bg-orange-200'
                   }`}>
-                    Hover Solution
+                    {activeTab === 'korean' ? '해결 솔루션 보기' : 'Hover Solution'}
                   </span>
                 </div>
 
@@ -95,7 +95,9 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                 <div className="grid grid-cols-1 grid-rows-1 my-2 relative z-10">
                   {/* Default Question / Problem */}
                   <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
-                    <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block mb-1">Mom's Painpoint</span>
+                    <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block mb-1">
+                      {activeTab === 'korean' ? '엄마의 매일 밤 고민' : "Mom's Painpoint"}
+                    </span>
                     <h3 className={`text-sm sm:text-base md:text-lg font-bold leading-snug ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                       {activeTab === 'korean' 
                         ? '"8시만 되면 영어 숙제 때문에 아이와 매일 싸우시나요?"' 
@@ -105,13 +107,15 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
 
                   {/* Hover Reveal Solution */}
                   <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-                    <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                    <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">
+                      {activeTab === 'korean' ? '체키의 따뜻한 솔루션' : 'Chekki Solution'}
+                    </span>
                     <h3 className={`text-sm sm:text-base font-bold mb-1 leading-snug ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                      {activeTab === 'korean' ? '10초 AI 채점 & 엄마의 칭찬 가이드' : 'Instant AI Grading & Praise Guide'}
+                      {activeTab === 'korean' ? '10초 오답 채점 & 엄마의 5초 칭찬 가이드' : 'Instant AI Grading & Praise Guide'}
                     </h3>
                     <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                       {activeTab === 'korean'
-                        ? '채점의 압박은 채키가 덜어주고, 엄마는 악역 대신 따뜻한 칭찬에만 집중할 수 있습니다.'
+                        ? '채점의 스트레스는 체키가 맡고, 엄마는 악역 대신 따뜻한 칭찬에만 집중하세요.'
                         : 'Chekki handles grading pressure so parents don\'t have to be the bad cop. Focus 100% on praise.'}
                     </p>
                   </div>
@@ -121,9 +125,9 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               <div className={`pt-3 border-t flex items-center justify-between text-xs font-mono mt-4 relative z-10 ${
                 isNight ? 'border-white/5 text-zinc-500' : 'border-zinc-100 text-zinc-400'
               }`}>
-                <span>Core Philosophy</span>
+                <span>{activeTab === 'korean' ? '체키 핵심 가치' : 'Core Philosophy'}</span>
                 <span className="px-2.5 py-1 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-300 font-bold text-xs flex items-center gap-1 shadow-md">
-                  Peace at Home <ArrowRight size={12} weight="bold" />
+                  {activeTab === 'korean' ? '숙제 평화' : 'Peace at Home'} <ArrowRight size={12} weight="bold" />
                 </span>
               </div>
             </div>
@@ -148,7 +152,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                     : 'bg-emerald-100 text-emerald-700 border-emerald-200'
                 }`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Hover Solution
+                  {activeTab === 'korean' ? '해결 솔루션 보기' : 'Hover Solution'}
                 </span>
               </div>
 
@@ -156,31 +160,35 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               <div className="grid grid-cols-1 grid-rows-1 my-2 relative z-10">
                 {/* Default Question / Problem */}
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
-                  <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block mb-1">Mom's Painpoint</span>
+                  <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block mb-1">
+                    {activeTab === 'korean' ? '엄마의 매일 밤 고민' : "Mom's Painpoint"}
+                  </span>
                   <h3 className={`text-sm sm:text-base font-bold leading-snug ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {activeTab === 'korean'
-                      ? '"영유/대형학원 정답지 맞대어 채점하느라 매일 1시간씩 쓰시나요?"'
+                      ? '"영유/대형학원 두꺼운 정답지 찾느라 매일 1시간씩 쓰시나요?"'
                       : '"Dread spent 1+ hours checking complex academy answer keys?"'}
                   </h3>
                 </div>
 
                 {/* Hover Reveal Solution */}
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">
+                    {activeTab === 'korean' ? '체키의 따뜻한 솔루션' : 'Chekki Solution'}
+                  </span>
                   <h3 className={`text-sm sm:text-base font-bold mb-1 leading-snug ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                    {activeTab === 'korean' ? '10초 스캔 & 학원 교재 정답 100% 연동' : '10-Sec Snap & Answer Key Sync'}
+                    {activeTab === 'korean' ? '사진 1장이면 끝! 손글씨 위 오답 빨간상자 표시' : '10-Sec Snap & Answer Key Sync'}
                   </h3>
                   <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {activeTab === 'korean'
-                      ? '숙제 사진 한 장이면 끝. 학원 교재 정답지와 99.9% 정밀 연동되어 10초 만에 완벽 채점됩니다.'
-                      : 'Snap a photo of the homework. Chekki scores handwriting with 99.9% precision against academy keys.'}
+                      ? '숙제 사진 1장이면 삐뚤빼뚤 손글씨 위 오답을 빨간상자로 정확하게 10초 만에 표시합니다.'
+                      : 'Snap 1 photo of homework. Chekki highlights handwriting errors with 99.9% precision.'}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 3. 10-Sec Snap & Save Time Action Card for Moms */}
+          {/* 3. NO TYPING / NO PROMPTS NEEDED CARD (Replacing 10-Sec Snap Grade) */}
           <div className={`rounded-[2.25rem] p-1.5 backdrop-blur-xl group transition-all duration-500 ${
             isNight 
               ? 'bg-gradient-to-b from-orange-600/30 to-purple-900/30 border border-orange-500/30 shadow-2xl' 
@@ -190,24 +198,25 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               isNight ? 'bg-[#0A0710]' : 'bg-white'
             }`}>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-500">
-                  <Lightning size={20} weight="fill" />
+                <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 shrink-0">
+                  <Sparkle size={22} weight="fill" />
                 </div>
                 <div>
-                  <h4 className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {activeTab === 'korean' ? '10초 완벽 채점' : '10-Sec Snap Grade'}
+                  <h4 className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {activeTab === 'korean' ? '타이핑·질문 작성 0번!' : 'Zero Typing or Prompts'}
                   </h4>
-                  <p className={`text-[11px] ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                    {activeTab === 'korean' ? '매일 저녁 1시간 절약' : 'Saves 1 hr every night'}
+                  <p className={`text-[11px] ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                    {activeTab === 'korean' ? '어려운 프롬프트 없이 사진 1장이면 완료' : 'No complex AI prompts required'}
                   </p>
                 </div>
               </div>
               <button 
                 type="button" 
-                className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                onClick={() => window.location.href = '#pricing'}
+                className="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
               >
                 <Camera weight="fill" size={14} />
-                {activeTab === 'korean' ? '스캔하기' : 'Scan Page'}
+                {activeTab === 'korean' ? '무료 체험' : 'Try Free'}
               </button>
             </div>
           </div>
@@ -230,19 +239,19 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
             
             {/* Top Hub Header */}
             <div className="relative z-20 flex justify-between items-start">
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border ${
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${
                 isNight 
                   ? 'bg-orange-500/15 border-orange-500/30 text-orange-400' 
                   : 'bg-orange-100 border-orange-200 text-orange-700'
               }`}>
                 <Pulse className="text-orange-500 animate-pulse" size={16} />
-                <span>Chekki Core Engine</span>
+                <span>{activeTab === 'korean' ? '체키 엄마표 AI 엔진' : 'Chekki Parent AI Engine'}</span>
               </div>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setActiveTab('korean')}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     activeTab === 'korean' 
                       ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' 
                       : isNight ? 'bg-white/5 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-600 hover:text-zinc-900'
@@ -253,7 +262,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                 <button
                   type="button"
                   onClick={() => setActiveTab('english')}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     activeTab === 'english' 
                       ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' 
                       : isNight ? 'bg-white/5 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-600 hover:text-zinc-900'
@@ -283,17 +292,17 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               </div>
 
               {/* Title & Subtitle inside Hub */}
-              <h3 className={`text-2xl md:text-3xl font-extrabold mt-4 mb-2 tracking-tight ${
+              <h3 className={`text-2xl md:text-3xl font-black mt-4 mb-2 tracking-tight ${
                 isNight ? 'text-white' : 'text-zinc-900'
               }`}>
-                {activeTab === 'korean' ? '채점은 채키가, 칭찬은 엄마가' : 'Grading by Chekki, Praise by Mom'}
+                {activeTab === 'korean' ? '채점은 체키가, 칭찬은 엄마가' : 'Grading by Chekki, Praise by Mom'}
               </h3>
-              <p className={`text-sm max-w-sm leading-relaxed ${
+              <p className={`text-sm max-w-md leading-relaxed ${
                 isNight ? 'text-zinc-400' : 'text-zinc-600'
               }`}>
                 {activeTab === 'korean' 
-                  ? '복잡한 영어 유치원 숙제도 AI가 10초 만에 완벽히 채점하고, 엄마를 위한 따뜻한 칭찬 가이드를 제공합니다.'
-                  : 'Instant handwriting OCR & smart scoring frees parents to focus purely on encouragement and bonding.'}
+                  ? '사진 한 장이면 손글씨 오답 채점, 원어민 진짜 발음 듣기, 엄마용 5초 한국어 칭찬 가이드까지 한 번에 해결됩니다.'
+                  : 'Snap 1 photo to get red-box autograding, native English voice answers, and warm 5-second Korean coaching tips for moms.'}
               </p>
             </div>
 
@@ -306,12 +315,16 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                   ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]' 
                   : 'bg-zinc-50 border-zinc-200/60 hover:bg-orange-50/50'
               }`}>
-                <div className="w-8 h-8 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-500">
+                <div className="w-8 h-8 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-500 shrink-0">
                   <BookOpen size={18} weight="fill" />
                 </div>
                 <div>
-                  <h4 className={`text-xs font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>Mom's Script</h4>
-                  <p className={`text-[10px] ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>Warm Korean guidance</p>
+                  <h4 className={`text-xs font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {activeTab === 'korean' ? '엄마용 5초 칭찬 가이드' : "Mom's Praise Guide"}
+                  </h4>
+                  <p className={`text-[10px] ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    {activeTab === 'korean' ? '따뜻한 한국어 코칭 답변' : 'Warm Korean coaching script'}
+                  </p>
                 </div>
               </div>
 
@@ -320,12 +333,16 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                   ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]' 
                   : 'bg-zinc-50 border-zinc-200/60 hover:bg-indigo-50/50'
               }`}>
-                <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-500">
+                <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-500 shrink-0">
                   <SpeakerHigh size={18} weight="fill" />
                 </div>
                 <div>
-                  <h4 className={`text-xs font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>Phonics Audio Coach</h4>
-                  <p className={`text-[10px] ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>Native TTS & speech check</p>
+                  <h4 className={`text-xs font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {activeTab === 'korean' ? '원어민 100% 음성 듣기' : 'Native English Voice'}
+                  </h4>
+                  <p className={`text-[10px] ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    {activeTab === 'korean' ? '정확한 원어민 발음 재생' : 'Real native English speech'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -348,11 +365,13 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               isNight ? 'bg-[#050505] group-hover:bg-[#0F0814]' : 'bg-white group-hover:bg-orange-50/40'
             }`}>
               <div className="flex items-center justify-between mb-2 relative z-10">
-                <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block">Mom's Painpoint</span>
+                <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block">
+                  {activeTab === 'korean' ? '엄마의 매일 밤 고민' : "Mom's Painpoint"}
+                </span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                   isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-700'
                 }`}>
-                  Hover Solution
+                  {activeTab === 'korean' ? '해결 솔루션 보기' : 'Hover Solution'}
                 </span>
               </div>
 
@@ -362,20 +381,22 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
                   <h3 className={`text-xs md:text-sm font-bold leading-snug ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {activeTab === 'korean'
-                      ? '"부정확한 엄마 발음으로 파닉스를 가르치기 부담스러우신가요?"'
+                      ? '"엄마인 내가 영어를 못해서 아이 발음이나 정답 지도하기 불안하신가요?"'
                       : '"Fear your own English accent will ruin your child\'s phonics?"'}
                   </h3>
                 </div>
 
                 {/* Hover Solution */}
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">
+                    {activeTab === 'korean' ? '체키의 따뜻한 솔루션' : 'Chekki Solution'}
+                  </span>
                   <h3 className={`text-xs sm:text-sm font-bold mb-1 leading-snug ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                    {activeTab === 'korean' ? '원어민 TTS & 1초 엄마 칭찬 가이드' : 'Native TTS & Instant Mom Script'}
+                    {activeTab === 'korean' ? '원어민 100% 생생한 발음 & 엄마용 5초 한국어 가이드' : 'Native English Voice & Instant Mom Script'}
                   </h3>
                   <p className={`text-[11px] leading-snug ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {activeTab === 'korean'
-                      ? '생생한 원어민 음성으로 들려주고, 채키가 제시해 주는 칭찬 문장을 아이에게 읽어주세요.'
+                      ? '생생한 원어민 음성으로 정답과 단어를 들려주고, 체키가 알려주는 한국어 칭찬 문장만 아이에게 읽어주세요.'
                       : 'Play crisp native audio for any word while reading Chekki\'s warm Korean praise script.'}
                   </p>
                 </div>
@@ -399,7 +420,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
                   isNight ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-100 text-emerald-700'
                 }`}>
-                  Hover Solution
+                  {activeTab === 'korean' ? '해결 솔루션 보기' : 'Hover Solution'}
                 </span>
               </div>
 
@@ -407,7 +428,9 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               <div className="grid grid-cols-1 grid-rows-1 my-2 relative z-10">
                 {/* Default Problem */}
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
-                  <span className="text-[10px] font-extrabold text-amber-500 uppercase tracking-widest block mb-1">Mom's Painpoint</span>
+                  <span className="text-[10px] font-extrabold text-amber-500 uppercase tracking-widest block mb-1">
+                    {activeTab === 'korean' ? '엄마의 매일 밤 고민' : "Mom's Painpoint"}
+                  </span>
                   <h3 className={`text-sm sm:text-base font-bold leading-snug ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {activeTab === 'korean' 
                       ? '"틀린 문제 다시 풀라고 하면 아이가 울고 떼쓰나요?"' 
@@ -417,13 +440,15 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
 
                 {/* Hover Solution */}
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">
+                    {activeTab === 'korean' ? '체키의 따뜻한 솔루션' : 'Chekki Solution'}
+                  </span>
                   <h3 className={`text-sm sm:text-base font-bold mb-1 leading-snug ${isNight ? 'text-emerald-300' : 'text-emerald-700'}`}>
-                    {activeTab === 'korean' ? '⚡ 2차 재도전 완벽 마스터' : '⚡ 2nd Rescan & Mastery'}
+                    {activeTab === 'korean' ? '⚡ 2차 재도전 스캔으로 100점 마스터' : '⚡ 2nd Rescan & Mastery'}
                   </h3>
                   <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {activeTab === 'korean'
-                      ? '엄마의 5초 꿀팁 가이드 후 아이가 직접 고쳐 써서 재스캔하면, 눈물 없이 100점 마스터 성공!'
+                      ? '엄마의 5초 코칭 가이드 후 아이가 직접 고쳐 써서 재스캔하면, 눈물 없이 100점 마스터 성공!'
                       : 'Mom shares a 5-sec coaching tip, child fixes the paper, rescans, and achieves 100% Mastery without tears.'}
                   </p>
                 </div>
@@ -445,30 +470,34 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                 {/* Default View */}
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block">Mom's Painpoint</span>
+                    <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block">
+                      {activeTab === 'korean' ? '엄마의 매일 밤 고민' : "Mom's Painpoint"}
+                    </span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                       isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-700'
                     }`}>
-                      Hover Solution
+                      {activeTab === 'korean' ? '해결 솔루션 보기' : 'Hover Solution'}
                     </span>
                   </div>
                   <h4 className={`text-xs sm:text-sm font-bold mb-1 leading-snug ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {activeTab === 'korean' ? '"우리 아이 맞춤 복습 프린트를 매번 찾아헤매시나요?"' : '"Searching endlessly for extra practice worksheets for weak phonics?"'}
+                    {activeTab === 'korean' ? '"우리 아이 틀린 어휘 맞춤 복습 프린트를 찾아 헤매시나요?"' : '"Searching endlessly for extra practice worksheets for weak phonics?"'}
                   </h4>
                   <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    {activeTab === 'korean' ? '주요 영어 어학원 및 영유 커리큘럼 오답 완벽 연동' : 'EK & Elementary curriculum templates (Pre-K to Grade 6 ready).'}
+                    {activeTab === 'korean' ? '학원 교재 어휘 & 오답 100% 자동 연동' : 'Academy curriculum & error sync.'}
                   </p>
                 </div>
 
                 {/* Hover Solution */}
                 <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">
+                    {activeTab === 'korean' ? '체키의 따뜻한 솔루션' : 'Chekki Solution'}
+                  </span>
                   <h3 className={`text-xs sm:text-sm font-bold mb-1 leading-snug ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
                     {activeTab === 'korean' ? '1클릭 맞춤형 PDF 학습지 출력' : '1-Click Custom PDF Printable Worksheets'}
                   </h3>
                   <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {activeTab === 'korean'
-                      ? '아이의 오답 패턴을 기반으로 즉시 인쇄 가능한 맞춤형 PDF 파닉스 학습지를 자동 생성합니다.'
+                      ? '아이의 오답 패턴을 기반으로 즉시 인쇄 가능한 맞춤형 PDF 학습지를 자동 생성합니다.'
                       : 'Instantly export clean, academy-ready phonics & mistake review worksheets for home practice.'}
                   </p>
                 </div>
@@ -485,7 +514,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                 <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
                   isNight ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-amber-100 text-amber-700 border-amber-200'
                 }`}>
-                  Phonics TTS
+                  {activeTab === 'korean' ? '원어민 100% 음성' : 'Native Audio'}
                 </span>
                 <span className={`px-3 py-1 rounded-lg text-[11px] font-mono flex items-center gap-1 border ${
                   isNight ? 'bg-white/5 text-zinc-300 border-white/10' : 'bg-zinc-100 text-zinc-700 border-zinc-200'
@@ -495,7 +524,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                 <span className={`px-3 py-1 rounded-lg text-[11px] font-mono flex items-center gap-1 border ${
                   isNight ? 'bg-white/5 text-zinc-300 border-white/10' : 'bg-zinc-100 text-zinc-700 border-zinc-200'
                 }`}>
-                  <ImageIcon size={12} className="text-blue-500" /> Print Ready
+                  <ImageIcon size={12} className="text-blue-500" /> {activeTab === 'korean' ? '1클릭 출력' : 'Print Ready'}
                 </span>
               </div>
             </div>
