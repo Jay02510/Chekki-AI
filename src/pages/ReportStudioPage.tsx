@@ -595,9 +595,9 @@ ${activeReport.parentScriptKo.closing}`.trim();
                     </span>
                     <span className="text-xs">🏢</span>
                   </div>
-                  <h4 className="font-bold text-xs sm:text-sm text-white">KT Review & 1-Click Copy</h4>
+                  <h4 className="font-bold text-xs sm:text-sm text-white">Director Admin Overview</h4>
                   <p className="text-[11px] text-zinc-400 leading-normal">
-                    {isKo ? '한국인 교사 검수 후 클릭 한 번으로 카카오톡 복사 발송' : 'KT reviews draft and 1-click copies into KakaoTalk'}
+                    {isKo ? '원장님 전용 반별 인원 관리, 교사 배정 & 학생 이슈 총괄' : 'Campus oversight, rosters & flagged student exception tracking'}
                   </p>
                 </button>
               </div>
@@ -609,7 +609,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                   <span className="text-zinc-300 font-bold">
                     {nativeDemoTab === 'ft-form' && (isKo ? '🎯 1단계: 원어민 모바일 작성 체험' : '🎯 Step 1: Submit sample 30s Foreign Teacher log below')}
                     {nativeDemoTab === 'kt-dashboard' && (isKo ? '⚡ 2단계: AI 알림톡 대본 검수 & 복사' : '⚡ Step 2: Review generated KakaoTalk script & 1-click copy')}
-                    {nativeDemoTab === 'director-portal' && (isKo ? '🏢 3단계: 원장님 대시보드 관리' : '🏢 Step 3: View Director Admin Oversight & Student Roster')}
+                    {nativeDemoTab === 'director-portal' && (isKo ? '🏢 3단계: 원장님 대시보드 총괄 관리 (Director Admin Overview)' : '🏢 Step 3: View Director Admin Overview & Student Rosters')}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
