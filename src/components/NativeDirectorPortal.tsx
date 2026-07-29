@@ -238,6 +238,18 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         </div>
       </div>
 
+      {/* Privacy Reassurance Banner */}
+      <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center justify-between text-emerald-400 font-mono">
+        <div className="flex items-center gap-2">
+          <span>🛡️</span>
+          <span className="font-bold">100% Student PII Protection (개인정보보호법 준수)</span>
+          <span className="hidden md:inline text-zinc-400">• Zero-Roster Exposure: Parents must enter their child's exact name. Student lists are never exposed to public view.</span>
+        </div>
+        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-[10px] font-black border border-emerald-500/30 shrink-0">
+          ENCRYPTED ISOLATION
+        </span>
+      </div>
+
       {/* ========================================================================= */}
       {/* TAB 1: CLASS ROSTERS & STUDENT MANAGEMENT */}
       {/* ========================================================================= */}
