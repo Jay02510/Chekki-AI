@@ -336,14 +336,14 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               href="#demo"
               className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
             >
-              <span>{isKo ? '14일 무료 원장님 체험 시작하기' : 'Start 14-Day Free Academy Trial'}</span>
+              <span>{isKo ? '7일 무료 원장님 체험 시작하기' : 'Start 7-Day Free Academy Trial'}</span>
               <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
             </a>
             <a
-              href="/teacher"
+              href="/reports"
               onClick={(e) => {
                 e.preventDefault();
-                window.location.href = '/teacher';
+                window.location.href = '/reports';
               }}
               className={`w-full sm:w-auto px-8 py-4 font-black text-sm rounded-3xl border transition-all active:scale-[0.97] text-center ${
                 isNight 
@@ -351,7 +351,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   : 'bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-900 shadow-sm'
               }`}
             >
-              {isKo ? '교사 전용 대시보드 둘러보기' : 'Try Live Teacher Portal'}
+              {isKo ? '리포트 스튜디오 체험' : 'Try Report Studio'}
             </a>
           </div>
         </div>

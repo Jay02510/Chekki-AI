@@ -529,22 +529,24 @@ ${activeReport.parentScriptKo.closing}`.trim();
                   onClick={() => setNativeDemoTab('ft-form')}
                   className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
                     nativeDemoTab === 'ft-form'
-                      ? 'bg-orange-500/15 border-orange-500 text-white shadow-xl shadow-orange-500/10 scale-[1.02]'
+                      ? 'bg-orange-500/15 border-orange-500 shadow-xl shadow-orange-500/10 scale-[1.02]'
                       : isNight
-                      ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-                      : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                      ? 'bg-white/5 border-white/10 hover:bg-white/10'
+                      : 'bg-white border-zinc-200 hover:bg-zinc-50 shadow-sm'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
-                      nativeDemoTab === 'ft-form' ? 'bg-orange-500 text-white' : 'bg-white/10 text-zinc-400'
+                      nativeDemoTab === 'ft-form' 
+                        ? 'bg-orange-500 text-white' 
+                        : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
                     }`}>
                       STEP 01
                     </span>
                     <span className="text-xs">📱</span>
                   </div>
-                  <h4 className="font-bold text-xs sm:text-sm text-white">Foreign Teacher 30s Log</h4>
-                  <p className="text-[11px] text-zinc-400 leading-normal">
+                  <h4 className={`font-bold text-xs sm:text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Foreign Teacher 30s Log</h4>
+                  <p className={`text-[11px] leading-normal ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                     {isKo ? '원어민 강사가 모바일에서 30초 만에 출석 및 이슈 제출' : 'FT submits quick 30s mobile checkmark log'}
                   </p>
                 </button>
@@ -555,22 +557,24 @@ ${activeReport.parentScriptKo.closing}`.trim();
                   onClick={() => setNativeDemoTab('kt-dashboard')}
                   className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
                     nativeDemoTab === 'kt-dashboard'
-                      ? 'bg-orange-500/15 border-orange-500 text-white shadow-xl shadow-orange-500/10 scale-[1.02]'
+                      ? 'bg-orange-500/15 border-orange-500 shadow-xl shadow-orange-500/10 scale-[1.02]'
                       : isNight
-                      ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-                      : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                      ? 'bg-white/5 border-white/10 hover:bg-white/10'
+                      : 'bg-white border-zinc-200 hover:bg-zinc-50 shadow-sm'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
-                      nativeDemoTab === 'kt-dashboard' ? 'bg-orange-500 text-white' : 'bg-white/10 text-zinc-400'
+                      nativeDemoTab === 'kt-dashboard' 
+                        ? 'bg-orange-500 text-white' 
+                        : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
                     }`}>
                       STEP 02
                     </span>
                     <span className="text-xs">⚡</span>
                   </div>
-                  <h4 className="font-bold text-xs sm:text-sm text-white">Bilingual KakaoTalk Generator</h4>
-                  <p className="text-[11px] text-zinc-400 leading-normal">
+                  <h4 className={`font-bold text-xs sm:text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Bilingual KakaoTalk Generator</h4>
+                  <p className={`text-[11px] leading-normal ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                     {isKo ? 'AI가 원어민 메모를 정갈한 존댓말 알림톡으로 1초 변환' : 'AI turns notes into polite Korean honorific script'}
                   </p>
                 </button>
@@ -581,32 +585,36 @@ ${activeReport.parentScriptKo.closing}`.trim();
                   onClick={() => setNativeDemoTab('director-portal')}
                   className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
                     nativeDemoTab === 'director-portal'
-                      ? 'bg-orange-500/15 border-orange-500 text-white shadow-xl shadow-orange-500/10 scale-[1.02]'
+                      ? 'bg-orange-500/15 border-orange-500 shadow-xl shadow-orange-500/10 scale-[1.02]'
                       : isNight
-                      ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-                      : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                      ? 'bg-white/5 border-white/10 hover:bg-white/10'
+                      : 'bg-white border-zinc-200 hover:bg-zinc-50 shadow-sm'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
-                      nativeDemoTab === 'director-portal' ? 'bg-orange-500 text-white' : 'bg-white/10 text-zinc-400'
+                      nativeDemoTab === 'director-portal' 
+                        ? 'bg-orange-500 text-white' 
+                        : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
                     }`}>
                       STEP 03
                     </span>
                     <span className="text-xs">🏢</span>
                   </div>
-                  <h4 className="font-bold text-xs sm:text-sm text-white">Director Admin Overview</h4>
-                  <p className="text-[11px] text-zinc-400 leading-normal">
+                  <h4 className={`font-bold text-xs sm:text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Director Admin Overview</h4>
+                  <p className={`text-[11px] leading-normal ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                     {isKo ? '원장님 전용 반별 인원 관리, 교사 배정 & 학생 이슈 총괄' : 'Campus oversight, rosters & flagged student exception tracking'}
                   </p>
                 </button>
               </div>
 
               {/* Guided Onboarding Controls Bar */}
-              <div className="p-3.5 rounded-2xl border bg-white/[0.02] border-white/10 flex items-center justify-between text-xs font-mono">
+              <div className={`p-3.5 rounded-2xl border flex items-center justify-between text-xs font-mono ${
+                isNight ? 'bg-white/[0.02] border-white/10' : 'bg-zinc-100 border-zinc-200'
+              }`}>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                  <span className="text-zinc-300 font-bold">
+                  <span className={`font-bold ${isNight ? 'text-zinc-300' : 'text-zinc-800'}`}>
                     {nativeDemoTab === 'ft-form' && (isKo ? '🎯 1단계: 원어민 모바일 작성 체험' : '🎯 Step 1: Submit sample 30s Foreign Teacher log below')}
                     {nativeDemoTab === 'kt-dashboard' && (isKo ? '⚡ 2단계: AI 알림톡 대본 검수 & 복사' : '⚡ Step 2: Review generated KakaoTalk script & 1-click copy')}
                     {nativeDemoTab === 'director-portal' && (isKo ? '🏢 3단계: 원장님 대시보드 총괄 관리 (Director Admin Overview)' : '🏢 Step 3: View Director Admin Overview & Student Rosters')}
@@ -958,300 +966,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
           </div>
         </section>
 
-        {/* ========================================================================= */}
-        {/* 6. REAL PRODUCTION SYSTEM ARCHITECTURE & HIGH-END SCREENSHOT SHOWCASE */}
-        {/* ========================================================================= */}
-        <section className="space-y-8 pt-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
-            <div className="space-y-2">
-              <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block font-mono">
-                REAL PRODUCTION ARCHITECTURE & UI SHOWCASE
-              </span>
-              <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight">
-                {t.howItWorks.heading}
-              </h2>
-              <p className={`text-xs sm:text-sm ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {t.howItWorks.subheading}
-              </p>
-            </div>
 
-            {/* Display Mode Switcher */}
-            <div className="flex items-center gap-2 shrink-0 self-start md:self-auto">
-              <button
-                type="button"
-                onClick={() => setGalleryDisplayMode('carousel')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
-                  galleryDisplayMode === 'carousel'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-md'
-                    : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
-                }`}
-              >
-                <Slideshow size={16} weight="bold" />
-                <span>{isKo ? '🎠 슬라이드쇼 뷰' : 'Carousel View'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setGalleryDisplayMode('grid')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
-                  galleryDisplayMode === 'grid'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-md'
-                    : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
-                }`}
-              >
-                <SquaresFour size={16} weight="bold" />
-                <span>{isKo ? '📱 그리드 뷰' : 'Grid View'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Interactive Native Data Pipeline Visualizer */}
-          <NativeArchitecturePipeline isNight={isNight} />
-
-          {galleryDisplayMode === 'carousel' ? (
-            /* =================================================================== */
-            /* MODE A: HIGH-END INTERACTIVE CAROUSEL SHOWCASE */
-            /* =================================================================== */
-            <div className="space-y-6">
-              {/* Step Navigation Ribbon */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                {SYSTEM_SCREENSHOTS.map((shot, idx) => (
-                  <button
-                    key={shot.id}
-                    type="button"
-                    onClick={() => setActiveCarouselIdx(idx)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer border flex items-center gap-2 ${
-                      activeCarouselIdx === idx
-                        ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-md scale-[1.02]'
-                        : isNight
-                        ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                        : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900'
-                    }`}
-                  >
-                    <span className="w-5 h-5 rounded-full bg-orange-500/30 text-orange-400 text-[10px] font-mono flex items-center justify-center font-black">
-                      {idx + 1}
-                    </span>
-                    <span>{isKo ? shot.titleKo : shot.titleEn}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Main Showcase Hero Window (Browser Mockup Frame) */}
-              <div
-                className={`rounded-3xl border overflow-hidden shadow-2xl relative transition-all ${
-                  isNight
-                    ? 'bg-[#050507] border-white/15 shadow-orange-500/10'
-                    : 'bg-white border-zinc-300 shadow-xl'
-                }`}
-              >
-                {/* Browser Frame Header */}
-                <div className={`px-4 py-3 border-b flex items-center justify-between font-mono text-xs ${
-                  isNight ? 'bg-black/60 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-600'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1.5">
-                      <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-                      <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
-                      <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
-                    </div>
-                    <span className="text-[11px] opacity-70 ml-2 font-mono hidden sm:inline">
-                      chekki.ai/production/architecture#{SYSTEM_SCREENSHOTS[activeCarouselIdx].id}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setAutoPlayCarousel(!autoPlayCarousel)}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors flex items-center gap-1 cursor-pointer ${
-                        autoPlayCarousel
-                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-                          : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      {autoPlayCarousel ? <Pause size={12} weight="bold" /> : <Play size={12} weight="bold" />}
-                      <span>{autoPlayCarousel ? (isKo ? '자동 슬라이드 중' : 'Auto ON') : (isKo ? '자동 재생' : 'Auto Play')}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setLightboxIdx(activeCarouselIdx)}
-                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-orange-500 hover:bg-orange-600 text-white transition-colors flex items-center gap-1 cursor-pointer"
-                    >
-                      <MagnifyingGlassPlus size={14} weight="bold" />
-                      <span>{isKo ? '크게보기' : 'Inspect HD'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Main Screenshot Container */}
-                <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full bg-black/90 group overflow-hidden">
-                  <img
-                    src={SYSTEM_SCREENSHOTS[activeCarouselIdx].url}
-                    alt={SYSTEM_SCREENSHOTS[activeCarouselIdx].titleEn}
-                    className="w-full h-full object-contain transition-opacity duration-300"
-                  />
-
-                  {/* Left Carousel Arrow */}
-                  <button
-                    type="button"
-                    onClick={() => setActiveCarouselIdx((prev) => (prev - 1 + SYSTEM_SCREENSHOTS.length) % SYSTEM_SCREENSHOTS.length)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/70 border border-white/20 text-white backdrop-blur-md hover:bg-orange-500 transition-all cursor-pointer shadow-lg active:scale-90"
-                    title={isKo ? '이전 이미지 (←)' : 'Previous Image'}
-                  >
-                    <CaretLeft size={20} weight="bold" />
-                  </button>
-
-                  {/* Right Carousel Arrow */}
-                  <button
-                    type="button"
-                    onClick={() => setActiveCarouselIdx((prev) => (prev + 1) % SYSTEM_SCREENSHOTS.length)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/70 border border-white/20 text-white backdrop-blur-md hover:bg-orange-500 transition-all cursor-pointer shadow-lg active:scale-90"
-                    title={isKo ? '다음 이미지 (→)' : 'Next Image'}
-                  >
-                    <CaretRight size={20} weight="bold" />
-                  </button>
-
-                  {/* Caption Bar Overlay inside Container */}
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/80 to-transparent p-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
-                    <div className="space-y-1 max-w-2xl">
-                      <div className="flex items-center gap-2 font-mono">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-orange-500 text-white">
-                          STEP {activeCarouselIdx + 1} / {SYSTEM_SCREENSHOTS.length}
-                        </span>
-                        <span className="text-[11px] text-orange-400 font-bold uppercase tracking-wider">
-                          {isKo ? SYSTEM_SCREENSHOTS[activeCarouselIdx].subtitleKo : SYSTEM_SCREENSHOTS[activeCarouselIdx].subtitleEn}
-                        </span>
-                      </div>
-
-                      <h3 className="font-black text-xl sm:text-2xl text-white">
-                        {isKo ? SYSTEM_SCREENSHOTS[activeCarouselIdx].titleKo : SYSTEM_SCREENSHOTS[activeCarouselIdx].titleEn}
-                      </h3>
-
-                      <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-                        {isKo ? SYSTEM_SCREENSHOTS[activeCarouselIdx].descKo : SYSTEM_SCREENSHOTS[activeCarouselIdx].descEn}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setLightboxIdx(activeCarouselIdx)}
-                      className="px-5 py-2.5 rounded-xl font-bold text-xs bg-white text-zinc-900 hover:bg-orange-500 hover:text-white transition-all shadow-xl shrink-0 cursor-pointer flex items-center gap-1.5"
-                    >
-                      <MagnifyingGlassPlus size={16} weight="bold" />
-                      <span>{isKo ? '전체화면 감상' : 'Full Screen'}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Thumbnail Strip */}
-              <div className="grid grid-cols-4 sm:grid-cols-7 gap-3 pt-2">
-                {SYSTEM_SCREENSHOTS.map((shot, idx) => (
-                  <button
-                    key={shot.id}
-                    type="button"
-                    onClick={() => setActiveCarouselIdx(idx)}
-                    className={`relative rounded-xl overflow-hidden aspect-video border transition-all cursor-pointer group ${
-                      activeCarouselIdx === idx
-                        ? 'border-orange-500 ring-2 ring-orange-500/50 scale-105 shadow-lg'
-                        : 'border-white/10 opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img
-                      src={shot.url}
-                      alt={shot.titleEn}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] font-black text-white font-mono">
-                      {idx + 1}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            /* =================================================================== */
-            /* MODE B: BENTO GRID VIEW WITH CATEGORY FILTERS */
-            /* =================================================================== */
-            <div className="space-y-6">
-              {/* Category Filters */}
-              <div className="flex flex-wrap justify-center items-center gap-2">
-                {[
-                  { id: 'all', label: isKo ? '전체 보기 (7)' : 'All Systems (7)' },
-                  { id: 'form', label: isKo ? '1. FT Fillout 양식' : '1. FT Fillout Form' },
-                  { id: 'automation', label: isKo ? '2. Make.com 워크플로우' : '2. Make.com Engine' },
-                  { id: 'database', label: isKo ? '3. Airtable 관계형 DB' : '3. Airtable Backend' },
-                  { id: 'dashboard', label: isKo ? '4. Softr 학부모 포털' : '4. Softr Parent Portal' },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setSelectedArchCategory(tab.id as any)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                      selectedArchCategory === tab.id
-                        ? 'bg-orange-500 border-orange-500 text-white shadow-md'
-                        : isNight
-                        ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                        : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Grid of Production Screenshots */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {SYSTEM_SCREENSHOTS.filter(s => selectedArchCategory === 'all' || s.category === selectedArchCategory).map((shot) => {
-                  const globalIdx = SYSTEM_SCREENSHOTS.findIndex(s => s.id === shot.id);
-                  return (
-                    <div
-                      key={shot.id}
-                      onClick={() => setLightboxIdx(globalIdx)}
-                      className={`group rounded-3xl border overflow-hidden transition-all duration-300 cursor-pointer hover:scale-[1.02] shadow-xl ${
-                        isNight ? 'bg-[#060608] border-white/10 hover:border-orange-500/50' : 'bg-white border-zinc-200 hover:border-orange-500'
-                      }`}
-                    >
-                      <div className="relative aspect-video overflow-hidden bg-black/40">
-                        <img
-                          src={shot.url}
-                          alt={shot.titleEn}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
-                        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono text-orange-400 font-bold border border-white/10 flex items-center gap-1">
-                          <MagnifyingGlassPlus size={12} weight="bold" />
-                          <span>{isKo ? '확대보기' : 'Inspect UI'}</span>
-                        </div>
-                      </div>
-
-                      <div className="p-5 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-500">
-                            {isKo ? shot.subtitleKo : shot.subtitleEn}
-                          </span>
-                          <span className="text-[10px] text-zinc-500 font-mono">Real Production</span>
-                        </div>
-
-                        <h3 className={`font-black text-base ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                          {isKo ? shot.titleKo : shot.titleEn}
-                        </h3>
-
-                        <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                          {isKo ? shot.descKo : shot.descEn}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </section>
 
         {/* ========================================================================= */}
         {/* 7. EMBEDDED ACADEMY ONBOARDING FORM (#onboarding-form) */}

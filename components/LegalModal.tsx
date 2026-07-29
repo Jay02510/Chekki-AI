@@ -479,8 +479,13 @@ export const LegalModal: React.FC<Props> = ({
           className={`${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-50 border-zinc-200'} p-6 border-t flex justify-end`}
         >
           <button
-            onClick={onClose}
-            className={`${isNight ? 'bg-white text-black hover:bg-zinc-200' : 'bg-zinc-900 text-white hover:bg-black shadow-lg shadow-zinc-900/20'} px-10 py-3 rounded-xl font-black transition-colors text-xs active:scale-[0.97] uppercase tracking-widest`}
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.history.length > 1) {
+                window.history.back();
+              }
+              onClose();
+            }}
+            className={`${isNight ? 'bg-white text-black hover:bg-zinc-200' : 'bg-zinc-900 text-white hover:bg-black shadow-lg shadow-zinc-900/20'} px-10 py-3 rounded-xl font-black transition-colors text-xs active:scale-[0.97] uppercase tracking-widest cursor-pointer`}
           >
             Confirm
           </button>

@@ -151,7 +151,7 @@ const translations = {
 
     // Hero
     hero_badge: 'Magic Scan ✨',
-    hero_title: 'Instant Answer Key\nRight on the Paper.',
+    hero_title: 'End the Homework War.\nInstant AI Answer Keys.',
     hero_title_night: "Snap your child's worksheet — Chekki checks it in Korean.",
     hero_desc:
       "The homework war is over. Get instant answer overlays and 'Teaching Scripts' so you can teach with confidence and love. No more guessing.",
@@ -515,7 +515,7 @@ const translations = {
 
     // Hero
     hero_badge: '마법 스캔 ✨',
-    hero_title: '잃어버린 답지 찾지 말고,\n사진 한 장만 찍으세요',
+    hero_title: '영어 숙제 전쟁은 끝,\n아이와 함께하는 따뜻한 시간.',
     hero_title_night: '영어 숙제, 채키가 확인해드려요',
     hero_desc:
       "영유 숙제, 정답 찾느라 헤매지 마세요. 마법처럼 종이 위에 나타나는 정답과 '티칭 스크립트'로 다정하게 지도하세요.",

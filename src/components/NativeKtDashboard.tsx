@@ -282,9 +282,13 @@ ${englishSummary}`.trim();
               {activeDrawerStudent.talkingPoints.map((pt, i) => (
                 <div
                   key={i}
-                  className="p-3.5 rounded-xl border bg-amber-500/10 border-amber-500/20 text-amber-200 leading-relaxed font-bold flex items-start gap-2"
+                  className={`p-3.5 rounded-xl border leading-relaxed font-bold flex items-start gap-2 ${
+                    isNight
+                      ? 'bg-amber-500/10 border-amber-500/20 text-amber-200'
+                      : 'bg-amber-50 border-amber-300 text-amber-950 shadow-sm'
+                  }`}
                 >
-                  <span className="text-amber-400 font-black">▶</span>
+                  <span className={isNight ? 'text-amber-400 font-black' : 'text-amber-700 font-black'}>▶</span>
                   <span>{pt}</span>
                 </div>
               ))}
