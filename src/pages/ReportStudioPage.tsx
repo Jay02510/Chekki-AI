@@ -520,77 +520,120 @@ ${activeReport.parentScriptKo.closing}`.trim();
               {demoT.subheading}
             </p>
 
-            {/* Native Workspace Tab Switcher */}
-            <div className="flex flex-wrap justify-center items-center gap-3 pt-4">
-              <button
-                type="button"
-                onClick={() => setNativeDemoTab('ft-form')}
-                className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
-                  nativeDemoTab === 'ft-form'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-xl shadow-orange-500/20 scale-[1.02]'
-                    : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
-                }`}
-              >
-                <span>📱 1. Foreign Teacher Log Form (&lt;30s)</span>
-              </button>
+            {/* Guided Step-by-Step Interactive Onboarding Stepper Bar */}
+            <div className="space-y-4 max-w-4xl mx-auto pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-sans">
+                {/* STEP 1 */}
+                <button
+                  type="button"
+                  onClick={() => setNativeDemoTab('ft-form')}
+                  className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
+                    nativeDemoTab === 'ft-form'
+                      ? 'bg-orange-500/15 border-orange-500 text-white shadow-xl shadow-orange-500/10 scale-[1.02]'
+                      : isNight
+                      ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
+                      : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
+                      nativeDemoTab === 'ft-form' ? 'bg-orange-500 text-white' : 'bg-white/10 text-zinc-400'
+                    }`}>
+                      STEP 01
+                    </span>
+                    <span className="text-xs">📱</span>
+                  </div>
+                  <h4 className="font-bold text-xs sm:text-sm text-white">Foreign Teacher 30s Log</h4>
+                  <p className="text-[11px] text-zinc-400 leading-normal">
+                    {isKo ? '원어민 강사가 모바일에서 30초 만에 출석 및 이슈 제출' : 'FT submits quick 30s mobile checkmark log'}
+                  </p>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => setNativeDemoTab('kt-dashboard')}
-                className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
-                  nativeDemoTab === 'kt-dashboard'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-xl shadow-orange-500/20 scale-[1.02]'
-                    : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
-                }`}
-              >
-                <span>💬 2. Director & Korean Teacher Review Dashboard</span>
-              </button>
+                {/* STEP 2 */}
+                <button
+                  type="button"
+                  onClick={() => setNativeDemoTab('kt-dashboard')}
+                  className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
+                    nativeDemoTab === 'kt-dashboard'
+                      ? 'bg-orange-500/15 border-orange-500 text-white shadow-xl shadow-orange-500/10 scale-[1.02]'
+                      : isNight
+                      ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
+                      : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
+                      nativeDemoTab === 'kt-dashboard' ? 'bg-orange-500 text-white' : 'bg-white/10 text-zinc-400'
+                    }`}>
+                      STEP 02
+                    </span>
+                    <span className="text-xs">⚡</span>
+                  </div>
+                  <h4 className="font-bold text-xs sm:text-sm text-white">Bilingual KakaoTalk Generator</h4>
+                  <p className="text-[11px] text-zinc-400 leading-normal">
+                    {isKo ? 'AI가 원어민 메모를 정갈한 존댓말 알림톡으로 1초 변환' : 'AI turns notes into polite Korean honorific script'}
+                  </p>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => setNativeDemoTab('director-portal')}
-                className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
-                  nativeDemoTab === 'director-portal'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-xl shadow-orange-500/20 scale-[1.02]'
-                    : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
-                }`}
-              >
-                <span>🏢 3. Director Admin Portal (Roster & Spotlights)</span>
-              </button>
+                {/* STEP 3 */}
+                <button
+                  type="button"
+                  onClick={() => setNativeDemoTab('director-portal')}
+                  className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-2 ${
+                    nativeDemoTab === 'director-portal'
+                      ? 'bg-orange-500/15 border-orange-500 text-white shadow-xl shadow-orange-500/10 scale-[1.02]'
+                      : isNight
+                      ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
+                      : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
+                      nativeDemoTab === 'director-portal' ? 'bg-orange-500 text-white' : 'bg-white/10 text-zinc-400'
+                    }`}>
+                      STEP 03
+                    </span>
+                    <span className="text-xs">🏢</span>
+                  </div>
+                  <h4 className="font-bold text-xs sm:text-sm text-white">KT Review & 1-Click Copy</h4>
+                  <p className="text-[11px] text-zinc-400 leading-normal">
+                    {isKo ? '한국인 교사 검수 후 클릭 한 번으로 카카오톡 복사 발송' : 'KT reviews draft and 1-click copies into KakaoTalk'}
+                  </p>
+                </button>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => setNativeDemoTab('curriculum-preseed')}
-                className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
-                  nativeDemoTab === 'curriculum-preseed'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-xl shadow-orange-500/20 scale-[1.02]'
-                    : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
-                }`}
-              >
-                <span>📚 4. Textbook Vocabulary Auto-Sync (School Pro)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setNativeDemoTab('preset-generator')}
-                className={`px-5 py-3 rounded-2xl text-xs font-black transition-all duration-200 cursor-pointer border flex items-center gap-2 ${
-                  nativeDemoTab === 'preset-generator'
-                    ? 'bg-orange-500 border-orange-500 text-white shadow-xl shadow-orange-500/20 scale-[1.02]'
-                    : isNight
-                    ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-                    : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-sm'
-                }`}
-              >
-                <span>🏫 5. Live Example Walkthrough</span>
-              </button>
+              {/* Guided Onboarding Controls Bar */}
+              <div className="p-3.5 rounded-2xl border bg-white/[0.02] border-white/10 flex items-center justify-between text-xs font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                  <span className="text-zinc-300 font-bold">
+                    {nativeDemoTab === 'ft-form' && (isKo ? '🎯 1단계: 원어민 모바일 작성 체험' : '🎯 Step 1: Submit sample 30s Foreign Teacher log below')}
+                    {nativeDemoTab === 'kt-dashboard' && (isKo ? '⚡ 2단계: AI 알림톡 대본 검수 & 복사' : '⚡ Step 2: Review generated KakaoTalk script & 1-click copy')}
+                    {nativeDemoTab === 'director-portal' && (isKo ? '🏢 3단계: 원장님 대시보드 관리' : '🏢 Step 3: View Director Admin Oversight & Student Roster')}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {nativeDemoTab !== 'ft-form' && (
+                    <button
+                      type="button"
+                      onClick={() => setNativeDemoTab(nativeDemoTab === 'director-portal' ? 'kt-dashboard' : 'ft-form')}
+                      className="px-3 py-1.5 rounded-xl border border-white/10 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      ← {isKo ? '이전 단계' : 'Prev Step'}
+                    </button>
+                  )}
+                  {nativeDemoTab !== 'director-portal' && (
+                    <button
+                      type="button"
+                      onClick={() => setNativeDemoTab(nativeDemoTab === 'ft-form' ? 'kt-dashboard' : 'director-portal')}
+                      className="px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold transition-colors cursor-pointer flex items-center gap-1 shadow-md"
+                    >
+                      <span>{isKo ? '다음 단계' : 'Next Step'}</span>
+                      <ArrowRight size={14} weight="bold" />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -598,7 +641,10 @@ ${activeReport.parentScriptKo.closing}`.trim();
           {nativeDemoTab === 'ft-form' && (
             <NativeTeacherLogForm
               isNight={isNight}
-              onSubmitLog={handleNativeLogSubmit}
+              onSubmitLog={(logData) => {
+                handleNativeLogSubmit(logData);
+                setNativeDemoTab('kt-dashboard');
+              }}
               isSubmitting={isSubmittingNativeLog}
             />
           )}
