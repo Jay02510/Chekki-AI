@@ -49,7 +49,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   isNight = true,
   academyName = 'Apex English Academy (Seocho)'
 }) => {
-  const [activeTab, setActiveTab] = useState<'roster' | 'exceptions' | 'teachers'>('roster');
+  const [activeTab, setActiveTab] = useState<'roster' | 'curriculum' | 'exceptions' | 'teachers'>('curriculum');
 
   // Sample State for Class Rosters
   const [students, setStudents] = useState<StudentItem[]>([
@@ -190,6 +190,21 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            onClick={() => setActiveTab('curriculum')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+              activeTab === 'curriculum'
+                ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                : isNight
+                ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+            }`}
+          >
+            <FolderUser size={16} weight="bold" className="text-orange-400" />
+            <span>Curriculum & Homework Stream</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('roster')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
               activeTab === 'roster'
@@ -249,6 +264,140 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           ENCRYPTED ISOLATION
         </span>
       </div>
+
+      {/* ========================================================================= */}
+      {/* TAB 0: CURRICULUM & HOMEWORK STREAM (Syllabus & Worksheet Oversight) */}
+      {/* ========================================================================= */}
+      {activeTab === 'curriculum' && (
+        <div className="space-y-6 animate-fade-in text-left">
+          {/* Header Banner */}
+          <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h4 className="font-bold text-orange-400 text-sm flex items-center gap-2">
+                <span>📘</span>
+                <span>원장님 전용 커리큘럼 & 일간 숙제 총괄 모니터링 Stream</span>
+              </h4>
+              <p className="text-zinc-400 mt-1 text-[11px]">
+                강사분들이 업로드한 교재 시라버스(주차별 어휘 범위)와 일간 워크시트(학부모 정답 잉크)가 체키 AI 보고서 생성기(Report Studio)로 실시간 연동됩니다.
+              </p>
+            </div>
+            <a
+              href="/report-studio"
+              className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer shrink-0 inline-flex items-center gap-1.5 transition-all"
+            >
+              <span>📄</span>
+              <span>Report Studio 성적표 생성기 이동</span>
+            </a>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* CARD 1: Course Syllabus Scope Stream */}
+            <div className={`p-6 rounded-2xl border space-y-4 ${
+              isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'
+            }`}>
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold text-xs">📘 SYLLABUS</span>
+                  <div>
+                    <h5 className="font-bold text-sm">업로드된 교재 목차 (Course Syllabus)</h5>
+                    <p className="text-[10px] text-zinc-400">학급별 Multi-Week 어휘 & 파닉스 범위</p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
+                  4-Week Scope Set
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-orange-400">Class 7A Sunshine • Bricks Reading 150</span>
+                    <span className="font-mono text-[10px] text-zinc-400">Week 2 of 4 Wks</span>
+                  </div>
+                  <p className="text-xs font-semibold">Unit 4: Photosynthesis & Plant Ecosystems</p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {['Chloroplast', 'Stomata', 'Glucose', 'Carbon Dioxide', 'Sunlight'].map((w) => (
+                      <span key={w} className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                        {w}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-purple-400">Class 8B Excellence • Subject Link L6</span>
+                    <span className="font-mono text-[10px] text-zinc-400">Week 3 of 8 Wks</span>
+                  </div>
+                  <p className="text-xs font-semibold">Unit 8: Solar System & Gravitational Physics</p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {['Gravitation', 'Atmosphere', 'Orbit', 'Asteroid', 'Eclipse'].map((w) => (
+                      <span key={w} className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                        {w}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 2: Daily Homework Worksheets Stream */}
+            <div className={`p-6 rounded-2xl border space-y-4 ${
+              isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'
+            }`}>
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-xs">📄 WORKSHEET</span>
+                  <div>
+                    <h5 className="font-bold text-sm">일간 워크시트 & 학부모 정답 잉크</h5>
+                    <p className="text-[10px] text-zinc-400">Chekki Parent App Green Ink Overlays</p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[10px] font-mono font-bold">
+                  94.2% Submit Rate
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-emerald-400">Class 7A Sunshine • Daily Worksheet #4</span>
+                    <span className="font-mono text-[10px] text-emerald-400 font-bold">Green Ink Synced</span>
+                  </div>
+                  <p className="text-xs font-mono text-zinc-400">
+                    Q1: Organisms that make food ➔ <strong className="text-emerald-300">producers</strong>
+                  </p>
+                  <p className="text-xs font-mono text-zinc-400">
+                    Q2: Organisms that eat living things ➔ <strong className="text-emerald-300">consumer</strong>
+                  </p>
+                  <div className="pt-2 flex justify-between items-center border-t border-white/10 text-[11px]">
+                    <span className="text-zinc-400">제출 14명 / 미제출 1명 (김민준)</span>
+                    <a href="/report-studio" className="font-bold text-orange-400 hover:underline">
+                      성적표 즉시 발급 →
+                    </a>
+                  </div>
+                </div>
+
+                <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-emerald-400">Class 8B Excellence • Daily Worksheet #8</span>
+                    <span className="font-mono text-[10px] text-emerald-400 font-bold">Green Ink Synced</span>
+                  </div>
+                  <p className="text-xs font-mono text-zinc-400">
+                    Q1: Force pulling planets ➔ <strong className="text-emerald-300">gravity</strong>
+                  </p>
+                  <div className="pt-2 flex justify-between items-center border-t border-white/10 text-[11px]">
+                    <span className="text-zinc-400">제출 12명 / 100% 제출 완수</span>
+                    <a href="/report-studio" className="font-bold text-orange-400 hover:underline">
+                      성적표 즉시 발급 →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* TAB 1: CLASS ROSTERS & STUDENT MANAGEMENT */}
