@@ -4276,7 +4276,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             className="absolute inset-0 bg-black/80 backdrop-blur-md" 
             onClick={() => setShowScannedModal(false)} 
           />
-          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh] ${
+          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full ${activeScannedModalType === 'worksheet' ? 'max-w-6xl' : 'max-w-3xl'} mx-4 animate-fade-in text-left max-h-[90vh] ${
             isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
           }`}>
             <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar ${
@@ -4393,10 +4393,235 @@ export default function TeacherPage({ isNight = true }: Props) {
                   ? scannedData
                   : (scannedData.pages.find((p: any) => (p.pageIndex || p.pageNumber) === selectedPageIndex) || scannedData);
 
+                const BAD_WORDS_PATTERN = /(fuck|shit|asshole|bitch|bastard|cunt|dick|cock|pussy|slut|whore|nigger|faggot|retard|damn|crap|idiot|stupid|씨발|개새끼|병신|지랄|존나|닥쳐|미친|좆|씹)/i;
+                const hasInappropriateContent = activeDisplayObj?.detectedAnswers?.some((ans: any) => 
+                  BAD_WORDS_PATTERN.test(ans.questionText || '') || BAD_WORDS_PATTERN.test(ans.correctAnswer || ans.answer || '') || BAD_WORDS_PATTERN.test(ans.category || '')
+                );
+
                 return (
-                  <>
-                    {/* Tab Content 1: Pick and Choose */}
-                    {activeScannedTab === 'picker' && (
+                  <div className="space-y-6">
+                    {/* Guardrail Warning Banner */}
+                    {hasInappropriateContent && (
+                      <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-bold flex items-center gap-3 animate-bounce">
+                        <Warning size={20} weight="bold" className="shrink-0 text-red-400" />
+                        <div>
+                          <p>{isKo ? '🛡️ AI 세이프티 가드레일: 부적절한 단어 또는 비속어가 감지되었습니다.' : '🛡️ Content Safety Guardrail: Inappropriate language detected.'}</p>
+                          <p className="text-[11px] font-normal text-red-300 mt-0.5">
+                            {isKo 
+                              ? '학습지 문항 및 정답에서 비속어를 수정해 주세요. 부적절한 단어는 커리큘럼 저장이 제한됩니다.' 
+                              : 'Please remove offensive or profane words. Guardrails restrict saving inappropriate content into the student curriculum.'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeScannedModalType === 'worksheet' ? (
+                      /* SIDE-BY-SIDE 2-COLUMN LAYOUT FOR WORKSHEETS */
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        {/* LEFT COLUMN: Scanned Physical Paper Preview with Green Answer Overlay Ink */}
+                        <div className="lg:col-span-5 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold font-mono text-orange-400 uppercase tracking-widest flex items-center gap-1.5">
+                              <Eye size={14} weight="bold" />
+                              <span>{isKo ? '스캔 원본 & AI 정답 잉크' : 'Scanned Paper & Answer Ink'}</span>
+                            </span>
+                            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-mono">
+                              Green Ink Overlay
+                            </span>
+                          </div>
+
+                          {/* Paper Sheet Preview Container */}
+                          <div className="relative w-full rounded-2xl border border-zinc-300 dark:border-white/10 bg-white text-zinc-900 shadow-xl overflow-hidden p-6 font-serif select-none min-h-[420px]">
+                            {/* Paper Background Lines */}
+                            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
+                            
+                            {/* Paper Header */}
+                            <div className="relative z-10 border-b-2 border-zinc-900 pb-3 mb-6 flex justify-between items-end">
+                              <div>
+                                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold">
+                                  DAILY WORKSHEET SCAN
+                                </span>
+                                <h4 className="text-base font-black tracking-tight text-zinc-900 font-sans">
+                                  {activeDisplayObj?.topic || 'Science Unit 4 Homework'}
+                                </h4>
+                              </div>
+                              <span className="text-[10px] font-mono text-zinc-400 border border-zinc-300 px-2 py-0.5 rounded">
+                                PAGE 1 / 1
+                              </span>
+                            </div>
+
+                            {/* Worksheet Questions with Green AI Answer Overlay Ink */}
+                            <div className="relative z-10 space-y-5 text-xs">
+                              {(activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0 
+                                ? activeDisplayObj.detectedAnswers 
+                                : [
+                                    { questionNumber: 1, questionText: '1. Organisms that make their own food (Plants are ____).', correctAnswer: 'producers' },
+                                    { questionNumber: 2, questionText: '2. Organisms that eat other living things (A rabbit is a ____).', correctAnswer: 'consumer' },
+                                    { questionNumber: 3, questionText: '3. Organisms that break down dead material (Fungi are ____).', correctAnswer: 'decomposers' }
+                                  ]
+                              ).map((item: any, idx: number) => (
+                                <div key={idx} className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 relative group">
+                                  <p className="font-semibold text-zinc-800 text-xs mb-2">
+                                    {item.questionText || item.question}
+                                  </p>
+
+                                  {/* Green AI Answer Ink Badge Floating on Paper */}
+                                  <div className="flex items-center gap-2 pt-1 border-t border-zinc-200">
+                                    <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase">
+                                      AI Ink:
+                                    </span>
+                                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500 text-white font-mono font-black text-xs shadow-md border border-emerald-400 animate-pulse flex items-center gap-1.5">
+                                      <Sparkle size={12} weight="fill" />
+                                      <span>{item.correctAnswer || item.answer || 'answer'}</span>
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            <p className="relative z-10 text-[10px] font-mono text-zinc-400 text-center mt-6 pt-3 border-t border-zinc-200">
+                              📷 Chekki AI Vision - Realtime Parent Screen Sync
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: Editable Question & Answer Key Panel */}
+                        <div className="lg:col-span-7 space-y-4">
+                          <div className="flex items-center justify-between px-1">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                              {isKo ? '✏️ 문항 및 정답 수정 (Right Panel Editor)' : '✏️ Edit Questions & Correct Answers'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setScannedData((prev: any) => {
+                                  const currentAnswers = prev?.detectedAnswers || [];
+                                  const newNum = currentAnswers.length + 1;
+                                  const newAnswers = [
+                                    ...currentAnswers,
+                                    {
+                                      questionNumber: newNum,
+                                      category: 'Vocabulary',
+                                      questionText: `${newNum}. Additional Question Text ${newNum}`,
+                                      correctAnswer: 'answer',
+                                      answer: 'answer'
+                                    }
+                                  ];
+                                  return { ...prev, detectedAnswers: newAnswers };
+                                });
+                              }}
+                              className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1 cursor-pointer"
+                            >
+                              <Plus size={14} weight="bold" />
+                              <span>{isKo ? '문항 추가' : 'Add Question'}</span>
+                            </button>
+                          </div>
+
+                          {activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0 ? (
+                            <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1 custom-scrollbar">
+                              {activeDisplayObj.detectedAnswers.map((item: any, idx: number) => {
+                                const itemHasBadWord = BAD_WORDS_PATTERN.test(item.questionText || '') || BAD_WORDS_PATTERN.test(item.correctAnswer || item.answer || '');
+
+                                return (
+                                  <div
+                                    key={idx}
+                                    className={`p-4 rounded-2xl border transition-all text-left space-y-2.5 ${
+                                      itemHasBadWord
+                                        ? 'bg-red-500/10 border-red-500/40'
+                                        : isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                                        Question #{item.questionNumber || idx + 1}
+                                      </span>
+                                      <input
+                                        type="text"
+                                        value={item.category || 'Vocabulary'}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setScannedData((prev: any) => {
+                                            const list = [...(prev?.detectedAnswers || [])];
+                                            list[idx] = { ...list[idx], category: val };
+                                            return { ...prev, detectedAnswers: list };
+                                          });
+                                        }}
+                                        className="text-[10px] font-bold uppercase tracking-wider bg-transparent border-b border-zinc-600 focus:border-orange-500 text-zinc-400 outline-none text-right w-28"
+                                      />
+                                    </div>
+
+                                    <input
+                                      type="text"
+                                      value={item.questionText || item.question || ''}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setScannedData((prev: any) => {
+                                          const list = [...(prev?.detectedAnswers || [])];
+                                          list[idx] = { ...list[idx], questionText: val, question: val };
+                                          return { ...prev, detectedAnswers: list };
+                                        });
+                                      }}
+                                      className={`w-full text-xs font-semibold p-2.5 rounded-xl border outline-none transition-all ${
+                                        itemHasBadWord
+                                          ? 'bg-red-950/40 border-red-500 text-red-200'
+                                          : isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-zinc-200' : 'bg-white border-zinc-300 focus:border-orange-500 text-zinc-800'
+                                      }`}
+                                      placeholder={isKo ? '문제 지문을 입력하세요' : 'Enter question text'}
+                                    />
+
+                                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
+                                      <span className="text-emerald-400 font-bold shrink-0 flex items-center gap-1">
+                                        <span>✏️</span>
+                                        <span>{isKo ? '부모님용 정답 잉크 (수정 가능):' : 'Correct Answer Ink:'}</span>
+                                      </span>
+                                      <input
+                                        type="text"
+                                        value={item.correctAnswer || item.answer || ''}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setScannedData((prev: any) => {
+                                            const list = [...(prev?.detectedAnswers || [])];
+                                            list[idx] = { ...list[idx], correctAnswer: val, answer: val };
+                                            return { ...prev, detectedAnswers: list };
+                                          });
+                                        }}
+                                        className={`bg-[#050505] border outline-none px-3 py-1.5 rounded-lg font-mono font-black text-xs w-full max-w-[220px] ${
+                                          BAD_WORDS_PATTERN.test(item.correctAnswer || item.answer || '')
+                                            ? 'border-red-500 text-red-300'
+                                            : 'border-emerald-500/50 focus:border-emerald-400 text-emerald-300'
+                                        }`}
+                                        placeholder={isKo ? '정답 단어/문장 입력' : 'Enter answer text'}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="p-8 text-center border rounded-2xl border-dashed border-white/10 text-xs text-zinc-500 space-y-3">
+                              <p>{isKo ? '추출된 개별 정답 문항이 없거나 아직 스캔되지 않았습니다.' : 'No worksheet question answers extracted yet.'}</p>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setScannedData((prev: any) => ({
+                                    ...prev,
+                                    detectedAnswers: [
+                                      { questionNumber: 1, category: 'Vocabulary', questionText: '1. Organisms that make food', correctAnswer: 'producers', answer: 'producers' },
+                                      { questionNumber: 2, category: 'Vocabulary', questionText: '2. Organisms that eat living things', correctAnswer: 'consumer', answer: 'consumer' }
+                                    ]
+                                  }));
+                                }}
+                                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
+                              >
+                                <Plus size={14} weight="bold" />
+                                <span>{isKo ? '수동 정답 문항 작성하기' : 'Create Answer Key Manually'}</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      /* SINGLE COLUMN SCOPE PICKER FOR SYLLABUS */
                       <div className="space-y-6">
                         {/* Topic selection */}
                         {activeDisplayObj?.topic && (
@@ -4473,221 +4698,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                             </div>
                           </div>
                         )}
-
-                        {/* Phonics Selection */}
-                        {activeDisplayObj?.phonicsRules && (Array.isArray(activeDisplayObj.phonicsRules) ? activeDisplayObj.phonicsRules.length > 0 : Boolean(activeDisplayObj.phonicsRules)) && (
-                          <div className={`p-4 rounded-2xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-                                {isKo ? '추출된 파닉스 음가 (Select Phonics Sounds)' : 'Extracted Phonics Rules'}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const pageSounds = Array.isArray(activeDisplayObj.phonicsRules)
-                                    ? activeDisplayObj.phonicsRules
-                                    : activeDisplayObj.phonicsRules.split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean);
-                                  
-                                  const allSelected = pageSounds.every((s: string) => selectedScannedPhonics.includes(s));
-                                  if (allSelected) {
-                                    setSelectedScannedPhonics(prev => prev.filter(s => !pageSounds.includes(s)));
-                                  } else {
-                                    setSelectedScannedPhonics(prev => Array.from(new Set([...prev, ...pageSounds])));
-                                  }
-                                }}
-                                className="text-[11px] font-bold text-indigo-400 hover:underline cursor-pointer"
-                              >
-                                {isKo ? '이 페이지 파닉스 전체 선택 / 해제' : 'Toggle Page Phonics'}
-                              </button>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                              {(Array.isArray(activeDisplayObj.phonicsRules) ? activeDisplayObj.phonicsRules : activeDisplayObj.phonicsRules.split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean)).map((sound: string) => {
-                                const isSelected = selectedScannedPhonics.includes(sound);
-                                return (
-                                  <button
-                                    type="button"
-                                    key={sound}
-                                    onClick={() => {
-                                      if (isSelected) {
-                                        setSelectedScannedPhonics(prev => prev.filter(s => s !== sound));
-                                      } else {
-                                        setSelectedScannedPhonics(prev => [...prev, sound]);
-                                      }
-                                    }}
-                                    className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                                      isSelected
-                                        ? 'bg-indigo-500 border-indigo-500 text-white shadow-md scale-[1.02]'
-                                        : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700'
-                                    }`}
-                                  >
-                                    <span>{sound}</span>
-                                    {isSelected ? <Check size={12} weight="bold" /> : <Plus size={12} weight="bold" />}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Reading Passage Selection */}
-                        {activeDisplayObj?.passage && (
-                          <div className={`p-4 rounded-2xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-                            <label className="flex items-center justify-between cursor-pointer mb-2">
-                              <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">
-                                {isKo ? '추출된 본문 지문 (Reading Passage)' : 'Extracted Reading Passage'}
-                              </span>
-                              <input
-                                type="checkbox"
-                                checked={selectedScannedPassage}
-                                onChange={(e) => setSelectedScannedPassage(e.target.checked)}
-                                className="w-4 h-4 accent-purple-500 cursor-pointer"
-                              />
-                            </label>
-                            <p className={`text-xs leading-relaxed p-3 rounded-xl border font-serif ${
-                              isThemeNight ? 'bg-[#050505] border-white/5 text-zinc-300' : 'bg-white border-zinc-200 text-zinc-800'
-                            }`}>
-                              "{activeDisplayObj.passage}"
-                            </p>
-                          </div>
-                        )}
                       </div>
                     )}
-
-                    {/* Tab Content 2: Parent View */}
-                    {activeScannedTab === 'parentView' && (
-                      <div className="space-y-4">
-                        <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400 flex items-center gap-3">
-                          <Info size={20} weight="bold" className="shrink-0" />
-                          <p>
-                            {isKo 
-                              ? '학부모가 스마트폰으로 워크시트를 찍었을 때 화면에 정답 잉크로 오버레이되는 가이드 내용입니다.' 
-                              : 'This is the exact answer key overlaid on parents\' screens when they scan their child\'s physical worksheet.'}
-                          </p>
-                        </div>
-
-                        {activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0 ? (
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between px-1">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                                {isKo ? '✏️ 추출된 정답을 자유롭게 수정하거나 추가하세요.' : '✏️ Edit or add answers before saving.'}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setScannedData((prev: any) => {
-                                    const currentAnswers = prev?.detectedAnswers || [];
-                                    const newNum = currentAnswers.length + 1;
-                                    const newAnswers = [
-                                      ...currentAnswers,
-                                      {
-                                        questionNumber: newNum,
-                                        category: 'Vocabulary',
-                                        questionText: `${newNum}. Additional Worksheet Question ${newNum}`,
-                                        correctAnswer: 'answer',
-                                        answer: 'answer'
-                                      }
-                                    ];
-                                    return { ...prev, detectedAnswers: newAnswers };
-                                  });
-                                }}
-                                className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1 cursor-pointer"
-                              >
-                                <Plus size={14} weight="bold" />
-                                <span>{isKo ? '문항 추가' : 'Add Question'}</span>
-                              </button>
-                            </div>
-
-                            {activeDisplayObj.detectedAnswers.map((item: any, idx: number) => (
-                              <div
-                                key={idx}
-                                className={`p-4 rounded-2xl border transition-all text-left space-y-2.5 ${
-                                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
-                                }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
-                                    Question #{item.questionNumber || idx + 1}
-                                  </span>
-                                  <input
-                                    type="text"
-                                    value={item.category || 'Vocabulary'}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setScannedData((prev: any) => {
-                                        const list = [...(prev?.detectedAnswers || [])];
-                                        list[idx] = { ...list[idx], category: val };
-                                        return { ...prev, detectedAnswers: list };
-                                      });
-                                    }}
-                                    className="text-[10px] font-bold uppercase tracking-wider bg-transparent border-b border-zinc-600 focus:border-orange-500 text-zinc-400 outline-none text-right w-28"
-                                  />
-                                </div>
-
-                                <input
-                                  type="text"
-                                  value={item.questionText || item.question || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setScannedData((prev: any) => {
-                                      const list = [...(prev?.detectedAnswers || [])];
-                                      list[idx] = { ...list[idx], questionText: val, question: val };
-                                      return { ...prev, detectedAnswers: list };
-                                    });
-                                  }}
-                                  className={`w-full text-xs font-semibold p-2.5 rounded-xl border outline-none transition-all ${
-                                    isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-zinc-200' : 'bg-white border-zinc-300 focus:border-orange-500 text-zinc-800'
-                                  }`}
-                                  placeholder={isKo ? '문제 지문을 입력하세요' : 'Enter question text'}
-                                />
-
-                                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
-                                  <span className="text-emerald-400 font-bold shrink-0 flex items-center gap-1">
-                                    <span>✏️</span>
-                                    <span>{isKo ? '부모님용 정답 잉크 (수정 가능):' : 'Correct Answer Ink:'}</span>
-                                  </span>
-                                  <input
-                                    type="text"
-                                    value={item.correctAnswer || item.answer || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setScannedData((prev: any) => {
-                                        const list = [...(prev?.detectedAnswers || [])];
-                                        list[idx] = { ...list[idx], correctAnswer: val, answer: val };
-                                        return { ...prev, detectedAnswers: list };
-                                      });
-                                    }}
-                                    className="bg-[#050505] border border-emerald-500/50 focus:border-emerald-400 outline-none px-3 py-1.5 rounded-lg text-emerald-300 font-mono font-black text-xs w-full max-w-[220px]"
-                                    placeholder={isKo ? '정답 단어/문장 입력' : 'Enter answer text'}
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="p-8 text-center border rounded-2xl border-dashed border-white/10 text-xs text-zinc-500 space-y-3">
-                            <p>{isKo ? '추출된 개별 정답 문항이 없거나 아직 스캔되지 않았습니다.' : 'No worksheet question answers extracted yet.'}</p>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setScannedData((prev: any) => ({
-                                  ...prev,
-                                  detectedAnswers: [
-                                    { questionNumber: 1, category: 'Vocabulary', questionText: '1. Organisms that make food', correctAnswer: 'producers', answer: 'producers' },
-                                    { questionNumber: 2, category: 'Vocabulary', questionText: '2. Organisms that eat living things', correctAnswer: 'consumer', answer: 'consumer' }
-                                  ]
-                                }));
-                              }}
-                              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
-                            >
-                              <Plus size={14} weight="bold" />
-                              <span>{isKo ? '수동 정답 문항 작성하기' : 'Create Answer Key Manually'}</span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </>
+                  </div>
                 );
               })()}
 
