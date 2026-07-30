@@ -94,7 +94,8 @@ export default function TeacherPage({ isNight = true }: Props) {
     new URLSearchParams(window.location.search).get('role') === 'director'
   );
   const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath ? 'director' : 'teacher');
-  const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'homework' | 'students' | 'curriculum'>('overview');
+  const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>((user as any)?.educatorRole || 'ft');
+  const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum'>('overview');
 
   // Curriculum state
   const [curriculumTopic, setCurriculumTopic] = useState('');
@@ -1742,30 +1743,57 @@ export default function TeacherPage({ isNight = true }: Props) {
             <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
           </button>
 
-          <a
-            href="/reports"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'instant' });
-              window.history.pushState({}, '', '/reports');
-              window.dispatchEvent(new PopStateEvent('popstate'));
-            }}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-              isThemeNight 
-                ? 'bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30 text-orange-400 hover:border-orange-500/50' 
-                : 'bg-gradient-to-r from-orange-50 to-pink-50 border-orange-300 text-orange-600 hover:border-orange-400'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
-                <Sparkle size={18} weight="fill" className="animate-pulse" />
+          {/* Tab 5 (FT Only): My Submitted Forms History */}
+          {educatorRole === 'ft' ? (
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
+                  : isThemeNight 
+                    ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl transition-colors ${
+                  activeTab === 'history' 
+                    ? 'bg-orange-500/20 text-orange-500' 
+                    : isThemeNight ? 'bg-white/5 text-purple-400 group-hover:text-white' : 'bg-purple-100 text-purple-600 group-hover:text-zinc-900'
+                }`}>
+                  <FileText size={18} weight="bold" />
+                </div>
+                <span>{isKo ? '📜 제출한 양식 기록 (Forms History)' : '📜 My Submitted Forms'}</span>
               </div>
-              <span>{isKo ? 'AI 성적표 스튜디오' : 'AI Report Studio'}</span>
-            </div>
-            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
-              NEW
-            </span>
-          </a>
+              <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'history' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+            </button>
+          ) : (
+            /* Tab 5 (KT / Director Only): AI Report Studio */
+            <a
+              href="/reports"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/reports');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                isThemeNight 
+                  ? 'bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30 text-orange-400 hover:border-orange-500/50' 
+                  : 'bg-gradient-to-r from-orange-50 to-pink-50 border-orange-300 text-orange-600 hover:border-orange-400'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
+                  <Sparkle size={18} weight="fill" className="animate-pulse" />
+                </div>
+                <span>{isKo ? 'AI 성적표 스튜디오' : 'AI Report Studio'}</span>
+              </div>
+              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                NEW
+              </span>
+            </a>
+          )}
         </nav>
 
         {/* Sidebar Footer / User Info */}
@@ -1938,6 +1966,38 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </div>
               </div>
             )}
+
+            {/* Educator Role Switcher Pill (FT vs KT) */}
+            <div className={`p-1 border rounded-2xl flex items-center gap-1 ${
+              isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-300'
+            }`}>
+              <button
+                type="button"
+                onClick={() => { setEducatorRole('ft'); if (activeTab === 'history') setActiveTab('overview'); }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  educatorRole === 'ft'
+                    ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20'
+                    : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                }`}
+                title="Foreign Teacher Mode (Curriculum & Autograding Focus)"
+              >
+                <span>🔤</span>
+                <span>FT Mode</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEducatorRole('kt'); }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  educatorRole === 'kt'
+                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                    : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                }`}
+                title="Korean Teacher Mode (Parent Reports & Approvals Focus)"
+              >
+                <span>👨‍🏫</span>
+                <span>KT Mode</span>
+              </button>
+            </div>
 
             {/* Language Switcher */}
             <button
@@ -2572,14 +2632,19 @@ export default function TeacherPage({ isNight = true }: Props) {
                         <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                           <BookOpen size={22} weight="bold" />
                         </div>
-                        <div>
-                          <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                            {isKo ? `주간 커리큘럼 편집 (Week ${selectedClass?.activeWeekNumber || 1})` : `Edit Weekly Curriculum (Week ${selectedClass?.activeWeekNumber || 1})`}
-                          </h4>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                              {isKo ? `주간 커리큘럼 편집 (Week ${selectedClass?.activeWeekNumber || 1})` : `Edit Weekly Curriculum (Week ${selectedClass?.activeWeekNumber || 1})`}
+                            </h4>
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono">
+                              ✍️ {isKo ? '담당 교사: Teacher Mark (FT)' : 'Submitted by: Teacher Mark (FT)'}
+                            </span>
+                          </div>
                           <p className="text-xs text-zinc-400 mt-0.5">
                             {isKo 
-                              ? '현재 주차의 학급 교안 정보입니다. 저장된 내용은 부모님들의 채점 피드백에 반영됩니다.' 
-                              : 'Weekly teaching details. Saved context is fed directly to parents\' scans.'}
+                              ? '현재 주차의 학급 교안 정보입니다. 원어민 선생님이 업로드한 내용이 실시간 자동 연동됩니다.' 
+                              : 'Weekly teaching details. Submitted FT logs auto-translate into Korean parent updates.'}
                           </p>
                         </div>
                       </div>
