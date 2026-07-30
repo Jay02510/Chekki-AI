@@ -3794,7 +3794,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               >
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                    {isKo ? '학원 로고 이미지 URL' : 'Academy Logo Image URL'}
+                    {isKo ? '학원 로고 이미지 URL (또는 파일 등록)' : 'Academy Logo Image URL'}
                   </label>
                   <input
                     type="url"
@@ -3805,6 +3805,12 @@ export default function TeacherPage({ isNight = true }: Props) {
                       isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
                     }`}
                   />
+                  <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-[10px] text-orange-400 leading-normal space-y-1 font-mono">
+                    <p className="font-bold">📐 {isKo ? '권장 로고 규격 및 지원 포맷:' : 'Recommended Dimensions & Formats:'}</p>
+                    <p>• {isKo ? '지원 포맷: PNG (투명 배경 권장), JPG, SVG, WEBP' : 'Formats: PNG (transparent recommended), JPG, SVG, WEBP'}</p>
+                    <p>• {isKo ? '권장 해상도: 400 × 400 px (정사각형) 또는 600 × 200 px (가로형)' : 'Resolution: 400 × 400 px (Square) or 600 × 200 px (Horizontal)'}</p>
+                    <p>• {isKo ? '최대 용량: 5 MB 이하' : 'Max Size: Under 5 MB'}</p>
+                  </div>
                 </div>
 
                 {tempLogoUrl && (

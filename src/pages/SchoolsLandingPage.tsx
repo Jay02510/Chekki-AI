@@ -37,10 +37,19 @@ const PRICING_TIERS = {
     minSeats: 1,
     defaultTeachers: 1
   },
+  solo: {
+    id: 'solo',
+    nameEn: 'Solo Tutor & Study Room (1 Seat)',
+    nameKo: '공부방 / 개인 교습소 (1석 단독)',
+    monthly: { krw: 39000, usd: 29 },
+    yearly: { krw: 31000, usd: 23 },
+    minSeats: 1,
+    defaultTeachers: 1
+  },
   starter: {
     id: 'starter',
     nameEn: 'Starter Academy Pack (Micro-School)',
-    nameKo: '스타터 학원 패키지 (공부방 / 소형)',
+    nameKo: '스타터 학원 패키지 (소형 어학원)',
     monthly: { krw: 69000, usd: 49 },
     yearly: { krw: 55000, usd: 39 },
     minSeats: 1,
