@@ -21,6 +21,7 @@ import { ProgressiveOnboardingModal } from './components/ProgressiveOnboardingMo
 import SubscribePage from './src/pages/SubscribePage';
 import AdminPage from './src/pages/AdminPage';
 import TeacherPage from './src/pages/TeacherPage';
+import DirectorPage from './src/pages/DirectorPage';
 import SchoolsLandingPage from './src/pages/SchoolsLandingPage';
 import ReportStudioPage from './src/pages/ReportStudioPage';
 import { AnalysisState, LegalType } from './types';
@@ -174,6 +175,7 @@ function AppContent() {
   const [showSubscribePage, setShowSubscribePage] = useState(false);
   const [showAdminPage, setShowAdminPage] = useState(false);
   const [showTeacherPage, setShowTeacherPage] = useState(false);
+  const [showDirectorPage, setShowDirectorPage] = useState(false);
   const [showSchoolsPage, setShowSchoolsPage] = useState(false);
   const [showReportStudioPage, setShowReportStudioPage] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -208,6 +210,7 @@ function AppContent() {
       setShowSubscribePage(path === '/subscribe');
       setShowAdminPage(path === '/admin');
       setShowTeacherPage(path === '/teacher');
+      setShowDirectorPage(path === '/director' || path === '/director-hq');
       setShowSchoolsPage(path === '/schools' || path === '/for-schools');
       setShowReportStudioPage(path === '/reports' || path === '/report-studio');
     };
@@ -253,6 +256,12 @@ function AppContent() {
     if (window.location.pathname === '/teacher' && Capacitor.getPlatform() === 'web') {
       setShowSplash(false);
       setShowTeacherPage(true);
+    }
+
+    // /director route — web only
+    if ((window.location.pathname === '/director' || window.location.pathname === '/director-hq') && Capacitor.getPlatform() === 'web') {
+      setShowSplash(false);
+      setShowDirectorPage(true);
     }
 
     // /schools and /for-schools route — web only
@@ -469,6 +478,7 @@ function AppContent() {
   if (showSubscribePage && platform === 'web') return <SubscribePage />;
   if (showAdminPage && platform === 'web') return <AdminPage />;
   if (showTeacherPage && platform === 'web') return <TeacherPage isNight={isNight} />;
+  if (showDirectorPage && platform === 'web') return <DirectorPage isNight={isNight} />;
   if (showSchoolsPage && platform === 'web')
     return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
   if (showReportStudioPage && platform === 'web')

@@ -1675,30 +1675,30 @@ export default function TeacherPage({ isNight = true }: Props) {
             <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
           </button>
 
-          <button
-            onClick={() => setActiveTab('directorPortal')}
+          <a
+            href="/director"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'instant' });
+              window.history.pushState({}, '', '/director');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
             className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-              activeTab === 'directorPortal'
-                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                : isThemeNight 
-                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
+              isThemeNight 
+                ? 'bg-amber-500/10 border-amber-500/20 text-amber-400 hover:border-amber-500/40' 
+                : 'bg-amber-50 border-amber-200 text-amber-800 hover:border-amber-300'
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl transition-colors ${
-                activeTab === 'directorPortal' 
-                  ? 'bg-orange-500/20 text-orange-500' 
-                  : isThemeNight ? 'bg-white/5 text-amber-400 group-hover:text-white' : 'bg-amber-100 text-amber-600 group-hover:text-zinc-900'
-              }`}>
+              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
                 <Buildings size={18} weight="bold" />
               </div>
-              <span>{isKo ? '🏢 원장님 전용 HQ 포털' : '🏢 Director Admin HQ'}</span>
+              <span>{isKo ? '🏢 원장님 HQ 이동' : '🏢 Director HQ Portal'}</span>
             </div>
             <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
               HQ
             </span>
-          </button>
+          </a>
 
           <a
             href="/reports"
