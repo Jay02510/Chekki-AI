@@ -37,30 +37,30 @@ const PRICING_TIERS = {
     minSeats: 1,
     defaultTeachers: 1
   },
-  report_studio: {
-    id: 'report_studio',
-    nameEn: 'Report Studio (Standalone)',
-    nameKo: '리포트 스튜디오 (단독 플랜)',
-    monthly: { krw: 35000, usd: 25 },
-    yearly: { krw: 28000, usd: 20 },
+  starter: {
+    id: 'starter',
+    nameEn: 'Starter Academy Pack (Micro-School)',
+    nameKo: '스타터 학원 패키지 (공부방 / 소형)',
+    monthly: { krw: 69000, usd: 49 },
+    yearly: { krw: 55000, usd: 39 },
     minSeats: 1,
     defaultTeachers: 3
   },
   school_pro: {
     id: 'school_pro',
-    nameEn: 'Chekki School Pro (All-in-One Bundle)',
-    nameKo: '체키 스쿨 프로 (완전 통합 패키지)',
-    monthly: { krw: 69000, usd: 49 },
-    yearly: { krw: 55000, usd: 39 },
-    minSeats: 1,
+    nameEn: 'Chekki Master School Pro (All-in-One Bundle)',
+    nameKo: '체키 마스터 스쿨 프로 (완전 통합 패키지)',
+    monthly: { krw: 290000, usd: 220 },
+    yearly: { krw: 232000, usd: 175 },
+    minSeats: 5,
     defaultTeachers: 10
   },
   enterprise: {
     id: 'enterprise',
     nameEn: 'Large Academy & Franchise',
     nameKo: '대형 학원 & 프랜차이즈 네트워크',
-    monthly: { krw: 149000, usd: 109 },
-    yearly: { krw: 119000, usd: 89 },
+    monthly: { krw: 590000, usd: 450 },
+    yearly: { krw: 472000, usd: 360 },
     minSeats: 10,
     defaultTeachers: 20
   }
