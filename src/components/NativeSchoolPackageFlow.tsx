@@ -129,15 +129,15 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
             }`}>
               <div>
                 <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block mb-2">
-                  {isKo ? '교재 이미지 / PDF 업로더' : 'IMAGE / PDF UPLOADER'}
+                  {isKo ? '독립 분리 AI 업로더' : 'DUAL-STREAM AI UPLOADER'}
                 </span>
                 <h4 className="font-bold text-base mb-2">
-                  {isKo ? '교재 목차 또는 과제 페이지 스캔' : 'Scan Textbook Syllabus or Unit Page'}
+                  {isKo ? '교재 목차(시라버스) vs 일간 워크시트 개별 업로드' : 'Scan Textbook Syllabus or Daily Worksheet'}
                 </h4>
-                <p className={`text-xs mb-6 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                <p className={`text-xs mb-4 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {isKo 
-                    ? '교재 목차 사진 1장을 찍어 업로드하면 체키 AI 비전이 단원별 주제, 타겟 어휘, 정답지 구조를 자동 추출합니다.'
-                    : 'Snap 1 photo of your textbook contents page. Chekki AI Vision extracts all topics, target vocabulary, and answer key structures automatically.'}
+                    ? '시라버스는 주차별 어휘 범위를 설정하고, 워크시트는 학부모용 정답 잉크를 생성합니다. 서로 지워지지 않고 독립 저장됩니다.'
+                    : 'Syllabi set multi-week course scope; worksheets generate parent answer ink. Both store independently without overwriting.'}
                 </p>
 
                 <div className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
@@ -147,14 +147,14 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                     <div className="py-4 space-y-2">
                       <Sparkle size={32} className="mx-auto text-orange-500 animate-spin" />
                       <p className="text-xs font-bold text-orange-400">
-                        {isKo ? 'AI 비전이 핵심 어휘 & 정답지 구조를 추출 중입니다...' : 'AI Vision Extracting Vocabulary & Answer Keys...'}
+                        {isKo ? 'AI 비전이 어휘 범위 & 학부모 정답 잉크를 추출 중입니다...' : 'AI Vision Extracting Vocabulary & Parent Answer Ink...'}
                       </p>
                     </div>
                   ) : (
                     <div className="py-4 space-y-3">
                       <BookOpen size={36} className="mx-auto text-orange-500" />
                       <p className="text-xs font-bold">
-                        {isKo ? '업로드됨: Bricks Reading 150 (Book 1) 목차.pdf' : 'Uploaded: Bricks Reading 150 (Book 1) Syllabus.pdf'}
+                        {isKo ? '업로드 완료: 📘 Bricks Reading 150 (4주 코스 목차) & 📄 Unit 4 Daily Worksheet.pdf' : 'Uploaded: 📘 Bricks Reading 150 (4-Wk Syllabus) & 📄 Unit 4 Daily Worksheet.pdf'}
                       </p>
                       <button
                         type="button"
@@ -167,7 +167,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                         className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer inline-flex items-center gap-1.5"
                       >
                         <Lightning size={14} weight="fill" />
-                        <span>{isKo ? '⚡ 목차 사진 다시 스캔하기' : 'Re-Scan Syllabus Photo'}</span>
+                        <span>{isKo ? '⚡ 다시 스캔 체험하기' : 'Re-Scan Demo File'}</span>
                       </button>
                     </div>
                   )}
@@ -179,7 +179,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                   <CheckCircle size={14} weight="fill" />
                   <span>{isKo ? 'OCR 정밀도: 99.9%' : 'OCR Accuracy: 99.9%'}</span>
                 </span>
-                <span>{isKo ? '총 4개 단원 자동 분류 완료' : 'Auto-categorized into 4 Units'}</span>
+                <span>{isKo ? '4주 코스 시라버스 + 1일차 정답지 분리 완료' : '4-Wk Syllabus + Daily Answer Key Stored'}</span>
               </div>
             </div>
 
@@ -190,21 +190,21 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div>
                   <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">
-                    {isKo ? 'AI 자동 추출 학습 카테고리' : 'AI EXTRACTED CATEGORIES'}
+                    {isKo ? 'AI 자동 추출 학습 범위 & 정답지' : 'AI EXTRACTED COURSE SCOPE & ANSWER INK'}
                   </span>
                   <h4 className="font-bold text-sm">
-                    {isKo ? '4단원: 광합성과 식물 (Unit 4: Photosynthesis)' : 'Unit 4: Photosynthesis & Plants'}
+                    {isKo ? '4단원: 광합성과 식물 (4주 코스 중 Week 1)' : 'Unit 4: Photosynthesis & Plants (Week 1 of 4-Wk Course)'}
                   </h4>
                 </div>
                 <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded text-[10px] font-bold">
-                  {isKo ? '연동 준비 완료' : 'Ready to Sync'}
+                  {isKo ? '독립 연동 준비 완료' : 'Independent Sync Ready'}
                 </span>
               </div>
 
               {/* Category 1: Target Vocabulary */}
               <div className={`p-3 rounded-xl border space-y-1.5 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
                 <span className="text-[10px] font-bold font-mono text-orange-400 uppercase tracking-wider block">
-                  {isKo ? '🔤 타겟 핵심 어휘 (자동 선제 탑재)' : '🔤 Target Vocabulary Chips (RAG Pre-seeded)'}
+                  {isKo ? '📘 시라버스 추출: 주차별 타겟 핵심 어휘' : '📘 Syllabus Scope: Target Vocabulary Chips (RAG Pre-seeded)'}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {['Chloroplast (엽록체)', 'Stomata (기공)', 'Glucose (포도당)', 'Carbon Dioxide', 'Sunlight'].map((word) => (
@@ -217,24 +217,20 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                 </div>
               </div>
 
-              {/* Category 2: Phonics & Grammar Rules */}
+              {/* Category 2: Parent Answer Key Ink Overlay */}
               <div className={`p-3 rounded-xl border space-y-1.5 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-                <span className="text-[10px] font-bold font-mono text-purple-400 uppercase tracking-wider block">
-                  {isKo ? '🔠 파닉스 & 주요 문법 카테고리' : '🔠 Phonics & Grammar Focus'}
+                <span className="text-[10px] font-bold font-mono text-emerald-400 uppercase tracking-wider block flex items-center gap-1">
+                  <span>📄</span>
+                  <span>{isKo ? '워크시트 스캔: 체키 앱 학부모 정답 잉크 오버레이' : 'Worksheet Scan: Parent App Green Answer Ink Overlay'}</span>
                 </span>
-                <p className="text-xs font-semibold">
-                  {isKo ? '과학 전문 용어 접미사 (-synthesis, -phyll) • 과학 시제 동사' : 'Scientific Term Suffixes (-synthesis, -phyll) • Present Tense Science Verbs'}
-                </p>
-              </div>
-
-              {/* Category 3: Answer Key Mapping */}
-              <div className={`p-3 rounded-xl border space-y-1.5 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-                <span className="text-[10px] font-bold font-mono text-cyan-400 uppercase tracking-wider block">
-                  {isKo ? '📖 정답 매핑 & 독해 이해도 점검' : '📖 Answer Key & Comprehension Checks'}
-                </span>
-                <p className="text-xs font-mono text-zinc-400">
-                  {isKo ? 'Q1: 태양 에너지 | Q2: 산소 방출 | Q3: 뿌리 수분 흡수' : 'Q1: Sunlight energy | Q2: Oxygen release | Q3: Root absorption'}
-                </p>
+                <div className="space-y-1 text-xs font-mono">
+                  <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                    Q1: Organisms that make food ➔ <strong className="text-white bg-emerald-600 px-1.5 py-0.5 rounded">producers</strong>
+                  </div>
+                  <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                    Q2: Organisms that eat living things ➔ <strong className="text-white bg-emerald-600 px-1.5 py-0.5 rounded">consumer</strong>
+                  </div>
+                </div>
               </div>
 
               <div className="pt-2 flex justify-end">
