@@ -847,9 +847,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto items-stretch">
-          {/* Card 1: Report Studio (Standalone Report Plan) */}
+          {/* Card 1: Starter Academy Pack (3 Seats) */}
           <div 
-            onClick={() => openPlanModal('report_studio', 3, 1)}
+            onClick={() => openPlanModal('starter', 3, 1)}
             className={`p-6 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
               isNight 
                 ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
@@ -859,16 +859,16 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <div>
               <div className="flex justify-between items-center mb-3">
                 <span className="px-2.5 py-1 bg-pink-500/10 border border-pink-500/20 text-pink-500 text-[10px] font-black tracking-wider uppercase rounded-full">
-                  {isKo ? '리포트 스튜디오 (단독)' : 'REPORT ONLY'}
+                  {isKo ? '스타터 패키지 (소형 어학원)' : 'STARTER ACADEMY PACK'}
                 </span>
               </div>
               <h3 className={`text-lg font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '리포트 스튜디오 (단독 플랜)' : 'Report Studio (Standalone)'}
+                {isKo ? '스타터 패키지 (소형 어학원)' : 'Starter Academy Pack (Micro-School)'}
               </h3>
               <div className="mb-3">
                 <div className="flex items-baseline gap-1">
                   <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {formatPrice(getPlanUnitPrice('report_studio', billingCycle))}
+                    {formatPrice(getPlanUnitPrice('starter', billingCycle))}
                   </span>
                   <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
                     {isKo ? '/월 (캠퍼스당)' : '/month per campus'}
@@ -876,7 +876,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </div>
                 {billingCycle === 'yearly' ? (
                   <p className="text-[11px] font-extrabold text-emerald-500 mt-1">
-                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('report_studio', 'yearly') * 12)} 일시 청구 (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('report_studio', 'yearly') * 12)}/yr`}
+                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('starter', 'yearly') * 12)} 일시 청구 (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('starter', 'yearly') * 12)}/yr`}
                   </p>
                 ) : (
                   <p className={`text-[11px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
@@ -886,7 +886,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
               <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '원어민/한국인 교사 모바일 평가 폼 & 카카오톡 알림톡 자동 생성을 위한 단독 플랜.' 
+                  ? '원어민/한국인 교사 모바일 평가 폼 & 카카오톡 알림톡 자동 생성을 위한 소형 학원용 패키지.' 
                   : 'Streamlined teacher logs & KakaoTalk report generation for foreign & Korean teachers.'}
               </p>
               <ul className={`space-y-3 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
@@ -916,7 +916,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                openPlanModal('report_studio', 3, 1);
+                openPlanModal('starter', 3, 1);
               }}
               className={`w-full py-3 font-bold text-xs rounded-2xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
                 isNight 
@@ -924,7 +924,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
               }`}
             >
-              {isKo ? '리포트 스튜디오 시작' : 'Choose Report Studio'}
+              {isKo ? '스타터 패키지 시작' : 'Choose Starter Pack'}
             </button>
           </div>
 
