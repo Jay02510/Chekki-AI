@@ -1157,7 +1157,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         {isKo ? '신청 접수 완료' : 'APPLICATION SUBMITTED'}
                       </span>
                       <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo ? '학원 정보 접수 & 청구서 발송' : 'Invoice & Onboarding Requested'}
+                        {isKo ? '학원 구독 등록 & 입금 안내' : 'Subscription & Setup Requested'}
                       </h3>
                     </div>
                   </div>
@@ -1168,8 +1168,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       : 'text-zinc-700 bg-emerald-50 border-emerald-200'
                   }`}>
                     {isKo 
-                      ? `✅ 학원 등록 정보가 Chekki AI 운영팀에 전달되었습니다! 아래 입금 계좌로 수강료를 입금해 주시면, 24시간 이내에 입력해주신 이메일(${invoiceResult.email})로 국세청 전자 세금계산서와 교사 인증 코드가 자동 발송됩니다.`
-                      : `✅ Your academy details have been registered with Chekki AI! A confirmation & tax invoice email has been sent to ${invoiceResult.email}. Please refer to the bank account details below to complete your payment.`}
+                      ? `✅ 학원 등록 정보가 Chekki AI 운영팀에 성공적으로 전달되었습니다! 아래 지정 계좌로 구독료를 입금해 주시면, 입금 확인 후 입력해주신 이메일(${invoiceResult.email})로 교사 인증 코드 및 사용 가이드가 즉시 발송됩니다.`
+                      : `✅ Your academy details have been registered with Chekki AI! Please refer to the bank account details below to complete your subscription payment. Authorization codes will be sent to ${invoiceResult.email}.`}
                   </p>
 
                   {/* Summary Card */}
@@ -1179,7 +1179,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <div className={`flex justify-between items-center text-xs pb-3 border-b font-mono ${
                       isNight ? 'border-white/5' : 'border-zinc-200'
                     }`}>
-                      <span className={isNight ? 'text-zinc-500' : 'text-zinc-500'}>{isKo ? '청구 코드' : 'Invoice ID'}:</span>
+                      <span className={isNight ? 'text-zinc-500' : 'text-zinc-500'}>{isKo ? '신청 코드' : 'Request Ref ID'}:</span>
                       <span className="font-bold text-orange-500">{invoiceResult.invoiceId}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
@@ -1193,29 +1193,23 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <div className="flex justify-between items-center text-xs">
                       <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '결제 주기' : 'Billing Cycle'}:</span>
                       <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {billingCycle === 'yearly' ? (isKo ? '연간 결제 (12개월, 20% 할인)' : 'Yearly (12 Months, 20% Off)') : (isKo ? '월간 결제' : 'Monthly')}
+                        {billingCycle === 'yearly' ? (isKo ? '연간 결제 (12개월, 20% 할인 반영)' : 'Yearly (12 Months, 20% Off)') : (isKo ? '월간 결제' : 'Monthly')}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '신청 강사 수' : 'Teacher Seats'}:</span>
-                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.teacherCount} {isKo ? '명' : 'seats'}</span>
+                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '포함 교사 수' : 'Included Teacher Seats'}:</span>
+                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{activePlan.defaultTeachers || invoiceResult.teacherCount || 10} {isKo ? '명 (전체 캠퍼스)' : 'seats (Campus Bundle)'}</span>
                     </div>
-                    {invoiceResult.studentCount && (
-                      <div className="flex justify-between items-center text-xs">
-                        <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '추정 재원생 수' : 'Enrolled Students'}:</span>
-                        <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.studentCount} {isKo ? '명' : 'students'}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between items-center text-xs">
-                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '수신 이메일' : 'Tax Invoice Email'}:</span>
+                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '수신 이메일' : 'Contact Email'}:</span>
                       <span className={`font-bold font-mono ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.email}</span>
                     </div>
                     <div className={`flex justify-between items-center text-sm pt-2 border-t font-bold ${
                       isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-200 text-zinc-700'
                     }`}>
-                      <span>{isKo ? '총 청구 입금 금액' : 'Total Invoice Amount'}:</span>
+                      <span>{isKo ? '총 입금 금액' : 'Total Payment Amount'}:</span>
                       <span className="text-xl font-black text-emerald-500 font-mono">
-                        {formatPrice(invoiceResult.totalAmount || 0)}
+                        {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle) * (billingCycle === 'yearly' ? 12 : 1))}
                       </span>
                     </div>
                   </div>
@@ -1226,7 +1220,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   }`}>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 flex items-center gap-1.5 font-mono">
                       <Bank size={14} weight="bold" />
-                      <span>{isKo ? '체키AI 법인 계좌 정보' : 'Chekki AI Corporate Bank Account'}</span>
+                      <span>{isKo ? '체키AI 입금 계좌 정보' : 'Chekki AI Bank Account Details'}</span>
                     </span>
 
                     <div className="space-y-1.5 text-xs">
