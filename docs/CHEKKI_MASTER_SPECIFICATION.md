@@ -67,46 +67,39 @@ By transforming a routine paper worksheet into an interactive, digital workspace
 * Native English Text-to-Speech (TTS) playback and Speech-to-Text (STT) speech recognition scoring.
 * Evaluates child spoken responses against expected answers and awards star badges.
 
-### Feature 5: Gamified Engagement & Badges
-* Daily scan streak tracking and unlockable achievement badges (Standard vs Pro Exclusive).
+### Feature 6: Dedicated FT & KT Dashboards with Role-Gated Access Control (`/teacher`)
+* **Foreign Teacher (FT) View (`educatorRole: 'ft'`):** Dedicated workspace for English instructors. Access to `📊 Class Dashboard`, `📘 Manage Syllabus`, `📄 Manage Homework`, and `📜 My History`. AI Report Studio is hidden to prevent parent miscommunication.
+* **Korean Teacher (KT) View (`educatorRole: 'kt'`):** Access to all FT features + **`📄 AI Report Studio`** (`/report-studio`), **`✍️ FT Form Attribution Badges`** (*Submitted by Teacher Mark (FT)*), **`💬 Pre-Translated Korean Comments`**, and **`👥 Student Approvals`**.
+* **Director HQ Admin Portal (`NativeDirectorPortal`):** Executive campus command center with student roster management, teacher class allocations, curriculum stream oversight, and **Director-Only Brand Logo Management**.
 
-### Feature 6: Unified Educator & Director Portal (`/teacher`)
-* **Unified Portal Route (`/teacher`):** Single, seamless entry point for both teachers and school directors.
-* **Role Switcher Pills:** Unauthenticated login screen features role selector pills (`👨‍🏫 교사 로그인` vs `🏢 원장님 HQ 로그인`).
-* **Director HQ Admin Overview (`NativeDirectorPortal`):** Logging in as a Director activates the Director HQ Overview with campus-wide student roster management, teacher assignments, multi-class syllabus & daily homework monitoring, and 1-click **Report Studio** progress report generation.
+### Feature 7: Single-Use Authorization Code System & Automated Role Routing
+* **Single-Use Consumption Guardrails:** Authorization codes (`FT-APEX10`, `KT-APEX10`) can only be registered once. Upon sign-up, the code is marked as `CONSUMED` and locked to the user's UID. Re-use attempts by other users are blocked.
+* **Automated Respective Dashboard Routing:** Subsequent logins with Email & Password automatically detect stored role bindings (`ft`, `kt`, `director`) and route straight to their respective dashboard.
+* **Revocation & Replacement Codes:** Revoking a teacher seat automatically generates a brand-new, unique single-use code for replacement staff.
 
-### Feature 7: Dual-Stream AI Curriculum & Homework Scanner
-* **📘 Syllabus / Course Plan Scanner:** Extracts multi-week topics, target vocabulary chips, and phonics focus rules across 4–16 week course durations.
-* **📄 Daily Homework Worksheet Scanner:** Extracts question text, correct answers, and generates green AI answer ink overlays for Chekki Parent App scanning.
-* **Independent Storage:** Syllabus data and worksheet answer keys store in separate state buckets, preventing overwriting or accidental deletion.
+### Feature 8: Worksheet Format & Question Style Selectors
+* **Worksheet Formats:** 1-Click selection between `Daily Homework`, `Weekly Review Quiz`, `Phonics & Vocab Tracing`, and `Reading Comprehension`.
+* **Question Style Formats:** 1-Click selection between `Multiple Choice (4-choice)`, `Fill-in-the-Blanks`, `Unscramble Sentences`, `Vocab Matching`, and `Short Answer` for precise AI autograding.
 
-### Feature 8: Side-by-Side Paper Overlay & Editable Answer Key Panel
-* **Left Panel:** Displays physical paper scan preview with floating **Green AI Answer Ink Badges** (`Q1 ➔ producers`, `Q2 ➔ consumer`, `Q3 ➔ decomposers`) directly on top of the document page.
-* **Right Panel:** Inline editable text fields for question text, category tags, and correct answer ink, plus a `➕ Add Question` button for manual question creation.
+### Feature 9: Director-Only Academy Logo & Brand Management
+* **Centralized Brand Control:** Logo uploading and editing is restricted exclusively to the Director HQ Admin Portal (`NativeDirectorPortal`).
+* **Enforced Specs:** Enforces format specifications (`PNG`, `JPG`, `SVG`, `WEBP`), resolution (`400x400px` square or `600x200px` horizontal), and size (`Max 5MB`).
+* **Automatic Campus Inheritance:** Saved logos automatically render on all FT & KT dashboard headers, printable A4 PDF reports, and KakaoTalk script footers.
 
-### Feature 9: AI Content Safety & Bad Words Guardrail System
+### Feature 10: AI Content Safety & Bad Words Guardrail System
 * Automated real-time regex filtering against an educational profanity safety dictionary (`checkContainsBadWords`).
 * High-visibility alert banners and curriculum save restrictions when inappropriate language or bad words are detected in teacher input or OCR extractions.
 
-### Feature 10: Director HQ Portal & Automated Report Generator Sync
-* Multi-class syllabus/worksheet oversight dashboard.
-* 1-Click **`Report Studio`** integration (`/report-studio`) that automatically seeds uploaded syllabus vocabulary and worksheet accuracy into parent progress report PDFs.
-
 ---
 
-## 1.4 Monetization & Tiering Architecture
+## 1.4 Monetization & B2B SaaS Tiering Architecture
 
-| Feature / Capability | Free Explorer Tier | Chekki Pro Tier | School / Enterprise Tier |
-| :--- | :--- | :--- | :--- |
-| **Daily Scans** | 2 Scans / Day | Unlimited (9,999/day) | Unlimited |
-| **AI Model Engine** | Gemini 3 Flash | **Gemini 3 Pro** (Deep Reasoning) | Gemini 3 Pro |
-| **Parent Guidance Script** | Basic | Advanced + Contextual | Advanced + Contextual |
-| **Audio Pronunciation** | Restricted | Native TTS & STT Coach | Native TTS & STT Coach |
-| **Practice Generator** | None | Unlimited Sheet Generation | Class Bulk Sheet Generation |
-| **Curriculum Pre-Seeding**| Read Only | Standard Pre-Seeding | **Full School Pre-Seeding** |
-| **Parent Growth Reports** | Basic Summary | Weekly Personal Report | **Automated Class Report Generator** |
-| **Analytics Dashboard** | Personal History | Mistake Vault + Insights | Class-level Analytics |
-| **Price Point** | Free | ₩14,900 / month ($9.99/mo) | Custom Contract Pricing |
+| Plan Tier | Monthly Price (KRW / USD) | Yearly Price (20% Off) | Included Seats & Features |
+| :--- | :---: | :---: | :--- |
+| **공부방 / 개인 교습소 (`solo`)** | **`₩39,000 / 월`** ($29/mo) | **`₩31,000 / 월`** ($23/mo) | • **1 Teacher Seat** (Dual FT & KT access)<br>• Up to 20 Active Students<br>• Full Autograding & Report Studio |
+| **스타터 소형 어학원 (`starter`)** | **`₩69,000 / 월`** ($49/mo) | **`₩55,000 / 월`** ($39/mo) | • **3 Teacher Seats** (1 FT + 2 KT)<br>• Up to 50 Active Students |
+| **체키 마스터 스쿨 프로 (`school_pro`)** | **`₩290,000 / 월`** ($220/mo) | **`₩232,000 / 월`** ($175/mo) | • **10 Teacher Seats** (5 FT + 5 KT)<br>• **Unlimited Student App Access** |
+| **대형 학원 & 프랜차이즈 (`enterprise`)** | **`₩590,000 / 월`** ($450/mo) | **`₩472,000 / 월`** ($360/mo) | • **20+ Teacher Seats**<br>• Custom LMS REST API & Webhook Sync |
 
 ---
 
