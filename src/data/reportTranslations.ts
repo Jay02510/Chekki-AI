@@ -22,8 +22,8 @@ export const REPORT_TRANSLATIONS = {
     pricing: {
       heading: 'Simple Monthly Academy Pricing',
       subheading: 'No hidden setup fees. Scale easily as your campus grows.',
-      starterTitle: 'Report Studio (Standalone)',
-      starterPrice: '₩35,000',
+      starterTitle: 'Starter Academy Pack (Micro-School)',
+      starterPrice: '₩69,000',
       starterPeriod: '/ month per campus',
       starterDesc: '30-second mobile FT log + bilingual KakaoTalk parent script generator & KT review workspace.',
       starterFeatures: [
@@ -34,10 +34,10 @@ export const REPORT_TRANSLATIONS = {
         '3-Stage Review Status Bar (Pending ➔ Edited ➔ Sent)',
         'Student Praise & Support Call Preparation'
       ],
-      starterCta: 'Choose Report Studio',
+      starterCta: 'Choose Starter Pack',
 
-      proTitle: 'Chekki School Pro (Master Bundle)',
-      proPrice: '₩69,000',
+      proTitle: 'Chekki Master School Pro (All-in-One Bundle)',
+      proPrice: '₩290,000',
       proPeriod: '/ month per campus',
       proBadge: 'MOST POPULAR (COMPLETE CAMPUS BUNDLE)',
       proDesc: 'Report Studio + Automated Textbook Syllabus Pre-seeding & Homework Autograding Sync.',
@@ -50,18 +50,18 @@ export const REPORT_TRANSLATIONS = {
         'FREE Chekki Pro App for All Parents (via 6-digit code)',
         'Dedicated 1:1 Director Setup & Support'
       ],
-      proCta: 'Choose Chekki School Pro',
+      proCta: 'Choose Master School Pro',
 
       enterpriseTitle: 'Large Academy & Franchise',
-      enterprisePrice: '₩149,000',
+      enterprisePrice: '₩590,000',
       enterprisePeriod: '/ month per campus',
-      enterpriseDesc: 'Unlimited teacher seats, multi-campus director dashboard, custom branding & CRM integration.',
+      enterpriseDesc: 'Unlimited teacher seats, multi-campus director dashboard, custom branding & LMS/API sync.',
       enterpriseFeatures: [
-        'Unlimited Teacher & Staff Seats across all branches',
+        '20+ Teacher & Staff Seats across all branches',
         'Multi-Campus Director HQ Dashboard',
         'Custom Academy Branding & KakaoTalk Notification Templates',
         'Priority Phone & On-Site Director Support',
-        'Custom Data Export & CRM Sync (Airtable / Excel)'
+        'Custom Data Export & LMS API Sync (REST / Webhooks)'
       ],
       enterpriseCta: 'Contact Enterprise Team'
     },
@@ -200,8 +200,8 @@ export const REPORT_TRANSLATIONS = {
     pricing: {
       heading: '월별 합리적인 학원 요금제',
       subheading: '추가 개설비 무료. 캠퍼스 성장 규모에 맞춰 자유롭게 선택하세요.',
-      starterTitle: '리포트 스튜디오 (알림톡 단독)',
-      starterPrice: '₩35,000',
+      starterTitle: '스타터 학원 패키지 (공부방 / 소형)',
+      starterPrice: '₩69,000',
       starterPeriod: '/ 월 (캠퍼스당)',
       starterDesc: '원어민 30초 작성 모바일 폼 + 한/영 알림톡 자동 생성 & 한국인 교사 검수 워크스페이스.',
       starterFeatures: [
@@ -212,10 +212,10 @@ export const REPORT_TRANSLATIONS = {
         '3단계 검수 상태 확인 (검수대기 ➔ 수정완료 ➔ 발송완료)',
         '학생 칭찬 및 주의사항 전화 상담 가이드'
       ],
-      starterCta: '리포트 스튜디오 선택하기',
+      starterCta: '스타터 패키지 선택하기',
 
-      proTitle: '체키 스쿨 프로 (마스터 통합 패키지)',
-      proPrice: '₩69,000',
+      proTitle: '체키 마스터 스쿨 프로 (마스터 통합 패키지)',
+      proPrice: '₩290,000',
       proPeriod: '/ 월 (캠퍼스당)',
       proBadge: '가장 인기 있는 플랜 (완전 통합 패키지)',
       proDesc: '리포트 스튜디오 + 교재 목차 자동 선제 탑재 & 숙제 채점 연동.',
@@ -228,18 +228,18 @@ export const REPORT_TRANSLATIONS = {
         '학부모 Chekki Pro 앱 무제한 무료 제공 (6자리 코드 연동)',
         '전담 매니저 1:1 맞춤 온보딩 지원'
       ],
-      proCta: '체키 스쿨 프로 선택하기',
+      proCta: '체키 마스터 스쿨 프로 선택하기',
 
       enterpriseTitle: '대형 학원 & 프랜차이즈 엔터프라이즈',
-      enterprisePrice: '₩149,000',
+      enterprisePrice: '₩590,000',
       enterprisePeriod: '/ 월 (캠퍼스당)',
-      enterpriseDesc: '무제한 강사 계정, 다중 캠퍼스 통합 원장 대시보드, 맞춤 브랜드 알림톡 및 DB 연동.',
+      enterpriseDesc: '무제한 강사 계정, 다중 캠퍼스 통합 원장 대시보드, 맞춤 브랜드 알림톡 및 LMS DB 연동.',
       enterpriseFeatures: [
-        '전 직영/가맹 캠퍼스 무제한 교사 계정',
+        '20석 이상 직영/가맹 캠퍼스 교사 계정',
         '다중 캠퍼스 통합 본사 원장 대시보드',
         '학원 맞춤 브랜딩 & 전용 알림톡 템플릿',
         '우선 전화 및 방문 원장님 온보딩 지원',
-        '맞춤 데이터 엑셀/Airtable/CRM 동기화'
+        '학원 LMS / ERP API 연동 (REST & Webhook)'
       ],
       enterpriseCta: '엔터프라이즈 문의하기'
     },
