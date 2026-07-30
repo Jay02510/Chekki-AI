@@ -333,6 +333,16 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
           {/* Right Actions */}
           <div className="flex items-center gap-3 ml-auto">
+            {/* KT Teacher Access Pill */}
+            <a
+              href="/teacher?role=teacher"
+              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-orange-500/10 border border-orange-500/30 text-orange-400 hover:bg-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
+              title="KT 한인 담임 교사 대시보드 로그인"
+            >
+              <span>👨‍🏫</span>
+              <span>{isKo ? 'KT 담임 교사 로그인' : 'KT Teacher Login'}</span>
+            </a>
+
             {/* Language Toggle */}
             <button
               type="button"
