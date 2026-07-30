@@ -35,6 +35,7 @@ import { NativeArchitecturePipeline } from '../components/NativeArchitecturePipe
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeAcademyOnboarding } from '../components/NativeAcademyOnboarding';
 import { NativeCurriculumPreseed } from '../components/NativeCurriculumPreseed';
+import { NativeSchoolPackageFlow } from '../components/NativeSchoolPackageFlow';
 import {
   generateGeneralClassSummary,
   generateStudentExceptionReport,
@@ -714,6 +715,11 @@ ${activeReport.parentScriptKo.closing}`.trim();
             {copied ? <CheckCircle size={18} weight="bold" /> : <Copy size={18} weight="bold" />}
             <span>{copied ? demoT.copiedText : demoT.copyScriptBtn}</span>
           </button>
+        </div>
+
+        {/* 4.5. SCHOOL PACKAGE WORKFLOW STEPPER */}
+        <div className="pt-6">
+          <NativeSchoolPackageFlow isNight={isNight} isKo={isKo} />
         </div>
 
         {/* ========================================================================= */}
