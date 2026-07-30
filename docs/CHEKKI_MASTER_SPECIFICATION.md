@@ -70,9 +70,11 @@ By transforming a routine paper worksheet into an interactive, digital workspace
 ### Feature 5: Gamified Engagement & Badges
 * Daily scan streak tracking and unlockable achievement badges (Standard vs Pro Exclusive).
 
-### Feature 6: School & Organization Portal
-* Transactional school code redemption (`APEX10`, `POLY10`, `GATE05`) for institution-funded Pro access.
-* Director Admin HQ Portal (`NativeDirectorPortal`) providing campus-wide student roster management, teacher assignments, and exception oversight.
+### Feature 6: Dedicated Director HQ Portal & Authentication System (`/director`)
+* **Dedicated Route (`/director`):** Completely separated from the Teacher Portal (`/teacher`). Directors access a standalone login and academy registration portal at `https://chekki.app/director`.
+* **Director Credentials & Onboarding:** School Directors sign up with their **Director Name**, **Academy/Hagwon Name**, **Director Email**, **Password**, and optional **Director Code** (`DIRECTOR-APEX10`).
+* **Director Admin HQ Dashboard (`DirectorPage`):** Provides campus-wide student roster management, teacher seat assignments, multi-class syllabus & daily homework monitoring, and 1-click **Report Studio** progress report generation.
+* **1-Click Demo Login:** Features instant one-click demo login (`director@apex-seocho.edu` / `director123`) for rapid sales demonstrations.
 
 ### Feature 7: Dual-Stream AI Curriculum & Homework Scanner
 * **📘 Syllabus / Course Plan Scanner:** Extracts multi-week topics, target vocabulary chips, and phonics focus rules across 4–16 week course durations.
