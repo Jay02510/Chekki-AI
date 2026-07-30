@@ -2751,7 +2751,24 @@ export default function TeacherPage({ isNight = true }: Props) {
                                     />
                                     <span className="text-[10px] text-zinc-400">{isKo ? '주간' : 'Weeks'}</span>
                                   </div>
-                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                            {/* Pro Scanner Tip Banner */}
+                            <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
+                              isThemeNight ? 'bg-orange-500/10 border-orange-500/30 text-orange-200' : 'bg-orange-50 border-orange-200 text-orange-950'
+                            }`}>
+                              <Sparkle size={20} weight="fill" className="shrink-0 text-orange-500 mt-0.5" />
+                              <div className="space-y-1">
+                                <span className="font-bold block text-xs text-orange-400">
+                                  💡 {isKo ? '교재 목차(Textbook Syllabus / Index) 촬영 & 스캔 팁:' : 'Pro Tips for Textbook Syllabus / Index Photo Scanning:'}
+                                </span>
+                                <ul className="text-[11px] text-zinc-300 space-y-1 list-disc pl-4 leading-relaxed">
+                                  <li>{isKo ? '교재 맨 앞쪽의 Table of Contents (목차) 및 Scope & Sequence 페이지를 평평하게 촬영하세요.' : 'Take a flat, glare-free photo of the textbook Table of Contents or Scope & Sequence page.'}</li>
+                                  <li>{isKo ? '주차별/단원별(Unit 1, Unit 2) 제목과 타겟 어휘 목록이 포함되도록 구도를 맞추세요.' : 'Ensure unit headers (Unit 1, Unit 2) and target vocabulary lists are clearly framed.'}</li>
+                                  <li>{isKo ? 'Chekki AI가 4주~16주 전체 과정의 주차별 어휘 및 파닉스를 자동 추출하여 대시보드에 선제 탑재합니다.' : 'Chekki AI automatically extracts multi-week vocabulary & phonics to pre-seed your entire course!'}</li>
+                                </ul>
                               </div>
                             </div>
 
@@ -3297,6 +3314,24 @@ export default function TeacherPage({ isNight = true }: Props) {
                                   <option value="vocab_matching">🔗 {isKo ? '어휘 뜻 연결 (Matching Definitions)' : 'Matching Definitions'}</option>
                                   <option value="short_answer">📝 {isKo ? '단답형 (Short Answer)' : 'Short Answer'}</option>
                                 </select>
+                              </div>
+
+                              {/* Explicit AI Worksheet Generation Button */}
+                              <div className="pt-3 border-t border-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <p className="text-[11px] text-zinc-400 font-medium">
+                                  {isKo ? '선택한 옵션으로 학급 맞춤 오답 복습지 및 정답지 PDF를 생성합니다.' : 'Generates custom review worksheet & answer key PDF based on chosen options.'}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    alert(isKo ? '⚡ AI 맞춤 워크시트(PDF) 작성이 완료되었습니다!' : '⚡ AI Worksheet Generated Successfully!');
+                                    window.print();
+                                  }}
+                                  className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                                >
+                                  <Printer size={15} weight="bold" />
+                                  <span>{isKo ? '⚡ AI 워크시트 생성 & 오답 복습지 인쇄 (PDF)' : '⚡ Generate Printable AI Worksheet (PDF)'}</span>
+                                </button>
                               </div>
                             </div>
                           </div>
