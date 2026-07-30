@@ -88,8 +88,15 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [isDeletingClass, setIsDeletingClass] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
-  // Tab navigation
-  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'students' | 'directorPortal'>('overview');
+  // Role selection & Tab navigation
+  const isDirectorPath = typeof window !== 'undefined' && (
+    window.location.pathname.includes('director') || 
+    new URLSearchParams(window.location.search).get('role') === 'director'
+  );
+  const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath ? 'director' : 'teacher');
+  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'students' | 'directorPortal'>(
+    isDirectorPath ? 'directorPortal' : 'overview'
+  );
 
   // Curriculum state
   const [curriculumTopic, setCurriculumTopic] = useState('');
@@ -1227,13 +1234,45 @@ export default function TeacherPage({ isNight = true }: Props) {
               </button>
             </div>
 
-            <div className="w-20 h-20 mb-6 drop-shadow-[0_10px_25px_rgba(249,115,22,0.25)]">
-              <ChekkiMascot className="w-full h-full" mood="thinking" />
+            {/* Role Switcher Pill (Teacher vs Director HQ) */}
+            <div className="w-full flex p-1 bg-[#050505] border border-white/10 rounded-2xl mb-4">
+              <button
+                type="button"
+                onClick={() => { setLoginRole('teacher'); setAuthError(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  loginRole === 'teacher'
+                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <ChalkboardTeacher size={14} weight="bold" />
+                <span>{isKo ? '교사 로그인' : 'Teacher Access'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLoginRole('director'); setActiveTab('directorPortal'); setAuthError(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  loginRole === 'director'
+                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Buildings size={14} weight="bold" />
+                <span>{isKo ? '원장님 HQ 로그인' : 'Director Admin'}</span>
+              </button>
             </div>
-            
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold bg-orange-500/10 border border-orange-500/20 text-orange-400">
-              <ChalkboardTeacher size={12} weight="bold" />
-              <span>{isKo ? '교사 전용 포털' : 'Teacher Access Portal'}</span>
+
+            <div className={`mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold ${
+              loginRole === 'director'
+                ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+                : 'bg-orange-500/10 border border-orange-500/20 text-orange-400'
+            }`}>
+              {loginRole === 'director' ? <Buildings size={12} weight="bold" /> : <ChalkboardTeacher size={12} weight="bold" />}
+              <span>
+                {loginRole === 'director'
+                  ? (isKo ? '원장님 전용 HQ 관리자 포털' : 'Director HQ Admin Access')
+                  : (isKo ? '교사 전용 포털' : 'Teacher Access Portal')}
+              </span>
             </div>
 
             {/* Auth Mode Toggle (Login vs Sign Up) */}
@@ -1241,9 +1280,9 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                   authMode === 'login'
-                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                    ? (loginRole === 'director' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-white shadow-lg shadow-orange-500/20')
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
@@ -1252,9 +1291,9 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => { setAuthMode('signup'); setAuthError(''); }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                   authMode === 'signup'
-                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                    ? (loginRole === 'director' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-white shadow-lg shadow-orange-500/20')
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
@@ -1264,27 +1303,36 @@ export default function TeacherPage({ isNight = true }: Props) {
 
             <h2 className="text-2xl font-black tracking-tight text-white mb-2 font-display">
               {authMode === 'login'
-                ? (isKo ? '교사 포털 로그인' : 'Teacher Portal Login')
-                : (isKo ? '교사 계정 생성' : 'Create Teacher Account')}
+                ? (loginRole === 'director' ? (isKo ? '원장님 HQ 로그인' : 'Director HQ Login') : (isKo ? '교사 포털 로그인' : 'Teacher Portal Login'))
+                : (loginRole === 'director' ? (isKo ? '원장님 계정 생성' : 'Create Director Account') : (isKo ? '교사 계정 생성' : 'Create Teacher Account'))}
             </h2>
             <p className="text-zinc-400 text-xs mb-6 text-center leading-relaxed max-w-xs">
               {authMode === 'login'
-                ? (isKo ? '학습지 관리 및 분석을 위해 교사 계정으로 로그인해 주세요.' : 'Log in with your teacher credentials to access your dashboard.')
-                : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.')}
+                ? (loginRole === 'director'
+                    ? (isKo ? '캠퍼스 전체 커리큘럼, 일간 숙제 제출률 및 보고서 총괄 대시보드로 이동합니다.' : 'Log in to view campus curriculum streams, homework status, and student reports.')
+                    : (isKo ? '학습지 관리 및 분석을 위해 교사 계정으로 로그인해 주세요.' : 'Log in with your teacher credentials to access your dashboard.'))
+                : (loginRole === 'director'
+                    ? (isKo ? '학원명을 등록하고 즉시 원장님 전용 대시보드를 개설하세요.' : 'Register your academy and activate your Director HQ Dashboard.')
+                    : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
             </p>
 
-            <form onSubmit={handleSignIn} className="w-full space-y-4">
+            <form onSubmit={(e) => {
+              if (loginRole === 'director') {
+                setActiveTab('directorPortal');
+              }
+              handleSignIn(e);
+            }} className="w-full space-y-4">
               {authMode === 'signup' && (
                 <div className="space-y-1.5 text-left">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                    {isKo ? '선생님 성함' : 'Teacher Full Name'}
+                    {loginRole === 'director' ? (isKo ? '원장님 성함' : 'Director Name') : (isKo ? '선생님 성함' : 'Teacher Full Name')}
                   </label>
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={isKo ? "김철수 선생님" : "Jane Doe"}
+                    placeholder={loginRole === 'director' ? (isKo ? "김원장 원장님" : "Director Jane Smith") : (isKo ? "김철수 선생님" : "Jane Doe")}
                     className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
                   />
                 </div>
@@ -1299,7 +1347,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="teacher@school.com"
+                  placeholder={loginRole === 'director' ? "director@school.com" : "teacher@school.com"}
                   className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
                 />
               </div>
@@ -1336,9 +1384,9 @@ export default function TeacherPage({ isNight = true }: Props) {
 
                   <div className="space-y-1.5 text-left pt-1">
                     <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-bold text-orange-400 uppercase tracking-widest pl-1 flex items-center gap-1">
+                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 flex items-center gap-1 ${loginRole === 'director' ? 'text-amber-400' : 'text-orange-400'}`}>
                         <Key size={12} weight="bold" />
-                        <span>{isKo ? '교사 인증 코드' : 'Teacher Code'}</span>
+                        <span>{loginRole === 'director' ? (isKo ? '원장님 승인 코드' : 'Director Code') : (isKo ? '교사 인증 코드' : 'Teacher Code')}</span>
                       </label>
                       <span className="text-[10px] text-zinc-500 font-medium">({isKo ? '1-Click 즉시 승인' : 'Instant 1-Click Access'})</span>
                     </div>
@@ -1346,13 +1394,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                       type="text"
                       value={teacherCode}
                       onChange={(e) => setTeacherCode(e.target.value)}
-                      placeholder="E.g. APEX10-TEACHER"
+                      placeholder={loginRole === 'director' ? "DIRECTOR-APEX10" : "APEX10-TEACHER"}
                       className="w-full bg-[#050505] border border-orange-500/30 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white uppercase font-mono tracking-wider placeholder:text-zinc-600"
                     />
                     <p className="text-[10px] text-zinc-500 pl-1 leading-normal">
                       {isKo 
-                        ? '💡 입금 확인 이메일로 받은 교사 인증 코드를 입력하시면 가입 즉시 대시보드가 열립니다.' 
-                        : '💡 Entering your authorization code now will activate your teacher account in 1 click.'}
+                        ? '💡 승인 코드를 입력하시면 가입 즉시 대시보드가 개설됩니다.' 
+                        : '💡 Entering your authorization code will activate your account immediately.'}
                     </p>
                   </div>
                 </>

@@ -207,18 +207,9 @@ function AppContent() {
   useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
-      if (path === '/director' || path === '/director-hq') {
-        setShowSplash(false);
-        setShowDirectorPage(true);
-        setShowTeacherPage(false);
-        setShowSchoolsPage(false);
-        setShowReportStudioPage(false);
-        return;
-      }
       setShowSubscribePage(path === '/subscribe');
       setShowAdminPage(path === '/admin');
-      setShowTeacherPage(path === '/teacher');
-      setShowDirectorPage(path === '/director' || path === '/director-hq');
+      setShowTeacherPage(path === '/teacher' || path === '/director' || path === '/director-hq');
       setShowSchoolsPage(path === '/schools' || path === '/for-schools');
       setShowReportStudioPage(path === '/reports' || path === '/report-studio');
     };
@@ -260,16 +251,10 @@ function AppContent() {
       setShowAdminPage(true);
     }
 
-    // /teacher route — web only
-    if (window.location.pathname === '/teacher' && Capacitor.getPlatform() === 'web') {
+    // /teacher and /director routes — web only
+    if ((window.location.pathname === '/teacher' || window.location.pathname === '/director' || window.location.pathname === '/director-hq') && Capacitor.getPlatform() === 'web') {
       setShowSplash(false);
       setShowTeacherPage(true);
-    }
-
-    // /director route — web only
-    if ((window.location.pathname === '/director' || window.location.pathname === '/director-hq') && Capacitor.getPlatform() === 'web') {
-      setShowSplash(false);
-      setShowDirectorPage(true);
     }
 
     // /schools and /for-schools route — web only
