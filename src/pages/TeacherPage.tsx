@@ -4568,34 +4568,121 @@ export default function TeacherPage({ isNight = true }: Props) {
 
                         {activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0 ? (
                           <div className="space-y-3">
+                            <div className="flex items-center justify-between px-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                                {isKo ? '✏️ 추출된 정답을 자유롭게 수정하거나 추가하세요.' : '✏️ Edit or add answers before saving.'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setScannedData((prev: any) => {
+                                    const currentAnswers = prev?.detectedAnswers || [];
+                                    const newNum = currentAnswers.length + 1;
+                                    const newAnswers = [
+                                      ...currentAnswers,
+                                      {
+                                        questionNumber: newNum,
+                                        category: 'Vocabulary',
+                                        questionText: `${newNum}. Additional Worksheet Question ${newNum}`,
+                                        correctAnswer: 'answer',
+                                        answer: 'answer'
+                                      }
+                                    ];
+                                    return { ...prev, detectedAnswers: newAnswers };
+                                  });
+                                }}
+                                className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1 cursor-pointer"
+                              >
+                                <Plus size={14} weight="bold" />
+                                <span>{isKo ? '문항 추가' : 'Add Question'}</span>
+                              </button>
+                            </div>
+
                             {activeDisplayObj.detectedAnswers.map((item: any, idx: number) => (
                               <div
                                 key={idx}
-                                className={`p-4 rounded-2xl border transition-all text-left ${
+                                className={`p-4 rounded-2xl border transition-all text-left space-y-2.5 ${
                                   isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
                                 }`}
                               >
-                                <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center justify-between">
                                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
                                     Question #{item.questionNumber || idx + 1}
                                   </span>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                                    {item.category || 'Vocabulary'}
-                                  </span>
+                                  <input
+                                    type="text"
+                                    value={item.category || 'Vocabulary'}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setScannedData((prev: any) => {
+                                        const list = [...(prev?.detectedAnswers || [])];
+                                        list[idx] = { ...list[idx], category: val };
+                                        return { ...prev, detectedAnswers: list };
+                                      });
+                                    }}
+                                    className="text-[10px] font-bold uppercase tracking-wider bg-transparent border-b border-zinc-600 focus:border-orange-500 text-zinc-400 outline-none text-right w-28"
+                                  />
                                 </div>
-                                <p className={`text-xs font-semibold mb-2 ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>
-                                  {item.questionText || item.question}
-                                </p>
-                                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs">
-                                  <span className="text-emerald-400 font-bold">{isKo ? '부모님용 정답 오버레이:' : 'Correct Answer Ink:'}</span>
-                                  <span className="font-mono font-black text-emerald-400 text-sm">{item.answer}</span>
+
+                                <input
+                                  type="text"
+                                  value={item.questionText || item.question || ''}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setScannedData((prev: any) => {
+                                      const list = [...(prev?.detectedAnswers || [])];
+                                      list[idx] = { ...list[idx], questionText: val, question: val };
+                                      return { ...prev, detectedAnswers: list };
+                                    });
+                                  }}
+                                  className={`w-full text-xs font-semibold p-2.5 rounded-xl border outline-none transition-all ${
+                                    isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-zinc-200' : 'bg-white border-zinc-300 focus:border-orange-500 text-zinc-800'
+                                  }`}
+                                  placeholder={isKo ? '문제 지문을 입력하세요' : 'Enter question text'}
+                                />
+
+                                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
+                                  <span className="text-emerald-400 font-bold shrink-0 flex items-center gap-1">
+                                    <span>✏️</span>
+                                    <span>{isKo ? '부모님용 정답 잉크 (수정 가능):' : 'Correct Answer Ink:'}</span>
+                                  </span>
+                                  <input
+                                    type="text"
+                                    value={item.correctAnswer || item.answer || ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setScannedData((prev: any) => {
+                                        const list = [...(prev?.detectedAnswers || [])];
+                                        list[idx] = { ...list[idx], correctAnswer: val, answer: val };
+                                        return { ...prev, detectedAnswers: list };
+                                      });
+                                    }}
+                                    className="bg-[#050505] border border-emerald-500/50 focus:border-emerald-400 outline-none px-3 py-1.5 rounded-lg text-emerald-300 font-mono font-black text-xs w-full max-w-[220px]"
+                                    placeholder={isKo ? '정답 단어/문장 입력' : 'Enter answer text'}
+                                  />
                                 </div>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="p-8 text-center border rounded-2xl border-dashed border-white/10 text-xs text-zinc-500">
-                            {isKo ? '워크시트에서 추출된 개별 정답 문항이 표시됩니다.' : 'Worksheet question answer keys will appear here after scanning.'}
+                          <div className="p-8 text-center border rounded-2xl border-dashed border-white/10 text-xs text-zinc-500 space-y-3">
+                            <p>{isKo ? '추출된 개별 정답 문항이 없거나 아직 스캔되지 않았습니다.' : 'No worksheet question answers extracted yet.'}</p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setScannedData((prev: any) => ({
+                                  ...prev,
+                                  detectedAnswers: [
+                                    { questionNumber: 1, category: 'Vocabulary', questionText: '1. Organisms that make food', correctAnswer: 'producers', answer: 'producers' },
+                                    { questionNumber: 2, category: 'Vocabulary', questionText: '2. Organisms that eat living things', correctAnswer: 'consumer', answer: 'consumer' }
+                                  ]
+                                }));
+                              }}
+                              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
+                            >
+                              <Plus size={14} weight="bold" />
+                              <span>{isKo ? '수동 정답 문항 작성하기' : 'Create Answer Key Manually'}</span>
+                            </button>
                           </div>
                         )}
                       </div>
