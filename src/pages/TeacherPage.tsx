@@ -1681,18 +1681,20 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              type="button"
-              onClick={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
-              title={isKo ? '학원 로고 설정' : 'Upload Academy Logo'}
-              className={`p-2 rounded-xl transition-all text-xs font-bold active:scale-[0.95] cursor-pointer ${
-                isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
-              }`}
-            >
-              🖼️
-            </button>
-          </div>
+          {loginRole === 'director' && (
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
+                title={isKo ? '원장님 전용 학원 로고 설정' : 'Director Logo Settings'}
+                className={`p-2 rounded-xl transition-all text-xs font-bold active:scale-[0.95] cursor-pointer ${
+                  isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                }`}
+              >
+                🖼️
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Navigation Tabs */}

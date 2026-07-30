@@ -180,10 +180,28 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               Campus Manager
             </span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-            <Buildings size={24} className="text-orange-500" />
-            <span>{academyName}</span>
-          </h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+              <Buildings size={24} className="text-orange-500" />
+              <span>{academyName}</span>
+            </h3>
+            <button
+              type="button"
+              onClick={() => {
+                const currentLogo = localStorage.getItem('chekki_academy_logo') || '';
+                const newUrl = prompt('🖼️ 원장님 전용 학원 맞춤 로고 URL을 입력하세요:\n(지원: PNG, JPG, SVG | 권장: 400x400px / 최대 5MB)', currentLogo);
+                if (newUrl !== null) {
+                  localStorage.setItem('chekki_academy_logo', newUrl.trim());
+                  alert('✅ 학원 맞춤 로고가 등록되었습니다! FT/KT 교사 대시보드 및 모든 성적표 리포트에 자동 적용됩니다.');
+                  window.location.reload();
+                }
+              }}
+              className="px-3 py-1 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[11px] font-bold rounded-xl border border-orange-500/20 transition-all cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <span>🖼️</span>
+              <span>원장님 맞춤 로고 등록</span>
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}
