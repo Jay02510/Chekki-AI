@@ -155,7 +155,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     setIsRequestingInvoice(true);
     const unitPrice = getPlanUnitPrice(selectedPlanId, billingCycle);
     const months = billingCycle === 'yearly' ? 12 : 1;
-    const totalAmount = unitPrice * months * teacherCount;
+    const totalAmount = selectedPlanId === 'trial' ? 0 : unitPrice * months;
     try {
       const res = await fetch('/api/request-school-invoice', {
         method: 'POST',
@@ -1270,10 +1270,14 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     </div>
                     <div>
                       <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block font-mono">
-                        {isKo ? '7일 무료 체험 신청 (신용카드 등록 X)' : '7-DAY FREE TRIAL (NO CREDIT CARD)'}
+                        {selectedPlanId === 'trial' 
+                          ? (isKo ? '7일 무료 체험 신청 (신용카드 등록 X)' : '7-DAY FREE TRIAL (NO CREDIT CARD)')
+                          : (isKo ? 'B2B 플랜 결제 & 세금계산서 청구' : 'B2B TAX INVOICE & PLAN APPLICATION')}
                       </span>
                       <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo ? '강사 1인 + 원생 30명 7일 무료 시작' : '1 Teacher + 30 Students 7-Day Free Trial'}
+                        {selectedPlanId === 'trial'
+                          ? (isKo ? '강사 1인 + 원생 30명 7일 무료 시작' : '1 Teacher + 30 Students 7-Day Free Trial')
+                          : (isKo ? `${activePlan.nameKo} 도입 신청` : `${activePlan.nameEn} Subscription`)}
                       </h3>
                       <p className="text-xs text-orange-500 font-bold">
                         {isKo ? '학부모용 Chekki 모바일 앱 100% 무료 포함' : 'Includes 100% FREE Chekki Parent Mobile App'}
@@ -1339,7 +1343,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
                     <div>
                       <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 block mb-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '이메일 (체험 승인 및 안내용) *' : 'Contact Email (For Trial Activation) *'}
+                        {isKo ? '이메일 (청구서/체험 승인 안내용) *' : 'Contact Email (For Invoice / Trial) *'}
                       </label>
                       <input
                         type="email"
@@ -1357,16 +1361,18 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   </div>
 
                   <p className="text-[10px] text-zinc-500 text-center font-mono">
-                    {isKo ? '💡 신청 후 1시간 내 이메일/문자로 14일 무료 체험 코드가 발급됩니다.' : 'Trial access code will be emailed within 1 hour after request.'}
+                    {selectedPlanId === 'trial' 
+                      ? (isKo ? '💡 신청 후 1시간 내 이메일/문자로 7일 무료 체험 코드가 발급됩니다.' : 'Trial access code will be emailed within 1 hour after request.')
+                      : (isKo ? '💡 신청 접수 후 등록된 이메일로 법인 계좌 정보와 전자 세금계산서가 발송됩니다.' : 'Payment instructions & tax invoice will be sent to your email.')}
                   </p>
 
-                  {getPlanUnitPrice(selectedPlanId, billingCycle) > 0 && (
+                  {selectedPlanId !== 'trial' && getPlanUnitPrice(selectedPlanId, billingCycle) > 0 && (
                     <div className={`p-4 border rounded-2xl space-y-2 mt-2 ${
                       isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-100/70 border-zinc-200'
                     }`}>
                       <div className="flex justify-between items-center text-xs">
                         <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
-                          {isKo ? '월 환산 청구 단가 (강사 1인)' : 'Monthly Effective Rate'}:
+                          {isKo ? '월 기준 청구 금액 (캠퍼스 패키지)' : 'Monthly Effective Rate'}:
                         </span>
                         <span className="font-bold font-mono">
                           {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle))} / {isKo ? '월' : 'mo'}
@@ -1375,7 +1381,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       {billingCycle === 'yearly' && (
                         <div className="flex justify-between items-center text-xs">
                           <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
-                            {isKo ? '결제 주기 (20% 할인)' : 'Billing Cycle (20% Off)'}:
+                            {isKo ? '결제 주기 (20% 할인 반영)' : 'Billing Cycle (20% Off)'}:
                           </span>
                           <span className="font-bold text-emerald-500 font-mono">
                             {isKo ? '연간 일시 결제 (12개월)' : 'Yearly (12 Months)'}
@@ -1389,7 +1395,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                             : (billingCycle === 'yearly' ? 'Total Billed (1 Year)' : 'Total Billed (1 Month)')}:
                         </span>
                         <span className="text-lg font-black text-emerald-500 font-mono">
-                          {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle) * (billingCycle === 'yearly' ? 12 : 1) * teacherCount)}
+                          {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle) * (billingCycle === 'yearly' ? 12 : 1))}
                         </span>
                       </div>
                     </div>
@@ -1404,7 +1410,11 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        <span>{isKo ? '14일 무료 체험 시작하기' : 'Start 14-Day Free Teacher Trial'}</span>
+                        <span>
+                          {selectedPlanId === 'trial'
+                            ? (isKo ? '7일 무료 체험 시작하기' : 'Start 7-Day Free Trial')
+                            : (isKo ? '청구서 발행 및 도입 신청' : 'Submit Plan & Invoice Request')}
+                        </span>
                         <ArrowRight size={14} weight="bold" />
                       </>
                     )}
@@ -1457,7 +1467,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 window.history.pushState({}, '', '/faq');
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
-              className="hover:text-orange-500 transition-colors font-bold text-orange-500"
+              className="hover:text-orange-500 transition-colors"
             >
               {isKo ? '자주 묻는 질문 (FAQ)' : 'FAQ'}
             </a>

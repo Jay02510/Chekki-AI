@@ -13,6 +13,8 @@ import {
   ChartBar, 
   FileText, 
   ArrowRight, 
+  ArrowLeft,
+  Eye,
   CheckCircle, 
   Plus, 
   Key, 
@@ -116,6 +118,8 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [selectedScannedPhonics, setSelectedScannedPhonics] = useState<string[]>([]);
   const [activeScannedTab, setActiveScannedTab] = useState<'parentView' | 'picker'>('picker');
   const [scanStatusMessage, setScanStatusMessage] = useState<string | null>(null);
+  const [showDocPreviewModal, setShowDocPreviewModal] = useState(false);
+  const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
 
   // New Chip Input state
   const [newVocabInput, setNewVocabInput] = useState('');
@@ -1128,6 +1132,17 @@ export default function TeacherPage({ isNight = true }: Props) {
         <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
         <div className="relative w-full max-w-md p-1.5 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col">
           <div className="bg-[#0c0c0e] rounded-[calc(2.5rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center">
+            <div className="w-full flex justify-start mb-2">
+              <button
+                type="button"
+                onClick={() => { window.location.href = '/'; }}
+                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <ArrowLeft size={14} weight="bold" />
+                <span>{isKo ? '메인 서비스로 돌아가기' : 'Return to Main Service'}</span>
+              </button>
+            </div>
+
             <div className="w-20 h-20 mb-6 drop-shadow-[0_10px_25px_rgba(249,115,22,0.25)]">
               <ChekkiMascot className="w-full h-full" mood="thinking" />
             </div>
@@ -1300,6 +1315,17 @@ export default function TeacherPage({ isNight = true }: Props) {
         <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
         <div className="relative w-full max-w-md p-1.5 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col">
           <div className="bg-[#0c0c0e] rounded-[calc(2.5rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center">
+            <div className="w-full flex justify-start mb-2">
+              <button
+                type="button"
+                onClick={() => { window.location.href = '/'; }}
+                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <ArrowLeft size={14} weight="bold" />
+                <span>{isKo ? '메인 서비스로 돌아가기' : 'Return to Main Service'}</span>
+              </button>
+            </div>
+
             <div className="w-20 h-20 mb-6 drop-shadow-[0_10px_25px_rgba(249,115,22,0.25)]">
               <ChekkiMascot className="w-full h-full" mood="happy" />
             </div>
@@ -2435,6 +2461,34 @@ export default function TeacherPage({ isNight = true }: Props) {
                           </div>
                         )}
 
+                        {/* Separate Upload Mode Selector Tabs */}
+                        <div className="flex gap-2 mb-4 p-1 bg-white/5 border border-white/10 rounded-2xl">
+                          <button
+                            type="button"
+                            onClick={() => setUploadMode('syllabus')}
+                            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                              uploadMode === 'syllabus'
+                                ? 'bg-orange-500 text-white shadow-md'
+                                : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                            }`}
+                          >
+                            <span>📘</span>
+                            <span>{isKo ? '교재 목차 / 시라버스 업로드' : 'Upload Syllabus / Course Plan'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setUploadMode('worksheet')}
+                            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                              uploadMode === 'worksheet'
+                                ? 'bg-orange-500 text-white shadow-md'
+                                : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                            }`}
+                          >
+                            <span>📄</span>
+                            <span>{isKo ? '일간 워크시트 / 정답지 업로드' : 'Upload Worksheet / Answer Key'}</span>
+                          </button>
+                        </div>
+
                         {/* Drag & Drop Textbook Page or PDF Zone */}
                         <div
                           onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
@@ -2468,7 +2522,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                             <div className="flex flex-col items-center py-4">
                               <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-3" />
                               <p className="text-xs font-bold text-orange-500">
-                                {isKo ? 'Chekki AI가 교재 페이지를 분석하고 있습니다...' : 'Scanning textbook page with Chekki AI...'}
+                                {isKo 
+                                  ? (uploadMode === 'syllabus' ? 'Chekki AI가 교재 목차/시라버스를 분석하고 있습니다...' : 'Chekki AI가 워크시트/정답지를 분석하고 있습니다...') 
+                                  : (uploadMode === 'syllabus' ? 'Scanning Syllabus with Chekki AI...' : 'Scanning Worksheet Page with Chekki AI...')}
                               </p>
                               <p className="text-[10px] text-zinc-500 mt-1">
                                 {isKo ? '단어, 파닉스 규칙, 학부모용 정답 가이드를 추출합니다' : 'Extracting vocabulary, phonics, and parent answer key'}
@@ -2486,7 +2542,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                                   <img 
                                     src={textbookPreviewUrl} 
                                     alt="Worksheet preview" 
-                                    className="w-16 h-16 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0" 
+                                    className="w-16 h-16 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0 cursor-pointer" 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setShowDocPreviewModal(true);
+                                    }}
                                     onError={(e) => {
                                       (e.target as HTMLImageElement).style.display = 'none';
                                     }}
@@ -2501,7 +2561,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                                     <span>
                                       {uploadedFileName 
                                         ? (uploadedFileName.length > 28 ? uploadedFileName.substring(0, 25) + '...' : uploadedFileName) 
-                                        : (isKo ? '교재 이미지 또는 PDF 파일 업로드' : 'Upload or Drag & Drop Textbook Page (Photo / PDF)')}
+                                        : (uploadMode === 'syllabus' 
+                                            ? (isKo ? '📘 교재 목차/시라버스 파일 업로드 (Photo/PDF)' : '📘 Upload Syllabus / Course Plan (Photo/PDF)') 
+                                            : (isKo ? '📄 일간 워크시트/정답지 업로드 (Photo/PDF)' : '📄 Upload Homework Worksheet / Answer Key (Photo/PDF)'))}
                                     </span>
                                     <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-[9px] font-black uppercase rounded-md border border-orange-500/30">
                                       AI Auto-Fill
@@ -2520,16 +2582,28 @@ export default function TeacherPage({ isNight = true }: Props) {
                                 </div>
                               </div>
 
-                              {scannedData && (
-                                <button
-                                  type="button"
-                                  onClick={() => setShowScannedModal(true)}
-                                  className="z-30 px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 shrink-0"
-                                >
-                                  <Sparkle size={14} weight="bold" />
-                                  <span>{isKo ? '답안 & 항목 선택' : 'Review AI Items'}</span>
-                                </button>
-                              )}
+                              <div className="flex items-center gap-2 shrink-0 z-30">
+                                {textbookPreviewUrl && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowDocPreviewModal(true)}
+                                    className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                                  >
+                                    <Eye size={14} weight="bold" />
+                                    <span>{isKo ? '스캔 문서 보기' : 'View Document'}</span>
+                                  </button>
+                                )}
+                                {scannedData && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowScannedModal(true)}
+                                    className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                                  >
+                                    <Sparkle size={14} weight="bold" />
+                                    <span>{isKo ? '답안 & 항목 선택' : 'Review AI Items'}</span>
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -3991,15 +4065,27 @@ export default function TeacherPage({ isNight = true }: Props) {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowScannedModal(false)}
-                  className={`p-2 rounded-full transition-all cursor-pointer ${
-                    isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
-                  }`}
-                >
-                  <X size={18} weight="bold" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {textbookPreviewUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDocPreviewModal(true)}
+                      className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Eye size={14} weight="bold" />
+                      <span>{isKo ? '스캔 원본 문서 보기' : 'View Scanned Document'}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowScannedModal(false)}
+                    className={`p-2 rounded-full transition-all cursor-pointer ${
+                      isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                    }`}
+                  >
+                    <X size={18} weight="bold" />
+                  </button>
+                </div>
               </div>
 
               {/* Tabs: Parent Answer Key vs Pick & Choose */}
@@ -4306,6 +4392,72 @@ export default function TeacherPage({ isNight = true }: Props) {
                 >
                   <CheckCircle size={16} weight="bold" />
                   <span>{isKo ? '선택 항목을 주간 커리큘럼에 적용' : 'Apply Selected to Curriculum'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- SCANNED DOCUMENT IMAGE / PDF PREVIEW MODAL --- */}
+      {showDocPreviewModal && (
+        <div className="fixed inset-0 z-[450] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            onClick={() => setShowDocPreviewModal(false)} 
+          />
+          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-4xl mx-4 animate-fade-in text-left max-h-[90vh] ${
+            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+          }`}>
+            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar flex flex-col ${
+              isThemeNight ? 'bg-[#0c0c0e] text-zinc-100' : 'bg-white text-zinc-900'
+            }`}>
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
+                    <Eye size={22} weight="bold" />
+                  </div>
+                  <div>
+                    <h3 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                      {isKo ? '스캔 원본 교재 / 워크시트 문서 미리보기' : 'Scanned Document Original Preview'}
+                    </h3>
+                    <p className="text-xs text-zinc-400">
+                      {uploadedFileName || (isKo ? '스캔된 교재 이미지/PDF' : 'Scanned Image / PDF')}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowDocPreviewModal(false)}
+                  className={`p-2 rounded-full transition-all cursor-pointer ${
+                    isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                  }`}
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+
+              <div className="flex-1 flex items-center justify-center p-4 bg-black/40 rounded-2xl border border-white/10 overflow-hidden min-h-[50vh]">
+                {textbookPreviewUrl ? (
+                  <img 
+                    src={textbookPreviewUrl} 
+                    alt="Scanned original document" 
+                    className="max-h-[65vh] w-auto object-contain rounded-xl shadow-2xl" 
+                  />
+                ) : (
+                  <p className="text-sm text-zinc-400 italic">
+                    {isKo ? '문서 미리보기 이미지를 로드할 수 없습니다.' : 'Document image preview unavailable.'}
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowDocPreviewModal(false)}
+                  className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer"
+                >
+                  {isKo ? '미리보기 닫기' : 'Close Preview'}
                 </button>
               </div>
             </div>

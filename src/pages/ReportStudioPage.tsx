@@ -284,9 +284,17 @@ ${activeReport.parentScriptKo.closing}`.trim();
     }
   };
 
-  const openOnboardingModal = () => {
-    setSubmitted(false);
-    setShowModal(true);
+  const [selectedPlanId, setSelectedPlanId] = useState<'starter' | 'pro' | 'enterprise'>('pro');
+
+  const openOnboardingModal = (planId: 'starter' | 'pro' | 'enterprise' = 'pro') => {
+    setSelectedPlanId(planId);
+    if (planId === 'enterprise') {
+      const el = document.getElementById('onboarding-form');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      setSubmitted(false);
+      setShowModal(true);
+    }
   };
 
   return (
@@ -363,7 +371,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
             <button
               type="button"
-              onClick={openOnboardingModal}
+              onClick={() => openOnboardingModal('pro')}
               className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full text-xs transition-all shadow-md active:scale-95 cursor-pointer"
             >
               {lang === 'ko' ? '맞춤 구축 신청' : 'Request Setup'}
@@ -391,7 +399,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <button
               type="button"
-              onClick={openOnboardingModal}
+              onClick={() => openOnboardingModal('pro')}
               className="w-full sm:w-auto pl-7 pr-4 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-full shadow-xl shadow-orange-500/25 transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] flex items-center justify-center gap-3 cursor-pointer group"
             >
               <span>{t.hero.primaryCta}</span>
@@ -796,7 +804,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
               <button
                 type="button"
-                onClick={openOnboardingModal}
+                onClick={() => openOnboardingModal('pro')}
                 className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-xl shadow-md transition-all cursor-pointer active:scale-95"
               >
                 {t.calculator.ctaText}
@@ -859,7 +867,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
                 <button
                   type="button"
-                  onClick={openOnboardingModal}
+                  onClick={() => openOnboardingModal('starter')}
                   className={`w-full py-3.5 rounded-2xl text-xs font-black transition-all cursor-pointer border ${
                     isNight
                       ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
@@ -914,7 +922,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
                 <button
                   type="button"
-                  onClick={openOnboardingModal}
+                  onClick={() => openOnboardingModal('pro')}
                   className="w-full py-4 rounded-2xl text-xs font-black transition-all cursor-pointer bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-xl shadow-orange-500/20 active:scale-[0.98]"
                 >
                   {t.pricing.proCta}
@@ -959,7 +967,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
                 <button
                   type="button"
-                  onClick={openOnboardingModal}
+                  onClick={() => openOnboardingModal('enterprise')}
                   className={`w-full py-3.5 rounded-2xl text-xs font-black transition-all cursor-pointer border ${
                     isNight
                       ? 'bg-purple-500/20 border-purple-500/30 hover:bg-purple-500/30 text-purple-300'

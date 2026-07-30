@@ -34,12 +34,12 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
           {isKo ? '체키 스쿨 프로 • 3단계 워크플로우' : 'CHEKKI SCHOOL PACKAGE • 3-STEP FLOW'}
         </span>
         <h3 className={`font-display text-xl sm:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-          {isKo ? '교재 목차 선제 탑재 ➔ 교사 대시보드 ➔ 학부모 앱 오답 레이더' : 'Textbook Seeding ➔ Teacher Dashboard ➔ Mom App Mistake Radar'}
+          {isKo ? '교재 목차 선제 탑재 ➔ 교사 대시보드 ➔ 가정 학습 성취 & 케어 레이더' : 'Textbook Seeding ➔ Teacher Dashboard ➔ Home Practice Insights'}
         </h3>
         <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
           {isKo 
-            ? '아래 3개 단계를 클릭하여 교재 목차 탑재, 교사 대시보드 자동 채우기, 학부모 앱 오답 수집을 실시간으로 체험해보세요.' 
-            : 'Click any step below to see how syllabus uploads, teacher dashboard auto-population, and mom app mistake callouts work together.'}
+            ? '아래 3개 단계를 클릭하여 교재 목차 탑재, 교사 대시보드 자동 채우기, 원생별 가정 학습 현황 실시간 파악을 체험해보세요.' 
+            : 'Click any step below to see how syllabus uploads, teacher dashboard auto-population, and home practice insights work together.'}
         </p>
       </div>
 
@@ -109,11 +109,11 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
             }`}>
               STEP 03
             </span>
-            <span className="text-sm">🚨</span>
+            <span className="text-sm">🎯</span>
           </div>
-          <h4 className="font-bold text-xs sm:text-sm">{isKo ? '3. 학부모 앱 오답 수집 레이더' : '3. Mom App Mistake Sync'}</h4>
+          <h4 className="font-bold text-xs sm:text-sm">{isKo ? '3. 가정 학습 케어 & 성취 레이더' : '3. Home Practice Sync'}</h4>
           <p className={`text-[11px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-            {isKo ? '학부모 앱에서 스캔된 오답을 선생님 레이더에서 실시간 확인' : 'Teachers view student homework mistakes highlighted from Mom App.'}
+            {isKo ? '원생들이 집에서 숙제할 때 도움이 필요한 항목을 실시간으로 파악' : 'Teachers see real-time analytics on student home practice & progress.'}
           </p>
         </button>
       </div>
@@ -345,14 +345,14 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                   onClick={() => setActiveStep(3)}
                   className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <span>{isKo ? '학부모 앱 오답 수집 레이더 확인 →' : 'View Student Mistake Radar →'}</span>
+                  <span>{isKo ? '가정 학습 케어 레이더 확인 →' : 'View Home Practice Radar →'}</span>
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* STEP 3: Student Homework Mistake Radar (Mom App Sync) */}
+        {/* STEP 3: Student Home Practice Radar (Parent App Sync) */}
         {activeStep === 3 && (
           <div className={`p-6 rounded-2xl border space-y-6 ${
             isNight ? 'bg-[#030305] border-white/10' : 'bg-zinc-50 border-zinc-200'
@@ -360,7 +360,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
               <div>
                 <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">
-                  {isKo ? '학부모 앱 오답 수집 레이더' : 'MOM APP HOMEWORK MISTAKE RADAR'}
+                  {isKo ? '가정 학습 성취 & 케어 레이더' : 'HOME PRACTICE & CARE RADAR'}
                 </span>
                 <h4 className="font-extrabold text-base sm:text-lg">
                   {isKo ? '실시간 원생 숙제 스캔 현황' : 'Real-Time Student Homework Scans'}
@@ -406,19 +406,25 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                 </div>
 
                 {/* Simulated Scanned Sheet */}
-                <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono space-y-3 relative">
+                <div className={`p-4 rounded-xl text-xs font-mono space-y-3 relative border ${
+                  isNight ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-zinc-100 border-zinc-300 text-zinc-900'
+                }`}>
                   <div>
-                    <p className="text-zinc-500">{isKo ? '4단원: 광합성 1번 문제' : 'Unit 4: Photosynthesis Question 1'}</p>
-                    <p className="text-zinc-200">{isKo ? 'Q: 식물 잎에서 태양 빛을 흡수하는 소기관은?' : 'Q: What organelle absorbs sunlight in plant leaves?'}</p>
+                    <p className={isNight ? 'text-zinc-500' : 'text-zinc-600 font-bold'}>{isKo ? '4단원: 광합성 1번 문제' : 'Unit 4: Photosynthesis Question 1'}</p>
+                    <p className={isNight ? 'text-zinc-200' : 'text-zinc-900 font-bold'}>{isKo ? 'Q: 식물 잎에서 태양 빛을 흡수하는 소기관은?' : 'Q: What organelle absorbs sunlight in plant leaves?'}</p>
                     {selectedStudent === 'jihoo' ? (
-                      <div className="mt-1 p-2 rounded border border-amber-500/50 bg-amber-500/10 text-amber-300 flex items-center justify-between">
+                      <div className={`mt-1 p-2 rounded border flex items-center justify-between ${
+                        isNight ? 'border-amber-500/50 bg-amber-500/10 text-amber-300' : 'border-amber-500/60 bg-amber-50 text-amber-900'
+                      }`}>
                         <span>{isKo ? '원생 손글씨:' : 'Student wrote:'} <strong className="line-through">Cloroplast</strong> ➔ {isKo ? '정답:' : 'Correction:'} <strong>Chloroplast</strong></span>
-                        <WarningCircle size={16} className="text-amber-400 flex-shrink-0" />
+                        <WarningCircle size={16} className="text-amber-500 flex-shrink-0" />
                       </div>
                     ) : (
-                      <div className="mt-1 p-2 rounded border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 flex items-center justify-between">
+                      <div className={`mt-1 p-2 rounded border flex items-center justify-between ${
+                        isNight ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300' : 'border-emerald-500/60 bg-emerald-50 text-emerald-900'
+                      }`}>
                         <span>{isKo ? '원생 손글씨:' : 'Student wrote:'} <strong>Chloroplast</strong></span>
-                        <CheckCircle size={16} className="text-emerald-400 flex-shrink-0" />
+                        <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" />
                       </div>
                     )}
                   </div>
@@ -431,7 +437,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                   <span className="text-[10px] font-mono font-bold text-orange-400 uppercase tracking-wider block">
                     💬 {isKo ? '학부모 동기화 칭찬 코칭 팁' : 'Synchronized Parent Coaching Tip'}
                   </span>
-                  <p className="text-xs text-zinc-300 italic leading-relaxed">
+                  <p className={`text-xs italic leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     "{selectedStudent === 'jihoo' 
                       ? (isKo ? '지후가 Chloroplast의 h 철자를 살짝 놓쳤어요! 엄마가 "지후야 5초만 같이 읽어볼까?" 하고 칭찬 후 2차 재도전 올려주시면 바로 100점으로 업데이트됩니다.' : 'Ji-hoo missed the "h" in Chloroplast! Warmly encourage him to rescan.')
                       : (isKo ? '민준이가 4단원 핵심 어휘 5개를 모두 정확히 작성했습니다! 최고의 집중력입니다.' : 'Min-jun spelled all Unit 4 words correctly!')}"
@@ -442,7 +448,7 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                   <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider block">
                     📞 {isKo ? '교사 1:1 상담 알림 노출' : 'Teacher 1:1 Consultation Note'}
                   </span>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
+                  <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                     {isKo 
                       ? '2차 재도전이 미완료될 경우 전화 상담 리포트에 자동 반영됩니다. 카카오톡 대본으로 1클릭 복사가 가능합니다.'
                       : 'Auto-flagged for phone consultation prep if 2nd rescan is missed. 1-Click copy available for KakaoTalk.'}
