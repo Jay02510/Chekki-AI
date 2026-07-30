@@ -427,6 +427,10 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [showLogoModal, setShowLogoModal] = useState(false);
   const [tempLogoUrl, setTempLogoUrl] = useState(academyLogo);
 
+  // Worksheet Format & Question Style State
+  const [worksheetType, setWorksheetType] = useState<string>('daily_homework');
+  const [questionStyle, setQuestionStyle] = useState<string>('multiple_choice');
+
   // Teacher Settings Modal
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [resetPwStatus, setResetPwStatus] = useState<{ text: string; isError?: boolean } | null>(null);
@@ -2915,6 +2919,61 @@ export default function TeacherPage({ isNight = true }: Props) {
                         {/* MODE 2: DAILY HOMEWORK WORKSHEET & ANSWER KEY SCANNER */}
                         {uploadMode === 'worksheet' && (
                           <div className="space-y-4">
+                            {/* Worksheet Format & Question Style Selectors */}
+                            <div className={`p-4 rounded-2xl border space-y-3 text-left ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div>
+                                  <label className="text-xs font-bold text-orange-500 uppercase tracking-widest block">
+                                    ⚙️ {isKo ? '워크시트 유형 및 문제 유형 선택' : 'Worksheet Type & Question Format'}
+                                  </label>
+                                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                                    {isKo ? '선생님이 원하는 학습지 형태 및 출제 문제 유형을 지정하여 정밀 채점 기준을 설정하세요.' : 'Specify target format and question styles for precise AI autograding.'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                {/* Worksheet Type Selector */}
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                                    {isKo ? '학습지 형태 (Worksheet Type)' : 'Worksheet Format'}
+                                  </label>
+                                  <select
+                                    value={worksheetType}
+                                    onChange={(e) => setWorksheetType(e.target.value)}
+                                    className={`w-full p-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
+                                      isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
+                                    }`}
+                                  >
+                                    <option value="daily_homework">📄 {isKo ? '일간 워크시트 (Daily Homework)' : 'Daily Homework'}</option>
+                                    <option value="weekly_quiz">📝 {isKo ? '주간 단원 평가 (Weekly Quiz)' : 'Weekly Quiz'}</option>
+                                    <option value="phonics_tracing">✍️ {isKo ? '파닉스/어휘 쓰기 (Phonics & Tracing)' : 'Phonics & Tracing'}</option>
+                                    <option value="reading_comp">📖 {isKo ? '독해 이해력 문제지 (Reading Comprehension)' : 'Reading Comprehension'}</option>
+                                  </select>
+                                </div>
+
+                                {/* Question Style Selector */}
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                                    {isKo ? '문제 출제 스타일 (Question Style)' : 'Question Format'}
+                                  </label>
+                                  <select
+                                    value={questionStyle}
+                                    onChange={(e) => setQuestionStyle(e.target.value)}
+                                    className={`w-full p-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
+                                      isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
+                                    }`}
+                                  >
+                                    <option value="multiple_choice">☑️ {isKo ? '4지 선다형 (Multiple Choice)' : 'Multiple Choice'}</option>
+                                    <option value="fill_in_blanks">✏️ {isKo ? '빈칸 채우기 (Fill-in-the-Blanks)' : 'Fill-in-the-Blanks'}</option>
+                                    <option value="unscramble">🔤 {isKo ? '문장 배열 (Unscramble Sentences)' : 'Unscramble Sentences'}</option>
+                                    <option value="vocab_matching">🔗 {isKo ? '어휘 뜻 연결 (Matching Definitions)' : 'Matching Definitions'}</option>
+                                    <option value="short_answer">📝 {isKo ? '단답형 (Short Answer)' : 'Short Answer'}</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+
                             <div
                               onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
                               onDragLeave={() => setIsDraggingFile(false)}
