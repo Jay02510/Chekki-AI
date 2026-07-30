@@ -593,12 +593,45 @@ export default function TeacherPage({ isNight = true }: Props) {
           throw new Error(isKo ? '비밀번호가 일치하지 않습니다.' : 'Passwords do not match.');
         }
 
+        // --- Single-Use Code Consumption Validation ---
+        const cleanCode = teacherCode.trim().toUpperCase();
+        if (cleanCode) {
+          const consumedCodes = JSON.parse(localStorage.getItem('chekki_consumed_codes') || '{}');
+          if (consumedCodes[cleanCode]) {
+            throw new Error(
+              isKo 
+                ? `❌ 인증 코드 [${cleanCode}]는 이미 다른 계정에서 사용 등록이 완료되었습니다.`
+                : `❌ Authorization code [${cleanCode}] has already been registered and used.`
+            );
+          }
+        }
+
         await signUp(name, email, password);
 
-        // Auto-redeem teacher authorization code if provided during signup (1-click setup)
-        if (teacherCode.trim()) {
+        // Auto-redeem teacher authorization code if provided during signup
+        if (cleanCode) {
+          const currentUser = auth.currentUser;
+          const uid = currentUser?.uid || `user_${Date.now()}`;
+          
+          // Mark code as consumed permanently
+          const consumedCodes = JSON.parse(localStorage.getItem('chekki_consumed_codes') || '{}');
+          consumedCodes[cleanCode] = {
+            claimedBy: uid,
+            claimedEmail: email,
+            claimedAt: new Date().toISOString()
+          };
+          localStorage.setItem('chekki_consumed_codes', JSON.stringify(consumedCodes));
+
+          // Auto-detect role from code
+          let assignedRole: 'ft' | 'kt' = 'ft';
+          if (cleanCode.includes('KT')) assignedRole = 'kt';
+          if (cleanCode.includes('FT')) assignedRole = 'ft';
+
+          localStorage.setItem(`chekki_educator_role_${uid}`, assignedRole);
+          localStorage.setItem(`chekki_educator_role_${email}`, assignedRole);
+          setEducatorRole(assignedRole);
+
           try {
-            const currentUser = auth.currentUser;
             if (currentUser) {
               const idToken = await currentUser.getIdToken(true);
               await fetch('/api/redeem-teacher-code', {
@@ -607,21 +640,37 @@ export default function TeacherPage({ isNight = true }: Props) {
                   'Content-Type': 'application/json',
                   Authorization: `Bearer ${idToken}`,
                 },
-                body: JSON.stringify({ teacherCode: teacherCode.trim() }),
+                body: JSON.stringify({ teacherCode: cleanCode }),
               });
-              window.location.reload();
             }
           } catch (codeErr) {
-            console.warn('Auto code activation failed during sign up:', codeErr);
+            console.warn('Auto code activation backend sync warning:', codeErr);
           }
         }
+
+        window.location.reload();
       } else {
         try {
           await signIn(email, password);
+          const currentUser = auth.currentUser;
+          const uid = currentUser?.uid || email;
+          
+          // Auto-detect saved role on subsequent logins
+          const savedRole = localStorage.getItem(`chekki_educator_role_${uid}`) || localStorage.getItem(`chekki_educator_role_${email}`);
+          if (savedRole === 'kt' || savedRole === 'ft') {
+            setEducatorRole(savedRole as 'ft' | 'kt');
+          }
         } catch (authErr: any) {
           console.warn('Firebase auth fallback to teacher demo mode:', authErr);
-          // Instant demo login fallback so demo credentials proceed immediately with zero lag
           if (email.includes('teacher') || email.includes('test') || email.includes('admin') || password.length >= 6) {
+            // Auto-detect role from email for demo logins
+            if (email.includes('kt') || email.includes('korean')) {
+              setEducatorRole('kt');
+              localStorage.setItem(`chekki_educator_role_${email}`, 'kt');
+            } else {
+              setEducatorRole('ft');
+              localStorage.setItem(`chekki_educator_role_${email}`, 'ft');
+            }
             window.location.reload();
           } else {
             throw authErr;
