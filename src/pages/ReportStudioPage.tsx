@@ -379,13 +379,14 @@ ${activeReport.parentScriptKo.closing}`.trim();
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => openOnboardingModal('pro')}
-              className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full text-xs transition-all shadow-md active:scale-95 cursor-pointer"
+            <a
+              href="/teacher?role=teacher"
+              className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full text-xs transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
+              title="KT 한인 담임 교사 로그인"
             >
-              {lang === 'ko' ? '맞춤 구축 신청' : 'Request Setup'}
-            </button>
+              <span>👨‍🏫</span>
+              <span>{isKo ? 'KT Teacher Login' : 'KT Teacher Login'}</span>
+            </a>
           </div>
         </header>
       </div>

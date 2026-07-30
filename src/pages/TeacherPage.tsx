@@ -94,9 +94,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     new URLSearchParams(window.location.search).get('role') === 'director'
   );
   const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath ? 'director' : 'teacher');
-  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'students' | 'directorPortal'>(
-    isDirectorPath ? 'directorPortal' : 'overview'
-  );
+  const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'homework' | 'students' | 'curriculum'>('overview');
 
   // Curriculum state
   const [curriculumTopic, setCurriculumTopic] = useState('');
@@ -831,7 +829,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       } catch (e) {}
       return next;
     });
-    setActiveTab('curriculum');
+    setActiveTab('syllabus');
 
     try {
       const classRef = doc(dbInstance, 'classes', selectedClass.id);
@@ -1250,7 +1248,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               </button>
               <button
                 type="button"
-                onClick={() => { setLoginRole('director'); setActiveTab('directorPortal'); setAuthError(''); }}
+                onClick={() => { setLoginRole('director'); setAuthError(''); }}
                 className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   loginRole === 'director'
                     ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
@@ -1316,12 +1314,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
             </p>
 
-            <form onSubmit={(e) => {
-              if (loginRole === 'director') {
-                setActiveTab('directorPortal');
-              }
-              handleSignIn(e);
-            }} className="w-full space-y-4">
+            <form onSubmit={handleSignIn} className="w-full space-y-4">
               {authMode === 'signup' && (
                 <div className="space-y-1.5 text-left">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
@@ -1677,10 +1670,11 @@ export default function TeacherPage({ isNight = true }: Props) {
             <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
           </button>
           
+          {/* Tab 2: Manage Syllabus */}
           <button
-            onClick={() => setActiveTab('curriculum')}
+            onClick={() => setActiveTab('syllabus')}
             className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
-              activeTab === 'curriculum'
+              activeTab === 'syllabus'
                 ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
                 : isThemeNight 
                   ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
@@ -1689,17 +1683,42 @@ export default function TeacherPage({ isNight = true }: Props) {
           >
             <div className="flex items-center gap-3">
               <div className={`p-2 rounded-xl transition-colors ${
-                activeTab === 'curriculum' 
+                activeTab === 'syllabus' 
                   ? 'bg-orange-500/20 text-orange-500' 
-                  : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
+                  : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
               }`}>
                 <BookOpen size={18} weight="bold" />
               </div>
-              <span>{isKo ? '주간 학습 커리큘럼' : 'Manage Curriculum'}</span>
+              <span>{isKo ? '📘 교재 목차 관리 (Syllabus)' : '📘 Manage Syllabus'}</span>
             </div>
-            <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'curriculum' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+            <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
           </button>
 
+          {/* Tab 3: Manage Homework Worksheets */}
+          <button
+            onClick={() => setActiveTab('homework')}
+            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
+              activeTab === 'homework'
+                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
+                : isThemeNight 
+                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-xl transition-colors ${
+                activeTab === 'homework' 
+                  ? 'bg-orange-500/20 text-orange-500' 
+                  : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
+              }`}>
+                <FileText size={18} weight="bold" />
+              </div>
+              <span>{isKo ? '📄 일간 워크시트 (Homework)' : '📄 Manage Homework'}</span>
+            </div>
+            <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'homework' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+          </button>
+
+          {/* Tab 4: Student Activity */}
           <button
             onClick={() => setActiveTab('students')}
             className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
@@ -1722,31 +1741,6 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
             <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
           </button>
-
-          <a
-            href="/director"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'instant' });
-              window.history.pushState({}, '', '/director');
-              window.dispatchEvent(new PopStateEvent('popstate'));
-            }}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-              isThemeNight 
-                ? 'bg-amber-500/10 border-amber-500/20 text-amber-400 hover:border-amber-500/40' 
-                : 'bg-amber-50 border-amber-200 text-amber-800 hover:border-amber-300'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
-                <Buildings size={18} weight="bold" />
-              </div>
-              <span>{isKo ? '🏢 원장님 HQ 이동' : '🏢 Director HQ Portal'}</span>
-            </div>
-            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
-              HQ
-            </span>
-          </a>
 
           <a
             href="/reports"
@@ -2017,10 +2011,6 @@ export default function TeacherPage({ isNight = true }: Props) {
           )}
 
           <div className="animate-fade-in">
-            {activeTab === 'directorPortal' && (
-              <NativeDirectorPortal isNight={isThemeNight} academyName={(user as any)?.academyName || 'Apex English Academy (Seocho)'} />
-            )}
-
             {activeTab === 'overview' && (
               <div className="space-y-8 animate-fade-in">
                 
@@ -2244,10 +2234,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                                           <span>{count} {isKo ? '명 틀림' : 'Mistakes'}</span>
                                         </span>
                                       ) : (
-                                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-1.5">
+                                        <button onClick={() => setActiveTab('curriculum')} className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-1.5">
                                           <Check size={14} weight="bold" />
                                           <span>{isKo ? '오답 없음' : 'Clear'}</span>
-                                        </span>
+                                        </button>
                                       )}
                                     </div>
                                   </div>
@@ -2369,7 +2359,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                                 </p>
                                 <button
                                   type="button"
-                                  onClick={() => setActiveTab('curriculum')}
+                                  onClick={() => setActiveTab('syllabus')}
                                   className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
                                 >
                                   + {isKo ? '파닉스 규칙 추가' : 'Add Phonics Rules'}
@@ -2570,7 +2560,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </div>
               )}
 
-              {activeTab === 'curriculum' && (
+              {(activeTab === 'syllabus' || activeTab === 'homework') && (
                 <div className={`p-1 rounded-[2.5rem] animate-fade-in text-left transition-colors ${
                   isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
                 }`}>
