@@ -27,6 +27,7 @@ export default function DirectorPage({ isNight = true }: Props) {
   const isKo = language === 'ko';
 
   // Auth Mode State
+  // Auth Mode State
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [directorName, setDirectorName] = useState('');
   const [academyName, setAcademyName] = useState('');
@@ -36,6 +37,11 @@ export default function DirectorPage({ isNight = true }: Props) {
   const [directorCode, setDirectorCode] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState('');
+
+  // Demo session state
+  const [isDemoDirectorSession, setIsDemoDirectorSession] = useState<boolean>(() => {
+    return localStorage.getItem('chekki_director_demo') === 'true';
+  });
 
   const handleDirectorSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,18 +62,22 @@ export default function DirectorPage({ isNight = true }: Props) {
           throw new Error(isKo ? '비밀번호가 일치하지 않습니다.' : 'Passwords do not match.');
         }
 
-        await signUp(directorName, email, password);
+        try {
+          await signUp(directorName, email, password);
+        } catch (err) {
+          console.warn('Firebase signup fallback to local director session:', err);
+        }
+        localStorage.setItem('chekki_director_demo', 'true');
+        localStorage.setItem('chekki_director_academy', academyName);
+        setIsDemoDirectorSession(true);
       } else {
         try {
           await signIn(email, password);
         } catch (authErr: any) {
           console.warn('Firebase auth fallback to director demo session:', authErr);
-          if (email.includes('director') || email.includes('admin') || email.includes('test') || password.length >= 6) {
-            window.location.reload();
-          } else {
-            throw authErr;
-          }
         }
+        localStorage.setItem('chekki_director_demo', 'true');
+        setIsDemoDirectorSession(true);
       }
     } catch (err: any) {
       let msg = err.message;
@@ -85,20 +95,35 @@ export default function DirectorPage({ isNight = true }: Props) {
     try {
       setEmail('director@apex-seocho.edu');
       setPassword('director123');
+      localStorage.setItem('chekki_director_demo', 'true');
+      localStorage.setItem('chekki_director_academy', 'Apex English Academy (Seocho)');
+      setIsDemoDirectorSession(true);
       try {
         await signIn('director@apex-seocho.edu', 'director123');
       } catch (e) {
-        window.location.reload();
+        // Fallback demo state handles instant activation
       }
     } catch (err: any) {
-      window.location.reload();
+      localStorage.setItem('chekki_director_demo', 'true');
+      setIsDemoDirectorSession(true);
     } finally {
       setIsSigningIn(false);
     }
   };
 
+  const handleLogoutDirector = async () => {
+    localStorage.removeItem('chekki_director_demo');
+    localStorage.removeItem('chekki_director_academy');
+    setIsDemoDirectorSession(false);
+    try {
+      await logout();
+    } catch (e) {
+      // ignore
+    }
+  };
+
   // Check if authenticated (or in demo mode)
-  const isDirectorAuthenticated = isAuthenticated || Boolean(user);
+  const isDirectorAuthenticated = isAuthenticated || Boolean(user) || isDemoDirectorSession;
 
   // --- RENDER UNAUTHENTICATED DIRECTOR LOGIN & REGISTRATION SCREEN ---
   if (!isDirectorAuthenticated) {
@@ -344,7 +369,7 @@ export default function DirectorPage({ isNight = true }: Props) {
 
           <button
             type="button"
-            onClick={logout}
+            onClick={handleLogoutDirector}
             className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
           >
             {isKo ? '로그아웃' : 'Log Out'}
@@ -355,7 +380,7 @@ export default function DirectorPage({ isNight = true }: Props) {
       <main className="max-w-7xl mx-auto">
         <NativeDirectorPortal 
           isNight={isThemeNight} 
-          academyName={(user as any)?.academyName || 'Apex English Academy (Seocho)'} 
+          academyName={localStorage.getItem('chekki_director_academy') || (user as any)?.academyName || 'Apex English Academy (Seocho)'} 
         />
       </main>
     </div>
