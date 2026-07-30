@@ -207,6 +207,14 @@ function AppContent() {
   useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
+      if (path === '/director' || path === '/director-hq') {
+        setShowSplash(false);
+        setShowDirectorPage(true);
+        setShowTeacherPage(false);
+        setShowSchoolsPage(false);
+        setShowReportStudioPage(false);
+        return;
+      }
       setShowSubscribePage(path === '/subscribe');
       setShowAdminPage(path === '/admin');
       setShowTeacherPage(path === '/teacher');

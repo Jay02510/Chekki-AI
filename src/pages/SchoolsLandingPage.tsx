@@ -276,6 +276,18 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </button>
 
             <a
+              href="/director"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = '/director';
+              }}
+              className="px-4 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold border border-amber-500/30 rounded-full text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+            >
+              <span>🏢</span>
+              <span>{isKo ? '원장님 로그인' : 'Director HQ Login'}</span>
+            </a>
+
+            <a
               href="/teacher"
               onClick={(e) => {
                 e.preventDefault();
