@@ -140,35 +140,68 @@ export const NativeSchoolPackageFlow: React.FC<Props> = ({ isNight = true, isKo 
                     : 'Syllabi set multi-week course scope; worksheets generate parent answer ink. Both store independently without overwriting.'}
                 </p>
 
-                <div className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
+                <div className={`border-2 border-dashed rounded-2xl p-4 transition-all relative overflow-hidden ${
                   isScanning ? 'border-orange-500 bg-orange-500/10 animate-pulse' : isNight ? 'border-white/20 bg-white/5' : 'border-zinc-300 bg-white'
                 }`}>
                   {isScanning ? (
-                    <div className="py-4 space-y-2">
-                      <Sparkle size={32} className="mx-auto text-orange-500 animate-spin" />
+                    <div className="py-8 space-y-3 text-center">
+                      <Sparkle size={36} className="mx-auto text-orange-500 animate-spin" />
                       <p className="text-xs font-bold text-orange-400">
-                        {isKo ? 'AI 비전이 어휘 범위 & 학부모 정답 잉크를 추출 중입니다...' : 'AI Vision Extracting Vocabulary & Parent Answer Ink...'}
+                        {isKo ? 'AI 비전이 교재 목차 표에서 주차별 타겟 어휘를 추출하는 중입니다...' : 'AI Vision Extracting Vocabulary & Course Scope from Syllabus Table...'}
                       </p>
                     </div>
                   ) : (
-                    <div className="py-4 space-y-3">
-                      <BookOpen size={36} className="mx-auto text-orange-500" />
-                      <p className="text-xs font-bold">
-                        {isKo ? '업로드 완료: 📘 Bricks Reading 150 (4주 코스 목차) & 📄 Unit 4 Daily Worksheet.pdf' : 'Uploaded: 📘 Bricks Reading 150 (4-Wk Syllabus) & 📄 Unit 4 Daily Worksheet.pdf'}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsScanning(true);
-                          setTimeout(() => {
-                            setIsScanning(false);
-                          }, 1200);
-                        }}
-                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer inline-flex items-center gap-1.5"
-                      >
-                        <Lightning size={14} weight="fill" />
-                        <span>{isKo ? '⚡ 다시 스캔 체험하기' : 'Re-Scan Demo File'}</span>
-                      </button>
+                    <div className="space-y-3 text-left">
+                      <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                        <span className="text-[10px] font-mono font-bold text-orange-400 uppercase">
+                          📷 {isKo ? '교재 목차 스캔 원본 & AI 인식 태그' : 'Scanned Syllabus & AI Extracted Tags'}
+                        </span>
+                        <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded">
+                          {isKo ? '스캔 성공' : 'Scan Success'}
+                        </span>
+                      </div>
+
+                      {/* Syllabus Visual Card Component */}
+                      <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-white flex items-center gap-1.5">
+                            <BookOpen size={14} className="text-orange-400" />
+                            <span>Bricks Reading 150 - Course Syllabus (4 Wks)</span>
+                          </span>
+                          <span className="text-[9px] font-mono text-zinc-400">PDF / Image</span>
+                        </div>
+
+                        <div className="p-2 bg-black/60 rounded-lg space-y-1.5 border border-zinc-800 text-[11px]">
+                          <div className="flex items-center justify-between text-zinc-300">
+                            <span>Unit 1: Life Sciences</span>
+                            <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 rounded text-[9px] font-bold">Week 1 Scope</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded text-[10px]">Chloroplast</span>
+                            <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded text-[10px]">Photosynthesis</span>
+                            <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-300 border border-orange-500/30 rounded text-[10px]">Stomata</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1">
+                        <p className="text-[11px] font-bold text-zinc-300">
+                          {isKo ? '📘 Bricks Reading 150 & 📄 Unit 4 Daily Homework.pdf' : '📘 Bricks Reading 150 & 📄 Unit 4 Daily Homework.pdf'}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsScanning(true);
+                            setTimeout(() => {
+                              setIsScanning(false);
+                            }, 1200);
+                          }}
+                          className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer flex items-center gap-1 shrink-0"
+                        >
+                          <Lightning size={13} weight="fill" />
+                          <span>{isKo ? '다시 스캔' : 'Re-Scan'}</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

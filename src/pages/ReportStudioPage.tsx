@@ -834,7 +834,56 @@ ${activeReport.parentScriptKo.closing}`.trim();
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
+            {/* Solo Plan */}
+            <div
+              className={`p-1.5 rounded-[2rem] border transition-all duration-300 ${
+                isNight ? 'bg-white/5 border-white/10' : 'bg-black/5 border-zinc-200 shadow-sm'
+              }`}
+            >
+              <div
+                className={`p-5 rounded-[calc(2rem-0.375rem)] h-full flex flex-col justify-between space-y-4 ${
+                  isNight ? 'bg-[#050505]' : 'bg-white'
+                }`}
+              >
+                <div className="space-y-3">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-blue-400 block">
+                    {t.pricing.soloTitle}
+                  </span>
+                  <div className="flex items-baseline gap-1">
+                    <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                      {t.pricing.soloPrice}
+                    </span>
+                    <span className="text-[10px] font-bold text-zinc-500">{t.pricing.soloPeriod}</span>
+                  </div>
+                  <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    {t.pricing.soloDesc}
+                  </p>
+
+                  <div className="space-y-2 pt-3 border-t border-white/5 text-[11px] font-medium">
+                    {t.pricing.soloFeatures.map((feat, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <CheckCircle size={14} weight="bold" className="text-blue-400 shrink-0" />
+                        <span className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openOnboardingModal('starter')}
+                  className={`w-full py-3 rounded-2xl text-xs font-black transition-all cursor-pointer border ${
+                    isNight
+                      ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
+                      : 'bg-zinc-100 border-zinc-300 hover:bg-zinc-200 text-zinc-900'
+                  }`}
+                >
+                  {t.pricing.soloCta}
+                </button>
+              </div>
+            </div>
+
             {/* Starter Plan */}
             <div
               className={`p-1.5 rounded-[2rem] border transition-all duration-300 ${
@@ -842,25 +891,25 @@ ${activeReport.parentScriptKo.closing}`.trim();
               }`}
             >
               <div
-                className={`p-6 md:p-8 rounded-[calc(2rem-0.375rem)] h-full flex flex-col justify-between space-y-6 ${
+                className={`p-5 rounded-[calc(2rem-0.375rem)] h-full flex flex-col justify-between space-y-4 ${
                   isNight ? 'bg-[#050505]' : 'bg-white'
                 }`}
               >
-                <div className="space-y-4">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 block">
+                <div className="space-y-3">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-pink-400 block">
                     {t.pricing.starterTitle}
                   </span>
                   <div className="flex items-baseline gap-1">
-                    <span className={`font-display text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                       {t.pricing.starterPrice}
                     </span>
-                    <span className="text-xs font-bold text-zinc-500">{t.pricing.starterPeriod}</span>
+                    <span className="text-[10px] font-bold text-zinc-500">{t.pricing.starterPeriod}</span>
                   </div>
-                  <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                  <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                     {t.pricing.starterDesc}
                   </p>
 
-                  <div className="space-y-2.5 pt-4 border-t border-white/5 text-xs font-medium">
+                  <div className="space-y-2 pt-3 border-t border-white/5 text-[11px] font-medium">
                     {t.pricing.starterFeatures.map((feat, idx) => (
                       <div key={idx} className="flex items-center gap-2">
                         <CheckCircle size={14} weight="bold" className="text-orange-500 shrink-0" />
@@ -873,7 +922,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 <button
                   type="button"
                   onClick={() => openOnboardingModal('starter')}
-                  className={`w-full py-3.5 rounded-2xl text-xs font-black transition-all cursor-pointer border ${
+                  className={`w-full py-3 rounded-2xl text-xs font-black transition-all cursor-pointer border ${
                     isNight
                       ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
                       : 'bg-zinc-100 border-zinc-300 hover:bg-zinc-200 text-zinc-900'
@@ -892,30 +941,30 @@ ${activeReport.parentScriptKo.closing}`.trim();
                   : 'bg-gradient-to-b from-orange-500/10 to-pink-500/10 border-orange-500 shadow-lg'
               }`}
             >
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white text-[10px] font-black uppercase tracking-widest shadow-md">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white text-[9px] font-black uppercase tracking-widest shadow-md">
                 {t.pricing.proBadge}
               </div>
 
               <div
-                className={`p-6 md:p-8 rounded-[calc(2rem-0.375rem)] h-full flex flex-col justify-between space-y-6 ${
+                className={`p-5 rounded-[calc(2rem-0.375rem)] h-full flex flex-col justify-between space-y-4 ${
                   isNight ? 'bg-[#0a080c]' : 'bg-white'
                 }`}
               >
-                <div className="space-y-4">
+                <div className="space-y-3 pt-1">
                   <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-500 block">
                     {t.pricing.proTitle}
                   </span>
                   <div className="flex items-baseline gap-1">
-                    <span className="font-display text-4xl font-black text-orange-500">
+                    <span className="font-display text-3xl font-black text-orange-500">
                       {t.pricing.proPrice}
                     </span>
-                    <span className="text-[11px] font-bold text-zinc-500">{t.pricing.proPeriod}</span>
+                    <span className="text-[10px] font-bold text-zinc-500">{t.pricing.proPeriod}</span>
                   </div>
-                  <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                  <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
                     {t.pricing.proDesc}
                   </p>
 
-                  <div className="space-y-2.5 pt-4 border-t border-orange-500/20 text-xs font-medium">
+                  <div className="space-y-2 pt-3 border-t border-orange-500/20 text-[11px] font-medium">
                     {t.pricing.proFeatures.map((feat, idx) => (
                       <div key={idx} className="flex items-center gap-2">
                         <CheckCircle size={14} weight="fill" className="text-orange-500 shrink-0" />
@@ -928,7 +977,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 <button
                   type="button"
                   onClick={() => openOnboardingModal('pro')}
-                  className="w-full py-4 rounded-2xl text-xs font-black transition-all cursor-pointer bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-xl shadow-orange-500/20 active:scale-[0.98]"
+                  className="w-full py-3 rounded-2xl text-xs font-black transition-all cursor-pointer bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-xl shadow-orange-500/20 active:scale-[0.98]"
                 >
                   {t.pricing.proCta}
                 </button>
@@ -942,25 +991,25 @@ ${activeReport.parentScriptKo.closing}`.trim();
               }`}
             >
               <div
-                className={`p-6 md:p-8 rounded-[calc(2rem-0.375rem)] h-full flex flex-col justify-between space-y-6 ${
+                className={`p-5 rounded-[calc(2rem-0.375rem)] h-full flex flex-col justify-between space-y-4 ${
                   isNight ? 'bg-[#050505]' : 'bg-white'
                 }`}
               >
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-purple-400 block">
                     {t.pricing.enterpriseTitle}
                   </span>
                   <div className="flex items-baseline gap-1">
-                    <span className={`font-display text-4xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                       {t.pricing.enterprisePrice}
                     </span>
-                    <span className="text-xs font-bold text-zinc-500">{t.pricing.enterprisePeriod}</span>
+                    <span className="text-[10px] font-bold text-zinc-500">{t.pricing.enterprisePeriod}</span>
                   </div>
-                  <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                  <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                     {t.pricing.enterpriseDesc}
                   </p>
 
-                  <div className="space-y-2.5 pt-4 border-t border-white/5 text-xs font-medium">
+                  <div className="space-y-2 pt-3 border-t border-white/5 text-[11px] font-medium">
                     {t.pricing.enterpriseFeatures.map((feat, idx) => (
                       <div key={idx} className="flex items-center gap-2">
                         <CheckCircle size={14} weight="bold" className="text-purple-400 shrink-0" />
@@ -973,7 +1022,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 <button
                   type="button"
                   onClick={() => openOnboardingModal('enterprise')}
-                  className={`w-full py-3.5 rounded-2xl text-xs font-black transition-all cursor-pointer border ${
+                  className={`w-full py-3 rounded-2xl text-xs font-black transition-all cursor-pointer border ${
                     isNight
                       ? 'bg-purple-500/20 border-purple-500/30 hover:bg-purple-500/30 text-purple-300'
                       : 'bg-purple-50 border-purple-200 hover:bg-purple-100 text-purple-800'

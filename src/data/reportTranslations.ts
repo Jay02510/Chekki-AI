@@ -22,46 +22,51 @@ export const REPORT_TRANSLATIONS = {
     pricing: {
       heading: 'Simple Monthly Academy Pricing',
       subheading: 'No hidden setup fees. Scale easily as your campus grows.',
-      starterTitle: 'Starter Academy Pack (Micro-School)',
+      soloTitle: 'Solo Tutor & Study Room (1 Seat)',
+      soloPrice: '₩39,000',
+      soloPeriod: '/ month',
+      soloDesc: 'Tailored for individual tutors, freelance teachers & home study rooms.',
+      soloFeatures: [
+        '1 Teacher Seat (Full Access)',
+        'Up to 20 Active Students',
+        'Bilingual KakaoTalk Script Generator',
+        'Homework Autograding & PDF Reports'
+      ],
+      soloCta: 'Choose Solo Plan',
+
+      starterTitle: 'Starter Academy Pack',
       starterPrice: '₩69,000',
       starterPeriod: '/ month per campus',
       starterDesc: '30-second mobile FT log + bilingual KakaoTalk parent script generator & KT review workspace.',
       starterFeatures: [
         'Up to 3 Teacher Seats (1 FT + 2 KTs)',
         '30-Second Foreign Teacher Mobile Log Form',
-        'Bilingual (Korean + English) KakaoTalk Script Generator',
-        'Live Editable Textarea for Korean Teacher Review',
-        '3-Stage Review Status Bar (Pending ➔ Edited ➔ Sent)',
-        'Student Praise & Support Call Preparation'
+        'Bilingual KakaoTalk Script Generator',
+        'Live Editable Textarea for KT Review'
       ],
       starterCta: 'Choose Starter Pack',
 
-      proTitle: 'Chekki Master School Pro (All-in-One Bundle)',
+      proTitle: 'Chekki Master School Pro',
       proPrice: '₩290,000',
       proPeriod: '/ month per campus',
-      proBadge: 'MOST POPULAR (COMPLETE CAMPUS BUNDLE)',
+      proBadge: 'MOST POPULAR',
       proDesc: 'Report Studio + Automated Textbook Syllabus Pre-seeding & Homework Autograding Sync.',
       proFeatures: [
-        'Up to 10 Teacher Seats & Unlimited Parents (6-digit code)',
-        'Everything in Report Studio Included',
-        '1-Click Textbook Syllabus Pre-seeding & Vocabulary Auto-Sync',
-        'Daily Homework Scanning & 99.9% Auto-Grading',
-        'Multi-Teacher & Multi-Class Roster Management',
-        'FREE Chekki Pro App for All Parents (via 6-digit code)',
-        'Dedicated 1:1 Director Setup & Support'
+        'Up to 10 Teacher Seats & Unlimited Parents',
+        'Includes Everything in Report Studio',
+        '1-Click Textbook Syllabus Pre-seeding',
+        'Daily Homework Scanning & 99.9% Autograding'
       ],
       proCta: 'Choose Master School Pro',
 
       enterpriseTitle: 'Large Academy & Franchise',
       enterprisePrice: '₩590,000',
       enterprisePeriod: '/ month per campus',
-      enterpriseDesc: 'Unlimited teacher seats, multi-campus director dashboard, custom branding & LMS/API sync.',
+      enterpriseDesc: 'Tailored for large multi-branch campuses & franchise networks needing custom LMS & API sync.',
       enterpriseFeatures: [
-        '20+ Teacher & Staff Seats across all branches',
-        'Multi-Campus Director HQ Dashboard',
-        'Custom Academy Branding & KakaoTalk Notification Templates',
-        'Priority Phone & On-Site Director Support',
-        'Custom Data Export & LMS API Sync (REST / Webhooks)'
+        '20+ Teacher Seats & Multi-Campus',
+        'Custom LMS & Student API Sync',
+        'Dedicated Success Manager & Priority SLA'
       ],
       enterpriseCta: 'Contact Enterprise Team'
     },
@@ -200,46 +205,51 @@ export const REPORT_TRANSLATIONS = {
     pricing: {
       heading: '월별 합리적인 학원 요금제',
       subheading: '추가 개설비 무료. 캠퍼스 성장 규모에 맞춰 자유롭게 선택하세요.',
-      starterTitle: '스타터 학원 패키지 (공부방 / 소형)',
+      soloTitle: '공부방 / 개인 교습소 (1석)',
+      soloPrice: '₩39,000',
+      soloPeriod: '/ 월',
+      soloDesc: '1인 개인 튜터 및 공부방 선생님을 위한 알뜰형 패키지.',
+      soloFeatures: [
+        '교사 계정 1석 (단독 관리)',
+        '원생 최대 20명 관리',
+        '한/영 이중언어 알림톡 자동 생성',
+        '숙제 채점 & PDF 성적표'
+      ],
+      soloCta: '솔로 플랜 시작',
+
+      starterTitle: '스타터 패키지',
       starterPrice: '₩69,000',
       starterPeriod: '/ 월 (캠퍼스당)',
       starterDesc: '원어민 30초 작성 모바일 폼 + 한/영 알림톡 자동 생성 & 한국인 교사 검수 워크스페이스.',
       starterFeatures: [
-        '교사 계정 최대 3석 제공 (원어민 1명 + 한국인 2명)',
+        '교사 계정 최대 3석 (원어민 1 + 한국인 2)',
         '30초 원어민 강사 모바일 평가 폼',
-        '한/영 이중언어 알림톡 대본 생성',
-        '실시간 편집 가능한 한국인 교사 검수 워크스페이스',
-        '3단계 검수 상태 확인 (검수대기 ➔ 수정완료 ➔ 발송완료)',
-        '학생 칭찬 및 주의사항 전화 상담 가이드'
+        '한/영 이중언어 알림톡 생성',
+        '한국인 교사 편집 워크스페이스'
       ],
-      starterCta: '스타터 패키지 선택하기',
+      starterCta: '스타터 패키지 시작',
 
-      proTitle: '체키 마스터 스쿨 프로 (마스터 통합 패키지)',
+      proTitle: '체키 마스터 스쿨 프로',
       proPrice: '₩290,000',
       proPeriod: '/ 월 (캠퍼스당)',
-      proBadge: '가장 인기 있는 플랜 (완전 통합 패키지)',
+      proBadge: 'MOST POPULAR',
       proDesc: '리포트 스튜디오 + 교재 목차 자동 선제 탑재 & 숙제 채점 연동.',
       proFeatures: [
-        '교사 계정 최대 10석 & 학부모 전원 무제한 무료 (6자리 코드)',
+        '교사 계정 최대 10석 & 학부모 무제한',
         '리포트 스튜디오 모든 기능 포함',
-        '1클릭 교재 목차 사진 스캔 & 타겟 어휘 자동 탑재',
-        '매일 숙제 스캔 & 99.9% 정밀 채점',
-        '강사별 반 배정 및 원생 명단 일괄 관리',
-        '학부모 Chekki Pro 앱 무제한 무료 제공 (6자리 코드 연동)',
-        '전담 매니저 1:1 맞춤 온보딩 지원'
+        '1클릭 교재 목차 스캔 & 어휘 선제 탑재',
+        '매일 숙제 스캔 & 99.9% AI 정밀 채점'
       ],
-      proCta: '체키 마스터 스쿨 프로 선택하기',
+      proCta: '마스터 스쿨 프로 시작',
 
-      enterpriseTitle: '대형 학원 & 프랜차이즈 엔터프라이즈',
+      enterpriseTitle: '대형 학원 / 프랜차이즈',
       enterprisePrice: '₩590,000',
       enterprisePeriod: '/ 월 (캠퍼스당)',
-      enterpriseDesc: '무제한 강사 계정, 다중 캠퍼스 통합 원장 대시보드, 맞춤 브랜드 알림톡 및 LMS DB 연동.',
+      enterpriseDesc: '여러 캠퍼스를 보유하고 맞춤 LMS 및 원생 관리 API 연동이 필요한 대형 학원용.',
       enterpriseFeatures: [
-        '20석 이상 직영/가맹 캠퍼스 교사 계정',
-        '다중 캠퍼스 통합 본사 원장 대시보드',
-        '학원 맞춤 브랜딩 & 전용 알림톡 템플릿',
-        '우선 전화 및 방문 원장님 온보딩 지원',
-        '학원 LMS / ERP API 연동 (REST & Webhook)'
+        '교사 계정 20석 이상 & 다중 캠퍼스',
+        '맞춤 학원 LMS/ERP API 동기화',
+        '전담 매니저 1:1 맞춤 지원'
       ],
       enterpriseCta: '엔터프라이즈 문의하기'
     },
