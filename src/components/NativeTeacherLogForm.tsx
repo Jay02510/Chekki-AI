@@ -9,6 +9,8 @@ interface Props {
   onSubmitLog: (payload: ClassLogPayload) => void;
   isSubmitting?: boolean;
   userProfile?: UserProfile | null;
+  selectedClassName?: string;
+  selectedTextbookName?: string;
 }
 
 export const NativeTeacherLogForm: React.FC<Props> = ({
@@ -16,13 +18,23 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   onSubmitLog,
   isSubmitting = false,
   userProfile,
+  selectedClassName,
+  selectedTextbookName,
 }) => {
   const permissions = getPermissionsForUser(userProfile);
-  const [className, setClassName] = useState('Apex Seocho 7A');
+  const [className, setClassName] = useState(selectedClassName || 'Apex Seocho 7A');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [lessonTopic, setLessonTopic] = useState('Unit 4: Photosynthesis & Plant Growth');
-  const [textbook, setTextbook] = useState('Bricks Reading 150 (Book 1)');
+  const [textbook, setTextbook] = useState(selectedTextbookName || 'Bricks Reading 150 (Book 1)');
   const [energyLevel, setEnergyLevel] = useState<string>('High Energy and Engaged');
+
+  useEffect(() => {
+    if (selectedClassName) setClassName(selectedClassName);
+  }, [selectedClassName]);
+
+  useEffect(() => {
+    if (selectedTextbookName) setTextbook(selectedTextbookName);
+  }, [selectedTextbookName]);
   const [activities, setActivities] = useState<string[]>(['Reading', 'Speaking', 'Worksheet']);
   const [generalComments, setGeneralComments] = useState(
     'Students engaged very enthusiastically with the new plant vocabulary drill. Everyone read aloud clearly.'

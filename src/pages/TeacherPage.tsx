@@ -108,6 +108,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   }, [activeTab]);
 
   // Curriculum state
+  const [selectedTextbookName, setSelectedTextbookName] = useState<string>('Bricks Reading 150 (Book 1)');
   const [curriculumTopic, setCurriculumTopic] = useState('');
   const [curriculumVocab, setCurriculumVocab] = useState('');
   const [curriculumPhonics, setCurriculumPhonics] = useState('');
@@ -2756,6 +2757,65 @@ export default function TeacherPage({ isNight = true }: Props) {
                             )}
                           </div>
                         )}
+
+                        {/* Target Class & Target Textbook Selection Lock Bar */}
+                        <div className={`p-4 rounded-2xl border space-y-3 mb-6 transition-all ${
+                          isThemeNight ? 'bg-orange-500/5 border-orange-500/20' : 'bg-orange-50/60 border-orange-200'
+                        }`}>
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div>
+                              <span className="text-[10px] font-mono font-black text-orange-500 uppercase tracking-widest block">
+                                📌 {isKo ? '적용 학급반 & 교재 지정 (Target Class & Textbook Lock)' : 'Target Class & Textbook Lock'}
+                              </span>
+                              <p className="text-[11px] text-zinc-400 mt-0.5">
+                                {isKo 
+                                  ? '현재 업로드 중인 커리큘럼이 적용될 학급반과 교재명을 정확히 지정하세요. 폼 및 대시보드가 실시간 동기화됩니다.' 
+                                  : 'Specify the exact class and textbook name for this upload. Auto-syncs with teacher forms to prevent wrong-class logs.'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                            {/* Target Class Selector */}
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                                {isKo ? '적용 학급반 (Target Class)' : 'Target Class'}
+                              </label>
+                              <select
+                                value={selectedClass?.id || ''}
+                                onChange={(e) => {
+                                  const target = classes.find(c => c.id === e.target.value);
+                                  if (target) setSelectedClass(target);
+                                }}
+                                className={`w-full p-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 cursor-pointer ${
+                                  isThemeNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+                                }`}
+                              >
+                                {classes.map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    🏫 {c.name} ({c.level || 'Active Class'})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Target Textbook Name Input */}
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                                {isKo ? '교재명 (Textbook Title)' : 'Textbook Title'}
+                              </label>
+                              <input
+                                type="text"
+                                value={selectedTextbookName}
+                                onChange={(e) => setSelectedTextbookName(e.target.value)}
+                                placeholder="E.g. Bricks Reading 150 (Book 1)"
+                                className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 ${
+                                  isThemeNight ? 'bg-[#050505] border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
+                                }`}
+                              />
+                            </div>
+                          </div>
+                        </div>
 
                         {/* MODE 1: SYLLABUS & COURSE DURATION MANAGER */}
                         {uploadMode === 'syllabus' && (
