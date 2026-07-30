@@ -292,7 +292,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               }}
               className="group relative overflow-hidden items-center gap-2 px-4 py-1.5 bg-brand text-white font-bold rounded-full text-xs uppercase tracking-wider transition-transform duration-700 active:scale-[0.96] flex"
             >
-              <span>{isKo ? '교사용 로그인' : 'Teacher Portal'}</span>
+              <span>👨‍🏫</span>
+              <span>{isKo ? '교사 포털 로그인' : 'Teacher Portal'}</span>
             </a>
           </div>
 

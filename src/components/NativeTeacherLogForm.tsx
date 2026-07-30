@@ -128,6 +128,14 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         </span>
       </div>
 
+      {/* Interactive Helper Banner */}
+      <div className="mb-6 p-3.5 bg-orange-500/10 border border-orange-500/30 rounded-2xl flex items-center justify-between text-xs font-bold text-orange-400 shadow-md">
+        <div className="flex items-center gap-2">
+          <Sparkle size={18} weight="fill" className="animate-pulse text-orange-500 shrink-0" />
+          <span>👇 Live Generator Simulator: Click any buttons below & hit orange button to test AI parent script generation!</span>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Class & Date */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
