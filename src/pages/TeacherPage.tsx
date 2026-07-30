@@ -97,6 +97,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>((user as any)?.educatorRole || 'ft');
   const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum'>('overview');
   const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
+  const [submittedLogs, setSubmittedLogs] = useState<any[]>([]);
 
   useEffect(() => {
     if (activeTab === 'syllabus') {
@@ -2671,7 +2672,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                               {isKo ? `주간 커리큘럼 편집 (Week ${selectedClass?.activeWeekNumber || 1})` : `Edit Weekly Curriculum (Week ${selectedClass?.activeWeekNumber || 1})`}
                             </h4>
                             <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono">
-                              ✍️ {isKo ? '담당 교사: Teacher Mark (FT)' : 'Submitted by: Teacher Mark (FT)'}
+                              ✍️ {isKo ? `담당 교사: ${(user as any)?.displayName || (user as any)?.email?.split('@')[0] || '원어민 교사'}` : `Submitted by: ${(user as any)?.displayName || (user as any)?.email?.split('@')[0] || 'Assigned FT'}`}
                             </span>
                           </div>
                           <p className="text-xs text-zinc-400 mt-0.5">
@@ -2869,60 +2870,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                         {/* MODE 2: DAILY HOMEWORK WORKSHEET & ANSWER KEY SCANNER */}
                         {uploadMode === 'worksheet' && (
                           <div className="space-y-4">
-                            {/* Worksheet Format & Question Style Selectors */}
-                            <div className={`p-4 rounded-2xl border space-y-3 text-left ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                <div>
-                                  <label className="text-xs font-bold text-orange-500 uppercase tracking-widest block">
-                                    ⚙️ {isKo ? '워크시트 유형 및 문제 유형 선택' : 'Worksheet Type & Question Format'}
-                                  </label>
-                                  <p className="text-[11px] text-zinc-400 mt-0.5">
-                                    {isKo ? '선생님이 원하는 학습지 형태 및 출제 문제 유형을 지정하여 정밀 채점 기준을 설정하세요.' : 'Specify target format and question styles for precise AI autograding.'}
-                                  </p>
-                                </div>
-                              </div>
 
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                                {/* Worksheet Type Selector */}
-                                <div className="space-y-1">
-                                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-                                    {isKo ? '학습지 형태 (Worksheet Type)' : 'Worksheet Format'}
-                                  </label>
-                                  <select
-                                    value={worksheetType}
-                                    onChange={(e) => setWorksheetType(e.target.value)}
-                                    className={`w-full p-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
-                                      isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
-                                    }`}
-                                  >
-                                    <option value="daily_homework">📄 {isKo ? '일간 워크시트 (Daily Homework)' : 'Daily Homework'}</option>
-                                    <option value="weekly_quiz">📝 {isKo ? '주간 단원 평가 (Weekly Quiz)' : 'Weekly Quiz'}</option>
-                                    <option value="phonics_tracing">✍️ {isKo ? '파닉스/어휘 쓰기 (Phonics & Tracing)' : 'Phonics & Tracing'}</option>
-                                    <option value="reading_comp">📖 {isKo ? '독해 이해력 문제지 (Reading Comprehension)' : 'Reading Comprehension'}</option>
-                                  </select>
-                                </div>
-
-                                {/* Question Style Selector */}
-                                <div className="space-y-1">
-                                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-                                    {isKo ? '문제 출제 스타일 (Question Style)' : 'Question Format'}
-                                  </label>
-                                  <select
-                                    value={questionStyle}
-                                    onChange={(e) => setQuestionStyle(e.target.value)}
-                                    className={`w-full p-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
-                                      isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
-                                    }`}
-                                  >
-                                    <option value="multiple_choice">☑️ {isKo ? '4지 선다형 (Multiple Choice)' : 'Multiple Choice'}</option>
-                                    <option value="fill_in_blanks">✏️ {isKo ? '빈칸 채우기 (Fill-in-the-Blanks)' : 'Fill-in-the-Blanks'}</option>
-                                    <option value="unscramble">🔤 {isKo ? '문장 배열 (Unscramble Sentences)' : 'Unscramble Sentences'}</option>
-                                    <option value="vocab_matching">🔗 {isKo ? '어휘 뜻 연결 (Matching Definitions)' : 'Matching Definitions'}</option>
-                                    <option value="short_answer">📝 {isKo ? '단답형 (Short Answer)' : 'Short Answer'}</option>
-                                  </select>
-                                </div>
-                              </div>
-                            </div>
 
                             <div
                               onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
@@ -3035,8 +2983,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                           </div>
                         )}
 
-                        {/* Quick Preset Chips */}
-                        <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
+                        {/* MODE 2 ONLY: DAILY HOMEWORK CURRICULUM DETAILS & WORKSHEET FORMAT OPTIONS */}
+                        {uploadMode === 'worksheet' && (
+                          <div className="space-y-6">
+                            {/* Quick Preset Chips */}
+                            <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
                           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mr-1">
                             {isKo ? '샘플 프리셋:' : 'Quick Presets:'}
                           </span>
@@ -3292,6 +3243,67 @@ export default function TeacherPage({ isNight = true }: Props) {
                           />
                         </div>
 
+                        {/* MODE 2 ONLY: AI WORKSHEET GENERATION & AUTOGRADED QUESTION FORMAT OPTIONS */}
+                        {uploadMode === 'worksheet' && (
+                          <div className={`p-4 sm:p-5 rounded-2xl border space-y-4 text-left transition-all ${
+                            isThemeNight ? 'bg-orange-500/5 border-orange-500/20' : 'bg-orange-50/70 border-orange-200'
+                          }`}>
+                            <div>
+                              <label className="text-xs font-bold text-orange-500 uppercase tracking-widest block">
+                                ⚙️ {isKo ? '📄 AI 워크시트 자동 생성 & 정밀 채점 옵션' : '📄 AI Worksheet Generation & Autograding Format'}
+                              </label>
+                              <p className="text-[11px] text-zinc-400 mt-1 leading-normal">
+                                {isKo 
+                                  ? '생성할 학습지 유형과 정답 채점 문제 형태를 설정하세요. 이 설정값에 맞춰 워크시트 생성 및 학부모 정답지 잉크가 구성됩니다.' 
+                                  : 'Specify the desired target worksheet format and question styles for AI worksheet generation & automated answer key grading.'}
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                              {/* Worksheet Type Selector */}
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                                  {isKo ? '생성할 학습지 형태 (Worksheet Format)' : 'Worksheet Format'}
+                                </label>
+                                <select
+                                  value={worksheetType}
+                                  onChange={(e) => setWorksheetType(e.target.value)}
+                                  className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 cursor-pointer ${
+                                    isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
+                                  }`}
+                                >
+                                  <option value="daily_homework">📄 {isKo ? '일간 워크시트 (Daily Homework)' : 'Daily Homework'}</option>
+                                  <option value="weekly_quiz">📝 {isKo ? '주간 단원 평가 (Weekly Quiz)' : 'Weekly Quiz'}</option>
+                                  <option value="phonics_tracing">✍️ {isKo ? '파닉스/어휘 쓰기 (Phonics & Tracing)' : 'Phonics & Tracing'}</option>
+                                  <option value="reading_comp">📖 {isKo ? '독해 이해력 문제지 (Reading Comprehension)' : 'Reading Comprehension'}</option>
+                                </select>
+                              </div>
+
+                              {/* Question Style Selector */}
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                                  {isKo ? '출제 및 채점 문제 스타일 (Question Style)' : 'Question Format'}
+                                </label>
+                                <select
+                                  value={questionStyle}
+                                  onChange={(e) => setQuestionStyle(e.target.value)}
+                                  className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 cursor-pointer ${
+                                    isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
+                                  }`}
+                                >
+                                  <option value="multiple_choice">☑️ {isKo ? '4지 선다형 (Multiple Choice)' : 'Multiple Choice'}</option>
+                                  <option value="fill_in_blanks">✏️ {isKo ? '빈칸 채우기 (Fill-in-the-Blanks)' : 'Fill-in-the-Blanks'}</option>
+                                  <option value="unscramble">🔤 {isKo ? '문장 배열 (Unscramble Sentences)' : 'Unscramble Sentences'}</option>
+                                  <option value="vocab_matching">🔗 {isKo ? '어휘 뜻 연결 (Matching Definitions)' : 'Matching Definitions'}</option>
+                                  <option value="short_answer">📝 {isKo ? '단답형 (Short Answer)' : 'Short Answer'}</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
 
 
                         <div className={`flex gap-4 justify-end pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
@@ -3522,6 +3534,92 @@ export default function TeacherPage({ isNight = true }: Props) {
                               ))}
                             </tbody>
                           </table>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'history' && (
+                <div className="space-y-8 animate-fade-in">
+                  <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${
+                    isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                  }`}>
+                    <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
+                      isThemeNight ? 'bg-[#0a0a0c] text-white' : 'bg-white text-zinc-900'
+                    }`}>
+                      <div className={`flex items-center justify-between mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
+                            <FileText size={22} weight="bold" />
+                          </div>
+                          <div>
+                            <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                              {isKo ? '제출된 원어민 평가 폼 내역' : 'Submitted Teacher Evaluation Forms'}
+                            </h4>
+                            <p className="text-xs text-zinc-400 mt-0.5">
+                              {isKo 
+                                ? '원어민 강사가 모바일에서 작성한 출석 및 관찰 일지 내역입니다. 학부모 알림톡 대본으로 1초 변환됩니다.' 
+                                : 'Daily classroom evaluation logs submitted by foreign teachers. Auto-translated into Korean parent scripts.'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTab('overview');
+                            setTimeout(() => {
+                              const el = document.getElementById('interactive');
+                              if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            }, 200);
+                          }}
+                          className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer flex items-center gap-1.5"
+                        >
+                          <Sparkle size={14} weight="bold" />
+                          <span>{isKo ? '⚡ 폼 작성 체험하기' : 'Test FT Log Form'}</span>
+                        </button>
+                      </div>
+
+                      {submittedLogs.length === 0 ? (
+                        <div className={`p-12 rounded-3xl border text-center space-y-4 ${
+                          isThemeNight ? 'bg-[#050505] border-white/5 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-700'
+                        }`}>
+                          <div className="w-16 h-16 rounded-3xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center mx-auto text-2xl shadow-inner">
+                            📑
+                          </div>
+                          <div className="space-y-1.5 max-w-md mx-auto">
+                            <h5 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                              {isKo ? '아직 제출된 평가 폼이 없습니다' : 'No Submitted Forms Found'}
+                            </h5>
+                            <p className="text-xs text-zinc-400 leading-relaxed">
+                              {isKo 
+                                ? '원어민 선생님이 30초 모바일 평가 폼을 제출하면 이곳에서 실시간으로 대본을 검수하고 복사할 수 있습니다.' 
+                                : 'When foreign teachers submit daily 30s evaluation logs, their responses and generated Korean KakaoTalk scripts will appear here.'}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {submittedLogs.map((log: any, idx: number) => (
+                            <div key={log.id || idx} className={`p-5 rounded-2xl border transition-all ${
+                              isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-200'
+                            }`}>
+                              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-sm text-orange-400">{log.className || 'Class'}</span>
+                                  <span className="text-xs text-zinc-500 font-mono">• {log.date}</span>
+                                </div>
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                                  {isKo ? '대본 생성 완료' : 'Script Ready'}
+                                </span>
+                              </div>
+                              <p className="text-xs text-zinc-300 pt-3 leading-relaxed">
+                                {log.generalComments || log.lessonTopic}
+                              </p>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
