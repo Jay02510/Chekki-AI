@@ -41,8 +41,10 @@ import {
   Sun,
   Moon,
   Info,
-  Trash
+  Trash,
+  Buildings
 } from '@phosphor-icons/react';
+import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 
 interface Props {
   isNight?: boolean;
@@ -87,7 +89,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   // Tab navigation
-  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'students'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'students' | 'directorPortal'>('overview');
 
   // Curriculum state
   const [curriculumTopic, setCurriculumTopic] = useState('');
@@ -1673,6 +1675,31 @@ export default function TeacherPage({ isNight = true }: Props) {
             <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
           </button>
 
+          <button
+            onClick={() => setActiveTab('directorPortal')}
+            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+              activeTab === 'directorPortal'
+                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
+                : isThemeNight 
+                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-xl transition-colors ${
+                activeTab === 'directorPortal' 
+                  ? 'bg-orange-500/20 text-orange-500' 
+                  : isThemeNight ? 'bg-white/5 text-amber-400 group-hover:text-white' : 'bg-amber-100 text-amber-600 group-hover:text-zinc-900'
+              }`}>
+                <Buildings size={18} weight="bold" />
+              </div>
+              <span>{isKo ? '🏢 원장님 전용 HQ 포털' : '🏢 Director Admin HQ'}</span>
+            </div>
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              HQ
+            </span>
+          </button>
+
           <a
             href="/reports"
             onClick={(e) => {
@@ -1942,6 +1969,10 @@ export default function TeacherPage({ isNight = true }: Props) {
           )}
 
           <div className="animate-fade-in">
+            {activeTab === 'directorPortal' && (
+              <NativeDirectorPortal isNight={isThemeNight} academyName={(user as any)?.academyName || 'Apex English Academy (Seocho)'} />
+            )}
+
             {activeTab === 'overview' && (
               <div className="space-y-8 animate-fade-in">
                 

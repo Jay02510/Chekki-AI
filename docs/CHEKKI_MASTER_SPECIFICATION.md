@@ -71,16 +71,25 @@ By transforming a routine paper worksheet into an interactive, digital workspace
 * Daily scan streak tracking and unlockable achievement badges (Standard vs Pro Exclusive).
 
 ### Feature 6: School & Organization Portal
-* Transactional school code redemption (`POLY10`, `GATE05`) for institution-funded Pro access.
-* Teacher classroom view for tracking aggregate student scan results.
+* Transactional school code redemption (`APEX10`, `POLY10`, `GATE05`) for institution-funded Pro access.
+* Director Admin HQ Portal (`NativeDirectorPortal`) providing campus-wide student roster management, teacher assignments, and exception oversight.
 
-### Feature 7: Teacher Curriculum Pre-Seeding Module
-* Allows hagwon teachers to pre-upload weekly textbook topics, passage texts, and target vocabulary to pre-seed Gemini's context window.
-* Elevates OCR recognition and answer verification accuracy to near 100% for specific school workbooks.
+### Feature 7: Dual-Stream AI Curriculum & Homework Scanner
+* **📘 Syllabus / Course Plan Scanner:** Extracts multi-week topics, target vocabulary chips, and phonics focus rules across 4–16 week course durations.
+* **📄 Daily Homework Worksheet Scanner:** Extracts question text, correct answers, and generates green AI answer ink overlays for Chekki Parent App scanning.
+* **Independent Storage:** Syllabus data and worksheet answer keys store in separate state buckets, preventing overwriting or accidental deletion.
 
-### Feature 8: Automated Weekly/Monthly Parent Progress Report Generator
-* Generates bilingual growth reports aggregating home scan accuracy, phonics mastery percentages, and weekly vocabulary acquisition.
-* Includes custom **Teacher Evaluation Notes** and personalized **Mom's Praise Scripts**.
+### Feature 8: Side-by-Side Paper Overlay & Editable Answer Key Panel
+* **Left Panel:** Displays physical paper scan preview with floating **Green AI Answer Ink Badges** (`Q1 ➔ producers`, `Q2 ➔ consumer`, `Q3 ➔ decomposers`) directly on top of the document page.
+* **Right Panel:** Inline editable text fields for question text, category tags, and correct answer ink, plus a `➕ Add Question` button for manual question creation.
+
+### Feature 9: AI Content Safety & Bad Words Guardrail System
+* Automated real-time regex filtering against an educational profanity safety dictionary (`checkContainsBadWords`).
+* High-visibility alert banners and curriculum save restrictions when inappropriate language or bad words are detected in teacher input or OCR extractions.
+
+### Feature 10: Director HQ Portal & Automated Report Generator Sync
+* Multi-class syllabus/worksheet oversight dashboard.
+* 1-Click **`Report Studio`** integration (`/report-studio`) that automatically seeds uploaded syllabus vocabulary and worksheet accuracy into parent progress report PDFs.
 
 ---
 
