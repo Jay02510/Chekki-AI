@@ -96,6 +96,15 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath ? 'director' : 'teacher');
   const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>((user as any)?.educatorRole || 'ft');
   const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum'>('overview');
+  const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
+
+  useEffect(() => {
+    if (activeTab === 'syllabus') {
+      setUploadMode('syllabus');
+    } else if (activeTab === 'homework') {
+      setUploadMode('worksheet');
+    }
+  }, [activeTab]);
 
   // Curriculum state
   const [curriculumTopic, setCurriculumTopic] = useState('');
@@ -169,7 +178,6 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [scanStatusMessage, setScanStatusMessage] = useState<string | null>(null);
   const [showDocPreviewModal, setShowDocPreviewModal] = useState(false);
   const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
-  const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
 
   // New Chip Input state
   const [newVocabInput, setNewVocabInput] = useState('');
@@ -2022,37 +2030,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               </div>
             )}
 
-            {/* Educator Role Switcher Pill (FT vs KT) */}
-            <div className={`p-1 border rounded-2xl flex items-center gap-1 ${
-              isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-300'
-            }`}>
-              <button
-                type="button"
-                onClick={() => { setEducatorRole('ft'); if (activeTab === 'history') setActiveTab('overview'); }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  educatorRole === 'ft'
-                    ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20'
-                    : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
-                }`}
-                title="Foreign Teacher Mode (Curriculum & Autograding Focus)"
-              >
-                <span>🔤</span>
-                <span>FT Mode</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => { setEducatorRole('kt'); }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  educatorRole === 'kt'
-                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-                    : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
-                }`}
-                title="Korean Teacher Mode (Parent Reports & Approvals Focus)"
-              >
-                <span>👨‍🏫</span>
-                <span>KT Mode</span>
-              </button>
-            </div>
+
 
             {/* Language Switcher */}
             <button
@@ -2731,34 +2709,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                             )}
                           </div>
                         )}
-
-                        {/* Separate Upload Mode Selector Tabs */}
-                        <div className="flex gap-2 mb-4 p-1 bg-white/5 border border-white/10 rounded-2xl">
-                          <button
-                            type="button"
-                            onClick={() => setUploadMode('syllabus')}
-                            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                              uploadMode === 'syllabus'
-                                ? 'bg-orange-500 text-white shadow-md'
-                                : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
-                            }`}
-                          >
-                            <span>📘</span>
-                            <span>{isKo ? '교재 목차 / 시라버스 업로드 (독립 관리)' : 'Upload Syllabus / Course Plan'}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setUploadMode('worksheet')}
-                            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                              uploadMode === 'worksheet'
-                                ? 'bg-orange-500 text-white shadow-md'
-                                : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
-                            }`}
-                          >
-                            <span>📄</span>
-                            <span>{isKo ? '일간 워크시트 / 정답지 업로드 (독립 관리)' : 'Upload Worksheet / Answer Key'}</span>
-                          </button>
-                        </div>
 
                         {/* MODE 1: SYLLABUS & COURSE DURATION MANAGER */}
                         {uploadMode === 'syllabus' && (
@@ -4217,135 +4167,52 @@ export default function TeacherPage({ isNight = true }: Props) {
         </div>
       )}
 
-      {/* --- AI REVIEW WORKSHEET PRINTABLE MODAL --- */}
-      {showReviewSheetModal && (
-        <div className="fixed inset-0 z-[320] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
-            onClick={() => setShowReviewSheetModal(false)} 
-          />
-          <div className="relative p-1 bg-white border border-zinc-200 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh]">
-            <div className="relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 bg-white text-zinc-900 overflow-y-auto custom-scrollbar">
-              <button
-                type="button"
-                onClick={() => setShowReviewSheetModal(false)}
-                className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-all cursor-pointer"
-              >
-                <X size={18} weight="bold" />
-              </button>
-
-              {/* Printable Worksheet Header */}
-              <div className="border-b border-zinc-200 pb-6 mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {academyLogo ? (
-                    <img src={academyLogo} alt="Logo" className="w-12 h-12 object-contain rounded-xl border border-zinc-200" />
-                  ) : (
-                    <div className="w-12 h-12 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-2xl flex items-center justify-center font-bold text-xl">
-                      🏫
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="text-lg font-black text-zinc-900">{user?.schoolName || 'B2B Academy'}</h3>
-                    <p className="text-xs text-orange-600 font-bold uppercase tracking-wider">
-                      {isKo ? '오답 맞춤 복습 프린트 학습지' : 'AI Individualized Review Worksheet'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right text-xs font-mono">
-                  <p className="font-bold text-zinc-800">{selectedClass?.name || 'Class'} | Week {selectedClass?.activeWeekNumber}</p>
-                  <p className="text-zinc-500">Student: ___________________</p>
-                </div>
-              </div>
-
-              {/* Section 1: Phonics Sound Blend Drill */}
-              <div className="space-y-6">
-                <div className="p-4 bg-orange-50/60 border border-orange-200 rounded-2xl">
-                  <h4 className="text-xs font-black text-orange-800 uppercase tracking-widest mb-1 flex items-center gap-2">
-                    <Sparkle size={14} weight="bold" />
-                    <span>Section A: Target Phonics & Sound Patterns (파닉스 타겟 복습)</span>
-                  </h4>
-                  <p className="text-xs text-zinc-700">
-                    {curriculumPhonics ? `Focus sounds for Week ${selectedClass?.activeWeekNumber}: [ ${curriculumPhonics} ]` : 'Focus sounds: -ai-, -ay-, sh-, ch-'}
-                  </p>
-                </div>
-
-                {/* Section 2: Vocabulary Writing Practice Lines */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-black text-zinc-800 uppercase tracking-widest">
-                    Section B: Weekly Target Vocabulary Practice (주간 타겟 단어 쓰기)
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {(activeVocabWords.length > 0 ? activeVocabWords : ['sunny', 'rainy', 'windy', 'cloudy', 'umbrella', 'jacket']).map((word, idx) => (
-                      <div key={idx} className="p-3 border border-zinc-200 rounded-xl bg-zinc-50 flex items-center justify-between">
-                        <span className="font-mono font-bold text-sm text-zinc-900">{idx + 1}. {word}</span>
-                        <span className="font-mono text-zinc-400 text-xs">____________________</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Section 3: Reading Passage Comprehension */}
-                {curriculumPassage && (
-                  <div className="space-y-3 pt-2">
-                    <h4 className="text-xs font-black text-zinc-800 uppercase tracking-widest">
-                      Section C: Reading Passage Reference (주간 본문 지문)
-                    </h4>
-                    <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-800 font-serif italic leading-relaxed">
-                      "{curriculumPassage}"
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Print Action Bar */}
-              <div className="mt-8 pt-4 border-t border-zinc-200 flex justify-between items-center">
-                <p className="text-[10px] text-zinc-500 font-mono">
-                  {isKo ? 'Chekki AI가 학급 오답 데이터를 바탕으로 자동 생성한 프린트입니다.' : 'Generated by Chekki AI B2B Platform'}
-                </p>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowReviewSheetModal(false)}
-                    className="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-xs rounded-xl border border-zinc-300 transition-all cursor-pointer"
-                  >
-                    {isKo ? '닫기' : 'Close'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => window.print()}
-                    className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
-                  >
-                    <Printer size={16} weight="bold" />
-                    <span>{isKo ? '학습지 인쇄 / PDF 저장' : 'Print / Save PDF'}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* --- ACADEMY BRANDED STUDENT GROWTH REPORT CARD MODAL --- */}
       {showReportCardModal && (
         <div className="fixed inset-0 z-[330] flex items-center justify-center p-4">
+          <style>{`
+            @media print {
+              body * {
+                visibility: hidden !important;
+              }
+              .printable-report-card, .printable-report-card * {
+                visibility: visible !important;
+              }
+              .printable-report-card {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 32px !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                box-shadow: none !important;
+                border: none !important;
+              }
+              .no-print {
+                display: none !important;
+              }
+            }
+          `}</style>
           <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md no-print" 
             onClick={() => setShowReportCardModal(false)} 
           />
           <div className="relative p-1 bg-white border border-zinc-200 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh]">
-            <div className="relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 bg-white text-zinc-900 overflow-y-auto custom-scrollbar">
+            <div className="printable-report-card relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 bg-white text-zinc-900 overflow-y-auto custom-scrollbar">
               <button
                 type="button"
                 onClick={() => setShowReportCardModal(false)}
-                className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-all cursor-pointer"
+                className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-all cursor-pointer no-print"
               >
                 <X size={18} weight="bold" />
               </button>
 
               {/* Student Selector Bar */}
               {activeRoster.length > 0 && (
-                <div className="mb-6 p-3 bg-orange-50/50 border border-orange-200 rounded-2xl flex items-center justify-between">
+                <div className="mb-6 p-3 bg-orange-50/50 border border-orange-200 rounded-2xl flex items-center justify-between no-print">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-orange-700">{isKo ? '성적표 대상 원생 선택:' : 'Select Student for Report Card:'}</span>
                     <select
@@ -4389,8 +4256,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </div>
 
                 <div className="text-right text-xs font-mono bg-zinc-50 p-3 rounded-xl border border-zinc-200">
-                  <p className="font-bold text-zinc-900">Student: {selectedStudentDetails?.studentName || 'Student'}</p>
-                  <p className="text-zinc-500">Class: {selectedClass?.name || '7-Mercury'}</p>
+                  <p className="font-bold text-zinc-900">Student: {selectedStudentDetails?.studentName || selectedStudentDetails?.name || 'Student'}</p>
+                  <p className="text-zinc-500">Class: {selectedClass?.name || 'Assigned Class'}</p>
                   <p className="text-zinc-500">Date: {new Date().toLocaleDateString()}</p>
                 </div>
               </div>

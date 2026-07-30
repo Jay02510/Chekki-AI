@@ -846,11 +846,88 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto items-stretch">
-          {/* Card 1: Starter Academy Pack (3 Seats) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-7xl mx-auto items-stretch">
+          {/* Card 1: Solo Tutor & Study Room (1 Seat) */}
+          <div 
+            onClick={() => openPlanModal('solo', 1, 1)}
+            className={`p-5 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
+              isNight 
+                ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
+                : 'bg-white border-zinc-200 hover:border-orange-500/50 hover:shadow-xl shadow-sm'
+            }`}
+          >
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black tracking-wider uppercase rounded-full">
+                  {isKo ? '공부방 / 개인 교습소' : 'SOLO & STUDY ROOM'}
+                </span>
+              </div>
+              <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {isKo ? '공부방 / 개인 교습소 (1석)' : 'Solo Tutor & Study Room (1 Seat)'}
+              </h3>
+              <div className="mb-3">
+                <div className="flex items-baseline gap-1">
+                  <span className={`font-display text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {formatPrice(getPlanUnitPrice('solo', billingCycle))}
+                  </span>
+                  <span className={`text-[10px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                    {isKo ? '/월' : '/month'}
+                  </span>
+                </div>
+                {billingCycle === 'yearly' ? (
+                  <p className="text-[10px] font-extrabold text-emerald-500 mt-1">
+                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('solo', 'yearly') * 12)} (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('solo', 'yearly') * 12)}/yr`}
+                  </p>
+                ) : (
+                  <p className={`text-[10px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    {isKo ? '월간 정기 결제' : 'Billed monthly'}
+                  </p>
+                )}
+              </div>
+              <p className={`text-[11px] mb-4 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {isKo 
+                  ? '1인 개인 튜터 및 공부방 선생님을 위한 알뜰형 패키지.' 
+                  : 'Tailored for individual tutors, freelance teachers & home study rooms.'}
+              </p>
+              <ul className={`space-y-2.5 text-[11px] mb-5 border-t pt-3 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '교사 계정 1석 (단독 관리)' : '1 Teacher Seat (Full Access)'}</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '원생 최대 20명 관리' : 'Up to 20 Active Students'}</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '한/영 이중언어 알림톡 자동 생성' : 'Bilingual KakaoTalk Generator'}</span>
+                </li>
+                <li className="flex items-center gap-1.5 font-bold text-orange-400">
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '숙제 채점 & PDF 성적표' : 'Autograding & PDF Reports'}</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openPlanModal('solo', 1, 1);
+              }}
+              className={`w-full py-2.5 font-bold text-xs rounded-xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
+                isNight 
+                  ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' 
+                  : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
+              }`}
+            >
+              {isKo ? '솔로 플랜 시작' : 'Choose Solo Plan'}
+            </button>
+          </div>
+
+          {/* Card 2: Starter Academy Pack (3 Seats) */}
           <div 
             onClick={() => openPlanModal('starter', 3, 1)}
-            className={`p-6 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
+            className={`p-5 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
               isNight 
                 ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
                 : 'bg-white border-zinc-200 hover:border-orange-500/50 hover:shadow-xl shadow-sm'
@@ -859,56 +936,52 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <div>
               <div className="flex justify-between items-center mb-3">
                 <span className="px-2.5 py-1 bg-pink-500/10 border border-pink-500/20 text-pink-500 text-[10px] font-black tracking-wider uppercase rounded-full">
-                  {isKo ? '스타터 패키지 (소형 어학원)' : 'STARTER ACADEMY PACK'}
+                  {isKo ? '스타터 패키지' : 'STARTER ACADEMY PACK'}
                 </span>
               </div>
-              <h3 className={`text-lg font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '스타터 패키지 (소형 어학원)' : 'Starter Academy Pack (Micro-School)'}
+              <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {isKo ? '스타터 패키지 (소형 어학원)' : 'Starter Academy Pack'}
               </h3>
               <div className="mb-3">
                 <div className="flex items-baseline gap-1">
-                  <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  <span className={`font-display text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {formatPrice(getPlanUnitPrice('starter', billingCycle))}
                   </span>
-                  <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  <span className={`text-[10px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
                     {isKo ? '/월 (캠퍼스당)' : '/month per campus'}
                   </span>
                 </div>
                 {billingCycle === 'yearly' ? (
-                  <p className="text-[11px] font-extrabold text-emerald-500 mt-1">
-                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('starter', 'yearly') * 12)} 일시 청구 (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('starter', 'yearly') * 12)}/yr`}
+                  <p className="text-[10px] font-extrabold text-emerald-500 mt-1">
+                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('starter', 'yearly') * 12)} (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('starter', 'yearly') * 12)}/yr`}
                   </p>
                 ) : (
-                  <p className={`text-[11px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                  <p className={`text-[10px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
                     {isKo ? '월간 정기 결제' : 'Billed monthly'}
                   </p>
                 )}
               </div>
-              <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              <p className={`text-[11px] mb-4 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
                   ? '원어민/한국인 교사 모바일 평가 폼 & 카카오톡 알림톡 자동 생성을 위한 소형 학원용 패키지.' 
                   : 'Streamlined teacher logs & KakaoTalk report generation for foreign & Korean teachers.'}
               </p>
-              <ul className={`space-y-3 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
-                <li className="flex items-center gap-2">
-                  <CheckCircle size={15} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '교사 계정 최대 3석 (원어민 1명 + 한국인 2명)' : 'Up to 3 Teacher Seats (1 FT + 2 KTs)'}</span>
+              <ul className={`space-y-2.5 text-[11px] mb-5 border-t pt-3 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '교사 계정 최대 3석 (원어민 1 + 한국인 2)' : 'Up to 3 Teacher Seats (1 FT + 2 KTs)'}</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle size={15} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '30초 원어민 강사 모바일 평가 폼' : '30-Second Foreign Teacher Mobile Log Form'}</span>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '30초 원어민 모바일 평가 폼' : '30-Second Foreign Teacher Log'}</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle size={15} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '한/영 이중언어 알림톡 대본 자동 생성' : 'Bilingual KakaoTalk Script Generator'}</span>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
+                  <span>{isKo ? '한/영 이중언어 알림톡 생성' : 'Bilingual KakaoTalk Script Generator'}</span>
                 </li>
-                <li className="flex items-center gap-2 font-bold text-xs text-orange-400">
-                  <Sparkle size={15} weight="bold" className="flex-shrink-0" />
-                  <span>{isKo ? '한국인 교사 실시간 편집 워크스페이스' : 'Live Editable Textarea for KT Review'}</span>
-                </li>
-                <li className="flex items-center gap-2 font-bold text-xs text-orange-400">
-                  <Sparkle size={15} weight="bold" className="flex-shrink-0" />
-                  <span>{isKo ? '학원 맞춤 로고 탑재 PDF 성적표 출력' : 'Custom Academy Logo on PDF Reports'}</span>
+                <li className="flex items-center gap-1.5 font-bold text-orange-400">
+                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
+                  <span>{isKo ? '한국인 교사 편집 워크스페이스' : 'Live Editable Textarea for KT Review'}</span>
                 </li>
               </ul>
             </div>
@@ -918,7 +991,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 e.stopPropagation();
                 openPlanModal('starter', 3, 1);
               }}
-              className={`w-full py-3 font-bold text-xs rounded-2xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
+              className={`w-full py-2.5 font-bold text-xs rounded-xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
                 isNight 
                   ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' 
                   : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
@@ -928,71 +1001,67 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </button>
           </div>
 
-          {/* Card 2: Chekki School Pro (All-in-One Master Bundle) [MOST POPULAR] */}
+          {/* Card 3: Chekki School Pro (All-in-One Master Bundle) [MOST POPULAR] */}
           <div 
             onClick={() => openPlanModal('school_pro', 10, 1)}
-            className={`p-6 border rounded-3xl flex flex-col justify-between transition-all relative scale-[1.02] cursor-pointer group ${
+            className={`p-5 border rounded-3xl flex flex-col justify-between transition-all relative scale-[1.02] cursor-pointer group ${
               isNight 
                 ? 'bg-[#0a0705] border-orange-500/80 text-white shadow-2xl shadow-orange-500/10 hover:border-orange-500' 
                 : 'bg-gradient-to-b from-orange-500/[0.08] to-white border-2 border-orange-500 text-zinc-900 shadow-xl hover:border-orange-600'
             }`}
           >
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-orange-500 text-white text-[9px] font-black tracking-widest uppercase rounded-full shadow-lg">
-              {isKo ? '가장 인기 있는 완전 통합 패키지' : 'MOST POPULAR (ALL-IN-ONE BUNDLE)'}
+              {isKo ? 'MOST POPULAR' : 'MOST POPULAR'}
             </div>
             <div>
               <div className="flex justify-between items-center mb-3 pt-1">
                 <span className="text-[10px] font-black uppercase tracking-wider text-orange-500">
-                  {isKo ? '완전 통합 어학원 패키지' : 'ALL-IN-ONE SCHOOL PACKAGE'}
+                  {isKo ? '통합 어학원 패키지' : 'ALL-IN-ONE SCHOOL PACKAGE'}
                 </span>
               </div>
-              <h3 className={`text-lg font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '체키 스쿨 프로 (통합 패키지)' : 'Chekki School Pro (Master Bundle)'}
+              <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {isKo ? '체키 마스터 스쿨 프로' : 'Chekki Master School Pro'}
               </h3>
               <div className="mb-3">
                 <div className="flex items-baseline gap-1">
-                  <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  <span className={`font-display text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {formatPrice(getPlanUnitPrice('school_pro', billingCycle))}
                   </span>
-                  <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  <span className={`text-[10px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
                     {isKo ? '/월 (캠퍼스당)' : '/month per campus'}
                   </span>
                 </div>
                 {billingCycle === 'yearly' ? (
-                  <p className="text-[11px] font-extrabold text-emerald-500 mt-1">
-                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('school_pro', 'yearly') * 12)} 일시 청구 (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('school_pro', 'yearly') * 12)}/yr`}
+                  <p className="text-[10px] font-extrabold text-emerald-500 mt-1">
+                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('school_pro', 'yearly') * 12)} (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('school_pro', 'yearly') * 12)}/yr`}
                   </p>
                 ) : (
-                  <p className={`text-[11px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                  <p className={`text-[10px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
                     {isKo ? '월간 정기 결제' : 'Billed monthly'}
                   </p>
                 )}
               </div>
-              <p className={`text-xs mb-5 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              <p className={`text-[11px] mb-4 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '교재 목차 선제 탑재, 99.9% 손글씨 AI 채점 & 학부모 앱 연동까지 완벽하게 통합된 학원용 풀 패키지.' 
-                  : 'Complete academy package featuring textbook pre-seeding, homework autograding & parent app sync.'}
+                  ? '교재 목차 탑재, 99.9% AI 채점 & 학부모 앱 연동까지 통합된 학원 풀 패키지.' 
+                  : 'Complete academy package featuring textbook pre-seeding, autograding & parent app sync.'}
               </p>
-              <ul className={`space-y-2.5 text-xs mb-6 border-t pt-4 ${isNight ? 'border-white/10 text-zinc-300' : 'border-zinc-200 text-zinc-700'}`}>
-                <li className="flex items-center gap-2">
+              <ul className={`space-y-2.5 text-[11px] mb-5 border-t pt-3 ${isNight ? 'border-white/10 text-zinc-300' : 'border-zinc-200 text-zinc-700'}`}>
+                <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '교사 계정 최대 10석 & 학부모 전원 무제한' : 'Up to 10 Teacher Seats & Unlimited Parents'}</span>
+                  <span>{isKo ? '교사 계정 최대 10석 & 학부모 무제한' : 'Up to 10 Teacher Seats & Unlimited Parents'}</span>
                 </li>
-                <li className="flex items-center gap-2 font-bold text-orange-500">
+                <li className="flex items-center gap-1.5 font-bold text-orange-500">
                   <Sparkle size={14} weight="bold" className="flex-shrink-0" />
                   <span>{isKo ? '리포트 스튜디오의 모든 기능 포함' : 'Includes Everything in Report Studio'}</span>
                 </li>
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '1클릭 교재 목차 스캔 & 어휘 선제 탑재' : '1-Click Textbook Syllabus Pre-seeding & Sync'}</span>
+                  <span>{isKo ? '1클릭 교재 목차 스캔 & 어휘 선제 탑재' : '1-Click Textbook Syllabus Pre-seeding'}</span>
                 </li>
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '매일 숙제 스캔 & 99.9% AI 손글씨 정밀 채점' : 'Daily Homework Scanning & Autograding'}</span>
-                </li>
-                <li className="flex items-center gap-2 font-bold text-orange-500">
-                  <Sparkle size={14} weight="bold" className="flex-shrink-0" />
-                  <span>{isKo ? '학부모 Chekki Pro 앱 무제한 무료 (6자리 코드)' : 'FREE Chekki Pro App for All Parents (via code)'}</span>
+                  <span>{isKo ? '매일 숙제 스캔 & 99.9% AI 정밀 채점' : 'Daily Homework Scanning & Autograding'}</span>
                 </li>
               </ul>
             </div>
@@ -1002,16 +1071,16 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 e.stopPropagation();
                 openPlanModal('school_pro', 10, 1);
               }}
-              className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
             >
-              {isKo ? '체키 스쿨 프로 시작' : 'Choose Chekki School Pro'}
+              {isKo ? '마스터 스쿨 프로 시작' : 'Choose Master School Pro'}
             </button>
           </div>
 
-          {/* Card 3: Large Academy & Franchise (Enterprise) */}
+          {/* Card 4: Large Academy & Franchise (Enterprise) */}
           <div 
             onClick={() => openPlanModal('enterprise', 20, 10)}
-            className={`p-6 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
+            className={`p-5 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
               isNight 
                 ? 'bg-[#050505] border-white/10 hover:border-purple-500/50 hover:bg-zinc-900/30' 
                 : 'bg-white border-zinc-200 hover:border-purple-500/50 hover:shadow-xl shadow-sm'
@@ -1023,24 +1092,24 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   {isKo ? '대형 학원 & 프랜차이즈' : 'LARGE ACADEMY & FRANCHISE'}
                 </span>
               </div>
-              <h3 className={`text-lg font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+              <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '대형 학원 / 프랜차이즈' : 'Large Academy & Franchise'}
               </h3>
               <div className="mb-3">
                 <div className="flex items-baseline gap-1">
-                  <span className={`font-display text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  <span className={`font-display text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {formatPrice(getPlanUnitPrice('enterprise', billingCycle))}
                   </span>
-                  <span className={`text-[11px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  <span className={`text-[10px] font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
                     {isKo ? '/월 (캠퍼스당)' : '/month per campus'}
                   </span>
                 </div>
                 {billingCycle === 'yearly' ? (
-                  <p className="text-[11px] font-extrabold text-emerald-500 mt-1">
-                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('enterprise', 'yearly') * 12)} 일시 청구 (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('enterprise', 'yearly') * 12)}/yr`}
+                  <p className="text-[10px] font-extrabold text-emerald-500 mt-1">
+                    {isKo ? `연간 ${formatPrice(getPlanUnitPrice('enterprise', 'yearly') * 12)} (20% 할인)` : `Billed annually at ${formatPrice(getPlanUnitPrice('enterprise', 'yearly') * 12)}/yr`}
                   </p>
                 ) : (
-                  <p className={`text-[11px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                  <p className={`text-[10px] font-bold mt-1 ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
                     {isKo ? '월간 정기 결제' : 'Billed monthly'}
                   </p>
                 )}

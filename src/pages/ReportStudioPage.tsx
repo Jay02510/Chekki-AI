@@ -333,16 +333,6 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
           {/* Right Actions */}
           <div className="flex items-center gap-3 ml-auto">
-            {/* KT Teacher Access Pill */}
-            <a
-              href="/teacher?role=teacher"
-              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-orange-500/10 border border-orange-500/30 text-orange-400 hover:bg-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
-              title="KT 한인 담임 교사 대시보드 로그인"
-            >
-              <span>👨‍🏫</span>
-              <span>{isKo ? 'KT 담임 교사 로그인' : 'KT Teacher Login'}</span>
-            </a>
-
             {/* Language Toggle */}
             <button
               type="button"
@@ -373,19 +363,23 @@ ${activeReport.parentScriptKo.closing}`.trim();
                     ? 'border-white/10 hover:bg-white/10 text-white/70 hover:text-white'
                     : 'border-slate-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900'
                 }`}
-                title="Toggle Light / Dark Mode"
+                title="Toggle Theme"
               >
                 {isNight ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
               </button>
             )}
 
+            {/* Single Unified Educator Portal Login Button */}
             <a
-              href="/teacher?role=teacher"
-              className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full text-xs transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
-              title="KT 한인 담임 교사 로그인"
+              href="/teacher"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = '/teacher';
+              }}
+              className="px-4 py-1.5 rounded-full text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <span>👨‍🏫</span>
-              <span>{isKo ? 'KT Teacher Login' : 'KT Teacher Login'}</span>
+              <span>{isKo ? '교사 포털 로그인' : 'Educator Login'}</span>
             </a>
           </div>
         </header>
