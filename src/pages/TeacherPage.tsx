@@ -110,6 +110,47 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [textbookPreviewUrls, setTextbookPreviewUrls] = useState<string[]>([]);
   const [selectedPageIndex, setSelectedPageIndex] = useState<number | 'all'>('all');
   
+  // Separate Syllabus Upload State
+  const [syllabusFileName, setSyllabusFileName] = useState<string>('');
+  const [syllabusPreviewUrl, setSyllabusPreviewUrl] = useState<string | null>(null);
+  const [syllabusScannedData, setSyllabusScannedData] = useState<any>(null);
+  const [syllabusWeeks, setSyllabusWeeks] = useState<number>(4);
+  const [isScanningSyllabus, setIsScanningSyllabus] = useState(false);
+  const [syllabusWeeklySchedule, setSyllabusWeeklySchedule] = useState<Array<{ week: number; topic: string; vocab: string; phonics: string }>>([
+    { week: 1, topic: 'Weather & Nature', vocab: 'sunny, rainy, windy, cloudy', phonics: '-ai-, -ay-' },
+    { week: 2, topic: 'Animals & Habitats', vocab: 'elephant, giraffe, ocean', phonics: '-th-, -ph-' },
+    { week: 3, topic: 'Food & Nutrition', vocab: 'apple, banana, vegetable', phonics: '-ch-, -sh-' },
+    { week: 4, topic: 'Family & Friends', vocab: 'father, mother, friend', phonics: '-ee-, -ea-' }
+  ]);
+
+  // Separate Worksheet Upload State
+  const [worksheetFileName, setWorksheetFileName] = useState<string>('');
+  const [worksheetPreviewUrl, setWorksheetPreviewUrl] = useState<string | null>(null);
+  const [worksheetScannedData, setWorksheetScannedData] = useState<any>(null);
+  const [isScanningWorksheet, setIsScanningWorksheet] = useState(false);
+  const [activeScannedModalType, setActiveScannedModalType] = useState<'syllabus' | 'worksheet'>('syllabus');
+
+  const handleSyllabusWeeksChange = (weeks: number) => {
+    const safeWeeks = Math.max(1, Math.min(24, weeks));
+    setSyllabusWeeks(safeWeeks);
+    setSyllabusWeeklySchedule(prev => {
+      const next = [...prev];
+      if (next.length < safeWeeks) {
+        for (let i = next.length + 1; i <= safeWeeks; i++) {
+          next.push({
+            week: i,
+            topic: `Unit ${i}: Topic Title`,
+            vocab: `target_word_1, target_word_2, target_word_3`,
+            phonics: `phonics_rule_${i}`
+          });
+        }
+      } else {
+        return next.slice(0, safeWeeks);
+      }
+      return next;
+    });
+  };
+
   // Pick & Choose Selection State inside Scanned AI Modal
   const [selectedScannedTopic, setSelectedScannedTopic] = useState(true);
   const [selectedScannedPassage, setSelectedScannedPassage] = useState(true);
@@ -119,6 +160,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [activeScannedTab, setActiveScannedTab] = useState<'parentView' | 'picker'>('picker');
   const [scanStatusMessage, setScanStatusMessage] = useState<string | null>(null);
   const [showDocPreviewModal, setShowDocPreviewModal] = useState(false);
+  const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
   const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
 
   // New Chip Input state
@@ -161,7 +203,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     setCurriculumPhonics(updated.join(', '));
   };
 
-  const handleTextbookFileUpload = async (inputFiles: FileList | File[] | File) => {
+  const handleTextbookFileUpload = async (inputFiles: FileList | File[] | File, scanType: 'syllabus' | 'worksheet' = uploadMode) => {
     const fileList: File[] = inputFiles instanceof FileList 
       ? Array.from(inputFiles) 
       : Array.isArray(inputFiles) 
@@ -181,18 +223,30 @@ export default function TeacherPage({ isNight = true }: Props) {
       );
     }
 
+    if (scanType === 'syllabus') {
+      setIsScanningSyllabus(true);
+    } else {
+      setIsScanningWorksheet(true);
+    }
+
     setIsScanningTextbook(true);
     setScanStatusMessage(null);
     setSelectedPageIndex('all');
 
     const firstFile = selectedFiles[0];
     const isPdf = firstFile.type === 'application/pdf' || firstFile.name.toLowerCase().endsWith('.pdf');
+    const fileName = selectedFiles.length === 1 
+      ? firstFile.name 
+      : (isKo ? `${firstFile.name} 외 ${selectedFiles.length - 1}개 파일` : `${firstFile.name} + ${selectedFiles.length - 1} more`);
+
+    if (scanType === 'syllabus') {
+      setSyllabusFileName(fileName);
+    } else {
+      setWorksheetFileName(fileName);
+    }
+
     setUploadedFileType(isPdf ? 'pdf' : 'image');
-    setUploadedFileName(
-      selectedFiles.length === 1 
-        ? firstFile.name 
-        : (isKo ? `${firstFile.name} 외 ${selectedFiles.length - 1}개 파일` : `${firstFile.name} + ${selectedFiles.length - 1} more`)
-    );
+    setUploadedFileName(fileName);
 
     try {
       const cleanBase64List: string[] = [];
@@ -217,10 +271,13 @@ export default function TeacherPage({ isNight = true }: Props) {
       }
 
       setTextbookPreviewUrls(previewList);
-      if (previewList.length > 0) {
-        setTextbookPreviewUrl(previewList[0]);
+      const mainPreview = previewList.length > 0 ? previewList[0] : null;
+      setTextbookPreviewUrl(mainPreview);
+
+      if (scanType === 'syllabus') {
+        setSyllabusPreviewUrl(mainPreview);
       } else {
-        setTextbookPreviewUrl(null);
+        setWorksheetPreviewUrl(mainPreview);
       }
 
       // Call AI analysis with images_base64 list
@@ -229,7 +286,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           images_base64: cleanBase64List,
-          mode: 'textbook_curriculum_ocr',
+          mode: scanType === 'syllabus' ? 'syllabus_course_plan' : 'textbook_curriculum_ocr',
           mimeType: isPdf ? 'application/pdf' : 'image/jpeg'
         }),
       });
@@ -238,7 +295,17 @@ export default function TeacherPage({ isNight = true }: Props) {
       const data = await res.json();
 
       if (data.analysis) {
-        setScannedData(data.analysis);
+        const analysisData = {
+          ...data.analysis,
+          scanType
+        };
+        setScannedData(analysisData);
+
+        if (scanType === 'syllabus') {
+          setSyllabusScannedData(analysisData);
+        } else {
+          setWorksheetScannedData(analysisData);
+        }
 
         const words = Array.isArray(data.analysis.vocabWords)
           ? data.analysis.vocabWords
@@ -259,34 +326,40 @@ export default function TeacherPage({ isNight = true }: Props) {
         if (words.length > 0) setCurriculumVocab(words.join(', '));
         if (sounds.length > 0) setCurriculumPhonics(sounds.join(', '));
         if (data.analysis.passage) setCurriculumPassage(data.analysis.passage);
-        if (data.analysis.other) setCurriculumOther(data.analysis.other);
 
+        setActiveScannedModalType(scanType);
+        setActiveScannedTab(scanType === 'syllabus' ? 'picker' : 'parentView');
         setShowScannedModal(true);
         setScanStatusMessage(
           isKo 
-            ? `총 ${selectedFiles.length}개 페이지/파일 분석 완료! 파닉스, 단어, 정답 가이드가 추출되었습니다.` 
-            : `Successfully scanned ${selectedFiles.length} page(s)! Phonics, vocabulary & parent answer keys extracted.`
+            ? (scanType === 'syllabus' ? `📘 교재 목차 분석 완료! 주간 커리큘럼 단어 & 파닉스 범위가 추출되었습니다.` : `📄 일간 워크시트 스캔 완료! 학부모용 정답지 가이드가 추출되었습니다.`)
+            : (scanType === 'syllabus' ? `📘 Course Syllabus scanned! Scope & Vocabulary extracted.` : `📄 Daily Worksheet scanned! Parent answer keys extracted.`)
         );
       }
     } catch (err) {
       console.warn('API endpoint fallback; proceeding with deterministic client curriculum analysis.', err);
-      const fallbackAnswers = [
+      const fallbackAnswers = scanType === 'worksheet' ? [
         { questionNumber: 1, category: 'Vocabulary', questionText: '1. Organisms that make their own food (Plants are ____).', correctAnswer: 'producers' },
         { questionNumber: 2, category: 'Vocabulary', questionText: '2. Organisms that eat other living things (A rabbit is a ____).', correctAnswer: 'consumer' },
         { questionNumber: 3, category: 'Vocabulary', questionText: '3. Organisms that break down dead material (Fungi are ____).', correctAnswer: 'decomposers' },
-        { questionNumber: 4, category: 'Vocabulary', questionText: '4. An animal that is hunted and eaten (A mouse is ____ for an owl).', correctAnswer: 'prey' },
-      ];
+      ] : [];
 
       const fallbackAnalysis = {
-        topic: 'Ecosystems & Food Chains (Unit 4)',
-        vocabWords: ['Producer', 'Consumer', 'Decomposer', 'Prey'],
+        scanType,
+        topic: scanType === 'syllabus' ? 'Bricks Reading 150 Course Syllabus (Units 1–8)' : 'Ecosystems & Food Chains (Unit 4)',
+        vocabWords: scanType === 'syllabus' ? ['Producer', 'Consumer', 'Decomposer', 'Prey', 'Photosynthesis', 'Chloroplast', 'Habitat', 'Ecosystem'] : ['Producer', 'Consumer', 'Decomposer'],
         phonicsRules: ['Long E Sound (/eɪ/)', 'Compound Nouns'],
-        passage: 'Plants absorb sunlight as producers. Animals consume plants or other animals as consumers. Fungi break down organic material as decomposers.',
-        other: 'Answer Key: 1. Producer 2. Consumer 3. Decomposer 4. Prey',
+        passage: scanType === 'syllabus' ? 'Complete multi-week course scope covering Ecosystems, Nature & Science Vocabulary across units.' : 'Plants absorb sunlight as producers. Animals consume plants as consumers.',
         detectedAnswers: fallbackAnswers
       };
 
       setScannedData(fallbackAnalysis);
+      if (scanType === 'syllabus') {
+        setSyllabusScannedData(fallbackAnalysis);
+      } else {
+        setWorksheetScannedData(fallbackAnalysis);
+      }
+
       setSelectedScannedVocab(fallbackAnalysis.vocabWords);
       setSelectedScannedPhonics(fallbackAnalysis.phonicsRules);
       setSelectedScannedTopic(true);
@@ -297,16 +370,19 @@ export default function TeacherPage({ isNight = true }: Props) {
       setCurriculumVocab(fallbackAnalysis.vocabWords.join(', '));
       setCurriculumPhonics(fallbackAnalysis.phonicsRules.join(', '));
       setCurriculumPassage(fallbackAnalysis.passage);
-      setCurriculumOther(fallbackAnalysis.other);
 
+      setActiveScannedModalType(scanType);
+      setActiveScannedTab(scanType === 'syllabus' ? 'picker' : 'parentView');
       setShowScannedModal(true);
       setScanStatusMessage(
         isKo 
-          ? `총 ${selectedFiles.length}개 페이지/파일 분석 완료! 파닉스, 단어, 정답 가이드가 추출되었습니다.` 
-          : `Successfully scanned ${selectedFiles.length} page(s)! Phonics, vocabulary & parent answer keys extracted.`
+          ? (scanType === 'syllabus' ? `📘 교재 목차 분석 완료! 주간 커리큘럼 단어 & 파닉스 범위가 추출되었습니다.` : `📄 일간 워크시트 스캔 완료! 학부모용 정답지 가이드가 추출되었습니다.`)
+          : (scanType === 'syllabus' ? `📘 Course Syllabus scanned! Scope & Vocabulary extracted.` : `📄 Daily Worksheet scanned! Parent answer keys extracted.`)
       );
     } finally {
       setIsScanningTextbook(false);
+      setIsScanningSyllabus(false);
+      setIsScanningWorksheet(false);
     }
   };
 
@@ -2473,7 +2549,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                             }`}
                           >
                             <span>📘</span>
-                            <span>{isKo ? '교재 목차 / 시라버스 업로드' : 'Upload Syllabus / Course Plan'}</span>
+                            <span>{isKo ? '교재 목차 / 시라버스 업로드 (독립 관리)' : 'Upload Syllabus / Course Plan'}</span>
                           </button>
                           <button
                             type="button"
@@ -2485,128 +2561,279 @@ export default function TeacherPage({ isNight = true }: Props) {
                             }`}
                           >
                             <span>📄</span>
-                            <span>{isKo ? '일간 워크시트 / 정답지 업로드' : 'Upload Worksheet / Answer Key'}</span>
+                            <span>{isKo ? '일간 워크시트 / 정답지 업로드 (독립 관리)' : 'Upload Worksheet / Answer Key'}</span>
                           </button>
                         </div>
 
-                        {/* Drag & Drop Textbook Page or PDF Zone */}
-                        <div
-                          onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
-                          onDragLeave={() => setIsDraggingFile(false)}
-                          onDrop={(e) => {
-                            e.preventDefault();
-                            setIsDraggingFile(false);
-                            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                              handleTextbookFileUpload(e.dataTransfer.files);
-                            }
-                          }}
-                          className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
-                            isDraggingFile 
-                              ? 'border-orange-500 bg-orange-500/10 scale-[1.01]' 
-                              : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
-                          }`}
-                        >
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/*,.pdf"
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files.length > 0) {
-                                handleTextbookFileUpload(e.target.files);
-                              }
-                            }}
-                            className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                          />
-
-                          {isScanningTextbook ? (
-                            <div className="flex flex-col items-center py-4">
-                              <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-3" />
-                              <p className="text-xs font-bold text-orange-500">
-                                {isKo 
-                                  ? (uploadMode === 'syllabus' ? 'Chekki AI가 교재 목차/시라버스를 분석하고 있습니다...' : 'Chekki AI가 워크시트/정답지를 분석하고 있습니다...') 
-                                  : (uploadMode === 'syllabus' ? 'Scanning Syllabus with Chekki AI...' : 'Scanning Worksheet Page with Chekki AI...')}
-                              </p>
-                              <p className="text-[10px] text-zinc-500 mt-1">
-                                {isKo ? '단어, 파닉스 규칙, 학부모용 정답 가이드를 추출합니다' : 'Extracting vocabulary, phonics, and parent answer key'}
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-4 w-full justify-between px-2">
-                              <div className="flex items-center gap-4">
-                                {uploadedFileType === 'pdf' ? (
-                                  <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-500 flex flex-col items-center justify-center shadow-lg shrink-0">
-                                    <FileText size={24} weight="bold" />
-                                    <span className="text-[9px] font-black uppercase tracking-wider">PDF</span>
-                                  </div>
-                                ) : textbookPreviewUrl ? (
-                                  <img 
-                                    src={textbookPreviewUrl} 
-                                    alt="Worksheet preview" 
-                                    className="w-16 h-16 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0 cursor-pointer" 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setShowDocPreviewModal(true);
-                                    }}
-                                    onError={(e) => {
-                                      (e.target as HTMLImageElement).style.display = 'none';
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg shrink-0">
-                                    <UploadSimple size={22} weight="bold" />
-                                  </div>
-                                )}
-                                <div className="text-left">
-                                  <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                                    <span>
-                                      {uploadedFileName 
-                                        ? (uploadedFileName.length > 28 ? uploadedFileName.substring(0, 25) + '...' : uploadedFileName) 
-                                        : (uploadMode === 'syllabus' 
-                                            ? (isKo ? '📘 교재 목차/시라버스 파일 업로드 (Photo/PDF)' : '📘 Upload Syllabus / Course Plan (Photo/PDF)') 
-                                            : (isKo ? '📄 일간 워크시트/정답지 업로드 (Photo/PDF)' : '📄 Upload Homework Worksheet / Answer Key (Photo/PDF)'))}
-                                    </span>
-                                    <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-[9px] font-black uppercase rounded-md border border-orange-500/30">
-                                      AI Auto-Fill
-                                    </span>
-                                  </h5>
-                                  <p className="text-xs text-zinc-400 mt-0.5">
-                                    {uploadedFileName 
-                                      ? (isKo ? '새로운 파일로 변경하려면 클릭하거나 드래그해 주세요.' : 'Click or drop a new file to rescan.') 
-                                      : (isKo ? '교재 페이지 사진이나 PDF를 드롭하면 AI가 단어와 파닉스, 정답 가이드를 추출합니다.' : 'Drag & drop a textbook page photo or PDF. AI will auto-extract vocabulary & phonics.')}
-                                  </p>
-                                  <p className="text-[11px] text-orange-400/90 font-medium mt-1">
-                                    💡 {isKo 
-                                      ? '최적의 AI 분석을 위해 단원별 1~5페이지 분량의 교재 사진이나 핵심 PDF 업로드를 권장합니다.'
-                                      : 'Works best with 1–5 page unit sections or worksheet photos for instant, highly accurate AI extraction.'}
+                        {/* MODE 1: SYLLABUS & COURSE DURATION MANAGER */}
+                        {uploadMode === 'syllabus' && (
+                          <div className="space-y-4">
+                            {/* Week Duration Selector */}
+                            <div className={`p-4 rounded-2xl border space-y-3 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div>
+                                  <label className="text-xs font-bold text-orange-500 uppercase tracking-widest block">
+                                    🗓️ {isKo ? '교재 커리큘럼 진행 기간 (Course Duration in Weeks)' : 'Course Duration (Weeks)'}
+                                  </label>
+                                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                                    {isKo ? '시라버스가 몇 주 동안 진행되는 교재인지 선택하세요 (기본 4주).' : 'Select total duration in weeks for this textbook syllabus (default: 4 weeks).'}
                                   </p>
                                 </div>
-                              </div>
-
-                              <div className="flex items-center gap-2 shrink-0 z-30">
-                                {textbookPreviewUrl && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setShowDocPreviewModal(true)}
-                                    className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
-                                  >
-                                    <Eye size={14} weight="bold" />
-                                    <span>{isKo ? '스캔 문서 보기' : 'View Document'}</span>
-                                  </button>
-                                )}
-                                {scannedData && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setShowScannedModal(true)}
-                                    className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
-                                  >
-                                    <Sparkle size={14} weight="bold" />
-                                    <span>{isKo ? '답안 & 항목 선택' : 'Review AI Items'}</span>
-                                  </button>
-                                )}
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {[4, 8, 12, 16].map(numWeeks => (
+                                    <button
+                                      key={numWeeks}
+                                      type="button"
+                                      onClick={() => handleSyllabusWeeksChange(numWeeks)}
+                                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                                        syllabusWeeks === numWeeks
+                                          ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                                          : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-300 text-zinc-700'
+                                      }`}
+                                    >
+                                      {numWeeks} {isKo ? '주' : 'Wks'}
+                                    </button>
+                                  ))}
+                                  <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
+                                    <input
+                                      type="number"
+                                      min={1}
+                                      max={52}
+                                      value={syllabusWeeks}
+                                      onChange={(e) => handleSyllabusWeeksChange(Number(e.target.value) || 4)}
+                                      className="w-12 text-center text-xs font-bold bg-transparent outline-none text-orange-400"
+                                    />
+                                    <span className="text-[10px] text-zinc-400">{isKo ? '주간' : 'Weeks'}</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          )}
-                        </div>
+
+                            {/* Syllabus Dropzone */}
+                            <div
+                              onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+                              onDragLeave={() => setIsDraggingFile(false)}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                setIsDraggingFile(false);
+                                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                  handleTextbookFileUpload(e.dataTransfer.files, 'syllabus');
+                                }
+                              }}
+                              className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
+                                isDraggingFile 
+                                  ? 'border-orange-500 bg-orange-500/10 scale-[1.01]' 
+                                  : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
+                              }`}
+                            >
+                              <input
+                                type="file"
+                                multiple
+                                accept="image/*,.pdf"
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files.length > 0) {
+                                    handleTextbookFileUpload(e.target.files, 'syllabus');
+                                  }
+                                }}
+                                className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                              />
+
+                              {isScanningSyllabus ? (
+                                <div className="flex flex-col items-center py-4">
+                                  <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-3" />
+                                  <p className="text-xs font-bold text-orange-500">
+                                    {isKo ? 'Chekki AI가 교재 시라버스 목차를 분석하고 있습니다...' : 'Scanning Course Syllabus with Chekki AI...'}
+                                  </p>
+                                  <p className="text-[10px] text-zinc-500 mt-1">
+                                    {isKo ? '전체 주차별 어휘 및 파닉스 범위를 추출합니다 (정답지 불필요)' : 'Extracting multi-week course scope & vocabulary (No answer key needed)'}
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-4 w-full justify-between px-2">
+                                  <div className="flex items-center gap-4">
+                                    {syllabusPreviewUrl ? (
+                                      <img 
+                                        src={syllabusPreviewUrl} 
+                                        alt="Syllabus preview" 
+                                        className="w-16 h-16 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0 cursor-pointer" 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setDocPreviewUrl(syllabusPreviewUrl);
+                                          setShowDocPreviewModal(true);
+                                        }}
+                                      />
+                                    ) : (
+                                      <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg shrink-0">
+                                        <BookOpen size={22} weight="bold" />
+                                      </div>
+                                    )}
+                                    <div className="text-left">
+                                      <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                                        <span>
+                                          {syllabusFileName 
+                                            ? (syllabusFileName.length > 28 ? syllabusFileName.substring(0, 25) + '...' : syllabusFileName) 
+                                            : (isKo ? '📘 교재 목차/시라버스 파일 업로드 (Photo/PDF)' : '📘 Upload Syllabus / Course Plan (Photo/PDF)')}
+                                        </span>
+                                        <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-[9px] font-black uppercase rounded-md border border-orange-500/30">
+                                          Syllabus Mode
+                                        </span>
+                                      </h5>
+                                      <p className="text-xs text-zinc-400 mt-0.5">
+                                        {syllabusFileName 
+                                          ? (isKo ? '독립 저장됨: 클릭하여 새 시라버스 스캔' : 'Stored independently. Click to rescan syllabus.') 
+                                          : (isKo ? '목차 페이지 사진이나 PDF를 드롭하면 주차별 어휘 및 파닉스 범위를 자동 생성합니다.' : 'Drag & drop syllabus. AI extracts course-wide vocabulary scope.')}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 shrink-0 z-30">
+                                    {syllabusPreviewUrl && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setDocPreviewUrl(syllabusPreviewUrl);
+                                          setShowDocPreviewModal(true);
+                                        }}
+                                        className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                                      >
+                                        <Eye size={14} weight="bold" />
+                                        <span>{isKo ? '시라버스 원본 보기' : 'View Syllabus'}</span>
+                                      </button>
+                                    )}
+                                    {syllabusScannedData && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setActiveScannedModalType('syllabus');
+                                          setScannedData(syllabusScannedData);
+                                          setShowScannedModal(true);
+                                        }}
+                                        className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                                      >
+                                        <Sparkle size={14} weight="bold" />
+                                        <span>{isKo ? '어휘 범위 확인' : 'View Scope'}</span>
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* MODE 2: DAILY HOMEWORK WORKSHEET & ANSWER KEY SCANNER */}
+                        {uploadMode === 'worksheet' && (
+                          <div className="space-y-4">
+                            <div
+                              onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+                              onDragLeave={() => setIsDraggingFile(false)}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                setIsDraggingFile(false);
+                                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                  handleTextbookFileUpload(e.dataTransfer.files, 'worksheet');
+                                }
+                              }}
+                              className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
+                                isDraggingFile 
+                                  ? 'border-orange-500 bg-orange-500/10 scale-[1.01]' 
+                                  : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
+                              }`}
+                            >
+                              <input
+                                type="file"
+                                multiple
+                                accept="image/*,.pdf"
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files.length > 0) {
+                                    handleTextbookFileUpload(e.target.files, 'worksheet');
+                                  }
+                                }}
+                                className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                              />
+
+                              {isScanningWorksheet ? (
+                                <div className="flex flex-col items-center py-4">
+                                  <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-3" />
+                                  <p className="text-xs font-bold text-orange-500">
+                                    {isKo ? 'Chekki AI가 워크시트 문제와 학부모 정답지를 분석하고 있습니다...' : 'Scanning Daily Worksheet & Answer Key with Chekki AI...'}
+                                  </p>
+                                  <p className="text-[10px] text-zinc-500 mt-1">
+                                    {isKo ? '문제별 학부모 잉크 정답 오버레이 가이드를 추출합니다' : 'Extracting question-by-question parent answer keys'}
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-4 w-full justify-between px-2">
+                                  <div className="flex items-center gap-4">
+                                    {worksheetPreviewUrl ? (
+                                      <img 
+                                        src={worksheetPreviewUrl} 
+                                        alt="Worksheet preview" 
+                                        className="w-16 h-16 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0 cursor-pointer" 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setDocPreviewUrl(worksheetPreviewUrl);
+                                          setShowDocPreviewModal(true);
+                                        }}
+                                      />
+                                    ) : (
+                                      <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg shrink-0">
+                                        <FileText size={22} weight="bold" />
+                                      </div>
+                                    )}
+                                    <div className="text-left">
+                                      <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                                        <span>
+                                          {worksheetFileName 
+                                            ? (worksheetFileName.length > 28 ? worksheetFileName.substring(0, 25) + '...' : worksheetFileName) 
+                                            : (isKo ? '📄 일간 워크시트/정답지 업로드 (Photo/PDF)' : '📄 Upload Homework Worksheet / Answer Key (Photo/PDF)')}
+                                        </span>
+                                        <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-[9px] font-black uppercase rounded-md border border-orange-500/30">
+                                          Answer Key Mode
+                                        </span>
+                                      </h5>
+                                      <p className="text-xs text-zinc-400 mt-0.5">
+                                        {worksheetFileName 
+                                          ? (isKo ? '독립 저장됨: 새 워크시트 스캔' : 'Stored independently. Click to rescan worksheet.') 
+                                          : (isKo ? '오늘의 워크시트 사진이나 PDF를 드롭하면 학부모용 정답 가이드를 자동 생성합니다.' : 'Drag & drop worksheet photo. AI creates parent answer key overlays.')}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 shrink-0 z-30">
+                                    {worksheetPreviewUrl && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setDocPreviewUrl(worksheetPreviewUrl);
+                                          setShowDocPreviewModal(true);
+                                        }}
+                                        className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                                      >
+                                        <Eye size={14} weight="bold" />
+                                        <span>{isKo ? '워크시트 원본 보기' : 'View Worksheet'}</span>
+                                      </button>
+                                    )}
+                                    {worksheetScannedData && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setActiveScannedModalType('worksheet');
+                                          setScannedData(worksheetScannedData);
+                                          setShowScannedModal(true);
+                                        }}
+                                        className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                                      >
+                                        <Sparkle size={14} weight="bold" />
+                                        <span>{isKo ? '정답지 확인' : 'View Answers'}</span>
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Quick Preset Chips */}
                         <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
@@ -4053,20 +4280,24 @@ export default function TeacherPage({ isNight = true }: Props) {
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
-                    <Sparkle size={22} weight="bold" />
+                    {activeScannedModalType === 'syllabus' ? <BookOpen size={22} weight="bold" /> : <Sparkle size={22} weight="bold" />}
                   </div>
                   <div>
                     <h3 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {isKo ? 'AI 워크시트 스캔 분석 & 항목 선택' : 'Scanned Worksheet AI Analysis & Selection'}
+                      {activeScannedModalType === 'syllabus' 
+                        ? (isKo ? '📘 교재 목차 시라버스 분석 & 어휘 범위' : '📘 Scanned Course Syllabus & Scope')
+                        : (isKo ? '📄 일간 워크시트 정답지 스캔 분석 & 항목 선택' : '📄 Scanned Worksheet AI Analysis & Selection')}
                     </h3>
                     <p className="text-xs text-zinc-400">
-                      {isKo ? '추출된 학부모 정답 가이드와 커리큘럼 항목을 선택하세요.' : 'Review parent answer keys & select items to add to curriculum.'}
+                      {activeScannedModalType === 'syllabus'
+                        ? (isKo ? '전체 주차별 어휘 및 파닉스 범위를 설정합니다.' : 'Review course-wide vocabulary & phonics scope across weeks.')
+                        : (isKo ? '추출된 학부모 정답 가이드와 커리큘럼 항목을 선택하세요.' : 'Review parent answer keys & select items to add to curriculum.')}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {textbookPreviewUrl && (
+                  {(textbookPreviewUrl || docPreviewUrl || syllabusPreviewUrl || worksheetPreviewUrl) && (
                     <button
                       type="button"
                       onClick={() => setShowDocPreviewModal(true)}
@@ -4100,20 +4331,22 @@ export default function TeacherPage({ isNight = true }: Props) {
                   }`}
                 >
                   <CheckCircle size={16} weight="bold" />
-                  <span>{isKo ? '🎯 커리큘럼 항목 선택 (Pick & Choose)' : '🎯 Pick & Choose Items'}</span>
+                  <span>{isKo ? '🎯 어휘 & 주차 범위 선택 (Scope Picker)' : '🎯 Pick & Choose Scope'}</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveScannedTab('parentView')}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                    activeScannedTab === 'parentView'
-                      ? 'bg-orange-500 text-white shadow-md'
-                      : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
-                  }`}
-                >
-                  <Users size={16} weight="bold" />
-                  <span>{isKo ? '👨‍👩‍👧‍👦 학부모용 정답 보기 (Parent View)' : '👨‍👩‍👧‍👦 Parent Answer Key'}</span>
-                </button>
+                {activeScannedModalType === 'worksheet' && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveScannedTab('parentView')}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                      activeScannedTab === 'parentView'
+                        ? 'bg-orange-500 text-white shadow-md'
+                        : isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                    }`}
+                  >
+                    <Users size={16} weight="bold" />
+                    <span>{isKo ? '👨‍👩‍👧‍👦 학부모용 정답 보기 (Parent View)' : '👨‍👩‍👧‍👦 Parent Answer Key'}</span>
+                  </button>
+                )}
               </div>
 
               {/* Page Selector Pill Bar for Multi-Page Extractions */}

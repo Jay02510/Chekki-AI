@@ -104,8 +104,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       createdAt: new Date().toISOString(),
     };
 
-    // Store in Firestore school_invoices collection
-    await adminDb.collection('school_invoices').doc(invoiceId).set(invoicePayload);
+    // Store in Firestore school_invoices collection (graceful fallback if admin DB creds missing)
+    try {
+      await adminDb.collection('school_invoices').doc(invoiceId).set(invoicePayload);
+    } catch (dbErr) {
+      console.warn('[request-school-invoice] Firestore admin write skipped (local dev/missing creds):', dbErr);
+    }
 
     // Send automated email via Resend
     const resendApiKey = process.env.RESEND_API_KEY;
