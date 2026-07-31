@@ -677,7 +677,6 @@ export default function TeacherPage({ isNight = true }: Props) {
         } catch (authErr: any) {
           console.warn('Firebase auth fallback to teacher demo mode:', authErr);
           if (email.includes('teacher') || email.includes('demo') || email.includes('director') || email.includes('test') || email.includes('admin') || password.length >= 6) {
-            // Auto-detect role from email for demo logins
             if (email.includes('kt') || email.includes('korean')) {
               setEducatorRole('kt');
               localStorage.setItem(`chekki_educator_role_${email}`, 'kt');
@@ -688,7 +687,6 @@ export default function TeacherPage({ isNight = true }: Props) {
               setEducatorRole('ft');
               localStorage.setItem(`chekki_educator_role_${email}`, 'ft');
             }
-            window.location.reload();
           } else {
             throw authErr;
           }
