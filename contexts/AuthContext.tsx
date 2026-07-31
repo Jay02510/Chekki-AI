@@ -479,7 +479,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signInFlow = async () => {
       try {
-        await signInWithEmailAndPassword(auth, cleanEmail, cleanPass);
+        const res = await signInWithEmailAndPassword(auth, cleanEmail, cleanPass);
+        if (res.user) {
+          const profile = await db.getUser(res.user.uid);
+          const targetRole: 'director' | 'teacher' = cleanEmail.includes('director') ? 'director' : 'teacher';
+          if (profile && (!profile.role || profile.role === 'parent' || cleanEmail.includes('demo'))) {
+            const updated: UserProfile = { ...profile, role: targetRole, plan: profile.plan || 'pro' };
+            await db.createUser(res.user.uid, updated);
+            await fetchAndSetUserProfile(res.user, updated);
+          }
+        }
       } catch (authErr: any) {
         if (
           cleanEmail.includes('demo') ||

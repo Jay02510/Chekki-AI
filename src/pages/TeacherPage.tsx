@@ -477,17 +477,17 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   };
 
-  // Load classes if authenticated and role is teacher
+  // Load classes if authenticated and role is teacher or director
   useEffect(() => {
-    if (isAuthenticated && user?.role === 'teacher') {
+    if (isAuthenticated && (user?.role === 'teacher' || user?.role === 'director' || loginRole === 'director')) {
       fetchClasses();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, loginRole]);
 
   // Show teacher onboarding once when first authenticated with no classes
   useEffect(() => {
     const uid = user?.uid || 'guest';
-    if (!isLoadingClasses && isAuthenticated && user?.role === 'teacher') {
+    if (!isLoadingClasses && isAuthenticated && (user?.role === 'teacher' || user?.role === 'director' || loginRole === 'director')) {
       if (classes.length === 0) {
         const obDone =
           localStorage.getItem('chekki_teacher_ob_done') ||
@@ -1500,7 +1500,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   }
 
   // --- RENDER B2B TEACHER CODE ACTIVATION VIEW ---
-  if (user?.role !== 'teacher') {
+  if (user?.role !== 'teacher' && user?.role !== 'director' && loginRole !== 'director' && user?.role !== 'admin') {
     return (
       <div className="min-h-screen bg-[#050505] text-zinc-200 flex items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
         <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
