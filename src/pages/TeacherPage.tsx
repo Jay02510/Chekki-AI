@@ -78,9 +78,17 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [isActivating, setIsActivating] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
 
+  const fallbackDemoClass = {
+    id: 'demo',
+    name: 'Sample Class (7-year-old)',
+    level: '7-year-old',
+    joinCode: 'DEMO01',
+    activeWeekNumber: 1,
+  };
+
   // Class state
-  const [classes, setClasses] = useState<any[]>([]);
-  const [selectedClass, setSelectedClass] = useState<any | null>(null);
+  const [classes, setClasses] = useState<any[]>([fallbackDemoClass]);
+  const [selectedClass, setSelectedClass] = useState<any>(fallbackDemoClass);
   const [showCreateClassModal, setShowCreateClassModal] = useState(false);
   const [newClassName, setNewClassName] = useState('');
   const [newClassLevel, setNewClassLevel] = useState('7-year-old');
@@ -454,14 +462,6 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [isSendingReset, setIsSendingReset] = useState(false);
 
   const isKo = language === 'ko';
-
-  const fallbackDemoClass = {
-    id: 'demo',
-    name: isKo ? '7세반 (샘플)' : 'Sample Class (7-year-old)',
-    level: '7-year-old',
-    joinCode: 'DEMO01',
-    activeWeekNumber: 1,
-  };
 
   const handleSendResetPassword = async () => {
     if (!user?.email) return;
