@@ -1032,17 +1032,18 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const fetchRosterAndMistakes = async () => {
     const targetClass = selectedClass || fallbackDemoClass;
+    if (!targetClass?.id) return;
     setIsLoadingRoster(true);
     try {
       // 1. Fetch dual-persisted class scans from LocalStorage
-      const localClassKey = `class_scans_${selectedClass.id}`;
+      const localClassKey = `class_scans_${targetClass.id}`;
       const localScans: any[] = JSON.parse(localStorage.getItem(localClassKey) || '[]');
       
       // 2. Fetch class scans from Firestore
       let firestoreScans: any[] = [];
       try {
         const scansQ = query(
-          collection(dbInstance, 'classes', selectedClass.id, 'studentScans')
+          collection(dbInstance, 'classes', targetClass.id, 'studentScans')
         );
         const scansSnap = await getDocs(scansQ);
         scansSnap.forEach(sDoc => firestoreScans.push({ id: sDoc.id, ...sDoc.data() }));
@@ -1059,7 +1060,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       // 3. Fetch Roster Users
       const q = query(
         collection(dbInstance, 'users'),
-        where('classId', '==', selectedClass.id)
+        where('classId', '==', targetClass.id)
       );
       const snap = await getDocs(q);
       const students: any[] = [];
