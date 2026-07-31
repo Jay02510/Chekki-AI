@@ -271,16 +271,24 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Privacy Reassurance Banner */}
-      <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center justify-between text-emerald-400 font-mono">
-        <div className="flex items-center gap-2">
-          <span>🛡️</span>
-          <span className="font-bold">100% Student PII Protection (개인정보보호법 준수)</span>
-          <span className="hidden md:inline text-zinc-400">• Zero-Roster Exposure: Parents must enter their child's exact name. Student lists are never exposed to public view.</span>
+      {/* High-Level Metric Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
+        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">CAMPUS CLASSES</span>
+          <h4 className="text-2xl font-black text-white mt-1">4 <span className="text-xs font-normal text-zinc-400">Active</span></h4>
         </div>
-        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-[10px] font-black border border-emerald-500/30 shrink-0">
-          ENCRYPTED ISOLATION
-        </span>
+        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">TOTAL ROSTER</span>
+          <h4 className="text-2xl font-black text-orange-400 mt-1">{students.length} <span className="text-xs font-normal text-zinc-400">Enrolled</span></h4>
+        </div>
+        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">STAFF SEATS</span>
+          <h4 className="text-2xl font-black text-emerald-400 mt-1">{teachers.length} <span className="text-xs font-normal text-zinc-400">Teachers</span></h4>
+        </div>
+        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">COMPLETION RATE</span>
+          <h4 className="text-2xl font-black text-amber-400 mt-1">94.2% <span className="text-xs font-normal text-zinc-400">Weekly</span></h4>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -288,25 +296,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* ========================================================================= */}
       {activeTab === 'curriculum' && (
         <div className="space-y-6 animate-fade-in text-left">
-          {/* Header Banner */}
-          <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h4 className="font-bold text-orange-400 text-sm flex items-center gap-2">
-                <span>📘</span>
-                <span>원장님 전용 커리큘럼 & 일간 숙제 총괄 모니터링 Stream</span>
-              </h4>
-              <p className="text-zinc-400 mt-1 text-[11px]">
-                강사분들이 업로드한 교재 시라버스(주차별 어휘 범위)와 일간 워크시트(학부모 정답 잉크)가 체키 AI 보고서 생성기(Report Studio)로 실시간 연동됩니다.
-              </p>
-            </div>
-            <a
-              href="/report-studio"
-              className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer shrink-0 inline-flex items-center gap-1.5 transition-all"
-            >
-              <span>📄</span>
-              <span>Report Studio 성적표 생성기 이동</span>
-            </a>
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* CARD 1: Course Syllabus Scope Stream */}

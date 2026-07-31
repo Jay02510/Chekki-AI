@@ -1759,29 +1759,31 @@ export default function TeacherPage({ isNight = true }: Props) {
             </button>
           )}
 
-          {/* Tab 1: Class Dashboard Overview */}
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
-              activeTab === 'overview'
-                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                : isThemeNight 
-                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl transition-colors ${
-                activeTab === 'overview' 
-                  ? 'bg-orange-500/20 text-orange-500' 
-                  : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
-              }`}>
-                <ChartBar size={18} weight="bold" />
+          {/* Tab 1: Class Dashboard Overview (Teachers Only) */}
+          {loginRole !== 'director' && user?.role !== 'director' && (
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
+                activeTab === 'overview'
+                  ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
+                  : isThemeNight 
+                    ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl transition-colors ${
+                  activeTab === 'overview' 
+                    ? 'bg-orange-500/20 text-orange-500' 
+                    : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
+                }`}>
+                  <ChartBar size={18} weight="bold" />
+                </div>
+                <span>{isKo ? '반 통계 및 대시보드' : 'Class Dashboard'}</span>
               </div>
-              <span>{isKo ? '반 통계 및 대시보드' : 'Class Dashboard'}</span>
-            </div>
-            <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-          </button>
+              <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+            </button>
+          )}
           
           {/* Tab 2: Manage Syllabus */}
           <button
@@ -3090,7 +3092,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                                     </div>
                                   </div>
 
-                                  <div className="flex items-center gap-2 shrink-0 z-30">
+                                  <div className="flex items-center gap-2 shrink-0 z-30 flex-wrap">
                                     {worksheetPreviewUrl && (
                                       <button
                                         type="button"
@@ -3118,50 +3120,25 @@ export default function TeacherPage({ isNight = true }: Props) {
                                         <span>{isKo ? '정답지 확인' : 'View Answers'}</span>
                                       </button>
                                     )}
+                                    {/* Continuous Upload Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setWorksheetPreviewUrl('');
+                                        setWorksheetScannedData(null);
+                                        setWorksheetFileName('');
+                                      }}
+                                      className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                                    >
+                                      <Plus size={14} weight="bold" />
+                                      <span>{isKo ? '+ 추가 워크시트 업로드' : '+ Upload Additional Worksheet'}</span>
+                                    </button>
                                   </div>
                                 </div>
                               )}
                             </div>
                           </div>
                         )}
-
-                        {/* MODE 2 ONLY: DAILY HOMEWORK CURRICULUM DETAILS & WORKSHEET FORMAT OPTIONS */}
-                        {uploadMode === 'worksheet' && (
-                          <div className="space-y-6">
-                            {/* Quick Preset Chips */}
-                            <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
-                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mr-1">
-                            {isKo ? '샘플 프리셋:' : 'Quick Presets:'}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCurriculumTopic('Weather & Nature');
-                              setCurriculumVocab('sunny, rainy, windy, cloudy, stormy, umbrella, jacket');
-                              setCurriculumPhonics('-ai-, -ay-, sh-, ch-');
-                              setCurriculumPassage('The weather was rainy today. Always remember your umbrella!');
-                            }}
-                            className={`px-3 py-1 border text-xs font-semibold rounded-full transition-all active:scale-[0.96] cursor-pointer ${
-                              isThemeNight ? 'bg-white/5 hover:bg-orange-500/20 border-white/10 text-zinc-300 hover:text-orange-400' : 'bg-zinc-100 hover:bg-orange-50 border-zinc-300 text-zinc-700 hover:text-orange-600'
-                            }`}
-                          >
-                            🌦️ Weather & Nature
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCurriculumTopic('Animals & Habitats');
-                              setCurriculumVocab('elephant, giraffe, dolphin, forest, jungle, ocean');
-                              setCurriculumPhonics('-th-, -ph-, -ea-');
-                              setCurriculumPassage('Dolphins live in the deep ocean and love to swim together.');
-                            }}
-                            className={`px-3 py-1 border text-xs font-semibold rounded-full transition-all active:scale-[0.96] cursor-pointer ${
-                              isThemeNight ? 'bg-white/5 hover:bg-orange-500/20 border-white/10 text-zinc-300 hover:text-orange-400' : 'bg-zinc-100 hover:bg-orange-50 border-zinc-300 text-zinc-700 hover:text-orange-600'
-                            }`}
-                          >
-                            🦁 Animals & Habitats
-                          </button>
-                        </div>
 
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
@@ -3461,10 +3438,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                             </div>
                           </div>
                         )}
-                      </div>
-                    )}
-
-
 
                         <div className={`flex gap-4 justify-end pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                           <button
@@ -4819,58 +4792,75 @@ export default function TeacherPage({ isNight = true }: Props) {
                             </span>
                           </div>
 
-                          {/* Paper Sheet Preview Container */}
-                          <div className="relative w-full rounded-2xl border border-zinc-300 dark:border-white/10 bg-white text-zinc-900 shadow-xl overflow-hidden p-6 font-serif select-none min-h-[420px]">
-                            {/* Paper Background Lines */}
-                            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
-                            
-                            {/* Paper Header */}
-                            <div className="relative z-10 border-b-2 border-zinc-900 pb-3 mb-6 flex justify-between items-end">
-                              <div>
-                                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold">
-                                  DAILY WORKSHEET SCAN
-                                </span>
-                                <h4 className="text-base font-black tracking-tight text-zinc-900 font-sans">
-                                  {activeDisplayObj?.topic || 'Science Unit 4 Homework'}
-                                </h4>
-                              </div>
-                              <span className="text-[10px] font-mono text-zinc-400 border border-zinc-300 px-2 py-0.5 rounded">
-                                PAGE 1 / 1
-                              </span>
-                            </div>
+                          {/* Paper Sheet Preview Container with Real Image Preview */}
+                          <div className="relative w-full rounded-2xl border border-zinc-300 dark:border-white/10 bg-black/40 text-zinc-900 shadow-xl overflow-hidden font-serif select-none min-h-[420px] flex flex-col items-center justify-center p-3">
+                            {(worksheetPreviewUrl || docPreviewUrl || syllabusPreviewUrl) ? (
+                              <div className="relative w-full h-full min-h-[380px] rounded-xl overflow-hidden border border-white/20 bg-zinc-900 flex items-center justify-center group">
+                                {/* Actual Scanned Physical Document Image */}
+                                <img 
+                                  src={(worksheetPreviewUrl || docPreviewUrl || syllabusPreviewUrl) || undefined} 
+                                  alt="Scanned Physical Worksheet" 
+                                  className="w-full h-auto max-h-[500px] object-contain rounded-lg drop-shadow-2xl"
+                                />
 
-                            {/* Worksheet Questions with Green AI Answer Overlay Ink */}
-                            <div className="relative z-10 space-y-5 text-xs">
-                              {(activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0 
-                                ? activeDisplayObj.detectedAnswers 
-                                : [
-                                    { questionNumber: 1, questionText: '1. Organisms that make their own food (Plants are ____).', correctAnswer: 'producers' },
-                                    { questionNumber: 2, questionText: '2. Organisms that eat other living things (A rabbit is a ____).', correctAnswer: 'consumer' },
-                                    { questionNumber: 3, questionText: '3. Organisms that break down dead material (Fungi are ____).', correctAnswer: 'decomposers' }
-                                  ]
-                              ).map((item: any, idx: number) => (
-                                <div key={idx} className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 relative group">
-                                  <p className="font-semibold text-zinc-800 text-xs mb-2">
-                                    {item.questionText || item.question}
-                                  </p>
+                                {/* Green Ink Answer Overlay Badge on top of image */}
+                                <div className="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-emerald-500/90 text-white font-mono font-bold text-xs shadow-lg backdrop-blur-md border border-emerald-300 flex items-center gap-1.5">
+                                  <Sparkle size={14} weight="fill" className="animate-pulse" />
+                                  <span>{isKo ? '🟢 Chekki Parent App 정답 오버레이 잉크' : '🟢 Green Ink Answer Overlay'}</span>
+                                </div>
 
-                                  {/* Green AI Answer Ink Badge Floating on Paper */}
-                                  <div className="flex items-center gap-2 pt-1 border-t border-zinc-200">
-                                    <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase">
-                                      AI Ink:
-                                    </span>
-                                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500 text-white font-mono font-black text-xs shadow-md border border-emerald-400 animate-pulse flex items-center gap-1.5">
-                                      <Sparkle size={12} weight="fill" />
-                                      <span>{item.correctAnswer || item.answer || 'answer'}</span>
-                                    </span>
+                                {/* Interactive Overlay Tags on Image */}
+                                <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 text-white text-xs space-y-1">
+                                  <span className="text-[10px] font-mono text-emerald-400 font-bold block uppercase tracking-wider">
+                                    {isKo ? '💡 학부모용 실시간 정답 오버레이 가이드:' : '💡 Live Parent App Screen Overlay:'}
+                                  </span>
+                                  <div className="flex flex-wrap gap-1.5 pt-1">
+                                    {(activeDisplayObj?.detectedAnswers || []).slice(0, 5).map((ans: any, i: number) => (
+                                      <span key={i} className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-emerald-500/30 text-emerald-300 border border-emerald-400/40">
+                                        Q{i+1}: {ans.correctAnswer || ans.answer || 'Answer'}
+                                      </span>
+                                    ))}
                                   </div>
                                 </div>
-                              ))}
-                            </div>
+                              </div>
+                            ) : (
+                              <div className="relative w-full rounded-2xl bg-white p-6 min-h-[380px] text-zinc-900">
+                                <div className="border-b-2 border-zinc-900 pb-3 mb-6 flex justify-between items-end">
+                                  <div>
+                                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold">
+                                      PHYSICAL WORKSHEET SCAN
+                                    </span>
+                                    <h4 className="text-base font-black tracking-tight text-zinc-900 font-sans">
+                                      {activeDisplayObj?.topic || 'Science Unit 4 Homework'}
+                                    </h4>
+                                  </div>
+                                  <span className="text-[10px] font-mono text-zinc-400 border border-zinc-300 px-2 py-0.5 rounded">
+                                    PAGE 1 / 1
+                                  </span>
+                                </div>
 
-                            <p className="relative z-10 text-[10px] font-mono text-zinc-400 text-center mt-6 pt-3 border-t border-zinc-200">
-                              📷 Chekki AI Vision - Realtime Parent Screen Sync
-                            </p>
+                                <div className="space-y-4 text-xs">
+                                  {(activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0 
+                                    ? activeDisplayObj.detectedAnswers 
+                                    : [
+                                        { questionNumber: 1, questionText: '1. Organisms that make their own food (Plants are ____).', correctAnswer: 'producers' },
+                                        { questionNumber: 2, questionText: '2. Organisms that eat other living things (A rabbit is a ____).', correctAnswer: 'consumer' },
+                                        { questionNumber: 3, questionText: '3. Organisms that break down dead material (Fungi are ____).', correctAnswer: 'decomposers' }
+                                      ]
+                                  ).map((item: any, idx: number) => (
+                                    <div key={idx} className="p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+                                      <p className="font-semibold text-zinc-800 text-xs mb-1">
+                                        {item.questionText || `Q${idx+1}: Question ${idx+1}`}
+                                      </p>
+                                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 font-mono text-xs font-bold border border-emerald-300">
+                                        <span>✍️ Green Ink:</span>
+                                        <span className="underline decoration-emerald-500 decoration-2">{item.correctAnswer || item.answer || 'Answer'}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
 
