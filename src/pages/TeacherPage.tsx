@@ -45,6 +45,7 @@ import {
   Buildings
 } from '@phosphor-icons/react';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
+import { NativeKtDashboard } from '../components/NativeKtDashboard';
 
 interface Props {
   isNight?: boolean;
@@ -93,9 +94,13 @@ export default function TeacherPage({ isNight = true }: Props) {
     window.location.pathname.includes('director') || 
     new URLSearchParams(window.location.search).get('role') === 'director'
   );
-  const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath ? 'director' : 'teacher');
-  const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>((user as any)?.educatorRole || 'ft');
-  const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum'>('overview');
+  const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath || (user as any)?.role === 'director' ? 'director' : 'teacher');
+  const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>(
+    user?.email?.includes('kt') || (user as any)?.educatorRole === 'kt' ? 'kt' : 'ft'
+  );
+  const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum' | 'director_hq' | 'kt_script'>(
+    isDirectorPath || (user as any)?.role === 'director' ? 'director_hq' : 'overview'
+  );
   const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
   const [submittedLogs, setSubmittedLogs] = useState<any[]>([]);
 
@@ -1702,6 +1707,59 @@ export default function TeacherPage({ isNight = true }: Props) {
 
         {/* Navigation Tabs */}
         <nav className="p-4 flex-1 space-y-2">
+          {/* Director HQ Tab (Director Only) */}
+          {(loginRole === 'director' || user?.role === 'director') && (
+            <button
+              onClick={() => setActiveTab('director_hq')}
+              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                activeTab === 'director_hq'
+                  ? 'bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-xl shadow-amber-500/10'
+                  : isThemeNight 
+                    ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl transition-colors ${
+                  activeTab === 'director_hq' 
+                    ? 'bg-amber-500/20 text-amber-500' 
+                    : isThemeNight ? 'bg-white/5 text-amber-400 group-hover:text-white' : 'bg-amber-100 text-amber-600 group-hover:text-zinc-900'
+                }`}>
+                  <Buildings size={18} weight="bold" />
+                </div>
+                <span>{isKo ? '🏢 원장님 HQ 총괄 대시보드' : '🏢 Director HQ Dashboard'}</span>
+              </div>
+              <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'director_hq' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+            </button>
+          )}
+
+          {/* KT KakaoTalk Script Tab (KT Only) */}
+          {educatorRole === 'kt' && (
+            <button
+              onClick={() => setActiveTab('kt_script')}
+              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                activeTab === 'kt_script'
+                  ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                  : isThemeNight 
+                    ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl transition-colors ${
+                  activeTab === 'kt_script' 
+                    ? 'bg-orange-500/20 text-orange-500' 
+                    : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
+                }`}>
+                  <Sparkle size={18} weight="fill" className="animate-pulse" />
+                </div>
+                <span>{isKo ? '⚡ AI 알림톡 대본 & 1클릭 복사' : '⚡ KakaoTalk Parent Script'}</span>
+              </div>
+              <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'kt_script' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+            </button>
+          )}
+
+          {/* Tab 1: Class Dashboard Overview */}
           <button
             onClick={() => setActiveTab('overview')}
             className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
@@ -1798,7 +1856,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           </button>
 
           {/* Tab 5 (FT Only): My Submitted Forms History */}
-          {educatorRole === 'ft' ? (
+          {educatorRole === 'ft' && (
             <button
               onClick={() => setActiveTab('history')}
               className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
@@ -1821,24 +1879,25 @@ export default function TeacherPage({ isNight = true }: Props) {
               </div>
               <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'history' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
             </button>
-          ) : (
-            /* Tab 5 (KT / Director Only): AI Report Studio */
-            <a
-              href="/reports"
-              onClick={(e) => {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'instant' });
-                window.history.pushState({}, '', '/reports');
-                window.dispatchEvent(new PopStateEvent('popstate'));
-              }}
-              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                isThemeNight 
-                  ? 'bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30 text-orange-400 hover:border-orange-500/50' 
-                  : 'bg-gradient-to-r from-orange-50 to-pink-50 border-orange-300 text-orange-600 hover:border-orange-400'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
+          )}
+
+          {/* AI Report Studio Link */}
+          <a
+            href="/reports"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'instant' });
+              window.history.pushState({}, '', '/reports');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
+            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+              isThemeNight 
+                ? 'bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30 text-orange-400 hover:border-orange-500/50' 
+                : 'bg-gradient-to-r from-orange-50 to-pink-50 border-orange-300 text-orange-600 hover:border-orange-400'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
                   <Sparkle size={18} weight="fill" className="animate-pulse" />
                 </div>
                 <span>{isKo ? 'AI 성적표 스튜디오' : 'AI Report Studio'}</span>
@@ -1847,7 +1906,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                 NEW
               </span>
             </a>
-          )}
         </nav>
 
         {/* Sidebar Footer / User Info */}
@@ -2095,6 +2153,24 @@ export default function TeacherPage({ isNight = true }: Props) {
           )}
 
           <div className="animate-fade-in">
+            {/* Director HQ Tab */}
+            {activeTab === 'director_hq' && (
+              <NativeDirectorPortal 
+                isNight={isThemeNight} 
+                academyName={user?.schoolName || 'Chekki Master Academy'} 
+              />
+            )}
+
+            {/* KT KakaoTalk Script Tab */}
+            {activeTab === 'kt_script' && (
+              <NativeKtDashboard 
+                isNight={isThemeNight} 
+                className={activeClass?.name || '7세반 (샘플)'} 
+                academyName={user?.schoolName || 'Chekki Master Academy'} 
+                userProfile={user} 
+              />
+            )}
+
             {activeTab === 'overview' && (
               <div className="space-y-8 animate-fade-in">
                 
@@ -4071,11 +4147,21 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <Gear size={24} weight="bold" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
-                    {isKo ? '교사 포털 설정' : 'TEACHER PORTAL SETTINGS'}
+                  <span className={`text-[10px] font-bold uppercase tracking-widest block font-mono ${
+                    loginRole === 'director' || user?.role === 'director' ? 'text-amber-400' : 'text-orange-500'
+                  }`}>
+                    {loginRole === 'director' || user?.role === 'director' 
+                      ? (isKo ? '🏢 원장님 HQ 전용 설정' : '🏢 DIRECTOR HQ SETTINGS')
+                      : (educatorRole === 'kt' 
+                          ? (isKo ? '👩‍🏫 한국인 교사 계정 설정' : '👩‍🏫 KOREAN TEACHER (KT) SETTINGS')
+                          : (isKo ? '👨‍🏫 원어민 교사 계정 설정' : '👨‍🏫 FOREIGN TEACHER (FT) SETTINGS'))}
                   </span>
                   <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo ? '선생님 환경 설정' : 'Teacher Account & Settings'}
+                    {loginRole === 'director' || user?.role === 'director'
+                      ? (isKo ? '원장님 HQ 환경 설정' : 'Director HQ Account & Settings')
+                      : (educatorRole === 'kt'
+                          ? (isKo ? '한국인 선생님 환경 설정' : 'Korean Teacher Account & Settings')
+                          : (isKo ? '원어민 선생님 환경 설정' : 'Foreign Teacher Account & Settings'))}
                   </h3>
                 </div>
               </div>
@@ -4089,8 +4175,12 @@ export default function TeacherPage({ isNight = true }: Props) {
                     {isKo ? '계정 프로필 정보' : 'ACCOUNT PROFILE'}
                   </span>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">{isKo ? '선생님 이름' : 'Teacher Name'}:</span>
-                    <strong className={isThemeNight ? 'text-white' : 'text-zinc-900'}>{user?.name || 'Teacher'}</strong>
+                    <span className="text-zinc-400">
+                      {loginRole === 'director' || user?.role === 'director' 
+                        ? (isKo ? '원장님 성함' : 'Director Name') 
+                        : (isKo ? '선생님 성함' : 'Teacher Name')}:
+                    </span>
+                    <strong className={isThemeNight ? 'text-white' : 'text-zinc-900'}>{user?.name || 'Director Admin'}</strong>
                   </div>
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-zinc-400">{isKo ? '이메일 주소' : 'Email Address'}:</span>
