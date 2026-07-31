@@ -378,7 +378,6 @@ ${activeReport.parentScriptKo.closing}`.trim();
               }}
               className="px-4 py-1.5 rounded-full text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <span>👨‍🏫</span>
               <span>{isKo ? '교사 포털 로그인' : 'Teacher Portal'}</span>
             </a>
           </div>

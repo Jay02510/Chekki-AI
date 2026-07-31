@@ -266,6 +266,15 @@ function AppContent() {
       setShowSchoolsPage(true);
     }
 
+    // /reports and /report-studio route — web only
+    if (
+      (window.location.pathname.startsWith('/report') || window.location.pathname.startsWith('/reports')) &&
+      Capacitor.getPlatform() === 'web'
+    ) {
+      setShowSplash(false);
+      setShowReportStudioPage(true);
+    }
+
     // Handle return from password reset
     const params = new URLSearchParams(window.location.search);
     if (params.get('auth_action') === 'reset') {

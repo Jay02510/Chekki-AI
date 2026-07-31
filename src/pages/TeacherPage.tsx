@@ -1324,51 +1324,6 @@ export default function TeacherPage({ isNight = true }: Props) {
               </button>
             </div>
 
-            {/* 1-Click Test Accounts Bar (FT, KT, Director) */}
-            <div className="w-full mb-6 p-3 bg-orange-500/10 border border-orange-500/20 rounded-2xl space-y-2 text-center">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-400 block">
-                ⚡ {isKo ? '1-클릭 테스트 데모 계정 입력 (Quick Fill Credentials)' : '1-Click Role Credentials'}
-              </span>
-              <div className="grid grid-cols-3 gap-1.5 pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail('ft.demo@chekki.ai');
-                    setPassword('demo1234');
-                    setLoginRole('teacher');
-                    setEducatorRole('ft');
-                    localStorage.setItem('chekki_educator_role_ft.demo@chekki.ai', 'ft');
-                  }}
-                  className="px-2 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/40 text-orange-300 text-[10px] font-bold rounded-xl transition-all cursor-pointer active:scale-[0.96]"
-                >
-                  👨‍🏫 {isKo ? '원어민 (FT)' : 'FT Demo'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail('kt.demo@chekki.ai');
-                    setPassword('demo1234');
-                    setLoginRole('teacher');
-                    setEducatorRole('kt');
-                    localStorage.setItem('chekki_educator_role_kt.demo@chekki.ai', 'kt');
-                  }}
-                  className="px-2 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 text-blue-300 text-[10px] font-bold rounded-xl transition-all cursor-pointer active:scale-[0.96]"
-                >
-                  👩‍🏫 {isKo ? '한국인 (KT)' : 'KT Demo'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail('director.demo@chekki.ai');
-                    setPassword('demo1234');
-                    setLoginRole('director');
-                  }}
-                  className="px-2 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-[10px] font-bold rounded-xl transition-all cursor-pointer active:scale-[0.96]"
-                >
-                  🏢 {isKo ? '원장님 (HQ)' : 'Director Demo'}
-                </button>
-              </div>
-            </div>
 
             <div className={`mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold ${
               loginRole === 'director'
