@@ -2056,7 +2056,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="button"
                     onClick={() => handleUpdateWeek(-1)}
-                    disabled={selectedClass.activeWeekNumber <= 1}
+                    disabled={(selectedClass?.activeWeekNumber || 1) <= 1}
                     className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-black transition-all cursor-pointer disabled:opacity-20 active:scale-95 ${
                       isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
                     }`}
@@ -2072,7 +2072,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     }`}
                     title={isKo ? '클릭하여 학기 주차별 커리큘럼 업로드 캘린더 열기' : 'Click to view semester calendar'}
                   >
-                    W{selectedClass.activeWeekNumber}
+                    W{selectedClass?.activeWeekNumber || 1}
                   </button>
                   <button
                     type="button"
@@ -2199,13 +2199,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                           <span>{isKo ? '대상 학급' : 'Active Class'}</span>
                         </span>
                         <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-500 font-mono">
-                          Level: {activeClass.level}
+                          Level: {activeClass?.level || '7-year-old'}
                         </span>
                       </div>
                       <div>
-                        <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{activeClass.name}</h4>
+                        <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{activeClass?.name || 'Active Class'}</h4>
                         <p className="text-xs text-zinc-500 mt-1">
-                          {isKo ? '선택된 가입 코드:' : 'Active join code:'} <span className={`font-mono ${isThemeNight ? 'text-zinc-300' : 'text-zinc-700'}`}>{activeClass.joinCode}</span>
+                          {isKo ? '선택된 가입 코드:' : 'Active join code:'} <span className={`font-mono ${isThemeNight ? 'text-zinc-300' : 'text-zinc-700'}`}>{activeClass?.joinCode || 'N/A'}</span>
                         </p>
                       </div>
                     </div>
