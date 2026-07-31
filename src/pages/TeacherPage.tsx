@@ -47,6 +47,7 @@ import {
 } from '@phosphor-icons/react';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
+import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
 
 interface Props {
   isNight?: boolean;
@@ -58,6 +59,10 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [isThemeNight, setIsThemeNight] = useState(isNight);
   const [copiedCode, setCopiedCode] = useState(false);
   const [showWeekCalendarModal, setShowWeekCalendarModal] = useState(false);
+  
+  // Account Activation Wizard State for new directors
+  const isActivateParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('activate') === 'true';
+  const [showActivationWizard, setShowActivationWizard] = useState(isActivateParam);
   const [showReviewSheetModal, setShowReviewSheetModal] = useState(false);
   const [showReportCardModal, setShowReportCardModal] = useState(false);
 
@@ -1616,6 +1621,18 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const activeClass = selectedClass || fallbackDemoClass;
 
+  if (showActivationWizard) {
+    return (
+      <UnifiedAccountActivation
+        isNight={isThemeNight}
+        isKo={isKo}
+        onComplete={(_data) => {
+          setShowActivationWizard(false);
+          setActiveTab('director_hq');
+        }}
+      />
+    );
+  }
 
   // --- RENDER CORE DASHBOARD LAYOUT SHELL ---
   return (
@@ -2216,6 +2233,137 @@ export default function TeacherPage({ isNight = true }: Props) {
 
             {activeTab === 'overview' && (
               <div className="space-y-8 animate-fade-in">
+                
+                {/* Embedded Zero-Redirect Daily Homework Worksheet Scanner */}
+                <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${
+                  isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+                }`}>
+                  <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
+                    isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                  }`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold">
+                          <FileText size={22} weight="bold" />
+                        </div>
+                        <div>
+                          <h4 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                            {isKo ? '📄 오늘 수업 워크시트 즉시 스캔 (Daily Worksheet Scanner)' : '📄 Daily Worksheet & Answer Key Scanner'}
+                          </h4>
+                          <p className="text-xs text-zinc-400">
+                            {isKo ? '종이 학습지 사진이나 PDF를 드롭하면 학부모용 그린 잉크 오버레이를 생성합니다.' : 'Drag & drop today\'s paper worksheet photo to generate Green Ink overlays.'}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold font-mono rounded-full border border-emerald-500/20">
+                        ⚡ Quick Scan
+                      </span>
+                    </div>
+
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+                      onDragLeave={() => setIsDraggingFile(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDraggingFile(false);
+                        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                          handleTextbookFileUpload(e.dataTransfer.files, 'worksheet');
+                        }
+                      }}
+                      className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
+                        isDraggingFile 
+                          ? 'border-orange-500 bg-orange-500/10 scale-[1.01]' 
+                          : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
+                      }`}
+                    >
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*,.pdf"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            handleTextbookFileUpload(e.target.files, 'worksheet');
+                          }
+                        }}
+                        className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                      />
+
+                      {isScanningWorksheet ? (
+                        <div className="flex flex-col items-center py-4">
+                          <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-3" />
+                          <p className="text-xs font-bold text-orange-500">
+                            {isKo ? 'Chekki AI가 워크시트를 분석하고 있습니다...' : 'Scanning Daily Worksheet with Chekki AI...'}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-4 w-full justify-between px-2">
+                          <div className="flex items-center gap-4">
+                            {worksheetPreviewUrl ? (
+                              <img 
+                                src={worksheetPreviewUrl} 
+                                alt="Worksheet preview" 
+                                className="w-14 h-14 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0 cursor-pointer" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDocPreviewUrl(worksheetPreviewUrl);
+                                  setShowDocPreviewModal(true);
+                                }}
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shadow-lg shrink-0">
+                                <FileText size={22} weight="bold" />
+                              </div>
+                            )}
+                            <div className="text-left">
+                              <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                                <span>
+                                  {worksheetFileName 
+                                    ? (worksheetFileName.length > 28 ? worksheetFileName.substring(0, 25) + '...' : worksheetFileName) 
+                                    : (isKo ? '📄 종이 학습지 사진 / PDF 업로드' : '📄 Upload Homework Paper Photo / PDF')}
+                                </span>
+                              </h5>
+                              <p className="text-xs text-zinc-400 mt-0.5">
+                                {worksheetFileName 
+                                  ? (isKo ? '독립 저장됨: 클릭하여 새 워크시트 스캔' : 'Stored independently. Click to rescan.') 
+                                  : (isKo ? '클릭하거나 드롭하여 오늘의 학습지를 등록하세요.' : 'Click or drop to register today\'s worksheet.')}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 z-30">
+                            {worksheetPreviewUrl && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDocPreviewUrl(worksheetPreviewUrl);
+                                  setShowDocPreviewModal(true);
+                                }}
+                                className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <Eye size={14} weight="bold" />
+                                <span>{isKo ? '원본 보기' : 'View Scan'}</span>
+                              </button>
+                            )}
+                            {worksheetScannedData && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveScannedModalType('worksheet');
+                                  setScannedData(worksheetScannedData);
+                                  setShowScannedModal(true);
+                                }}
+                                className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <Sparkle size={14} weight="bold" />
+                                <span>{isKo ? '정답지 확인' : 'View Answers'}</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 
                 {/* Top Double-Bezel Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -2863,7 +3011,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                               </select>
                             </div>
 
-                            {/* Target Textbook Name Input */}
+                            {/* Target Textbook Name Input — Syllabus tab only */}
+                            {activeTab === 'syllabus' && (
                             <div className="space-y-1">
                               <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
                                 {isKo ? '교재명 (Textbook Title)' : 'Textbook Title'}
@@ -2878,71 +3027,15 @@ export default function TeacherPage({ isNight = true }: Props) {
                                 }`}
                               />
                             </div>
+                            )}
                           </div>
                         </div>
 
                         {/* MODE 1: SYLLABUS & COURSE DURATION MANAGER */}
                         {uploadMode === 'syllabus' && (
                           <div className="space-y-4">
-                            {/* Week Duration Selector */}
-                            <div className={`p-4 rounded-2xl border space-y-3 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                <div>
-                                  <label className="text-xs font-bold text-orange-500 uppercase tracking-widest block">
-                                    🗓️ {isKo ? '교재 커리큘럼 진행 기간 (Course Duration in Weeks)' : 'Course Duration (Weeks)'}
-                                  </label>
-                                  <p className="text-[11px] text-zinc-400 mt-0.5">
-                                    {isKo ? '시라버스가 몇 주 동안 진행되는 교재인지 선택하세요 (기본 4주).' : 'Select total duration in weeks for this textbook syllabus (default: 4 weeks).'}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  {[4, 8, 12, 16].map(numWeeks => (
-                                    <button
-                                      key={numWeeks}
-                                      type="button"
-                                      onClick={() => handleSyllabusWeeksChange(numWeeks)}
-                                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                                        syllabusWeeks === numWeeks
-                                          ? 'bg-orange-500 text-white border-orange-500 shadow-md'
-                                          : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-300 text-zinc-700'
-                                      }`}
-                                    >
-                                      {numWeeks} {isKo ? '주' : 'Wks'}
-                                    </button>
-                                  ))}
-                                  <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
-                                    <input
-                                      type="number"
-                                      min={1}
-                                      max={52}
-                                      value={syllabusWeeks}
-                                      onChange={(e) => handleSyllabusWeeksChange(Number(e.target.value) || 4)}
-                                      className="w-12 text-center text-xs font-bold bg-transparent outline-none text-orange-400"
-                                    />
-                                    <span className="text-[10px] text-zinc-400">{isKo ? '주간' : 'Weeks'}</span>
-                                  </div>
-                              </div>
-                            </div>
-                          </div>
 
-                            {/* Pro Scanner Tip Banner */}
-                            <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
-                              isThemeNight ? 'bg-orange-500/10 border-orange-500/30 text-orange-200' : 'bg-orange-50 border-orange-200 text-orange-950'
-                            }`}>
-                              <Sparkle size={20} weight="fill" className="shrink-0 text-orange-500 mt-0.5" />
-                              <div className="space-y-1">
-                                <span className="font-bold block text-xs text-orange-400">
-                                  💡 {isKo ? '교재 목차(Textbook Syllabus / Index) 촬영 & 스캔 팁:' : 'Pro Tips for Textbook Syllabus / Index Photo Scanning:'}
-                                </span>
-                                <ul className="text-[11px] text-zinc-300 space-y-1 list-disc pl-4 leading-relaxed">
-                                  <li>{isKo ? '교재 맨 앞쪽의 Table of Contents (목차) 및 Scope & Sequence 페이지를 평평하게 촬영하세요.' : 'Take a flat, glare-free photo of the textbook Table of Contents or Scope & Sequence page.'}</li>
-                                  <li>{isKo ? '주차별/단원별(Unit 1, Unit 2) 제목과 타겟 어휘 목록이 포함되도록 구도를 맞추세요.' : 'Ensure unit headers (Unit 1, Unit 2) and target vocabulary lists are clearly framed.'}</li>
-                                  <li>{isKo ? 'Chekki AI가 4주~16주 전체 과정의 주차별 어휘 및 파닉스를 자동 추출하여 대시보드에 선제 탑재합니다.' : 'Chekki AI automatically extracts multi-week vocabulary & phonics to pre-seed your entire course!'}</li>
-                                </ul>
-                              </div>
-                            </div>
-
-                            {/* Syllabus Dropzone */}
+                            {/* ① UPLOAD FIRST — Syllabus Dropzone */}
                             <div
                               onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
                               onDragLeave={() => setIsDraggingFile(false)}
@@ -3011,7 +3104,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                                           Syllabus Mode
                                         </span>
                                       </h5>
-                                      <p className="text-xs text-zinc-400 mt-0.5">
+                                      <p className={`text-xs mt-0.5 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
                                         {syllabusFileName 
                                           ? (isKo ? '독립 저장됨: 클릭하여 새 시라버스 스캔' : 'Stored independently. Click to rescan syllabus.') 
                                           : (isKo ? '목차 페이지 사진이나 PDF를 드롭하면 주차별 어휘 및 파닉스 범위를 자동 생성합니다.' : 'Drag & drop syllabus. AI extracts course-wide vocabulary scope.')}
@@ -3051,8 +3144,68 @@ export default function TeacherPage({ isNight = true }: Props) {
                                 </div>
                               )}
                             </div>
+
+                            {/* ② Course Duration Selector */}
+                            <div className={`p-4 rounded-2xl border space-y-3 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div>
+                                  <label className="text-xs font-bold text-orange-500 uppercase tracking-widest block">
+                                    🗓️ {isKo ? '교재 커리큘럼 진행 기간 (Course Duration in Weeks)' : 'Course Duration (Weeks)'}
+                                  </label>
+                                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                                    {isKo ? '시라버스가 몇 주 동안 진행되는 교재인지 선택하세요 (기본 4주).' : 'Select total duration in weeks for this textbook syllabus (default: 4 weeks).'}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {[4, 8, 12, 16].map(numWeeks => (
+                                    <button
+                                      key={numWeeks}
+                                      type="button"
+                                      onClick={() => handleSyllabusWeeksChange(numWeeks)}
+                                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                                        syllabusWeeks === numWeeks
+                                          ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                                          : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-300 text-zinc-700'
+                                      }`}
+                                    >
+                                      {numWeeks} {isKo ? '주' : 'Wks'}
+                                    </button>
+                                  ))}
+                                  <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
+                                    <input
+                                      type="number"
+                                      min={1}
+                                      max={52}
+                                      value={syllabusWeeks}
+                                      onChange={(e) => handleSyllabusWeeksChange(Number(e.target.value) || 4)}
+                                      className="w-12 text-center text-xs font-bold bg-transparent outline-none text-orange-400"
+                                    />
+                                    <span className="text-[10px] text-zinc-400">{isKo ? '주간' : 'Weeks'}</span>
+                                  </div>
+                              </div>
+                            </div>
+                          </div>
+
+                            {/* ③ Pro Scanner Tip Banner */}
+                            <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
+                              isThemeNight ? 'bg-orange-500/10 border-orange-500/30 text-orange-200' : 'bg-orange-50 border-orange-200 text-orange-950'
+                            }`}>
+                              <Sparkle size={20} weight="fill" className="shrink-0 text-orange-500 mt-0.5" />
+                              <div className="space-y-1">
+                                <span className="font-bold block text-xs text-orange-400">
+                                  💡 {isKo ? '교재 목차(Textbook Syllabus / Index) 촬영 & 스캔 팁:' : 'Pro Tips for Textbook Syllabus / Index Photo Scanning:'}
+                                </span>
+                                <ul className={`text-[11px] space-y-1 list-disc pl-4 leading-relaxed ${isThemeNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                                  <li>{isKo ? '교재 맨 앞쪽의 Table of Contents (목차) 및 Scope & Sequence 페이지를 평평하게 촬영하세요.' : 'Take a flat, glare-free photo of the textbook Table of Contents or Scope & Sequence page.'}</li>
+                                  <li>{isKo ? '주차별/단원별(Unit 1, Unit 2) 제목과 타겟 어휘 목록이 포함되도록 구도를 맞추세요.' : 'Ensure unit headers (Unit 1, Unit 2) and target vocabulary lists are clearly framed.'}</li>
+                                  <li>{isKo ? 'Chekki AI가 4주~16주 전체 과정의 주차별 어휘 및 파닉스를 자동 추출하여 대시보드에 선제 탑재합니다.' : 'Chekki AI automatically extracts multi-week vocabulary & phonics to pre-seed your entire course!'}</li>
+                                </ul>
+                              </div>
+                            </div>
+
                           </div>
                         )}
+
 
                         {/* MODE 2: DAILY HOMEWORK WORKSHEET & ANSWER KEY SCANNER */}
                         {activeTab === 'homework' && (
@@ -3183,8 +3336,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                           </div>
                         )}
 
+                        {/* SYLLABUS TAB ONLY: Weekly Topic, Vocabulary, Phonics, Reading Passage, Other */}
+                        {activeTab === 'syllabus' && (<>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                          <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                             {isKo ? '대주제 / 주간 테마 (Topic)' : 'Weekly Topic / Theme'}
                           </label>
                           <input
@@ -3404,6 +3559,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                             }`}
                           />
                         </div>
+                        </>)}
 
                         {/* MODE 2 ONLY: AI WORKSHEET GENERATION & AUTOGRADED QUESTION FORMAT OPTIONS */}
                         {uploadMode === 'worksheet' && (

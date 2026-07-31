@@ -33,7 +33,6 @@ import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeArchitecturePipeline } from '../components/NativeArchitecturePipeline';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
-import { NativeAcademyOnboarding } from '../components/NativeAcademyOnboarding';
 import { NativeCurriculumPreseed } from '../components/NativeCurriculumPreseed';
 import {
   generateGeneralClassSummary,
@@ -93,6 +92,18 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
     }
     return 'ko';
   });
+
+  // Theme Persistence
+  useEffect(() => {
+    if (typeof window !== 'undefined' && setIsNight) {
+      const savedTheme = localStorage.getItem('chekki_theme');
+      if (savedTheme === 'light') {
+        setIsNight(false);
+      } else if (savedTheme === 'dark') {
+        setIsNight(true);
+      }
+    }
+  }, [setIsNight]);
 
   const handleLangToggle = () => {
     const next = lang === 'ko' ? 'en' : 'ko';
@@ -286,15 +297,8 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
   const [selectedPlanId, setSelectedPlanId] = useState<'starter' | 'pro' | 'enterprise'>('pro');
 
-  const openOnboardingModal = (planId: 'starter' | 'pro' | 'enterprise' = 'pro') => {
-    setSelectedPlanId(planId);
-    if (planId === 'enterprise') {
-      const el = document.getElementById('onboarding-form');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      setSubmitted(false);
-      setShowModal(true);
-    }
+  const openOnboardingModal = (_planId: 'starter' | 'pro' | 'enterprise' = 'pro') => {
+    window.location.href = '/schools/login';
   };
 
   return (
@@ -825,7 +829,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
         <section id="pricing" className="space-y-8 pt-8">
           <div className="text-center max-w-3xl mx-auto">
             <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block font-mono mb-2">
-              TRANSPARENT B2B PRICING
+              {isKo ? '요금 안내' : 'ACADEMY PRICING'}
             </span>
             <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight mb-4">
               {t.pricing.heading}
@@ -1038,249 +1042,9 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
 
 
-        {/* ========================================================================= */}
-        {/* 7. EMBEDDED ACADEMY ONBOARDING FORM (#onboarding-form) */}
-        {/* ========================================================================= */}
-        <section id="onboarding-form" className="space-y-8 pt-8">
-          <div
-            className={`p-8 md:p-12 rounded-3xl border max-w-4xl mx-auto w-full space-y-8 ${
-              isNight ? 'bg-gradient-to-b from-[#0a0a0c] to-[#050505] border-white/10' : 'bg-white border-zinc-200 shadow-xl'
-            }`}
-          >
-            <div className="text-center space-y-3">
-              <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block font-mono">
-                CUSTOM ACADEMY ONBOARDING
-              </span>
-              <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight">
-                {t.onboardingForm.heading}
-              </h2>
-              <p className={`text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {t.onboardingForm.subheading}
-              </p>
-            </div>
-
-            {submitted ? (
-              <div className="p-8 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-3xl">
-                  🎉
-                </div>
-                <h3 className="font-black text-xl text-white">{t.onboardingForm.successTitle}</h3>
-                <p className="text-xs sm:text-sm text-zinc-300 max-w-lg mx-auto leading-relaxed">
-                  {t.onboardingForm.successMessage}
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleFormSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.directorName} *</label>
-                  <input
-                    type="text"
-                    required
-                    value={directorName}
-                    onChange={(e) => setDirectorName(e.target.value)}
-                    className={`w-full p-3.5 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                    }`}
-                    placeholder="김원장"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.academyName} *</label>
-                  <input
-                    type="text"
-                    required
-                    value={academyName}
-                    onChange={(e) => setAcademyName(e.target.value)}
-                    className={`w-full p-3.5 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                    }`}
-                    placeholder="청담 이스트 어학원"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.phone} *</label>
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className={`w-full p-3.5 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                    }`}
-                    placeholder="010-1234-5678"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.email} *</label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={`w-full p-3.5 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                    }`}
-                    placeholder="director@academy.com"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.location}</label>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className={`w-full p-3.5 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                    }`}
-                    placeholder="서울 강남구 대치동"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.currentMethod}</label>
-                  <input
-                    type="text"
-                    value={currentMethod}
-                    onChange={(e) => setCurrentMethod(e.target.value)}
-                    className={`w-full p-3.5 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                    }`}
-                    placeholder="카카오 알림톡 / 종이 성적표 / 전화 상담"
-                  />
-                </div>
-
-                <div className="md:col-span-2 pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all active:scale-[0.98] cursor-pointer"
-                  >
-                    {isSubmitting ? t.onboardingForm.submitting : t.onboardingForm.submitBtn}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </section>
       </main>
 
-      {/* ========================================================================= */}
-      {/* 8. POP-UP MODAL OVERLAY (`showModal`) */}
-      {/* ========================================================================= */}
-      {showModal && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 overflow-y-auto bg-black/80 backdrop-blur-md">
-          <div
-            className={`w-full max-w-xl p-6 sm:p-8 rounded-3xl border shadow-2xl relative transition-all ${
-              isNight ? 'bg-[#0a0a0c] border-white/15 text-white' : 'bg-white border-zinc-200 text-zinc-900'
-            }`}
-          >
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="mb-6 space-y-1">
-              <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest font-mono block">
-                CHEKKI ACADEMY ONBOARDING
-              </span>
-              <h3 className="font-display text-2xl font-black">{t.onboardingForm.modalTitle}</h3>
-              <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {t.onboardingForm.modalSubtitle}
-              </p>
-            </div>
-
-            {submitted ? (
-              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
-                <span className="text-3xl block">🎉</span>
-                <h4 className="font-black text-lg text-white">{t.onboardingForm.successTitle}</h4>
-                <p className="text-xs text-zinc-300 leading-relaxed">{t.onboardingForm.successMessage}</p>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="mt-4 px-6 py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl"
-                >
-                  닫기 (Close)
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleFormSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.directorName} *</label>
-                    <input
-                      type="text"
-                      required
-                      value={directorName}
-                      onChange={(e) => setDirectorName(e.target.value)}
-                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none ${
-                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                      }`}
-                      placeholder="김원장"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.academyName} *</label>
-                    <input
-                      type="text"
-                      required
-                      value={academyName}
-                      onChange={(e) => setAcademyName(e.target.value)}
-                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none ${
-                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                      }`}
-                      placeholder="청담 이스트 어학원"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.phone} *</label>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none ${
-                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                      }`}
-                      placeholder="010-1234-5678"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-400 block">{t.onboardingForm.email} *</label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none ${
-                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                      }`}
-                      placeholder="director@academy.com"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-xl shadow-lg transition-all cursor-pointer active:scale-95 mt-2"
-                >
-                  {isSubmitting ? t.onboardingForm.submitting : t.onboardingForm.submitBtn}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+      {/* High-Resolution Multi-Slide System Screenshot Lightbox Inspector */}
       {/* High-Resolution Multi-Slide System Screenshot Lightbox Inspector */}
       {lightboxIdx !== null && (
         <div
@@ -1353,20 +1117,10 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 {isKo ? SYSTEM_SCREENSHOTS[lightboxIdx].descKo : SYSTEM_SCREENSHOTS[lightboxIdx].descEn}
               </p>
 
-              <div className="flex items-center gap-2 shrink-0 font-mono text-[11px] text-zinc-500">
-                <span>Use ← → Arrow Keys to Navigate</span>
-              </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Guided 1-Click Campus Onboarding Wizard Modal */}
-      <NativeAcademyOnboarding
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        isNight={isNight}
-      />
     </div>
   );
 }

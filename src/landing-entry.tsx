@@ -7,7 +7,25 @@ import App from '../App';
 import '../landing.css';
 
 function LandingRoot() {
-  const [isNight, setIsNight] = useState(true);
+  const [isNight, setIsNightState] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('chekki_theme');
+      if (saved === 'light') return false;
+      if (saved === 'dark') return true;
+    }
+    return true;
+  });
+
+  const setIsNight = (val: boolean | ((prev: boolean) => boolean)) => {
+    setIsNightState((prev) => {
+      const next = typeof val === 'function' ? val(prev) : val;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('chekki_theme', next ? 'dark' : 'light');
+      }
+      return next;
+    });
+  };
+
   const [pathname, setPathname] = useState(window.location.pathname);
 
   useEffect(() => {

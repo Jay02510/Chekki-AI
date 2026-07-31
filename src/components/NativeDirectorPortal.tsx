@@ -53,80 +53,17 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'roster' | 'curriculum' | 'exceptions' | 'teachers'>('curriculum');
 
-  // Sample State for Class Rosters
-  const [students, setStudents] = useState<StudentItem[]>([
-    {
-      id: 'st-1',
-      nameEn: 'Min-jun Kim',
-      nameKo: '김민준',
-      grade: 'Grade 4',
-      assignedClass: '7A Sunshine',
-      flaggedException: {
-        date: '2026-07-27',
-        reason: 'Struggled with target word "Photosynthesis". Homework unsubmitted.',
-        teacherName: 'Sarah Teacher (FT)',
-        resolved: false
-      }
-    },
-    {
-      id: 'st-2',
-      nameEn: 'Seo-yeon Park',
-      nameKo: '박서연',
-      grade: 'Grade 4',
-      assignedClass: '7A Sunshine'
-    },
-    {
-      id: 'st-3',
-      nameEn: 'Ji-hoo Lee',
-      nameKo: '이지후',
-      grade: 'Grade 5',
-      assignedClass: '8B Excellence',
-      flaggedException: {
-        date: '2026-07-26',
-        reason: 'Hesitant during speaking assessment. Needs encouragement at home.',
-        teacherName: 'Mark Teacher (FT)',
-        resolved: true
-      }
-    },
-    {
-      id: 'st-4',
-      nameEn: 'Yuna Choi',
-      nameKo: '최유나',
-      grade: 'Grade 5',
-      assignedClass: '8B Excellence'
-    }
-  ]);
+  // Real state — starts empty for new directors. Data loads from Firestore via TeacherPage props.
+  const [students, setStudents] = useState<StudentItem[]>([]);
 
-  // Sample State for Teacher Assignments
-  const [teachers, setTeachers] = useState<TeacherItem[]>([
-    {
-      id: 't-1',
-      name: 'Sarah Miller',
-      role: 'foreign_teacher',
-      email: 'sarah.miller@apex.edu',
-      assignedClasses: ['7A Sunshine', '7B Star']
-    },
-    {
-      id: 't-2',
-      name: 'Mark Davis',
-      role: 'foreign_teacher',
-      email: 'mark.davis@apex.edu',
-      assignedClasses: ['8B Excellence']
-    },
-    {
-      id: 't-3',
-      name: 'Ji-young Kang (강지영)',
-      role: 'korean_teacher',
-      email: 'jiyoung.kang@apex.edu',
-      assignedClasses: ['7A Sunshine', '8B Excellence']
-    }
-  ]);
+  // Teacher Assignments — empty until director adds them
+  const [teachers, setTeachers] = useState<TeacherItem[]>([]);
 
   // Modal / Add Student Form State
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [newStudentEn, setNewStudentEn] = useState('');
   const [newStudentKo, setNewStudentKo] = useState('');
-  const [newStudentClass, setNewStudentClass] = useState('7A Sunshine');
+  const [newStudentClass, setNewStudentClass] = useState('');
   const [newStudentGrade, setNewStudentGrade] = useState('Grade 4');
 
   // Search filter
@@ -219,7 +156,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             }`}
           >
             <FolderUser size={16} weight="bold" className="text-orange-400" />
-            <span>Curriculum & Homework Stream</span>
+            <span>Curriculum &amp; Homework Stream</span>
           </button>
 
           <button
@@ -276,7 +213,10 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">CAMPUS CLASSES</span>
-          <h4 className="text-2xl font-black text-white mt-1">4 <span className="text-xs font-normal text-zinc-400">Active</span></h4>
+          <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+            {teachers.length > 0 ? teachers.reduce((a, t) => a + t.assignedClasses.length, 0) : '—'}{' '}
+            <span className="text-xs font-normal text-zinc-400">Active</span>
+          </h4>
         </div>
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">TOTAL ROSTER</span>
@@ -287,8 +227,8 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <h4 className="text-2xl font-black text-emerald-400 mt-1">{teachers.length} <span className="text-xs font-normal text-zinc-400">Teachers</span></h4>
         </div>
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">COMPLETION RATE</span>
-          <h4 className="text-2xl font-black text-amber-400 mt-1">94.2% <span className="text-xs font-normal text-zinc-400">Weekly</span></h4>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">FLAGGED EXCEPTIONS</span>
+          <h4 className="text-2xl font-black text-amber-400 mt-1">{flaggedStudents.filter(s => !s.flaggedException?.resolved).length} <span className="text-xs font-normal text-zinc-400">Unresolved</span></h4>
         </div>
       </div>
 
@@ -307,45 +247,18 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 <div className="flex items-center gap-2">
                   <span className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold text-xs">📘 SYLLABUS</span>
                   <div>
-                    <h5 className="font-bold text-sm">업로드된 교재 목차 (Course Syllabus)</h5>
-                    <p className="text-[10px] text-zinc-400">학급별 Multi-Week 어휘 & 파닉스 범위</p>
+                    <h5 className={`font-bold text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Course Syllabus Stream</h5>
+                    <p className="text-[10px] text-zinc-400">Multi-Week Vocabulary &amp; Phonics Scope per Class</p>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
-                  4-Week Scope Set
-                </span>
               </div>
 
-              <div className="space-y-3">
-                <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-orange-400">Class 7A Sunshine • Bricks Reading 150</span>
-                    <span className="font-mono text-[10px] text-zinc-400">Week 2 of 4 Wks</span>
-                  </div>
-                  <p className="text-xs font-semibold">Unit 4: Photosynthesis & Plant Ecosystems</p>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {['Chloroplast', 'Stomata', 'Glucose', 'Carbon Dioxide', 'Sunlight'].map((w) => (
-                      <span key={w} className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                        {w}
-                      </span>
-                    ))}
-                  </div>
+              <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
+                  <PlusCircle size={24} weight="bold" />
                 </div>
-
-                <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-purple-400">Class 8B Excellence • Subject Link L6</span>
-                    <span className="font-mono text-[10px] text-zinc-400">Week 3 of 8 Wks</span>
-                  </div>
-                  <p className="text-xs font-semibold">Unit 8: Solar System & Gravitational Physics</p>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {['Gravitation', 'Atmosphere', 'Orbit', 'Asteroid', 'Eclipse'].map((w) => (
-                      <span key={w} className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                        {w}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No syllabi uploaded yet</p>
+                <p className="text-xs text-zinc-400 max-w-[200px]">Teachers can upload course syllabi from the Manage Syllabus tab to populate this stream.</p>
               </div>
             </div>
 
@@ -355,52 +268,20 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             }`}>
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-xs">📄 WORKSHEET</span>
+                  <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-xs">📄 WORKSHEETS</span>
                   <div>
-                    <h5 className="font-bold text-sm">일간 워크시트 & 학부모 정답 잉크</h5>
+                    <h5 className={`font-bold text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Daily Homework Stream</h5>
                     <p className="text-[10px] text-zinc-400">Chekki Parent App Green Ink Overlays</p>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[10px] font-mono font-bold">
-                  94.2% Submit Rate
-                </span>
               </div>
 
-              <div className="space-y-3">
-                <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-emerald-400">Class 7A Sunshine • Daily Worksheet #4</span>
-                    <span className="font-mono text-[10px] text-emerald-400 font-bold">Green Ink Synced</span>
-                  </div>
-                  <p className="text-xs font-mono text-zinc-400">
-                    Q1: Organisms that make food ➔ <strong className="text-emerald-300">producers</strong>
-                  </p>
-                  <p className="text-xs font-mono text-zinc-400">
-                    Q2: Organisms that eat living things ➔ <strong className="text-emerald-300">consumer</strong>
-                  </p>
-                  <div className="pt-2 flex justify-between items-center border-t border-white/10 text-[11px]">
-                    <span className="text-zinc-400">제출 14명 / 미제출 1명 (김민준)</span>
-                    <a href="/report-studio" className="font-bold text-orange-400 hover:underline">
-                      성적표 즉시 발급 →
-                    </a>
-                  </div>
+              <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <PlusCircle size={24} weight="bold" />
                 </div>
-
-                <div className={`p-4 rounded-xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-emerald-400">Class 8B Excellence • Daily Worksheet #8</span>
-                    <span className="font-mono text-[10px] text-emerald-400 font-bold">Green Ink Synced</span>
-                  </div>
-                  <p className="text-xs font-mono text-zinc-400">
-                    Q1: Force pulling planets ➔ <strong className="text-emerald-300">gravity</strong>
-                  </p>
-                  <div className="pt-2 flex justify-between items-center border-t border-white/10 text-[11px]">
-                    <span className="text-zinc-400">제출 12명 / 100% 제출 완수</span>
-                    <a href="/report-studio" className="font-bold text-orange-400 hover:underline">
-                      성적표 즉시 발급 →
-                    </a>
-                  </div>
-                </div>
+                <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No worksheets submitted yet</p>
+                <p className="text-xs text-zinc-400 max-w-[200px]">Teachers upload daily homework from the Manage Homework tab. Submissions appear here automatically.</p>
               </div>
             </div>
           </div>
@@ -650,14 +531,28 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* ========================================================================= */}
       {activeTab === 'teachers' && (
         <div className="space-y-6">
-          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3">
-            <UserGear size={20} className="text-blue-400 shrink-0 mt-0.5" />
-            <div className="space-y-1 text-xs">
-              <h4 className="font-bold text-blue-400">Teacher & Class Allocation</h4>
-              <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
-                Assign Foreign Teachers (FT) to generate daily class logs and Korean Teachers (KT) to review and copy KakaoTalk scripts.
-              </p>
+          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <UserGear size={20} className="text-blue-400 shrink-0 mt-0.5" />
+              <div className="space-y-1 text-xs text-left">
+                <h4 className="font-bold text-blue-400">Teacher &amp; Staff Invite System</h4>
+                <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
+                  Invite Foreign Teachers (FT) and Korean Teachers (KT) via email or single-click workspace invite link.
+                </p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                const inviteUrl = `${window.location.origin}/schools/login?invite=${encodeURIComponent(academyName.replace(/\s+/g, '-').toLowerCase())}`;
+                navigator.clipboard.writeText(inviteUrl);
+                alert(`✅ Workspace Invite Link Copied to Clipboard!\n\n${inviteUrl}\n\nSend this link to teachers to instantly connect them to ${academyName}.`);
+              }}
+              className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer active:scale-95"
+            >
+              <span>🔗</span>
+              <span>1-Click Copy Invite Link</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

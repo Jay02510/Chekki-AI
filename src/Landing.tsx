@@ -29,18 +29,39 @@ export default function Home() {
   const heroRef = useRef<HTMLElement>(null);
   const textRevealRef = useRef<HTMLHeadingElement>(null);
   const [mounted, setMounted] = useState(false);
-  const [isNight, setIsNight] = useState(true);
+  const [isNight, setIsNight] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('chekki_theme');
+      if (saved === 'light') return false;
+      if (saved === 'dark') return true;
+    }
+    return true;
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isKo, setIsKo] = useState<boolean>(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [copiedInvite, setCopiedInvite] = useState(false);
 
+  const toggleTheme = () => {
+    const next = !isNight;
+    setIsNight(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('chekki_theme', next ? 'dark' : 'light');
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('chekki_lang');
-      if (saved) {
-        setIsKo(saved === 'ko');
+      const savedLang = localStorage.getItem('chekki_lang');
+      if (savedLang) {
+        setIsKo(savedLang === 'ko');
+      }
+      const savedTheme = localStorage.getItem('chekki_theme');
+      if (savedTheme === 'light') {
+        setIsNight(false);
+      } else if (savedTheme === 'dark') {
+        setIsNight(true);
       }
     }
   }, []);
@@ -131,7 +152,14 @@ export default function Home() {
             : 'bg-white/90 border-slate-200/90 text-slate-900 shadow-slate-200/60'
         }`}>
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 shrink-0">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="flex items-center gap-2 shrink-0 cursor-pointer"
+          >
             <span className="font-extrabold text-lg tracking-tight">
               Chekki<span className="text-brand">AI</span>
             </span>
@@ -169,7 +197,7 @@ export default function Home() {
             {/* Sun / Moon Theme Toggle */}
             <button
               type="button"
-              onClick={() => setIsNight(!isNight)}
+              onClick={toggleTheme}
               className={`p-2 rounded-full border transition-colors cursor-pointer ${
                 isNight 
                   ? 'border-white/10 hover:bg-white/10 text-white/70 hover:text-white' 

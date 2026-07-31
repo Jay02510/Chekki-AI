@@ -14,7 +14,8 @@ import {
   Copy,
   Receipt,
   X,
-  List
+  List,
+  ShieldCheck
 } from '@phosphor-icons/react';
 import { NativeCurriculumPreseed } from '../components/NativeCurriculumPreseed';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
@@ -102,6 +103,26 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [schoolDemoTab, setSchoolDemoTab] = useState<'syllabus' | 'ft-log' | 'director'>('syllabus');
 
+  // Theme Persistence
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('chekki_theme');
+      if (savedTheme === 'light') {
+        setIsNight(false);
+      } else if (savedTheme === 'dark') {
+        setIsNight(true);
+      }
+    }
+  }, [setIsNight]);
+
+  const toggleTheme = () => {
+    const next = !isNight;
+    setIsNight(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('chekki_theme', next ? 'dark' : 'light');
+    }
+  };
+
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -110,15 +131,28 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     }
   }, [mobileMenuOpen]);
 
+  // Pricing Tier Details Modal & Instant Payment State
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('school_pro');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [currency, setCurrency] = useState<'KRW' | 'USD'>('KRW');
+
+  // Payment Form States
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'kakaopay' | 'tosspay' | 'bank'>('card');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const openPlanModal = (planId: string, _defaultTeachers: number = 1, _minSeats: number = 1) => {
+    setSelectedPlanId(planId);
+    setShowPricingModal(true);
+  };
+
   // State for form inputs
   const [academyName, setAcademyName] = useState('');
   const [contactName, setContactName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const [currency, setCurrency] = useState<'KRW' | 'USD'>('KRW');
-  const [showBankModal, setShowBankModal] = useState(false);
-  const [selectedPlanId, setSelectedPlanId] = useState<string>('school_pro');
   const [teacherCount, setTeacherCount] = useState(3);
   const [studentCount, setStudentCount] = useState('');
   const [bizRegNumber, setBizRegNumber] = useState('');
@@ -151,12 +185,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     }
   };
 
-  const openPlanModal = (planId: string, defaultTeachers: number, minSeats: number = 1) => {
-    setSelectedPlanId(planId);
-    setTeacherCount(defaultTeachers);
-    setInvoiceResult(null);
-    setShowBankModal(true);
-  };
+
 
   const handleRequestBankInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1199,314 +1228,335 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
-      {/* --- CORPORATE BANK TRANSFER & TAX INVOICE MODAL WITH FULL THEME SUPPORT --- */}
-      {showBankModal && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 overflow-y-auto">
+
+      {/* --- PRICING TIER DETAILS & BENEFITS MODAL --- */}
+      {showPricingModal && (
+        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 overflow-y-auto">
           <div 
             className={`fixed inset-0 backdrop-blur-md transition-opacity ${isNight ? 'bg-black/85' : 'bg-zinc-900/60'}`} 
-            onClick={() => setShowBankModal(false)} 
+            onClick={() => setShowPricingModal(false)} 
+          />
+          <div className={`relative w-full max-w-2xl p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
+            isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
+          }`}>
+            <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 space-y-6 transition-colors ${
+              isNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+            }`}>
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-xl">
+                    ⚡
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
+                      {isKo ? '요금제 상세 스펙 & 핵심 기능 안내' : 'PLAN SPECIFICATIONS & INCLUDED FEATURES'}
+                    </span>
+                    <h3 className={`text-xl sm:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                      {isKo ? activePlan.nameKo : activePlan.nameEn}
+                    </h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPricingModal(false)}
+                  className={`p-2 rounded-full transition-all active:scale-[0.95] cursor-pointer ${
+                    isNight 
+                      ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' 
+                      : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                  }`}
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+
+              {/* Price & Seats Overview */}
+              <div className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                isNight ? 'bg-[#050505] border-white/10' : 'bg-orange-50/50 border-orange-200'
+              }`}>
+                <div>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block font-mono">
+                    {isKo ? '구독 금액 (월/연간 선택 가능)' : 'Subscription Rate'}
+                  </span>
+                  <p className="text-2xl sm:text-3xl font-black text-orange-500 font-display">
+                    {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle))}
+                    <span className="text-xs font-normal text-zinc-400"> {billingCycle === 'yearly' ? (isKo ? '/월 (연간 20% 할인)' : '/mo (billed annually)') : (isKo ? '/월' : '/month')}</span>
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <span className="px-3 py-1 bg-orange-500/20 text-orange-400 font-bold text-xs rounded-xl border border-orange-500/30 self-start">
+                    {activePlan.defaultTeachers} {isKo ? '명 강사 계정' : 'Teacher Seats'}
+                  </span>
+                  <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-xl border border-emerald-500/30 self-start">
+                    {selectedPlanId === 'solo' ? (isKo ? '원생 20명 포함' : '20 Students') : (isKo ? '무제한 원생 수용' : 'Unlimited Students')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Comprehensive Feature Grid Specs */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                  {isKo ? '📋 학원에 제공되는 전용 AI 도구 및 서비스 목록:' : '📋 Included AI Tools & Operations Package:'}
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                  <div className={`p-3 rounded-xl border ${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle size={16} weight="bold" className="text-emerald-400 shrink-0" />
+                      <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '종이 워크시트 AI 채점기' : 'Paper Worksheet AI Autograder'}</p>
+                    </div>
+                    <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                      {isKo ? '카메라 촬영 시 99.9% 정확도로 정답 그린 잉크 오버레이 자동 생성' : 'Instant camera capture with 99.9% accurate green ink score overlay generation'}
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl border ${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle size={16} weight="bold" className="text-emerald-400 shrink-0" />
+                      <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '교재 목차 Scope Pre-seeder' : 'Syllabus Scope Pre-seeder'}</p>
+                    </div>
+                    <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                      {isKo ? '시중 영어 교재 수록 어휘 및 파닉스 범위를 학급별 선제 탑재' : 'Pre-populates multi-week textbook vocabulary & phonics target lists'}
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl border ${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle size={16} weight="bold" className="text-emerald-400 shrink-0" />
+                      <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? 'KT 카카오 알림톡 대본 1클릭 복사' : 'Bilingual KakaoTalk Comment Generator'}</p>
+                    </div>
+                    <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                      {isKo ? '원어민 30초 로그 ➔ 한국인 교사 분할 화면 검수 & 카톡 1클릭 전송' : 'Turns 30-sec native teacher logs into split-screen Korean parent updates'}
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl border ${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle size={16} weight="bold" className="text-emerald-400 shrink-0" />
+                      <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '원장님 통합 관제 HQ 포털' : 'Director Central HQ Portal'}</p>
+                    </div>
+                    <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                      {isKo ? '교사 초청 링크 1클릭 발급, 반별 출석 & 수업 보고 실시간 통계' : '1-click staff invite link generator, class attendance & real-time analytics'}
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl border ${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle size={16} weight="bold" className="text-emerald-400 shrink-0" />
+                      <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '학원 맞춤 브랜딩 로고 박음질' : 'Custom School Brand Header'}</p>
+                    </div>
+                    <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                      {isKo ? '성적표 및 학부모 리포트 상단 원장님 학원 로고 정밀 적용' : 'Presents your academy logo on all digital and printable parent report cards'}
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl border ${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle size={16} weight="bold" className="text-emerald-400 shrink-0" />
+                      <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '학부모 전용 모바일 앱 100% 무료' : 'FREE Parent Mobile App Included'}</p>
+                    </div>
+                    <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                      {isKo ? '학부모님 추가 요금 없이 1초 성적 확인 앱 무료 제공' : 'Zero cost for parents to view digital grade updates and monthly reports'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Security & Money Back Guarantee Badge */}
+              <div className="flex items-center justify-between text-[11px] text-zinc-400 border-t border-white/10 pt-3">
+                <span className="flex items-center gap-1 font-bold text-emerald-400">
+                  <ShieldCheck size={14} weight="bold" />
+                  {isKo ? '7일 이내 100% 전액 환불 보장' : '7-Day 100% Money-Back Guarantee'}
+                </span>
+                <span>{isKo ? '위약금 없음 • 언제든 해지 가능' : 'No hidden fees • Cancel anytime'}</span>
+              </div>
+
+              {/* Proceed to Instant Payment Action Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPricingModal(false);
+                  setShowPaymentModal(true);
+                }}
+                className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+              >
+                <span>{isKo ? '💳 결제 진행 & 온보딩 위저드 시작하기 →' : '💳 Complete Payment & Start Onboarding Wizard →'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- INSTANT PLAN CHECKOUT & PAYMENT MODAL --- */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 overflow-y-auto">
+          <div 
+            className={`fixed inset-0 backdrop-blur-md transition-opacity ${isNight ? 'bg-black/85' : 'bg-zinc-900/60'}`} 
+            onClick={() => setShowPaymentModal(false)} 
           />
           <div className={`relative w-full max-w-lg p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
             isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
           }`}>
-            <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
+            <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 space-y-6 transition-colors ${
               isNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
             }`}>
-              <button
-                onClick={() => setShowBankModal(false)}
-                className={`absolute top-6 right-6 p-2 rounded-full transition-all active:scale-[0.95] ${
-                  isNight 
-                    ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' 
-                    : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
-                }`}
-              >
-                <X size={18} weight="bold" />
-              </button>
-
-              {invoiceResult ? (
-                /* Invoice Created Confirmation View */
-                <div className="space-y-6 animate-fade-in">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
-                      <Receipt size={24} weight="bold" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 font-mono">
-                        {isKo ? '신청 접수 완료' : 'APPLICATION SUBMITTED'}
-                      </span>
-                      <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo ? '학원 구독 등록 & 입금 안내' : 'Subscription & Setup Requested'}
-                      </h3>
-                    </div>
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-lg">
+                    💳
                   </div>
-
-                  <p className={`text-xs leading-relaxed p-3.5 rounded-xl border ${
-                    isNight 
-                      ? 'text-zinc-300 bg-emerald-500/10 border-emerald-500/20' 
-                      : 'text-zinc-700 bg-emerald-50 border-emerald-200'
-                  }`}>
-                    {isKo 
-                      ? `✅ 학원 등록 정보가 Chekki AI 운영팀에 성공적으로 전달되었습니다! 아래 지정 계좌로 구독료를 입금해 주시면, 입금 확인 후 입력해주신 이메일(${invoiceResult.email})로 교사 인증 코드 및 사용 가이드가 즉시 발송됩니다.`
-                      : `✅ Your academy details have been registered with Chekki AI! Please refer to the bank account details below to complete your subscription payment. Authorization codes will be sent to ${invoiceResult.email}.`}
-                  </p>
-
-                  {/* Summary Card */}
-                  <div className={`p-5 border rounded-2xl space-y-3 ${
-                    isNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-200'
-                  }`}>
-                    <div className={`flex justify-between items-center text-xs pb-3 border-b font-mono ${
-                      isNight ? 'border-white/5' : 'border-zinc-200'
-                    }`}>
-                      <span className={isNight ? 'text-zinc-500' : 'text-zinc-500'}>{isKo ? '신청 코드' : 'Request Ref ID'}:</span>
-                      <span className="font-bold text-orange-500">{invoiceResult.invoiceId}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '학원 / 기관명' : 'Academy Name'}:</span>
-                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.academyName}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '선택 플랜' : 'Selected Plan'}:</span>
-                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? activePlan.nameKo : activePlan.nameEn}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '결제 주기' : 'Billing Cycle'}:</span>
-                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {billingCycle === 'yearly' ? (isKo ? '연간 결제 (12개월, 20% 할인 반영)' : 'Yearly (12 Months, 20% Off)') : (isKo ? '월간 결제' : 'Monthly')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '포함 교사 수' : 'Included Teacher Seats'}:</span>
-                      <span className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{activePlan.defaultTeachers || invoiceResult.teacherCount || 10} {isKo ? '명 (전체 캠퍼스)' : 'seats (Campus Bundle)'}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>{isKo ? '수신 이메일' : 'Contact Email'}:</span>
-                      <span className={`font-bold font-mono ${isNight ? 'text-white' : 'text-zinc-900'}`}>{invoiceResult.email}</span>
-                    </div>
-                    <div className={`flex justify-between items-center text-sm pt-2 border-t font-bold ${
-                      isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-200 text-zinc-700'
-                    }`}>
-                      <span>{isKo ? '총 입금 금액' : 'Total Payment Amount'}:</span>
-                      <span className="text-xl font-black text-emerald-500 font-mono">
-                        {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle) * (billingCycle === 'yearly' ? 12 : 1))}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Corporate Bank Account Details */}
-                  <div className={`p-5 border rounded-2xl space-y-3 ${
-                    isNight ? 'bg-orange-500/10 border-orange-500/30' : 'bg-orange-50 border-orange-200'
-                  }`}>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 flex items-center gap-1.5 font-mono">
-                      <Bank size={14} weight="bold" />
-                      <span>{isKo ? '체키AI 입금 계좌 정보' : 'Chekki AI Bank Account Details'}</span>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
+                      {isKo ? '안전 결제 & 워크스페이스 생성' : 'SECURE PAYMENT & ACTIVATION'}
                     </span>
-
-                    <div className="space-y-1.5 text-xs">
-                      <p className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
-                        {isKo ? '은행' : 'Bank'}: <strong className={isNight ? 'text-white' : 'text-zinc-900'}>신한은행 (Shinhan Bank)</strong>
-                      </p>
-                      <p className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
-                        {isKo ? '예금주' : 'Holder'}: <strong className={isNight ? 'text-white' : 'text-zinc-900'}>BENJAMIN JASON</strong>
-                      </p>
-                      <div className={`flex items-center justify-between gap-2 pt-2 border-t ${
-                        isNight ? 'border-orange-500/20' : 'border-orange-200'
-                      }`}>
-                        <p className={`font-mono text-lg font-black select-all ${isNight ? 'text-white' : 'text-zinc-900'}`}>110-623-147138</p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText('110-623-147138');
-                            setCopiedBank(true);
-                            setTimeout(() => setCopiedBank(false), 2000);
-                          }}
-                          className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.95] shadow-md cursor-pointer"
-                        >
-                          <Copy size={14} weight="bold" />
-                          <span>{copiedBank ? (isKo ? '복사 완료!' : 'Copied!') : (isKo ? '계좌번호 복사' : 'Copy Account')}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => window.print()}
-                      className={`w-1/3 py-3.5 font-bold text-xs rounded-2xl border transition-all active:scale-[0.98] cursor-pointer ${
-                        isNight ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-200'
-                      }`}
-                    >
-                      {isKo ? '청구서 인쇄' : 'Print Invoice'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setShowBankModal(false); setInvoiceResult(null); }}
-                      className="w-2/3 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
-                    >
-                      {isKo ? '확인 및 닫기' : 'Done & Close'}
-                    </button>
+                    <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                      {isKo ? `${activePlan.nameKo} 결제` : `Checkout ${activePlan.nameEn}`}
+                    </h3>
                   </div>
                 </div>
-              ) : (
-                /* Bank Transfer & Onboarding Form */
-                <form onSubmit={handleRequestBankInvoice} className="space-y-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center flex-shrink-0">
-                      <Bank size={20} weight="bold" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block font-mono">
-                        {selectedPlanId === 'trial' 
-                          ? (isKo ? '7일 무료 체험 신청 (신용카드 등록 X)' : '7-DAY FREE TRIAL (NO CREDIT CARD)')
-                          : (isKo ? 'B2B 플랜 결제 & 세금계산서 청구' : 'B2B TAX INVOICE & PLAN APPLICATION')}
-                      </span>
-                      <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {selectedPlanId === 'trial'
-                          ? (isKo ? '강사 1인 + 원생 30명 7일 무료 시작' : '1 Teacher + 30 Students 7-Day Free Trial')
-                          : (isKo ? `${activePlan.nameKo} 도입 신청` : `${activePlan.nameEn} Subscription`)}
-                      </h3>
-                      <p className="text-xs text-orange-500 font-bold">
-                        {isKo ? '학부모용 Chekki 모바일 앱 100% 무료 포함' : 'Includes 100% FREE Chekki Parent Mobile App'}
-                      </p>
-                    </div>
-                  </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPaymentModal(false)}
+                  className={`p-2 rounded-full transition-all active:scale-[0.95] cursor-pointer ${
+                    isNight 
+                      ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' 
+                      : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                  }`}
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
 
-                  <div className="space-y-3 text-left">
-                    <div>
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 block mb-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '교육기관명 / 학원명 *' : 'Academy / Organization Name *'}
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={academyName}
-                        onChange={(e) => setAcademyName(e.target.value)}
-                        placeholder={isKo ? '예: 대치 럭스 어학원 / 영어유치원 서초점' : 'E.g. Apex Seocho / Chekki English Academy'}
-                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
-                          isNight 
-                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
-                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
-                        }`}
-                      />
-                    </div>
+              {/* Order Summary Box */}
+              <div className={`p-4 rounded-2xl border ${isNight ? 'bg-[#050505] border-white/10' : 'bg-orange-50/50 border-orange-200'}`}>
+                <div className="flex justify-between items-center text-xs pb-2 border-b border-white/10 mb-2">
+                  <span className="text-zinc-400 font-bold">{isKo ? '선택한 플랜' : 'Selected Plan'}:</span>
+                  <span className="font-bold text-orange-400">{isKo ? activePlan.nameKo : activePlan.nameEn}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-zinc-400">{isKo ? '최종 결제 금액' : 'Total Amount'}:</span>
+                  <span className="text-2xl font-black text-emerald-400 font-mono">
+                    {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle))}
+                    <span className="text-xs font-normal text-zinc-400"> {billingCycle === 'yearly' ? '/월' : '/월'}</span>
+                  </span>
+                </div>
+              </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 block mb-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                          {isKo ? '담당자 성함 *' : 'Contact Name *'}
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={contactName}
-                          onChange={(e) => setContactName(e.target.value)}
-                          placeholder={isKo ? '김민지 원장/선생님' : 'Jane Doe'}
-                          className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
-                            isNight 
-                              ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
-                              : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
-                          }`}
-                        />
-                      </div>
-                      <div>
-                        <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 block mb-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                          {isKo ? '연락처 (핸드폰) *' : 'Phone Number *'}
-                        </label>
-                        <input
-                          type="tel"
-                          required
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="010-0000-0000"
-                          className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
-                            isNight 
-                              ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
-                              : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
-                          }`}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 block mb-1 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        {isKo ? '이메일 (청구서/체험 승인 안내용) *' : 'Contact Email (For Invoice / Trial) *'}
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="teacher@academy.com"
-                        className={`w-full border focus:border-orange-500 outline-none text-xs p-3.5 rounded-xl transition-all ${
-                          isNight 
-                            ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500' 
-                            : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:bg-white'
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  <p className="text-[10px] text-zinc-500 text-center font-mono">
-                    {selectedPlanId === 'trial' 
-                      ? (isKo ? '💡 신청 후 1시간 내 이메일/문자로 7일 무료 체험 코드가 발급됩니다.' : 'Trial access code will be emailed within 1 hour after request.')
-                      : (isKo ? '💡 신청 접수 후 등록된 이메일로 법인 계좌 정보와 전자 세금계산서가 발송됩니다.' : 'Payment instructions & tax invoice will be sent to your email.')}
-                  </p>
-
-                  {selectedPlanId !== 'trial' && getPlanUnitPrice(selectedPlanId, billingCycle) > 0 && (
-                    <div className={`p-4 border rounded-2xl space-y-2 mt-2 ${
-                      isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-100/70 border-zinc-200'
-                    }`}>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
-                          {isKo ? '월 기준 청구 금액 (캠퍼스 패키지)' : 'Monthly Effective Rate'}:
-                        </span>
-                        <span className="font-bold font-mono">
-                          {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle))} / {isKo ? '월' : 'mo'}
-                        </span>
-                      </div>
-                      {billingCycle === 'yearly' && (
-                        <div className="flex justify-between items-center text-xs">
-                          <span className={isNight ? 'text-zinc-400' : 'text-zinc-600'}>
-                            {isKo ? '결제 주기 (20% 할인 반영)' : 'Billing Cycle (20% Off)'}:
-                          </span>
-                          <span className="font-bold text-emerald-500 font-mono">
-                            {isKo ? '연간 일시 결제 (12개월)' : 'Yearly (12 Months)'}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex justify-between items-center text-xs pt-2 border-t border-zinc-200 dark:border-white/10">
-                        <span className={`font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                          {isKo 
-                            ? (billingCycle === 'yearly' ? '총 연간 청구 금액 (세금계산서)' : '총 월간 청구 금액') 
-                            : (billingCycle === 'yearly' ? 'Total Billed (1 Year)' : 'Total Billed (1 Month)')}:
-                        </span>
-                        <span className="text-lg font-black text-emerald-500 font-mono">
-                          {formatPrice(getPlanUnitPrice(selectedPlanId, billingCycle) * (billingCycle === 'yearly' ? 12 : 1))}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
+              {/* Payment Method Selector */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block font-mono">
+                  {isKo ? '결제 수단 선택 *' : 'Select Payment Method *'}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
                   <button
-                    type="submit"
-                    disabled={isRequestingInvoice}
-                    className="group w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-black text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                    type="button"
+                    onClick={() => setPaymentMethod('card')}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      paymentMethod === 'card' 
+                        ? 'border-orange-500 bg-orange-500/10 text-orange-400 shadow-md' 
+                        : (isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700')
+                    }`}
                   >
-                    {isRequestingInvoice ? (
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <span>
-                          {selectedPlanId === 'trial'
-                            ? (isKo ? '7일 무료 체험 시작하기' : 'Start 7-Day Free Trial')
-                            : (isKo ? '청구서 발행 및 도입 신청' : 'Submit Plan & Invoice Request')}
-                        </span>
-                        <ArrowRight size={14} weight="bold" />
-                      </>
-                    )}
+                    💳 {isKo ? '신용 / 체크카드' : 'Credit Card'}
                   </button>
-                </form>
-              )}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('kakaopay')}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      paymentMethod === 'kakaopay' 
+                        ? 'border-yellow-500 bg-yellow-500/10 text-yellow-400 shadow-md' 
+                        : (isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700')
+                    }`}
+                  >
+                    💛 {isKo ? '카카오페이' : 'KakaoPay'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('tosspay')}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      paymentMethod === 'tosspay' 
+                        ? 'border-blue-500 bg-blue-500/10 text-blue-400 shadow-md' 
+                        : (isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700')
+                    }`}
+                  >
+                    💙 {isKo ? '토스페이' : 'TossPay'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('bank')}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      paymentMethod === 'bank' 
+                        ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-md' 
+                        : (isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700')
+                    }`}
+                  >
+                    🏦 {isKo ? '계좌이체 / 세금계산서' : 'Bank Transfer'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Inputs */}
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="text-[11px] font-bold text-zinc-400 block mb-1">
+                    {isKo ? '학원 / 기관명 *' : 'Academy Name *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={academyName}
+                    onChange={(e) => setAcademyName(e.target.value)}
+                    placeholder={isKo ? '예: 대치 럭스 어학원' : 'E.g. Chekki Seocho Academy'}
+                    className={`w-full p-3 rounded-xl border outline-none ${
+                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                    }`}
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-zinc-400 block mb-1">
+                    {isKo ? '원장님 이메일 (결제 승인 및 온보딩용) *' : 'Director Email *'}
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="director@academy.com"
+                    className={`w-full p-3 rounded-xl border outline-none ${
+                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* Complete Payment & Launch Onboarding Button */}
+              <button
+                type="button"
+                disabled={isProcessingPayment}
+                onClick={() => {
+                  setIsProcessingPayment(true);
+                  setTimeout(() => {
+                    setIsProcessingPayment(false);
+                    setPaymentSuccess(true);
+                    setTimeout(() => {
+                      window.location.href = '/teacher?activate=true';
+                    }, 800);
+                  }, 1200);
+                }}
+                className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+              >
+                {isProcessingPayment ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>{isKo ? 'PG 결제 승인 처리 중...' : 'Processing Payment Gateway...'}</span>
+                  </div>
+                ) : paymentSuccess ? (
+                  <div className="flex items-center gap-2">
+                    <span>🎉 {isKo ? '결제 승인 완료! 온보딩 위저드로 이동 중...' : 'Payment Complete! Launching Onboarding...'}</span>
+                  </div>
+                ) : (
+                  <span>⚡ {isKo ? '결제 완료하고 온보딩 위저드 시작하기 →' : 'Complete Payment & Start Onboarding Wizard →'}</span>
+                )}
+              </button>
             </div>
           </div>
         </div>
