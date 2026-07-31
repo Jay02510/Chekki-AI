@@ -666,27 +666,14 @@ export default function TeacherPage({ isNight = true }: Props) {
       } else {
         try {
           await signIn(email, password);
-          const currentUser = auth.currentUser;
-          const uid = currentUser?.uid || email;
-          
-          // Auto-detect saved role on subsequent logins
-          const savedRole = localStorage.getItem(`chekki_educator_role_${uid}`) || localStorage.getItem(`chekki_educator_role_${email}`);
-          if (savedRole === 'kt' || savedRole === 'ft') {
-            setEducatorRole(savedRole as 'ft' | 'kt');
-          }
         } catch (authErr: any) {
-          console.warn('Firebase auth fallback to teacher demo mode:', authErr);
+          console.warn('Firebase auth fallback login handler:', authErr);
           if (email.includes('teacher') || email.includes('demo') || email.includes('director') || email.includes('test') || email.includes('admin') || password.length >= 6) {
-            if (email.includes('kt') || email.includes('korean')) {
-              setEducatorRole('kt');
-              localStorage.setItem(`chekki_educator_role_${email}`, 'kt');
-            } else if (email.includes('director')) {
-              setLoginRole('director');
-              localStorage.setItem(`chekki_educator_role_${email}`, 'director');
-            } else {
-              setEducatorRole('ft');
-              localStorage.setItem(`chekki_educator_role_${email}`, 'ft');
-            }
+            const role = email.includes('director') ? 'director' : 'teacher';
+            setLoginRole(role as any);
+            if (email.includes('kt')) setEducatorRole('kt');
+            else setEducatorRole('ft');
+            localStorage.setItem(`chekki_educator_role_${email}`, role);
           } else {
             throw authErr;
           }

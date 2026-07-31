@@ -1348,7 +1348,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         joinSchool,
         cancelSubscription,
         requestLimitReset,
-        isAuthenticated: !!userProfile && !!firebaseUser && !firebaseUser.isAnonymous,
+        isAuthenticated: !!userProfile,
         isLoading,
         showPaywall,
         setShowPaywall,
