@@ -1186,14 +1186,16 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   // Analytics Helpers
   const getWeeklyVocabWords = () => {
-    return curriculumVocab
+    const raw = typeof curriculumVocab === 'string' ? curriculumVocab : '';
+    return raw
       .split(/[,\n]/)
       .map((w) => w.trim().toLowerCase())
       .filter((w) => w.length > 0);
   };
 
   const getWeeklyPhonicsRules = () => {
-    return curriculumPhonics
+    const raw = typeof curriculumPhonics === 'string' ? curriculumPhonics : '';
+    return raw
       .split(/[,\n]/)
       .map((p) => p.trim())
       .filter((p) => p.length > 0);

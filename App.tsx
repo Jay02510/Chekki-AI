@@ -38,29 +38,39 @@ import { APP_VERSION } from './src/version';
 
 const SESSION_KEY = 'hw_last_session';
 
-// Root Error Boundary Component - Fixed property issues by using property initializers and explicit typing
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
-  // Explicitly declare props and state properties to fix "Property 'state/props' does not exist" errors
-  // Explicitly declared state type removed props as it's handled by generics
-  state: { hasError: boolean } = { hasError: false };
+// Root Error Boundary Component
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
+  state: { hasError: boolean; error: Error | null } = { hasError: false, error: null };
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('[ErrorBoundary caught crash]:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-32 h-32 mb-8">
+        <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center z-[99999]">
+          <div className="w-24 h-24 mb-6">
             <ChekkiMascot className="w-full h-full" mood="thinking" />
           </div>
-          <h1 className="text-2xl font-black text-white mb-4 font-display">
+          <h1 className="text-xl font-black text-white mb-2 font-display">
             Something went wrong.
           </h1>
+          {this.state.error && (
+            <div className="max-w-md w-full p-4 mb-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono text-left overflow-auto max-h-40">
+              <p className="font-bold">{this.state.error.name}: {this.state.error.message}</p>
+              {this.state.error.stack && (
+                <pre className="text-[10px] mt-2 text-rose-300/80 whitespace-pre-wrap">{this.state.error.stack.slice(0, 300)}</pre>
+              )}
+            </div>
+          )}
           <button
             onClick={() => window.location.reload()}
-            className="bg-orange-500 text-white px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-orange-600 transition-all active:scale-[0.97]"
+            className="bg-orange-500 text-white px-8 py-3.5 rounded-2xl font-black text-xs shadow-lg hover:bg-orange-600 transition-all active:scale-[0.97] cursor-pointer"
           >
             Reload App
           </button>
