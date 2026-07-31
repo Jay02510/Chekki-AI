@@ -170,11 +170,46 @@ ${englishSummary}`.trim();
 
       {/* Editable Korean Summary Section */}
       <div className="space-y-3">
-        <div className="flex justify-between items-center text-xs font-bold font-mono">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold font-mono">
           <span className="text-orange-400 uppercase tracking-wider">
             ✏️ Live Editable Korean Script (Review & Tweak Before Copying)
           </span>
-          <span className="text-zinc-500 text-[10px]">Polite Honorifics (존댓말)</span>
+          <div className="flex items-center gap-1">
+            <span className="text-zinc-500 text-[10px] mr-1">Tone:</span>
+            <button
+              type="button"
+              onClick={() => {
+                setEditedKoreanSummary(
+                  `[학부모 알림톡] 안녕하세요 학부모님! 오늘 ${className} 원생들이 Unit 4 광합성 어휘를 즐겁고 활기차게 학습했습니다! 아주 기특하게 집중하여 적극적으로 참여했습니다.`
+                );
+              }}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-pink-500/10 border border-pink-500/20 text-pink-400 hover:bg-pink-500/20 transition-all"
+            >
+              🌸 Warm (다정한)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditedKoreanSummary(
+                  `[학부모 알림톡] 학부모님 안녕하십니까. 금일 ${className} 수업 경과 보고드립니다. Unit 4 어휘 학습 및 오답 케어가 차질없이 완료되었습니다.`
+                );
+              }}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-all"
+            >
+              🎓 Formal (정중한)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditedKoreanSummary(
+                  `[학부모 알림톡] ${className} 학습 요약:\n• Unit 4 주요 어휘 학습 완료\n• 오답 재확인 및 발음 케어 진행`
+                );
+              }}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all"
+            >
+              ⚡ Concise (요약)
+            </button>
+          </div>
         </div>
 
         <textarea
