@@ -617,8 +617,9 @@ export default function TeacherPage({ isNight = true }: Props) {
       setClasses(combined);
       if (combined.length > 0) {
         setSelectedClass((prev: any) => (prev && combined.some((c: any) => c.id === prev.id)) ? prev : combined[0]);
-      } else if (!isDemoUser) {
-        setSelectedClass(null);
+      } else {
+        // Never set to null — always keep fallbackDemoClass so JSX never crashes reading .joinCode etc.
+        setSelectedClass((prev: any) => prev ?? fallbackDemoClass);
       }
       setIsLoadingClasses(false);
     }
@@ -2029,6 +2030,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </button>
               </>
             )}
+              {selectedClass && (
               <button
                 type="button"
                 onClick={handleCopyClassCode}
@@ -2044,12 +2046,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <span className={`font-mono font-black text-xs px-2 py-0.5 rounded-md border ${
                   isThemeNight ? 'bg-black/50 border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900 shadow-xs'
                 }`}>
-                  {selectedClass.joinCode || 'N/A'}
+                  {selectedClass?.joinCode || 'N/A'}
                 </span>
                 <span className="text-[10px] font-bold">
                   {copiedCode ? '✅' : '📋'}
                 </span>
               </button>
+              )}
 
             {selectedClass && (
               <button
