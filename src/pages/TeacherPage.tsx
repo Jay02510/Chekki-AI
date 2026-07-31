@@ -6,6 +6,7 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
 import { compressImage, stripDataUrlPrefix } from '../../services/compressImage';
+import ReportStudioPage from './ReportStudioPage';
 import { 
   GraduationCap, 
   Sparkle, 
@@ -582,7 +583,8 @@ export default function TeacherPage({ isNight = true }: Props) {
     } finally {
       const localKey = `teacher_classes_${uid}`;
       const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
-      const globalSaved = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
+      const isDemoUser = user?.email?.includes('demo') || user?.email?.includes('test');
+      const globalSaved = isDemoUser ? JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]') : [];
 
       const map = new Map();
       fetchedFromFirestore.forEach(c => map.set(c.id, c));
@@ -593,6 +595,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       setClasses(combined);
       if (combined.length > 0) {
         setSelectedClass((prev: any) => (prev && combined.some((c: any) => c.id === prev.id)) ? prev : combined[0]);
+      } else if (!isDemoUser) {
+        setSelectedClass(null);
       }
       setIsLoadingClasses(false);
     }
@@ -1890,31 +1894,28 @@ export default function TeacherPage({ isNight = true }: Props) {
             </button>
           )}
 
-          {/* AI Report Studio Link */}
-          <a
-            href="/reports"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'instant' });
-              window.history.pushState({}, '', '/reports');
-              window.dispatchEvent(new PopStateEvent('popstate'));
-            }}
+          {/* AI Report Studio In-Dashboard Tab */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('report_studio' as any)}
             className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-              isThemeNight 
-                ? 'bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30 text-orange-400 hover:border-orange-500/50' 
-                : 'bg-gradient-to-r from-orange-50 to-pink-50 border-orange-300 text-orange-600 hover:border-orange-400'
+              activeTab === ('report_studio' as any)
+                ? 'bg-orange-500/20 text-orange-400 border-orange-500/50 shadow-xl shadow-orange-500/10 font-black' 
+                : isThemeNight 
+                  ? 'bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30 text-orange-400 hover:border-orange-500/50' 
+                  : 'bg-gradient-to-r from-orange-50 to-pink-50 border-orange-300 text-orange-600 hover:border-orange-400'
             }`}
           >
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
-                  <Sparkle size={18} weight="fill" className="animate-pulse" />
-                </div>
-                <span>{isKo ? 'AI 성적표 스튜디오' : 'AI Report Studio'}</span>
+                <Sparkle size={18} weight="fill" className="animate-pulse" />
               </div>
-              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
-                NEW
-              </span>
-            </a>
+              <span>{isKo ? 'AI 성적표 스튜디오' : 'AI Report Studio'}</span>
+            </div>
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
+              NEW
+            </span>
+          </button>
         </nav>
 
         {/* Sidebar Footer / User Info */}
@@ -2167,7 +2168,15 @@ export default function TeacherPage({ isNight = true }: Props) {
               <NativeDirectorPortal 
                 isNight={isThemeNight} 
                 academyName={user?.schoolName || 'Chekki Master Academy'} 
+                onOpenLogoModal={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
               />
+            )}
+
+            {/* Embedded AI Report Studio Tab */}
+            {activeTab === ('report_studio' as any) && (
+              <div className="animate-fade-in">
+                <ReportStudioPage isNight={isThemeNight} setIsNight={setIsThemeNight} />
+              </div>
             )}
 
             {/* KT KakaoTalk Script Tab */}
@@ -2739,21 +2748,23 @@ export default function TeacherPage({ isNight = true }: Props) {
                     <div className={`flex items-center justify-between mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
-                          <BookOpen size={22} weight="bold" />
+                          {activeTab === 'syllabus' ? <BookOpen size={22} weight="bold" /> : <FileText size={22} weight="bold" />}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                              {isKo ? `주간 커리큘럼 편집 (Week ${selectedClass?.activeWeekNumber || 1})` : `Edit Weekly Curriculum (Week ${selectedClass?.activeWeekNumber || 1})`}
+                              {activeTab === 'syllabus' 
+                                ? (isKo ? `📘 주간 학과목/교재 범위 설정 (Week ${selectedClass?.activeWeekNumber || 1})` : `📘 Course Syllabus & Scope (Week ${selectedClass?.activeWeekNumber || 1})`)
+                                : (isKo ? `📄 일간 워크시트 및 오답 채점 (Week ${selectedClass?.activeWeekNumber || 1})` : `📄 Daily Homework Worksheet Scanner (Week ${selectedClass?.activeWeekNumber || 1})`)}
                             </h4>
                             <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono">
-                              ✍️ {isKo ? `담당 교사: ${(user as any)?.displayName || (user as any)?.email?.split('@')[0] || '원어민 교사'}` : `Submitted by: ${(user as any)?.displayName || (user as any)?.email?.split('@')[0] || 'Assigned FT'}`}
+                              ✍️ {isKo ? `담당 교사: ${(user as any)?.displayName || (user as any)?.email?.split('@')[0] || '원어민 교사'}` : `Assigned: ${(user as any)?.displayName || (user as any)?.email?.split('@')[0] || 'FT Teacher'}`}
                             </span>
                           </div>
                           <p className="text-xs text-zinc-400 mt-0.5">
-                            {isKo 
-                              ? '현재 주차의 학급 교안 정보입니다. 원어민 선생님이 업로드한 내용이 실시간 자동 연동됩니다.' 
-                              : 'Weekly teaching details. Submitted FT logs auto-translate into Korean parent updates.'}
+                            {activeTab === 'syllabus'
+                              ? (isKo ? '선택된 학급의 교재목차, 주차별 학습 주제, 어휘 및 파닉스 범위를 구성합니다.' : 'Configure course textbook, weekly topics, vocabulary lists, and phonics targets.')
+                              : (isKo ? '학생이 작성한 매일 워크시트 종이를 스캔하여 학부모 채점 그린 잉크 오버레이를 생성합니다.' : 'Upload scanned physical student worksheet papers to generate Green Ink overlays.')}
                           </p>
                         </div>
                       </div>
@@ -3019,7 +3030,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                         )}
 
                         {/* MODE 2: DAILY HOMEWORK WORKSHEET & ANSWER KEY SCANNER */}
-                        {uploadMode === 'worksheet' && (
+                        {activeTab === 'homework' && (
                           <div className="space-y-4">
 
 
@@ -4041,25 +4052,57 @@ export default function TeacherPage({ isNight = true }: Props) {
                 }}
                 className="space-y-4"
               >
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                    {isKo ? '학원 로고 이미지 URL (또는 파일 등록)' : 'Academy Logo Image URL'}
+                    {isKo ? '학원 로고 이미지 등록 (파일 선택 또는 URL)' : 'Academy Brand Logo (File or URL)'}
                   </label>
+                  
+                  {/* File Upload Zone */}
+                  <label className={`block cursor-pointer p-4 border-2 border-dashed rounded-2xl text-center transition-all ${
+                    isThemeNight ? 'border-white/10 hover:border-orange-500/50 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/50 bg-zinc-50'
+                  }`}>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (evt) => {
+                            const res = evt.target?.result as string;
+                            if (res) setTempLogoUrl(res);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="hidden" 
+                    />
+                    <div className="flex flex-col items-center gap-1.5">
+                      <span className="text-2xl">🖼️</span>
+                      <p className={`text-xs font-bold ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                        {isKo ? '내 컴퓨터에서 로고 이미지 파일 선택' : 'Click to Upload Logo Image File'}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 font-mono">
+                        {isKo ? 'PNG (투명 배경 권장), JPG, SVG, WEBP (최대 5MB)' : 'PNG (transparent), JPG, SVG, WEBP (Max 5MB)'}
+                      </p>
+                    </div>
+                  </label>
+
+                  <div className="flex items-center gap-2 my-1">
+                    <div className={`h-[1px] flex-1 ${isThemeNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase">{isKo ? '또는 URL 직접 입력' : 'OR PASTE IMAGE URL'}</span>
+                    <div className={`h-[1px] flex-1 ${isThemeNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
+                  </div>
+
                   <input
                     type="url"
                     value={tempLogoUrl}
                     onChange={(e) => setTempLogoUrl(e.target.value)}
-                    placeholder="https://example.com/logo.png"
-                    className={`w-full border outline-none text-xs p-4 rounded-2xl transition-all font-mono ${
+                    placeholder="https://example.com/school-logo.png"
+                    className={`w-full border outline-none text-xs p-3.5 rounded-2xl transition-all font-mono ${
                       isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
                     }`}
                   />
-                  <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-[10px] text-orange-400 leading-normal space-y-1 font-mono">
-                    <p className="font-bold">📐 {isKo ? '권장 로고 규격 및 지원 포맷:' : 'Recommended Dimensions & Formats:'}</p>
-                    <p>• {isKo ? '지원 포맷: PNG (투명 배경 권장), JPG, SVG, WEBP' : 'Formats: PNG (transparent recommended), JPG, SVG, WEBP'}</p>
-                    <p>• {isKo ? '권장 해상도: 400 × 400 px (정사각형) 또는 600 × 200 px (가로형)' : 'Resolution: 400 × 400 px (Square) or 600 × 200 px (Horizontal)'}</p>
-                    <p>• {isKo ? '최대 용량: 5 MB 이하' : 'Max Size: Under 5 MB'}</p>
-                  </div>
                 </div>
 
                 {tempLogoUrl && (
