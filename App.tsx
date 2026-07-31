@@ -477,14 +477,14 @@ function AppContent() {
   }, [isLocked]);
 
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
-  if (showSubscribePage && platform === 'web') return <SubscribePage />;
-  if (showAdminPage && platform === 'web') return <AdminPage />;
-  if (showTeacherPage && platform === 'web') return <TeacherPage isNight={isNight} />;
-  if (showDirectorPage && platform === 'web') return <DirectorPage isNight={isNight} />;
+  if (showSubscribePage && platform === 'web') return <ErrorBoundary><SubscribePage /></ErrorBoundary>;
+  if (showAdminPage && platform === 'web') return <ErrorBoundary><AdminPage /></ErrorBoundary>;
+  if (showTeacherPage && platform === 'web') return <ErrorBoundary><TeacherPage isNight={isNight} /></ErrorBoundary>;
+  if (showDirectorPage && platform === 'web') return <ErrorBoundary><DirectorPage isNight={isNight} /></ErrorBoundary>;
   if (showSchoolsPage && platform === 'web')
-    return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
+    return <ErrorBoundary><SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} /></ErrorBoundary>;
   if (showReportStudioPage && platform === 'web')
-    return <ReportStudioPage isNight={isNight} setIsNight={setIsNight} />;
+    return <ErrorBoundary><ReportStudioPage isNight={isNight} setIsNight={setIsNight} /></ErrorBoundary>;
 
   return (
     <ErrorBoundary>

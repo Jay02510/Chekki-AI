@@ -481,13 +481,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const res = await signInWithEmailAndPassword(auth, cleanEmail, cleanPass);
         if (res.user) {
-          const profile = await db.getUser(res.user.uid);
+          let profile = await db.getUser(res.user.uid);
           const targetRole: 'director' | 'teacher' = cleanEmail.includes('director') ? 'director' : 'teacher';
-          if (profile && (!profile.role || profile.role === 'parent' || cleanEmail.includes('demo'))) {
-            const updated: UserProfile = { ...profile, role: targetRole, plan: profile.plan || 'pro' };
-            await db.createUser(res.user.uid, updated);
-            await fetchAndSetUserProfile(res.user, updated);
+          if (!profile) {
+            profile = {
+              name: cleanEmail.includes('director') 
+                ? 'Director Admin (HQ)' 
+                : cleanEmail.includes('kt') ? '김은지 선생님 (KT)' : 'Teacher Mark (FT)',
+              email: cleanEmail,
+              role: targetRole,
+              plan: 'pro',
+              scansUsedToday: 0,
+              lastScanDate: new Date().toISOString().split('T')[0],
+              maxScansPerDay: 999,
+              questionsUsedToday: 0,
+              maxQuestionsPerDay: 999,
+              lastQuestionDate: new Date().toISOString().split('T')[0],
+              schoolId: 'school_demo_123',
+              schoolName: 'Chekki Master Academy',
+              subscriptionStartedAt: new Date().toISOString(),
+              nextBillingDate: null,
+            };
+            await db.createUser(res.user.uid, profile);
+          } else if (!profile.role || profile.role === 'parent' || cleanEmail.includes('demo') || cleanEmail.includes('teacher') || cleanEmail.includes('director')) {
+            profile = { ...profile, role: targetRole, plan: profile.plan || 'pro' };
+            await db.createUser(res.user.uid, profile);
           }
+          await fetchAndSetUserProfile(res.user, profile);
         }
       } catch (authErr: any) {
         if (
