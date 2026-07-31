@@ -99,7 +99,9 @@ export default function TeacherPage({ isNight = true }: Props) {
     user?.email?.includes('kt') || (user as any)?.educatorRole === 'kt' ? 'kt' : 'ft'
   );
   const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum' | 'director_hq' | 'kt_script'>(
-    isDirectorPath || (user as any)?.role === 'director' ? 'director_hq' : 'overview'
+    isDirectorPath || (user as any)?.role === 'director' 
+      ? 'director_hq' 
+      : (user?.email?.includes('kt') || (user as any)?.educatorRole === 'kt' ? 'kt_script' : 'overview')
   );
   const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
   const [submittedLogs, setSubmittedLogs] = useState<any[]>([]);
@@ -1956,48 +1958,49 @@ export default function TeacherPage({ isNight = true }: Props) {
         <header className={`p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-4 relative z-10 shrink-0 transition-colors ${
           isThemeNight ? 'bg-[#08080a]/90 border-white/5 text-white' : 'bg-white/90 border-zinc-200 text-zinc-900 shadow-xs'
         }`}>
-          {/* Left Controls: Class Selector, New Class Button, Class Code */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500">
-              <ChalkboardTeacher size={20} weight="bold" />
-            </div>
-            
-            <div className="relative">
-              {classes.length > 0 ? (
-                <select
-                  value={selectedClass?.id || ''}
-                  onChange={(e) => {
-                    const found = classes.find(c => c.id === e.target.value);
-                    if (found) setSelectedClass(found);
-                  }}
-                  className={`font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
-                    isThemeNight ? 'bg-[#050505] border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
-                  }`}
-                >
-                  {classes.map((cls) => (
-                    <option key={cls.id} value={cls.id}>
-                      {cls.name} ({cls.level})
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <div className="text-zinc-500 text-sm font-semibold p-2">
-                  {isKo ? '학급을 먼저 등록해 주세요.' : 'Create a class to get started.'}
+            {loginRole !== 'director' && user?.role !== 'director' && (
+              <>
+                <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500">
+                  <ChalkboardTeacher size={20} weight="bold" />
                 </div>
-              )}
-            </div>
+                
+                <div className="relative">
+                  {classes.length > 0 ? (
+                    <select
+                      value={selectedClass?.id || ''}
+                      onChange={(e) => {
+                        const found = classes.find(c => c.id === e.target.value);
+                        if (found) setSelectedClass(found);
+                      }}
+                      className={`font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
+                        isThemeNight ? 'bg-[#050505] border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
+                      }`}
+                    >
+                      {classes.map((cls) => (
+                        <option key={cls.id} value={cls.id}>
+                          {cls.name} ({cls.level})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="text-zinc-500 text-sm font-semibold p-2">
+                      {isKo ? '학급을 먼저 등록해 주세요.' : 'Create a class to get started.'}
+                    </div>
+                  )}
+                </div>
 
-            <button
-              type="button"
-              onClick={() => setShowCreateClassModal(true)}
-              className="group px-3.5 py-2.5 border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 rounded-2xl transition-all font-bold text-xs shrink-0 active:scale-[0.97] flex items-center gap-1.5 cursor-pointer"
-              title="Add New Class"
-            >
-              <Plus size={16} weight="bold" className="group-hover:rotate-90 transition-transform" />
-              <span className="hidden sm:inline">{isKo ? '새 학급' : 'New Class'}</span>
-            </button>
-
-            {selectedClass && (
+                <button
+                  type="button"
+                  onClick={() => setShowCreateClassModal(true)}
+                  className="group px-3.5 py-2.5 border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 rounded-2xl transition-all font-bold text-xs shrink-0 active:scale-[0.97] flex items-center gap-1.5 cursor-pointer"
+                  title="Add New Class"
+                >
+                  <Plus size={16} weight="bold" className="group-hover:rotate-90 transition-transform" />
+                  <span className="hidden sm:inline">{isKo ? '새 학급' : 'New Class'}</span>
+                </button>
+              </>
+            )}
               <button
                 type="button"
                 onClick={handleCopyClassCode}
@@ -2019,7 +2022,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                   {copiedCode ? '✅' : '📋'}
                 </span>
               </button>
-            )}
 
             {selectedClass && (
               <button
