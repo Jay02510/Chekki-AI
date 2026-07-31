@@ -1,8 +1,6 @@
-# 🦅 Chekki AI - Consolidated Master Specification & System Documentation
-
-**Document Version:** 2.1  
-**Status:** Approved / Active  
-**Last Updated:** July 31, 2026  
+# 📐 Chekki AI — Master Technical Architecture & Specification
+**Version 2.2 — Updated July 31, 2026**
+*Authoritative specification for all multi-role portals, brand logo management, embedded report studio, and workflow features.** July 31, 2026  
 **Target Audience:** Product Managers, Software Engineers, UI/UX Designers, Database Administrators, System Architects, QA Teams  
 
 ---
