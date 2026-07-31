@@ -116,6 +116,28 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [submittedLogs, setSubmittedLogs] = useState<any[]>([]);
 
   useEffect(() => {
+    if (user) {
+      const isDirector = (user as any).role === 'director' || user.email?.includes('director') || isDirectorPath;
+      const isKt = user.email?.includes('kt') || (user as any).educatorRole === 'kt';
+
+      if (isDirector) {
+        setLoginRole('director');
+        setActiveTab('director_hq');
+      } else if (isKt) {
+        setLoginRole('teacher');
+        setEducatorRole('kt');
+        setActiveTab('kt_script');
+      } else {
+        setLoginRole('teacher');
+        setEducatorRole('ft');
+        if (activeTab === 'director_hq' || activeTab === 'kt_script') {
+          setActiveTab('homework');
+        }
+      }
+    }
+  }, [user?.uid, user?.email, user?.role, isDirectorPath]);
+
+  useEffect(() => {
     if (activeTab === 'syllabus') {
       setUploadMode('syllabus');
     } else if (activeTab === 'homework') {
@@ -1285,7 +1307,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   // --- RENDER AUTH (LOGIN / SIGN UP) VIEW ---
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#050505] text-zinc-200 flex items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
+      <div className="fixed inset-0 z-[500] overflow-y-auto bg-[#050505] text-zinc-200 flex items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
         <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
         <div className="relative w-full max-w-md p-1.5 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col">
           <div className="bg-[#0c0c0e] rounded-[calc(2.5rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center">
@@ -1869,7 +1891,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           </button>
 
           {/* Tab 5 (FT Only): My Submitted Forms History */}
-          {educatorRole === 'ft' && (
+          {educatorRole === 'ft' && loginRole !== 'director' && user?.role !== 'director' && (
             <button
               onClick={() => setActiveTab('history')}
               className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
@@ -1894,12 +1916,12 @@ export default function TeacherPage({ isNight = true }: Props) {
             </button>
           )}
 
-          {/* AI Report Studio In-Dashboard Tab */}
+          {/* AI Report Studio Generator Trigger Button */}
           <button
             type="button"
-            onClick={() => setActiveTab('report_studio' as any)}
+            onClick={() => setShowReportCardModal(true)}
             className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-              activeTab === ('report_studio' as any)
+              showReportCardModal
                 ? 'bg-orange-500/20 text-orange-400 border-orange-500/50 shadow-xl shadow-orange-500/10 font-black' 
                 : isThemeNight 
                   ? 'bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30 text-orange-400 hover:border-orange-500/50' 
@@ -1910,10 +1932,10 @@ export default function TeacherPage({ isNight = true }: Props) {
               <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
                 <Sparkle size={18} weight="fill" className="animate-pulse" />
               </div>
-              <span>{isKo ? 'AI 성적표 스튜디오' : 'AI Report Studio'}</span>
+              <span>{isKo ? '📊 학부모 성적표 발급기' : '📊 AI Report Studio'}</span>
             </div>
             <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
-              NEW
+              GENERATE
             </span>
           </button>
         </nav>
