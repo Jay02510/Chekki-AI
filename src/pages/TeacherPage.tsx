@@ -1227,8 +1227,9 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   let completedHomeworkCount = 0;
 
-  const rosterWithCompletion = studentsData.map(student => {
-    const weeklyMistakes = (student.mistakes || []).filter((m: any) => isMistakeInWeeklyCurriculum(m));
+  const rosterWithCompletion = (studentsData || []).filter(Boolean).map(student => {
+    if (!student) return null;
+    const weeklyMistakes = (student.mistakes || []).filter((m: any) => m && isMistakeInWeeklyCurriculum(m));
     const hasScannedThisWeek = weeklyMistakes.length > 0 || (
       student.lastScanDate && 
       (new Date().getTime() - new Date(student.lastScanDate).getTime()) < 7 * 24 * 60 * 60 * 1000
@@ -1240,6 +1241,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
     if (student.classStatus === 'active') {
       weeklyMistakes.forEach((m: any) => {
+        if (!m) return;
         const qText = (m.question_text || '').toLowerCase();
         const aText = (m.correct_answer || '').toLowerCase();
         const rText = (m.student_response || '').toLowerCase();
@@ -1258,7 +1260,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       weeklyMistakesCount: weeklyMistakes.length,
       weeklyMistakes
     };
-  });
+  }).filter(Boolean);
 
   const activeRoster = rosterWithCompletion.filter(student => student.classStatus === 'active');
   const pendingRoster = rosterWithCompletion.filter(student => student.classStatus === 'pending');
