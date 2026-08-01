@@ -34,13 +34,16 @@ function LandingRoot() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  const hasInviteParam = typeof window !== 'undefined' && window.location.search.includes('invite=');
+
   // Dedicated FAQ Page route: chekkiai.com/faq
   if (pathname === '/faq' || pathname.startsWith('/faq')) {
     return <FaqPage isNight={isNight} setIsNight={setIsNight} />;
   }
 
-  // Web App route: chekkiai.com/app (also teacher portal, admin, subscribe, legal, report studio)
+  // Web App route: chekkiai.com/app (also teacher portal, admin, subscribe, legal, report studio, OR any invite link)
   if (
+    hasInviteParam ||
     pathname.startsWith('/app') || 
     pathname.startsWith('/teacher') || 
     pathname.startsWith('/admin') || 

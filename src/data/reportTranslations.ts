@@ -72,7 +72,7 @@ export const REPORT_TRANSLATIONS = {
     },
     videoDemo: {
       tagline: '1-MINUTE PLATFORM WALKTHROUGH',
-      heading: 'See How Chekki AI Transforms Raw FT Logs Into Phone-Ready Parent Scripts',
+      heading: 'See How Chekki Transforms Raw FT Logs Into Phone-Ready Parent Scripts',
       subheading: 'Watch how simple 30-second mobile logs generate polished bilingual parent updates.'
     },
     painVsDream: {
@@ -105,7 +105,7 @@ export const REPORT_TRANSLATIONS = {
         },
         {
           title: 'Ready-to-Copy KakaoTalk Scripts',
-          desc: 'AI converts teacher notes into polite Korean (존댓말) KakaoTalk updates in seconds.'
+          desc: 'Smart engine converts teacher notes into polite Korean (존댓말) KakaoTalk updates in seconds.'
         },
         {
           title: '1-Click Parent Care',
@@ -119,7 +119,7 @@ export const REPORT_TRANSLATIONS = {
       step1Title: '1. Foreign Teacher 30s Log',
       step1Desc: 'Native teachers submit quiz scores and student highlights in 30 seconds on mobile.',
       step2Title: '2. Bilingual Script Generator',
-      step2Desc: 'AI converts raw English notes into formal Korean honorific scripts with zero delay.',
+      step2Desc: 'Smart system converts raw English notes into formal Korean honorific scripts with zero delay.',
       step3Title: '3. KT Review & 1-Click KakaoTalk Copy',
       step3Desc: 'Korean teachers review drafts and 1-click copy formatted updates directly into KakaoTalk.',
       step4Title: '4. 1-Click Parent Care',
@@ -150,7 +150,7 @@ export const REPORT_TRANSLATIONS = {
       inputPlaceholder: 'Type or paste foreign teacher comments here...'
     },
     calculator: {
-      heading: 'Calculate How Much Time & Money ChekkiAI Saves Your Academy',
+      heading: 'Calculate How Much Time & Money Chekki Saves Your Academy',
       subheading: 'Based on operational data from top Korean English Academies.',
       foreignTeachersLabel: 'Number of Foreign Teachers (FTs):',
       studentCountLabel: 'Total Enrolled Students:',
@@ -196,8 +196,8 @@ export const REPORT_TRANSLATIONS = {
     },
     hero: {
       tagline: '어학원 원어민 강사 관리 & 학부모 피드백 자동화 시스템',
-      headline: 'ChekkiAI: 원어민 강사 관리 및 자동 이중언어 보고서 시스템',
-      subheadline: '학원 운영의 핵심인 원어민 강사 관리와 학부모 피드백, 이제 ChekkiAI로 완벽하게 자동화하세요. 원어민 교사의 간단한 Fillout 입력 데이터를 0초 만에 정교한 한/영 학부모 상담 대본으로 전환해드립니다.',
+      headline: 'Chekki: 원어민 강사 관리 및 자동 이중언어 보고서 시스템',
+      subheadline: '학원 운영의 핵심인 원어민 강사 관리와 학부모 피드백, 이제 Chekki로 완벽하게 자동화하세요. 원어민 교사의 간단한 Fillout 입력 데이터를 0초 만에 정교한 한/영 학부모 상담 대본으로 전환해드립니다.',
       primaryCta: '맞춤 학원 구축 & 온보딩 신청',
       secondaryCta: '1분 시연 데모 영상 보기',
       badge: '원어민 강사를 보유한 초등·중등 어학원 및 영유 전용 전용 시스템'
@@ -238,7 +238,7 @@ export const REPORT_TRANSLATIONS = {
         '교사 계정 최대 10석 & 학부모 무제한',
         '리포트 스튜디오 모든 기능 포함',
         '1클릭 교재 목차 스캔 & 어휘 선제 탑재',
-        '매일 숙제 스캔 & 99.9% AI 정밀 채점'
+        '매일 숙제 스캔 & 99.9% 정밀 채점'
       ],
       proCta: '마스터 스쿨 프로 시작',
 

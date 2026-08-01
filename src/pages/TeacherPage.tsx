@@ -60,11 +60,22 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [copiedCode, setCopiedCode] = useState(false);
   const [showWeekCalendarModal, setShowWeekCalendarModal] = useState(false);
   
-  // Account Activation Wizard State for new directors
+  // Account Activation Wizard State for new directors (Requires payment or active license)
   const isActivateParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('activate') === 'true';
-  const [showActivationWizard, setShowActivationWizard] = useState(isActivateParam);
+  const isPaidSession = typeof window !== 'undefined' && (
+    sessionStorage.getItem('chekki_paid_active') === 'true' || 
+    localStorage.getItem('chekki_paid_active') === 'true'
+  );
+  const [showActivationWizard, setShowActivationWizard] = useState(() => isActivateParam && isPaidSession);
   const [showReviewSheetModal, setShowReviewSheetModal] = useState(false);
   const [showReportCardModal, setShowReportCardModal] = useState(false);
+
+  useEffect(() => {
+    if (isActivateParam && !isPaidSession) {
+      // Unpaid access attempt: redirect to checkout/login
+      window.location.href = '/schools/login';
+    }
+  }, [isActivateParam, isPaidSession]);
 
   const handleCopyClassCode = () => {
     if (!selectedClass?.joinCode) return;
@@ -136,11 +147,26 @@ export default function TeacherPage({ isNight = true }: Props) {
         setLoginRole('teacher');
         setEducatorRole('ft');
         if (activeTab === 'director_hq' || activeTab === 'kt_script') {
-          setActiveTab('homework');
+          setActiveTab('overview');
         }
       }
     }
   }, [user?.uid, user?.email, user?.role, isDirectorPath]);
+
+  // Handle Teacher Invite Link URL Params (FT vs KT Role Routing)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const inviteRole = params.get('role');
+      if (inviteRole === 'kt') {
+        setEducatorRole('kt');
+        setActiveTab('kt_script');
+      } else if (inviteRole === 'ft') {
+        setEducatorRole('ft');
+        setActiveTab('overview');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'syllabus') {
@@ -1626,7 +1652,22 @@ export default function TeacherPage({ isNight = true }: Props) {
       <UnifiedAccountActivation
         isNight={isThemeNight}
         isKo={isKo}
-        onComplete={(_data) => {
+        onComplete={(data) => {
+          dismissTeacherOnboarding();
+          if (data.academyName) {
+            localStorage.setItem('chekki_academy_name', data.academyName);
+          }
+          if (data.classes && data.classes.length > 0) {
+            const newClasses = data.classes.map((clsName, idx) => ({
+              id: `cls_${Date.now()}_${idx}`,
+              name: clsName,
+              level: 'Kindergarten & Elementary',
+              joinCode: `CHK${Math.floor(1000 + Math.random() * 9000)}`,
+              activeWeekNumber: 1,
+            }));
+            setClasses(newClasses);
+            setSelectedClass(newClasses[0]);
+          }
           setShowActivationWizard(false);
           setActiveTab('director_hq');
         }}

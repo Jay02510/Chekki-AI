@@ -294,7 +294,7 @@ export default function Home() {
           <div className={`hero-text mb-6 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold border ${
             isNight ? 'bg-white/5 border-white/10 text-white/70' : 'bg-slate-200/60 border-slate-300 text-slate-700'
           }`}>
-            {isKo ? '학부모 & 교사를 위한 AI 서비스' : 'For Parents & Educators'}
+            {isKo ? '학부모 & 교사를 위한 스마트 플랫폼' : 'For Parents & Educators'}
           </div>
 
           <h1 className={`hero-text text-[clamp(2.5rem,5.5vw,5.5rem)] font-bold tracking-tighter leading-[1.05] w-full max-w-4xl ${
@@ -311,7 +311,7 @@ export default function Home() {
             isNight ? 'text-white/60' : 'text-slate-600'
           }`}>
             {isKo 
-              ? '복잡하고 스트레스 받는 숙제 채점, 이제 체키가 대신합니다. 원어민 교재 답안과 손글씨 AI 스캔으로 학부모와 학원 모두에게 최상의 학습 경험을 제공합니다.'
+              ? '복잡하고 스트레스 받는 숙제 채점, 이제 체키가 대신합니다. 원어민 교재 답안과 손글씨 정밀 스캔으로 학부모와 학원 모두에게 최상의 학습 경험을 제공합니다.'
               : 'Empower your child\'s education. Chekki helps Korean parents stay connected to their child\'s daily assignments without the stress.'}
           </p>
 
@@ -563,7 +563,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
-                  <span>{isKo ? '✍️ 99.9% AI 손글씨 정밀 오답 빨간상자 표시' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
+                  <span>{isKo ? '✍️ 99.9% 손글씨 정밀 오답 빨간상자 표시' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
@@ -615,7 +615,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
-                  <span>{isKo ? '✍️ 99.9% AI 손글씨 자동 채점 & 오답 박스' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
+                  <span>{isKo ? '✍️ 99.9% 손글씨 자동 채점 & 오답 박스' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
@@ -675,7 +675,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
-                  <span>{isKo ? '✍️ 99.9% AI 손글씨 정밀 오답 빨간상자 표시' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
+                  <span>{isKo ? '✍️ 99.9% 손글씨 정밀 오답 빨간상자 표시' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />

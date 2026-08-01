@@ -366,7 +366,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full z-10">
           {/* Eyebrow */}
           <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-4 block">
-            {isKo ? '전국 어학원·영유 전용 AI 자동 채점 & 학부모 리포트 플랫폼' : 'AUTOMATED ACADEMY GRADING & PARENT CARE'}
+            {isKo ? '전국 어학원·영유 전용 스마트 자동 채점 & 학부모 리포트 플랫폼' : 'AUTOMATED ACADEMY GRADING & PARENT CARE'}
           </span>
 
           {/* Headline */}
@@ -374,7 +374,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             {isKo ? (
               <>강사 행정 업무 <span className="text-orange-500">90% 감축</span>,<br />학부모 피드백 만족도 <span className="text-orange-500">200% 상승</span>.</>
             ) : (
-              <>Cut Grading Admin by <span className="text-orange-500">90%</span>.<br />Delight Parents with <span className="text-orange-500">Instant AI Reports</span>.</>
+              <>Cut Grading Admin by <span className="text-orange-500">90%</span>.<br />Delight Parents with <span className="text-orange-500">Instant Smart Reports</span>.</>
             )}
           </h1>
 
@@ -1494,7 +1494,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </div>
               </div>
 
-              {/* Inputs */}
+              {/* Payment Method Details & Fields */}
               <div className="space-y-3 text-xs">
                 <div>
                   <label className="text-[11px] font-bold text-zinc-400 block mb-1">
@@ -1513,7 +1513,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </div>
                 <div>
                   <label className="text-[11px] font-bold text-zinc-400 block mb-1">
-                    {isKo ? '원장님 이메일 (결제 승인 및 온보딩용) *' : 'Director Email *'}
+                    {isKo ? '원장님 이메일 (결제 영수증 & 승인 안내) *' : 'Director Email *'}
                   </label>
                   <input
                     type="email"
@@ -1526,6 +1526,92 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     }`}
                   />
                 </div>
+
+                {/* Specific Fields by Payment Type */}
+                {paymentMethod === 'card' && (
+                  <div className={`p-3.5 rounded-2xl border space-y-2.5 ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                    <div>
+                      <label className="text-[10px] font-bold text-zinc-400 block mb-1">카드 번호 (16자리)</label>
+                      <input
+                        type="text"
+                        maxLength={19}
+                        placeholder="4532 - 1234 - 5678 - 9012"
+                        className={`w-full p-2.5 rounded-xl border text-xs font-mono outline-none ${
+                          isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+                        }`}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] font-bold text-zinc-400 block mb-1">유효기간 (MM/YY)</label>
+                        <input
+                          type="text"
+                          maxLength={5}
+                          placeholder="MM/YY"
+                          className={`w-full p-2.5 rounded-xl border text-xs font-mono outline-none ${
+                            isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+                          }`}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-zinc-400 block mb-1">CVC 번호</label>
+                        <input
+                          type="password"
+                          maxLength={4}
+                          placeholder="***"
+                          className={`w-full p-2.5 rounded-xl border text-xs font-mono outline-none ${
+                            isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {(paymentMethod === 'kakaopay' || paymentMethod === 'tosspay') && (
+                  <div className={`p-3.5 rounded-2xl border space-y-2 ${
+                    paymentMethod === 'kakaopay' 
+                      ? (isNight ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200')
+                      : (isNight ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200')
+                  }`}>
+                    <label className="text-[10px] font-bold text-zinc-400 block">
+                      {paymentMethod === 'kakaopay' ? '카카오톡 1클릭 결제 수신 휴대폰 번호' : '토스 앱 결제 승인 휴대폰 번호'}
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="010-1234-5678"
+                      className={`w-full p-2.5 rounded-xl border text-xs font-mono outline-none ${
+                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+                      }`}
+                    />
+                  </div>
+                )}
+
+                {paymentMethod === 'bank' && (
+                  <div className={`p-4 rounded-2xl border space-y-2.5 ${isNight ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-emerald-50 border-emerald-200'}`}>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 font-mono flex items-center gap-1">
+                      <Bank size={14} /> 입금 계좌 및 세금계산서 청구 안내
+                    </span>
+                    <div className="text-[11px] space-y-1">
+                      <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>은행: <strong>신한은행 (Shinhan Bank)</strong></p>
+                      <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>예금주: <strong>BENJAMIN JASON</strong></p>
+                      <div className="flex justify-between items-center pt-1 font-mono">
+                        <strong className="text-base text-emerald-400">110-623-147138</strong>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText('110-623-147138');
+                            setCopiedBank(true);
+                            setTimeout(() => setCopiedBank(false), 2000);
+                          }}
+                          className="px-2.5 py-1 bg-emerald-500 text-white font-bold text-[10px] rounded-lg cursor-pointer"
+                        >
+                          {copiedBank ? '복사됨!' : '계좌복사'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Complete Payment & Launch Onboarding Button */}
@@ -1533,10 +1619,16 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 type="button"
                 disabled={isProcessingPayment}
                 onClick={() => {
+                  if (!academyName || !email) {
+                    alert(isKo ? '학원명과 이메일을 입력해주세요.' : 'Please fill out your academy name and email.');
+                    return;
+                  }
                   setIsProcessingPayment(true);
                   setTimeout(() => {
                     setIsProcessingPayment(false);
                     setPaymentSuccess(true);
+                    sessionStorage.setItem('chekki_paid_active', 'true');
+                    sessionStorage.setItem('chekki_paid_school', academyName);
                     setTimeout(() => {
                       window.location.href = '/teacher?activate=true';
                     }, 800);

@@ -15,12 +15,12 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Step 1: School Profile
-  const [academyName, setAcademyName] = useState('Apex International Academy');
+  const [academyName, setAcademyName] = useState(() => (typeof window !== 'undefined' ? sessionStorage.getItem('chekki_paid_school') || '' : ''));
   const [campusLevel, setCampusLevel] = useState('Kindergarten & Elementary');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Step 2: Curriculum & Classes
-  const [selectedClasses, setSelectedClasses] = useState<string[]>(['7A Sunshine', '8B Excellence', '9C Leader']);
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [newClassName, setNewClassName] = useState('');
   const [selectedTextbook, setSelectedTextbook] = useState('Bricks Reading 150');
 

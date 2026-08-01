@@ -541,18 +541,32 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                const inviteUrl = `${window.location.origin}/schools/login?invite=${encodeURIComponent(academyName.replace(/\s+/g, '-').toLowerCase())}`;
-                navigator.clipboard.writeText(inviteUrl);
-                alert(`✅ Workspace Invite Link Copied to Clipboard!\n\n${inviteUrl}\n\nSend this link to teachers to instantly connect them to ${academyName}.`);
-              }}
-              className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer active:scale-95"
-            >
-              <span>🔗</span>
-              <span>1-Click Copy Invite Link</span>
-            </button>
+            <div className="flex flex-wrap gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  const inviteUrl = `${window.location.origin}/teacher?invite=${encodeURIComponent(academyName.replace(/\s+/g, '-').toLowerCase())}&role=ft`;
+                  navigator.clipboard.writeText(inviteUrl);
+                  alert(`🌐 Foreign Teacher (FT) Invite Link Copied!\n\n${inviteUrl}\n\nThis link directly logs Foreign Teachers into the Class Overview & Daily Scanner Dropzone.`);
+                }}
+                className="px-3.5 py-2 bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <span>🌐</span>
+                <span>Copy FT Invite Link (Foreign Teacher)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const inviteUrl = `${window.location.origin}/teacher?invite=${encodeURIComponent(academyName.replace(/\s+/g, '-').toLowerCase())}&role=kt`;
+                  navigator.clipboard.writeText(inviteUrl);
+                  alert(`🇰🇷 Korean Teacher (KT) Invite Link Copied!\n\n${inviteUrl}\n\nThis link directly logs Korean Teachers into the KakaoTalk Script Review Dashboard.`);
+                }}
+                className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <span>🇰🇷</span>
+                <span>Copy KT Invite Link (Korean Teacher)</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
