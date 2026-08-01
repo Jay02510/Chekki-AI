@@ -101,6 +101,9 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   );
 
   const flaggedStudents = students.filter((s) => s.flaggedException);
+  const [showSeatExpansionModal, setShowSeatExpansionModal] = useState(false);
+  const [requestedExtraSeats, setRequestedExtraSeats] = useState(3);
+  const [seatRequestSent, setSeatRequestSent] = useState(false);
 
   return (
     <div
@@ -257,8 +260,19 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <h4 className="text-2xl font-black text-orange-400 mt-1">{students.length} <span className="text-xs font-normal text-zinc-400">Enrolled</span></h4>
         </div>
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">STAFF SEATS</span>
-          <h4 className="text-2xl font-black text-emerald-400 mt-1">{teachers.length} <span className="text-xs font-normal text-zinc-400">Teachers</span></h4>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">STAFF SEAT QUOTA</span>
+            <button
+              type="button"
+              onClick={() => setShowSeatExpansionModal(true)}
+              className="text-[10px] font-bold text-orange-400 hover:underline cursor-pointer"
+            >
+              + Add Seats
+            </button>
+          </div>
+          <h4 className="text-2xl font-black text-emerald-400 mt-1">
+            {teachers.length} <span className="text-xs font-normal text-zinc-400">/ {typeof window !== 'undefined' ? sessionStorage.getItem('chekki_teacher_seats') || '10' : '10'} Active</span>
+          </h4>
         </div>
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">FLAGGED EXCEPTIONS</span>
@@ -644,6 +658,98 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* SEAT EXPANSION REQUEST MODAL */}
+      {showSeatExpansionModal && (
+        <div className="fixed inset-0 z-[550] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className={`relative w-full max-w-md p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 text-left transition-all ${
+            isNight ? 'bg-[#0a0a0d] border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+          }`}>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-black text-lg">
+                  ➕
+                </div>
+                <div>
+                  <h3 className="font-black text-lg">교사 석 추가 (Seat Expansion)</h3>
+                  <p className="text-xs text-zinc-400 font-mono">Current Allowance: {sessionStorage.getItem('chekki_teacher_seats') || '10'} Seats</p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => { setShowSeatExpansionModal(false); setSeatRequestSent(false); }}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {seatRequestSent ? (
+              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
+                <span className="text-3xl block">🎉</span>
+                <h4 className="font-black text-emerald-400 text-base">교사 석 추가 청구서 발송 완료!</h4>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  +{requestedExtraSeats}석 추가 세금계산서 청구서가 등록되었습니다.<br />
+                  전자세금계산서 발행 후 즉시 추가 교사 계정 초대가 활성화됩니다.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setShowSeatExpansionModal(false); setSeatRequestSent(false); }}
+                  className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                >
+                  확인 완료
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4 text-xs">
+                <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
+                  원어민 강사(FT) 또는 한국인 코티처(KT)를 추가 등록하기 위해 교사 계정 석을 확장합니다. (석당 ₩19,000 / 월)
+                </p>
+
+                <div className="space-y-2">
+                  <label className="font-bold text-zinc-400 block font-mono">추가 교사 석 수 선택:</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[+1, +3, +5].map((count) => (
+                      <button
+                        key={count}
+                        type="button"
+                        onClick={() => setRequestedExtraSeats(count)}
+                        className={`p-3 rounded-xl border text-xs font-black transition-all cursor-pointer ${
+                          requestedExtraSeats === count
+                            ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                            : isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+                        }`}
+                      >
+                        +{count}석 추가
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={`p-4 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-zinc-400">추가 석 요금:</span>
+                    <strong className="text-orange-400">₩{(requestedExtraSeats * 19000).toLocaleString()} / 월</strong>
+                  </div>
+                  <p className="text-[10px] text-zinc-500 mt-1">계좌이체 세금계산서로합산 청구됩니다.</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const current = Number(sessionStorage.getItem('chekki_teacher_seats') || '10');
+                    sessionStorage.setItem('chekki_teacher_seats', (current + requestedExtraSeats).toString());
+                    setSeatRequestSent(true);
+                  }}
+                  className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-xl shadow-lg transition-all cursor-pointer"
+                >
+                  ⚡ +{requestedExtraSeats}석 추가 세금계산서 청구하기 →
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

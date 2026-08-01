@@ -139,7 +139,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [currency, setCurrency] = useState<'KRW' | 'USD'>('KRW');
 
   // Payment Form States
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'kakaopay' | 'tosspay' | 'bank'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'kakaopay' | 'tosspay' | 'bank'>('bank');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
@@ -1451,52 +1451,29 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               {/* Payment Method Selector */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block font-mono">
-                  {isKo ? '결제 수단 선택 *' : 'Select Payment Method *'}
+                  {isKo ? '결제 수단 선택 (현재 계좌이체/세금계산서 지원) *' : 'Select Payment Method *'}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                      paymentMethod === 'card' 
-                        ? 'border-orange-500 bg-orange-500/10 text-orange-400 shadow-md' 
-                        : (isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700')
-                    }`}
-                  >
-                    💳 {isKo ? '신용 / 체크카드' : 'Credit Card'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('kakaopay')}
-                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                      paymentMethod === 'kakaopay' 
-                        ? 'border-yellow-500 bg-yellow-500/10 text-yellow-400 shadow-md' 
-                        : (isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700')
-                    }`}
-                  >
-                    💛 {isKo ? '카카오페이' : 'KakaoPay'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('tosspay')}
-                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                      paymentMethod === 'tosspay' 
-                        ? 'border-blue-500 bg-blue-500/10 text-blue-400 shadow-md' 
-                        : (isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700')
-                    }`}
-                  >
-                    💙 {isKo ? '토스페이' : 'TossPay'}
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setPaymentMethod('bank')}
-                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                      paymentMethod === 'bank' 
-                        ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-md' 
-                        : (isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700')
-                    }`}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-md col-span-2`}
                   >
-                    🏦 {isKo ? '계좌이체 / 세금계산서' : 'Bank Transfer'}
+                    🏦 {isKo ? '계좌이체 / 전자세금계산서 청구 (공식)' : 'Corporate Bank Transfer & Tax Invoice'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled
+                    className="p-2.5 rounded-xl border text-[11px] font-bold opacity-50 bg-white/5 border-white/10 text-zinc-500 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                  >
+                    💳 {isKo ? '신용카드 (출시 예정)' : 'Credit Card (Coming Soon)'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled
+                    className="p-2.5 rounded-xl border text-[11px] font-bold opacity-50 bg-white/5 border-white/10 text-zinc-500 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                  >
+                    💛 {isKo ? '카카오페이 (출시 예정)' : 'KakaoPay (Coming Soon)'}
                   </button>
                 </div>
               </div>
