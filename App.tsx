@@ -217,10 +217,13 @@ function AppContent() {
   useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
+      const search = window.location.search;
+      const isInvite = search.includes('invite=');
+
       setShowSubscribePage(path === '/subscribe');
       setShowAdminPage(path === '/admin');
-      setShowTeacherPage(path === '/teacher' || path === '/director' || path === '/director-hq');
-      setShowSchoolsPage(path === '/schools' || path === '/for-schools');
+      setShowTeacherPage(isInvite || path === '/teacher' || path === '/director' || path === '/director-hq' || path.includes('/schools/login'));
+      setShowSchoolsPage(!isInvite && (path === '/schools' || path === '/for-schools'));
       setShowReportStudioPage(path === '/reports' || path === '/report-studio');
     };
 
@@ -249,6 +252,9 @@ function AppContent() {
       setStandaloneLegal(path);
     }
 
+    const search = window.location.search;
+    const isInvite = search.includes('invite=');
+
     // /subscribe route — web only
     if (window.location.pathname === '/subscribe' && Capacitor.getPlatform() === 'web') {
       setShowSplash(false);
@@ -261,8 +267,8 @@ function AppContent() {
       setShowAdminPage(true);
     }
 
-    // /teacher and /director routes — web only
-    if ((window.location.pathname === '/teacher' || window.location.pathname === '/director' || window.location.pathname === '/director-hq') && Capacitor.getPlatform() === 'web') {
+    // /teacher, /director, or any teacher invite links — web only
+    if ((isInvite || window.location.pathname === '/teacher' || window.location.pathname === '/director' || window.location.pathname === '/director-hq' || window.location.pathname.includes('/schools/login')) && Capacitor.getPlatform() === 'web') {
       setShowSplash(false);
       setShowTeacherPage(true);
     }

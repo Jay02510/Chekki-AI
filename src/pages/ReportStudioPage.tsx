@@ -297,8 +297,12 @@ ${activeReport.parentScriptKo.closing}`.trim();
 
   const [selectedPlanId, setSelectedPlanId] = useState<'starter' | 'pro' | 'enterprise'>('pro');
 
-  const openOnboardingModal = (_planId: 'starter' | 'pro' | 'enterprise' = 'pro') => {
-    window.location.href = '/schools/login';
+  const openOnboardingModal = (planId: 'starter' | 'pro' | 'enterprise' = 'pro') => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('chekki_selected_plan', planId === 'starter' ? 'starter' : planId === 'enterprise' ? 'enterprise' : 'school_pro');
+      sessionStorage.setItem('chekki_teacher_seats', planId === 'starter' ? '3' : planId === 'enterprise' ? '20' : '10');
+      window.location.href = '/teacher?activate=true';
+    }
   };
 
   return (
