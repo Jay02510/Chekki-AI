@@ -111,18 +111,39 @@ ${englishSummary}`.trim();
             <span>Print Custom Logo PDF Report</span>
           </button>
 
-          <button
-            type="button"
-            onClick={handleCopyKakaoScript}
-            className={`px-5 py-2.5 rounded-2xl font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 ${
-              copied
-                ? 'bg-emerald-600 text-white'
-                : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
-            }`}
-          >
-            {copied ? <CheckCircle size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
-            <span>{copied ? 'Copied Edited Script! ✅' : '1-Click Copy KakaoTalk'}</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: '체키 학부모 상담 알림톡',
+                    text: editedKoreanSummary,
+                  }).catch(() => {});
+                } else {
+                  navigator.clipboard.writeText(editedKoreanSummary);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }
+              }}
+              className="px-3.5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-zinc-900 font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
+            >
+              <span>💬</span>
+              <span>카카오톡 공유</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleCopyKakaoScript}
+              className={`px-4 py-2.5 rounded-xl text-xs font-black shadow-lg transition-all flex items-center gap-2 shrink-0 cursor-pointer active:scale-95 ${
+                copied
+                  ? 'bg-emerald-500 text-white shadow-emerald-500/20'
+                  : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
+              }`}
+            >
+              {copied ? <CheckCircle size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
+              <span>{copied ? '복사 완료! ✅' : '대본 1클릭 복사'}</span>
+            </button>
+          </div>
         </div>
       </div>
 

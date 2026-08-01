@@ -13,6 +13,7 @@ import {
   Users, 
   ChartBar, 
   FileText, 
+  ClockCounterClockwise,
   ArrowRight, 
   ArrowLeft,
   Eye,
@@ -103,9 +104,37 @@ export default function TeacherPage({ isNight = true }: Props) {
     activeWeekNumber: 1,
   };
 
-  // Class state
-  const [classes, setClasses] = useState<any[]>([fallbackDemoClass]);
-  const [selectedClass, setSelectedClass] = useState<any>(fallbackDemoClass);
+  // Class state (Persists created classes in localStorage)
+  const [classes, setClassesState] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('chekki_academy_classes');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {
+        console.error('Failed to load saved classes', e);
+      }
+    }
+    return [fallbackDemoClass];
+  });
+
+  const setClasses = (action: any) => {
+    setClassesState((prev) => {
+      const next = typeof action === 'function' ? action(prev) : action;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('chekki_academy_classes', JSON.stringify(next));
+        } catch (e) {
+          console.error('Failed to save classes to localStorage', e);
+        }
+      }
+      return next;
+    });
+  };
+
+  const [selectedClass, setSelectedClass] = useState<any>(() => classes[0] || fallbackDemoClass);
   const [showCreateClassModal, setShowCreateClassModal] = useState(false);
   const [newClassName, setNewClassName] = useState('');
   const [newClassLevel, setNewClassLevel] = useState('7-year-old');
@@ -830,8 +859,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       localStorage.setItem(`teacher_ob_done_${uid}`, 'true');
       setShowTeacherOnboarding(false);
       
-      setClasses((prev) => {
-        const exists = prev.some((c) => c.id === classId);
+      setClasses((prev: any[]) => {
+        const exists = prev.some((c: any) => c.id === classId);
         return exists ? prev : [newClass, ...prev];
       });
       setSelectedClass(newClass);
@@ -850,7 +879,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     const targetId = classIdToDelete || selectedClass?.id;
     if (!targetId) return;
 
-    const classToDelete = classes.find((c) => c.id === targetId);
+    const classToDelete = classes.find((c: any) => c.id === targetId);
     if (!classToDelete) return;
 
     const confirmMsg = isKo
@@ -871,7 +900,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         }
       }
 
-      const updatedClasses = classes.filter((c) => c.id !== targetId);
+      const updatedClasses = classes.filter((c: any) => c.id !== targetId);
       setClasses(updatedClasses);
 
       if (selectedClass?.id === targetId) {
@@ -915,8 +944,8 @@ export default function TeacherPage({ isNight = true }: Props) {
     const newWeek = Math.max(1, (selectedClass.activeWeekNumber || 1) + delta);
     const updated = { ...selectedClass, activeWeekNumber: newWeek };
     setSelectedClass(updated);
-    setClasses(prev => {
-      const next = prev.map(c => c.id === updated.id ? updated : c);
+    setClasses((prev: any[]) => {
+      const next = prev.map((c: any) => c.id === updated.id ? updated : c);
       const uid = user?.uid || 'guest';
       try {
         localStorage.setItem(`teacher_classes_${uid}`, JSON.stringify(next));
@@ -937,8 +966,8 @@ export default function TeacherPage({ isNight = true }: Props) {
     if (!selectedClass) return;
     const updated = { ...selectedClass, activeWeekNumber: targetWeekNum };
     setSelectedClass(updated);
-    setClasses(prev => {
-      const next = prev.map(c => c.id === updated.id ? updated : c);
+    setClasses((prev: any[]) => {
+      const next = prev.map((c: any) => c.id === updated.id ? updated : c);
       const uid = user?.uid || 'guest';
       try {
         localStorage.setItem(`teacher_classes_${uid}`, JSON.stringify(next));
@@ -1797,182 +1826,205 @@ export default function TeacherPage({ isNight = true }: Props) {
           )}
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Navigation Tabs (Scoped by Role) */}
         <nav className="p-4 flex-1 space-y-2">
           {/* Director HQ Tab (Director Only) */}
           {(loginRole === 'director' || user?.role === 'director') && (
-            <button
-              onClick={() => setActiveTab('director_hq')}
-              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                activeTab === 'director_hq'
-                  ? 'bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-xl shadow-amber-500/10'
-                  : isThemeNight 
-                    ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-xl transition-colors ${
-                  activeTab === 'director_hq' 
-                    ? 'bg-amber-500/20 text-amber-500' 
-                    : isThemeNight ? 'bg-white/5 text-amber-400 group-hover:text-white' : 'bg-amber-100 text-amber-600 group-hover:text-zinc-900'
-                }`}>
-                  <Buildings size={18} weight="bold" />
+            <>
+              <button
+                onClick={() => setActiveTab('director_hq')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'director_hq'
+                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-xl shadow-amber-500/10'
+                    : isThemeNight 
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'director_hq' 
+                      ? 'bg-amber-500/20 text-amber-500' 
+                      : isThemeNight ? 'bg-white/5 text-amber-400 group-hover:text-white' : 'bg-amber-100 text-amber-600 group-hover:text-zinc-900'
+                  }`}>
+                    <Buildings size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '🏢 원장님 HQ 총괄 대시보드' : '🏢 Director HQ Dashboard'}</span>
                 </div>
-                <span>{isKo ? '🏢 원장님 HQ 총괄 대시보드' : '🏢 Director HQ Dashboard'}</span>
-              </div>
-              <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'director_hq' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-            </button>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'director_hq' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+
+              <button
+                onClick={() => setActiveTab('syllabus')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'syllabus'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight 
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'syllabus' 
+                      ? 'bg-orange-500/20 text-orange-500' 
+                      : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
+                  }`}>
+                    <BookOpen size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '📘 교재 목차 등록 (Curriculum)' : '📘 Curriculum Preseed'}</span>
+                </div>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+
+              <button
+                onClick={() => setActiveTab('students')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'students'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight 
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'students' 
+                      ? 'bg-orange-500/20 text-orange-500' 
+                      : isThemeNight ? 'bg-white/5 text-purple-400 group-hover:text-white' : 'bg-purple-100 text-purple-600 group-hover:text-zinc-900'
+                  }`}>
+                    <Users size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '👥 원생 명단 관리 (Roster)' : '👥 Student Roster'}</span>
+                </div>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+            </>
           )}
 
           {/* KT KakaoTalk Script Tab (KT Only) */}
-          {educatorRole === 'kt' && (
-            <button
-              onClick={() => setActiveTab('kt_script')}
-              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                activeTab === 'kt_script'
-                  ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                  : isThemeNight 
-                    ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-xl transition-colors ${
-                  activeTab === 'kt_script' 
-                    ? 'bg-orange-500/20 text-orange-500' 
-                    : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
-                }`}>
-                  <Sparkle size={18} weight="fill" className="animate-pulse" />
+          {loginRole !== 'director' && educatorRole === 'kt' && (
+            <>
+              <button
+                onClick={() => setActiveTab('kt_script')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'kt_script'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight 
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'kt_script' 
+                      ? 'bg-orange-500/20 text-orange-500' 
+                      : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
+                  }`}>
+                    <Sparkle size={18} weight="fill" className="animate-pulse" />
+                  </div>
+                  <span>{isKo ? '⚡ 알림톡 대본 & 1클릭 복사' : '⚡ KakaoTalk Parent Script'}</span>
                 </div>
-                <span>{isKo ? '⚡ AI 알림톡 대본 & 1클릭 복사' : '⚡ KakaoTalk Parent Script'}</span>
-              </div>
-              <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'kt_script' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-            </button>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'kt_script' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'overview'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight 
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'overview' 
+                      ? 'bg-orange-500/20 text-orange-500' 
+                      : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
+                  }`}>
+                    <ChartBar size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '반 출석 및 채점 현황' : 'Class Overview'}</span>
+                </div>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+            </>
           )}
 
-          {/* Tab 1: Class Dashboard Overview (Teachers Only) */}
-          {loginRole !== 'director' && user?.role !== 'director' && (
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
-                activeTab === 'overview'
-                  ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                  : isThemeNight 
-                    ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-xl transition-colors ${
-                  activeTab === 'overview' 
-                    ? 'bg-orange-500/20 text-orange-500' 
-                    : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
-                }`}>
-                  <ChartBar size={18} weight="bold" />
+          {/* FT Foreign Teacher Tabs (FT Only) */}
+          {loginRole !== 'director' && educatorRole === 'ft' && (
+            <>
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'overview'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight 
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'overview' 
+                      ? 'bg-orange-500/20 text-orange-500' 
+                      : isThemeNight ? 'bg-white/5 text-orange-400 group-hover:text-white' : 'bg-orange-100 text-orange-600 group-hover:text-zinc-900'
+                  }`}>
+                    <ChartBar size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '클래스 스캐너 & 일지' : 'Class Scanner & Log'}</span>
                 </div>
-                <span>{isKo ? '반 통계 및 대시보드' : 'Class Dashboard'}</span>
-              </div>
-              <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-            </button>
-          )}
-          
-          {/* Tab 2: Manage Syllabus */}
-          <button
-            onClick={() => setActiveTab('syllabus')}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
-              activeTab === 'syllabus'
-                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                : isThemeNight 
-                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl transition-colors ${
-                activeTab === 'syllabus' 
-                  ? 'bg-orange-500/20 text-orange-500' 
-                  : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
-              }`}>
-                <BookOpen size={18} weight="bold" />
-              </div>
-              <span>{isKo ? '📘 교재 목차 관리 (Syllabus)' : '📘 Manage Syllabus'}</span>
-            </div>
-            <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-          </button>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
 
-          {/* Tab 3: Manage Homework Worksheets */}
-          <button
-            onClick={() => setActiveTab('homework')}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
-              activeTab === 'homework'
-                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                : isThemeNight 
-                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl transition-colors ${
-                activeTab === 'homework' 
-                  ? 'bg-orange-500/20 text-orange-500' 
-                  : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
-              }`}>
-                <FileText size={18} weight="bold" />
-              </div>
-              <span>{isKo ? '📄 일간 워크시트 (Homework)' : '📄 Manage Homework'}</span>
-            </div>
-            <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'homework' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-          </button>
-
-          {/* Tab 4: Student Activity */}
-          <button
-            onClick={() => setActiveTab('students')}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
-              activeTab === 'students'
-                ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                : isThemeNight 
-                  ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl transition-colors ${
-                activeTab === 'students' 
-                  ? 'bg-orange-500/20 text-orange-500' 
-                  : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
-              }`}>
-                <Users size={18} weight="bold" />
-              </div>
-              <span>{isKo ? '학생 출석 및 활동 정보' : 'Student Activity'}</span>
-            </div>
-            <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-          </button>
-
-          {/* Tab 5 (FT Only): My Submitted Forms History */}
-          {educatorRole === 'ft' && loginRole !== 'director' && user?.role !== 'director' && (
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer ${
-                activeTab === 'history'
-                  ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-xl shadow-orange-500/5'
-                  : isThemeNight 
-                    ? 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-xl transition-colors ${
-                  activeTab === 'history' 
-                    ? 'bg-orange-500/20 text-orange-500' 
-                    : isThemeNight ? 'bg-white/5 text-purple-400 group-hover:text-white' : 'bg-purple-100 text-purple-600 group-hover:text-zinc-900'
-                }`}>
-                  <FileText size={18} weight="bold" />
+              <button
+                onClick={() => setActiveTab('homework')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'homework'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight 
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'homework' 
+                      ? 'bg-orange-500/20 text-orange-500' 
+                      : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
+                  }`}>
+                    <FileText size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '📄 워크시트 채점기' : '📄 Worksheet Scanner'}</span>
                 </div>
-                <span>{isKo ? '📜 제출한 양식 기록 (Forms History)' : '📜 My Submitted Forms'}</span>
-              </div>
-              <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'history' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-            </button>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'homework' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'history'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight 
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'history' 
+                      ? 'bg-orange-500/20 text-orange-500' 
+                      : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
+                  }`}>
+                    <ClockCounterClockwise size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '📜 작성한 일지 이력' : '📜 Log History'}</span>
+                </div>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'history' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+            </>
           )}
 
           {/* AI Report Studio Generator Trigger Button */}
@@ -3330,6 +3382,21 @@ export default function TeacherPage({ isNight = true }: Props) {
                                   </div>
 
                                   <div className="flex items-center gap-2 shrink-0 z-30 flex-wrap">
+                                    <label className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
+                                      <span>📷</span>
+                                      <span>{isKo ? '카메라 바로 촬영' : 'Camera Snap'}</span>
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        capture="environment"
+                                        onChange={(e) => {
+                                          if (e.target.files && e.target.files.length > 0) {
+                                            handleTextbookFileUpload(e.target.files, 'worksheet');
+                                          }
+                                        }}
+                                        className="hidden"
+                                      />
+                                    </label>
                                     {worksheetPreviewUrl && (
                                       <button
                                         type="button"

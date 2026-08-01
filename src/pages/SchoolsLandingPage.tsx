@@ -148,11 +148,11 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     setShowPricingModal(true);
   };
 
-  // State for form inputs
-  const [academyName, setAcademyName] = useState('');
+  // State for form inputs (Pre-filled from localStorage if available)
+  const [academyName, setAcademyName] = useState(() => typeof window !== 'undefined' ? localStorage.getItem('chekki_academy_name') || '' : '');
   const [contactName, setContactName] = useState('');
   const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => typeof window !== 'undefined' ? localStorage.getItem('chekki_director_email') || '' : '');
   const [teacherCount, setTeacherCount] = useState(3);
   const [studentCount, setStudentCount] = useState('');
   const [bizRegNumber, setBizRegNumber] = useState('');
