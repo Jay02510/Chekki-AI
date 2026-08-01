@@ -3303,6 +3303,34 @@ export default function TeacherPage({ isNight = true }: Props) {
                         {/* MODE 2: DAILY HOMEWORK WORKSHEET & ANSWER KEY SCANNER */}
                         {activeTab === 'homework' && (
                           <div className="space-y-4">
+                            {/* FT Quick Week Switcher Header Bar */}
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-bold text-orange-400">⚡ ACTIVE SCANNING WEEK:</span>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateWeek(-1)}
+                                    className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-all cursor-pointer active:scale-95"
+                                  >
+                                    ‹ Prev
+                                  </button>
+                                  <span className="px-3 py-1 rounded-xl bg-orange-500/20 text-orange-400 font-black text-xs border border-orange-500/30 font-mono">
+                                    Week {selectedClass?.activeWeekNumber || 1}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateWeek(1)}
+                                    className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-all cursor-pointer active:scale-95"
+                                  >
+                                    Next ›
+                                  </button>
+                                </div>
+                              </div>
+                              <span className="text-[11px] text-zinc-400 font-mono">
+                                Class: {selectedClass?.name || '7A'}
+                              </span>
+                            </div>
 
 
                             <div

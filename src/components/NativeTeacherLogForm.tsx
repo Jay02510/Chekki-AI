@@ -263,7 +263,10 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
         {/* General Class Comments */}
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-zinc-400 block font-mono">General Class Comments</label>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-zinc-400 block font-mono">General Class Comments</label>
+            <span className="text-[10px] text-orange-400 font-mono">1-Tap Presets Below</span>
+          </div>
           <textarea
             value={generalComments}
             onChange={(e) => setGeneralComments(e.target.value)}
@@ -273,6 +276,22 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             }`}
             placeholder="Type general class notes here..."
           />
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {[
+              "⭐ Students engaged very enthusiastically with reading drills.",
+              "📝 All students completed vocabulary homework on time.",
+              "🗣️ Great active speaking participation during team quiz."
+            ].map((preset, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setGeneralComments(preset)}
+                className="px-2.5 py-1 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[11px] font-medium border border-orange-500/20 transition-all cursor-pointer"
+              >
+                + Preset: {preset.slice(0, 32)}...
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Student Exceptions Section */}

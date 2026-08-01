@@ -105,6 +105,22 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   const [requestedExtraSeats, setRequestedExtraSeats] = useState(3);
   const [seatRequestSent, setSeatRequestSent] = useState(false);
 
+  const handleExportRosterCSV = () => {
+    const headers = "Student Name (EN),Student Name (KO),Grade,Assigned Class,Exception Flag,Exception Details\n";
+    const rows = students.map((s) => 
+      `"${s.nameEn}","${s.nameKo}","${s.grade}","${s.assignedClass}","${s.flaggedException ? 'YES' : 'NO'}","${s.flaggedException?.reason || 'None'}"`
+    ).join("\n");
+    
+    const blob = new Blob(["\uFEFF" + headers + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${academyName.replace(/\s+/g, '_')}_Student_Roster_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div
       className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-8 font-sans transition-all ${
@@ -358,15 +374,25 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               />
             </div>
 
-            {/* Add Student CTA */}
-            <button
-              type="button"
-              onClick={() => setShowAddStudent(true)}
-              className="w-full sm:w-auto px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer transition-all"
-            >
-              <UserPlus size={16} weight="bold" />
-              <span>+ Add Student to Class</span>
-            </button>
+            {/* Action Cluster: Export CSV & Add Student CTA */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={handleExportRosterCSV}
+                className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-bold border border-emerald-500/30 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+              >
+                <span>📥</span>
+                <span>Export Roster to CSV</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAddStudent(true)}
+                className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer transition-all shrink-0"
+              >
+                <UserPlus size={16} weight="bold" />
+                <span>+ Add Student to Class</span>
+              </button>
+            </div>
           </div>
 
           {/* Add Student Modal / Slide-down Form */}

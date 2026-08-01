@@ -36,6 +36,23 @@ export const NativeKtDashboard: React.FC<Props> = ({
     generatedOutput?.status || 'pending_review'
   );
 
+  // 3-Tone Script Switcher State
+  const [scriptTone, setScriptTone] = useState<'formal' | 'friendly' | 'concise'>('formal');
+  const [filterUrgentOnly, setFilterUrgentOnly] = useState(false);
+
+  const getToneHeader = () => {
+    if (scriptTone === 'friendly') return `[어머님 안녕하세요! ${academyName}입니다 🌸]`;
+    if (scriptTone === 'concise') return `[${className} 알림톡]`;
+    return `[${academyName} 학부모 알림톡]`;
+  };
+
+  const getFormattedScript = () => {
+    return `${getToneHeader()}\n학급: ${className}\n\n${editedKoreanSummary}\n\n-----------------------------------\n[Original Teacher Note]\n${englishSummary}`.trim();
+  };
+
+  const currentFullText = getFormattedScript();
+  const charCount = currentFullText.length;
+
   const [copied, setCopied] = useState(false);
 
   // Phone Consultation Drawer State
@@ -52,14 +69,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
   };
 
   const handleCopyKakaoScript = () => {
-    const fullText = `[${academyName} 학부모 알림톡]
-학급: ${className}
-
-${editedKoreanSummary}
-
------------------------------------
-[Original Teacher Note]
-${englishSummary}`.trim();
+    const fullText = currentFullText;
 
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -185,6 +195,70 @@ ${englishSummary}`.trim();
             }`}
           >
             🟢 COPIED & SENT
+          </button>
+        </div>
+      </div>
+
+      {/* 3-Tone Script Switcher & Character Counter Bar */}
+      <div className="p-4 rounded-2xl border bg-white/[0.02] border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs font-mono">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-zinc-400">💬 Script Tone:</span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setScriptTone('formal')}
+              className={`px-3 py-1.5 rounded-xl font-bold border transition-all cursor-pointer ${
+                scriptTone === 'formal'
+                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
+                  : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+              }`}
+            >
+              🎩 정중한 톤 (Standard)
+            </button>
+            <button
+              type="button"
+              onClick={() => setScriptTone('friendly')}
+              className={`px-3 py-1.5 rounded-xl font-bold border transition-all cursor-pointer ${
+                scriptTone === 'friendly'
+                  ? 'bg-purple-500/20 border-purple-500 text-purple-400 shadow-sm'
+                  : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+              }`}
+            >
+              🌸 친근한 톤 (Soft)
+            </button>
+            <button
+              type="button"
+              onClick={() => setScriptTone('concise')}
+              className={`px-3 py-1.5 rounded-xl font-bold border transition-all cursor-pointer ${
+                scriptTone === 'concise'
+                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm'
+                  : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+              }`}
+            >
+              ⚡ 간결한 톤 (Concise)
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className={`px-3 py-1 rounded-xl border font-bold ${
+            charCount <= 500
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+              : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+          }`}>
+            💬 KakaoTalk Length: {charCount} chars ({charCount <= 500 ? 'Ideal ~30s read' : 'Long ~1m read'})
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setFilterUrgentOnly(!filterUrgentOnly)}
+            className={`px-3 py-1 rounded-xl font-bold border transition-all cursor-pointer ${
+              filterUrgentOnly
+                ? 'bg-red-500 border-red-500 text-white shadow-md'
+                : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+            }`}
+          >
+            🚨 전화상담 필요만 {filterUrgentOnly ? 'ON' : 'OFF'}
           </button>
         </div>
       </div>
