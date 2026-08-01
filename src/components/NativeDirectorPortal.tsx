@@ -108,6 +108,40 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         isNight ? 'bg-[#060608] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
+      {/* Setup-First Activation Header Banner */}
+      {typeof window !== 'undefined' && sessionStorage.getItem('chekki_paid_active') !== 'true' && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-emerald-500/20 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center font-bold text-lg shrink-0">
+              🎉
+            </div>
+            <div>
+              <h4 className="font-black text-sm text-white flex items-center gap-2">
+                <span>{academyName || '어학원'} 캠퍼스 구축 완료!</span>
+                <span className="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 text-[10px] font-mono border border-orange-500/30">
+                  {sessionStorage.getItem('chekki_selected_plan')?.replace('_', ' ').toUpperCase() || 'MASTER SCHOOL PRO'} ({sessionStorage.getItem('chekki_teacher_seats') || '10'} SEATS ALLOWED)
+                </span>
+              </h4>
+              <p className="text-xs text-zinc-300 mt-0.5">
+                원생 숙제 자동 스캐너 &amp; 학부모 카카오톡 연동을 위해 결제를 완료하세요. (7일 100% 환불 보장)
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('chekki_paid_school', academyName);
+                window.location.href = '/schools';
+              }
+            }}
+            className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer active:scale-95"
+          >
+            <span>⚡ 결제 완료하고 최종 활성화하기 →</span>
+          </button>
+        </div>
+      )}
+
       {/* Portal Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>

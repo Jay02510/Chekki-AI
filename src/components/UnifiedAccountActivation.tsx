@@ -92,9 +92,11 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                 {isKo ? '원장님 맞춤 캠퍼스 워크스페이스 활성화' : 'Campus Workspace Activation'}
               </h2>
             </div>
-            <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
-              DIRECTOR SETUP
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                ⚡ {typeof window !== 'undefined' && sessionStorage.getItem('chekki_selected_plan') ? sessionStorage.getItem('chekki_selected_plan')?.replace('_', ' ').toUpperCase() : 'SCHOOL PRO'} ({typeof window !== 'undefined' ? sessionStorage.getItem('chekki_teacher_seats') || '10' : '10'} SEATS ALLOWED)
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">

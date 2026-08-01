@@ -387,13 +387,18 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center md:justify-start items-center">
-            <a
-              href="#demo"
-              className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.setItem('chekki_selected_plan', 'school_pro');
+                sessionStorage.setItem('chekki_teacher_seats', '10');
+                window.location.href = '/teacher?activate=true';
+              }}
+              className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg shadow-orange-500/25 transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
             >
-              <span>{isKo ? '7일 무료 원장님 체험 시작하기' : 'Start 7-Day Free Academy Trial'}</span>
+              <span>{isKo ? '⚡ 60초 무료 캠퍼스 구축 시작하기 →' : 'Start Free 60-Second Campus Setup →'}</span>
               <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
-            </a>
+            </button>
             <a
               href="/reports"
               onClick={(e) => {
@@ -1370,16 +1375,18 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 <span>{isKo ? '위약금 없음 • 언제든 해지 가능' : 'No hidden fees • Cancel anytime'}</span>
               </div>
 
-              {/* Proceed to Instant Payment Action Button */}
+              {/* Proceed to Free Setup First Action Button */}
               <button
                 type="button"
                 onClick={() => {
                   setShowPricingModal(false);
-                  setShowPaymentModal(true);
+                  sessionStorage.setItem('chekki_selected_plan', selectedPlanId);
+                  sessionStorage.setItem('chekki_teacher_seats', activePlan.defaultTeachers?.toString() || '10');
+                  window.location.href = '/teacher?activate=true';
                 }}
                 className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
-                <span>{isKo ? '💳 결제 진행 & 온보딩 위저드 시작하기 →' : '💳 Complete Payment & Start Onboarding Wizard →'}</span>
+                <span>{isKo ? `⚡ 60초 무료 캠퍼스 구축 시작하기 (${activePlan.nameKo} 전용) →` : `⚡ Start Free 60-Second Setup (${activePlan.nameEn}) →`}</span>
               </button>
             </div>
           </div>
