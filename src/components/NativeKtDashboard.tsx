@@ -6,6 +6,7 @@ import { getPermissionsForUser } from '../utils/permissions';
 
 interface Props {
   isNight?: boolean;
+  isKo?: boolean;
   generatedOutput?: GeneratedReportOutput | null;
   className?: string;
   academyName?: string;
@@ -14,16 +15,20 @@ interface Props {
 
 export const NativeKtDashboard: React.FC<Props> = ({
   isNight = true,
+  isKo: isKoProp,
   generatedOutput,
   className = 'POLY Seocho 7A',
   academyName = 'POLY Academy (Seocho)',
   userProfile,
 }) => {
+  const isKo = isKoProp !== undefined ? isKoProp : (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
   const permissions = getPermissionsForUser(userProfile);
   // Live Editable State for Korean Teacher Review
   const [editedKoreanSummary, setEditedKoreanSummary] = useState(
     generatedOutput?.bilingualClassSummary.korean ||
-      '오늘 7A 반 원생들은 Unit 4 식물의 광합성(Photosynthesis) 어휘를 집중 학습했습니다. 모든 원생이 어휘 읽기 카드 활동에 밝고 적극적으로 참여하였습니다.'
+      (isKo 
+        ? '오늘 7A 반 원생들은 Unit 4 식물의 광합성(Photosynthesis) 어휘를 집중 학습했습니다. 모든 원생이 어휘 읽기 카드 활동에 밝고 적극적으로 참여하였습니다.'
+        : 'Today in 7A, students focused on learning Unit 4 Photosynthesis vocabulary. All students actively and cheerfully participated in the vocabulary flashcard reading activity.')
   );
 
   const [englishSummary, setEnglishSummary] = useState(
@@ -41,13 +46,13 @@ export const NativeKtDashboard: React.FC<Props> = ({
   const [filterUrgentOnly, setFilterUrgentOnly] = useState(false);
 
   const getToneHeader = () => {
-    if (scriptTone === 'friendly') return `[어머님 안녕하세요! ${academyName}입니다 🌸]`;
-    if (scriptTone === 'concise') return `[${className} 알림톡]`;
-    return `[${academyName} 학부모 알림톡]`;
+    if (scriptTone === 'friendly') return isKo ? `[어머님 안녕하세요! ${academyName}입니다 🌸]` : `[Hello Parents! This is ${academyName} 🌸]`;
+    if (scriptTone === 'concise') return `[${className} ${isKo ? '알림톡' : 'Report'}]`;
+    return `[${academyName} ${isKo ? '학부모 알림톡' : 'Parent Update'}]`;
   };
 
   const getFormattedScript = () => {
-    return `${getToneHeader()}\n학급: ${className}\n\n${editedKoreanSummary}\n\n-----------------------------------\n[Original Teacher Note]\n${englishSummary}`.trim();
+    return `${getToneHeader()}\n${isKo ? '학급' : 'Class'}: ${className}\n\n${editedKoreanSummary}\n\n-----------------------------------\n[Original Teacher Note]\n${englishSummary}`.trim();
   };
 
   const currentFullText = getFormattedScript();
@@ -101,12 +106,14 @@ export const NativeKtDashboard: React.FC<Props> = ({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">
-              KT REVIEW WORKSPACE (HUMAN-IN-THE-LOOP)
+              {isKo ? '한국인 교사 검수 워크스페이스' : 'KT REVIEW WORKSPACE (HUMAN-IN-THE-LOOP)'}
             </span>
-            <span className="text-[10px] text-amber-400 font-mono font-bold">🔒 No Auto-Send (Edit First)</span>
+            <span className="text-[10px] text-amber-400 font-mono font-bold">
+              {isKo ? '🔒 자동발송 없음 (검수 후 복사)' : '🔒 No Auto-Send (Edit First)'}
+            </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight">
-            Korean Teacher & Counselor Dashboard
+            {isKo ? '한국인 담임 교사 & 상담 대시보드' : 'Korean Teacher & Counselor Dashboard'}
           </h2>
         </div>
 
@@ -115,10 +122,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
             type="button"
             onClick={() => window.print()}
             className="px-4 py-2.5 rounded-2xl font-bold text-xs bg-white/10 hover:bg-white/15 border border-white/15 text-white flex items-center justify-center gap-2 transition-all cursor-pointer"
-            title="Download/Print PDF Report with Custom Academy Logo Header"
+            title={isKo ? '학원 로고 리포트 PDF 인쇄' : 'Download/Print PDF Report with Custom Academy Logo Header'}
           >
             <span>📄</span>
-            <span>Print Custom Logo PDF Report</span>
+            <span>{isKo ? '학원 로고 PDF 인쇄' : 'Print Custom Logo PDF Report'}</span>
           </button>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -127,7 +134,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               onClick={() => {
                 if (navigator.share) {
                   navigator.share({
-                    title: '체키 학부모 상담 알림톡',
+                    title: isKo ? '체키 학부모 상담 알림톡' : 'Chekki Parent Update',
                     text: editedKoreanSummary,
                   }).catch(() => {});
                 } else {
@@ -139,7 +146,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               className="px-3.5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-zinc-900 font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
             >
               <span>💬</span>
-              <span>카카오톡 공유</span>
+              <span>{isKo ? '카카오톡 공유' : 'Share KakaoTalk'}</span>
             </button>
             <button
               type="button"
@@ -151,7 +158,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               }`}
             >
               {copied ? <CheckCircle size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
-              <span>{copied ? '복사 완료! ✅' : '대본 1클릭 복사'}</span>
+              <span>{copied ? (isKo ? '복사 완료! ✅' : 'Copied! ✅') : (isKo ? '대본 1클릭 복사' : '1-Click Copy Script')}</span>
             </button>
           </div>
         </div>
@@ -159,7 +166,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
 
       {/* 3-Stage Report Status Badge Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 rounded-2xl border bg-white/[0.02] border-white/10 font-mono text-xs">
-        <span className="font-bold text-zinc-400">Report Review Status:</span>
+        <span className="font-bold text-zinc-400">{isKo ? '리포트 검수 진행 상태:' : 'Report Review Status:'}</span>
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             type="button"
@@ -170,7 +177,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 : 'bg-white/5 border-white/10 text-zinc-500'
             }`}
           >
-            🔴 PENDING REVIEW
+            🔴 {isKo ? '검수 대기' : 'PENDING REVIEW'}
           </button>
 
           <button
@@ -182,7 +189,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 : 'bg-white/5 border-white/10 text-zinc-500'
             }`}
           >
-            🟡 EDITED BY KT
+            🟡 {isKo ? '교사 수정완료' : 'EDITED BY KT'}
           </button>
 
           <button
@@ -194,7 +201,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 : 'bg-white/5 border-white/10 text-zinc-500'
             }`}
           >
-            🟢 COPIED & SENT
+            🟢 {isKo ? '발송 완료' : 'COPIED & SENT'}
           </button>
         </div>
       </div>
@@ -202,7 +209,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
       {/* 3-Tone Script Switcher & Character Counter Bar */}
       <div className="p-4 rounded-2xl border bg-white/[0.02] border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs font-mono">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-zinc-400">💬 Script Tone:</span>
+          <span className="font-bold text-zinc-400">💬 {isKo ? '대본 어조 선택:' : 'Script Tone:'}</span>
           <div className="flex items-center gap-1.5">
             <button
               type="button"
@@ -213,11 +220,12 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
               }`}
             >
-              🎩 정중한 톤 (Standard)
+              🎩 {isKo ? '정중한 톤 (Standard)' : 'Formal Tone (Standard)'}
             </button>
             <button
               type="button"
               onClick={() => setScriptTone('friendly')}
+
               className={`px-3 py-1.5 rounded-xl font-bold border transition-all cursor-pointer ${
                 scriptTone === 'friendly'
                   ? 'bg-purple-500/20 border-purple-500 text-purple-400 shadow-sm'
@@ -246,7 +254,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
               : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
           }`}>
-            💬 KakaoTalk Length: {charCount} chars ({charCount <= 500 ? 'Ideal ~30s read' : 'Long ~1m read'})
+            💬 {isKo ? '카카오톡 분량' : 'KakaoTalk Length'}: {charCount} {isKo ? '자' : 'chars'} ({charCount <= 500 ? (isKo ? '적정 ~30초' : 'Ideal ~30s read') : (isKo ? '긴 분량 ~1분' : 'Long ~1m read')})
           </span>
 
           <button
@@ -258,7 +266,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
             }`}
           >
-            🚨 전화상담 필요만 {filterUrgentOnly ? 'ON' : 'OFF'}
+            🚨 {isKo ? '전화상담 필요만' : 'Urgent Call Only'} {filterUrgentOnly ? 'ON' : 'OFF'}
           </button>
         </div>
       </div>
@@ -267,42 +275,48 @@ export const NativeKtDashboard: React.FC<Props> = ({
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold font-mono">
           <span className="text-orange-400 uppercase tracking-wider">
-            ✏️ Live Editable Korean Script (Review & Tweak Before Copying)
+            ✏️ {isKo ? '실시간 편집 가능 학부모 알림톡 대본 (복사 전 자유 수정)' : 'Live Editable Korean Script (Review & Tweak Before Copying)'}
           </span>
           <div className="flex items-center gap-1">
-            <span className="text-zinc-500 text-[10px] mr-1">Tone:</span>
+            <span className="text-zinc-500 text-[10px] mr-1">{isKo ? '어조:' : 'Tone:'}</span>
             <button
               type="button"
               onClick={() => {
                 setEditedKoreanSummary(
-                  `[학부모 알림톡] 안녕하세요 학부모님! 오늘 ${className} 원생들이 Unit 4 광합성 어휘를 즐겁고 활기차게 학습했습니다! 아주 기특하게 집중하여 적극적으로 참여했습니다.`
+                  isKo 
+                    ? `[학부모 알림톡] 안녕하세요 학부모님! 오늘 ${className} 원생들이 Unit 4 광합성 어휘를 즐겁고 활기차게 학습했습니다! 아주 기특하게 집중하여 적극적으로 참여했습니다.`
+                    : `[Parent Update] Hello parents! Today, ${className} students joyfully studied Unit 4 Photosynthesis vocabulary! Everyone was focused and actively engaged.`
                 );
               }}
               className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-pink-500/10 border border-pink-500/20 text-pink-400 hover:bg-pink-500/20 transition-all"
             >
-              🌸 Warm (다정한)
+              🌸 {isKo ? 'Warm (다정한)' : 'Warm (Soft)'}
             </button>
             <button
               type="button"
               onClick={() => {
                 setEditedKoreanSummary(
-                  `[학부모 알림톡] 학부모님 안녕하십니까. 금일 ${className} 수업 경과 보고드립니다. Unit 4 어휘 학습 및 오답 케어가 차질없이 완료되었습니다.`
+                  isKo 
+                    ? `[학부모 알림톡] 학부모님 안녕하십니까. 금일 ${className} 수업 경과 보고드립니다. Unit 4 어휘 학습 및 오답 케어가 차질없이 완료되었습니다.`
+                    : `[Parent Update] Greetings parents. Today's progress report for ${className}: Unit 4 vocabulary learning and error care have been successfully completed.`
                 );
               }}
               className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-all"
             >
-              🎓 Formal (정중한)
+              🎓 {isKo ? 'Formal (정중한)' : 'Formal (Standard)'}
             </button>
             <button
               type="button"
               onClick={() => {
                 setEditedKoreanSummary(
-                  `[학부모 알림톡] ${className} 학습 요약:\n• Unit 4 주요 어휘 학습 완료\n• 오답 재확인 및 발음 케어 진행`
+                  isKo 
+                    ? `[학부모 알림톡] ${className} 학습 요약:\n• Unit 4 주요 어휘 학습 완료\n• 오답 재확인 및 발음 케어 진행`
+                    : `[Parent Update] ${className} Summary:\n• Unit 4 target vocabulary completed\n• Error verification & pronunciation care conducted`
                 );
               }}
               className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all"
             >
-              ⚡ Concise (요약)
+              ⚡ {isKo ? 'Concise (요약)' : 'Concise (Brief)'}
             </button>
           </div>
         </div>
@@ -321,10 +335,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
           }`}
         />
         <div className="flex justify-between items-center text-[11px] text-zinc-500 font-mono italic">
-          <span>ℹ️ KT can edit any sentence above directly. Clicking copy will copy your edited version.</span>
+          <span>ℹ️ {isKo ? '위 대본 문장을 직접 수정할 수 있습니다. 복사 버튼 클릭 시 수정된 내용이 복사됩니다.' : 'KT can edit any sentence above directly. Clicking copy will copy your edited version.'}</span>
           {!permissions.canEditReports && (
             <span className="text-amber-400 font-bold flex items-center gap-1">
-              <Lock size={12} /> Read-only Permission
+              <Lock size={12} /> {isKo ? '읽기 전용 권한' : 'Read-only Permission'}
             </span>
           )}
         </div>
@@ -332,15 +346,16 @@ export const NativeKtDashboard: React.FC<Props> = ({
 
       {/* English Original Reference */}
       <div className="space-y-1.5 p-4 rounded-2xl border bg-white/[0.02] border-white/10 text-xs">
-        <span className="font-bold text-zinc-400 block font-mono">Original Foreign Teacher English Note:</span>
+        <span className="font-bold text-zinc-400 block font-mono">{isKo ? '원어민 강사 원본 작성 메모:' : 'Original Foreign Teacher English Note:'}</span>
         <p className="text-zinc-300 font-mono leading-relaxed">{englishSummary}</p>
       </div>
 
       {/* Flagged Student Exception Section with Phone Consultation Prep Drawer Trigger */}
       <div className="space-y-4 pt-4 border-t border-white/10">
         <span className="text-xs font-bold text-amber-400 uppercase font-mono block">
-          ⚠️ Flagged Student Exceptions & Phone Consultation Prep
+          ⚠️ {isKo ? '주의 필요 학생 집중 케어 & 전화 상담 대본' : 'Flagged Student Exceptions & Phone Consultation Prep'}
         </span>
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(generatedOutput?.studentReports && generatedOutput.studentReports.length > 0

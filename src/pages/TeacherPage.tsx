@@ -100,8 +100,16 @@ export default function TeacherPage({ isNight = true }: Props) {
     setTimeout(() => setCopiedCode(false), 2000);
   };
   
-  // Auth state
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  // Auth state - Defaults to 'signup' if coming from setup CTA or invite link
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('activate') === 'true' || params.get('invite') || params.get('signup') === 'true') {
+        return 'signup';
+      }
+    }
+    return 'login';
+  });
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

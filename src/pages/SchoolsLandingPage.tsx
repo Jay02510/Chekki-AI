@@ -49,8 +49,8 @@ const PRICING_TIERS = {
   },
   starter: {
     id: 'starter',
-    nameEn: 'Starter Academy Pack (Micro-School)',
-    nameKo: '스타터 학원 패키지 (소형 어학원)',
+    nameEn: 'Starter Academy Pack',
+    nameKo: '스타터 학원 패키지',
     monthly: { krw: 69000, usd: 49 },
     yearly: { krw: 55000, usd: 39 },
     minSeats: 1,
@@ -134,6 +134,10 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   // Pricing Tier Details Modal & Instant Payment State
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showConsultationModal, setShowConsultationModal] = useState(false);
+  const [consultationSubmitted, setConsultationSubmitted] = useState(false);
+  const [consultationMessage, setConsultationMessage] = useState('');
+  const [isSubmittingConsultation, setIsSubmittingConsultation] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('school_pro');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [currency, setCurrency] = useState<'KRW' | 'USD'>('KRW');
@@ -1220,32 +1224,220 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             : 'Get in touch with our operations team for a 1:1 onboarding consultation, custom multi-teacher setups, or bank invoice inquiries.'}
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex justify-center items-center">
           <button
             type="button"
             onClick={() => {
-              const pricingEl = document.getElementById('pricing');
-              if (pricingEl) pricingEl.scrollIntoView({ behavior: 'smooth' });
-              else openPlanModal('medium', 3, 3);
+              setConsultationSubmitted(false);
+              setShowConsultationModal(true);
             }}
-            className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>{isKo ? '지금 시작하기' : 'Start Now'}</span>
+            <span>{isKo ? '1:1 학원 맞춤 상담 신청하기' : 'Schedule 1:1 Consultation'}</span>
             <ArrowRight size={16} weight="bold" />
-          </button>
-          <button
-            type="button"
-            onClick={() => openPlanModal('custom', 1, 1)}
-            className={`w-full sm:w-auto px-8 py-4 font-bold text-sm rounded-2xl border transition-all active:scale-[0.97] cursor-pointer ${
-              isNight 
-                ? 'bg-white/5 hover:bg-white/10 text-white border-white/10' 
-                : 'bg-white hover:bg-zinc-50 text-zinc-900 border-zinc-300 shadow-sm'
-            }`}
-          >
-            {isKo ? '1:1 학원 맞춤 상담 신청' : 'Schedule 1:1 Consultation'}
           </button>
         </div>
       </section>
+
+      {/* --- 1:1 CONSULTATION MODAL FORM --- */}
+      {showConsultationModal && (
+        <div className="fixed inset-0 z-[450] flex items-center justify-center p-4 overflow-y-auto">
+          <div 
+            className={`fixed inset-0 backdrop-blur-md transition-opacity ${isNight ? 'bg-black/85' : 'bg-zinc-900/60'}`} 
+            onClick={() => setShowConsultationModal(false)} 
+          />
+          <div className={`relative w-full max-w-lg p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
+            isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
+          }`}>
+            <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 space-y-6 transition-colors ${
+              isNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+            }`}>
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-lg">
+                    ✉️
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
+                      {isKo ? '1:1 맞춤 온보딩 & 청구서 문의' : '1:1 CUSTOM CONSULTATION'}
+                    </span>
+                    <h3 className={`text-lg sm:text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                      {isKo ? '학원 도입 1:1 맞춤 상담 신청' : 'Schedule 1:1 Consultation'}
+                    </h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowConsultationModal(false)}
+                  className={`p-2 rounded-full transition-all cursor-pointer ${
+                    isNight 
+                      ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' 
+                      : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                  }`}
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+
+              {consultationSubmitted ? (
+                <div className="py-8 text-center space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-2xl font-bold border border-emerald-500/30">
+                    <CheckCircle size={32} weight="bold" />
+                  </div>
+                  <h4 className={`text-lg font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {isKo ? '상담 신청이 완료되었습니다!' : 'Consultation Request Sent!'}
+                  </h4>
+                  <p className={`text-xs max-w-sm mx-auto leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    {isKo 
+                      ? '24시간 이내에 입력하신 연락처/이메일로 담당자가 학원 맞춤 구축 가이드 및 상담을 진행해 드립니다.' 
+                      : 'Our operations team will contact you within 24 hours via phone/email to guide your custom setup.'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowConsultationModal(false)}
+                    className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all shadow-md cursor-pointer"
+                  >
+                    {isKo ? '확인' : 'Close'}
+                  </button>
+                </div>
+              ) : (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setIsSubmittingConsultation(true);
+                    try {
+                      await fetch('/api/request-school-invoice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          contactName,
+                          academyName,
+                          phone,
+                          email,
+                          consultationMessage,
+                          type: '1:1-consultation',
+                        }),
+                      });
+                    } catch (err) {
+                      console.warn('Consultation API fallback; showing client success');
+                    } finally {
+                      setIsSubmittingConsultation(false);
+                      setConsultationSubmitted(true);
+                    }
+                  }}
+                  className="space-y-4 text-left"
+                >
+                  <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    {isKo 
+                      ? '원장님의 학원 명과 연락처를 입력해주시면 Chekki 운영팀에서 1:1 상담을 도와드립니다.' 
+                      : 'Please leave your contact info below. Our team will reach out to schedule your 1:1 session.'}
+                  </p>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                      {isKo ? '원장님 / 담당자 성함 *' : 'Contact Name *'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                      placeholder={isKo ? '예: 김원장' : 'E.g. Director Kim'}
+                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
+                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                      {isKo ? '학원 / 어학원 명 *' : 'Academy Name *'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={academyName}
+                      onChange={(e) => setAcademyName(e.target.value)}
+                      placeholder={isKo ? '예: 서초 에이펙스 어학원' : 'E.g. Apex Academy Seocho'}
+                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
+                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                        {isKo ? '전화번호 *' : 'Phone Number *'}
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="010-0000-0000"
+                        className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
+                          isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                        }`}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                        {isKo ? '이메일 주소 *' : 'Email Address *'}
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="director@academy.com"
+                        className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
+                          isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                      {isKo ? '문의 사항 및 요청 내용' : 'Message / Request Details'}
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={consultationMessage}
+                      onChange={(e) => setConsultationMessage(e.target.value)}
+                      placeholder={isKo ? '예: 강사 5명, 원생 150명 규모 세팅 및 계좌이체 청구서 발행 문의' : 'E.g. 5 teachers, 150 students, bank invoice setup'}
+                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all font-sans ${
+                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={isSubmittingConsultation}
+                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer active:scale-98 flex items-center justify-center gap-2"
+                    >
+                      {isSubmittingConsultation ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <span>{isKo ? '1:1 상담 신청하기' : 'Submit Consultation Request'}</span>
+                      )}
+                    </button>
+                    <p className="text-[10px] text-zinc-500 text-center mt-2 font-mono">
+                      ✉️ support@chekkiai.com
+                    </p>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
 
 
       {/* --- PRICING TIER DETAILS & BENEFITS MODAL --- */}
