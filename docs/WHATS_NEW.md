@@ -2,8 +2,31 @@ What's New in Chekki AI
 
 English
 
-Multi-Page Worksheet AI Scanning & Page Picker
-Teachers can now drag and drop up to 5 textbook unit photos or multi-page PDFs at once! Chekki's Gemini AI scans all pages simultaneously and opens an interactive "🎯 Pick & Choose Drawer". Easily toggle between Page 1, Page 2, and Page 3 tabs to selectively assign target vocabulary words, phonics rules, reading passages, and parent answer keys directly to your weekly curriculum.
+Unified B2B Educator Invite-Link Authorization
+We've completely overhauled authentication for private English Kindergartens and hagwons! Directors can now set up their campus and instantly share 1-click invite links (`/teacher?invite=school-slug`). Foreign (FT) and Korean (KT) teachers join directly via sign-up without needing to type or remember authorization codes.
+
+Interactive Live Report Studio Sandbox & Cross-Link
+Explore Chekki's 3-stage AI parent reporting pipeline directly from web landing pages! Directors browsing `/schools` pricing can click "⚡ Try AI Parent Report Generator (1 Min)" to deep-link straight into the `/report-studio` sandbox. Submit sample 30-second foreign teacher logs and watch Gemini AI generate polite Korean KakaoTalk parent scripts live.
+
+Integrated Foreign Teacher 30s Mobile Checkmark Log
+Foreign teachers can now log daily class energy, attendance, and student spotlight tags directly from their live portal dashboard (`TeacherPage.tsx`). Submitting a log immediately triggers Gemini AI to compose bilingual parent KakaoTalk scripts for Korean teachers in the review dashboard (`NativeKtDashboard`).
+
+---
+
+채키 AI 업데이트 소식
+
+한국어
+
+통합 B2B 교사 초대 링크 인증 시스템
+어학원 및 영어유치원용 회원가입 시스템이 완전히 혁신되었습니다! 원장님께서 캠퍼스를 등록하신 후 1클릭 전용 초대 링크(`/teacher?invite=school-slug`)를 강사님들께 전달하면, 원어민(FT) 및 한국인(KT) 선생님들께서 별도의 인증 코드 입력 없이 가입 즉시 해당 학원 권한으로 연동됩니다.
+
+대화형 라이브 알림톡 생성기 샌드박스 & 요금제 연결
+회원가입 전에도 Chekki AI의 3단계 알림톡 파이프라인을 웹 랜딩페이지에서 직접 체험하실 수 있습니다! `/schools` 요금제 안내에서 "⚡ 학부모 알림톡 AI 생성기 1분 체험하기"를 클릭하면 `/report-studio` 샌드박스로 즉시 이동합니다. 원어민 교사 30초 로그를 제출하고 AI가 정갈한 존댓말 알림톡 대본을 작성하는 과정을 라이브로 확인해보세요.
+
+원어민 교사 30초 모바일 일지 대시보드 통합
+원어민 교사 포털(`TeacherPage.tsx`)에 30초 모바일 수업 일지 폼이 완벽히 내장되었습니다. 수업 태도와 주의 필요 학생을 체크하고 제출하면, Gemini AI가 한국인 교사 대시보드(`NativeKtDashboard`)에 학부모 발송용 이중언어 알림톡 대본을 즉시 생성합니다.
+
+---
 
 Interactive Chip Management
 Effortlessly add or delete target vocabulary and phonics rules with 1-click interactive chip tags. Type new words and hit Enter or click "+ Add" for instantaneous updates.

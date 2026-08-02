@@ -192,6 +192,48 @@ flowchart TD
 
 ---
 
+### 2.7 Trajectory G: Unified B2B Invite-Link Onboarding & Welcome Flow (Option A)
+
+For Directors creating campuses and Teachers joining via invite links without code entry.
+
+```mermaid
+flowchart TD
+    subgraph Director Flow
+        D1[Director Clicks Landing CTA] --> D2[Navigate to /teacher?activate=true]
+        D2 --> D3[Sign Up: Name, Email, Password]
+        D3 --> D4[Write role='director' to Firestore Profile]
+        D4 --> D5[Auto-Trigger 3-Step Director Setup Wizard]
+        D5 --> D6[Director HQ Dashboard & Copy Invite Links]
+    end
+
+    subgraph Teacher Flow
+        T1[Teacher Clicks Director's Invite Link e.g. /teacher?invite=apex-seocho] --> T2[View Green 'Invited to: Apex Seocho' Badge]
+        T2 --> T3[Sign Up: Name, Email, Password]
+        T3 --> T4[Write role='teacher' & invite school to Profile]
+        T4 --> T5[Auto-Trigger 2-Step FT/KT Welcome Modal]
+        T5 --> T6[Teacher Dashboard: Class Scanner, 30s Log & KakaoTalk Script]
+    end
+```
+
+---
+
+### 2.8 Trajectory H: Report Studio Sandbox & Landing Cross-Link Flow
+
+For prospective directors testing the 3-stage AI pipeline before subscribing.
+
+```mermaid
+flowchart TD
+    A[Director browses /schools landing page] --> B[Sees Pricing Section CTA: '⚡ 학부모 알림톡 AI 생성기 1분 체험하기']
+    B --> C[Click CTA -> Deep-link to /report-studio#interactive]
+    C --> D[STEP 01: Submit sample 30s Foreign Teacher Log]
+    D --> E[Gemini AI generates Summary & Student Exception Reports]
+    E --> F[STEP 02: View bilingual parent KakaoTalk script & 1-click copy]
+    F --> G[STEP 03: Review Director Admin Overview & Campus Rosters]
+    G --> H[Click 'Start Free Setup' -> /teacher?activate=true]
+```
+
+---
+
 ## 3. Screen Navigation Map
 
 | View Name | Primary Function | Key Interactive Components | Transition Targets |
@@ -202,3 +244,5 @@ flowchart TD
 | **`workspace`** | Interactive review interface | Image Overlay Canvas, Toggle (Overlay/Split), Detail Drawer, TTS Audio Button | `camera`, `mistake_vault`, `paywall` |
 | **`mistake_vault`** | Historical review & drills | Filter Chips, Mistake Cards, AI Practice Generator Trigger | `workspace`, `practice_preview` |
 | **`paywall`** | Subscription conversion | Feature Comparison Table, Plan Cards, Apple/Google Buy Buttons | Returns to previous screen |
+| **`teacher_portal`** | B2B Educator & Director Workspace | 30s Mobile Log, KT KakaoTalk Script Review, Director HQ | `teacher_onboarding`, `app` |
+| **`report_studio`** | Interactive Live Generator Sandbox | STEP 01-03 Stepper, ROI Calculator, KakaoTalk Script Preview | `teacher_portal`, `schools` |

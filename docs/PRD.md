@@ -88,11 +88,12 @@ To be the ultimate AI learning companion for physical workbooks worldwide, makin
   * Unlockable badges (e.g., "Phonics Explorer", "Star Scanner", "Master Reader").
   * Distinguish Standard vs Pro Exclusive Badges.
 
-### 4.6 Feature 6: School & Organization Portal
-* **Description:** Institutional tier for schools and hagwons.
+### 4.6 Feature 6: School & Organization Portal (Unified Invite Link Architecture)
+* **Description:** Institutional tier for schools, English Kindergartens, and hagwons.
 * **Requirements:**
-  * **School Code Redemption:** Transactional activation codes (e.g., `POLY10`, `GATE05`) to grant students institution-funded Pro access.
-  * **Teacher Classroom View:** Teachers can set up classes, view aggregated student scan results, and identify group weak spots.
+  * **Option A Unified Invite Link System:** Directors register campus profiles via `/teacher?activate=true` and generate unique academy invite links (`/teacher?invite=school-slug&role=ft|kt`). Eliminates manual, error-prone authorization codes (`APEX10-TEACHER`).
+  * **Role-Based Post-Auth Routing:** Brand-new Director signups automatically trigger the 3-step Academy Setup Wizard. Teacher signups via invite links trigger a tailored 2-step FT/KT Welcome Modal.
+  * **Teacher Classroom View & Director HQ:** Directors access campus oversight (`NativeDirectorPortal`); Foreign Teachers submit 30s checkmark logs (`NativeTeacherLogForm`); Korean Teachers review bilingual parent KakaoTalk scripts (`NativeKtDashboard`).
 
 ### 4.7 Feature 7: Teacher Curriculum Pre-Seeding Module
 * **Description:** Allows hagwon teachers to pre-upload weekly textbook topics, passage texts, and target vocabulary to pre-seed the AI's context window.
@@ -101,9 +102,11 @@ To be the ultimate AI learning companion for physical workbooks worldwide, makin
   * Automatically inject active class curriculum context into Gemini 3 prompt calls when a student from that class scans a sheet.
   * Elevate OCR recognition and answer verification accuracy to near 100% for specific school workbooks.
 
-### 4.8 Feature 8: Automated Weekly/Monthly Parent Progress Report Generator
-* **Description:** Generates beautifully structured, printable/shareable bilingual growth reports for parents and teachers.
+### 4.8 Feature 8: Automated Weekly/Monthly Parent Report & Report Studio Sandbox
+* **Description:** Generates beautifully structured, printable/shareable bilingual growth reports for parents and teachers, previewed via an interactive live sandbox (`/report-studio`).
 * **Requirements:**
+  * **Interactive Report Studio Sandbox (`/report-studio`):** Allows prospective directors to test the 3-stage pipeline live on web landing pages without signing up.
+  * **Bilingual Parent KakaoTalk Script Engine:** Transforms foreign teacher class energy notes and student exception tags into polite Korean honorific KakaoTalk parent messages via Gemini AI.
   * Aggregate home scan accuracy, phonics mastery percentages, and weekly vocabulary acquisition.
   * Highlight 3 specific review focus words/rules (e.g., *silent 'e' long vowels, consonant blends*).
   * Include custom **Teacher Evaluation Notes** input box for hagwon instructors.
