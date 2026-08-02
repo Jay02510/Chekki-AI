@@ -36,10 +36,18 @@ function LandingRoot() {
 
   const hasInviteParam = typeof window !== 'undefined' && window.location.search.includes('invite=');
 
+  // Legacy redirect: /schools/login → /teacher (old links and bookmarks)
+  if (pathname === '/schools/login' || pathname.startsWith('/schools/login')) {
+    const search = window.location.search;
+    window.location.replace(`/teacher${search}`);
+    return null;
+  }
+
   // Dedicated FAQ Page route: chekkiai.com/faq
   if (pathname === '/faq' || pathname.startsWith('/faq')) {
     return <FaqPage isNight={isNight} setIsNight={setIsNight} />;
   }
+
 
   // Web App route: chekkiai.com/app (also teacher portal, admin, subscribe, legal, report studio, OR any invite link)
   if (

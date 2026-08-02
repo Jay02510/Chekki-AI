@@ -112,26 +112,19 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
       localStorage.setItem('chekki_lang', next);
     }
   };
-  const [selectedReportId, setSelectedReportId] = useState<string>(SAMPLE_REPORTS[0].id);
-  const [customInput, setCustomInput] = useState<string>(SAMPLE_REPORTS[0].rawInput);
-  const [customAcademyName, setCustomAcademyName] = useState<string>('Apex English Academy (Seocho)');
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [customAcademyName] = useState<string>('Apex English Academy (Seocho)');
   
   // Interactive Screenshots, Gallery & Lightbox State
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [activeCarouselIdx, setActiveCarouselIdx] = useState<number>(0);
-  const [galleryDisplayMode, setGalleryDisplayMode] = useState<'carousel' | 'grid'>('carousel');
-  const [autoPlayCarousel, setAutoPlayCarousel] = useState<boolean>(false);
-
-  const [studioOutputView, setStudioOutputView] = useState<'script' | 'dashboard'>('script');
-  const [selectedArchCategory, setSelectedArchCategory] = useState<'all' | 'form' | 'automation' | 'database' | 'dashboard'>('all');
+  const [galleryDisplayMode] = useState<'carousel' | 'grid'>('carousel');
+  const [autoPlayCarousel] = useState<boolean>(false);
 
   // Native Engine Demo States
-  const [nativeDemoTab, setNativeDemoTab] = useState<'ft-form' | 'kt-dashboard' | 'director-portal' | 'curriculum-preseed' | 'preset-generator'>('ft-form');
+  const [nativeDemoTab, setNativeDemoTab] = useState<'ft-form' | 'kt-dashboard' | 'director-portal' | 'curriculum-preseed'>('ft-form');
   const [isSubmittingNativeLog, setIsSubmittingNativeLog] = useState(false);
   const [nativeOutput, setNativeOutput] = useState<GeneratedReportOutput | null>(null);
+  const [copied, setCopied] = useState<boolean>(false);
 
   const handleNativeLogSubmit = async (payload: ClassLogPayload) => {
     setIsSubmittingNativeLog(true);
@@ -205,21 +198,10 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
   const [ftCount, setFtCount] = useState<number>(3);
   const [studentCount, setStudentCount] = useState<number>(100);
 
-  // Form State (for both embedded & modal forms)
-  const [directorName, setDirectorName] = useState('');
-  const [academyName, setAcademyName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [location, setLocation] = useState('');
-  const [currentMethod, setCurrentMethod] = useState('');
-  const [preferredTime, setPreferredTime] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
   const t = REPORT_TRANSLATIONS[lang];
   const isKo = lang === 'ko';
   const demoT = t.interactiveDemo;
-  const activeReport = SAMPLE_REPORTS.find((r) => r.id === selectedReportId) || SAMPLE_REPORTS[0];
+  const activeReport = SAMPLE_REPORTS[0];
 
   // ROI Math
   const weeklyHoursSaved = Math.round(ftCount * 3.5);
@@ -227,20 +209,12 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
   const monthlyLaborSavingsKRW = weeklyHoursSaved * 4 * hourlyRateKRW;
   const annualLaborSavingsKRW = monthlyLaborSavingsKRW * 12;
 
-  const handleSelectPreset = (report: SampleReport) => {
-    setSelectedReportId(report.id);
-    setCustomInput(report.rawInput);
-  };
-
-  const handleGenerate = () => {
-    setIsGenerating(true);
-    setTimeout(() => {
-      setIsGenerating(false);
-    }, 450);
-  };
-
   const handleCopyKakaoScript = () => {
-    const scriptText = `[체키AI 학부모 상담 대본]
+    let scriptText = '';
+    if (nativeOutput && nativeOutput.bilingualClassSummary) {
+      scriptText = `[체키AI 학부모 알림톡 대본]\n\n${nativeOutput.bilingualClassSummary}`;
+    } else {
+      scriptText = `[체키AI 학부모 상담 대본]
 학생: ${activeReport.studentNameKo} (${activeReport.studentNameEn}) - ${activeReport.gradeKo}
 과목: ${activeReport.subject}
 담당: ${activeReport.teacherName}
@@ -259,45 +233,15 @@ ${activeReport.parentScriptKo.actionItems}
 
 [5. 맺음말]
 ${activeReport.parentScriptKo.closing}`.trim();
+    }
 
     navigator.clipboard.writeText(scriptText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!directorName || !academyName || !email || !phone) return;
-
-    setIsSubmitting(true);
-    try {
-      await fetch('/api/request-school-invoice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          directorName,
-          academyName,
-          phone,
-          email,
-          location,
-          ftCount,
-          studentCount,
-          currentMethod,
-          preferredTime,
-          type: 'report-studio-setup',
-        }),
-      });
-    } catch (err) {
-      console.warn('Backend endpoint fallback; proceeding with client success state.');
-    } finally {
-      setIsSubmitting(false);
-      setSubmitted(true);
-    }
-  };
-
-  const [selectedPlanId, setSelectedPlanId] = useState<'starter' | 'pro' | 'enterprise'>('pro');
-
   const openOnboardingModal = (planId: 'starter' | 'pro' | 'enterprise' = 'pro') => {
+
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('chekki_selected_plan', planId === 'starter' ? 'starter' : planId === 'enterprise' ? 'enterprise' : 'school_pro');
       sessionStorage.setItem('chekki_teacher_seats', planId === 'starter' ? '3' : planId === 'enterprise' ? '20' : '10');
@@ -386,7 +330,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
               }}
               className="px-4 py-1.5 rounded-full text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <span>{isKo ? '교사 포털 로그인' : 'Teacher Portal'}</span>
+              <span>{isKo ? '로그인' : 'Log In'}</span>
             </a>
           </div>
         </header>

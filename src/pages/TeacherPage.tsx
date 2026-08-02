@@ -48,7 +48,15 @@ import {
 } from '@phosphor-icons/react';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
+import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
+import { 
+  generateGeneralClassSummary, 
+  generateStudentExceptionReport, 
+  generatePhoneConsultationPrep, 
+  ClassLogPayload, 
+  GeneratedReportOutput 
+} from '../services/aiGenerator';
 
 interface Props {
   isNight?: boolean;
@@ -61,22 +69,29 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [copiedCode, setCopiedCode] = useState(false);
   const [showWeekCalendarModal, setShowWeekCalendarModal] = useState(false);
   
-  // Account Activation Wizard State for new directors (Requires payment or active license)
+  // Account Activation Wizard State for new directors
+  // Triggers when: ?activate=true in URL AND user is authenticated AND wizard not yet completed for this account
   const isActivateParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('activate') === 'true';
-  const isPaidSession = typeof window !== 'undefined' && (
-    sessionStorage.getItem('chekki_paid_active') === 'true' || 
-    localStorage.getItem('chekki_paid_active') === 'true'
-  );
-  const [showActivationWizard, setShowActivationWizard] = useState(() => isActivateParam && isPaidSession);
+  const inviteSlug = typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('invite') || '') : '';
+
+
+  const [showActivationWizard, setShowActivationWizard] = useState(false);
   const [showReviewSheetModal, setShowReviewSheetModal] = useState(false);
   const [showReportCardModal, setShowReportCardModal] = useState(false);
 
-  useEffect(() => {
-    if (isActivateParam && !isPaidSession) {
-      // Unpaid access attempt: redirect to checkout/login
-      window.location.href = '/schools/login';
-    }
-  }, [isActivateParam, isPaidSession]);
+  // FT/KT first-login welcome modal state
+  const [showTeacherWelcome, setShowTeacherWelcome] = useState(false);
+  const [teacherWelcomeStep, setTeacherWelcomeStep] = useState<1 | 2>(1);
+  const [welcomeName, setWelcomeName] = useState('');
+  const [welcomeRole, setWelcomeRole] = useState<'ft' | 'kt'>('ft');
+  const [welcomeSchool, setWelcomeSchool] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    // Pre-fill from invite slug in URL or localStorage (set on signup)
+    const slug = new URLSearchParams(window.location.search).get('invite') ||
+      localStorage.getItem('chekki_invite_school') || '';
+    return slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '';
+  });
+  const [welcomeClassName, setWelcomeClassName] = useState('');
 
   const handleCopyClassCode = () => {
     if (!selectedClass?.joinCode) return;
@@ -91,10 +106,46 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [teacherCode, setTeacherCode] = useState('');
   const [authError, setAuthError] = useState('');
-  const [isActivating, setIsActivating] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+
+  // FT Log & AI Script state
+  const [ftLogOutput, setFtLogOutput] = useState<GeneratedReportOutput | null>(null);
+  const [isSubmittingFtLog, setIsSubmittingFtLog] = useState(false);
+
+  const handleFtLogSubmit = async (payload: ClassLogPayload) => {
+    setIsSubmittingFtLog(true);
+    try {
+      const summary = await generateGeneralClassSummary(payload);
+      const studentReports = await Promise.all(
+        payload.exceptions.map(async (ex) => {
+          const updateText = await generateStudentExceptionReport(
+            ex.studentName,
+            payload.lessonTopic,
+            payload.textbook,
+            ex.details
+          );
+          const points = await generatePhoneConsultationPrep(ex.studentName, ex.details);
+          return {
+            studentName: ex.studentName,
+            koreanUpdate: updateText,
+            phoneTalkingPoints: points,
+          };
+        })
+      );
+      const output: GeneratedReportOutput = {
+        bilingualClassSummary: summary,
+        studentReports,
+      };
+      setFtLogOutput(output);
+      setActiveTab('kt_script');
+    } catch (err) {
+      console.error('Failed to generate AI report from FT log:', err);
+    } finally {
+      setIsSubmittingFtLog(false);
+    }
+  };
+
 
   const fallbackDemoClass = {
     id: 'demo',
@@ -592,6 +643,49 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   }, [isAuthenticated, user, classes, isLoadingClasses]);
 
+  // --- Post-auth routing: director wizard vs FT/KT welcome ---
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    const uid = user.uid || '';
+
+    // Role resolution: Firestore role → localStorage fallback (written at signup) → loginRole selection
+    const firestoreRole = (user as any).role;
+    const localRole = uid ? localStorage.getItem(`chekki_user_role_${uid}`) : null;
+    const resolvedRole = firestoreRole || localRole || loginRole;
+
+    const isDirector = resolvedRole === 'director' || isDirectorPath;
+
+    if (isDirector && isActivateParam) {
+      // Director with ?activate=true — show wizard only if first time
+      const wizardDone =
+        localStorage.getItem('chekki_wizard_done') ||
+        (uid && localStorage.getItem(`chekki_wizard_done_${uid}`));
+      if (!wizardDone) {
+        setShowActivationWizard(true);
+      }
+    } else if (!isDirector) {
+      // FT/KT teacher — show welcome only if first login
+      const welcomeDone =
+        localStorage.getItem('chekki_teacher_welcome_done') ||
+        (uid && localStorage.getItem(`chekki_teacher_welcome_done_${uid}`));
+      if (!welcomeDone) {
+        // Pre-fill name from user profile
+        setWelcomeName(user.name || user.email?.split('@')[0] || '');
+        // Detect FT/KT from localStorage role or email
+        const storedEducatorRole = localStorage.getItem(`chekki_educator_role_${uid}`) ||
+          localStorage.getItem(`chekki_educator_role_${user.email}`);
+        if (storedEducatorRole === 'kt' || user.email?.includes('kt')) {
+          setWelcomeRole('kt');
+        } else {
+          setWelcomeRole('ft');
+        }
+        setShowTeacherWelcome(true);
+      }
+    }
+  }, [isAuthenticated, user?.uid]);
+
+
+
   const dismissTeacherOnboarding = () => {
     const uid = user?.uid || 'guest';
     localStorage.setItem('chekki_teacher_ob_done', '1');
@@ -701,77 +795,34 @@ export default function TeacherPage({ isNight = true }: Props) {
           throw new Error(isKo ? '비밀번호가 일치하지 않습니다.' : 'Passwords do not match.');
         }
 
-        // --- Single-Use Code Consumption Validation ---
-        const cleanCode = teacherCode.trim().toUpperCase();
-        if (cleanCode) {
-          const consumedCodes = JSON.parse(localStorage.getItem('chekki_consumed_codes') || '{}');
-          if (consumedCodes[cleanCode]) {
-            throw new Error(
-              isKo 
-                ? `❌ 인증 코드 [${cleanCode}]는 이미 다른 계정에서 사용 등록이 완료되었습니다.`
-                : `❌ Authorization code [${cleanCode}] has already been registered and used.`
-            );
-          }
-        }
-
         await signUp(name, email, password);
 
-        // Auto-redeem teacher authorization code if provided during signup
-        if (cleanCode) {
-          const currentUser = auth.currentUser;
-          const uid = currentUser?.uid || `user_${Date.now()}`;
-          
-          // Mark code as consumed permanently
-          const consumedCodes = JSON.parse(localStorage.getItem('chekki_consumed_codes') || '{}');
-          consumedCodes[cleanCode] = {
-            claimedBy: uid,
-            claimedEmail: email,
-            claimedAt: new Date().toISOString()
-          };
-          localStorage.setItem('chekki_consumed_codes', JSON.stringify(consumedCodes));
-
-          // Auto-detect role from code
-          let assignedRole: 'ft' | 'kt' = 'ft';
-          if (cleanCode.includes('KT')) assignedRole = 'kt';
-          if (cleanCode.includes('FT')) assignedRole = 'ft';
-
-          localStorage.setItem(`chekki_educator_role_${uid}`, assignedRole);
-          localStorage.setItem(`chekki_educator_role_${email}`, assignedRole);
-          setEducatorRole(assignedRole);
-
+        // Write the role to Firestore/localStorage so post-auth routing works correctly after reload
+        const newUid = auth.currentUser?.uid || '';
+        const assignedRole = loginRole === 'director' ? 'director' : 'teacher';
+        if (newUid) {
           try {
-            if (currentUser) {
-              const idToken = await currentUser.getIdToken(true);
-              await fetch('/api/redeem-teacher-code', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${idToken}`,
-                },
-                body: JSON.stringify({ teacherCode: cleanCode }),
-              });
-            }
-          } catch (codeErr) {
-            console.warn('Auto code activation backend sync warning:', codeErr);
+            // Update the Firestore profile with the correct role
+            const { doc, updateDoc } = await import('firebase/firestore');
+            const { dbInstance } = await import('../../services/database');
+            await updateDoc(doc(dbInstance, 'users', newUid), { role: assignedRole });
+          } catch (roleErr) {
+            console.warn('Role write to Firestore failed, using localStorage fallback:', roleErr);
           }
+          localStorage.setItem(`chekki_user_role_${newUid}`, assignedRole);
+        }
+
+        // Persist invite school if teacher arrived via invite link
+        if (inviteSlug) {
+          const uid = auth.currentUser?.uid || '';
+          if (uid) localStorage.setItem(`chekki_invite_school_${uid}`, inviteSlug);
+          localStorage.setItem('chekki_invite_school', inviteSlug);
         }
 
         window.location.reload();
+
       } else {
-        try {
-          await signIn(email, password);
-        } catch (authErr: any) {
-          console.warn('Firebase auth fallback login handler:', authErr);
-          if (email.includes('teacher') || email.includes('demo') || email.includes('director') || email.includes('test') || email.includes('admin') || password.length >= 6) {
-            const role = email.includes('director') ? 'director' : 'teacher';
-            setLoginRole(role as any);
-            if (email.includes('kt')) setEducatorRole('kt');
-            else setEducatorRole('ft');
-            localStorage.setItem(`chekki_educator_role_${email}`, role);
-          } else {
-            throw authErr;
-          }
-        }
+        await signIn(email, password);
       }
     } catch (err: any) {
       let msg = err.message;
@@ -784,32 +835,6 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   };
 
-  const handleActivateTeacher = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!firebaseUser) return;
-    setAuthError('');
-    setIsActivating(true);
-    try {
-      const idToken = await firebaseUser.getIdToken();
-      const res = await fetch('/api/redeem-teacher-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ teacherCode }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to activate teacher code.');
-      }
-      window.location.reload();
-    } catch (err: any) {
-      setAuthError(err.message || 'Failed to activate code.');
-    } finally {
-      setIsActivating(false);
-    }
-  };
 
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1425,6 +1450,17 @@ export default function TeacherPage({ isNight = true }: Props) {
               </span>
             </div>
 
+            {/* Invite School Badge — shown when teacher arrives via director's invite link */}
+            {inviteSlug && (
+              <div className="w-full mb-4 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5">
+                <Buildings size={16} className="text-emerald-400 shrink-0" />
+                <div className="text-left">
+                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{isKo ? '초대받은 학원' : 'Invited to Academy'}</p>
+                  <p className="text-sm font-black text-white">{inviteSlug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</p>
+                </div>
+              </div>
+            )}
+
             {/* Auth Mode Toggle (Login vs Sign Up) */}
             <div className="w-full flex bg-[#050505] p-1 rounded-2xl border border-white/10 mb-6">
               <button
@@ -1512,44 +1548,21 @@ export default function TeacherPage({ isNight = true }: Props) {
               </div>
 
               {authMode === 'signup' && (
-                <>
-                  <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                      {isKo ? '비밀번호 확인' : 'Confirm Password'}
-                    </label>
-                    <input
-                      type="password"
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 text-left pt-1">
-                    <div className="flex items-center justify-between">
-                      <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 flex items-center gap-1 ${loginRole === 'director' ? 'text-amber-400' : 'text-orange-400'}`}>
-                        <Key size={12} weight="bold" />
-                        <span>{loginRole === 'director' ? (isKo ? '원장님 승인 코드' : 'Director Code') : (isKo ? '교사 인증 코드' : 'Teacher Code')}</span>
-                      </label>
-                      <span className="text-[10px] text-zinc-500 font-medium">({isKo ? '1-Click 즉시 승인' : 'Instant 1-Click Access'})</span>
-                    </div>
-                    <input
-                      type="text"
-                      value={teacherCode}
-                      onChange={(e) => setTeacherCode(e.target.value)}
-                      placeholder={loginRole === 'director' ? "DIRECTOR-APEX10" : "APEX10-TEACHER"}
-                      className="w-full bg-[#050505] border border-orange-500/30 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white uppercase font-mono tracking-wider placeholder:text-zinc-600"
-                    />
-                    <p className="text-[10px] text-zinc-500 pl-1 leading-normal">
-                      {isKo 
-                        ? '💡 승인 코드를 입력하시면 가입 즉시 대시보드가 개설됩니다.' 
-                        : '💡 Entering your authorization code will activate your account immediately.'}
-                    </p>
-                  </div>
-                </>
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                    {isKo ? '비밀번호 확인' : 'Confirm Password'}
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                  />
+                </div>
               )}
+
 
               {authError && (
                 <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold rounded-2xl text-center flex items-center justify-center gap-2">
@@ -1585,96 +1598,9 @@ export default function TeacherPage({ isNight = true }: Props) {
     );
   }
 
-  // --- RENDER B2B TEACHER CODE ACTIVATION VIEW ---
-  if (loginRole !== 'teacher' && loginRole !== 'director' && user?.role !== 'teacher' && user?.role !== 'director' && user?.role !== 'admin' && !user?.email?.includes('demo')) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-zinc-200 flex items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
-        <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
-        <div className="relative w-full max-w-md p-1.5 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col">
-          <div className="bg-[#0c0c0e] rounded-[calc(2.5rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center">
-            <div className="w-full flex justify-start mb-2">
-              <button
-                type="button"
-                onClick={() => { window.location.href = '/'; }}
-                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <ArrowLeft size={14} weight="bold" />
-                <span>{isKo ? '메인 서비스로 돌아가기' : 'Return to Main Service'}</span>
-              </button>
-            </div>
-
-            <div className="w-20 h-20 mb-6 drop-shadow-[0_10px_25px_rgba(249,115,22,0.25)]">
-              <ChekkiMascot className="w-full h-full" mood="happy" />
-            </div>
-
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold bg-orange-500/10 border border-orange-500/20 text-orange-400">
-              <Key size={12} weight="bold" />
-              <span>{isKo ? '권한 승인' : 'Authorization Required'}</span>
-            </div>
-
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white mb-2 text-center">
-              {isKo ? '교사용 권한 활성화' : 'Activate Teacher Access'}
-            </h2>
-            <p className="text-zinc-400 text-xs mb-8 text-center leading-relaxed max-w-xs">
-              {isKo 
-                ? `반갑습니다, ${user?.name || '선생님'}! 교사 대시보드에 접근하려면 인증 코드를 등록해 주세요.`
-                : `Welcome, ${user?.name || 'Teacher'}! Please enter your teacher authorization code to proceed.`}
-            </p>
-
-            <form onSubmit={handleActivateTeacher} className="w-full space-y-4">
-              <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                  {isKo ? '교사 인증 코드' : 'Teacher Authorization Code'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={teacherCode}
-                  onChange={(e) => setTeacherCode(e.target.value)}
-                  placeholder="E.g. APEX10-TEACHER"
-                  className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white uppercase tracking-wider font-mono placeholder:text-zinc-600"
-                />
-              </div>
-
-              {authError && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold rounded-2xl text-center flex items-center justify-center gap-2">
-                  <Warning size={16} weight="bold" />
-                  <span>{authError}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isActivating}
-                className="group w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
-              >
-                {isActivating ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>{isKo ? '인증 및 활성화' : 'Verify & Activate'}</span>
-                    <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                      <ArrowRight size={14} weight="bold" />
-                    </div>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={logout}
-                className="w-full py-3 bg-[#050505] hover:bg-white/5 text-zinc-400 hover:text-white font-bold text-xs rounded-2xl transition-all border border-white/10 active:scale-[0.98]"
-              >
-                {isKo ? '로그아웃' : 'Log Out'}
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const activeClass = selectedClass || fallbackDemoClass;
+
 
   if (showActivationWizard) {
     return (
@@ -1682,6 +1608,10 @@ export default function TeacherPage({ isNight = true }: Props) {
         isNight={isThemeNight}
         isKo={isKo}
         onComplete={(data) => {
+          const uid = user?.uid || '';
+          // Mark wizard as done so it never shows again for this account
+          localStorage.setItem('chekki_wizard_done', '1');
+          if (uid) localStorage.setItem(`chekki_wizard_done_${uid}`, '1');
           dismissTeacherOnboarding();
           if (data.academyName) {
             localStorage.setItem('chekki_academy_name', data.academyName);
@@ -1703,6 +1633,158 @@ export default function TeacherPage({ isNight = true }: Props) {
       />
     );
   }
+
+  // --- FT/KT FIRST-LOGIN WELCOME MODAL ---
+  if (showTeacherWelcome) {
+    const dismissWelcome = (className?: string) => {
+      const uid = user?.uid || '';
+      localStorage.setItem('chekki_teacher_welcome_done', '1');
+      if (uid) localStorage.setItem(`chekki_teacher_welcome_done_${uid}`, '1');
+      // If a class was confirmed, save it
+      if (className && className.trim()) {
+        const newClass = {
+          id: `cls_${Date.now()}_welcome`,
+          name: className.trim(),
+          level: 'General',
+          joinCode: `CHK${Math.floor(1000 + Math.random() * 9000)}`,
+          activeWeekNumber: 1,
+        };
+        setClasses((prev: any[]) => [newClass, ...prev]);
+        setSelectedClass(newClass);
+      }
+      setShowTeacherWelcome(false);
+      setActiveTab(welcomeRole === 'kt' ? 'kt_script' : 'overview');
+    };
+    return (
+      <div className={`min-h-screen flex items-center justify-center p-4 font-sans ${isThemeNight ? 'bg-[#030305] text-zinc-100' : 'bg-zinc-50 text-zinc-900'}`}>
+        <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/8 via-transparent to-transparent blur-[100px] pointer-events-none" />
+        <div className={`relative w-full max-w-md rounded-[2rem] border shadow-2xl p-1.5 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
+          <div className={`rounded-[calc(2rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center ${isThemeNight ? 'bg-[#0c0c0e]' : 'bg-white'}`}>
+
+            {/* Mascot + Badge */}
+            <div className="w-16 h-16 mb-5 drop-shadow-[0_8px_20px_rgba(249,115,22,0.25)]">
+              <ChekkiMascot className="w-full h-full" mood="happy" />
+            </div>
+            <div className={`mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold ${
+              welcomeRole === 'kt'
+                ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400'
+                : 'bg-orange-500/10 border border-orange-500/20 text-orange-400'
+            }`}>
+              <ChalkboardTeacher size={12} weight="bold" />
+              <span>{welcomeRole === 'kt' ? (isKo ? 'KT 한국인 선생님 환영' : 'Korean Teacher (KT) Access') : (isKo ? 'FT 원어민 선생님 환영' : 'Foreign Teacher (FT) Access')}</span>
+            </div>
+
+            {/* Step 1 — Confirm name & role */}
+            {teacherWelcomeStep === 1 && (
+              <div className="w-full space-y-5">
+                <div className="text-center mb-2">
+                  <h2 className="text-2xl font-black tracking-tight text-white mb-1">{isKo ? '선생님, 환영합니다! 👋' : 'Welcome, Teacher! 👋'}</h2>
+                  <p className="text-zinc-400 text-xs leading-relaxed">{isKo ? '아래 정보를 확인하고 시작해 주세요.' : 'Confirm your details to get started.'}</p>
+                </div>
+
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">{isKo ? '선생님 성함' : 'Your Name'}</label>
+                  <input
+                    type="text"
+                    value={welcomeName}
+                    onChange={(e) => setWelcomeName(e.target.value)}
+                    placeholder={isKo ? '홍길동 선생님' : 'Jane Doe'}
+                    className={`w-full p-4 rounded-2xl border text-sm font-bold outline-none focus:border-orange-500 transition-all ${isThemeNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
+                  />
+                </div>
+
+                {welcomeSchool && (
+                  <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5">
+                    <Buildings size={16} className="text-emerald-400 shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{isKo ? '초대받은 학원' : 'Invited Academy'}</p>
+                      <p className="text-sm font-black text-white">{welcomeSchool}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">{isKo ? '선생님 역할' : 'Your Role'}</label>
+                  <div className="flex gap-2">
+                    {(['ft', 'kt'] as const).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setWelcomeRole(r)}
+                        className={`flex-1 py-3 rounded-xl text-xs font-black border transition-all cursor-pointer ${
+                          welcomeRole === r
+                            ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
+                            : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-600'
+                        }`}
+                      >
+                        {r === 'ft' ? (isKo ? '🌍 FT 원어민' : '🌍 Foreign Teacher') : (isKo ? '🇰🇷 KT 한국어' : '🇰🇷 Korean Teacher')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setTeacherWelcomeStep(2)}
+                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                >
+                  <span>{isKo ? '다음: 학급 확인 →' : 'Next: Class Setup →'}</span>
+                </button>
+              </div>
+            )}
+
+            {/* Step 2 — Confirm / create class */}
+            {teacherWelcomeStep === 2 && (
+              <div className="w-full space-y-5">
+                <div className="text-center mb-2">
+                  <h2 className="text-2xl font-black tracking-tight text-white mb-1">{isKo ? '담당 학급반을 알려주세요' : 'Your Class Assignment'}</h2>
+                  <p className="text-zinc-400 text-xs leading-relaxed">{isKo ? '담당 학급반 이름을 입력하세요. 나중에 언제든 추가할 수 있습니다.' : 'Enter your class name. You can add more later.'}</p>
+                </div>
+
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">{isKo ? '학급반 이름' : 'Class Name'}</label>
+                  <input
+                    type="text"
+                    value={welcomeClassName}
+                    onChange={(e) => setWelcomeClassName(e.target.value)}
+                    placeholder={isKo ? '예: 7B Sunshine / 초등 3반' : 'E.g. 7B Sunshine / Level 3 Advanced'}
+                    className={`w-full p-4 rounded-2xl border text-sm font-bold outline-none focus:border-orange-500 transition-all ${isThemeNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setTeacherWelcomeStep(1)}
+                    className={`w-1/3 py-4 rounded-2xl font-bold text-xs border transition-all cursor-pointer ${isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700'}`}
+                  >
+                    ← {isKo ? '이전' : 'Back'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => dismissWelcome(welcomeClassName)}
+                    className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                  >
+                    <CheckCircle size={18} weight="bold" />
+                    <span>{isKo ? '완료 — 대시보드 입장! 🎉' : 'Done — Enter Dashboard! 🎉'}</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => dismissWelcome('')}
+                  className="w-full text-xs text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer py-1"
+                >
+                  {isKo ? '나중에 설정하기' : 'Skip for now'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   // --- RENDER CORE DASHBOARD LAYOUT SHELL ---
   return (
@@ -2321,11 +2403,24 @@ export default function TeacherPage({ isNight = true }: Props) {
                 className={activeClass?.name || '7세반 (샘플)'} 
                 academyName={user?.schoolName || 'Chekki Master Academy'} 
                 userProfile={user} 
+                generatedOutput={ftLogOutput}
               />
             )}
 
             {activeTab === 'overview' && (
               <div className="space-y-8 animate-fade-in">
+                
+                {/* 30s Foreign Teacher Mobile Class Log Entry */}
+                <div className="mb-8">
+                  <NativeTeacherLogForm 
+                    isNight={isThemeNight} 
+                    onSubmitLog={handleFtLogSubmit}
+                    isSubmitting={isSubmittingFtLog}
+                    userProfile={user}
+                    selectedClassName={activeClass?.name}
+                    selectedTextbookName={selectedTextbookName}
+                  />
+                </div>
                 
                 {/* Embedded Zero-Redirect Daily Homework Worksheet Scanner */}
                 <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${

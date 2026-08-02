@@ -819,7 +819,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </p>
 
           {/* Monthly / Yearly Billing Toggle with Theme Adaptation */}
-          <div className={`inline-flex items-center p-1.5 border rounded-full shadow-inner mb-10 transition-colors ${
+          <div className={`inline-flex items-center p-1.5 border rounded-full shadow-inner mb-6 transition-colors ${
             isNight ? 'bg-[#0a0a0c] border-white/10' : 'bg-zinc-200/70 border-zinc-300/80'
           }`}>
             <button
@@ -847,6 +847,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 {isKo ? '20% 할인' : 'Save 20%'}
               </span>
             </button>
+          </div>
+
+          <div className="mb-10">
+            <a
+              href="/report-studio"
+              className={`inline-flex items-center gap-1.5 text-xs font-bold transition-all px-4 py-2 rounded-full border ${
+                isNight 
+                  ? 'bg-white/5 border-white/10 hover:bg-white/15 text-orange-400 hover:text-orange-300' 
+                  : 'bg-zinc-100 border-zinc-300 hover:bg-zinc-200 text-orange-600 hover:text-orange-500 shadow-sm'
+              }`}
+            >
+              <span>{isKo ? '⚡ 학부모 알림톡 AI 생성기 1분 체험하기' : '⚡ Try AI Parent Report Generator (1 Min)'}</span>
+              <span className="text-[10px]">→</span>
+            </a>
           </div>
 
           {/* 14-Day Free Teacher Trial Banner with Theme Adaptation */}

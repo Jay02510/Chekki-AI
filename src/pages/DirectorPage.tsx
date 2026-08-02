@@ -5,14 +5,9 @@ import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { ChekkiMascot } from '../../components/Icons';
 import { 
   Buildings, 
-  Key, 
   ArrowRight, 
   ArrowLeft, 
   Warning, 
-  CheckCircle, 
-  ShieldCheck,
-  UserGear,
-  EnvelopeSimple,
   Sparkle
 } from '@phosphor-icons/react';
 
@@ -34,7 +29,6 @@ export default function DirectorPage({ isNight = true }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [directorCode, setDirectorCode] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState('');
 
@@ -261,38 +255,19 @@ export default function DirectorPage({ isNight = true }: Props) {
               </div>
 
               {authMode === 'signup' && (
-                <>
-                  <div className="space-y-1 text-left">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                      {isKo ? '비밀번호 확인' : 'Confirm Password'}
-                    </label>
-                    <input
-                      type="password"
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-2xl transition-all text-white placeholder:text-zinc-600"
-                    />
-                  </div>
-
-                  <div className="space-y-1 text-left pt-1">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-bold text-amber-400 uppercase tracking-widest pl-1 flex items-center gap-1">
-                        <Key size={12} weight="bold" />
-                        <span>{isKo ? '원장님 승인 코드 (선택)' : 'Director Code (Optional)'}</span>
-                      </label>
-                      <span className="text-[10px] text-zinc-500 font-medium">({isKo ? '1-Click 즉시 개설' : 'Instant Setup'})</span>
-                    </div>
-                    <input
-                      type="text"
-                      value={directorCode}
-                      onChange={(e) => setDirectorCode(e.target.value)}
-                      placeholder="E.g. DIRECTOR-APEX10"
-                      className="w-full bg-[#050505] border border-amber-500/30 focus:border-amber-500 outline-none text-xs p-3.5 rounded-2xl transition-all text-white uppercase font-mono tracking-wider placeholder:text-zinc-600"
-                    />
-                  </div>
-                </>
+                <div className="space-y-1 text-left">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                    {isKo ? '비밀번호 확인' : 'Confirm Password'}
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-xs p-3.5 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                  />
+                </div>
               )}
 
               {authError && (

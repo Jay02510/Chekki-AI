@@ -58,7 +58,8 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
   };
 
   const handleCopyInviteLink = () => {
-    const inviteUrl = `${window.location.origin}/schools/login?invite=${encodeURIComponent(academyName.replace(/\s+/g, '-').toLowerCase())}`;
+    const inviteUrl = `${window.location.origin}/teacher?invite=${encodeURIComponent(academyName.replace(/\s+/g, '-').toLowerCase())}`;
+
     navigator.clipboard.writeText(inviteUrl);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 3000);
