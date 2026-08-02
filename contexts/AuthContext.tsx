@@ -510,15 +510,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await fetchAndSetUserProfile(res.user, profile);
         }
       } catch (authErr: any) {
-        if (
+        // 🍎 Apple Review Demo Account Bypass — ONLY for explicit demo keyword emails.
+        // IMPORTANT: Do NOT add generic Firebase error codes here (auth/user-not-found,
+        // auth/invalid-credential, auth/invalid-email) — doing so would silently create
+        // Pro accounts for any user who mistypes their password, which is a critical
+        // monetization and security vulnerability (see audit §14).
+        const isDemoEmail =
           cleanEmail.includes('demo') ||
           cleanEmail.includes('teacher') ||
           cleanEmail.includes('director') ||
-          cleanEmail.includes('test') ||
-          authErr.code === 'auth/user-not-found' ||
-          authErr.code === 'auth/invalid-credential' ||
-          authErr.code === 'auth/invalid-email'
-        ) {
+          cleanEmail.includes('test');
+
+        if (isDemoEmail) {
           try {
             console.log('[AuthContext] Auto-provisioning demo user:', cleanEmail);
             const res = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPass.length >= 6 ? cleanPass : 'demo1234');
@@ -526,7 +529,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const newProfile: UserProfile = {
               name: cleanEmail.includes('director')
                 ? 'Director Admin (HQ)'
-                : cleanEmail.includes('kt') ? '김은지 선생님 (KT)' : 'Teacher Mark (FT)',
+                : '선생님 (Demo)',
               email: cleanEmail,
               role: demoRole,
               plan: 'pro',
@@ -552,7 +555,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const anonProfile: UserProfile = {
                   name: cleanEmail.includes('director')
                     ? 'Director Admin (HQ)'
-                    : cleanEmail.includes('kt') ? '김은지 선생님 (KT)' : 'Teacher Mark (FT)',
+                    : '선생님 (Demo)',
                   email: cleanEmail,
                   role: demoRole,
                   plan: 'pro',
@@ -575,6 +578,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         } else {
+          // Real user with a wrong password or non-existent account — throw so the
+          // UI can show a proper "Invalid credentials" error message. Never auto-create.
           throw authErr;
         }
       }

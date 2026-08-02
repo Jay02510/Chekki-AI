@@ -182,12 +182,35 @@ function AppContent() {
 
   const [showChildProfileModal, setShowChildProfileModal] = useState(false);
   const [standaloneLegal, setStandaloneLegal] = useState<LegalType | null>(null);
-  const [showSubscribePage, setShowSubscribePage] = useState(false);
-  const [showAdminPage, setShowAdminPage] = useState(false);
-  const [showTeacherPage, setShowTeacherPage] = useState(false);
+  // ── Route detection: resolved synchronously on first render to prevent
+  //    a one-frame flash of the parent/mom app before useEffect fires.
+  const [showSubscribePage, setShowSubscribePage] = useState(() =>
+    typeof window !== 'undefined' && window.location.pathname === '/subscribe'
+  );
+  const [showAdminPage, setShowAdminPage] = useState(() =>
+    typeof window !== 'undefined' && window.location.pathname === '/admin'
+  );
+  const [showTeacherPage, setShowTeacherPage] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const { pathname, search } = window.location;
+    return (
+      search.includes('invite=') ||
+      pathname === '/teacher' ||
+      pathname === '/director' ||
+      pathname === '/director-hq' ||
+      pathname.includes('/schools/login')
+    );
+  });
   const [showDirectorPage, setShowDirectorPage] = useState(false);
-  const [showSchoolsPage, setShowSchoolsPage] = useState(false);
-  const [showReportStudioPage, setShowReportStudioPage] = useState(false);
+  const [showSchoolsPage, setShowSchoolsPage] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const { pathname, search } = window.location;
+    return !search.includes('invite=') && (pathname === '/schools' || pathname === '/for-schools');
+  });
+  const [showReportStudioPage, setShowReportStudioPage] = useState(() =>
+    typeof window !== 'undefined' &&
+    (window.location.pathname.startsWith('/report') || window.location.pathname.startsWith('/reports'))
+  );
   const [showHelp, setShowHelp] = useState(false);
   const platform = Capacitor.getPlatform();
 
@@ -214,6 +237,8 @@ function AppContent() {
   }, []);
 
   // Listen for history popstate navigation changes (Dynamic Web Routing)
+  // Note: initial state is set synchronously above — this only handles
+  // back/forward navigation after the first paint.
   useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
@@ -228,11 +253,7 @@ function AppContent() {
     };
 
     window.addEventListener('popstate', handleLocationChange);
-    handleLocationChange(); // Trigger on mount
-
-    return () => {
-      window.removeEventListener('popstate', handleLocationChange);
-    };
+    return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
 
   // Global Confirmation State
@@ -246,55 +267,24 @@ function AppContent() {
   const [successDialog, setSuccessDialog] = useState<string | null>(null);
 
   useEffect(() => {
+    // Handle standalone legal pages and splash suppression for known routes
     const path = window.location.pathname.replace('/', '') as LegalType;
     if (['terms', 'privacy', 'refund', 'youth', 'support'].includes(path)) {
       setShowSplash(false);
       setStandaloneLegal(path);
     }
 
-    const search = window.location.search;
-    const isInvite = search.includes('invite=');
-
-    // /subscribe route — web only
-    if (window.location.pathname === '/subscribe' && Capacitor.getPlatform() === 'web') {
-      setShowSplash(false);
-      setShowSubscribePage(true);
-    }
-
-    // /admin route — web only
-    if (window.location.pathname === '/admin' && Capacitor.getPlatform() === 'web') {
-      setShowSplash(false);
-      setShowAdminPage(true);
-    }
-
-    // /teacher, /director, or any teacher invite links — web only
-    if ((isInvite || window.location.pathname === '/teacher' || window.location.pathname === '/director' || window.location.pathname === '/director-hq' || window.location.pathname.includes('/schools/login')) && Capacitor.getPlatform() === 'web') {
-      setShowSplash(false);
-      setShowTeacherPage(true);
-    }
-
-    // /schools and /for-schools route — web only
+    // Suppress splash for any recognized non-parent route (already set correctly via lazy init)
     if (
-      (window.location.pathname === '/schools' || window.location.pathname === '/for-schools') &&
-      Capacitor.getPlatform() === 'web'
+      showSubscribePage || showAdminPage || showTeacherPage ||
+      showSchoolsPage || showReportStudioPage
     ) {
       setShowSplash(false);
-      setShowSchoolsPage(true);
-    }
-
-    // /reports and /report-studio route — web only
-    if (
-      (window.location.pathname.startsWith('/report') || window.location.pathname.startsWith('/reports')) &&
-      Capacitor.getPlatform() === 'web'
-    ) {
-      setShowSplash(false);
-      setShowReportStudioPage(true);
     }
 
     // Handle return from password reset
     const params = new URLSearchParams(window.location.search);
     if (params.get('auth_action') === 'reset') {
-      // Clear the query parameter from the URL to prevent message appearing on refresh
       window.history.replaceState({}, '', window.location.pathname);
       setSuccessDialog(
         language === 'ko'
@@ -303,6 +293,7 @@ function AppContent() {
       );
       setTimeout(openLoginModal, 1500);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language, openLoginModal]);
 
   useEffect(() => {

@@ -201,6 +201,8 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
   const [isDeletingClass, setIsDeletingClass] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  // Sync warning: set when Firestore writes fail silently (Fix 8 — Audit §13b)
+  const [syncWarning, setSyncWarning] = useState<string | null>(null);
 
   // Role selection & Tab navigation
   const isDirectorPath = typeof window !== 'undefined' && (
@@ -208,13 +210,18 @@ export default function TeacherPage({ isNight = true }: Props) {
     new URLSearchParams(window.location.search).get('role') === 'director'
   );
   const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath || (user as any)?.role === 'director' ? 'director' : 'teacher');
+  // Educator role is sourced from Firestore profile field (educatorRole) ONLY.
+  // Email-substring matching ('kt' in email) is intentionally removed — it was
+  // silently misclassifying FT teachers whose email happened to contain 'kt'
+  // (e.g. kate@, dakota@, nikto@) and hiding their homework tab. (Audit §7)
+  const firestoreEducatorRole = (user as any)?.educatorRole as 'ft' | 'kt' | undefined;
   const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>(
-    user?.email?.includes('kt') || (user as any)?.educatorRole === 'kt' ? 'kt' : 'ft'
+    firestoreEducatorRole === 'kt' ? 'kt' : 'ft'
   );
   const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum' | 'director_hq' | 'kt_script'>(
-    isDirectorPath || (user as any)?.role === 'director' 
-      ? 'director_hq' 
-      : (user?.email?.includes('kt') || (user as any)?.educatorRole === 'kt' ? 'kt_script' : 'overview')
+    isDirectorPath || (user as any)?.role === 'director'
+      ? 'director_hq'
+      : (firestoreEducatorRole === 'kt' ? 'kt_script' : 'overview')
   );
   const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
   const [submittedLogs, setSubmittedLogs] = useState<any[]>([]);
@@ -222,12 +229,14 @@ export default function TeacherPage({ isNight = true }: Props) {
   useEffect(() => {
     if (user) {
       const isDirector = (user as any).role === 'director' || user.email?.includes('director') || isDirectorPath;
-      const isKt = user.email?.includes('kt') || (user as any).educatorRole === 'kt';
+      // Educator role: always read from Firestore field first.
+      // Do NOT use email.includes('kt') — see comment on educatorRole state above.
+      const isKtRole = (user as any).educatorRole === 'kt';
 
       if (isDirector) {
         setLoginRole('director');
         setActiveTab('director_hq');
-      } else if (isKt) {
+      } else if (isKtRole) {
         setLoginRole('teacher');
         setEducatorRole('kt');
         setActiveTab('kt_script');
@@ -239,7 +248,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         }
       }
     }
-  }, [user?.uid, user?.email, user?.role, isDirectorPath]);
+  }, [user?.uid, (user as any)?.educatorRole, (user as any)?.role, isDirectorPath]);
 
   // Handle Teacher Invite Link URL Params (FT vs KT Role Routing)
   useEffect(() => {
@@ -847,12 +856,27 @@ export default function TeacherPage({ isNight = true }: Props) {
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
     const uid = user?.uid || 'guest';
+
+    // Fix 10 — Seat limit guard (Audit §3):
+    // Read the provisioned seat count from the user profile (set by ops team
+    // after confirming payment). Default to 1 for unconfirmed/pending accounts.
+    const provisionedSeats: number = (user as any)?.seatCount ?? 1;
+    if (classes.length >= provisionedSeats) {
+      alert(
+        isKo
+          ? `현재 플랜에서 사용 가능한 반 수(${provisionedSeats}야)에 도달했습니다. 반을 더 수염하려면 support@chekkiai.com으로 문의해 주세요.`
+          : `You've reached your class limit (${provisionedSeats}). Contact support@chekkiai.com to add more seats.`
+      );
+      return;
+    }
+
     setIsCreatingClass(true);
+    let firestoreFailed = false;
     try {
       const schoolId = user?.schoolId || `school_${uid.slice(0, 8)}`;
       const sanitizedName = newClassName.trim().replace(/\s+/g, '-');
       const classId = `${schoolId}_${sanitizedName}_${Date.now()}`;
-      
+
       let joinCode = '';
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       for (let i = 0; i < 6; i++) {
@@ -871,10 +895,12 @@ export default function TeacherPage({ isNight = true }: Props) {
         createdAt: new Date().toISOString(),
       };
 
+      // Fix 8 — Surface Firestore sync failures instead of silently swallowing them.
       try {
         await setDoc(doc(dbInstance, 'classes', classId), newClass);
       } catch (firestoreErr) {
-        console.warn('Firestore write warning (proceeding with local sync):', firestoreErr);
+        console.warn('Firestore write failed (saved locally only):', firestoreErr);
+        firestoreFailed = true; // will show sync-warning banner below
       }
 
       // Persist in localStorage under user-specific and fallback keys
@@ -891,7 +917,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       localStorage.setItem(`chekki_teacher_ob_done_${uid}`, '1');
       localStorage.setItem(`teacher_ob_done_${uid}`, 'true');
       setShowTeacherOnboarding(false);
-      
+
       setClasses((prev: any[]) => {
         const exists = prev.some((c: any) => c.id === classId);
         return exists ? prev : [newClass, ...prev];
@@ -900,6 +926,16 @@ export default function TeacherPage({ isNight = true }: Props) {
 
       setNewClassName('');
       setShowCreateClassModal(false);
+
+      if (firestoreFailed) {
+        // Show a persistent sync-warning so the teacher knows the class is
+        // only saved locally and needs to retry when connection is restored.
+        setSyncWarning(
+          isKo
+            ? '⚠️ 학급 정보가 로쫈에만 저장되었습니다. 인터넷 연결을 확인하고 페이지를 새로고침하여 클라우드에 동기화하세요.'
+            : '⚠️ Class saved locally but not yet synced to cloud. Check your connection and refresh to re-sync.'
+        );
+      }
     } catch (err: any) {
       console.error('Failed to create class:', err);
       alert(isKo ? '학급 개설 중 오류가 발생했습니다. 다시 시도해 주세요.' : `Failed to create class: ${err?.message || 'Please try again.'}`);
@@ -2415,13 +2451,67 @@ export default function TeacherPage({ isNight = true }: Props) {
               />
             )}
 
-            {activeTab === 'overview' && (
+            {/* Sync Warning Banner — shown when a Firestore write failed silently (Fix 8) */}
+            {syncWarning && (
+              <div className={`mb-4 p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${
+                isThemeNight ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300'
+              }`}>
+                <p className="text-xs font-bold text-amber-500 flex-1">{syncWarning}</p>
+                <button
+                  type="button"
+                  onClick={() => setSyncWarning(null)}
+                  className="text-amber-400 hover:text-amber-200 text-xs font-bold cursor-pointer shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {activeTab === 'overview' && educatorRole === 'kt' && (
+              // KT Overview: lightweight summary only — stat cards + navigation hints.
+              // The worksheet scanner and log-form are FT tools, not KT's job.
+              // KT's primary tool is the kt_script tab. (Audit §9)
+              <div className="space-y-6 animate-fade-in">
+                <div className={`p-5 rounded-3xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
+                  <p className={`text-sm font-bold mb-1 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {isKo ? '한국인 담임 교사 현황 요약' : 'KT Class Summary'}
+                  </p>
+                  <p className={`text-xs ${isThemeNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    {isKo ? '선택된 반:' : 'Active class:'} <span className="font-mono font-bold">{activeClass?.name || '—'}</span>
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className={`p-6 rounded-3xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">{isKo ? '등록 원생 수' : 'Enrolled Students'}</p>
+                    <p className={`text-3xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{activeStudentsCount}</p>
+                  </div>
+                  <div className={`p-6 rounded-3xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">{isKo ? '숙제 완료율' : 'Homework Rate'}</p>
+                    <p className={`text-3xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{completionRate}%</p>
+                  </div>
+                </div>
+                <div className={`p-5 rounded-3xl border flex items-center justify-between ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
+                  <p className={`text-sm ${isThemeNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                    {isKo ? '학부모 알림톡 작성 & 1클릭 복사' : 'Write & copy parent KakaoTalk script'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('kt_script')}
+                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    {isKo ? '알림톡 작성하기 →' : 'Go to Script →'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'overview' && educatorRole !== 'kt' && (
               <div className="space-y-8 animate-fade-in">
-                
+
                 {/* 30s Foreign Teacher Mobile Class Log Entry */}
                 <div className="mb-8">
-                  <NativeTeacherLogForm 
-                    isNight={isThemeNight} 
+                  <NativeTeacherLogForm
+                    isNight={isThemeNight}
                     onSubmitLog={handleFtLogSubmit}
                     isSubmitting={isSubmittingFtLog}
                     userProfile={user}
@@ -2429,137 +2519,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                     selectedTextbookName={selectedTextbookName}
                   />
                 </div>
-                
-                {/* Embedded Zero-Redirect Daily Homework Worksheet Scanner */}
-                <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${
-                  isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
-                }`}>
-                  <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
-                    isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
-                  }`}>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold">
-                          <FileText size={22} weight="bold" />
-                        </div>
-                        <div>
-                          <h4 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                            {isKo ? '📄 오늘 수업 워크시트 즉시 스캔 (Daily Worksheet Scanner)' : '📄 Daily Worksheet & Answer Key Scanner'}
-                          </h4>
-                          <p className="text-xs text-zinc-400">
-                            {isKo ? '종이 학습지 사진이나 PDF를 드롭하면 학부모용 그린 잉크 오버레이를 생성합니다.' : 'Drag & drop today\'s paper worksheet photo to generate Green Ink overlays.'}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold font-mono rounded-full border border-emerald-500/20">
-                        ⚡ Quick Scan
-                      </span>
-                    </div>
-
-                    <div
-                      onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
-                      onDragLeave={() => setIsDraggingFile(false)}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        setIsDraggingFile(false);
-                        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                          handleTextbookFileUpload(e.dataTransfer.files, 'worksheet');
-                        }
-                      }}
-                      className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
-                        isDraggingFile 
-                          ? 'border-orange-500 bg-orange-500/10 scale-[1.01]' 
-                          : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
-                      }`}
-                    >
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*,.pdf"
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files.length > 0) {
-                            handleTextbookFileUpload(e.target.files, 'worksheet');
-                          }
-                        }}
-                        className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                      />
-
-                      {isScanningWorksheet ? (
-                        <div className="flex flex-col items-center py-4">
-                          <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-3" />
-                          <p className="text-xs font-bold text-orange-500">
-                            {isKo ? 'Chekki AI가 워크시트를 분석하고 있습니다...' : 'Scanning Daily Worksheet with Chekki AI...'}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-4 w-full justify-between px-2">
-                          <div className="flex items-center gap-4">
-                            {worksheetPreviewUrl ? (
-                              <img 
-                                src={worksheetPreviewUrl} 
-                                alt="Worksheet preview" 
-                                className="w-14 h-14 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0 cursor-pointer" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDocPreviewUrl(worksheetPreviewUrl);
-                                  setShowDocPreviewModal(true);
-                                }}
-                              />
-                            ) : (
-                              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shadow-lg shrink-0">
-                                <FileText size={22} weight="bold" />
-                              </div>
-                            )}
-                            <div className="text-left">
-                              <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                                <span>
-                                  {worksheetFileName 
-                                    ? (worksheetFileName.length > 28 ? worksheetFileName.substring(0, 25) + '...' : worksheetFileName) 
-                                    : (isKo ? '📄 종이 학습지 사진 / PDF 업로드' : '📄 Upload Homework Paper Photo / PDF')}
-                                </span>
-                              </h5>
-                              <p className="text-xs text-zinc-400 mt-0.5">
-                                {worksheetFileName 
-                                  ? (isKo ? '독립 저장됨: 클릭하여 새 워크시트 스캔' : 'Stored independently. Click to rescan.') 
-                                  : (isKo ? '클릭하거나 드롭하여 오늘의 학습지를 등록하세요.' : 'Click or drop to register today\'s worksheet.')}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0 z-30">
-                            {worksheetPreviewUrl && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setDocPreviewUrl(worksheetPreviewUrl);
-                                  setShowDocPreviewModal(true);
-                                }}
-                                className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
-                              >
-                                <Eye size={14} weight="bold" />
-                                <span>{isKo ? '원본 보기' : 'View Scan'}</span>
-                              </button>
-                            )}
-                            {worksheetScannedData && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setActiveScannedModalType('worksheet');
-                                  setScannedData(worksheetScannedData);
-                                  setShowScannedModal(true);
-                                }}
-                                className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
-                              >
-                                <Sparkle size={14} weight="bold" />
-                                <span>{isKo ? '정답지 확인' : 'View Answers'}</span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                {/* NOTE: Duplicate worksheet scanner that previously lived here was
+                    removed (Audit §7). It is now exclusively on the Homework tab.
+                    This keeps Overview focused: log form + stats + carousel. */}
                 
                 {/* Top Double-Bezel Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

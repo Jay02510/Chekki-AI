@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { AppleLogo, GooglePlayLogo, ArrowLeft } from '@phosphor-icons/react';
 
@@ -7,6 +7,31 @@ const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.chekki
 
 // QR code for App Store (using a free QR code API)
 const QR_CODE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(APP_STORE_URL)}`;
+
+/** QR code with graceful fallback if the external API is unreachable (Audit §12) */
+const QRCodeWithFallback: React.FC<{ url: string; qrUrl: string }> = ({ url, qrUrl }) => {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-28 h-28 rounded-2xl border border-white/10 bg-zinc-900 flex items-center justify-center text-center text-[10px] font-bold text-orange-400 p-2 hover:bg-zinc-800 transition-colors"
+      >
+        📱 Tap to open App Store
+      </a>
+    );
+  }
+  return (
+    <img
+      src={qrUrl}
+      alt="App Store QR Code"
+      className="w-28 h-28 rounded-2xl border border-white/10 bg-white p-1"
+      onError={() => setFailed(true)}
+    />
+  );
+};
 
 /**
  * /subscribe — Web-only subscription redirect page.
@@ -121,12 +146,8 @@ const SubscribePage: React.FC = () => {
           <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
             {isKo ? 'iPhone / Android QR 코드로 스캔' : 'Scan to download on mobile'}
           </p>
-          <img
-            src={QR_CODE_URL}
-            alt="App Store QR Code"
-            className="w-28 h-28 rounded-2xl border border-white/10 bg-white p-1"
-          />
-          <p className="text-[9px] text-zinc-500">iOS & Android App Store</p>
+          <QRCodeWithFallback url={APP_STORE_URL} qrUrl={QR_CODE_URL} />
+          <p className="text-[9px] text-zinc-500">iOS &amp; Android App Store</p>
         </div>
 
         {/* Language toggle */}

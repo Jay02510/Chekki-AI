@@ -376,7 +376,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Headline */}
           <h1 className={`font-display text-3xl sm:text-5xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] mb-6 text-balance ${isNight ? 'text-white' : 'text-zinc-900'} break-keep`}>
             {isKo ? (
-              <>강사 행정 업무 <span className="text-orange-500">90% 감축</span>,<br />학부모 피드백 만족도 <span className="text-orange-500">200% 상승</span>.</>
+              <>강사 행정 업무 <span className="text-orange-500">90% 감축</span>,<br />학부모 피드백 만족도가 <span className="text-orange-500">크게 향상됩니다</span>.</>
             ) : (
               <>Cut Grading Admin by <span className="text-orange-500">90%</span>.<br />Delight Parents with <span className="text-orange-500">Instant Smart Reports</span>.</>
             )}
@@ -1719,61 +1719,54 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
                 {/* Specific Fields by Payment Type */}
                 {paymentMethod === 'card' && (
-                  <div className={`p-3.5 rounded-2xl border space-y-2.5 ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-                    <div>
-                      <label className="text-[10px] font-bold text-zinc-400 block mb-1">카드 번호 (16자리)</label>
-                      <input
-                        type="text"
-                        maxLength={19}
-                        placeholder="4532 - 1234 - 5678 - 9012"
-                        className={`w-full p-2.5 rounded-xl border text-xs font-mono outline-none ${
-                          isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-                        }`}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
+                  <div className={`p-4 rounded-2xl border space-y-3 ${isNight ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-200'}`}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-400 text-lg">🔧</span>
                       <div>
-                        <label className="text-[10px] font-bold text-zinc-400 block mb-1">유효기간 (MM/YY)</label>
-                        <input
-                          type="text"
-                          maxLength={5}
-                          placeholder="MM/YY"
-                          className={`w-full p-2.5 rounded-xl border text-xs font-mono outline-none ${
-                            isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-                          }`}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-zinc-400 block mb-1">CVC 번호</label>
-                        <input
-                          type="password"
-                          maxLength={4}
-                          placeholder="***"
-                          className={`w-full p-2.5 rounded-xl border text-xs font-mono outline-none ${
-                            isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-                          }`}
-                        />
+                        <p className="text-xs font-bold text-amber-400">
+                          {isKo ? '카드 결제 게이트웨이 연동 준비 중' : 'Card Payment Gateway — Coming Soon'}
+                        </p>
+                        <p className={`text-[11px] mt-0.5 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                          {isKo
+                            ? '현재 카드 결제는 준비 중입니다. 아래 계좌이체 방법을 이용해 주시면 24시간 내 계정을 활성화해 드립니다.'
+                            : 'Card payment integration is in progress. Please use bank transfer below — we will activate your account within 24 hours of confirming the deposit.'}
+                        </p>
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('bank')}
+                      className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                    >
+                      {isKo ? '→ 계좌이체로 전환하기' : '→ Switch to Bank Transfer'}
+                    </button>
                   </div>
                 )}
 
                 {(paymentMethod === 'kakaopay' || paymentMethod === 'tosspay') && (
-                  <div className={`p-3.5 rounded-2xl border space-y-2 ${
-                    paymentMethod === 'kakaopay' 
-                      ? (isNight ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200')
-                      : (isNight ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200')
-                  }`}>
-                    <label className="text-[10px] font-bold text-zinc-400 block">
-                      {paymentMethod === 'kakaopay' ? '카카오톡 1클릭 결제 수신 휴대폰 번호' : '토스 앱 결제 승인 휴대폰 번호'}
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="010-1234-5678"
-                      className={`w-full p-2.5 rounded-xl border text-xs font-mono outline-none ${
-                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-                      }`}
-                    />
+                  <div className={`p-4 rounded-2xl border space-y-3 ${isNight ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-200'}`}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-400 text-lg">🔧</span>
+                      <div>
+                        <p className="text-xs font-bold text-amber-400">
+                          {paymentMethod === 'kakaopay'
+                            ? (isKo ? '카카오페이 연동 준비 중' : 'KakaoPay Integration — Coming Soon')
+                            : (isKo ? '토스페이 연동 준비 중' : 'TossPay Integration — Coming Soon')}
+                        </p>
+                        <p className={`text-[11px] mt-0.5 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                          {isKo
+                            ? '간편결제 연동을 준비 중입니다. 지금은 계좌이체를 이용해 주세요.'
+                            : 'Digital payment integration is in progress. Please use bank transfer in the meantime.'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('bank')}
+                      className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                    >
+                      {isKo ? '→ 계좌이체로 전환하기' : '→ Switch to Bank Transfer'}
+                    </button>
                   </div>
                 )}
 
@@ -1804,41 +1797,76 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 )}
               </div>
 
-              {/* Complete Payment & Launch Onboarding Button */}
-              <button
-                type="button"
-                disabled={isProcessingPayment}
-                onClick={() => {
-                  if (!academyName || !email) {
-                    alert(isKo ? '학원명과 이메일을 입력해주세요.' : 'Please fill out your academy name and email.');
-                    return;
-                  }
-                  setIsProcessingPayment(true);
-                  setTimeout(() => {
-                    setIsProcessingPayment(false);
-                    setPaymentSuccess(true);
-                    sessionStorage.setItem('chekki_paid_active', 'true');
-                    sessionStorage.setItem('chekki_paid_school', academyName);
-                    setTimeout(() => {
-                      window.location.href = '/teacher?activate=true';
-                    }, 800);
-                  }, 1200);
-                }}
-                className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-              >
-                {isProcessingPayment ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>{isKo ? 'PG 결제 승인 처리 중...' : 'Processing Payment Gateway...'}</span>
-                  </div>
-                ) : paymentSuccess ? (
-                  <div className="flex items-center gap-2">
-                    <span>🎉 {isKo ? '결제 승인 완료! 온보딩 위저드로 이동 중...' : 'Payment Complete! Launching Onboarding...'}</span>
-                  </div>
-                ) : (
-                  <span>⚡ {isKo ? '결제 완료하고 온보딩 위저드 시작하기 →' : 'Complete Payment & Start Onboarding Wizard →'}</span>
-                )}
-              </button>
+              {/* Complete Payment & Submit Request */}
+              {paymentMethod === 'bank' && !paymentSuccess && (
+                <button
+                  type="button"
+                  disabled={isProcessingPayment}
+                  onClick={() => {
+                    if (!academyName || !email) {
+                      alert(isKo ? '학원명과 이메일을 입력해주세요.' : 'Please fill out your academy name and email.');
+                      return;
+                    }
+                    // Record the bank transfer request — account will be activated
+                    // manually by ops team after confirming the deposit.
+                    setIsProcessingPayment(true);
+                    fetch('/api/request-school-invoice', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        academyName,
+                        email,
+                        plan: selectedPlanId,
+                        teacherCount,
+                        contactName,
+                        phone,
+                        type: 'bank-transfer',
+                      }),
+                    })
+                      .catch(() => {
+                        // API may not exist yet — fall through to pending state regardless
+                        console.warn('[Payment] Invoice API not reachable, showing pending state client-side.');
+                      })
+                      .finally(() => {
+                        setIsProcessingPayment(false);
+                        setPaymentSuccess(true);
+                        // Store pending (not active) state — ops team activates after deposit confirmed
+                        sessionStorage.setItem('chekki_payment_pending', 'true');
+                        sessionStorage.setItem('chekki_paid_school', academyName);
+                      });
+                  }}
+                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                >
+                  {isProcessingPayment ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>{isKo ? '요청 전송 중...' : 'Submitting request...'}</span>
+                    </div>
+                  ) : (
+                    <span>📋 {isKo ? '계좌이체 신청 완료 & 입금 안내 받기 →' : 'Submit Bank Transfer Request →'}</span>
+                  )}
+                </button>
+              )}
+
+              {/* Pending Confirmation State (shown after bank transfer submission) */}
+              {paymentSuccess && (
+                <div className={`p-5 rounded-2xl border text-center space-y-3 ${
+                  isNight ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-emerald-50 border-emerald-200'
+                }`}>
+                  <div className="text-3xl">⏳</div>
+                  <h4 className={`text-base font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {isKo ? '계좌이체 신청이 완료되었습니다!' : 'Bank Transfer Request Submitted!'}
+                  </h4>
+                  <p className={`text-xs leading-relaxed max-w-sm mx-auto ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    {isKo
+                      ? `입금 확인 후 영업일 기준 1-2일 내에 ${email} 주소로 계정 활성화 안내를 보내드립니다. 입금 전에는 대시보드에 접속되지 않습니다.`
+                      : `Once we confirm your deposit, we'll send account activation instructions to ${email} within 1–2 business days. Your dashboard will not be accessible until payment is confirmed.`}
+                  </p>
+                  <p className={`text-[11px] font-mono font-bold ${isNight ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                    ✉️ support@chekkiai.com
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
