@@ -27,15 +27,29 @@ const adminDb = getFirestore();
 const authDb = getAuth();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const allowedOrigins = [
+    'https://chekkiai.com',
+    'https://www.chekkiai.com',
+    'http://localhost:5173',
+    'http://localhost:3000',
+  ];
+  const origin = req.headers.origin as string | undefined;
+  const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
+  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { passcode, action, uid, email, duration, schoolId, schoolName, teacherCode, maxUses } =
     req.body || {};
+
+  if (!ADMIN_PASSCODE) {
+    return res.status(500).json({ error: 'Admin passcode is not configured.' });
+  }
 
   if (passcode !== ADMIN_PASSCODE) {
     return res.status(401).json({ error: 'Unauthorized: Invalid Passcode' });

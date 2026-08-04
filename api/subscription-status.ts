@@ -1,37 +1,18 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
-
-/**
- * Robust Firebase Admin Initialization
- * Handles service account from FIREBASE_SERVICE_ACCOUNT environment variable (JSON string)
- * or falls back to default Vercel/GCP credentials.
- */
-function initAdmin() {
-  if (getApps().length > 0) return;
-
-  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (serviceAccount) {
-    try {
-      const cleaned = serviceAccount.trim().replace(/\n/g, '').replace(/\r/g, '');
-      const parsed = JSON.parse(cleaned);
-      initializeApp({ credential: cert(parsed) });
-    } catch (e) {
-      console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', e);
-      initializeApp();
-    }
-  } else {
-    initializeApp();
-  }
-}
-
-initAdmin();
-const adminDb = getFirestore();
-const adminAuth = getAuth();
+import { adminDb, adminAuth } from './_lib/firebaseAdmin';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const allowedOrigins = [
+    'https://chekkiai.com',
+    'https://www.chekkiai.com',
+    'http://localhost:5173',
+    'http://localhost:3000',
+  ];
+  const origin = req.headers.origin as string | undefined;
+  const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
+  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 

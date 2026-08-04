@@ -2,6 +2,16 @@
 
 This document summarizes the updates made to transition Chekki AI from a Beta-only tool to a production-ready application with tiered subscriptions.
 
+## 2026-08-04 — Audit remediation and reliability hardening
+
+The most recent release completed the remaining high-priority audit fixes across the core experience:
+
+- Hardened API access control for school and teacher redemption endpoints with allowlisted CORS and stricter request handling.
+- Made admin-only actions fail closed when the passcode or admin config is missing.
+- Replaced the external QR-code dependency with a local SVG generator for the subscription experience.
+- Sanitized AI-generated markdown rendering to prevent injection risks in chat and worksheet content.
+- Added seat-limit protection for teacher class creation and verified the app builds successfully.
+
 ## 1. Subscription Tiers (Free vs. Pro)
 
 | Feature         | Free Explorer  | Chekki Pro                     |

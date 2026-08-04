@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { AppleLogo, GooglePlayLogo, ArrowLeft } from '@phosphor-icons/react';
+import { createQrSvgDataUrl } from '../utils/qrCode';
 
 const APP_STORE_URL = 'https://apps.apple.com/app/id6741479840';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.chekkiai.app';
 
-// QR code for App Store (using a free QR code API)
-const QR_CODE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(APP_STORE_URL)}`;
-
-/** QR code with graceful fallback if the external API is unreachable (Audit §12) */
-const QRCodeWithFallback: React.FC<{ url: string; qrUrl: string }> = ({ url, qrUrl }) => {
+/** QR code with graceful fallback that does not depend on a third-party API. */
+const QRCodeWithFallback: React.FC<{ url: string }> = ({ url }) => {
   const [failed, setFailed] = useState(false);
+  const qrDataUrl = useMemo(() => createQrSvgDataUrl(url), [url]);
+
   if (failed) {
     return (
       <a
@@ -23,9 +23,10 @@ const QRCodeWithFallback: React.FC<{ url: string; qrUrl: string }> = ({ url, qrU
       </a>
     );
   }
+
   return (
     <img
-      src={qrUrl}
+      src={qrDataUrl}
       alt="App Store QR Code"
       className="w-28 h-28 rounded-2xl border border-white/10 bg-white p-1"
       onError={() => setFailed(true)}
@@ -146,7 +147,7 @@ const SubscribePage: React.FC = () => {
           <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
             {isKo ? 'iPhone / Android QR 코드로 스캔' : 'Scan to download on mobile'}
           </p>
-          <QRCodeWithFallback url={APP_STORE_URL} qrUrl={QR_CODE_URL} />
+          <QRCodeWithFallback url={APP_STORE_URL} />
           <p className="text-[9px] text-zinc-500">iOS &amp; Android App Store</p>
         </div>
 
