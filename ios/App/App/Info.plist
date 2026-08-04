@@ -49,11 +49,6 @@
 	<true/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Chekki needs access to your camera to scan worksheets and analyze them.</string>
 	<key>NSMicrophoneUsageDescription</key>

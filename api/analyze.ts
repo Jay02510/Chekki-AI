@@ -252,11 +252,21 @@ const CONSOLIDATED_SCHEMA = {
   required: ['worksheet_summary', 'items'],
 };
 
+const ANALYZE_ALLOWED_ORIGINS = [
+  'capacitor://localhost',
+  'http://localhost',
+  'https://chekkiai.com',
+  'https://www.chekkiai.com',
+];
+
 export default async function handler(req: any, res: any) {
   const adminAuth = adminAuthClient;
 
   // CORS headers for Capacitor WebView (origin: capacitor://localhost)
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const reqOrigin = req.headers.origin as string | undefined;
+  const corsOrigin = reqOrigin && ANALYZE_ALLOWED_ORIGINS.includes(reqOrigin) ? reqOrigin : ANALYZE_ALLOWED_ORIGINS[0];
+  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Idempotency-Key');
 

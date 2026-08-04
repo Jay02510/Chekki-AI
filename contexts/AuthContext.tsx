@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProfile, SubscriptionRecord, SubscriptionPlatform } from '../types';
 import { auth, db, dbInstance } from '../services/database';
-import { doc, updateDoc, increment, arrayRemove } from 'firebase/firestore';
+import { doc, updateDoc, increment, arrayRemove, deleteDoc } from 'firebase/firestore';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -478,110 +478,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     const signInFlow = async () => {
-      try {
-        const res = await signInWithEmailAndPassword(auth, cleanEmail, cleanPass);
-        if (res.user) {
-          let profile = await db.getUser(res.user.uid);
-          const targetRole: 'director' | 'teacher' = cleanEmail.includes('director') ? 'director' : 'teacher';
-          if (!profile) {
-            profile = {
-              name: cleanEmail.includes('director') 
-                ? 'Director Admin (HQ)' 
-                : cleanEmail.includes('kt') ? '김은지 선생님 (KT)' : 'Teacher Mark (FT)',
-              email: cleanEmail,
-              role: targetRole,
-              plan: 'pro',
-              scansUsedToday: 0,
-              lastScanDate: new Date().toISOString().split('T')[0],
-              maxScansPerDay: 999,
-              questionsUsedToday: 0,
-              maxQuestionsPerDay: 999,
-              lastQuestionDate: new Date().toISOString().split('T')[0],
-              schoolId: 'school_demo_123',
-              schoolName: 'Chekki Master Academy',
-              subscriptionStartedAt: new Date().toISOString(),
-              nextBillingDate: null,
-            };
-            await db.createUser(res.user.uid, profile);
-          } else if (!profile.role || profile.role === 'parent' || cleanEmail.includes('demo') || cleanEmail.includes('teacher') || cleanEmail.includes('director')) {
-            profile = { ...profile, role: targetRole, plan: profile.plan || 'pro' };
-            await db.createUser(res.user.uid, profile);
-          }
-          await fetchAndSetUserProfile(res.user, profile);
+      // The old catch block here auto-provisioned a free Pro/director account
+      // (and, on failure, an anonymous Pro account) for ANY failed login
+      // matching "demo"/"teacher"/"director"/"test" in the email — that
+      // covers real customer emails like "director@school.com" and was a
+      // critical monetization/security hole (audit §14/§18). It has been
+      // removed entirely: a failed login now always surfaces as a thrown
+      // error and never auto-creates an account.
+      const res = await signInWithEmailAndPassword(auth, cleanEmail, cleanPass);
+      if (res.user) {
+        let profile = await db.getUser(res.user.uid);
+        if (!profile) {
+          profile = {
+            name: 'User',
+            email: cleanEmail,
+            role: 'parent',
+            plan: 'free',
+            scansUsedToday: 0,
+            lastScanDate: new Date().toISOString().split('T')[0],
+            maxScansPerDay: FREE_DAILY_LIMIT,
+            questionsUsedToday: 0,
+            maxQuestionsPerDay: 5,
+            lastQuestionDate: new Date().toISOString().split('T')[0],
+            schoolId: null,
+            schoolName: null,
+            subscriptionStartedAt: null,
+            nextBillingDate: null,
+          };
+          await db.createUser(res.user.uid, profile);
         }
-      } catch (authErr: any) {
-        // 🍎 Apple Review Demo Account Bypass — ONLY for explicit demo keyword emails.
-        // IMPORTANT: Do NOT add generic Firebase error codes here (auth/user-not-found,
-        // auth/invalid-credential, auth/invalid-email) — doing so would silently create
-        // Pro accounts for any user who mistypes their password, which is a critical
-        // monetization and security vulnerability (see audit §14).
-        const isDemoEmail =
-          cleanEmail.includes('demo') ||
-          cleanEmail.includes('teacher') ||
-          cleanEmail.includes('director') ||
-          cleanEmail.includes('test');
-
-        if (isDemoEmail) {
-          try {
-            console.log('[AuthContext] Auto-provisioning demo user:', cleanEmail);
-            const res = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPass.length >= 6 ? cleanPass : 'demo1234');
-            const demoRole = cleanEmail.includes('director') ? 'director' : 'teacher';
-            const newProfile: UserProfile = {
-              name: cleanEmail.includes('director')
-                ? 'Director Admin (HQ)'
-                : '선생님 (Demo)',
-              email: cleanEmail,
-              role: demoRole,
-              plan: 'pro',
-              scansUsedToday: 0,
-              lastScanDate: new Date().toISOString().split('T')[0],
-              maxScansPerDay: 999,
-              questionsUsedToday: 0,
-              maxQuestionsPerDay: 999,
-              lastQuestionDate: new Date().toISOString().split('T')[0],
-              schoolId: 'school_demo_123',
-              schoolName: 'Chekki Master Academy',
-              subscriptionStartedAt: new Date().toISOString(),
-              nextBillingDate: null,
-            };
-            await db.createUser(res.user.uid, newProfile);
-            await fetchAndSetUserProfile(res.user, newProfile);
-          } catch (createErr: any) {
-            console.warn('[AuthContext] Demo fallback creation warning, falling back to anon signin:', createErr);
-            try {
-              const anonRes = await signInAnonymously(auth);
-              if (anonRes.user) {
-                const demoRole = cleanEmail.includes('director') ? 'director' : 'teacher';
-                const anonProfile: UserProfile = {
-                  name: cleanEmail.includes('director')
-                    ? 'Director Admin (HQ)'
-                    : '선생님 (Demo)',
-                  email: cleanEmail,
-                  role: demoRole,
-                  plan: 'pro',
-                  scansUsedToday: 0,
-                  lastScanDate: new Date().toISOString().split('T')[0],
-                  maxScansPerDay: 999,
-                  questionsUsedToday: 0,
-                  maxQuestionsPerDay: 999,
-                  lastQuestionDate: new Date().toISOString().split('T')[0],
-                  schoolId: 'school_demo_123',
-                  schoolName: 'Chekki Master Academy',
-                  subscriptionStartedAt: new Date().toISOString(),
-                  nextBillingDate: null,
-                };
-                await db.createUser(anonRes.user.uid, anonProfile);
-                await fetchAndSetUserProfile(anonRes.user, anonProfile);
-              }
-            } catch (anonErr) {
-              console.error('[AuthContext] Anon fallback failed:', anonErr);
-            }
-          }
-        } else {
-          // Real user with a wrong password or non-existent account — throw so the
-          // UI can show a proper "Invalid credentials" error message. Never auto-create.
-          throw authErr;
-        }
+        await fetchAndSetUserProfile(res.user, profile);
       }
       localStorage.setItem('chekki_last_auth', Date.now().toString());
       setShowLoginModal(false);
@@ -1051,6 +977,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (sErr) {
           console.warn('Failed to remove user UID from school doc during account deletion:', sErr);
         }
+      }
+
+      // Clean up the users/{uid}/data/mistakes subcollection doc — deleting
+      // the parent user doc does NOT cascade to subcollections in Firestore,
+      // so this used to survive account deletion as an orphaned record of a
+      // child's mistake notebook (audit §15d).
+      try {
+        await deleteDoc(doc(dbInstance, 'users', firebaseUser.uid, 'data', 'mistakes'));
+      } catch (dErr) {
+        console.warn('Failed to delete mistakes subcollection doc during account deletion:', dErr);
       }
 
       await db.deleteUserDoc(firebaseUser.uid);

@@ -228,7 +228,17 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   useEffect(() => {
     if (user) {
-      const isDirector = (user as any).role === 'director' || user.email?.includes('director') || isDirectorPath;
+      // Same fallback chain as the post-auth routing effect below (Firestore
+      // role → localStorage role written at signup → loginRole selection) —
+      // these two effects previously disagreed because this one only checked
+      // the Firestore field, so a director whose Firestore role write failed
+      // (audit §20b) would render the regular teacher dashboard here even
+      // though the other effect correctly fell back to localStorage (§20c).
+      const uid = user.uid || '';
+      const firestoreRole = (user as any).role;
+      const localRole = uid ? localStorage.getItem(`chekki_user_role_${uid}`) : null;
+      const resolvedRole = firestoreRole || localRole || loginRole;
+      const isDirector = resolvedRole === 'director' || isDirectorPath;
       // Educator role: always read from Firestore field first.
       // Do NOT use email.includes('kt') — see comment on educatorRole state above.
       const isKtRole = (user as any).educatorRole === 'kt';
@@ -688,14 +698,11 @@ export default function TeacherPage({ isNight = true }: Props) {
       if (!welcomeDone) {
         // Pre-fill name from user profile
         setWelcomeName(user.name || user.email?.split('@')[0] || '');
-        // Detect FT/KT from localStorage role or email
+        // Detect FT/KT from a previously stored explicit selection only — never
+        // from an email substring (the last instance of that pattern, audit §20e).
         const storedEducatorRole = localStorage.getItem(`chekki_educator_role_${uid}`) ||
           localStorage.getItem(`chekki_educator_role_${user.email}`);
-        if (storedEducatorRole === 'kt' || user.email?.includes('kt')) {
-          setWelcomeRole('kt');
-        } else {
-          setWelcomeRole('ft');
-        }
+        setWelcomeRole(storedEducatorRole === 'kt' ? 'kt' : 'ft');
         setShowTeacherWelcome(true);
       }
     }
@@ -759,7 +766,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const fetchClasses = async () => {
     const uid = user?.uid || 'guest';
     setIsLoadingClasses(true);
-    let fetchedFromFirestore: any[] = [];
+    const fetchedFromFirestore: any[] = [];
     try {
       if (user?.uid) {
         const q = query(
@@ -773,6 +780,11 @@ export default function TeacherPage({ isNight = true }: Props) {
       }
     } catch (err) {
       console.warn('Firestore fetch warning (falling back to local storage):', err);
+      setSyncWarning(
+        isKo
+          ? '⚠️ 클라우드에서 학급 목록을 불러오지 못해 이 기기에 저장된 정보를 표시하고 있습니다. 최신 정보가 아닐 수 있습니다.'
+          : "⚠️ Couldn't load classes from the cloud — showing what's saved on this device, which may be out of date."
+      );
     } finally {
       const localKey = `teacher_classes_${uid}`;
       const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
@@ -814,17 +826,25 @@ export default function TeacherPage({ isNight = true }: Props) {
 
         await signUp(name, email, password);
 
-        // Write the role to Firestore/localStorage so post-auth routing works correctly after reload
+        // Assign the role server-side — firestore.rules blocks clients from
+        // writing their own `role` field, so a direct client updateDoc() call
+        // silently fails (audit §20b). /api/set-initial-role uses the Admin
+        // SDK and only allows a one-time assignment on a fresh account.
         const newUid = auth.currentUser?.uid || '';
         const assignedRole = loginRole === 'director' ? 'director' : 'teacher';
         if (newUid) {
           try {
-            // Update the Firestore profile with the correct role
-            const { doc, updateDoc } = await import('firebase/firestore');
-            const { dbInstance } = await import('../../services/database');
-            await updateDoc(doc(dbInstance, 'users', newUid), { role: assignedRole });
+            const idToken = await auth.currentUser?.getIdToken();
+            const response = await fetch('/api/set-initial-role', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+              body: JSON.stringify({ role: assignedRole }),
+            });
+            if (!response.ok) {
+              console.warn('Server-side role assignment failed, using localStorage fallback:', await response.text());
+            }
           } catch (roleErr) {
-            console.warn('Role write to Firestore failed, using localStorage fallback:', roleErr);
+            console.warn('Role write failed, using localStorage fallback:', roleErr);
           }
           localStorage.setItem(`chekki_user_role_${newUid}`, assignedRole);
         }
@@ -966,6 +986,11 @@ export default function TeacherPage({ isNight = true }: Props) {
           await deleteDoc(doc(dbInstance, 'classes', targetId));
         } catch (fsErr) {
           console.warn('Firestore delete class warning:', fsErr);
+          setSyncWarning(
+            isKo
+              ? '⚠️ 학급이 이 기기에서만 삭제되었습니다. 클라우드에서 삭제되지 않아 다른 기기나 학부모 화면에는 계속 표시될 수 있습니다.'
+              : '⚠️ Class removed on this device only — the cloud delete failed, so it may still appear elsewhere until you retry with a connection.'
+          );
         }
       }
 
@@ -1028,6 +1053,11 @@ export default function TeacherPage({ isNight = true }: Props) {
       await updateDoc(classRef, { activeWeekNumber: newWeek });
     } catch (err) {
       console.warn('Firestore active week update warning (updated locally):', err);
+      setSyncWarning(
+        isKo
+          ? '⚠️ 주차 변경이 이 기기에만 저장되었습니다. 다른 기기에는 반영되지 않을 수 있습니다.'
+          : '⚠️ Week change saved on this device only — it may not appear on other devices until this syncs.'
+      );
     }
   };
 
@@ -1051,6 +1081,11 @@ export default function TeacherPage({ isNight = true }: Props) {
       await updateDoc(classRef, { activeWeekNumber: targetWeekNum });
     } catch (err) {
       console.warn('Firestore target week update warning (updated locally):', err);
+      setSyncWarning(
+        isKo
+          ? '⚠️ 주차 변경이 이 기기에만 저장되었습니다. 다른 기기에는 반영되지 않을 수 있습니다.'
+          : '⚠️ Week change saved on this device only — it may not appear on other devices until this syncs.'
+      );
     }
   };
 
@@ -1104,6 +1139,11 @@ export default function TeacherPage({ isNight = true }: Props) {
       }
     } catch (err) {
       console.warn('Failed to load curriculum from Firestore (using local fallback):', err);
+      setSyncWarning(
+        isKo
+          ? '⚠️ 클라우드에서 커리큘럼을 불러오지 못해 이 기기에 저장된 정보를 표시하고 있습니다.'
+          : "⚠️ Couldn't load curriculum from the cloud — showing what's saved on this device."
+      );
     } finally {
       setIsLoadingCurriculum(false);
     }
@@ -1170,14 +1210,24 @@ export default function TeacherPage({ isNight = true }: Props) {
       }
 
       // 2. Persist to Firestore
+      let curriculumFirestoreFailed = false;
       try {
         const docRef = doc(dbInstance, 'curriculums', currDocId);
         await setDoc(docRef, payload, { merge: true });
       } catch (firestoreErr) {
         console.warn('Firestore curriculum write warning (saved locally):', firestoreErr);
+        curriculumFirestoreFailed = true;
       }
 
-      alert(isKo ? '주간 커리큘럼이 성공적으로 저장되었습니다!' : 'Weekly curriculum saved successfully!');
+      if (curriculumFirestoreFailed) {
+        setSyncWarning(
+          isKo
+            ? '⚠️ 커리큘럼이 이 기기에만 저장되었습니다. 클라우드에 동기화되지 않았습니다.'
+            : '⚠️ Curriculum saved on this device only — it has not synced to the cloud yet.'
+        );
+      } else {
+        alert(isKo ? '주간 커리큘럼이 성공적으로 저장되었습니다!' : 'Weekly curriculum saved successfully!');
+      }
     } catch (err) {
       console.error('Failed to save curriculum:', err);
       alert(isKo ? '저장 실패. 다시 시도해 주세요.' : 'Failed to save curriculum.');
@@ -1196,7 +1246,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       const localScans: any[] = JSON.parse(localStorage.getItem(localClassKey) || '[]');
       
       // 2. Fetch class scans from Firestore
-      let firestoreScans: any[] = [];
+      const firestoreScans: any[] = [];
       try {
         const scansQ = query(
           collection(dbInstance, 'classes', targetClass.id, 'studentScans')
@@ -1205,6 +1255,11 @@ export default function TeacherPage({ isNight = true }: Props) {
         scansSnap.forEach(sDoc => firestoreScans.push({ id: sDoc.id, ...sDoc.data() }));
       } catch (sErr) {
         console.warn('Firestore class scans fetch warning (using local fallback):', sErr);
+        setSyncWarning(
+          isKo
+            ? '⚠️ 클라우드에서 채점 기록을 불러오지 못해 이 기기에 저장된 정보만 표시하고 있습니다.'
+            : "⚠️ Couldn't load scan history from the cloud — showing only what's saved on this device."
+        );
       }
 
       // Merge scans by ID

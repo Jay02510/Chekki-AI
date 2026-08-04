@@ -1,30 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
 import crypto from 'crypto';
-
-/**
- * Robust Firebase Admin Initialization
- */
-function initAdmin() {
-  if (getApps().length > 0) return;
-  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (serviceAccount) {
-    try {
-      const cleaned = serviceAccount.trim().replace(/\n/g, '').replace(/\r/g, '');
-      const parsed = JSON.parse(cleaned);
-      initializeApp({ credential: cert(parsed) });
-    } catch (e) {
-      console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', e);
-      initializeApp();
-    }
-  } else {
-    initializeApp();
-  }
-}
-
-initAdmin();
-const adminDb = getFirestore();
+import { adminDb } from './_lib/firebaseAdmin';
 
 /**
  * Apple Server-to-Server Notification Handler

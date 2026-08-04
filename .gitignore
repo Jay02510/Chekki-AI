@@ -25,3 +25,11 @@ dist-ssr
 .vercel
 .env
 
+# Mobile signing secrets — never commit a real keystore or provisioning profile
+*.keystore
+*.jks
+keystore.properties
+*.p12
+*.mobileprovision
+local.properties
+

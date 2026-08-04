@@ -9,13 +9,12 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
-const ADMIN_PASSCODE = 'ChecciAdmin2026!';
-
 export default function AdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [showPasscode, setShowPasscode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [authorizing, setAuthorizing] = useState(false);
 
   // User Creation State
   const [email, setEmail] = useState('');
@@ -244,13 +243,28 @@ export default function AdminPage() {
       s.teacherCode.toLowerCase().includes(schoolSearchQuery.toLowerCase())
   );
 
-  const handleAuthorize = (e: React.FormEvent) => {
+  const handleAuthorize = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode.trim() === ADMIN_PASSCODE) {
-      setIsAuthorized(true);
-      setMessage({ text: '', type: '' });
-    } else {
-      setMessage({ text: 'Incorrect Passcode', type: 'error' });
+    setAuthorizing(true);
+    setMessage({ text: '', type: '' });
+    try {
+      // The passcode is never checked client-side — it's only ever validated
+      // server-side in api/admin.ts. Verify it here with a cheap real action
+      // so no admin secret ever ships in the client bundle.
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: passcode.trim(), action: 'list' }),
+      });
+      if (response.ok) {
+        setIsAuthorized(true);
+      } else {
+        setMessage({ text: 'Incorrect Passcode', type: 'error' });
+      }
+    } catch {
+      setMessage({ text: 'Failed to verify passcode. Check your connection.', type: 'error' });
+    } finally {
+      setAuthorizing(false);
     }
   };
 
@@ -581,9 +595,10 @@ export default function AdminPage() {
             </div>
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-orange-600 hover:to-pink-600 text-white font-black py-4 rounded-xl mt-4 shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              disabled={authorizing}
+              className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-orange-600 hover:to-pink-600 text-white font-black py-4 rounded-xl mt-4 shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              Verify
+              {authorizing ? 'Verifying...' : 'Verify'}
             </button>
           </form>
         ) : (

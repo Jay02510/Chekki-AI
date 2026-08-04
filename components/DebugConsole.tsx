@@ -52,8 +52,10 @@ const addGlobalLog = (type: 'log' | 'warn' | 'error', args: any[]) => {
   listeners.forEach((listener) => listener());
 };
 
-// Override console methods immediately in module scope
-if (typeof window !== 'undefined') {
+// Override console methods immediately in module scope — dev builds only.
+// This used to run unconditionally in production, patching console.* for
+// every user regardless of the debug-panel visibility flag (audit §16c).
+if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
   const originalLog = console.log;
   const originalWarn = console.warn;
   const originalError = console.error;

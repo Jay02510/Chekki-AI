@@ -1,30 +1,24 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
+import { FieldValue } from 'firebase-admin/firestore';
+import { Redis } from '@upstash/redis';
+import { Ratelimit } from '@upstash/ratelimit';
+import { adminDb, adminAuth as authDb } from './_lib/firebaseAdmin';
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
 
-function initAdmin() {
-  if (getApps().length > 0) return;
-  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (serviceAccount) {
-    try {
-      const cleaned = serviceAccount.trim().replace(/\n/g, '').replace(/\r/g, '');
-      const parsed = JSON.parse(cleaned);
-      initializeApp({ credential: cert(parsed) });
-    } catch (e) {
-      console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', e);
-      initializeApp();
-    }
-  } else {
-    initializeApp();
-  }
-}
-
-initAdmin();
-const adminDb = getFirestore();
-const authDb = getAuth();
+// This endpoint gates account impersonation, deletion, and upgrades behind a
+// single shared passcode — rate limit failed attempts hard so it can't be
+// brute-forced (audit §15a).
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
+const ratelimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '60 s'),
+      analytics: true,
+    })
+  : null;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const allowedOrigins = [
@@ -51,8 +45,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Admin passcode is not configured.' });
   }
 
+  if (ratelimit) {
+    const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anonymous';
+    const ipString = Array.isArray(ip) ? ip[0] : ip;
+    const { success, limit, reset, remaining } = await ratelimit.limit(`admin_${ipString}`);
+    res.setHeader('X-RateLimit-Limit', limit.toString());
+    res.setHeader('X-RateLimit-Remaining', remaining.toString());
+    res.setHeader('X-RateLimit-Reset', reset.toString());
+    if (!success) {
+      console.warn(`[admin.ts] Rate limit exceeded for IP: ${ipString}`);
+      return res.status(429).json({ error: 'Too many attempts. Try again later.' });
+    }
+  }
+
   if (passcode !== ADMIN_PASSCODE) {
     return res.status(401).json({ error: 'Unauthorized: Invalid Passcode' });
+  }
+
+  // Minimal audit trail for powerful actions (impersonation, deletion).
+  if (action === 'impersonate' || action === 'delete') {
+    console.warn(`[admin.ts] AUDIT: action=${action} uid=${uid || 'n/a'} email=${email || 'n/a'} at=${new Date().toISOString()}`);
   }
 
   try {
