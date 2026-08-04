@@ -1,5 +1,45 @@
 import React from 'react';
-import { Warning, UserCheck, CheckCircle, MagnifyingGlass } from '@phosphor-icons/react';
+import { Warning, UserCheck, CheckCircle, MagnifyingGlass, DownloadSimple } from '@phosphor-icons/react';
+
+// Escapes a CSV field per RFC 4180: wraps in quotes and doubles any embedded
+// quotes whenever the value contains a comma, quote, or newline.
+function csvField(value: unknown): string {
+  const str = value === null || value === undefined ? '' : String(value);
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function exportRosterCSV(pendingRoster: any[], activeRoster: any[], className: string) {
+  const header = ['Student Name', 'Parent Name', 'Parent Email', 'Status', 'Weekly Scan', 'Last Scan Date', 'Flagged', 'Flag Reason', 'Flag Date'];
+  const rows = [
+    ...pendingRoster.map((s) => [s.studentName || 'Unnamed', s.name || '', s.email || '', 'Pending', '', '', '', '', '']),
+    ...activeRoster.map((s) => [
+      s.studentName || 'Unnamed',
+      s.name || '',
+      s.email || '',
+      'Active',
+      s.hasScannedThisWeek ? 'Scanned' : 'Not Scanned',
+      s.lastScanDate || '',
+      s.flaggedException ? 'Yes' : 'No',
+      s.flaggedException?.reason || '',
+      s.flaggedException?.date || '',
+    ]),
+  ];
+
+  const csv = [header, ...rows].map((row) => row.map(csvField).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const safeClassName = (className || 'roster').replace(/[^a-z0-9-_]+/gi, '-');
+  link.href = url;
+  link.download = `${safeClassName}-roster-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 
 interface Props {
   isNight: boolean;
@@ -144,17 +184,31 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={fetchRosterAndMistakes}
-              className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] ${
-                isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
-              }`}
-              title="Refresh parent scans & roster"
-            >
-              <span>🔄</span>
-              <span>{isKo ? '동기화 새로고침' : 'Refresh Live Sync'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => exportRosterCSV(pendingRoster, activeRoster, selectedClass?.name)}
+                disabled={pendingRoster.length === 0 && activeRoster.length === 0}
+                className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed ${
+                  isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
+                }`}
+                title="Export roster as CSV"
+              >
+                <DownloadSimple size={14} weight="bold" />
+                <span>{isKo ? 'CSV 내보내기' : 'Export CSV'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={fetchRosterAndMistakes}
+                className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] ${
+                  isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
+                }`}
+                title="Refresh parent scans & roster"
+              >
+                <span>🔄</span>
+                <span>{isKo ? '동기화 새로고침' : 'Refresh Live Sync'}</span>
+              </button>
+            </div>
           </div>
 
           {isLoadingRoster ? (
