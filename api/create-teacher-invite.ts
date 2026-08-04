@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
+import { maxInvitesForRole } from './_lib/seatLimits';
 
 /**
  * Director-only: generates a role-locked, seat-checked teacher invite.
@@ -67,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     const schoolData = schoolSnap.data() || {};
     const seatsTotal = schoolData.seatsTotal || { ft: 0, kt: 0 };
-    const maxForRole = Number(seatsTotal[role] ?? 0);
+    const maxForRole = maxInvitesForRole(seatsTotal, role);
 
     const invitesRef = adminDb.collection('invites');
     const existingForRole = await invitesRef

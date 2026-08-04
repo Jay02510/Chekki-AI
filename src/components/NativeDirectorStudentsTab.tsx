@@ -3,7 +3,7 @@ import { Warning, UserCheck, CheckCircle, MagnifyingGlass, DownloadSimple } from
 
 // Escapes a CSV field per RFC 4180: wraps in quotes and doubles any embedded
 // quotes whenever the value contains a comma, quote, or newline.
-function csvField(value: unknown): string {
+export function csvField(value: unknown): string {
   const str = value === null || value === undefined ? '' : String(value);
   if (/[",\n]/.test(str)) {
     return `"${str.replace(/"/g, '""')}"`;

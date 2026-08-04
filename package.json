@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test": "vitest run",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,css,md}\"",
     "build": "tsc --skipLibCheck && vite build",
@@ -60,6 +61,7 @@
     "prettier": "^3.2.5",
     "tailwindcss": "^4.2.4",
     "typescript": "5.6.2",
-    "vite": "6.0.3"
+    "vite": "6.0.3",
+    "vitest": "^2.1.9"
   }
 }

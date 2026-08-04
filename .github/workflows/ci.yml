@@ -22,6 +22,9 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
+      - name: Test
+        run: npx vitest run
+
       - name: Lint
         # Report-only: repo has a pre-existing baseline of lint errors/warnings
         # not yet triaged, so this step is informational and won't block PRs

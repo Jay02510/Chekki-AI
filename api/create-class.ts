@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
+import { maxClassesForSeats } from './_lib/seatLimits';
 
 /**
  * Server-side seat-limit enforcement on class creation (audit §2/§10/§18).
@@ -69,10 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let maxClasses = 1; // unconfirmed/no-school accounts get a single trial class
     if (schoolId) {
       const schoolSnap = await adminDb.collection('schools').doc(schoolId).get();
-      const seatsTotal = schoolSnap.data()?.seatsTotal;
-      if (seatsTotal) {
-        maxClasses = Math.max(1, Number(seatsTotal.ft || 0) + Number(seatsTotal.kt || 0));
-      }
+      maxClasses = maxClassesForSeats(schoolSnap.data()?.seatsTotal);
     }
 
     const existingQuery = schoolId
