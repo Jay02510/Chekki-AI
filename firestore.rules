@@ -191,10 +191,13 @@ service cloud.firestore {
     // Classes rules
     match /classes/{classId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null && (
-        request.resource.data.teacherUid == request.auth.uid ||
-        isAdmin()
-      );
+      // Creation only happens server-side via api/create-class.ts (Admin SDK,
+      // bypasses these rules), which counts existing classes against
+      // schools/{schoolId}.seatsTotal before writing. A client-side
+      // `teacherUid == request.auth.uid` create rule (the old version of this
+      // rule) had no count check at all — any authenticated teacher could
+      // create unlimited classes on a 1-seat plan (audit §2/§10/§18).
+      allow create: if request.auth != null && isAdmin();
       allow update: if request.auth != null && (
         (resource.data.teacherUid == request.auth.uid && request.resource.data.teacherUid == request.auth.uid) ||
         isAdmin()

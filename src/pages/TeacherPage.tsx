@@ -924,50 +924,54 @@ export default function TeacherPage({ isNight = true }: Props) {
     e.preventDefault();
     const uid = user?.uid || 'guest';
 
-    // Fix 10 — Seat limit guard (Audit §3):
-    // Read the provisioned seat count from the user profile (set by ops team
-    // after confirming payment). Default to 1 for unconfirmed/pending accounts.
-    const provisionedSeats: number = (user as any)?.seatCount ?? 1;
-    if (classes.length >= provisionedSeats) {
-      alert(
-        isKo
-          ? `현재 플랜에서 사용 가능한 반 수(${provisionedSeats}야)에 도달했습니다. 반을 더 수염하려면 support@chekkiai.com으로 문의해 주세요.`
-          : `You've reached your class limit (${provisionedSeats}). Contact support@chekkiai.com to add more seats.`
-      );
-      return;
-    }
-
     setIsCreatingClass(true);
     let firestoreFailed = false;
     try {
-      const schoolId = user?.schoolId || `school_${uid.slice(0, 8)}`;
-      const sanitizedName = newClassName.trim().replace(/\s+/g, '-');
-      const classId = `${schoolId}_${sanitizedName}_${Date.now()}`;
+      // Seat-limit enforcement now happens server-side in api/create-class.ts
+      // (audit §2/§10/§18) — it counts existing classes against
+      // schools/{schoolId}.seatsTotal via the Admin SDK and firestore.rules
+      // denies direct client creates entirely, so this can't be bypassed by
+      // editing localStorage or calling the Firestore SDK directly the way
+      // the old client-only check could be.
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch('/api/create-class', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ name: newClassName.trim(), level: newClassLevel }),
+      });
+      const data = await response.json();
 
-      let joinCode = '';
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      for (let i = 0; i < 6; i++) {
-        joinCode += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-
-      const newClass: any = {
-        id: classId,
-        schoolId: schoolId,
-        schoolName: user?.schoolName || 'B2B Academy',
-        name: newClassName.trim(),
-        level: newClassLevel,
-        teacherUid: uid,
-        activeWeekNumber: 1,
-        joinCode: joinCode,
-        createdAt: new Date().toISOString(),
-      };
-
-      // Fix 8 — Surface Firestore sync failures instead of silently swallowing them.
-      try {
-        await setDoc(doc(dbInstance, 'classes', classId), newClass);
-      } catch (firestoreErr) {
-        console.warn('Firestore write failed (saved locally only):', firestoreErr);
-        firestoreFailed = true; // will show sync-warning banner below
+      let newClass: any;
+      if (response.ok) {
+        newClass = data.class;
+      } else if (response.status === 400) {
+        // Real seat-limit rejection — surface it and stop, don't fall back to
+        // a local-only class that the server has explicitly refused.
+        alert(data.error || (isKo ? '학급 개설 한도에 도달했습니다.' : "You've reached your class limit."));
+        return;
+      } else {
+        // Server unreachable for some other reason — keep the teacher moving
+        // with a local-only class, same as the old Firestore-write-failure
+        // fallback, but now flagged clearly as unsynced rather than silently
+        // treated as created.
+        console.warn('create-class API failed, saving locally only:', data.error);
+        firestoreFailed = true;
+        const schoolId = user?.schoolId || `school_${uid.slice(0, 8)}`;
+        const sanitizedName = newClassName.trim().replace(/\s+/g, '-');
+        let joinCode = '';
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        for (let i = 0; i < 6; i++) joinCode += chars.charAt(Math.floor(Math.random() * chars.length));
+        newClass = {
+          id: `${schoolId}_${sanitizedName}_${Date.now()}`,
+          schoolId,
+          schoolName: user?.schoolName || 'B2B Academy',
+          name: newClassName.trim(),
+          level: newClassLevel,
+          teacherUid: uid,
+          activeWeekNumber: 1,
+          joinCode,
+          createdAt: new Date().toISOString(),
+        };
       }
 
       // Persist in localStorage under user-specific and fallback keys
@@ -986,7 +990,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       setShowTeacherOnboarding(false);
 
       setClasses((prev: any[]) => {
-        const exists = prev.some((c: any) => c.id === classId);
+        const exists = prev.some((c: any) => c.id === newClass.id);
         return exists ? prev : [newClass, ...prev];
       });
       setSelectedClass(newClass);
