@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import { FieldValue } from 'firebase-admin/firestore';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
@@ -21,7 +22,7 @@ const ratelimit = redis
     })
   : null;
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const allowedOrigins = [
     'https://chekkiai.com',
     'https://www.chekkiai.com',
@@ -501,3 +502,5 @@ https://urlgeni.us/chekki
     return res.status(500).json({ error: err.message || 'Internal server error' });
   }
 }
+
+export default withSentry(handler);

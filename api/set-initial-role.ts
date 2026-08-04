@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
 import { seatsForPlan } from './_lib/pricingTiers';
 
@@ -12,7 +13,7 @@ import { seatsForPlan } from './_lib/pricingTiers';
 // self-promote an existing account.
 const ALLOWED_ROLES = new Set(['director', 'teacher']);
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const allowedOrigins = [
     'https://chekkiai.com',
     'https://www.chekkiai.com',
@@ -95,3 +96,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Failed to set role' });
   }
 }
+
+export default withSentry(handler);

@@ -26,3 +26,8 @@ The current release includes the remaining audit remediation work for core produ
 - Added fail-closed admin handling so missing configuration does not silently allow privileged actions.
 - Replaced the external QR dependency with a local SVG-based generator and hardened markdown rendering for AI-generated content.
 - Added seat-limit protection for teacher class creation and verified the app still builds successfully.
+- Deployed `firestore.rules` to the live Firebase project (was previously written but never pushed).
+- Consolidated the four `redeem-*` serverless functions into one `api/redeem.ts` (with `vercel.json` rewrites preserving the old URLs for already-shipped native app builds) to stay under Vercel Hobby's 12-function cap.
+- Added director roster/class CSV export (client-side, no new serverless function).
+- Stood up CI (GitHub Actions: typecheck, test, lint (report-only), build on every push/PR to `main`) and a first unit test suite (Vitest) covering seat-limit math and CSV field escaping.
+- Added Sentry error monitoring for both the frontend (`@sentry/react`, via `VITE_SENTRY_DSN`) and the Vercel API functions (`@sentry/node`, via `SENTRY_DSN`); no-ops until those env vars are set.

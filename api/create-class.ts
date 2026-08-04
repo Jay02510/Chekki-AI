@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
 import { maxClassesForSeats } from './_lib/seatLimits';
 
@@ -27,7 +28,7 @@ function generateJoinCode(): string {
   return code;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const allowedOrigins = [
     'https://chekkiai.com',
     'https://www.chekkiai.com',
@@ -106,3 +107,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Failed to create class' });
   }
 }
+
+export default withSentry(handler);

@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const allowedOrigins = [
     'https://chekkiai.com',
     'https://www.chekkiai.com',
@@ -215,3 +216,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 }
+
+export default withSentry(handler);

@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import crypto from 'crypto';
 import { adminDb } from './_lib/firebaseAdmin';
 
@@ -7,7 +8,7 @@ import { adminDb } from './_lib/firebaseAdmin';
  * Configure this URL in App Store Connect > App Information > App Store Server Notifications
  * URL: https://your-domain.vercel.app/api/subscription/webhook/apple
  */
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // Optional Secret Webhook Auth check using constant-time timingSafeEqual to prevent side-channel timing attacks
@@ -144,3 +145,5 @@ async function handleNotification(type: string, subtype: string, data: any) {
 async function handleV1Notification(notificationType: string, latestReceiptInfo: any) {
   console.log('[webhook-apple] V1 notification received:', notificationType);
 }
+
+export default withSentry(handler);

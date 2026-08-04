@@ -1,11 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
 
 // Lets a director set their own school's display name (and logo, later)
 // after api/set-initial-role.ts creates the school doc with a placeholder
 // name. Ownership is checked server-side against schools/{schoolId}.ownerUid
 // — the client never gets to pick which school it's writing to.
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const allowedOrigins = [
     'https://chekkiai.com',
     'https://www.chekkiai.com',
@@ -63,3 +64,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Failed to update school profile' });
   }
 }
+
+export default withSentry(handler);

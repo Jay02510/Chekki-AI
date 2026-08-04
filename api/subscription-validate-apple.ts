@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
 
 const allowedOrigins = [
@@ -46,7 +47,7 @@ function extractLatestExpiry(receiptInfo: any[]): Date | null {
   return new Date(parseInt(latest.expires_date_ms));
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = req.headers.origin as string | undefined;
   const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   res.setHeader('Access-Control-Allow-Origin', corsOrigin);
@@ -144,3 +145,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Authentication failed' });
   }
 }
+
+export default withSentry(handler);

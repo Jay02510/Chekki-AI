@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import { adminDb } from './_lib/firebaseAdmin';
 
 const allowedOrigins = [
@@ -8,7 +9,7 @@ const allowedOrigins = [
   'http://localhost:3000',
 ];
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
   const origin = req.headers.origin as string | undefined;
   const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
@@ -167,3 +168,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: err?.message || 'Internal server error' });
   }
 }
+
+export default withSentry(handler);

@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
 
@@ -10,7 +11,7 @@ import { adminDb, adminAuth } from './_lib/firebaseAdmin';
  * branch runs is decided by which body field is present, matching each
  * endpoint's original request shape exactly.
  */
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const allowedOrigins = [
     'https://chekkiai.com',
     'https://www.chekkiai.com',
@@ -244,3 +245,5 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
     schoolName,
   });
 }
+
+export default withSentry(handler);

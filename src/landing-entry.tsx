@@ -5,6 +5,9 @@ import FaqPage from './pages/FaqPage';
 import Landing from './Landing';
 import App from '../App';
 import '../landing.css';
+import { initSentry } from './lib/sentry';
+
+initSentry();
 
 function LandingRoot() {
   const [isNight, setIsNightState] = useState(() => {

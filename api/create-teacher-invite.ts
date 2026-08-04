@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/withSentry';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
 import { maxInvitesForRole } from './_lib/seatLimits';
 
@@ -20,7 +21,7 @@ function generateInviteId(): string {
   return `inv_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const allowedOrigins = [
     'https://chekkiai.com',
     'https://www.chekkiai.com',
@@ -139,3 +140,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Failed to create invite' });
   }
 }
+
+export default withSentry(handler);

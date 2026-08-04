@@ -1,4 +1,5 @@
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from '@google/genai';
+import { withSentry } from './_lib/withSentry';
 import { FieldValue } from 'firebase-admin/firestore';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
@@ -259,7 +260,7 @@ const ANALYZE_ALLOWED_ORIGINS = [
   'https://www.chekkiai.com',
 ];
 
-export default async function handler(req: any, res: any) {
+async function handler(req: any, res: any) {
   const adminAuth = adminAuthClient;
 
   // CORS headers for Capacitor WebView (origin: capacitor://localhost)
@@ -1169,3 +1170,5 @@ CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
     });
   }
 }
+
+export default withSentry(handler as any);
