@@ -2551,10 +2551,22 @@ export default function TeacherPage({ isNight = true }: Props) {
             {activeTab === 'director_hq' && (
               <NativeDirectorPortal
                 isNight={isThemeNight}
+                isKo={isKo}
                 academyName={user?.schoolName || 'Chekki Master Academy'}
                 onOpenLogoModal={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
                 schoolId={(user as any)?.schoolId}
                 seatsTotal={schoolSeatsTotal}
+                pendingRoster={pendingRoster}
+                activeRoster={activeRoster}
+                isLoadingRoster={isLoadingRoster}
+                classes={classes}
+                selectedClass={selectedClass}
+                handleApproveStudent={handleApproveStudent}
+                handleDeclineStudent={handleDeclineStudent}
+                handleRemoveStudent={handleRemoveStudent}
+                handleMoveStudent={handleMoveStudent}
+                fetchRosterAndMistakes={fetchRosterAndMistakes}
+                setSelectedStudentDetails={setSelectedStudentDetails}
               />
             )}
 

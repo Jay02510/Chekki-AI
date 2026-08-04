@@ -2,36 +2,14 @@ import React, { useState } from 'react';
 import {
   Buildings,
   Users,
-  UserPlus,
-  Trash,
-  CheckCircle,
   WarningCircle,
-  PhoneCall,
-  MagnifyingGlass,
-  Gear,
-  PencilSimple,
   UserGear,
   PlusCircle,
-  DotsThreeVertical,
-  SlidersHorizontal,
   FolderUser,
   EnvelopeSimple
 } from '@phosphor-icons/react';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
-
-interface StudentItem {
-  id: string;
-  nameEn: string;
-  nameKo: string;
-  grade: string;
-  assignedClass: string;
-  flaggedException?: {
-    date: string;
-    reason: string;
-    teacherName: string;
-    resolved: boolean;
-  };
-}
+import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
 
 interface TeacherItem {
   id: string;
@@ -43,88 +21,59 @@ interface TeacherItem {
 
 interface Props {
   isNight?: boolean;
+  isKo?: boolean;
   academyName?: string;
   onOpenLogoModal?: () => void;
   schoolId?: string;
   seatsTotal?: { ft: number; kt: number };
+  // Real, live-Firestore roster data -- same source TeacherPage's own
+  // "Student Roster" sidebar tab uses. This tab used to hold a separate,
+  // local-only mock `students` array that was never populated by anything
+  // real, so it silently showed nothing regardless of the director's
+  // actual roster (see NativeDirectorStudentsTab.tsx).
+  pendingRoster?: any[];
+  activeRoster?: any[];
+  isLoadingRoster?: boolean;
+  classes?: any[];
+  selectedClass?: any;
+  handleApproveStudent?: (uid: string) => void;
+  handleDeclineStudent?: (uid: string) => void;
+  handleRemoveStudent?: (uid: string) => void;
+  handleMoveStudent?: (uid: string, targetClassId: string) => void;
+  fetchRosterAndMistakes?: () => void;
+  setSelectedStudentDetails?: (student: any) => void;
 }
 
 export const NativeDirectorPortal: React.FC<Props> = ({
   isNight = true,
+  isKo = false,
   academyName = 'Apex English Academy (Seocho)',
   onOpenLogoModal,
   schoolId,
-  seatsTotal
+  seatsTotal,
+  pendingRoster = [],
+  activeRoster = [],
+  isLoadingRoster = false,
+  classes = [],
+  selectedClass,
+  handleApproveStudent = () => {},
+  handleDeclineStudent = () => {},
+  handleRemoveStudent = () => {},
+  handleMoveStudent = () => {},
+  fetchRosterAndMistakes = () => {},
+  setSelectedStudentDetails = () => {},
 }) => {
   const [activeTab, setActiveTab] = useState<'roster' | 'curriculum' | 'exceptions' | 'teachers'>('curriculum');
 
-  // Real state — starts empty for new directors. Data loads from Firestore via TeacherPage props.
-  const [students, setStudents] = useState<StudentItem[]>([]);
-
-  // Teacher Assignments — empty until director adds them
+  // Teacher Assignments -- empty until director adds them
   const [teachers, setTeachers] = useState<TeacherItem[]>([]);
 
-  // Modal / Add Student Form State
-  const [showAddStudent, setShowAddStudent] = useState(false);
-  const [newStudentEn, setNewStudentEn] = useState('');
-  const [newStudentKo, setNewStudentKo] = useState('');
-  const [newStudentClass, setNewStudentClass] = useState('');
-  const [newStudentGrade, setNewStudentGrade] = useState('Grade 4');
+  const totalRosterCount = pendingRoster.length + activeRoster.length;
 
-  // Search filter
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const handleAddStudent = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newStudentEn || !newStudentKo) return;
-
-    const newSt: StudentItem = {
-      id: `st-${Date.now()}`,
-      nameEn: newStudentEn,
-      nameKo: newStudentKo,
-      grade: newStudentGrade,
-      assignedClass: newStudentClass
-    };
-
-    setStudents([newSt, ...students]);
-    setNewStudentEn('');
-    setNewStudentKo('');
-    setShowAddStudent(false);
-  };
-
-  const handleRemoveStudent = (id: string) => {
-    if (confirm('Are you sure you want to remove this student from the class roster?')) {
-      setStudents(students.filter((s) => s.id !== id));
-    }
-  };
-
-  const filteredStudents = students.filter(
-    (s) =>
-      s.nameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.nameKo.includes(searchTerm) ||
-      s.assignedClass.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const flaggedStudents = students.filter((s) => s.flaggedException);
   const [showSeatExpansionModal, setShowSeatExpansionModal] = useState(false);
   const [requestedExtraSeats, setRequestedExtraSeats] = useState(3);
   const [seatRequestSent, setSeatRequestSent] = useState(false);
 
-  const handleExportRosterCSV = () => {
-    const headers = "Student Name (EN),Student Name (KO),Grade,Assigned Class,Exception Flag,Exception Details\n";
-    const rows = students.map((s) => 
-      `"${s.nameEn}","${s.nameKo}","${s.grade}","${s.assignedClass}","${s.flaggedException ? 'YES' : 'NO'}","${s.flaggedException?.reason || 'None'}"`
-    ).join("\n");
-    
-    const blob = new Blob(["\uFEFF" + headers + rows], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${academyName.replace(/\s+/g, '_')}_Student_Roster_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   return (
     <div
@@ -229,7 +178,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             }`}
           >
             <Users size={16} weight="bold" />
-            <span>Class Rosters ({students.length})</span>
+            <span>Class Rosters ({totalRosterCount})</span>
           </button>
 
           <button
@@ -244,10 +193,8 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             }`}
           >
             <WarningCircle size={16} weight="bold" className="text-amber-400" />
-            <span>Flagged Exceptions ({flaggedStudents.length})</span>
-            {flaggedStudents.some((s) => !s.flaggedException?.resolved) && (
-              <span className="w-2 h-2 rounded-full bg-rose-500 absolute -top-1 -right-1 animate-ping" />
-            )}
+            <span>Flagged Exceptions</span>
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-white/10 text-zinc-400">Soon</span>
           </button>
 
           <button
@@ -278,7 +225,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         </div>
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">TOTAL ROSTER</span>
-          <h4 className="text-2xl font-black text-orange-400 mt-1">{students.length} <span className="text-xs font-normal text-zinc-400">Enrolled</span></h4>
+          <h4 className="text-2xl font-black text-orange-400 mt-1">{totalRosterCount} <span className="text-xs font-normal text-zinc-400">Enrolled</span></h4>
         </div>
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
           <div className="flex items-center justify-between">
@@ -297,7 +244,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         </div>
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">FLAGGED EXCEPTIONS</span>
-          <h4 className="text-2xl font-black text-amber-400 mt-1">{flaggedStudents.filter(s => !s.flaggedException?.resolved).length} <span className="text-xs font-normal text-zinc-400">Unresolved</span></h4>
+          <h4 className="text-2xl font-black text-zinc-500 mt-1">— <span className="text-xs font-normal text-zinc-400">Coming soon</span></h4>
         </div>
       </div>
 
@@ -361,186 +308,21 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* TAB 1: CLASS ROSTERS & STUDENT MANAGEMENT */}
       {/* ========================================================================= */}
       {activeTab === 'roster' && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-72">
-              <MagnifyingGlass size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search student or class..."
-                className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-medium focus:outline-none transition-all ${
-                  isNight
-                    ? 'bg-[#08080c] border-white/10 text-white focus:border-orange-500'
-                    : 'bg-white border-zinc-300 text-zinc-900 focus:border-orange-500 shadow-sm'
-                }`}
-              />
-            </div>
-
-            {/* Action Cluster: Export CSV & Add Student CTA */}
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={handleExportRosterCSV}
-                className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-bold border border-emerald-500/30 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
-              >
-                <span>📥</span>
-                <span>Export Roster to CSV</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddStudent(true)}
-                className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer transition-all shrink-0"
-              >
-                <UserPlus size={16} weight="bold" />
-                <span>+ Add Student to Class</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Add Student Modal / Slide-down Form */}
-          {showAddStudent && (
-            <form
-              onSubmit={handleAddStudent}
-              className={`p-6 rounded-2xl border space-y-4 transition-all ${
-                isNight ? 'bg-[#08080c] border-orange-500/40' : 'bg-orange-50/50 border-orange-300'
-              }`}
-            >
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <h4 className="font-black text-sm text-orange-500 flex items-center gap-2">
-                  <UserPlus size={18} />
-                  <span>Add New Student to Roster</span>
-                </h4>
-                <button
-                  type="button"
-                  onClick={() => setShowAddStudent(false)}
-                  className="text-xs text-zinc-400 hover:text-white"
-                >
-                  Cancel
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-medium">
-                <div>
-                  <label className="block text-zinc-400 mb-1">English Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={newStudentEn}
-                    onChange={(e) => setNewStudentEn(e.target.value)}
-                    placeholder="e.g. Min-jun Kim"
-                    className={`w-full p-2.5 rounded-xl border ${
-                      isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-                    }`}
-                  />
-                </div>
-                <div>
-                  <label className="block text-zinc-400 mb-1">Korean Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={newStudentKo}
-                    onChange={(e) => setNewStudentKo(e.target.value)}
-                    placeholder="e.g. 김민준"
-                    className={`w-full p-2.5 rounded-xl border ${
-                      isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-                    }`}
-                  />
-                </div>
-                <div>
-                  <label className="block text-zinc-400 mb-1">Assign Class</label>
-                  <select
-                    value={newStudentClass}
-                    onChange={(e) => setNewStudentClass(e.target.value)}
-                    className={`w-full p-2.5 rounded-xl border ${
-                      isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-                    }`}
-                  >
-                    <option value="7A Sunshine">7A Sunshine</option>
-                    <option value="8B Excellence">8B Excellence</option>
-                    <option value="6C Phonics">6C Phonics</option>
-                  </select>
-                </div>
-                <div className="flex items-end">
-                  <button
-                    type="submit"
-                    className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs cursor-pointer shadow-md active:scale-95 transition-all"
-                  >
-                    Save Student
-                  </button>
-                </div>
-              </div>
-            </form>
-          )}
-
-          {/* Student Roster Table */}
-          <div
-            className={`rounded-2xl border overflow-hidden ${
-              isNight ? 'bg-[#050507] border-white/10' : 'bg-white border-zinc-200'
-            }`}
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead
-                  className={`font-mono text-[11px] uppercase tracking-wider ${
-                    isNight ? 'bg-white/5 text-zinc-400' : 'bg-zinc-100 text-zinc-600'
-                  }`}
-                >
-                  <tr>
-                    <th className="p-4">Student Name (EN/KO)</th>
-                    <th className="p-4">Grade</th>
-                    <th className="p-4">Assigned Class</th>
-                    <th className="p-4">Exception Status</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y ${isNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
-                  {filteredStudents.map((st) => (
-                    <tr key={st.id} className={isNight ? 'hover:bg-white/[0.02]' : 'hover:bg-zinc-50'}>
-                      <td className="p-4 font-bold">
-                        <div className="flex items-center gap-2">
-                          <span className={isNight ? 'text-white' : 'text-zinc-900'}>{st.nameEn}</span>
-                          <span className="text-zinc-400 font-normal">({st.nameKo})</span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-zinc-400">{st.grade}</td>
-                      <td className="p-4">
-                        <span className="px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 font-bold border border-orange-500/20 text-[11px]">
-                          {st.assignedClass}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        {st.flaggedException ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 font-bold text-[11px] border border-amber-500/30">
-                            <WarningCircle size={14} />
-                            <span>Flagged Issue</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-zinc-500 font-mono">
-                            <CheckCircle size={13} className="text-emerald-500" />
-                            <span>Normal</span>
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveStudent(st.id)}
-                          className="p-1.5 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
-                          title="Remove student from roster"
-                        >
-                          <Trash size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <NativeDirectorStudentsTab
+          isNight={isNight}
+          isKo={isKo}
+          pendingRoster={pendingRoster}
+          activeRoster={activeRoster}
+          isLoadingRoster={isLoadingRoster}
+          classes={classes}
+          selectedClass={selectedClass}
+          handleApproveStudent={handleApproveStudent}
+          handleDeclineStudent={handleDeclineStudent}
+          handleRemoveStudent={handleRemoveStudent}
+          handleMoveStudent={handleMoveStudent}
+          fetchRosterAndMistakes={fetchRosterAndMistakes}
+          setSelectedStudentDetails={setSelectedStudentDetails}
+        />
       )}
 
       {/* ========================================================================= */}
@@ -553,54 +335,13 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             <div className="space-y-1 text-xs">
               <h4 className="font-bold text-amber-400">Director Exception Oversight Center</h4>
               <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
-                Foreign teachers flagged these specific students for academic or behavioral issues during daily logs.
-                Korean counselors use these pre-generated talking points for parent phone calls.
+                Coming soon: foreign teachers will be able to flag a student for academic or
+                behavioral issues during their daily logs, and Korean counselors will get
+                pre-generated talking points here for parent phone calls. That flagging
+                capability doesn&apos;t exist yet on the teacher side, so this tab has nothing
+                real to show until it does.
               </p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {flaggedStudents.map((st) => (
-              <div
-                key={st.id}
-                className={`p-6 rounded-2xl border space-y-4 ${
-                  isNight ? 'bg-[#08080c] border-white/10' : 'bg-white border-zinc-200 shadow-sm'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-black text-sm text-white">
-                      {st.nameEn} ({st.nameKo})
-                    </h4>
-                    <span className="text-xs text-orange-400 font-mono">{st.assignedClass}</span>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                    {st.flaggedException?.date}
-                  </span>
-                </div>
-
-                <div className={`p-4 rounded-xl border text-xs leading-relaxed ${isNight ? 'bg-[#030305] border-white/5 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-800'}`}>
-                  <span className="text-[10px] font-bold uppercase font-mono text-zinc-500 block mb-1">
-                    Flagged Reason by {st.flaggedException?.teacherName}:
-                  </span>
-                  <p>{st.flaggedException?.reason}</p>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
-                  <span className="text-zinc-400 font-mono text-[11px]">Parent Consultation Prep Ready</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      alert(`Phone Talking Points for ${st.nameKo}:\n1. Acknowledge class effort\n2. Address: ${st.flaggedException?.reason}\n3. Suggest 10-minute home vocabulary review.`);
-                    }}
-                    className="px-3 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold rounded-lg border border-orange-500/30 flex items-center gap-1.5 cursor-pointer transition-colors"
-                  >
-                    <PhoneCall size={14} />
-                    <span>View Phone Script</span>
-                  </button>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       )}
