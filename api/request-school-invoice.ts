@@ -1,25 +1,34 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry';
+import { Redis } from '@upstash/redis';
+import { Ratelimit } from '@upstash/ratelimit';
 import { adminDb } from './_lib/firebaseAdmin';
+import { applyCors } from './_lib/cors';
 
-const allowedOrigins = [
-  'https://chekkiai.com',
-  'https://www.chekkiai.com',
-  'http://localhost:5173',
-  'http://localhost:3000',
-];
+// This endpoint is public/unauthenticated (a sales lead form) and triggers a
+// real Resend email per call — rate limit hard so it can't be used to spam
+// arbitrary inboxes or run up the Resend bill.
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
+const ratelimit = redis
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3, '3600 s'), analytics: true })
+  : null;
 
 async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS headers
-  const origin = req.headers.origin as string | undefined;
-  const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  applyCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  if (ratelimit) {
+    const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anonymous';
+    const ipString = Array.isArray(ip) ? ip[0] : ip;
+    const { success } = await ratelimit.limit(`invoice_${ipString}`);
+    if (!success) {
+      return res.status(429).json({ error: 'Too many requests. Try again later.' });
+    }
+  }
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
@@ -165,7 +174,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (err: any) {
     console.error('[request-school-invoice] Error:', err);
-    return res.status(500).json({ error: err?.message || 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
 

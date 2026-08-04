@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
 import { maxInvitesForRole } from './_lib/seatLimits';
+import { applyCors } from './_lib/cors';
 
 /**
  * Director-only: generates a role-locked, seat-checked teacher invite.
@@ -22,19 +23,7 @@ function generateInviteId(): string {
 }
 
 async function handler(req: VercelRequest, res: VercelResponse) {
-  const allowedOrigins = [
-    'https://chekkiai.com',
-    'https://www.chekkiai.com',
-    'http://localhost:5173',
-    'http://localhost:3000',
-  ];
-  const origin = req.headers.origin as string | undefined;
-  const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  const corsOrigin = applyCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -96,7 +85,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     };
     await invitesRef.doc(inviteId).set(invitePayload);
 
-    const inviteUrl = `${corsOrigin}/teacher?invite=${inviteId}`;
+    // Always build the invite link against a real https origin — corsOrigin
+    // can resolve to 'capacitor://localhost' when the request comes from
+    // the native app's WebView, which would produce a broken link.
+    const linkOrigin = corsOrigin.startsWith('http') ? corsOrigin : 'https://chekkiai.com';
+    const inviteUrl = `${linkOrigin}/teacher?invite=${inviteId}`;
 
     // Email the invite directly if we have an address — reuses the same
     // Resend integration already wired up for invoice emails (audit §22),

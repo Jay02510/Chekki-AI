@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Buildings, CheckCircle, FolderUser, UserGear, UploadSimple } from '@phosphor-icons/react';
 import { auth } from '../../services/database';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
+import { useToast } from '../../contexts/ToastContext';
 
 interface Props {
   isNight?: boolean;
@@ -19,6 +20,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
   onComplete,
 }) => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const { showToast } = useToast();
 
   // Step 1: School Profile
   const [academyName, setAcademyName] = useState(() => (typeof window !== 'undefined' ? sessionStorage.getItem('chekki_paid_school') || '' : ''));
@@ -57,13 +59,24 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
     if (!academyName.trim()) return;
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      await fetch('/api/update-school-profile', {
+      const response = await fetch('/api/update-school-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
         body: JSON.stringify({ academyName: academyName.trim() }),
       });
+      if (!response.ok) throw new Error(await response.text());
     } catch (err) {
       console.warn('Failed to persist academy name:', err);
+      // Not on the critical path for the wizard (still lets the director
+      // continue), but a silent failure here used to mean they'd finish
+      // onboarding and see the 'B2B Academy' placeholder everywhere with no
+      // idea why — this at least tells them to fix it in settings.
+      showToast({
+        type: 'error',
+        message: isKo
+          ? '학원 이름 저장에 실패했습니다. 나중에 설정에서 다시 시도해주세요.'
+          : "Couldn't save your academy name. Please try again later from settings.",
+      });
     }
   };
 
@@ -169,8 +182,12 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                       </div>
                     )}
                     <div>
-                      <p className="text-xs font-bold">{logoPreview ? (isKo ? '로고 업로드 완료' : 'Logo Uploaded') : (isKo ? '원장님 로고 이미지 첨부' : 'Attach School Logo Image')}</p>
-                      <p className="text-[10px] text-zinc-400">PNG, JPG (Transparent background recommended)</p>
+                      <p className="text-xs font-bold">{logoPreview ? (isKo ? '미리보기 (아직 저장되지 않음)' : 'Preview (not saved yet)') : (isKo ? '원장님 로고 이미지 첨부' : 'Attach School Logo Image')}</p>
+                      <p className="text-[10px] text-zinc-400">
+                        {logoPreview
+                          ? (isKo ? '로고 업로드 기능은 준비 중입니다.' : 'Logo upload isn’t saved to your account yet — coming soon.')
+                          : 'PNG, JPG (Transparent background recommended)'}
+                      </p>
                     </div>
                   </div>
 

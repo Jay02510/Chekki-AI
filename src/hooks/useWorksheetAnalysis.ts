@@ -12,8 +12,15 @@ const SESSION_KEY = 'hw_last_session';
 const GUEST_SCAN_KEY = 'chekki_guest_scan_used';
 
 export const useWorksheetAnalysis = () => {
-  const { user, openLoginModal, isAuthenticated, incrementScan, checkScanLimit, setShowPaywall } =
-    useAuth();
+  const {
+    user,
+    openLoginModal,
+    isAuthenticated,
+    incrementScan,
+    decrementScan,
+    checkScanLimit,
+    setShowPaywall,
+  } = useAuth();
   const { language } = useLanguage();
   const { autoBookmark } = useMistakes();
 
@@ -218,6 +225,19 @@ export const useWorksheetAnalysis = () => {
 
         return true; // Success
       } catch (e: unknown) {
+        // The scan was deducted before the API call (deliberately, to close
+        // a quota-bypass gap — see the DEDUCT SCAN comment above). A failed
+        // or aborted request produced no result, so refund it rather than
+        // silently costing the user a real scan (their only free one, for
+        // guests).
+        if (!isRetry) {
+          if (isAuthenticated) {
+            decrementScan();
+          } else {
+            localStorage.removeItem(GUEST_SCAN_KEY);
+          }
+        }
+
         if (e instanceof Error) {
           if (e.name === 'AbortError') return;
           console.error('[useWorksheetAnalysis] Analysis error:', e.message, e);
@@ -255,6 +275,7 @@ export const useWorksheetAnalysis = () => {
       checkScanLimit,
       openLoginModal,
       incrementScan,
+      decrementScan,
       setShowPaywall,
       user?.uid,
       user?.plan,

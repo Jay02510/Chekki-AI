@@ -1,21 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry';
 import { adminAuth } from './_lib/firebaseAdmin';
-
-const allowedOrigins = [
-  'capacitor://localhost',
-  'http://localhost',
-  'https://chekkiai.com',
-  'https://www.chekkiai.com',
-];
+import { applyCors } from './_lib/cors';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
-  const origin = req.headers.origin as string | undefined;
-  const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  applyCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -62,7 +51,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         if (email) {
           createParams.email = email;
         }
-        await adminAuth.createUser(createParams);
+        try {
+          await adminAuth.createUser(createParams);
+        } catch (createErr: any) {
+          // Firebase enforces unique emails, so this can't silently take
+          // over an existing email/Google/Apple account — it fails loudly.
+          // Give the user an actionable message instead of a raw 500.
+          if (createErr.code === 'auth/email-already-exists') {
+            return res.status(409).json({
+              error: 'An account with this email already exists. Please sign in using your original method.',
+            });
+          }
+          throw createErr;
+        }
       } else {
         throw err;
       }
@@ -82,7 +83,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (err: any) {
     console.error('[kakao-auth] Error:', err);
-    return res.status(500).json({ error: err.message || 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
 

@@ -68,6 +68,7 @@ interface AuthContextType {
   updateProfile: (name: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   incrementScan: () => Promise<boolean>;
+  decrementScan: () => void;
   checkScanLimit: () => boolean;
   checkQuestionLimit: () => boolean;
   incrementQuestion: () => Promise<boolean>;
@@ -1057,6 +1058,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Refunds the optimistic local-state increment from incrementScan() when
+  // an analysis request fails after the scan was deducted (deducting before
+  // the API call, rather than after, is deliberate — it closes a quota-
+  // bypass gap — but a failed request shouldn't cost the user a real scan).
+  // The real quota (Firestore scansUsedToday) is only ever incremented by
+  // api/analyze.ts on success, so this just re-syncs the local optimistic
+  // copy back to match — it isn't a second source of truth.
+  const decrementScan = (): void => {
+    setUserProfile((prev) =>
+      prev ? { ...prev, scansUsedToday: Math.max(0, prev.scansUsedToday - 1) } : null
+    );
+  };
+
   const checkQuestionLimit = (): boolean => {
     if (!userProfile || userProfile.plan === 'pro') return true;
     const today = new Date().toISOString().split('T')[0];
@@ -1301,6 +1315,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteAccount,
         checkScanLimit,
         incrementScan,
+        decrementScan,
         checkQuestionLimit,
         incrementQuestion,
         upgradeToPro,

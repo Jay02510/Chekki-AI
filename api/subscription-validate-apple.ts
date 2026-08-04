@@ -1,13 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
-
-const allowedOrigins = [
-  'capacitor://localhost',
-  'http://localhost',
-  'https://chekkiai.com',
-  'https://www.chekkiai.com',
-];
+import { applyCors } from './_lib/cors';
 
 // Apple receipt validation endpoints
 const APPLE_PRODUCTION_URL = 'https://buy.itunes.apple.com/verifyReceipt';
@@ -33,7 +27,7 @@ async function validateWithApple(receiptData: string, useSandbox = false): Promi
   return response.json();
 }
 
-function extractLatestExpiry(receiptInfo: any[]): Date | null {
+export function extractLatestExpiry(receiptInfo: any[]): Date | null {
   if (!receiptInfo || receiptInfo.length === 0) return null;
 
   const sorted = [...receiptInfo].sort((a, b) => {
@@ -48,12 +42,7 @@ function extractLatestExpiry(receiptInfo: any[]): Date | null {
 }
 
 async function handler(req: VercelRequest, res: VercelResponse) {
-  const origin = req.headers.origin as string | undefined;
-  const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  applyCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

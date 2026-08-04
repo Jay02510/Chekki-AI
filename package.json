@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "test": "vitest run",
-    "lint": "eslint . --ext .ts,.tsx --fix",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,css,md}\"",
     "build": "tsc --skipLibCheck && vite build",
     "build:mobile": "npm run build && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html",
@@ -16,6 +17,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@apple/app-store-server-library": "^3.1.0",
     "@capacitor-community/apple-sign-in": "^7.1.0",
     "@capacitor-community/in-app-review": "^8.0.0",
     "@capacitor/android": "^8.1.0",

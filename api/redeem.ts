@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
+import { applyCors } from './_lib/cors';
 
 /**
  * Merged redeem-class-code / redeem-school-code / redeem-teacher-code /
@@ -12,19 +13,7 @@ import { adminDb, adminAuth } from './_lib/firebaseAdmin';
  * endpoint's original request shape exactly.
  */
 async function handler(req: VercelRequest, res: VercelResponse) {
-  const allowedOrigins = [
-    'https://chekkiai.com',
-    'https://www.chekkiai.com',
-    'http://localhost:5173',
-    'http://localhost:3000',
-  ];
-  const origin = req.headers.origin as string | undefined;
-  const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  applyCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

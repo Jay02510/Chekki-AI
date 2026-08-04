@@ -5,8 +5,18 @@ import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 import { adminDb, adminAuth as authDb } from './_lib/firebaseAdmin';
 import { seatsForPlan } from './_lib/pricingTiers';
+import { applyCors } from './_lib/cors';
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
+
+// schoolId becomes a Firestore doc ID via .doc(sanitizedSchoolId) below — the
+// Admin SDK treats '/' in that string as a subcollection path separator, so
+// an unrestricted schoolId (e.g. containing '/') could target an arbitrary
+// nested path instead of a single schools/{id} document. Strip to a safe,
+// still-human-readable charset.
+export function sanitizeSchoolId(raw: string): string {
+  return raw.toUpperCase().trim().replace(/[^A-Z0-9_-]/g, '');
+}
 
 // This endpoint gates account impersonation, deletion, and upgrades behind a
 // single shared passcode — rate limit failed attempts hard so it can't be
@@ -23,19 +33,7 @@ const ratelimit = redis
   : null;
 
 async function handler(req: VercelRequest, res: VercelResponse) {
-  const allowedOrigins = [
-    'https://chekkiai.com',
-    'https://www.chekkiai.com',
-    'http://localhost:5173',
-    'http://localhost:3000',
-  ];
-  const origin = req.headers.origin as string | undefined;
-  const corsOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  applyCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -64,10 +62,20 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Unauthorized: Invalid Passcode' });
   }
 
-  // Minimal audit trail for powerful actions (impersonation, deletion).
-  if (action === 'impersonate' || action === 'delete') {
-    console.warn(`[admin.ts] AUDIT: action=${action} uid=${uid || 'n/a'} email=${email || 'n/a'} at=${new Date().toISOString()}`);
-  }
+  // Persistent audit trail for every admin action (not just console output,
+  // which is easy to lose in Vercel's rolling log retention). The passcode
+  // is shared/anonymous, so this is the only record of what an admin did.
+  const auditIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
+  adminDb.collection('adminAuditLog').add({
+    action,
+    uid: uid || null,
+    email: email || null,
+    schoolId: schoolId || null,
+    ip: Array.isArray(auditIp) ? auditIp[0] : auditIp,
+    at: new Date().toISOString(),
+  }).catch((auditErr) => {
+    console.error('[admin.ts] Failed to write audit log:', auditErr);
+  });
 
   try {
     if (action === 'list') {
@@ -226,7 +234,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       if (!schoolName) return res.status(400).json({ error: 'Missing schoolName' });
       if (!teacherCode) return res.status(400).json({ error: 'Missing teacherCode' });
 
-      const sanitizedSchoolId = schoolId.toUpperCase().trim();
+      const sanitizedSchoolId = sanitizeSchoolId(schoolId);
+      if (!sanitizedSchoolId) return res.status(400).json({ error: 'Invalid schoolId' });
       const sanitizedTeacherCode = teacherCode.toUpperCase().trim();
 
       await adminDb
@@ -259,7 +268,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ success: true, schools });
     } else if (action === 'delete_school') {
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
-      const sanitizedSchoolId = schoolId.toUpperCase().trim();
+      const sanitizedSchoolId = sanitizeSchoolId(schoolId);
+      if (!sanitizedSchoolId) return res.status(400).json({ error: 'Invalid schoolId' });
 
       const usersRef = adminDb.collection('users');
       const teachersSnapshot = await usersRef.where('schoolId', '==', sanitizedSchoolId).get();
@@ -305,7 +315,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       if (!invoiceSnap.exists) return res.status(404).json({ error: 'Invoice not found' });
 
       const invoiceData = invoiceSnap.data() || {};
-      const sanitizedSchoolId = (invoiceData.academyName || 'SCHOOL').toUpperCase().replace(/\s+/g, '-').slice(0, 10) + `_${Date.now().toString().slice(-4)}`;
+      const academyPrefix = sanitizeSchoolId((invoiceData.academyName || 'SCHOOL').replace(/\s+/g, '-')).slice(0, 10) || 'SCHOOL';
+      const sanitizedSchoolId = `${academyPrefix}_${Date.now().toString().slice(-4)}`;
       const teacherCode = `${sanitizedSchoolId.split('_')[0]}-TEACHER`;
 
       // 1. Create school in schools collection
@@ -499,7 +510,7 @@ https://urlgeni.us/chekki
     }
   } catch (err: any) {
     console.error(`[admin] Error (${action}):`, err);
-    return res.status(500).json({ error: err.message || 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
 

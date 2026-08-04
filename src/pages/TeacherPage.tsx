@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useToast } from '../../contexts/ToastContext';
 import { dbInstance, auth } from '../../services/database';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
@@ -60,6 +61,7 @@ interface Props {
 
 export default function TeacherPage({ isNight = true }: Props) {
   const { user, firebaseUser, signIn, signUp, logout, deleteAccount, isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const { language, setLanguage } = useLanguage();
   const [isThemeNight, setIsThemeNight] = useState(isNight);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -146,6 +148,12 @@ export default function TeacherPage({ isNight = true }: Props) {
       setActiveTab('kt_script');
     } catch (err) {
       console.error('Failed to generate AI report from FT log:', err);
+      showToast({
+        type: 'error',
+        message: isKo
+          ? '일지 생성에 실패했습니다. 다시 제출해주세요.'
+          : "Couldn't generate the report from your log. Please try submitting again.",
+      });
     } finally {
       setIsSubmittingFtLog(false);
     }
@@ -222,6 +230,33 @@ export default function TeacherPage({ isNight = true }: Props) {
   );
   const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
   const [submittedLogs, setSubmittedLogs] = useState<any[]>([]);
+
+  // Retries a role write that failed server-side at signup (see the
+  // set-initial-role call above) so the account doesn't stay
+  // localStorage-only on this device forever, silently losing its role on
+  // any other device/browser.
+  useEffect(() => {
+    if (!user?.uid) return;
+    const uid = user.uid;
+    const pendingRole = localStorage.getItem(`chekki_pending_role_sync_${uid}`);
+    if (!pendingRole) return;
+
+    (async () => {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        const response = await fetch('/api/set-initial-role', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+          body: JSON.stringify({ role: pendingRole }),
+        });
+        if (response.ok) {
+          localStorage.removeItem(`chekki_pending_role_sync_${uid}`);
+        }
+      } catch (err) {
+        console.warn('Pending role sync retry failed, will retry on next visit:', err);
+      }
+    })();
+  }, [user?.uid]);
 
   useEffect(() => {
     if (user) {
@@ -886,9 +921,15 @@ export default function TeacherPage({ isNight = true }: Props) {
               });
               if (!response.ok) {
                 console.warn('Server-side role assignment failed, using localStorage fallback:', await response.text());
+                // Retried automatically by the pendingRoleSync effect below
+                // on this device — the role otherwise only lives in
+                // localStorage and silently vanishes on any other
+                // device/browser.
+                localStorage.setItem(`chekki_pending_role_sync_${newUid}`, assignedRole);
               }
             } catch (roleErr) {
               console.warn('Role write failed, using localStorage fallback:', roleErr);
+              localStorage.setItem(`chekki_pending_role_sync_${newUid}`, assignedRole);
             }
             localStorage.setItem(`chekki_user_role_${newUid}`, assignedRole);
           }
@@ -1405,9 +1446,10 @@ export default function TeacherPage({ isNight = true }: Props) {
       const userRef = doc(dbInstance, 'users', studentUid);
       await updateDoc(userRef, { classStatus: 'active' });
       await fetchRosterAndMistakes();
-      alert(isKo ? '원생 승인이 완료되었습니다.' : 'Student approved successfully.');
+      showToast({ type: 'success', message: isKo ? '원생 승인이 완료되었습니다.' : 'Student approved successfully.' });
     } catch (err) {
       console.error('Failed to approve student:', err);
+      showToast({ type: 'error', message: isKo ? '원생 승인에 실패했습니다. 다시 시도해주세요.' : 'Failed to approve student. Please try again.' });
     }
   };
 
@@ -1418,6 +1460,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       await fetchRosterAndMistakes();
     } catch (err) {
       console.error('Failed to decline student:', err);
+      showToast({ type: 'error', message: isKo ? '거절 처리에 실패했습니다. 다시 시도해주세요.' : 'Failed to decline student. Please try again.' });
     }
   };
 
@@ -1429,6 +1472,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       await fetchRosterAndMistakes();
     } catch (err) {
       console.error('Failed to remove student:', err);
+      showToast({ type: 'error', message: isKo ? '학생 삭제에 실패했습니다. 다시 시도해주세요.' : 'Failed to remove student. Please try again.' });
     }
   };
 
@@ -1438,9 +1482,10 @@ export default function TeacherPage({ isNight = true }: Props) {
       const userRef = doc(dbInstance, 'users', studentUid);
       await updateDoc(userRef, { classId: targetClassId, classStatus: 'active' });
       await fetchRosterAndMistakes();
-      alert(isKo ? '학급 이동이 완료되었습니다.' : 'Student transferred successfully.');
+      showToast({ type: 'success', message: isKo ? '학급 이동이 완료되었습니다.' : 'Student transferred successfully.' });
     } catch (err) {
       console.error('Failed to transfer student:', err);
+      showToast({ type: 'error', message: isKo ? '학급 이동에 실패했습니다. 다시 시도해주세요.' : 'Failed to transfer student. Please try again.' });
     }
   };
 

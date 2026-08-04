@@ -224,9 +224,14 @@ service cloud.firestore {
 
       match /studentScans/{scanId} {
         allow read: if request.auth != null;
+        // A scan can only ever be written as the writer's own uid — the old
+        // rule OR'd `userBelongsToClass(classId)` on its own, which let any
+        // classmate create/overwrite another student's scan record, and
+        // OR'd the studentUid-match on its own, which let anyone write into
+        // a class they don't belong to as long as they set studentUid to
+        // themselves. Both conditions are now required together.
         allow create, update: if request.auth != null && (
-          userBelongsToClass(classId) ||
-          request.resource.data.studentUid == request.auth.uid ||
+          (userBelongsToClass(classId) && request.resource.data.studentUid == request.auth.uid) ||
           isClassTeacher(classId) ||
           isAdmin()
         );

@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry';
 import crypto from 'crypto';
 import { adminDb } from './_lib/firebaseAdmin';
+import { verifyAppleNotification, verifyAppleTransaction } from './_lib/appleWebhookVerifier';
 
 /**
  * Apple Server-to-Server Notification Handler
@@ -30,25 +31,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Apple sends a 'signedPayload' (JWT) for version 2
     if (payload.signedPayload) {
-      // Version 2 (App Store Server Notifications v2)
-      // Decode the payload (Verifying requires Apple's public cert chain, usually overkill for non-financial apps but recommended)
-      const parts = payload.signedPayload.split('.');
-      if (parts.length < 2) return res.status(400).json({ error: 'Invalid signed payload' });
-
-      const decoded = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+      // Verify the outer notification JWS against Apple's real certificate
+      // chain before trusting anything in it — a base64 decode alone (the
+      // old behavior here) lets anyone POST a crafted payload and flip a
+      // user to plan:'pro'.
+      const decoded = await verifyAppleNotification(payload.signedPayload);
       const { notificationType, subtype, data } = decoded;
 
-      // The 'data' object contains 'signedTransactionInfo' and 'signedRenewalInfo'
-      // which also need decoding.
-      let transactionInfo = null;
+      // signedTransactionInfo is itself a separately-signed JWS and needs
+      // its own verification, not just a base64 decode.
+      let transactionInfo: any = null;
       if (data?.signedTransactionInfo) {
-        const tParts = data.signedTransactionInfo.split('.');
-        if (tParts.length >= 2) {
-          transactionInfo = JSON.parse(Buffer.from(tParts[1], 'base64').toString('utf-8'));
-        }
+        transactionInfo = await verifyAppleTransaction(data.signedTransactionInfo).catch((e) => {
+          console.error('[webhook-apple] Transaction JWS verification failed:', e);
+          return null;
+        });
       }
 
-      await handleNotification(notificationType, subtype, transactionInfo);
+      await handleNotification(notificationType as string, subtype as string, transactionInfo);
     } else {
       // Version 1 fallback
       const { notification_type, latest_receipt_info } = payload;

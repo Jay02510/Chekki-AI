@@ -72,6 +72,18 @@
     },
     "api/subscription-webhook-apple.ts": {
       "maxDuration": 15
+    },
+    "api/kakao-auth.ts": {
+      "maxDuration": 15
+    },
+    "api/create-teacher-invite.ts": {
+      "maxDuration": 15
+    },
+    "api/admin.ts": {
+      "maxDuration": 15
+    },
+    "api/request-school-invoice.ts": {
+      "maxDuration": 15
     }
   }
 }

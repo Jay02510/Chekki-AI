@@ -23,14 +23,17 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Test
-        run: npx vitest run
+        run: npm test
 
       - name: Lint
         # Report-only: repo has a pre-existing baseline of lint errors/warnings
         # not yet triaged, so this step is informational and won't block PRs
-        # until that baseline is cleaned up.
+        # until that baseline is cleaned up. Runs the same non-mutating
+        # `npm run lint` a contributor would run locally (the old raw `npx
+        # eslint` call here had drifted from package.json's script, whose
+        # `lint` used to --fix in place — never safe for CI to run).
         continue-on-error: true
-        run: npx eslint . --ext .ts,.tsx
+        run: npm run lint
 
       - name: Build
         run: npx vite build

@@ -5,6 +5,7 @@ import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 import crypto from 'crypto';
 import { adminDb, adminAuth as adminAuthClient } from './_lib/firebaseAdmin';
+import { applyCors } from './_lib/cors';
 
 export const config = {
   maxDuration: 300,
@@ -253,23 +254,10 @@ const CONSOLIDATED_SCHEMA = {
   required: ['worksheet_summary', 'items'],
 };
 
-const ANALYZE_ALLOWED_ORIGINS = [
-  'capacitor://localhost',
-  'http://localhost',
-  'https://chekkiai.com',
-  'https://www.chekkiai.com',
-];
-
 async function handler(req: any, res: any) {
   const adminAuth = adminAuthClient;
 
-  // CORS headers for Capacitor WebView (origin: capacitor://localhost)
-  const reqOrigin = req.headers.origin as string | undefined;
-  const corsOrigin = reqOrigin && ANALYZE_ALLOWED_ORIGINS.includes(reqOrigin) ? reqOrigin : ANALYZE_ALLOWED_ORIGINS[0];
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Idempotency-Key');
+  applyCors(req, res, { headers: 'Content-Type, Authorization, X-Idempotency-Key' });
 
   // Handle preflight
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -306,11 +294,17 @@ async function handler(req: any, res: any) {
 
         if (isCredentialError) {
           console.error(
-            '[analyze.ts] ⚠️ Firebase Admin credential error — FIREBASE_SERVICE_ACCOUNT may be missing from Vercel env vars. Degrading gracefully (no token verification).',
+            '[analyze.ts] Firebase Admin credential error — FIREBASE_SERVICE_ACCOUNT may be missing from Vercel env vars.',
             err.message
           );
           firebaseAdminAvailable = false;
-          // Do NOT reject the request — fall through as unverified
+          // Fail closed for anything that requires auth: a broken service
+          // account must never be treated as "let the request through
+          // unverified", since that used to let a client-supplied plan
+          // (see userData fallback below) bypass paid-tier quota checks.
+          if (requiresAuth) {
+            return res.status(503).json({ error: 'Service temporarily unavailable' });
+          }
         } else {
           console.error('[analyze.ts] Token Verification Failed (invalid token):', err.message);
           if (requiresAuth) {
@@ -477,8 +471,11 @@ async function handler(req: any, res: any) {
     } = body;
 
     // --- SECURITY: Fetch Real User Data ---
+    // Plan always defaults to 'free' regardless of what the client sends —
+    // clientPlan is read above for logging/back-compat only, never trusted
+    // for quota enforcement (a client could otherwise self-report 'pro').
     let userData: any = {
-      plan: clientPlan || 'free',
+      plan: 'free',
       scansUsedToday: 0,
       maxScansPerDay: 2,
       lastScanDate: '',
@@ -1166,7 +1163,7 @@ CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
     console.error('[Backend Security Error]:', error);
     return res.status(500).json({
       error: 'ANALYSIS_FAILED',
-      details: error.message || 'An unexpected error occurred during analysis.',
+      details: 'An unexpected error occurred during analysis.',
     });
   }
 }

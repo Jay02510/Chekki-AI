@@ -21,7 +21,6 @@ import { ProgressiveOnboardingModal } from './components/ProgressiveOnboardingMo
 import SubscribePage from './src/pages/SubscribePage';
 import AdminPage from './src/pages/AdminPage';
 import TeacherPage from './src/pages/TeacherPage';
-import DirectorPage from './src/pages/DirectorPage';
 import SchoolsLandingPage from './src/pages/SchoolsLandingPage';
 import ReportStudioPage from './src/pages/ReportStudioPage';
 import { AnalysisState, LegalType } from './types';
@@ -201,7 +200,6 @@ function AppContent() {
       pathname.includes('/schools/login')
     );
   });
-  const [showDirectorPage, setShowDirectorPage] = useState(false);
   const [showSchoolsPage, setShowSchoolsPage] = useState(() => {
     if (typeof window === 'undefined') return false;
     const { pathname, search } = window.location;
@@ -487,7 +485,6 @@ function AppContent() {
   if (showSubscribePage && platform === 'web') return <ErrorBoundary><SubscribePage /></ErrorBoundary>;
   if (showAdminPage && platform === 'web') return <ErrorBoundary><AdminPage /></ErrorBoundary>;
   if (showTeacherPage && platform === 'web') return <ErrorBoundary><TeacherPage isNight={isNight} /></ErrorBoundary>;
-  if (showDirectorPage && platform === 'web') return <ErrorBoundary><DirectorPage isNight={isNight} /></ErrorBoundary>;
   if (showSchoolsPage && platform === 'web')
     return <ErrorBoundary><SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} /></ErrorBoundary>;
   if (showReportStudioPage && platform === 'web')
