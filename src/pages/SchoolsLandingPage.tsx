@@ -36,7 +36,8 @@ const PRICING_TIERS = {
     monthly: { krw: 0, usd: 0 },
     yearly: { krw: 0, usd: 0 },
     minSeats: 1,
-    defaultTeachers: 1
+    defaultTeachers: 1,
+    seats: { ft: 1, kt: 1 }
   },
   solo: {
     id: 'solo',
@@ -45,7 +46,8 @@ const PRICING_TIERS = {
     monthly: { krw: 39000, usd: 29 },
     yearly: { krw: 31000, usd: 23 },
     minSeats: 1,
-    defaultTeachers: 1
+    defaultTeachers: 1,
+    seats: { ft: 1, kt: 0 }
   },
   starter: {
     id: 'starter',
@@ -54,7 +56,8 @@ const PRICING_TIERS = {
     monthly: { krw: 69000, usd: 49 },
     yearly: { krw: 55000, usd: 39 },
     minSeats: 1,
-    defaultTeachers: 3
+    defaultTeachers: 3,
+    seats: { ft: 2, kt: 1 }
   },
   school_pro: {
     id: 'school_pro',
@@ -63,7 +66,8 @@ const PRICING_TIERS = {
     monthly: { krw: 290000, usd: 220 },
     yearly: { krw: 232000, usd: 175 },
     minSeats: 5,
-    defaultTeachers: 10
+    defaultTeachers: 10,
+    seats: { ft: 6, kt: 4 }
   },
   enterprise: {
     id: 'enterprise',
@@ -72,7 +76,8 @@ const PRICING_TIERS = {
     monthly: { krw: 590000, usd: 450 },
     yearly: { krw: 472000, usd: 360 },
     minSeats: 10,
-    defaultTeachers: 20
+    defaultTeachers: 20,
+    seats: { ft: 12, kt: 8 }
   }
 };
 

@@ -43,7 +43,7 @@ service cloud.firestore {
       allow update: if request.auth != null && (
         isAdmin() || 
         // User updating their own profile
-        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate'])) ||
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'schoolId', 'schoolName', 'educatorRole', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate'])) ||
         // Teacher updating classroom fields
         (
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' &&
@@ -173,6 +173,19 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == schoolId
       );
       allow write: if request.auth != null && isAdmin();
+    }
+
+    // Teacher invites (audit §21): director dashboards read these directly via
+    // the client SDK to show seat usage and pending invites, but every write
+    // (create on send, claim on redemption) only ever happens server-side via
+    // Admin SDK in api/create-teacher-invite.ts and api/redeem-invite.ts —
+    // role and seat-limit enforcement live there, not in these rules.
+    match /invites/{inviteId} {
+      allow read: if request.auth != null && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId
+      );
+      allow write: if false;
     }
 
     // Classes rules

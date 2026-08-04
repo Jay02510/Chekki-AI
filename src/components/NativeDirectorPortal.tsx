@@ -17,6 +17,7 @@ import {
   FolderUser,
   EnvelopeSimple
 } from '@phosphor-icons/react';
+import { TeacherInvitePanel } from './TeacherInvitePanel';
 
 interface StudentItem {
   id: string;
@@ -44,12 +45,16 @@ interface Props {
   isNight?: boolean;
   academyName?: string;
   onOpenLogoModal?: () => void;
+  schoolId?: string;
+  seatsTotal?: { ft: number; kt: number };
 }
 
 export const NativeDirectorPortal: React.FC<Props> = ({
   isNight = true,
   academyName = 'Apex English Academy (Seocho)',
-  onOpenLogoModal
+  onOpenLogoModal,
+  schoolId,
+  seatsTotal
 }) => {
   const [activeTab, setActiveTab] = useState<'roster' | 'curriculum' | 'exceptions' | 'teachers'>('curriculum');
 
@@ -605,43 +610,18 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* ========================================================================= */}
       {activeTab === 'teachers' && (
         <div className="space-y-6">
-          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <UserGear size={20} className="text-blue-400 shrink-0 mt-0.5" />
-              <div className="space-y-1 text-xs text-left">
-                <h4 className="font-bold text-blue-400">Teacher &amp; Staff Invite System</h4>
-                <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
-                  Invite Foreign Teachers (FT) and Korean Teachers (KT) via email or single-click workspace invite link.
-                </p>
-              </div>
+          {schoolId ? (
+            <TeacherInvitePanel
+              isNight={isNight}
+              isKo={false}
+              schoolId={schoolId}
+              seatsTotal={seatsTotal || { ft: 0, kt: 0 }}
+            />
+          ) : (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
+              School profile still loading — invites will be available once it finishes.
             </div>
-            <div className="flex flex-wrap gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  const inviteUrl = `${window.location.origin}/teacher?invite=${encodeURIComponent(academyName.replace(/\s+/g, '-').toLowerCase())}&role=ft`;
-                  navigator.clipboard.writeText(inviteUrl);
-                  alert(`🌐 Foreign Teacher (FT) Invite Link Copied!\n\n${inviteUrl}\n\nThis link directly logs Foreign Teachers into the Class Overview & Daily Scanner Dropzone.`);
-                }}
-                className="px-3.5 py-2 bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
-              >
-                <span>🌐</span>
-                <span>Copy FT Invite Link (Foreign Teacher)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const inviteUrl = `${window.location.origin}/teacher?invite=${encodeURIComponent(academyName.replace(/\s+/g, '-').toLowerCase())}&role=kt`;
-                  navigator.clipboard.writeText(inviteUrl);
-                  alert(`🇰🇷 Korean Teacher (KT) Invite Link Copied!\n\n${inviteUrl}\n\nThis link directly logs Korean Teachers into the KakaoTalk Script Review Dashboard.`);
-                }}
-                className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
-              >
-                <span>🇰🇷</span>
-                <span>Copy KT Invite Link (Korean Teacher)</span>
-              </button>
-            </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {teachers.map((t) => (

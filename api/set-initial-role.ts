@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin';
+import { seatsForPlan } from './_lib/pricingTiers';
 
 // Sets a brand-new account's role (director/teacher) server-side, right after
 // signup. The client can never write `role` directly — firestore.rules blocks
@@ -35,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const idToken = authHeader.split('Bearer ')[1].trim();
 
-  const { role } = req.body || {};
+  const { role, academyName, planId } = req.body || {};
   if (!ALLOWED_ROLES.has(role)) {
     return res.status(400).json({ error: 'Invalid role' });
   }
@@ -57,8 +58,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(409).json({ error: 'Role already set', role: existingRole });
     }
 
-    await userRef.update({ role });
-    return res.status(200).json({ success: true, role });
+    let schoolId: string | undefined;
+    if (role === 'director') {
+      // A director needs a school to own before they can invite anyone —
+      // create one if this account doesn't have one yet. The `seats` figure
+      // comes from a server-side plan table (api/_lib/pricingTiers.ts), never
+      // from the client, so it can't be inflated by editing the request body
+      // (audit §21b — this is the fix for the old sessionStorage-only
+      // `chekki_teacher_seats` number that nothing ever enforced).
+      const existingSchoolId = userSnap.data()?.schoolId;
+      const resolvedSchoolId: string = existingSchoolId || `school_${uid}`;
+      schoolId = resolvedSchoolId;
+      if (!existingSchoolId) {
+        const seats = seatsForPlan(typeof planId === 'string' ? planId : undefined);
+        await adminDb.collection('schools').doc(resolvedSchoolId).set(
+          {
+            name: typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy',
+            ownerUid: uid,
+            planId: typeof planId === 'string' ? planId : 'trial',
+            seatsTotal: seats,
+            usedByUids: [],
+            createdAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+      }
+      const schoolNameForUser = typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy';
+      await userRef.update({ role, schoolId, schoolName: schoolNameForUser });
+    } else {
+      await userRef.update({ role });
+    }
+
+    return res.status(200).json({ success: true, role, schoolId });
   } catch (error: any) {
     console.error('[set-initial-role] error:', error);
     return res.status(500).json({ error: 'Failed to set role' });

@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
-import { Buildings, CheckCircle, FolderUser, UserGear, UploadSimple, Sparkle } from '@phosphor-icons/react';
+import { Buildings, CheckCircle, FolderUser, UserGear, UploadSimple } from '@phosphor-icons/react';
+import { auth } from '../../services/database';
+import { TeacherInvitePanel } from './TeacherInvitePanel';
 
 interface Props {
   isNight?: boolean;
   isKo?: boolean;
-  onComplete: (data: { academyName: string; logoUrl?: string; classes: string[]; staffEmails: string[] }) => void;
+  schoolId: string;
+  seatsTotal: { ft: number; kt: number };
+  onComplete: (data: { academyName: string; logoUrl?: string; classes: string[] }) => void;
 }
 
 export const UnifiedAccountActivation: React.FC<Props> = ({
   isNight = true,
   isKo = true,
+  schoolId,
+  seatsTotal,
   onComplete,
 }) => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -24,11 +30,6 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
   const [newClassName, setNewClassName] = useState('');
   const [selectedTextbook, setSelectedTextbook] = useState('Bricks Reading 150');
 
-  // Step 3: Staff Invites
-  const [staffEmailInput, setStaffEmailInput] = useState('');
-  const [staffEmails, setStaffEmails] = useState<string[]>([]);
-  const [copiedLink, setCopiedLink] = useState(false);
-
   const handleAddClass = () => {
     if (!newClassName.trim()) return;
     if (!selectedClasses.includes(newClassName.trim())) {
@@ -41,14 +42,6 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
     setSelectedClasses(selectedClasses.filter((c) => c !== cls));
   };
 
-  const handleAddStaffEmail = () => {
-    if (!staffEmailInput.trim()) return;
-    if (!staffEmails.includes(staffEmailInput.trim())) {
-      setStaffEmails([...staffEmails, staffEmailInput.trim()]);
-    }
-    setStaffEmailInput('');
-  };
-
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -57,12 +50,21 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
     }
   };
 
-  const handleCopyInviteLink = () => {
-    const inviteUrl = `${window.location.origin}/teacher?invite=${encodeURIComponent(academyName.replace(/\s+/g, '-').toLowerCase())}`;
-
-    navigator.clipboard.writeText(inviteUrl);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 3000);
+  // Persists the real school name server-side (api/set-initial-role.ts only
+  // had a placeholder "New Academy" to work with) — fire-and-forget since
+  // it's not on the critical path for the wizard to keep moving.
+  const persistAcademyName = async () => {
+    if (!academyName.trim()) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      await fetch('/api/update-school-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ academyName: academyName.trim() }),
+      });
+    } catch (err) {
+      console.warn('Failed to persist academy name:', err);
+    }
   };
 
   const handleFinish = () => {
@@ -70,7 +72,6 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
       academyName,
       logoUrl: logoPreview || undefined,
       classes: selectedClasses,
-      staffEmails,
     });
   };
 
@@ -183,7 +184,10 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
 
             <button
               type="button"
-              onClick={() => setStep(2)}
+              onClick={() => {
+                persistAcademyName();
+                setStep(2);
+              }}
               className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
             >
               <span>{isKo ? '다음: 학급반 및 커리큘럼 설정 →' : 'Next: Setup Classes & Curriculum →'}</span>
@@ -295,66 +299,12 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
             </div>
 
             <div className="space-y-4">
-              {/* 1-Click Copy Invite Link Box */}
-              <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-orange-400 flex items-center gap-1.5">
-                    <Sparkle size={16} weight="fill" />
-                    <span>{isKo ? '🔗 1초 전용 초대 링크 (Workspace Invite Link)' : '1-Click Workspace Invite Link'}</span>
-                  </span>
-                  {copiedLink && (
-                    <span className="text-[10px] font-bold text-emerald-400 font-mono">
-                      ✓ {isKo ? '복사 완료!' : 'Copied!'}
-                    </span>
-                  )}
-                </div>
-                <p className="text-[11px] text-zinc-300">
-                  {isKo ? '이 링크를 선생님 카톡이나 이메일에 전송하면 코드 입력 없이 자동 연결됩니다.' : 'Send this link to teachers to instantly attach them to your campus without typing codes.'}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleCopyInviteLink}
-                  className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <span>📋 {isKo ? '초대 링크 1초 복사하기' : 'Copy Invite Link'}</span>
-                </button>
-              </div>
-
-              {/* Direct Email Invite */}
-              <div className="space-y-2 pt-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
-                  {isKo ? '선생님 이메일 مستقیم 초대 (선택)' : 'Direct Staff Email Invite (Optional)'}
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="email"
-                    value={staffEmailInput}
-                    onChange={(e) => setStaffEmailInput(e.target.value)}
-                    placeholder="E.g. sarah.teacher@apex.edu"
-                    className={`flex-1 p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 ${
-                      isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                    }`}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddStaffEmail}
-                    className="px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
-                  >
-                    + {isKo ? '초대 추가' : 'Invite'}
-                  </button>
-                </div>
-
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {staffEmails.map((email) => (
-                    <span
-                      key={email}
-                      className="px-3 py-1 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono font-bold"
-                    >
-                      ✉️ {email}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <TeacherInvitePanel isNight={isNight} isKo={isKo} schoolId={schoolId} seatsTotal={seatsTotal} />
+              <p className="text-[11px] text-zinc-500 text-center">
+                {isKo
+                  ? '지금 초대하지 않아도 괜찮습니다 — 대시보드에서 언제든 선생님을 초대할 수 있습니다.'
+                  : "You don't have to invite anyone right now — you can send invites anytime from your dashboard."}
+              </p>
             </div>
 
             <div className="flex gap-3">

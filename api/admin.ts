@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 import { adminDb, adminAuth as authDb } from './_lib/firebaseAdmin';
+import { seatsForPlan } from './_lib/pricingTiers';
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
 
@@ -235,6 +236,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           teacherCode: sanitizedTeacherCode,
           maxUses: maxUses ? parseInt(maxUses, 10) : 5,
           usedByUids: [],
+          seatsTotal: seatsForPlan(req.body?.planId),
           createdAt: new Date().toISOString(),
         });
 
@@ -311,6 +313,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         teacherCode: teacherCode,
         maxUses: invoiceData.teacherCount || 5,
         usedByUids: [],
+        // Seat pool for the new director-invite system (§21) — derived from
+        // the confirmed invoice's plan, same server-owned table used by
+        // set-initial-role.ts, never a client-supplied number.
+        seatsTotal: seatsForPlan(invoiceData.planId),
         createdAt: new Date().toISOString(),
       });
 

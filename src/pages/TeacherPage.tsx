@@ -76,6 +76,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
 
   const [showActivationWizard, setShowActivationWizard] = useState(false);
+  const [schoolSeatsTotal, setSchoolSeatsTotal] = useState<{ ft: number; kt: number }>({ ft: 0, kt: 0 });
   const [showReviewSheetModal, setShowReviewSheetModal] = useState(false);
   const [showReportCardModal, setShowReportCardModal] = useState(false);
 
@@ -259,6 +260,21 @@ export default function TeacherPage({ isNight = true }: Props) {
       }
     }
   }, [user?.uid, (user as any)?.educatorRole, (user as any)?.role, isDirectorPath]);
+
+  // Load the school's seat pool for the director invite panel (wizard + dashboard).
+  useEffect(() => {
+    const schoolId = (user as any)?.schoolId;
+    if (!schoolId || (user as any)?.role !== 'director') return;
+    (async () => {
+      try {
+        const snap = await getDoc(doc(dbInstance, 'schools', schoolId));
+        const seats = snap.data()?.seatsTotal;
+        if (seats) setSchoolSeatsTotal({ ft: seats.ft || 0, kt: seats.kt || 0 });
+      } catch (err) {
+        console.warn('Failed to load school seat totals:', err);
+      }
+    })();
+  }, [(user as any)?.schoolId, (user as any)?.role]);
 
   // Handle Teacher Invite Link URL Params (FT vs KT Role Routing)
   useEffect(() => {
@@ -826,27 +842,58 @@ export default function TeacherPage({ isNight = true }: Props) {
 
         await signUp(name, email, password);
 
-        // Assign the role server-side — firestore.rules blocks clients from
-        // writing their own `role` field, so a direct client updateDoc() call
-        // silently fails (audit §20b). /api/set-initial-role uses the Admin
-        // SDK and only allows a one-time assignment on a fresh account.
         const newUid = auth.currentUser?.uid || '';
-        const assignedRole = loginRole === 'director' ? 'director' : 'teacher';
-        if (newUid) {
+
+        if (inviteSlug) {
+          // Arrived via a role-locked director invite (audit §21d) — role and
+          // educatorRole are decided by the invite document, not the signup
+          // form's Teacher/Director toggle. Redeeming is server-side via the
+          // Admin SDK, same reasoning as set-initial-role below.
           try {
             const idToken = await auth.currentUser?.getIdToken();
-            const response = await fetch('/api/set-initial-role', {
+            const response = await fetch('/api/redeem-invite', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-              body: JSON.stringify({ role: assignedRole }),
+              body: JSON.stringify({ inviteId: inviteSlug }),
             });
+            const data = await response.json();
             if (!response.ok) {
-              console.warn('Server-side role assignment failed, using localStorage fallback:', await response.text());
+              throw new Error(data.error || 'Failed to redeem invite');
             }
-          } catch (roleErr) {
-            console.warn('Role write failed, using localStorage fallback:', roleErr);
+            if (newUid) {
+              localStorage.setItem(`chekki_user_role_${newUid}`, 'teacher');
+              localStorage.setItem(`chekki_educator_role_${newUid}`, data.educatorRole);
+            }
+          } catch (inviteErr: any) {
+            throw new Error(
+              isKo
+                ? `초대 링크를 사용할 수 없습니다: ${inviteErr.message}`
+                : `This invite link couldn't be used: ${inviteErr.message}`
+            );
           }
-          localStorage.setItem(`chekki_user_role_${newUid}`, assignedRole);
+        } else {
+          // Assign the role server-side — firestore.rules blocks clients from
+          // writing their own `role` field, so a direct client updateDoc() call
+          // silently fails (audit §20b). /api/set-initial-role uses the Admin
+          // SDK and only allows a one-time assignment on a fresh account.
+          const assignedRole = loginRole === 'director' ? 'director' : 'teacher';
+          if (newUid) {
+            try {
+              const idToken = await auth.currentUser?.getIdToken();
+              const planId = typeof window !== 'undefined' ? sessionStorage.getItem('chekki_selected_plan') || undefined : undefined;
+              const response = await fetch('/api/set-initial-role', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+                body: JSON.stringify({ role: assignedRole, planId }),
+              });
+              if (!response.ok) {
+                console.warn('Server-side role assignment failed, using localStorage fallback:', await response.text());
+              }
+            } catch (roleErr) {
+              console.warn('Role write failed, using localStorage fallback:', roleErr);
+            }
+            localStorage.setItem(`chekki_user_role_${newUid}`, assignedRole);
+          }
         }
 
         // Persist invite school if teacher arrived via invite link
@@ -1507,33 +1554,42 @@ export default function TeacherPage({ isNight = true }: Props) {
               </button>
             </div>
 
-            {/* Role Switcher Pill (Teacher vs Director HQ) */}
-            <div className="w-full flex p-1 bg-[#050505] border border-white/10 rounded-2xl mb-4">
-              <button
-                type="button"
-                onClick={() => { setLoginRole('teacher'); setAuthError(''); }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  loginRole === 'teacher'
-                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <ChalkboardTeacher size={14} weight="bold" />
-                <span>{isKo ? '교사 로그인' : 'Teacher Access'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => { setLoginRole('director'); setAuthError(''); }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  loginRole === 'director'
-                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <Buildings size={14} weight="bold" />
-                <span>{isKo ? '원장님 HQ 로그인' : 'Director Admin'}</span>
-              </button>
-            </div>
+            {/* Role Switcher Pill (Teacher vs Director HQ) — hidden when the
+                account is arriving via a role-locked director invite link,
+                since the role isn't a choice in that case (audit §21d). */}
+            {!(inviteSlug && authMode === 'signup') && (
+              <div className="w-full flex p-1 bg-[#050505] border border-white/10 rounded-2xl mb-4">
+                <button
+                  type="button"
+                  onClick={() => { setLoginRole('teacher'); setAuthError(''); }}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    loginRole === 'teacher'
+                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <ChalkboardTeacher size={14} weight="bold" />
+                  <span>{isKo ? '교사 로그인' : 'Teacher Access'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setLoginRole('director'); setAuthError(''); }}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    loginRole === 'director'
+                      ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Buildings size={14} weight="bold" />
+                  <span>{isKo ? '원장님 HQ 로그인' : 'Director Admin'}</span>
+                </button>
+              </div>
+            )}
+            {inviteSlug && authMode === 'signup' && (
+              <div className="mb-4 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-xs font-bold text-orange-400 text-center">
+                {isKo ? '✉️ 초대받은 선생님 계정을 생성합니다.' : "✉️ You're creating a teacher account from an invite."}
+              </div>
+            )}
 
 
             <div className={`mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold ${
@@ -1706,6 +1762,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       <UnifiedAccountActivation
         isNight={isThemeNight}
         isKo={isKo}
+        schoolId={(user as any)?.schoolId || ''}
+        seatsTotal={schoolSeatsTotal}
         onComplete={(data) => {
           const uid = user?.uid || '';
           // Mark wizard as done so it never shows again for this account
@@ -1804,22 +1862,32 @@ export default function TeacherPage({ isNight = true }: Props) {
 
                 <div className="space-y-1.5 text-left">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">{isKo ? '선생님 역할' : 'Your Role'}</label>
-                  <div className="flex gap-2">
-                    {(['ft', 'kt'] as const).map((r) => (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => setWelcomeRole(r)}
-                        className={`flex-1 py-3 rounded-xl text-xs font-black border transition-all cursor-pointer ${
-                          welcomeRole === r
-                            ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
-                            : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-600'
-                        }`}
-                      >
-                        {r === 'ft' ? (isKo ? '🌍 FT 원어민' : '🌍 Foreign Teacher') : (isKo ? '🇰🇷 KT 한국어' : '🇰🇷 Korean Teacher')}
-                      </button>
-                    ))}
-                  </div>
+                  {(user as any)?.educatorRole ? (
+                    // Role was already decided by the director's invite (audit
+                    // §21d) — this is a read-only confirmation, not a choice.
+                    <div className={`w-full py-3 rounded-xl text-xs font-black border text-center ${
+                      welcomeRole === 'kt' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-orange-500/10 border-orange-500/30 text-orange-400'
+                    }`}>
+                      {welcomeRole === 'kt' ? (isKo ? '🇰🇷 KT 한국어 선생님 (초대로 지정됨)' : '🇰🇷 Korean Teacher — set by your invite') : (isKo ? '🌍 FT 원어민 선생님 (초대로 지정됨)' : '🌍 Foreign Teacher — set by your invite')}
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      {(['ft', 'kt'] as const).map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => setWelcomeRole(r)}
+                          className={`flex-1 py-3 rounded-xl text-xs font-black border transition-all cursor-pointer ${
+                            welcomeRole === r
+                              ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
+                              : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-600'
+                          }`}
+                        >
+                          {r === 'ft' ? (isKo ? '🌍 FT 원어민' : '🌍 Foreign Teacher') : (isKo ? '🇰🇷 KT 한국어' : '🇰🇷 Korean Teacher')}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <button
@@ -2481,10 +2549,12 @@ export default function TeacherPage({ isNight = true }: Props) {
           <div className="animate-fade-in">
             {/* Director HQ Tab */}
             {activeTab === 'director_hq' && (
-              <NativeDirectorPortal 
-                isNight={isThemeNight} 
-                academyName={user?.schoolName || 'Chekki Master Academy'} 
+              <NativeDirectorPortal
+                isNight={isThemeNight}
+                academyName={user?.schoolName || 'Chekki Master Academy'}
                 onOpenLogoModal={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
+                schoolId={(user as any)?.schoolId}
+                seatsTotal={schoolSeatsTotal}
               />
             )}
 
