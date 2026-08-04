@@ -1,6 +1,22 @@
 {
   "rewrites": [
     {
+      "source": "/api/redeem-class-code",
+      "destination": "/api/redeem"
+    },
+    {
+      "source": "/api/redeem-school-code",
+      "destination": "/api/redeem"
+    },
+    {
+      "source": "/api/redeem-teacher-code",
+      "destination": "/api/redeem"
+    },
+    {
+      "source": "/api/redeem-invite",
+      "destination": "/api/redeem"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },
