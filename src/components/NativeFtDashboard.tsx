@@ -488,7 +488,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                             <div className={`p-4 rounded-xl border italic font-serif text-sm leading-relaxed ${
                               isThemeNight ? 'bg-white/5 border-white/10 text-zinc-200' : 'bg-white border-emerald-200 text-zinc-800'
                             }`}>
-                              "{curriculumPassage}"
+                              &quot;{curriculumPassage}&quot;
                             </div>
                           </div>
                           <p className="text-[11px] text-zinc-400 mt-3">

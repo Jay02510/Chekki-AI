@@ -825,7 +825,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   </span>
                   <div className="flex items-center gap-2 flex-wrap">
                     <code className="px-2.5 py-1 rounded-xl bg-purple-500/20 border border-purple-500/30 text-[11px] font-mono font-bold text-purple-300">
-                      "Speaking: Practice reading the word umbrella 3 times."
+                      &quot;Speaking: Practice reading the word umbrella 3 times.&quot;
                     </code>
                   </div>
                   <p className="text-[11px] text-purple-400 leading-normal">

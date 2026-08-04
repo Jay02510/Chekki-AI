@@ -5,19 +5,10 @@ import {
   WarningCircle,
   UserGear,
   PlusCircle,
-  FolderUser,
-  EnvelopeSimple
+  FolderUser
 } from '@phosphor-icons/react';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
-
-interface TeacherItem {
-  id: string;
-  name: string;
-  role: 'foreign_teacher' | 'korean_teacher';
-  email: string;
-  assignedClasses: string[];
-}
 
 interface Props {
   isNight?: boolean;
@@ -64,9 +55,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   setSelectedStudentDetails = () => {},
 }) => {
   const [activeTab, setActiveTab] = useState<'roster' | 'curriculum' | 'exceptions' | 'teachers'>('curriculum');
-
-  // Teacher Assignments -- empty until director adds them
-  const [teachers, setTeachers] = useState<TeacherItem[]>([]);
 
   const totalRosterCount = pendingRoster.length + activeRoster.length;
 
@@ -219,7 +207,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">CAMPUS CLASSES</span>
           <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-            {teachers.length > 0 ? teachers.reduce((a, t) => a + t.assignedClasses.length, 0) : '—'}{' '}
+            {classes.length}{' '}
             <span className="text-xs font-normal text-zinc-400">Active</span>
           </h4>
         </div>
@@ -239,7 +227,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             </button>
           </div>
           <h4 className="text-2xl font-black text-emerald-400 mt-1">
-            {teachers.length} <span className="text-xs font-normal text-zinc-400">/ {typeof window !== 'undefined' ? sessionStorage.getItem('chekki_teacher_seats') || '10' : '10'} Active</span>
+            {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)} <span className="text-xs font-normal text-zinc-400">Total ({seatsTotal?.ft || 0} FT / {seatsTotal?.kt || 0} KT)</span>
           </h4>
         </div>
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
@@ -364,47 +352,9 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {teachers.map((t) => (
-              <div
-                key={t.id}
-                className={`p-6 rounded-2xl border space-y-4 ${
-                  isNight ? 'bg-[#08080c] border-white/10' : 'bg-white border-zinc-200 shadow-sm'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold font-mono border ${
-                      t.role === 'foreign_teacher'
-                        ? 'bg-purple-500/20 text-purple-400 border-purple-500/30'
-                        : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                    }`}
-                  >
-                    {t.role === 'foreign_teacher' ? 'Foreign Teacher (FT)' : 'Korean Teacher (KT)'}
-                  </span>
-                  <EnvelopeSimple size={16} className="text-zinc-500" />
-                </div>
-
-                <div>
-                  <h4 className="font-black text-base text-white">{t.name}</h4>
-                  <p className="text-xs text-zinc-400 font-mono mt-0.5">{t.email}</p>
-                </div>
-
-                <div className="space-y-2 pt-2 border-t border-white/5 text-xs">
-                  <span className="text-zinc-400 font-bold block">Assigned Classes:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {t.assignedClasses.map((cls, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 font-mono text-[11px] text-zinc-300"
-                      >
-                        {cls}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-zinc-400 font-bold">
+            Teacher-to-class assignment management is coming soon. Invited teachers
+            appear in the list above once they accept.
           </div>
         </div>
       )}
