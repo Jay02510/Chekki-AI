@@ -617,6 +617,8 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [studentsData, setStudentsData] = useState<any[]>([]);
   const [isLoadingRoster, setIsLoadingRoster] = useState(false);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState<any | null>(null);
+  const [flagReasonInput, setFlagReasonInput] = useState('');
+  const [showFlagReasonInput, setShowFlagReasonInput] = useState(false);
 
   // Teacher onboarding & Academy Branding & Settings
   const [showTeacherOnboarding, setShowTeacherOnboarding] = useState(false);
@@ -1439,6 +1441,39 @@ export default function TeacherPage({ isNight = true }: Props) {
       alert(isKo ? '학급 이동이 완료되었습니다.' : 'Student transferred successfully.');
     } catch (err) {
       console.error('Failed to transfer student:', err);
+    }
+  };
+
+  // Backs the "Flagged Exceptions" tab in NativeDirectorPortal — previously
+  // that tab read from local mock state nothing ever wrote to, because there
+  // was no real way to flag a student anywhere in the app. This is that path:
+  // written on users/{studentUid}, same write surface as approve/decline/
+  // move (already permitted by firestore.rules for the class's teacher or
+  // the school's director).
+  const handleToggleFlagStudent = async (studentUid: string, reason?: string) => {
+    try {
+      const userRef = doc(dbInstance, 'users', studentUid);
+      if (reason && reason.trim()) {
+        await updateDoc(userRef, {
+          flaggedException: {
+            date: new Date().toISOString().split('T')[0],
+            reason: reason.trim(),
+            teacherName: (user as any)?.displayName || (user as any)?.email?.split('@')[0] || (isKo ? '선생님' : 'Teacher'),
+            resolved: false,
+          },
+        });
+      } else {
+        await updateDoc(userRef, { flaggedException: null });
+      }
+      await fetchRosterAndMistakes();
+      setSelectedStudentDetails((prev: any) =>
+        prev && prev.uid === studentUid
+          ? { ...prev, flaggedException: reason && reason.trim() ? { date: new Date().toISOString().split('T')[0], reason: reason.trim(), teacherName: (user as any)?.displayName || (user as any)?.email?.split('@')[0] || 'Teacher', resolved: false } : null }
+          : prev
+      );
+    } catch (err) {
+      console.error('Failed to update flag status:', err);
+      alert(isKo ? '플래그 상태 변경에 실패했습니다.' : 'Failed to update flag status.');
     }
   };
 
@@ -2567,6 +2602,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 handleMoveStudent={handleMoveStudent}
                 fetchRosterAndMistakes={fetchRosterAndMistakes}
                 setSelectedStudentDetails={setSelectedStudentDetails}
+                onResolveFlag={(uid: string) => handleToggleFlagStudent(uid)}
               />
             )}
 
@@ -2790,6 +2826,75 @@ export default function TeacherPage({ isNight = true }: Props) {
               >
                 <X size={18} weight="bold" />
               </button>
+            </div>
+
+            {/* Flag for Director/Counselor */}
+            <div className={`mt-4 p-4 rounded-2xl border shrink-0 ${
+              selectedStudentDetails.flaggedException
+                ? 'bg-amber-500/10 border-amber-500/30'
+                : isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+            }`}>
+              {selectedStudentDetails.flaggedException ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">
+                      {isKo ? '⚠️ 원장님께 플래그됨' : '⚠️ Flagged for Director'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleFlagStudent(selectedStudentDetails.uid)}
+                      className="text-[10px] font-bold text-zinc-400 hover:text-white cursor-pointer"
+                    >
+                      {isKo ? '플래그 해제' : 'Unflag'}
+                    </button>
+                  </div>
+                  <p className="text-xs text-zinc-300">{selectedStudentDetails.flaggedException.reason}</p>
+                  <p className="text-[10px] text-zinc-500 font-mono">
+                    {selectedStudentDetails.flaggedException.teacherName} · {selectedStudentDetails.flaggedException.date}
+                  </p>
+                </div>
+              ) : showFlagReasonInput ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={flagReasonInput}
+                    onChange={(e) => setFlagReasonInput(e.target.value)}
+                    placeholder={isKo ? '플래그 사유를 입력하세요 (학습/행동 이슈 등)' : 'Reason for flagging (academic or behavioral issue)...'}
+                    className={`w-full h-20 p-3 rounded-xl border text-xs outline-none resize-none ${
+                      isThemeNight ? 'bg-[#050505] border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
+                    }`}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!flagReasonInput.trim()) return;
+                        handleToggleFlagStudent(selectedStudentDetails.uid, flagReasonInput);
+                        setFlagReasonInput('');
+                        setShowFlagReasonInput(false);
+                      }}
+                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl cursor-pointer"
+                    >
+                      {isKo ? '플래그 제출' : 'Submit Flag'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowFlagReasonInput(false); setFlagReasonInput(''); }}
+                      className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                    >
+                      {isKo ? '취소' : 'Cancel'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowFlagReasonInput(true)}
+                  className={`text-xs font-bold flex items-center gap-1.5 cursor-pointer ${isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'}`}
+                >
+                  <Warning size={14} weight="bold" />
+                  <span>{isKo ? '원장님께 플래그하기' : 'Flag for Director'}</span>
+                </button>
+              )}
             </div>
 
             {/* Drawer Content */}
@@ -3551,7 +3656,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   {curriculumPassage && (
                     <div className="sm:col-span-2">
                       <span className="font-bold text-zinc-900 block">{isKo ? '본문 지문 (Passage):' : 'Reading Story:'}</span>
-                      <p className="text-zinc-700 italic">"{curriculumPassage}"</p>
+                      <p className="text-zinc-700 italic">&quot;{curriculumPassage}&quot;</p>
                     </div>
                   )}
                   {curriculumOther && (

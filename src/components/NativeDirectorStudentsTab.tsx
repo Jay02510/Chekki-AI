@@ -182,7 +182,16 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                 <tbody className={`divide-y ${isThemeNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
                   {activeRoster.map((student) => (
                     <tr key={student.uid} className={`transition-colors ${isThemeNight ? 'hover:bg-white/[0.02]' : 'hover:bg-zinc-50'}`}>
-                      <td className={`py-4 pl-2 font-black text-sm ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{student.studentName || 'Unnamed'}</td>
+                      <td className={`py-4 pl-2 font-black text-sm ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                        <span className="flex items-center gap-1.5">
+                          {student.studentName || 'Unnamed'}
+                          {student.flaggedException && (
+                            <span title="Flagged">
+                              <Warning size={14} weight="fill" className="text-amber-500" />
+                            </span>
+                          )}
+                        </span>
+                      </td>
                       <td className="py-4">
                         <p className={`font-bold ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>{student.name}</p>
                         <p className="text-[10px] text-zinc-500 font-mono">{student.email}</p>

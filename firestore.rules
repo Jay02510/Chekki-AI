@@ -23,8 +23,22 @@ service cloud.firestore {
 
     // Helper: Check if user is the designated teacher of a class
     function isClassTeacher(classId) {
-      return request.auth != null && 
+      return request.auth != null &&
         get(/databases/$(database)/documents/classes/$(classId)).data.teacherUid == request.auth.uid;
+    }
+
+    // Helper: Check if user is a director of the school that owns a class.
+    // Directors aren't the class's teacherUid (that's the FT/KT who created
+    // it), so isClassTeacher() alone always excludes them — this is why
+    // roster actions (approve/decline/remove/move/flag) written as
+    // `role == 'teacher' && isClassTeacher(classId)` silently failed for
+    // directors even after NativeDirectorPortal started using the real
+    // roster component.
+    function isSchoolDirectorOfClass(classId) {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId ==
+          get(/databases/$(database)/documents/classes/$(classId)).data.schoolId;
     }
 
     // User Profiles: Authenticated users can read profiles; updates restricted to self or admin
@@ -44,12 +58,13 @@ service cloud.firestore {
         isAdmin() || 
         // User updating their own profile
         (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'schoolId', 'schoolName', 'educatorRole', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate'])) ||
-        // Teacher updating classroom fields
+        // Teacher or director updating classroom fields (roster
+        // approve/decline/remove/move, flaggedException) on a student in
+        // their own class/school.
         (
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' &&
           (
-            (request.resource.data.classId != null && isClassTeacher(request.resource.data.classId)) ||
-            (resource.data.classId != null && isClassTeacher(resource.data.classId) && request.resource.data.classId == null)
+            (request.resource.data.classId != null && (isClassTeacher(request.resource.data.classId) || isSchoolDirectorOfClass(request.resource.data.classId))) ||
+            (resource.data.classId != null && (isClassTeacher(resource.data.classId) || isSchoolDirectorOfClass(resource.data.classId)) && request.resource.data.classId == null)
           ) &&
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'email', 'name', 'schoolId', 'schoolName', 'childAge', 'childEnglishLevel', 'parentEnglishLevel'])
         )

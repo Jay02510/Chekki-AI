@@ -33,6 +33,7 @@ interface Props {
   handleMoveStudent?: (uid: string, targetClassId: string) => void;
   fetchRosterAndMistakes?: () => void;
   setSelectedStudentDetails?: (student: any) => void;
+  onResolveFlag?: (studentUid: string) => void;
 }
 
 export const NativeDirectorPortal: React.FC<Props> = ({
@@ -53,10 +54,12 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   handleMoveStudent = () => {},
   fetchRosterAndMistakes = () => {},
   setSelectedStudentDetails = () => {},
+  onResolveFlag = () => {},
 }) => {
   const [activeTab, setActiveTab] = useState<'roster' | 'curriculum' | 'exceptions' | 'teachers'>('curriculum');
 
   const totalRosterCount = pendingRoster.length + activeRoster.length;
+  const flaggedStudents = activeRoster.filter((s: any) => s.flaggedException);
 
   const [showSeatExpansionModal, setShowSeatExpansionModal] = useState(false);
   const [requestedExtraSeats, setRequestedExtraSeats] = useState(3);
@@ -181,8 +184,10 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             }`}
           >
             <WarningCircle size={16} weight="bold" className="text-amber-400" />
-            <span>Flagged Exceptions</span>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-white/10 text-zinc-400">Soon</span>
+            <span>Flagged Exceptions ({flaggedStudents.length})</span>
+            {flaggedStudents.length > 0 && (
+              <span className="w-2 h-2 rounded-full bg-rose-500 absolute -top-1 -right-1 animate-ping" />
+            )}
           </button>
 
           <button
@@ -232,7 +237,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         </div>
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">FLAGGED EXCEPTIONS</span>
-          <h4 className="text-2xl font-black text-zinc-500 mt-1">— <span className="text-xs font-normal text-zinc-400">Coming soon</span></h4>
+          <h4 className="text-2xl font-black text-amber-400 mt-1">{flaggedStudents.length} <span className="text-xs font-normal text-zinc-400">Unresolved</span></h4>
         </div>
       </div>
 
@@ -323,14 +328,65 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             <div className="space-y-1 text-xs">
               <h4 className="font-bold text-amber-400">Director Exception Oversight Center</h4>
               <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
-                Coming soon: foreign teachers will be able to flag a student for academic or
-                behavioral issues during their daily logs, and Korean counselors will get
-                pre-generated talking points here for parent phone calls. That flagging
-                capability doesn&apos;t exist yet on the teacher side, so this tab has nothing
-                real to show until it does.
+                Students flagged by a teacher from the roster&apos;s student detail view for
+                academic or behavioral issues. Resolving a flag here clears it.
               </p>
             </div>
           </div>
+
+          {flaggedStudents.length === 0 ? (
+            <div className={`p-12 rounded-2xl border text-center text-xs ${isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-50 border-zinc-200 text-zinc-500'}`}>
+              No students are currently flagged.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {flaggedStudents.map((st: any) => (
+                <div
+                  key={st.uid}
+                  className={`p-6 rounded-2xl border space-y-4 ${
+                    isNight ? 'bg-[#08080c] border-white/10' : 'bg-white border-zinc-200 shadow-sm'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-black text-sm text-white">{st.studentName || st.name || 'Unnamed'}</h4>
+                      <span className="text-xs text-orange-400 font-mono">{st.email}</span>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                      {st.flaggedException?.date}
+                    </span>
+                  </div>
+
+                  <div className={`p-4 rounded-xl border text-xs leading-relaxed ${isNight ? 'bg-[#030305] border-white/5 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-800'}`}>
+                    <span className="text-[10px] font-bold uppercase font-mono text-zinc-500 block mb-1">
+                      Flagged Reason by {st.flaggedException?.teacherName}:
+                    </span>
+                    <p>{st.flaggedException?.reason}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        alert(`Phone Talking Points for ${st.studentName || st.name}:\n1. Acknowledge class effort\n2. Address: ${st.flaggedException?.reason}\n3. Suggest 10-minute home vocabulary review.`);
+                      }}
+                      className="px-3 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold rounded-lg border border-orange-500/30 flex items-center gap-1.5 cursor-pointer transition-colors"
+                    >
+                      <span>📞</span>
+                      <span>View Phone Script</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onResolveFlag(st.uid)}
+                      className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold rounded-lg border border-emerald-500/30 cursor-pointer transition-colors"
+                    >
+                      Resolve
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
