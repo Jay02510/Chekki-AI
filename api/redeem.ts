@@ -185,51 +185,70 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
   const callerEmail = (callerEmailRaw || '').toLowerCase();
 
   const inviteRef = adminDb.collection('invites').doc(inviteId);
-  const inviteSnap = await inviteRef.get();
 
-  if (!inviteSnap.exists) {
-    return res.status(404).json({ error: 'Invalid or expired invite link' });
+  let schoolId: string;
+  let schoolName: string;
+  let educatorRole: string;
+
+  try {
+    const result = await adminDb.runTransaction(async (t) => {
+      const inviteSnap = await t.get(inviteRef);
+      if (!inviteSnap.exists) {
+        throw { httpStatus: 404, message: 'Invalid or expired invite link' };
+      }
+      const invite = inviteSnap.data()!;
+
+      if (invite.status !== 'pending') {
+        throw { httpStatus: 409, message: 'This invite has already been used' };
+      }
+      if (invite.email && invite.email.toLowerCase() !== callerEmail) {
+        throw { httpStatus: 403, message: 'This invite was sent to a different email address' };
+      }
+
+      const schoolRef = adminDb.collection('schools').doc(invite.schoolId);
+      const schoolSnap = await t.get(schoolRef);
+      const resolvedSchoolName = schoolSnap.data()?.name || invite.schoolId;
+
+      t.set(
+        adminDb.collection('users').doc(uid),
+        {
+          role: 'teacher',
+          educatorRole: invite.role,
+          schoolId: invite.schoolId,
+          schoolName: resolvedSchoolName,
+          plan: 'pro',
+          maxScansPerDay: 9999,
+          maxQuestionsPerDay: 9999,
+          subscriptionPlatform: 'teacher_invite',
+        },
+        { merge: true }
+      );
+
+      t.update(inviteRef, {
+        status: 'claimed',
+        claimedByUid: uid,
+        claimedAt: new Date().toISOString(),
+      });
+
+      t.update(schoolRef, { usedByUids: FieldValue.arrayUnion(uid) });
+
+      return { schoolId: invite.schoolId, schoolName: resolvedSchoolName, educatorRole: invite.role };
+    });
+
+    schoolId = result.schoolId;
+    schoolName = result.schoolName;
+    educatorRole = result.educatorRole;
+  } catch (error: any) {
+    if (error && typeof error.httpStatus === 'number') {
+      return res.status(error.httpStatus).json({ error: error.message });
+    }
+    throw error;
   }
-  const invite = inviteSnap.data()!;
-  const schoolId = invite.schoolId;
-
-  if (invite.status !== 'pending') {
-    return res.status(409).json({ error: 'This invite has already been used' });
-  }
-  if (invite.email && invite.email.toLowerCase() !== callerEmail) {
-    return res.status(403).json({ error: 'This invite was sent to a different email address' });
-  }
-
-  const schoolRef = adminDb.collection('schools').doc(schoolId);
-  const schoolSnap = await schoolRef.get();
-  const schoolName = schoolSnap.data()?.name || schoolId;
-
-  await adminDb.collection('users').doc(uid).set(
-    {
-      role: 'teacher',
-      educatorRole: invite.role,
-      schoolId,
-      schoolName,
-      plan: 'pro',
-      maxScansPerDay: 9999,
-      maxQuestionsPerDay: 9999,
-      subscriptionPlatform: 'teacher_invite',
-    },
-    { merge: true }
-  );
-
-  await inviteRef.update({
-    status: 'claimed',
-    claimedByUid: uid,
-    claimedAt: new Date().toISOString(),
-  });
-
-  await schoolRef.update({ usedByUids: FieldValue.arrayUnion(uid) });
 
   return res.status(200).json({
     success: true,
     role: 'teacher',
-    educatorRole: invite.role,
+    educatorRole,
     schoolId,
     schoolName,
   });
