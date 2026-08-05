@@ -57,6 +57,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ error: 'School not found' });
     }
     const schoolData = schoolSnap.data() || {};
+
+    // Soft-lock: trial expiry blocks new invites but leaves existing
+    // teachers, classes, and data fully accessible.
+    if (schoolData.planId === 'trial' && schoolData.trialEndsAt && new Date(schoolData.trialEndsAt).getTime() < Date.now()) {
+      return res.status(400).json({
+        error: 'Your 7-day trial has ended. Upgrade your plan to invite more teachers.',
+        trialExpired: true,
+      });
+    }
+
     const seatsTotal = schoolData.seatsTotal || { ft: 0, kt: 0 };
     const maxForRole = maxInvitesForRole(seatsTotal, role);
 

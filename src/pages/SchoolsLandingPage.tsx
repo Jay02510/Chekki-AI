@@ -401,7 +401,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               onClick={() => {
                 sessionStorage.setItem('chekki_selected_plan', 'school_pro');
                 sessionStorage.setItem('chekki_teacher_seats', '10');
-                window.location.href = '/teacher?activate=true';
+                window.location.href = '/teacher?activate=true&role=director';
               }}
               className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg shadow-orange-500/25 transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
             >
@@ -1593,7 +1593,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   setShowPricingModal(false);
                   sessionStorage.setItem('chekki_selected_plan', selectedPlanId);
                   sessionStorage.setItem('chekki_teacher_seats', activePlan.defaultTeachers?.toString() || '10');
-                  window.location.href = '/teacher?activate=true';
+                  window.location.href = '/teacher?activate=true&role=director';
                 }}
                 className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >

@@ -60,7 +60,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     let maxClasses = 1; // unconfirmed/no-school accounts get a single trial class
     if (schoolId) {
       const schoolSnap = await adminDb.collection('schools').doc(schoolId).get();
-      maxClasses = maxClassesForSeats(schoolSnap.data()?.seatsTotal);
+      const schoolData = schoolSnap.data();
+      maxClasses = maxClassesForSeats(schoolData?.seatsTotal);
+
+      // Soft-lock: trial expiry blocks new classes but leaves existing
+      // classes, scans, and reports fully visible — only forward progress
+      // is gated, not access to what's already there.
+      if (schoolData?.planId === 'trial' && schoolData?.trialEndsAt && new Date(schoolData.trialEndsAt).getTime() < Date.now()) {
+        return res.status(400).json({
+          error: 'Your 7-day trial has ended. Upgrade your plan to create new classes.',
+          trialExpired: true,
+        });
+      }
     }
 
     const existingQuery = schoolId

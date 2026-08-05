@@ -60,18 +60,25 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const resolvedSchoolId: string = existingSchoolId || `school_${uid}`;
       schoolId = resolvedSchoolId;
       if (!existingSchoolId) {
-        const seats = seatsForPlan(typeof planId === 'string' ? planId : undefined);
-        await adminDb.collection('schools').doc(resolvedSchoolId).set(
-          {
-            name: typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy',
-            ownerUid: uid,
-            planId: typeof planId === 'string' ? planId : 'trial',
-            seatsTotal: seats,
-            usedByUids: [],
-            createdAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
+        const resolvedPlanId = typeof planId === 'string' ? planId : 'trial';
+        const seats = seatsForPlan(resolvedPlanId);
+        const schoolDoc: Record<string, any> = {
+          name: typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy',
+          ownerUid: uid,
+          planId: resolvedPlanId,
+          seatsTotal: seats,
+          usedByUids: [],
+          createdAt: new Date().toISOString(),
+        };
+        // The "7-day free trial" promise was previously just landing-page
+        // copy — createdAt was stored but nothing ever read it to check
+        // whether 7 days had passed. trialEndsAt is the real, checkable
+        // deadline that api/create-class.ts and api/create-teacher-invite.ts
+        // gate new actions on.
+        if (resolvedPlanId === 'trial') {
+          schoolDoc.trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+        }
+        await adminDb.collection('schools').doc(resolvedSchoolId).set(schoolDoc, { merge: true });
       }
       const schoolNameForUser = typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy';
       await userRef.update({ role, schoolId, schoolName: schoolNameForUser });

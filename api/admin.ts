@@ -452,6 +452,39 @@ https://urlgeni.us/chekki
         schoolId: sanitizedSchoolId,
         teacherCode: teacherCode,
       });
+    } else if (action === 'upgrade_school') {
+      // The missing half of confirm_invoice: that action activates a
+      // brand-new school from a pre-signup invoice, but nothing updated an
+      // *existing* director's school when they paid after starting on the
+      // trial. This is the same shape — seatsTotal from the server-owned
+      // PLAN_SEATS table, never a client number — just applied to an
+      // existing schools/{schoolId} doc instead of creating a new one, and
+      // it clears trialEndsAt so the create-class/create-teacher-invite
+      // soft-lock stops applying.
+      if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
+      const targetPlanId = req.body?.planId;
+      if (!targetPlanId || typeof targetPlanId !== 'string') {
+        return res.status(400).json({ error: 'Missing planId' });
+      }
+
+      const schoolRef = adminDb.collection('schools').doc(schoolId);
+      const schoolSnap = await schoolRef.get();
+      if (!schoolSnap.exists) return res.status(404).json({ error: 'School not found' });
+
+      const newSeats = seatsForPlan(targetPlanId);
+      await schoolRef.update({
+        planId: targetPlanId,
+        seatsTotal: newSeats,
+        trialEndsAt: FieldValue.delete(),
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'School upgraded successfully',
+        schoolId,
+        planId: targetPlanId,
+        seatsTotal: newSeats,
+      });
     } else if (action === 'assign_teacher') {
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
       let targetUid = uid;

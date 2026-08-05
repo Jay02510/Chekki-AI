@@ -25,6 +25,7 @@ interface Props {
   pendingRoster?: any[];
   activeRoster?: any[];
   isLoadingRoster?: boolean;
+  trialStatus?: { onTrial: boolean; daysRemaining: number; expired: boolean } | null;
   classes?: any[];
   selectedClass?: any;
   handleApproveStudent?: (uid: string) => void;
@@ -46,6 +47,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   pendingRoster = [],
   activeRoster = [],
   isLoadingRoster = false,
+  trialStatus = null,
   classes = [],
   selectedClass,
   handleApproveStudent = () => {},
@@ -103,6 +105,38 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           >
             <span>⚡ 결제 완료하고 최종 활성화하기 →</span>
           </button>
+        </div>
+      )}
+
+      {/* Trial Countdown / Expired Banner */}
+      {trialStatus?.onTrial && (
+        <div
+          className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left ${
+            trialStatus.expired
+              ? 'bg-red-500/10 border-red-500/30'
+              : trialStatus.daysRemaining <= 2
+                ? 'bg-orange-500/10 border-orange-500/30'
+                : 'bg-white/5 border-white/10'
+          }`}
+        >
+          <div>
+            <p className={`text-sm font-black ${trialStatus.expired ? 'text-red-400' : trialStatus.daysRemaining <= 2 ? 'text-orange-400' : isNight ? 'text-white' : 'text-zinc-900'}`}>
+              {trialStatus.expired
+                ? (isKo ? '⏰ 무료 체험이 종료되었습니다' : '⏰ Your free trial has ended')
+                : (isKo ? `⏳ 무료 체험 ${trialStatus.daysRemaining}일 남음` : `⏳ ${trialStatus.daysRemaining} day${trialStatus.daysRemaining === 1 ? '' : 's'} left in your free trial`)}
+            </p>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              {trialStatus.expired
+                ? (isKo ? '기존 학급과 데이터는 계속 볼 수 있지만, 새 학급 개설과 선생님 초대는 제한됩니다.' : 'Existing classes and data stay visible, but creating new classes or inviting teachers is paused until you upgrade.')
+                : (isKo ? '체험 종료 후에도 기존 데이터는 유지되며, 새 학급/초대만 제한됩니다.' : "New classes and invites will pause when it ends — your existing data isn't affected.")}
+            </p>
+          </div>
+          <a
+            href="/schools"
+            className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all shrink-0 cursor-pointer whitespace-nowrap"
+          >
+            {isKo ? '플랜 업그레이드 →' : 'Upgrade Plan →'}
+          </a>
         </div>
       )}
 

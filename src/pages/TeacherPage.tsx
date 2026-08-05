@@ -76,6 +76,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const [showActivationWizard, setShowActivationWizard] = useState(false);
   const [schoolSeatsTotal, setSchoolSeatsTotal] = useState<{ ft: number; kt: number }>({ ft: 0, kt: 0 });
+  const [trialStatus, setTrialStatus] = useState<{ onTrial: boolean; daysRemaining: number; expired: boolean } | null>(null);
   const [showReviewSheetModal, setShowReviewSheetModal] = useState(false);
   const [showReportCardModal, setShowReportCardModal] = useState(false);
 
@@ -304,6 +305,32 @@ export default function TeacherPage({ isNight = true }: Props) {
         if (seats) setSchoolSeatsTotal({ ft: seats.ft || 0, kt: seats.kt || 0 });
       } catch (err) {
         console.warn('Failed to load school seat totals:', err);
+      }
+    })();
+  }, [(user as any)?.schoolId, (user as any)?.role]);
+
+  // Trial countdown banner + one-time day-5/6 Resend reminder (server-side
+  // idempotency via trialReminderSentAt — see api/update-school-profile.ts).
+  useEffect(() => {
+    if ((user as any)?.role !== 'director') return;
+    (async () => {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        const response = await fetch('/api/update-school-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+          body: JSON.stringify({ checkTrialStatus: true }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setTrialStatus({
+            onTrial: !!data.onTrial,
+            daysRemaining: data.daysRemaining ?? 0,
+            expired: !!data.expired,
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to check trial status:', err);
       }
     })();
   }, [(user as any)?.schoolId, (user as any)?.role]);
@@ -2637,6 +2664,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 onOpenLogoModal={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
                 schoolId={(user as any)?.schoolId}
                 seatsTotal={schoolSeatsTotal}
+                trialStatus={trialStatus}
                 pendingRoster={pendingRoster}
                 activeRoster={activeRoster}
                 isLoadingRoster={isLoadingRoster}
