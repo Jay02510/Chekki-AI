@@ -99,7 +99,7 @@ const translations = {
     biz_name: 'Chekki',
     biz_info_title: 'Business Information',
     biz_reg_num: 'Business Registration: 814-14-03096',
-    biz_rep: 'Representative: Chekki Support Team',
+    biz_rep: 'Representative: Benjamin Jason',
     biz_address: 'Address: Jongno 347, Lotte Castle, Seoul 03113, South Korea',
     biz_mail_order: 'E-commerce Registration Number: (Pending)',
     biz_hours: 'Customer Support Hours: Weekdays 10AM–6PM (KST)',
@@ -107,7 +107,7 @@ const translations = {
       'This service guarantees payment safety through the Purchase Safety Service (Escrow).',
     biz_contact_notice:
       'Inquiries are accepted 24 hours a day and will be answered within 1 business day.',
-    biz_email: 'Email: chekkihelp@gmail.com',
+    biz_email: 'Email: support@chekkiai.com',
 
     // Settings
     settings_title: 'Parent Profile',
@@ -463,13 +463,13 @@ const translations = {
     biz_name: 'Chekki (채키)',
     biz_info_title: '사업자 정보',
     biz_reg_num: '사업자등록번호: 814-14-03096',
-    biz_rep: '대표자: Chekki 지원팀',
+    biz_rep: '대표자: Benjamin Jason',
     biz_address: '주소: 서울특별시 종로구 종로 347, 롯데캐슬, 03113',
     biz_mail_order: '통신판매업 신고번호: 준비중',
     biz_hours: '고객센터: 평일 10:00–18:00 (KST)',
     biz_escrow: '본 서비스는 구매안전서비스를 통해 결제 안전을 보장합니다.',
     biz_contact_notice: '문의는 1영업일 이내 답변드립니다.',
-    biz_email: '이메일: chekkihelp@gmail.com',
+    biz_email: '이메일: support@chekkiai.com',
 
     // Settings
     settings_title: '학부모 프로필',

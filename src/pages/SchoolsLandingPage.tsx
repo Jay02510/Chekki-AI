@@ -1878,12 +1878,22 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       )}
 
       {/* --- FOOTER --- */}
-      <footer className={`py-12 border-t ${isNight ? 'border-white/5 bg-black/30' : 'border-zinc-200 bg-white'} px-6 text-center transition-colors`}>
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-xs text-zinc-500 font-medium">
-            © {new Date().getFullYear()} ChekkiAI. All rights reserved.
-          </p>
-          <div className="flex flex-wrap justify-center md:justify-end items-center gap-4 md:gap-6 text-xs text-zinc-500 font-black tracking-wider uppercase">
+      <footer className={`py-12 border-t ${isNight ? 'border-white/5 bg-black/30 text-zinc-400' : 'border-zinc-200 bg-white text-zinc-600'} px-6 transition-colors`}>
+        <div className="max-w-7xl mx-auto flex flex-col gap-6 items-center text-center">
+          {/* Business Info section for KC INCIS / PortOne Inspection */}
+          <div className="text-xs space-y-1.5 font-medium max-w-3xl opacity-80">
+            <p className="font-bold text-sm mb-1">
+              {isKo ? '사업자 정보' : 'Business Information'}
+            </p>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-1.5 text-xs">
+              <span><strong>{isKo ? '상호명:' : 'Company:'}</strong> 채키 AI (Chekki AI)</span>
+              <span><strong>{isKo ? '대표자:' : 'Representative:'}</strong> Benjamin Jason</span>
+              <span><strong>{isKo ? '사업자등록번호:' : 'Biz Reg No:'}</strong> 814-14-03096</span>
+              <span><strong>{isKo ? '고객센터:' : 'Email:'}</strong> support@chekkiai.com</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6 text-xs font-black tracking-wider uppercase">
             <a
               href="/"
               onClick={(e) => {
@@ -1894,7 +1904,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               }}
               className="hover:text-orange-500 transition-colors"
             >
-              {isKo ? '메인 서비스로 이동' : 'Main Service'}
+              {isKo ? '메인 서비스' : 'Main Service'}
             </a>
             <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
             <a
@@ -1948,7 +1958,37 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             >
               {isKo ? '이용약관' : 'Terms of Service'}
             </a>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <a
+              href="/refund"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/refund');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-orange-500 transition-colors"
+            >
+              {isKo ? '환불정책' : 'Refund Policy'}
+            </a>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <a
+              href="/support"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/support');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-orange-500 transition-colors"
+            >
+              {isKo ? '고객지원' : 'Customer Support'}
+            </a>
           </div>
+
+          <p className="text-xs text-zinc-500 font-medium pt-2">
+            © {new Date().getFullYear()} ChekkiAI. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

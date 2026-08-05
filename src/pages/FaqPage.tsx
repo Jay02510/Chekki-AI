@@ -421,6 +421,49 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
         </div>
 
       </main>
+
+      {/* --- FOOTER --- */}
+      <footer className={`py-12 border-t ${isNight ? 'border-white/5 bg-black/30 text-zinc-400' : 'border-zinc-200 bg-white text-zinc-600'} px-6 transition-colors mt-20`}>
+        <div className="max-w-7xl mx-auto flex flex-col gap-6 items-center text-center">
+          <div className="text-xs space-y-1.5 font-medium max-w-3xl opacity-80">
+            <p className="font-bold text-sm mb-1">
+              {isKo ? '사업자 정보' : 'Business Information'}
+            </p>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-1.5 text-xs">
+              <span><strong>{isKo ? '상호명:' : 'Company:'}</strong> 채키 AI (Chekki AI)</span>
+              <span><strong>{isKo ? '대표자:' : 'Representative:'}</strong> Benjamin Jason</span>
+              <span><strong>{isKo ? '사업자등록번호:' : 'Biz Reg No:'}</strong> 814-14-03096</span>
+              <span><strong>{isKo ? '고객센터:' : 'Email:'}</strong> support@chekkiai.com</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6 text-xs font-black tracking-wider uppercase">
+            <button onClick={() => navigateTo('/')} className="hover:text-orange-500 transition-colors">
+              {isKo ? '메인 서비스' : 'Main Service'}
+            </button>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <button onClick={() => navigateTo('/privacy')} className="hover:text-orange-500 transition-colors">
+              {isKo ? '개인정보처리방침' : 'Privacy Policy'}
+            </button>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <button onClick={() => navigateTo('/terms')} className="hover:text-orange-500 transition-colors">
+              {isKo ? '이용약관' : 'Terms of Service'}
+            </button>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <button onClick={() => navigateTo('/refund')} className="hover:text-orange-500 transition-colors">
+              {isKo ? '환불정책' : 'Refund Policy'}
+            </button>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <button onClick={() => navigateTo('/support')} className="hover:text-orange-500 transition-colors">
+              {isKo ? '고객지원' : 'Customer Support'}
+            </button>
+          </div>
+
+          <p className="text-xs text-zinc-500 font-medium pt-2">
+            © {new Date().getFullYear()} ChekkiAI. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

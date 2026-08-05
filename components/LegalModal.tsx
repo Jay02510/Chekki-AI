@@ -225,7 +225,7 @@ export const LegalModal: React.FC<Props> = ({
                       이용자가 계정 탈퇴를 요청할 경우 수집된 개인정보는 즉시 파기됩니다.
                     </p>
 
-                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>개인정보 관리책임자: Chekki 지원팀 (chekkihelp@gmail.com)</p>
+                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>개인정보 관리책임자: Benjamin Jason (support@chekkiai.com / 사업자등록번호: 814-14-03096)</p>
                   </div>
                 </div>
                 <div className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}>
@@ -274,7 +274,7 @@ export const LegalModal: React.FC<Props> = ({
                       all associated data at any time through the app settings.
                     </p>
 
-                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>Data Protection Officer: Chekki Support Team (chekkihelp@gmail.com)</p>
+                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>Data Protection Officer: Benjamin Jason (support@chekkiai.com / Biz Reg No: 814-14-03096)</p>
                   </div>
                 </div>
               </section>

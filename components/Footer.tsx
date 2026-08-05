@@ -48,6 +48,12 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
               </p>
               <p>
                 <span className="text-zinc-600 font-bold">
+                  {language === 'ko' ? '대표자:' : 'Representative:'}
+                </span>{' '}
+                Benjamin Jason
+              </p>
+              <p>
+                <span className="text-zinc-600 font-bold">
                   {language === 'ko' ? '사업자번호:' : 'Reg No:'}
                 </span>{' '}
                 814-14-03096

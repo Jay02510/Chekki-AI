@@ -746,8 +746,22 @@ export default function Home() {
           </a>
         </div>
 
-        <div className="relative z-10 mt-24 flex flex-col items-center gap-6">
-          <div className="flex items-center gap-6 text-white/50 text-sm font-medium mb-4">
+        <div className="relative z-10 mt-16 max-w-4xl w-full flex flex-col items-center gap-8 border-t border-white/10 pt-10">
+          {/* Business Info for KC INCIS / PortOne Inspection */}
+          <div className="text-center text-xs text-white/50 space-y-1.5 font-medium max-w-2xl">
+            <p className="font-bold text-white/80 text-sm mb-2">
+              {isKo ? '사업자 정보' : 'Business Information'}
+            </p>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-1.5 text-xs">
+              <span><strong className="text-white/70">{isKo ? '상호명:' : 'Company:'}</strong> 채키 AI (Chekki AI)</span>
+              <span><strong className="text-white/70">{isKo ? '대표자:' : 'Representative:'}</strong> Benjamin Jason</span>
+              <span><strong className="text-white/70">{isKo ? '사업자등록번호:' : 'Biz Reg No:'}</strong> 814-14-03096</span>
+              <span><strong className="text-white/70">{isKo ? '고객센터:' : 'Email:'}</strong> support@chekkiai.com</span>
+            </div>
+          </div>
+
+          {/* Legal Policies & Links */}
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs text-white/60 font-bold uppercase tracking-wider">
             <a
               href="/faq"
               onClick={(e) => {
@@ -756,10 +770,11 @@ export default function Home() {
                 window.history.pushState({}, '', '/faq');
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
-              className="hover:text-white transition-colors"
+              className="hover:text-orange-400 transition-colors"
             >
-              FAQ
+              {isKo ? '자주 묻는 질문 (FAQ)' : 'FAQ'}
             </a>
+            <span className="text-white/20">|</span>
             <a
               href="/privacy"
               onClick={(e) => {
@@ -768,10 +783,11 @@ export default function Home() {
                 window.history.pushState({}, '', '/privacy');
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
-              className="hover:text-white transition-colors"
+              className="hover:text-orange-400 transition-colors"
             >
-              Privacy Policy
+              {isKo ? '개인정보처리방침' : 'Privacy Policy'}
             </a>
+            <span className="text-white/20">|</span>
             <a
               href="/terms"
               onClick={(e) => {
@@ -780,30 +796,57 @@ export default function Home() {
                 window.history.pushState({}, '', '/terms');
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
-              className="hover:text-white transition-colors"
+              className="hover:text-orange-400 transition-colors"
             >
-              Terms of Service
+              {isKo ? '이용약관' : 'Terms of Service'}
+            </a>
+            <span className="text-white/20">|</span>
+            <a
+              href="/refund"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/refund');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-orange-400 transition-colors"
+            >
+              {isKo ? '환불정책' : 'Refund Policy'}
+            </a>
+            <span className="text-white/20">|</span>
+            <a
+              href="/support"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({}, '', '/support');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-orange-400 transition-colors"
+            >
+              {isKo ? '고객지원' : 'Customer Support'}
             </a>
           </div>
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-4 pt-2">
             <a
               href="https://www.instagram.com/chekki__ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-16 h-16 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500"
+              className="w-12 h-12 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500"
             >
-              <InstagramLogo size={32} weight="fill" />
+              <InstagramLogo size={24} weight="fill" />
             </a>
             <a
               href="https://www.tiktok.com/@chekkiai"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-16 h-16 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500"
+              className="w-12 h-12 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500"
             >
-              <TiktokLogo size={32} weight="fill" />
+              <TiktokLogo size={24} weight="fill" />
             </a>
           </div>
-          <p className="text-white/60 font-medium">
+          <p className="text-white/40 text-xs font-medium">
             © {new Date().getFullYear()} Chekki. Designed for parents & educators.
           </p>
         </div>

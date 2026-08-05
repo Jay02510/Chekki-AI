@@ -170,10 +170,37 @@ const SubscribePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer note */}
-      <p className="text-[10px] text-zinc-700 mt-10 text-center font-bold uppercase tracking-[0.2em]">
-        © 2025 Chekki AI — {isKo ? '모바일 전용 구독' : 'Mobile App Subscriptions Only'}
-      </p>
+      {/* Footer & Business Info */}
+      <footer className="mt-12 text-center text-xs text-zinc-500 space-y-4 max-w-lg w-full border-t border-white/10 pt-8">
+        <div className="space-y-1 text-[11px] text-zinc-400">
+          <p>
+            <span><strong>{isKo ? '상호:' : 'Company:'}</strong> 채키 AI (Chekki AI)</span> | {' '}
+            <span><strong>{isKo ? '대표자:' : 'Representative:'}</strong> Benjamin Jason</span>
+          </p>
+          <p>
+            <span><strong>{isKo ? '사업자번호:' : 'Biz Reg No:'}</strong> 814-14-03096</span> | {' '}
+            <span><strong>{isKo ? '이메일:' : 'Email:'}</strong> support@chekkiai.com</span>
+          </p>
+        </div>
+
+        <div className="flex justify-center gap-4 text-[11px] font-bold text-zinc-400">
+          <a href="/privacy" onClick={(e) => { e.preventDefault(); window.location.href = '/privacy'; }} className="hover:text-orange-400">
+            {isKo ? '개인정보처리방침' : 'Privacy Policy'}
+          </a>
+          <span>|</span>
+          <a href="/terms" onClick={(e) => { e.preventDefault(); window.location.href = '/terms'; }} className="hover:text-orange-400">
+            {isKo ? '이용약관' : 'Terms of Service'}
+          </a>
+          <span>|</span>
+          <a href="/refund" onClick={(e) => { e.preventDefault(); window.location.href = '/refund'; }} className="hover:text-orange-400">
+            {isKo ? '환불정책' : 'Refund Policy'}
+          </a>
+        </div>
+
+        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest pt-2">
+          © {new Date().getFullYear()} Chekki AI — {isKo ? '모바일 전용 구독' : 'Mobile App Subscriptions Only'}
+        </p>
+      </footer>
     </div>
   );
 };
