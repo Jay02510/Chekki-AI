@@ -6,6 +6,7 @@ import { dbInstance, auth } from '../../services/database';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
+import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
 import { compressImage, stripDataUrlPrefix } from '../../services/compressImage';
 import ReportStudioPage from './ReportStudioPage';
 import { 
@@ -72,6 +73,19 @@ export default function TeacherPage({ isNight = true }: Props) {
   // Triggers when: ?activate=true in URL AND user is authenticated AND wizard not yet completed for this account
   const isActivateParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('activate') === 'true';
   const inviteSlug = typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('invite') || '') : '';
+  // Plan carried in the URL from the /schools plan modal (?plan=school_pro),
+  // not just sessionStorage — sessionStorage alone breaks if this link is
+  // opened in a new tab or the page is refreshed mid-signup. Mirrored into
+  // sessionStorage below so the existing signUp()/wizard reads keep working.
+  const urlPlanId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('plan') : null;
+  const [activationPlanId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    if (urlPlanId) {
+      sessionStorage.setItem('chekki_selected_plan', urlPlanId);
+      return urlPlanId;
+    }
+    return sessionStorage.getItem('chekki_selected_plan');
+  });
 
 
   const [showActivationWizard, setShowActivationWizard] = useState(false);
@@ -1012,9 +1026,21 @@ export default function TeacherPage({ isNight = true }: Props) {
       if (response.ok) {
         newClass = data.class;
       } else if (response.status === 400) {
-        // Real seat-limit rejection — surface it and stop, don't fall back to
-        // a local-only class that the server has explicitly refused.
-        alert(data.error || (isKo ? '학급 개설 한도에 도달했습니다.' : "You've reached your class limit."));
+        // Real seat-limit/trial-expiry rejection — surface it and stop, don't
+        // fall back to a local-only class that the server has explicitly
+        // refused. For trial expiry specifically, the upgrade path is one
+        // click away instead of a dead-end alert (server soft-locks this
+        // action but a director had no way to act on it from here before).
+        if (data.trialExpired) {
+          const wantsUpgrade = window.confirm(
+            (data.error || (isKo ? '7일 무료 체험이 종료되었습니다.' : 'Your 7-day trial has ended.')) +
+              '\n\n' +
+              (isKo ? '지금 업그레이드하시겠습니까?' : 'Upgrade now?')
+          );
+          if (wantsUpgrade) window.location.href = '/schools';
+        } else {
+          alert(data.error || (isKo ? '학급 개설 한도에 도달했습니다.' : "You've reached your class limit."));
+        }
         return;
       } else {
         // Server unreachable for some other reason — keep the teacher moving
@@ -1646,6 +1672,13 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   // --- RENDER AUTH (LOGIN / SIGN UP) VIEW ---
   if (!isAuthenticated) {
+    // A director arriving fresh off picking a plan on /schools (?plan=... in
+    // the URL, carried into activationPlanId above) gets a dedicated signup
+    // screen instead of the shared Login/SignUp toggle — see caveman review:
+    // "no Login vs Sign Up choice for someone who just picked a plan."
+    const isPlanSignup = !!(activationPlanId && isActivateParam && loginRole === 'director' && authMode === 'signup' && !inviteSlug);
+    const planSeats = seatsForPlan(activationPlanId);
+    const planLabel = labelsForPlan(activationPlanId);
     return (
       <div className="fixed inset-0 z-[500] overflow-y-auto bg-[#050505] text-zinc-200 flex items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
         <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
@@ -1664,8 +1697,10 @@ export default function TeacherPage({ isNight = true }: Props) {
 
             {/* Role Switcher Pill (Teacher vs Director HQ) — hidden when the
                 account is arriving via a role-locked director invite link,
-                since the role isn't a choice in that case (audit §21d). */}
-            {!(inviteSlug && authMode === 'signup') && (
+                since the role isn't a choice in that case (audit §21d), and
+                also hidden for a plan-linked director signup (picked a plan
+                on /schools) since that's already role-locked to director. */}
+            {!(inviteSlug && authMode === 'signup') && !isPlanSignup && (
               <div className="w-full flex p-1 bg-[#050505] border border-white/10 rounded-2xl mb-4">
                 <button
                   type="button"
@@ -1724,39 +1759,52 @@ export default function TeacherPage({ isNight = true }: Props) {
               </div>
             )}
 
-            {/* Auth Mode Toggle (Login vs Sign Up) */}
-            <div className="w-full flex bg-[#050505] p-1 rounded-2xl border border-white/10 mb-6">
-              <button
-                type="button"
-                onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                  authMode === 'login'
-                    ? (loginRole === 'director' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-white shadow-lg shadow-orange-500/20')
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                {isKo ? '로그인' : 'Log In'}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setAuthMode('signup'); setAuthError(''); }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                  authMode === 'signup'
-                    ? (loginRole === 'director' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-white shadow-lg shadow-orange-500/20')
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                {isKo ? '회원가입' : 'Sign Up'}
-              </button>
-            </div>
+            {/* Auth Mode Toggle (Login vs Sign Up) — hidden for a plan-linked
+                director signup, replaced by a small "already have an
+                account?" link below instead. That choice belongs to
+                returning users, not someone who just picked a plan. */}
+            {!isPlanSignup && (
+              <div className="w-full flex bg-[#050505] p-1 rounded-2xl border border-white/10 mb-6">
+                <button
+                  type="button"
+                  onClick={() => { setAuthMode('login'); setAuthError(''); }}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                    authMode === 'login'
+                      ? (loginRole === 'director' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-white shadow-lg shadow-orange-500/20')
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  {isKo ? '로그인' : 'Log In'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setAuthMode('signup'); setAuthError(''); }}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                    authMode === 'signup'
+                      ? (loginRole === 'director' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-white shadow-lg shadow-orange-500/20')
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  {isKo ? '회원가입' : 'Sign Up'}
+                </button>
+              </div>
+            )}
 
             <h2 className="text-2xl font-black tracking-tight text-white mb-2 font-display">
-              {authMode === 'login'
+              {isPlanSignup
+                ? (isKo
+                    ? `${planLabel.nameKo} 원장님 계정 생성 — FT ${planSeats.ft}석, KT ${planSeats.kt}석`
+                    : `Create your Director account for ${planLabel.nameEn} — ${planSeats.ft} FT seats, ${planSeats.kt} KT seats`)
+                : authMode === 'login'
                 ? (loginRole === 'director' ? (isKo ? '원장님 HQ 로그인' : 'Director HQ Login') : (isKo ? '교사 포털 로그인' : 'Teacher Portal Login'))
                 : (loginRole === 'director' ? (isKo ? '원장님 계정 생성' : 'Create Director Account') : (isKo ? '교사 계정 생성' : 'Create Teacher Account'))}
             </h2>
-            <p className="text-zinc-400 text-xs mb-6 text-center leading-relaxed max-w-xs">
-              {authMode === 'login'
+            <p className={`text-zinc-400 text-xs text-center leading-relaxed max-w-xs ${isPlanSignup ? 'mb-2' : 'mb-6'}`}>
+              {isPlanSignup
+                ? (activationPlanId === 'trial'
+                    ? (isKo ? '신용카드 등록 없이 7일 무료 체험이 바로 시작됩니다.' : 'Free for 7 days, no payment required now.')
+                    : (isKo ? '가입 즉시 원장님 전용 대시보드가 개설됩니다. 결제는 대시보드에서 별도로 안내드립니다.' : 'Your Director dashboard activates immediately after signup — billing is handled separately from your dashboard.'))
+                : authMode === 'login'
                 ? (loginRole === 'director'
                     ? (isKo ? '캠퍼스 전체 커리큘럼, 일간 숙제 제출률 및 보고서 총괄 대시보드로 이동합니다.' : 'Log in to view campus curriculum streams, homework status, and student reports.')
                     : (isKo ? '학습지 관리 및 분석을 위해 교사 계정으로 로그인해 주세요.' : 'Log in with your teacher credentials to access your dashboard.'))
@@ -1764,6 +1812,15 @@ export default function TeacherPage({ isNight = true }: Props) {
                     ? (isKo ? '학원명을 등록하고 즉시 원장님 전용 대시보드를 개설하세요.' : 'Register your academy and activate your Director HQ Dashboard.')
                     : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
             </p>
+            {isPlanSignup && (
+              <button
+                type="button"
+                onClick={() => { setAuthMode('login'); setAuthError(''); }}
+                className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer mb-6 underline underline-offset-2"
+              >
+                {isKo ? '이미 계정이 있으신가요? 로그인' : 'Already have an account? Log in'}
+              </button>
+            )}
 
             <form onSubmit={handleSignIn} className="w-full space-y-4">
               {authMode === 'signup' && (
@@ -1872,6 +1929,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         isKo={isKo}
         schoolId={(user as any)?.schoolId || ''}
         seatsTotal={schoolSeatsTotal}
+        trialStatus={trialStatus}
         onComplete={(data) => {
           const uid = user?.uid || '';
           // Mark wizard as done so it never shows again for this account

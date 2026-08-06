@@ -71,6 +71,12 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
       const data = await response.json();
       if (!response.ok) {
         setMessage({ text: data.error || (isKo ? '초대 생성에 실패했습니다.' : 'Failed to create invite.'), type: 'error' });
+        // Trial-expiry soft-lock (api/create-teacher-invite.ts) — the upgrade
+        // path should be one click away here too, not just a dead-end error.
+        if (data.trialExpired) {
+          const wantsUpgrade = window.confirm(isKo ? '지금 업그레이드하시겠습니까?' : 'Upgrade now?');
+          if (wantsUpgrade) window.location.href = '/schools';
+        }
         return;
       }
       setMessage({

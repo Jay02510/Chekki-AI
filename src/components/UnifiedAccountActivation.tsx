@@ -3,12 +3,14 @@ import { Buildings, CheckCircle, FolderUser, UserGear, UploadSimple } from '@pho
 import { auth } from '../../services/database';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { useToast } from '../../contexts/ToastContext';
+import { labelsForPlan } from '../../api/_lib/pricingTiers';
 
 interface Props {
   isNight?: boolean;
   isKo?: boolean;
   schoolId: string;
   seatsTotal: { ft: number; kt: number };
+  trialStatus?: { onTrial: boolean; daysRemaining: number; expired: boolean } | null;
   onComplete: (data: { academyName: string; logoUrl?: string; classes: string[] }) => void;
 }
 
@@ -17,10 +19,12 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
   isKo = true,
   schoolId,
   seatsTotal,
+  trialStatus = null,
   onComplete,
 }) => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const { showToast } = useToast();
+  const planLabel = labelsForPlan(typeof window !== 'undefined' ? sessionStorage.getItem('chekki_selected_plan') : null);
 
   // Step 1: School Profile
   const [academyName, setAcademyName] = useState(() => (typeof window !== 'undefined' ? sessionStorage.getItem('chekki_paid_school') || '' : ''));
@@ -108,8 +112,11 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
               </h2>
             </div>
             <div className="flex items-center gap-2">
+              {/* seatsTotal comes from the school doc set-initial-role.ts wrote
+                  server-side — the real granted split, not the sessionStorage
+                  display-only number this used to read. */}
               <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                ⚡ {typeof window !== 'undefined' && sessionStorage.getItem('chekki_selected_plan') ? sessionStorage.getItem('chekki_selected_plan')?.replace('_', ' ').toUpperCase() : 'SCHOOL PRO'} ({typeof window !== 'undefined' ? sessionStorage.getItem('chekki_teacher_seats') || '10' : '10'} SEATS ALLOWED)
+                ⚡ {(isKo ? planLabel.nameKo : planLabel.nameEn).toUpperCase()} (FT {seatsTotal.ft} / KT {seatsTotal.kt})
               </span>
             </div>
           </div>
@@ -119,6 +126,25 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
             <div className={`h-1.5 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-orange-500' : isNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
             <div className={`h-1.5 rounded-full transition-all duration-500 ${step >= 3 ? 'bg-orange-500' : isNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
           </div>
+
+          {/* Trial Countdown — mirrors the dashboard banner (NativeDirectorPortal)
+              and the mobile app's RevenueCat trial badge in SettingsModal, so the
+              director sees it while actually setting up, not just at signup. */}
+          {trialStatus?.onTrial && (
+            <div className={`px-4 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 ${
+              trialStatus.expired
+                ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                : trialStatus.daysRemaining <= 2
+                  ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
+                  : isNight ? 'bg-white/5 border-white/10 text-zinc-300' : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+            }`}>
+              <span>
+                {trialStatus.expired
+                  ? (isKo ? '⏰ 무료 체험이 종료되었습니다 — 대시보드에서 업그레이드하세요.' : '⏰ Your free trial has ended — upgrade from the dashboard.')
+                  : (isKo ? `⏳ 무료 체험 ${trialStatus.daysRemaining}일 남음` : `⏳ ${trialStatus.daysRemaining} day${trialStatus.daysRemaining === 1 ? '' : 's'} left in your trial`)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* STEP 1: Campus Profile & Logo Upload */}

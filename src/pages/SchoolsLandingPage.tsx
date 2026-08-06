@@ -22,64 +22,38 @@ import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { NativeSchoolPackageFlow } from '../components/NativeSchoolPackageFlow';
+import { PLAN_SEATS, PLAN_LABELS } from '../../api/_lib/pricingTiers';
 
 interface Props {
   isNight: boolean;
   setIsNight: (val: boolean) => void;
 }
 
-const PRICING_TIERS = {
-  trial: {
-    id: 'trial',
-    nameEn: '7-Day Free Teacher Trial',
-    nameKo: '7일 무료 학원 체험',
-    monthly: { krw: 0, usd: 0 },
-    yearly: { krw: 0, usd: 0 },
-    minSeats: 1,
-    defaultTeachers: 1,
-    seats: { ft: 1, kt: 1 }
-  },
-  solo: {
-    id: 'solo',
-    nameEn: 'Solo Tutor & Study Room (1 Seat)',
-    nameKo: '공부방 / 개인 교습소 (1석 단독)',
-    monthly: { krw: 39000, usd: 29 },
-    yearly: { krw: 31000, usd: 23 },
-    minSeats: 1,
-    defaultTeachers: 1,
-    seats: { ft: 1, kt: 0 }
-  },
-  starter: {
-    id: 'starter',
-    nameEn: 'Starter Academy Pack',
-    nameKo: '스타터 학원 패키지',
-    monthly: { krw: 69000, usd: 49 },
-    yearly: { krw: 55000, usd: 39 },
-    minSeats: 1,
-    defaultTeachers: 3,
-    seats: { ft: 2, kt: 1 }
-  },
-  school_pro: {
-    id: 'school_pro',
-    nameEn: 'Chekki Master School Pro (All-in-One Bundle)',
-    nameKo: '체키 마스터 스쿨 프로 (완전 통합 패키지)',
-    monthly: { krw: 290000, usd: 220 },
-    yearly: { krw: 232000, usd: 175 },
-    minSeats: 5,
-    defaultTeachers: 10,
-    seats: { ft: 6, kt: 4 }
-  },
-  enterprise: {
-    id: 'enterprise',
-    nameEn: 'Large Academy & Franchise',
-    nameKo: '대형 학원 & 프랜차이즈 네트워크',
-    monthly: { krw: 590000, usd: 450 },
-    yearly: { krw: 472000, usd: 360 },
-    minSeats: 10,
-    defaultTeachers: 20,
-    seats: { ft: 12, kt: 8 }
-  }
+// Pricing/billing figures only — seat counts and plan names are NOT
+// duplicated here anymore. They're pulled from api/_lib/pricingTiers.ts
+// (PLAN_SEATS/PLAN_LABELS), the same table api/set-initial-role.ts uses
+// server-side to grant seats, so the modal can never show a split the
+// backend wouldn't actually honor.
+const PRICING_BILLING: Record<string, { monthly: { krw: number; usd: number }; yearly: { krw: number; usd: number }; minSeats: number; defaultTeachers: number }> = {
+  trial: { monthly: { krw: 0, usd: 0 }, yearly: { krw: 0, usd: 0 }, minSeats: 1, defaultTeachers: 1 },
+  solo: { monthly: { krw: 39000, usd: 29 }, yearly: { krw: 31000, usd: 23 }, minSeats: 1, defaultTeachers: 1 },
+  starter: { monthly: { krw: 69000, usd: 49 }, yearly: { krw: 55000, usd: 39 }, minSeats: 1, defaultTeachers: 3 },
+  school_pro: { monthly: { krw: 290000, usd: 220 }, yearly: { krw: 232000, usd: 175 }, minSeats: 5, defaultTeachers: 10 },
+  enterprise: { monthly: { krw: 590000, usd: 450 }, yearly: { krw: 472000, usd: 360 }, minSeats: 10, defaultTeachers: 20 },
 };
+
+const PRICING_TIERS = Object.fromEntries(
+  Object.entries(PRICING_BILLING).map(([id, billing]) => [
+    id,
+    {
+      id,
+      nameEn: PLAN_LABELS[id]?.nameEn || id,
+      nameKo: PLAN_LABELS[id]?.nameKo || id,
+      seats: PLAN_SEATS[id] || { ft: 0, kt: 0 },
+      ...billing,
+    },
+  ])
+) as Record<string, { id: string; nameEn: string; nameKo: string; seats: { ft: number; kt: number } } & typeof PRICING_BILLING[string]>;
 
 const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [language, setLanguage] = useState<'ko' | 'en'>(() => {
@@ -401,7 +375,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               onClick={() => {
                 sessionStorage.setItem('chekki_selected_plan', 'school_pro');
                 sessionStorage.setItem('chekki_teacher_seats', '10');
-                window.location.href = '/teacher?activate=true&role=director';
+                window.location.href = '/teacher?activate=true&role=director&plan=school_pro';
               }}
               className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg shadow-orange-500/25 transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
             >
@@ -1499,9 +1473,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <span className="text-xs font-normal text-zinc-400"> {billingCycle === 'yearly' ? (isKo ? '/월 (연간 20% 할인)' : '/mo (billed annually)') : (isKo ? '/월' : '/month')}</span>
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <span className="px-3 py-1 bg-orange-500/20 text-orange-400 font-bold text-xs rounded-xl border border-orange-500/30 self-start">
-                    {activePlan.defaultTeachers} {isKo ? '명 강사 계정' : 'Teacher Seats'}
+                    FT {activePlan.seats.ft} / KT {activePlan.seats.kt} {isKo ? '좌석' : 'Seats'}
                   </span>
                   <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-xl border border-emerald-500/30 self-start">
                     {selectedPlanId === 'solo' ? (isKo ? '원생 20명 포함' : '20 Students') : (isKo ? '무제한 원생 수용' : 'Unlimited Students')}
@@ -1593,7 +1567,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   setShowPricingModal(false);
                   sessionStorage.setItem('chekki_selected_plan', selectedPlanId);
                   sessionStorage.setItem('chekki_teacher_seats', activePlan.defaultTeachers?.toString() || '10');
-                  window.location.href = '/teacher?activate=true&role=director';
+                  window.location.href = `/teacher?activate=true&role=director&plan=${encodeURIComponent(selectedPlanId)}`;
                 }}
                 className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
