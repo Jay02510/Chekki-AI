@@ -62,10 +62,13 @@ async function callGenerateReport(type: string, payload: unknown): Promise<any> 
   const idToken = await auth.currentUser?.getIdToken();
   if (!idToken) throw new Error('Not authenticated');
 
-  const response = await fetch('/api/generate-report', {
+  // Folded into api/analyze.ts (task: 'generate_report') — was its own
+  // endpoint file until the Vercel Hobby plan's 12-function limit blocked
+  // deployment.
+  const response = await fetch('/api/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-    body: JSON.stringify({ type, payload }),
+    body: JSON.stringify({ task: 'generate_report', type, payload }),
   });
 
   if (!response.ok) {

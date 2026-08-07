@@ -17,11 +17,12 @@ interface Props {
 
 /**
  * Director-facing teacher→class assignment + removal. Both writes go
- * through Admin SDK endpoints (api/assign-class-teacher.ts,
- * api/remove-teacher.ts) — firestore.rules explicitly forbids a client from
- * changing a class's teacherUid/assignedTeacherUids or another user's
- * role/schoolId directly, so this panel is a thin UI over those two
- * endpoints, not a second place those checks are implemented.
+ * through api/create-teacher-invite.ts's action dispatch (assign/remove —
+ * folded in from their own endpoint files to stay under Vercel's 12-function
+ * Hobby limit) via Admin SDK — firestore.rules explicitly forbids a client
+ * from changing a class's teacherUid/assignedTeacherUids or another user's
+ * role/schoolId directly, so this panel is a thin UI over that endpoint, not
+ * a second place those checks are implemented.
  */
 export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, classes }) => {
   const [teachers, setTeachers] = useState<SchoolTeacher[]>([]);
@@ -58,7 +59,7 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
     setBusyKey(key);
     setMessage(null);
     try {
-      await callEndpoint('/api/assign-class-teacher', { classId, teacherUid, action: isAssigned ? 'remove' : 'add' });
+      await callEndpoint('/api/create-teacher-invite', { action: 'assign', classId, teacherUid, assignAction: isAssigned ? 'remove' : 'add' });
     } catch (err: any) {
       setMessage({ text: err.message || 'Failed to update assignment.', type: 'error' });
     } finally {
@@ -71,7 +72,7 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
     setBusyKey(teacherUid);
     setMessage(null);
     try {
-      await callEndpoint('/api/remove-teacher', { teacherUid });
+      await callEndpoint('/api/create-teacher-invite', { action: 'remove', teacherUid });
       setMessage({ text: `${label} removed.`, type: 'success' });
     } catch (err: any) {
       setMessage({ text: err.message || 'Failed to remove teacher.', type: 'error' });
