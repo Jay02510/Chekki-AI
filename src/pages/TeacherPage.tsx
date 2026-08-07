@@ -4,7 +4,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../../contexts/ToastContext';
 import { dbInstance, auth } from '../../services/database';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc, addDoc, orderBy, limit as fbLimit, serverTimestamp } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
 import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
 import { compressImage, stripDataUrlPrefix } from '../../services/compressImage';
@@ -162,6 +162,25 @@ export default function TeacherPage({ isNight = true }: Props) {
       };
       setFtLogOutput(output);
       setActiveTab('kt_script');
+
+      // Persist the log so it's visible in the FT history tab and, once
+      // synced, to parents of enrolled students (see classes/{classId}/logs
+      // Firestore rule). Best-effort — an AI report was already generated
+      // and shown, so a Firestore hiccup here shouldn't block the teacher.
+      if (selectedClass?.id && selectedClass.id !== 'demo' && user?.uid) {
+        try {
+          const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
+          const docRef = await addDoc(logsRef, {
+            ...payload,
+            classId: selectedClass.id,
+            teacherUid: user.uid,
+            createdAt: serverTimestamp(),
+          });
+          setSubmittedLogs((prev) => [{ id: docRef.id, ...payload }, ...prev]);
+        } catch (persistErr) {
+          console.error('Failed to save class log to Firestore:', persistErr);
+        }
+      }
     } catch (err) {
       console.error('Failed to generate AI report from FT log:', err);
       showToast({
@@ -742,6 +761,24 @@ export default function TeacherPage({ isNight = true }: Props) {
       fetchClasses();
     }
   }, [isAuthenticated, user, loginRole]);
+
+  // Load previously submitted logs for the selected class (history tab).
+  useEffect(() => {
+    if (!selectedClass?.id || selectedClass.id === 'demo') {
+      setSubmittedLogs([]);
+      return;
+    }
+    (async () => {
+      try {
+        const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
+        const logsQuery = query(logsRef, orderBy('createdAt', 'desc'), fbLimit(50));
+        const snap = await getDocs(logsQuery);
+        setSubmittedLogs(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      } catch (err) {
+        console.error('Failed to load class log history:', err);
+      }
+    })();
+  }, [selectedClass?.id]);
 
   // Show teacher onboarding once when first authenticated with no classes
   useEffect(() => {

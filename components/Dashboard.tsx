@@ -22,6 +22,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useMistakes } from '../contexts/MistakeContext';
 import { WorksheetItem } from '../types';
 import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
+import { ParentClassLogs } from './ParentClassLogs';
 import { FlashcardsView } from './FlashcardsView';
 import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
@@ -461,6 +462,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         className="relative z-10 px-4 md:px-12 pb-24 max-w-[1400px] mx-auto animate-fade-in-up"
         style={{ animationDelay: '200ms' }}
       >
+        {user?.classId && user?.classStatus === 'active' && (
+          <ParentClassLogs classId={user.classId} studentName={user.studentName} language={language} />
+        )}
+
         {/* B2B Customer Acquisition Banner: Invite Academy Director */}
         <div className="mb-6 p-4 md:p-5 rounded-2xl bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-purple-500/15 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
           <div className="flex items-center gap-3">

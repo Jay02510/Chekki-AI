@@ -245,6 +245,25 @@ service cloud.firestore {
         isAdmin()
       );
 
+      // Class logs (FT/KT daily log entries). Readable by the teacher(s) and
+      // director who own the class, plus parents whose enrolled child belongs
+      // to this class — closes the loop between what a teacher records and
+      // what the parent sees. Written only by the class's own teacher(s);
+      // logs are treated as immutable records, so no update/delete rule.
+      match /logs/{logId} {
+        allow read: if request.auth != null && (
+          userBelongsToClass(classId) ||
+          isClassTeacher(classId) ||
+          isSchoolDirectorOfClass(classId) ||
+          isAdmin()
+        );
+        allow create: if request.auth != null && (
+          isClassTeacher(classId) ||
+          isAdmin()
+        ) && request.resource.data.classId == classId;
+        allow update, delete: if request.auth != null && isAdmin();
+      }
+
       match /studentScans/{scanId} {
         allow read: if request.auth != null;
         // A scan can only ever be written as the writer's own uid — the old
