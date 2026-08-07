@@ -822,8 +822,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       img: '/assets/teacher_ob_seed_curriculum.png',
       titleEn: 'Zero-Typing Curriculum Upload',
       titleKo: '3초 교재 AI 자동 등록 (0타이핑 정답지)',
-      descEn: 'Drop your textbook photo or PDF. Chekki AI automatically extracts target vocabulary and answer keys with 99.9% precision.',
-      descKo: '교재 사진이나 PDF 한 장만 드롭하면 끝. Chekki AI가 주간 어휘와 정답지를 3초 만에 99.9% 정확도로 자동 생성합니다.',
+      descEn: 'Drop your textbook photo or PDF. Chekki AI automatically extracts target vocabulary and answer keys in seconds.',
+      descKo: '교재 사진이나 PDF 한 장만 드롭하면 끝. Chekki AI가 주간 어휘와 정답지를 3초 만에 자동 생성합니다.',
     },
     {
       img: '/assets/teacher_ob_share_code.png',
@@ -860,12 +860,18 @@ export default function TeacherPage({ isNight = true }: Props) {
     const fetchedFromFirestore: any[] = [];
     try {
       if (user?.uid) {
-        const q = query(
-          collection(dbInstance, 'classes'),
-          where('teacherUid', '==', user.uid)
-        );
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
+        // Two queries merged by id: `teacherUid` (original single-owner
+        // field, still set on every class) and `assignedTeacherUids`
+        // (director-assigned co-teachers). Classes created before
+        // assignedTeacherUids existed only match the first query — merging
+        // keeps them showing up exactly as before.
+        const ownedQuery = query(collection(dbInstance, 'classes'), where('teacherUid', '==', user.uid));
+        const assignedQuery = query(collection(dbInstance, 'classes'), where('assignedTeacherUids', 'array-contains', user.uid));
+        const [ownedSnap, assignedSnap] = await Promise.all([getDocs(ownedQuery), getDocs(assignedQuery)]);
+        const seen = new Set<string>();
+        [...ownedSnap.docs, ...assignedSnap.docs].forEach((doc) => {
+          if (seen.has(doc.id)) return;
+          seen.add(doc.id);
           fetchedFromFirestore.push({ id: doc.id, ...doc.data() });
         });
       }
@@ -2728,6 +2734,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 isLoadingRoster={isLoadingRoster}
                 classes={classes}
                 selectedClass={selectedClass}
+                weeklyVocabWords={getWeeklyVocabWords()}
                 handleApproveStudent={handleApproveStudent}
                 handleDeclineStudent={handleDeclineStudent}
                 handleRemoveStudent={handleRemoveStudent}

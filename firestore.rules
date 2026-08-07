@@ -21,10 +21,23 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.classId == classId;
     }
 
-    // Helper: Check if user is the designated teacher of a class
+    // Helper: Check if user is a designated teacher of a class — either the
+    // original single-owner `teacherUid` (pre-multi-teacher classes) or
+    // listed in `assignedTeacherUids` (director-assigned co-teachers, e.g.
+    // FT+KT sharing a class). Checking both keeps every class doc written
+    // before this field existed working exactly as before.
     function isClassTeacher(classId) {
+      let classData = get(/databases/$(database)/documents/classes/$(classId)).data;
+      // Also requires the caller to still BE an active teacher, not just
+      // once-matched a class doc's teacherUid — otherwise a director
+      // removing a teacher (api/remove-teacher.ts clears their role/schoolId)
+      // wouldn't actually revoke access to classes that teacher originally
+      // created, since teacherUid alone never expires.
       return request.auth != null &&
-        get(/databases/$(database)/documents/classes/$(classId)).data.teacherUid == request.auth.uid;
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' && (
+          classData.teacherUid == request.auth.uid ||
+          ('assignedTeacherUids' in classData && classData.assignedTeacherUids.hasAny([request.auth.uid]))
+        );
     }
 
     // Helper: Check if user is a director of the school that owns a class.
@@ -213,8 +226,18 @@ service cloud.firestore {
       // rule) had no count check at all — any authenticated teacher could
       // create unlimited classes on a 1-seat plan (audit §2/§10/§18).
       allow create: if request.auth != null && isAdmin();
+      // Co-teacher assignment (assignedTeacherUids) only ever happens
+      // server-side via api/assign-class-teacher.ts (Admin SDK) — director-
+      // authorized and school-membership-checked there. This rule only
+      // covers day-to-day field updates (e.g. activeWeekNumber) by whoever
+      // is already an owner or assigned teacher, not who can become one.
       allow update: if request.auth != null && (
-        (resource.data.teacherUid == request.auth.uid && request.resource.data.teacherUid == request.auth.uid) ||
+        (
+          (resource.data.teacherUid == request.auth.uid ||
+            ('assignedTeacherUids' in resource.data && resource.data.assignedTeacherUids.hasAny([request.auth.uid]))) &&
+          request.resource.data.teacherUid == resource.data.teacherUid &&
+          request.resource.data.assignedTeacherUids == resource.data.assignedTeacherUids
+        ) ||
         isAdmin()
       );
       allow delete: if request.auth != null && (

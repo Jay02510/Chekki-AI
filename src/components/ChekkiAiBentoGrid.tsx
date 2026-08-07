@@ -181,7 +181,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                   <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {activeTab === 'korean'
                       ? '숙제 사진 1장이면 삐뚤빼뚤 손글씨 위 오답을 빨간상자로 정확하게 10초 만에 표시합니다.'
-                      : 'Snap 1 photo of homework. Chekki highlights handwriting errors with 99.9% precision.'}
+                      : 'Snap 1 photo of homework. Chekki highlights handwriting errors in seconds, matched against the real answer key.'}
                   </p>
                 </div>
               </div>

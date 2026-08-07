@@ -68,8 +68,8 @@ const FAQ_DATA: FaqItem[] = [
     tagEn: 'Academy Key Sync',
     questionKo: '영유/어학원 교재 정답지와 AI 채점 결과가 일치하나요?',
     questionEn: 'Does Chekki sync with English Kindergarten & Academy textbook answer keys?',
-    answerKo: '네, 99.9% 정확도로 연동됩니다. 다니고 계신 학원의 6자리 학급 코드를 등록하면, 학원에서 입력한 이번 주 타겟 단어, 파닉스 규칙, 읽기 지문과 100% 연동되어 일반 AI의 환각 오류 없이 정밀하게 채점됩니다.',
-    answerEn: 'Yes, with 99.9% precision! By entering your academy\'s 6-digit class code, Chekki evaluates scans against the teacher\'s active textbook keys, eliminating false AI grading errors.'
+    answerKo: '네, 정확하게 연동됩니다. 다니고 계신 학원의 6자리 학급 코드를 등록하면, 학원에서 입력한 이번 주 타겟 단어, 파닉스 규칙, 읽기 지문과 100% 연동되어 일반 AI의 환각 오류 없이 채점됩니다.',
+    answerEn: 'Yes! By entering your academy\'s 6-digit class code, Chekki evaluates scans against the teacher\'s active textbook keys, eliminating false AI grading errors.'
   },
   {
     id: 'p5',
@@ -130,8 +130,8 @@ const FAQ_DATA: FaqItem[] = [
     tagEn: 'AI Precision',
     questionKo: '학생 손글씨 채점 시 일반 AI의 환각(Hallucination) 오답 우려는 없나요?',
     questionEn: 'Are there concerns about AI OCR hallucinations misgrading student handwriting?',
-    answerKo: '체키는 학원 교재의 정답지 데이터(Ground-Truth)를 채점 기준으로 1차 대조하기 때문에, 일반 AI 파운데이션 모델의 환각 오류 없이 99.9% 정밀한 채점 기준을 유지합니다.',
-    answerEn: 'Chekki cross-references scans against your academy\'s ground-truth answer key, achieving 99.9% precision and completely eliminating false AI grading hallucinations.'
+    answerKo: '체키는 학원 교재의 정답지 데이터(Ground-Truth)를 채점 기준으로 1차 대조하기 때문에, 일반 AI 파운데이션 모델의 환각 오류 없이 정밀한 채점 기준을 유지합니다.',
+    answerEn: 'Chekki cross-references scans against your academy\'s ground-truth answer key, keeping grading precise and eliminating false AI grading hallucinations.'
   },
   {
     id: 't6',

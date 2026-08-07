@@ -5,7 +5,7 @@ import { auth, dbInstance } from '../../services/database';
 interface Invite {
   id: string;
   role: 'ft' | 'kt';
-  status: 'pending' | 'claimed';
+  status: 'pending' | 'claimed' | 'revoked';
   email: string | null;
 }
 
@@ -178,9 +178,9 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         </div>
       )}
 
-      {invites.length > 0 && (
+      {invites.filter((inv) => inv.status !== 'revoked').length > 0 && (
         <div className="pt-2 border-t border-white/10 space-y-1.5 max-h-40 overflow-y-auto">
-          {invites.map((inv) => (
+          {invites.filter((inv) => inv.status !== 'revoked').map((inv) => (
             <div key={inv.id} className="flex items-center justify-between text-[11px]">
               <span className="text-zinc-400 truncate">{inv.email || (isKo ? '(링크 전용)' : '(link only)')}</span>
               <span className={`font-mono font-bold px-1.5 py-0.5 rounded ${inv.role === 'ft' ? 'text-orange-400' : 'text-blue-400'}`}>

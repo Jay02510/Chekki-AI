@@ -55,7 +55,7 @@ export const REPORT_TRANSLATIONS = {
         'Up to 10 Teacher Seats & Unlimited Parents',
         'Includes Everything in Report Studio',
         '1-Click Textbook Syllabus Pre-seeding',
-        'Daily Homework Scanning & 99.9% Autograding'
+        'Daily Homework Scanning & Ground-Truth-Matched Autograding'
       ],
       proCta: 'Choose Master School Pro',
 
@@ -238,7 +238,7 @@ export const REPORT_TRANSLATIONS = {
         '교사 계정 최대 10석 & 학부모 무제한',
         '리포트 스튜디오 모든 기능 포함',
         '1클릭 교재 목차 스캔 & 어휘 선제 탑재',
-        '매일 숙제 스캔 & 99.9% 정밀 채점'
+        '매일 숙제 스캔 & 정답지 기반 정밀 채점'
       ],
       proCta: '마스터 스쿨 프로 시작',
 

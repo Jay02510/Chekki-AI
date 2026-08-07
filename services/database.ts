@@ -26,7 +26,7 @@ import { UserProfile } from '../types';
 import { Capacitor } from '@capacitor/core';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k',
+  apiKey: 'AIzaSyDEh8M-G_2HCzBi3bU5NaRHT7XbXsXpCVM',
   authDomain: 'homework-assistant-c00b9.firebaseapp.com',
   projectId: 'homework-assistant-c00b9',
   storageBucket: 'homework-assistant-c00b9.firebasestorage.app',

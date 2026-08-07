@@ -94,6 +94,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       name: name.trim(),
       level: typeof level === 'string' && level.trim() ? level.trim() : 'General',
       teacherUid: uid,
+      assignedTeacherUids: [uid],
       activeWeekNumber: 1,
       joinCode: generateJoinCode(),
       createdAt: new Date().toISOString(),

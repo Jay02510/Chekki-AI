@@ -21,8 +21,9 @@ import { NativeCurriculumPreseed } from '../components/NativeCurriculumPreseed';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
-import { NativeSchoolPackageFlow } from '../components/NativeSchoolPackageFlow';
 import { PLAN_SEATS, PLAN_LABELS } from '../../api/_lib/pricingTiers';
+import { ClassLogPayload, GeneratedReportOutput } from '../services/aiGenerator';
+import { buildDemoReportOutput } from '../data/demoReportOutput';
 
 interface Props {
   isNight: boolean;
@@ -80,7 +81,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
   const isKo = language === 'ko';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [schoolDemoTab, setSchoolDemoTab] = useState<'syllabus' | 'ft-log' | 'director'>('syllabus');
+  const [schoolDemoTab, setSchoolDemoTab] = useState<'syllabus' | 'ft-log' | 'kt-review' | 'director'>('syllabus');
+  const [isSubmittingSchoolDemoLog, setIsSubmittingSchoolDemoLog] = useState(false);
+  const [schoolDemoOutput, setSchoolDemoOutput] = useState<GeneratedReportOutput | null>(null);
+  const schoolDemoAcademyName = 'Apex English Academy (Seocho)';
+
+  const handleSchoolDemoLogSubmit = (payload: ClassLogPayload) => {
+    setIsSubmittingSchoolDemoLog(true);
+    // Canned, offline example output — no live AI call from this public page.
+    setTimeout(() => {
+      setSchoolDemoOutput(buildDemoReportOutput(payload));
+      setSchoolDemoTab('kt-review');
+      setIsSubmittingSchoolDemoLog(false);
+    }, 600);
+  };
 
   // Theme Persistence
   useEffect(() => {
@@ -411,9 +425,76 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
-      {/* --- CHEKKI SCHOOL PACKAGE 3-STEP FLOW INTERACTIVE PREVIEW --- */}
-      <section id="demo" className="py-12 md:py-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
-        <NativeSchoolPackageFlow isNight={isNight} isKo={isKo} />
+      {/* --- CHEKKI SCHOOL PACKAGE LIVE PRODUCT PREVIEW (real components, not mockups) --- */}
+      <section id="demo" className="py-12 md:py-16 px-4 md:px-8 max-w-7xl mx-auto w-full space-y-6">
+        <div className="text-center max-w-2xl mx-auto space-y-2">
+          <span className="px-3 py-1 bg-orange-500/10 border border-orange-500/30 text-orange-500 text-[10px] font-mono font-black uppercase tracking-widest rounded-full inline-block">
+            {isKo ? '실제 제품 화면 체험' : 'LIVE PRODUCT WALKTHROUGH'}
+          </span>
+          <h3 className={`font-display text-xl sm:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+            {isKo ? '교재 목차 탑재 ➔ 교사 기록 제출 ➔ AI 리포트 ➔ 원장님 대시보드' : 'Curriculum Preseed ➔ Teacher Log ➔ AI Report ➔ Director Dashboard'}
+          </h3>
+          <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+            {isKo
+              ? '아래는 실제 제품 컴포넌트입니다 — 마케팅용으로 따로 만든 화면이 아닙니다.'
+              : 'This is the real product below, not a separate marketing mockup.'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto font-sans">
+          {([
+            { id: 'syllabus' as const, step: '01', emoji: '📸', titleKo: '교재 목차 스캔', titleEn: 'Curriculum Scan', descKo: '교재 사진으로 어휘/정답지 선제 탑재', descEn: 'Scan syllabus, AI preseeds vocab & answer keys' },
+            { id: 'ft-log' as const, step: '02', emoji: '📱', titleKo: '교사 30초 기록', titleEn: 'Teacher 30s Log', descKo: '수업 후 모바일에서 30초 기록 제출', descEn: 'Teacher submits quick mobile class log' },
+            { id: 'kt-review' as const, step: '03', emoji: '⚡', titleKo: 'AI 리포트 생성', titleEn: 'AI Report', descKo: '기록을 존댓말 알림톡 리포트로 자동 변환', descEn: 'AI turns log into bilingual parent report' },
+            { id: 'director' as const, step: '04', emoji: '🏢', titleKo: '원장님 대시보드', titleEn: 'Director Dashboard', descKo: '반별 명단, 교재, 이상 징후, 교사 총괄 관리', descEn: 'Rosters, curriculum, exceptions & teacher management' },
+          ]).map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setSchoolDemoTab(s.id)}
+              className={`p-3 md:p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-1.5 ${
+                schoolDemoTab === s.id
+                  ? 'bg-orange-500/15 border-orange-500 shadow-lg shadow-orange-500/10 scale-[1.02]'
+                  : isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
+                  schoolDemoTab === s.id ? 'bg-orange-500 text-white' : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
+                }`}>
+                  STEP {s.step}
+                </span>
+                <span className="text-sm">{s.emoji}</span>
+              </div>
+              <h4 className="font-bold text-xs sm:text-sm">{isKo ? s.titleKo : s.titleEn}</h4>
+              <p className={`text-[11px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {isKo ? s.descKo : s.descEn}
+              </p>
+            </button>
+          ))}
+        </div>
+
+        {schoolDemoTab === 'syllabus' && (
+          <NativeCurriculumPreseed isNight={isNight} />
+        )}
+        {schoolDemoTab === 'ft-log' && (
+          <NativeTeacherLogForm
+            isNight={isNight}
+            onSubmitLog={handleSchoolDemoLogSubmit}
+            isSubmitting={isSubmittingSchoolDemoLog}
+          />
+        )}
+        {schoolDemoTab === 'kt-review' && (
+          <NativeKtDashboard
+            isNight={isNight}
+            generatedOutput={schoolDemoOutput}
+            className="Apex Seocho 7A"
+            academyName={schoolDemoAcademyName}
+          />
+        )}
+        {schoolDemoTab === 'director' && (
+          <NativeDirectorPortal isNight={isNight} academyName={schoolDemoAcademyName} />
+        )}
       </section>
 
       {/* --- BENTO GRID FEATURES --- */}
@@ -470,7 +551,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
                     <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
                     <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                      {isKo ? '다중 교재 AI 스캔 & 페이지별 픽앤치즈 (99.9% 정밀 채점)' : 'Multi-Page AI Unit Scan & Page Picker (99.9% Accuracy)'}
+                      {isKo ? '다중 교재 AI 스캔 & 페이지별 픽앤치즈 (정답지 기반 정밀 채점)' : 'Multi-Page AI Unit Scan & Page Picker (Ground-Truth-Matched Grading)'}
                     </h3>
                     <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                       {isKo 
@@ -1074,7 +1155,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
               <p className={`text-[11px] mb-4 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '교재 목차 탑재, 99.9% AI 채점 & 학부모 앱 연동까지 통합된 학원 풀 패키지.' 
+                  ? '교재 목차 탑재, 정답지 기반 AI 채점 & 학부모 앱 연동까지 통합된 학원 풀 패키지.'
                   : 'Complete academy package featuring textbook pre-seeding, autograding & parent app sync.'}
               </p>
               <ul className={`space-y-2.5 text-[11px] mb-5 border-t pt-3 ${isNight ? 'border-white/10 text-zinc-300' : 'border-zinc-200 text-zinc-700'}`}>
@@ -1092,7 +1173,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '매일 숙제 스캔 & 99.9% AI 정밀 채점' : 'Daily Homework Scanning & Autograding'}</span>
+                  <span>{isKo ? '매일 숙제 스캔 & 정답지 기반 AI 정밀 채점' : 'Daily Homework Scanning & Ground-Truth-Matched AI Grading'}</span>
                 </li>
               </ul>
             </div>
@@ -1495,7 +1576,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '종이 워크시트 AI 채점기' : 'Paper Worksheet AI Autograder'}</p>
                     </div>
                     <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                      {isKo ? '카메라 촬영 시 99.9% 정확도로 정답 그린 잉크 오버레이 자동 생성' : 'Instant camera capture with 99.9% accurate green ink score overlay generation'}
+                      {isKo ? '카메라 촬영 시 정답지 기반 그린 잉크 오버레이 자동 생성' : 'Instant camera capture with ground-truth-matched green ink score overlay generation'}
                     </p>
                   </div>
 

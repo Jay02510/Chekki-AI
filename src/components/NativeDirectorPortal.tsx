@@ -5,10 +5,14 @@ import {
   WarningCircle,
   UserGear,
   PlusCircle,
-  FolderUser
+  FolderUser,
+  SquaresFour,
+  CheckCircle
 } from '@phosphor-icons/react';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
+import { TeacherRosterPanel } from './TeacherRosterPanel';
+import { SchoolBillingPanel } from './SchoolBillingPanel';
 
 interface Props {
   isNight?: boolean;
@@ -28,6 +32,11 @@ interface Props {
   trialStatus?: { onTrial: boolean; daysRemaining: number; expired: boolean } | null;
   classes?: any[];
   selectedClass?: any;
+  // Current active-week target vocab for selectedClass, same computation
+  // TeacherPage's own curriculum tab and per-student mistake tracking use
+  // (getWeeklyVocabWords). Passed down so the Overview tab can show real
+  // "this unit, at a glance" data without a second source of truth.
+  weeklyVocabWords?: string[];
   handleApproveStudent?: (uid: string) => void;
   handleDeclineStudent?: (uid: string) => void;
   handleRemoveStudent?: (uid: string) => void;
@@ -50,6 +59,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   trialStatus = null,
   classes = [],
   selectedClass,
+  weeklyVocabWords = [],
   handleApproveStudent = () => {},
   handleDeclineStudent = () => {},
   handleRemoveStudent = () => {},
@@ -58,7 +68,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   setSelectedStudentDetails = () => {},
   onResolveFlag = () => {},
 }) => {
-  const [activeTab, setActiveTab] = useState<'roster' | 'curriculum' | 'exceptions' | 'teachers'>('curriculum');
+  const [activeTab, setActiveTab] = useState<'overview' | 'roster' | 'curriculum' | 'exceptions' | 'teachers' | 'billing'>('overview');
 
   const totalRosterCount = pendingRoster.length + activeRoster.length;
   const flaggedStudents = activeRoster.filter((s: any) => s.flaggedException);
@@ -178,6 +188,21 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            onClick={() => setActiveTab('overview')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+              activeTab === 'overview'
+                ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                : isNight
+                ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+            }`}
+          >
+            <SquaresFour size={16} weight="bold" />
+            <span>Overview</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('curriculum')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
               activeTab === 'curriculum'
@@ -238,6 +263,21 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             <UserGear size={16} weight="bold" />
             <span>Teacher Assignments</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('billing')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+              activeTab === 'billing'
+                ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                : isNight
+                ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+            }`}
+          >
+            <span>💳</span>
+            <span>Billing</span>
+          </button>
         </div>
       </div>
 
@@ -274,6 +314,95 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <h4 className="text-2xl font-black text-amber-400 mt-1">{flaggedStudents.length} <span className="text-xs font-normal text-zinc-400">Unresolved</span></h4>
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* TAB OVERVIEW: THIS UNIT, AT A GLANCE (selectedClass's active week: real */}
+      {/* target vocab + real per-student sync status, both already computed by */}
+      {/* TeacherPage — no separate mock data, no second source of truth) */}
+      {/* ========================================================================= */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6 animate-fade-in text-left">
+          {!selectedClass ? (
+            <div className={`p-8 rounded-2xl border text-center ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+              <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No class selected</p>
+              <p className="text-xs text-zinc-400 mt-1">Select a class to see this week's vocab and student status in one view.</p>
+            </div>
+          ) : (
+            <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
+                <div>
+                  <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">This Week</span>
+                  <h4 className={`font-black text-base sm:text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {selectedClass.name || selectedClass.className || 'Class'} • Week {selectedClass.activeWeekNumber || 1}
+                  </h4>
+                </div>
+                {flaggedStudents.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('exceptions')}
+                    className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold cursor-pointer hover:bg-amber-500/20 transition-all"
+                  >
+                    ⚠️ {flaggedStudents.length} Flagged — Review
+                  </button>
+                )}
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-orange-400 uppercase font-mono tracking-wider block mb-2">Target Vocab</span>
+                {weeklyVocabWords.length === 0 ? (
+                  <p className="text-xs text-zinc-400">No vocab set for this week yet — add it from the Curriculum tab.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {weeklyVocabWords.map((word) => (
+                      <span
+                        key={word}
+                        className={`px-2 py-1 rounded-md text-xs font-bold border ${
+                          isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-800 border-orange-200'
+                        }`}
+                      >
+                        {word}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-purple-400 uppercase font-mono tracking-wider block mb-2">
+                  Roster Sync Status ({activeRoster.length})
+                </span>
+                {activeRoster.length === 0 ? (
+                  <p className="text-xs text-zinc-400">No active students in this class yet.</p>
+                ) : (
+                  <ul className="text-xs space-y-1.5">
+                    {activeRoster.map((student: any) => (
+                      <li
+                        key={student.uid || student.studentName}
+                        className={`flex justify-between items-center p-2 rounded ${isNight ? 'bg-white/5' : 'bg-white border border-zinc-200'}`}
+                      >
+                        <span className="font-medium">{student.studentName || student.name || 'Unnamed'}</span>
+                        {student.flaggedException || student.weeklyMistakesCount > 0 ? (
+                          <span className="text-[10px] font-bold text-amber-400 flex items-center gap-1">
+                            <WarningCircle size={12} weight="fill" />
+                            {student.weeklyMistakesCount > 0 ? `${student.weeklyMistakesCount} Error(s) Flagged` : 'Flagged'}
+                          </span>
+                        ) : student.hasScannedThisWeek ? (
+                          <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
+                            <CheckCircle size={12} weight="fill" />
+                            Synced
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-zinc-500">No scan yet</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* TAB 0: CURRICULUM & HOMEWORK STREAM (Syllabus & Worksheet Oversight) */}
@@ -442,11 +571,27 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             </div>
           )}
 
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-zinc-400 font-bold">
-            Teacher-to-class assignment management is coming soon. Invited teachers
-            appear in the list above once they accept.
-          </div>
+          {schoolId ? (
+            <TeacherRosterPanel isNight={isNight} schoolId={schoolId} classes={classes} />
+          ) : (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
+              School profile still loading — teacher assignment will be available once it finishes.
+            </div>
+          )}
         </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 4: BILLING — plan, seats, trial/renewal, always checkable */}
+      {/* ========================================================================= */}
+      {activeTab === 'billing' && (
+        schoolId ? (
+          <SchoolBillingPanel isNight={isNight} isKo={isKo} schoolId={schoolId} seatsTotal={seatsTotal || { ft: 0, kt: 0 }} trialStatus={trialStatus} />
+        ) : (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
+            School profile still loading — billing info will be available once it finishes.
+          </div>
+        )
       )}
 
       {/* SEAT EXPANSION REQUEST MODAL */}

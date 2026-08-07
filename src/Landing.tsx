@@ -563,7 +563,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
-                  <span>{isKo ? '✍️ 99.9% 손글씨 정밀 오답 빨간상자 표시' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
+                  <span>{isKo ? '✍️ 손글씨 정밀 채점 & 오답 빨간상자 표시' : '✍️ Precision Handwriting Grading & Red-Box Autograding'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
@@ -615,7 +615,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
-                  <span>{isKo ? '✍️ 99.9% 손글씨 자동 채점 & 오답 박스' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
+                  <span>{isKo ? '✍️ 손글씨 자동 채점 & 오답 박스' : '✍️ Precision Handwriting Autograding & Red-Box'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
@@ -675,7 +675,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />
-                  <span>{isKo ? '✍️ 99.9% 손글씨 정밀 오답 빨간상자 표시' : '✍️ 99.9% Red-Box Handwriting Autograding'}</span>
+                  <span>{isKo ? '✍️ 손글씨 정밀 채점 & 오답 빨간상자 표시' : '✍️ Precision Handwriting Grading & Red-Box Autograding'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-orange-400 flex-shrink-0" />

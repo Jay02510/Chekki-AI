@@ -34,13 +34,8 @@ import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeArchitecturePipeline } from '../components/NativeArchitecturePipeline';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeCurriculumPreseed } from '../components/NativeCurriculumPreseed';
-import {
-  generateGeneralClassSummary,
-  generateStudentExceptionReport,
-  generatePhoneConsultationPrep,
-  ClassLogPayload,
-  GeneratedReportOutput,
-} from '../services/aiGenerator';
+import { ClassLogPayload, GeneratedReportOutput } from '../services/aiGenerator';
+import { buildDemoReportOutput } from '../data/demoReportOutput';
 
 interface SystemScreenshot {
   id: string;
@@ -126,42 +121,14 @@ export default function ReportStudioPage({ isNight = true, setIsNight }: Props) 
   const [nativeOutput, setNativeOutput] = useState<GeneratedReportOutput | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
 
-  const handleNativeLogSubmit = async (payload: ClassLogPayload) => {
+  const handleNativeLogSubmit = (payload: ClassLogPayload) => {
     setIsSubmittingNativeLog(true);
-    try {
-      // 1. Generate General Summary (Gemini Prompt #1)
-      const summary = await generateGeneralClassSummary(payload);
-
-      // 2. Generate Student Exceptions & Phone Prep (Gemini Prompts #2 & #3)
-      const studentReports = await Promise.all(
-        payload.exceptions.map(async (ex) => {
-          const updateText = await generateStudentExceptionReport(
-            ex.studentName,
-            payload.lessonTopic,
-            payload.textbook,
-            ex.details
-          );
-          const points = await generatePhoneConsultationPrep(ex.studentName, ex.details);
-          return {
-            studentName: ex.studentName,
-            koreanUpdate: updateText,
-            phoneTalkingPoints: points,
-          };
-        })
-      );
-
-      setNativeOutput({
-        bilingualClassSummary: summary,
-        studentReports,
-      });
-
-      // Switch tab to KT Dashboard to show reviewed editing workspace
+    // Canned, offline example output — no live AI call from this public page.
+    setTimeout(() => {
+      setNativeOutput(buildDemoReportOutput(payload));
       setNativeDemoTab('kt-dashboard');
-    } catch (err) {
-      console.error('Native AI generation error:', err);
-    } finally {
       setIsSubmittingNativeLog(false);
-    }
+    }, 600);
   };
 
   useEffect(() => {
