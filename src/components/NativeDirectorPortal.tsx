@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Buildings,
   Users,
@@ -9,6 +9,8 @@ import {
   SquaresFour,
   CheckCircle
 } from '@phosphor-icons/react';
+import { collection, query, where, getCountFromServer } from 'firebase/firestore';
+import { dbInstance } from '../../services/database';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
 import { TeacherRosterPanel } from './TeacherRosterPanel';
@@ -76,6 +78,53 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   const [showSeatExpansionModal, setShowSeatExpansionModal] = useState(false);
   const [requestedExtraSeats, setRequestedExtraSeats] = useState(3);
   const [seatRequestSent, setSeatRequestSent] = useState(false);
+
+  // Thin visibility layer over the FT->KT log review pipeline: not the
+  // content of a log (that's private teacher-to-teacher until a KT reviews
+  // it — see ParentClassLogs.tsx), just whether classes are keeping up with
+  // submitting and reviewing them. Counts only, via aggregate queries.
+  const [logReviewStats, setLogReviewStats] = useState<{
+    pending: number;
+    sent: number;
+    byClass: { classId: string; className: string; pending: number }[];
+  }>({ pending: 0, sent: 0, byClass: [] });
+
+  useEffect(() => {
+    if (classes.length === 0) {
+      setLogReviewStats({ pending: 0, sent: 0, byClass: [] });
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const results = await Promise.all(
+          classes.map(async (cls: any) => {
+            if (!cls?.id || cls.id === 'demo') return { classId: cls?.id, className: cls?.name, pending: 0, sent: 0 };
+            const logsRef = collection(dbInstance, 'classes', cls.id, 'logs');
+            const [pendingSnap, sentSnap] = await Promise.all([
+              getCountFromServer(query(logsRef, where('reviewStatus', '==', 'pending_review'))),
+              getCountFromServer(query(logsRef, where('reviewStatus', '==', 'sent'))),
+            ]);
+            return {
+              classId: cls.id,
+              className: cls.name || cls.className || 'Class',
+              pending: pendingSnap.data().count,
+              sent: sentSnap.data().count,
+            };
+          })
+        );
+        if (cancelled) return;
+        setLogReviewStats({
+          pending: results.reduce((sum, r) => sum + r.pending, 0),
+          sent: results.reduce((sum, r) => sum + r.sent, 0),
+          byClass: results.filter((r) => r.pending > 0).map((r) => ({ classId: r.classId, className: r.className, pending: r.pending })),
+        });
+      } catch (err) {
+        console.error('Failed to load log review stats:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [classes]);
 
 
   return (
@@ -313,6 +362,12 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">FLAGGED EXCEPTIONS</span>
           <h4 className="text-2xl font-black text-amber-400 mt-1">{flaggedStudents.length} <span className="text-xs font-normal text-zinc-400">Unresolved</span></h4>
         </div>
+        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">DAILY LOG REVIEW</span>
+          <h4 className={`text-2xl font-black mt-1 ${logReviewStats.pending > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+            {logReviewStats.pending} <span className="text-xs font-normal text-zinc-400">Awaiting KT Review ({logReviewStats.sent} sent)</span>
+          </h4>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -496,6 +551,24 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               </p>
             </div>
           </div>
+
+          {logReviewStats.byClass.length > 0 && (
+            <div className={`p-4 rounded-2xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+              <h4 className="text-xs font-bold text-zinc-400 uppercase font-mono tracking-wider">
+                Daily Logs Awaiting KT Review
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {logReviewStats.byClass.map((c) => (
+                  <span
+                    key={c.classId}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400"
+                  >
+                    {c.className}: {c.pending} pending
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {flaggedStudents.length === 0 ? (
             <div className={`p-12 rounded-2xl border text-center text-xs ${isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-50 border-zinc-200 text-zinc-500'}`}>

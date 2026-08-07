@@ -136,6 +136,30 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [ftLogOutput, setFtLogOutput] = useState<GeneratedReportOutput | null>(null);
   const [isSubmittingFtLog, setIsSubmittingFtLog] = useState(false);
 
+  // KT review queue — real, Firestore-backed logs pending review for the
+  // selected class, so a KT on a separate account/device actually sees
+  // what the FT submitted (previously relied on shared `ftLogOutput` state,
+  // which never reached a KT on another device — Audit: FT->KT handoff).
+  const [ktPendingLogs, setKtPendingLogs] = useState<any[]>([]);
+  const activeKtLog = ktPendingLogs[0] || null;
+
+  const handleKtApprove = async (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) => {
+    if (!activeKtLog?.id || !activeKtLog?.classId || !user?.uid) return;
+    try {
+      const logRef = doc(dbInstance, 'classes', activeKtLog.classId, 'logs', activeKtLog.id);
+      await updateDoc(logRef, {
+        approvedSummary,
+        approvedExceptions,
+        reviewStatus: 'sent',
+        reviewedByUid: user.uid,
+        sentAt: serverTimestamp(),
+      });
+      setKtPendingLogs((prev) => prev.filter((l) => l.id !== activeKtLog.id));
+    } catch (err) {
+      console.error('Failed to save KT-reviewed report:', err);
+    }
+  };
+
   const handleFtLogSubmit = async (payload: ClassLogPayload) => {
     setIsSubmittingFtLog(true);
     try {
@@ -163,10 +187,14 @@ export default function TeacherPage({ isNight = true }: Props) {
       setFtLogOutput(output);
       setActiveTab('kt_script');
 
-      // Persist the log so it's visible in the FT history tab and, once
-      // synced, to parents of enrolled students (see classes/{classId}/logs
-      // Firestore rule). Best-effort — an AI report was already generated
-      // and shown, so a Firestore hiccup here shouldn't block the teacher.
+      // Persist the log AND the AI-generated KT script so the handoff
+      // survives across accounts/devices — it used to live only in
+      // `ftLogOutput` React state, which meant a KT logging in separately
+      // never saw it (Audit: FT->KT handoff). Visible in the FT history
+      // tab, the KT review queue, and — once reviewed and sent — to
+      // parents of enrolled students. Best-effort — an AI report was
+      // already generated and shown, so a Firestore hiccup here shouldn't
+      // block the teacher.
       if (selectedClass?.id && selectedClass.id !== 'demo' && user?.uid) {
         try {
           const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
@@ -175,8 +203,20 @@ export default function TeacherPage({ isNight = true }: Props) {
             classId: selectedClass.id,
             teacherUid: user.uid,
             createdAt: serverTimestamp(),
+            aiKoreanSummary: summary.korean,
+            aiEnglishSummary: summary.english,
+            aiStudentReports: studentReports,
+            reviewStatus: 'pending_review',
           });
-          setSubmittedLogs((prev) => [{ id: docRef.id, ...payload }, ...prev]);
+          const newLog = { id: docRef.id, ...payload };
+          setSubmittedLogs((prev) => [newLog, ...prev]);
+          setKtPendingLogs((prev) => [...prev, {
+            id: docRef.id,
+            classId: selectedClass.id,
+            aiKoreanSummary: summary.korean,
+            aiEnglishSummary: summary.english,
+            aiStudentReports: studentReports,
+          }]);
         } catch (persistErr) {
           console.error('Failed to save class log to Firestore:', persistErr);
         }
@@ -762,10 +802,12 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   }, [isAuthenticated, user, loginRole]);
 
-  // Load previously submitted logs for the selected class (history tab).
+  // Load previously submitted logs for the selected class (history tab),
+  // and the queue of logs still awaiting KT review for that class.
   useEffect(() => {
     if (!selectedClass?.id || selectedClass.id === 'demo') {
       setSubmittedLogs([]);
+      setKtPendingLogs([]);
       return;
     }
     (async () => {
@@ -773,7 +815,13 @@ export default function TeacherPage({ isNight = true }: Props) {
         const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
         const logsQuery = query(logsRef, orderBy('createdAt', 'desc'), fbLimit(50));
         const snap = await getDocs(logsQuery);
-        setSubmittedLogs(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        const allLogs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as any));
+        setSubmittedLogs(allLogs);
+        setKtPendingLogs(
+          allLogs
+            .filter((l) => l.reviewStatus === 'pending_review')
+            .reverse() // oldest pending first
+        );
       } catch (err) {
         console.error('Failed to load class log history:', err);
       }
@@ -2791,12 +2839,25 @@ export default function TeacherPage({ isNight = true }: Props) {
 
             {/* KT KakaoTalk Script Tab */}
             {activeTab === 'kt_script' && (
-              <NativeKtDashboard 
-                isNight={isThemeNight} 
-                className={activeClass?.name || '7세반 (샘플)'} 
-                academyName={user?.schoolName || 'Chekki Master Academy'} 
-                userProfile={user} 
-                generatedOutput={ftLogOutput}
+              <NativeKtDashboard
+                key={activeKtLog?.id || 'empty'}
+                isNight={isThemeNight}
+                className={activeClass?.name || '7세반 (샘플)'}
+                academyName={user?.schoolName || 'Chekki Master Academy'}
+                userProfile={user}
+                generatedOutput={
+                  activeKtLog
+                    ? {
+                        bilingualClassSummary: {
+                          korean: activeKtLog.aiKoreanSummary,
+                          english: activeKtLog.aiEnglishSummary,
+                        },
+                        studentReports: activeKtLog.aiStudentReports || [],
+                      }
+                    : ftLogOutput
+                }
+                pendingCount={ktPendingLogs.length}
+                onApprove={handleKtApprove}
               />
             )}
 

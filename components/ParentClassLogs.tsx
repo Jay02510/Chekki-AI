@@ -3,9 +3,9 @@ import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { dbInstance } from '../services/database';
 import { ChalkboardTeacher } from '@phosphor-icons/react';
 
-interface ClassLogException {
+interface ApprovedException {
   studentName: string;
-  details: string;
+  approvedText: string;
 }
 
 interface ClassLogEntry {
@@ -13,9 +13,9 @@ interface ClassLogEntry {
   className?: string;
   date?: string;
   lessonTopic?: string;
-  energyLevel?: string;
-  generalComments?: string;
-  exceptions?: ClassLogException[];
+  reviewStatus?: 'pending_review' | 'sent';
+  approvedSummary?: string;
+  approvedExceptions?: ApprovedException[];
 }
 
 interface Props {
@@ -35,9 +35,18 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentName, languag
       setIsLoading(true);
       try {
         const logsRef = collection(dbInstance, 'classes', classId, 'logs');
-        const logsQuery = query(logsRef, orderBy('createdAt', 'desc'), limit(20));
+        // No `where('reviewStatus', ...)` here — combining it with orderBy on a
+        // different field needs a composite index this project doesn't
+        // provision. Pull the recent window and filter to KT-reviewed,
+        // sent logs client-side instead — parents must only ever see the
+        // KT-approved version, never the raw FT note underneath it.
+        const logsQuery = query(logsRef, orderBy('createdAt', 'desc'), limit(50));
         const snap = await getDocs(logsQuery);
-        setLogs(snap.docs.map((d) => ({ id: d.id, ...d.data() } as ClassLogEntry)));
+        const sent = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as ClassLogEntry))
+          .filter((l) => l.reviewStatus === 'sent')
+          .slice(0, 20);
+        setLogs(sent);
       } catch (err) {
         console.error('Failed to load class logs for parent view:', err);
       } finally {
@@ -61,15 +70,15 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentName, languag
               {isKo ? '선생님 수업 리포트' : "Teacher's Class Reports"}
             </h3>
             <p className="text-xs text-zinc-400">
-              {isKo ? '학원 선생님이 남긴 최근 수업 기록입니다.' : "Recent updates from your child's class."}
+              {isKo ? '학원 선생님이 검수 후 보낸 최근 수업 기록입니다.' : "Recent updates, reviewed by your child's teacher."}
             </p>
           </div>
         </div>
 
         <div className="space-y-3">
           {logs.map((log) => {
-            const myException = studentName
-              ? log.exceptions?.find((ex) => ex.studentName === studentName)
+            const myNote = studentName
+              ? log.approvedExceptions?.find((ex) => ex.studentName === studentName)
               : undefined;
             return (
               <div key={log.id} className="p-4 rounded-2xl border border-white/10 bg-[#050505]">
@@ -83,15 +92,15 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentName, languag
                     {log.lessonTopic}
                   </p>
                 )}
-                {log.generalComments && (
-                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{log.generalComments}</p>
+                {log.approvedSummary && (
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{log.approvedSummary}</p>
                 )}
-                {myException && (
+                {myNote && (
                   <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
                     <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wide">
                       {isKo ? `${studentName} 관련 메모` : `Note about ${studentName}`}
                     </span>
-                    <p className="text-xs text-amber-100 mt-1 leading-relaxed">{myException.details}</p>
+                    <p className="text-xs text-amber-100 mt-1 leading-relaxed">{myNote.approvedText}</p>
                   </div>
                 )}
               </div>

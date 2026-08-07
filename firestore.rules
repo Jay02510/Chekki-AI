@@ -248,8 +248,7 @@ service cloud.firestore {
       // Class logs (FT/KT daily log entries). Readable by the teacher(s) and
       // director who own the class, plus parents whose enrolled child belongs
       // to this class — closes the loop between what a teacher records and
-      // what the parent sees. Written only by the class's own teacher(s);
-      // logs are treated as immutable records, so no update/delete rule.
+      // what the parent sees. Written only by the class's own teacher(s).
       match /logs/{logId} {
         allow read: if request.auth != null && (
           userBelongsToClass(classId) ||
@@ -261,7 +260,20 @@ service cloud.firestore {
           isClassTeacher(classId) ||
           isAdmin()
         ) && request.resource.data.classId == classId;
-        allow update, delete: if request.auth != null && isAdmin();
+        // The only legitimate update is a KT (or co-teacher) reviewing and
+        // sending the log — writing the approved parent-facing text back
+        // onto the same doc. Restricted to just those fields so a teacher
+        // can't rewrite another teacher's original raw log after the fact.
+        allow update: if request.auth != null && (
+          isAdmin() ||
+          (
+            isClassTeacher(classId) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+              ['approvedSummary', 'approvedExceptions', 'reviewStatus', 'reviewedByUid', 'sentAt']
+            )
+          )
+        );
+        allow delete: if request.auth != null && isAdmin();
       }
 
       match /studentScans/{scanId} {

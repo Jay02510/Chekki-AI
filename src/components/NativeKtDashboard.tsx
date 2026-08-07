@@ -11,6 +11,13 @@ interface Props {
   className?: string;
   academyName?: string;
   userProfile?: UserProfile | null;
+  // Number of other logs still waiting behind this one in the review queue.
+  pendingCount?: number;
+  // Persists the KT-reviewed version to Firestore (classes/{id}/logs/{id})
+  // so it's the record parents see — never the raw FT note. Fired when the
+  // KT copies the script to send, since that's the point they've committed
+  // to this version being final.
+  onApprove?: (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) => void;
 }
 
 export const NativeKtDashboard: React.FC<Props> = ({
@@ -20,6 +27,8 @@ export const NativeKtDashboard: React.FC<Props> = ({
   className = 'POLY Seocho 7A',
   academyName = 'POLY Academy (Seocho)',
   userProfile,
+  pendingCount = 0,
+  onApprove,
 }) => {
   const isKo = isKoProp !== undefined ? isKoProp : (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
   const permissions = getPermissionsForUser(userProfile);
@@ -73,6 +82,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
     }
   };
 
+  const displayedStudentReports = generatedOutput?.studentReports && generatedOutput.studentReports.length > 0
+    ? generatedOutput.studentReports
+    : [];
+
   const handleCopyKakaoScript = () => {
     const fullText = currentFullText;
 
@@ -94,6 +107,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
     setCopied(true);
     setReportStatus('copied_sent');
     setTimeout(() => setCopied(false), 2500);
+
+    onApprove?.(
+      editedKoreanSummary,
+      displayedStudentReports.map((s) => ({ studentName: s.studentName, approvedText: s.koreanUpdate }))
+    );
   };
 
   return (
@@ -115,6 +133,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <h2 className="text-xl sm:text-2xl font-black tracking-tight">
             {isKo ? '한국인 담임 교사 & 상담 대시보드' : 'Korean Teacher & Counselor Dashboard'}
           </h2>
+          {pendingCount > 0 && (
+            <span className="mt-1 inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-red-500/15 border border-red-500/30 text-red-400 font-mono">
+              {isKo ? `대기 중인 리포트 ${pendingCount}건 더 있음` : `${pendingCount} more waiting in queue`}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
