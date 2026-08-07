@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withSentry } from './_lib/withSentry';
-import { adminAuth } from './_lib/firebaseAdmin';
-import { applyCors } from './_lib/cors';
+import { withSentry } from './_lib/withSentry.js';
+import { adminAuth } from './_lib/firebaseAdmin.js';
+import { applyCors } from './_lib/cors.js';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res);

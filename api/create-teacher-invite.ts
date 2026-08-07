@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withSentry } from './_lib/withSentry';
-import { adminDb, adminAuth } from './_lib/firebaseAdmin';
-import { maxInvitesForRole } from './_lib/seatLimits';
-import { applyCors } from './_lib/cors';
+import { withSentry } from './_lib/withSentry.js';
+import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
+import { maxInvitesForRole } from './_lib/seatLimits.js';
+import { applyCors } from './_lib/cors.js';
 import { FieldValue } from 'firebase-admin/firestore';
 
 /**

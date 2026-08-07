@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withSentry } from './_lib/withSentry';
+import { withSentry } from './_lib/withSentry.js';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
-import { adminDb } from './_lib/firebaseAdmin';
-import { applyCors } from './_lib/cors';
+import { adminDb } from './_lib/firebaseAdmin.js';
+import { applyCors } from './_lib/cors.js';
 
 // This endpoint is public/unauthenticated (a sales lead form) and triggers a
 // real Resend email per call — rate limit hard so it can't be used to spam

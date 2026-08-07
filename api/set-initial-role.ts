@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withSentry } from './_lib/withSentry';
-import { adminDb, adminAuth } from './_lib/firebaseAdmin';
-import { seatsForPlan } from './_lib/pricingTiers';
-import { applyCors } from './_lib/cors';
+import { withSentry } from './_lib/withSentry.js';
+import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
+import { seatsForPlan } from './_lib/pricingTiers.js';
+import { applyCors } from './_lib/cors.js';
 
 // Sets a brand-new account's role (director/teacher) server-side, right after
 // signup. The client can never write `role` directly — firestore.rules blocks

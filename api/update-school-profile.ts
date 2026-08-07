@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withSentry } from './_lib/withSentry';
-import { adminDb, adminAuth } from './_lib/firebaseAdmin';
-import { applyCors } from './_lib/cors';
+import { withSentry } from './_lib/withSentry.js';
+import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
+import { applyCors } from './_lib/cors.js';
 
 /**
  * Two director-only, schoolId-owner-checked actions merged into one

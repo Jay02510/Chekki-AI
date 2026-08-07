@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withSentry } from './_lib/withSentry';
+import { withSentry } from './_lib/withSentry.js';
 import { FieldValue } from 'firebase-admin/firestore';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
-import { adminDb, adminAuth as authDb } from './_lib/firebaseAdmin';
-import { seatsForPlan } from './_lib/pricingTiers';
-import { applyCors } from './_lib/cors';
+import { adminDb, adminAuth as authDb } from './_lib/firebaseAdmin.js';
+import { seatsForPlan } from './_lib/pricingTiers.js';
+import { applyCors } from './_lib/cors.js';
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
 

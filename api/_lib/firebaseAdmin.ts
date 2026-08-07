@@ -6,7 +6,7 @@
  * instead of duplicating the init logic.
  *
  * Usage:
- *   import { adminDb, adminAuth } from './_lib/firebaseAdmin';
+ *   import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
  */
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';

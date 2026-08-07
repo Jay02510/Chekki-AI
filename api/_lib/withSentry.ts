@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { captureException } from './sentry';
+import { captureException } from './sentry.js';
 
 type Handler = (req: VercelRequest, res: VercelResponse) => Promise<void | VercelResponse>;
 

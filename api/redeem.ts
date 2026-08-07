@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withSentry } from './_lib/withSentry';
+import { withSentry } from './_lib/withSentry.js';
 import { FieldValue } from 'firebase-admin/firestore';
-import { adminDb, adminAuth } from './_lib/firebaseAdmin';
-import { applyCors } from './_lib/cors';
+import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
+import { applyCors } from './_lib/cors.js';
 
 /**
  * Merged redeem-class-code / redeem-school-code / redeem-teacher-code /

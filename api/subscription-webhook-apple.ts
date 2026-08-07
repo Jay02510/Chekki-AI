@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withSentry } from './_lib/withSentry';
+import { withSentry } from './_lib/withSentry.js';
 import crypto from 'crypto';
-import { adminDb } from './_lib/firebaseAdmin';
-import { verifyAppleNotification, verifyAppleTransaction } from './_lib/appleWebhookVerifier';
+import { adminDb } from './_lib/firebaseAdmin.js';
+import { verifyAppleNotification, verifyAppleTransaction } from './_lib/appleWebhookVerifier.js';
 
 /**
  * Apple Server-to-Server Notification Handler

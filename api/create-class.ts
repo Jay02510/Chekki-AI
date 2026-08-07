@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withSentry } from './_lib/withSentry';
-import { adminDb, adminAuth } from './_lib/firebaseAdmin';
-import { maxClassesForSeats } from './_lib/seatLimits';
-import { applyCors } from './_lib/cors';
+import { withSentry } from './_lib/withSentry.js';
+import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
+import { maxClassesForSeats } from './_lib/seatLimits.js';
+import { applyCors } from './_lib/cors.js';
 
 /**
  * Server-side seat-limit enforcement on class creation (audit §2/§10/§18).

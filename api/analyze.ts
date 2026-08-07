@@ -1,11 +1,11 @@
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from '@google/genai';
-import { withSentry } from './_lib/withSentry';
+import { withSentry } from './_lib/withSentry.js';
 import { FieldValue } from 'firebase-admin/firestore';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 import crypto from 'crypto';
-import { adminDb, adminAuth as adminAuthClient } from './_lib/firebaseAdmin';
-import { applyCors } from './_lib/cors';
+import { adminDb, adminAuth as adminAuthClient } from './_lib/firebaseAdmin.js';
+import { applyCors } from './_lib/cors.js';
 
 export const config = {
   maxDuration: 300,
