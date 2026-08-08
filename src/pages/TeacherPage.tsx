@@ -47,6 +47,10 @@ import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeFtDashboard } from '../components/NativeFtDashboard';
 import { NativeDirectorStudentsTab } from '../components/NativeDirectorStudentsTab';
 import { ScannedModal } from '../components/ScannedModal';
+import { AcademyLogoModal } from '../components/AcademyLogoModal';
+import { DocPreviewModal } from '../components/DocPreviewModal';
+import { WeekCalendarModal } from '../components/WeekCalendarModal';
+import { ReportCardModal } from '../components/ReportCardModal';
 import { CurriculumEditorForm } from '../components/CurriculumEditorForm';
 import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
 import { 
@@ -142,6 +146,11 @@ export default function TeacherPage({ isNight = true }: Props) {
   // which never reached a KT on another device — Audit: FT->KT handoff).
   const [ktPendingLogs, setKtPendingLogs] = useState<any[]>([]);
   const activeKtLog = ktPendingLogs[0] || null;
+  // Distinguishes "no logs submitted yet" from "failed to load logs" — without
+  // this a failed Firestore read looked identical to an empty queue, and
+  // NativeKtDashboard's placeholder sample content made that indistinguishable
+  // from real emptiness too (Audit: no loading/error state for KT queue).
+  const [ktLogsLoadError, setKtLogsLoadError] = useState(false);
 
   const handleKtApprove = async (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) => {
     if (!activeKtLog?.id || !activeKtLog?.classId || !user?.uid) return;
@@ -157,6 +166,16 @@ export default function TeacherPage({ isNight = true }: Props) {
       setKtPendingLogs((prev) => prev.filter((l) => l.id !== activeKtLog.id));
     } catch (err) {
       console.error('Failed to save KT-reviewed report:', err);
+      // The UI (copy/share buttons) previously reported success regardless of
+      // this write's outcome, so a failed approve silently never reached
+      // parents with no indication to the KT that it didn't go through
+      // (Audit: silent FT->KT persist failure).
+      showToast({
+        type: 'error',
+        message: isKo
+          ? '⚠️ 학부모 전송 승인이 저장되지 않았습니다. 다시 시도해주세요.'
+          : "⚠️ The approval wasn't saved — parents won't see this yet. Please try again.",
+      });
     }
   };
 
@@ -219,6 +238,16 @@ export default function TeacherPage({ isNight = true }: Props) {
           }]);
         } catch (persistErr) {
           console.error('Failed to save class log to Firestore:', persistErr);
+          // Previously silent: the UI still switched to the "success" kt_script
+          // tab even when this write failed, so the log never reached a KT on
+          // another device with no indication anything went wrong (Audit:
+          // silent FT->KT persist failure).
+          showToast({
+            type: 'error',
+            message: isKo
+              ? '⚠️ 일지가 클라우드에 저장되지 않았습니다. 다른 기기의 한국인 교사에게 전달되지 않을 수 있습니다.'
+              : "⚠️ This log wasn't saved to the cloud — it may not reach your co-teacher on another device.",
+          });
         }
       }
     } catch (err) {
@@ -808,8 +837,10 @@ export default function TeacherPage({ isNight = true }: Props) {
     if (!selectedClass?.id || selectedClass.id === 'demo') {
       setSubmittedLogs([]);
       setKtPendingLogs([]);
+      setKtLogsLoadError(false);
       return;
     }
+    setKtLogsLoadError(false);
     (async () => {
       try {
         const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
@@ -824,6 +855,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         );
       } catch (err) {
         console.error('Failed to load class log history:', err);
+        setKtLogsLoadError(true);
       }
     })();
   }, [selectedClass?.id]);
@@ -1279,7 +1311,9 @@ export default function TeacherPage({ isNight = true }: Props) {
       try {
         localStorage.setItem(`teacher_classes_${uid}`, JSON.stringify(next));
         localStorage.setItem('teacher_classes_fallback', JSON.stringify(next));
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Failed to cache classes to localStorage:', e);
+      }
       return next;
     });
 
@@ -1306,7 +1340,9 @@ export default function TeacherPage({ isNight = true }: Props) {
       try {
         localStorage.setItem(`teacher_classes_${uid}`, JSON.stringify(next));
         localStorage.setItem('teacher_classes_fallback', JSON.stringify(next));
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Failed to cache classes to localStorage:', e);
+      }
       return next;
     });
     setActiveTab('syllabus');
@@ -1370,7 +1406,9 @@ export default function TeacherPage({ isNight = true }: Props) {
         setCurriculumOther(data.other || '');
         try {
           localStorage.setItem(localKey, JSON.stringify(data));
-        } catch (e) {}
+        } catch (e) {
+          console.warn('Failed to cache curriculum to localStorage:', e);
+        }
       }
     } catch (err) {
       console.warn('Failed to load curriculum from Firestore (using local fallback):', err);
@@ -2861,6 +2899,15 @@ export default function TeacherPage({ isNight = true }: Props) {
             )}
 
             {/* KT KakaoTalk Script Tab */}
+            {activeTab === 'kt_script' && ktLogsLoadError && (
+              <div className="mb-4 p-3.5 rounded-2xl border flex items-center gap-3 bg-red-500/10 border-red-500/30 text-red-400">
+                <span className="text-sm">
+                  {isKo
+                    ? '⚠️ 리포트 대기열을 불러오지 못했습니다. 아래는 실제 데이터가 아닙니다 — 새로고침 후 다시 시도해주세요.'
+                    : "⚠️ Couldn't load the review queue — what's shown below is not real data. Please refresh and try again."}
+                </span>
+              </div>
+            )}
             {activeTab === 'kt_script' && (
               <NativeKtDashboard
                 key={activeKtLog?.id || 'empty'}
@@ -3342,146 +3389,14 @@ export default function TeacherPage({ isNight = true }: Props) {
       )}
       {/* --- CUSTOM ACADEMY LOGO CONFIGURATION MODAL --- */}
       {showLogoModal && (
-        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
-            onClick={() => setShowLogoModal(false)} 
-          />
-          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in text-left ${
-            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
-          }`}>
-            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 transition-colors ${
-              isThemeNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
-            }`}>
-              <button
-                type="button"
-                onClick={() => setShowLogoModal(false)}
-                className={`absolute top-6 right-6 p-2 rounded-full transition-all cursor-pointer ${
-                  isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
-                }`}
-              >
-                <X size={16} weight="bold" />
-              </button>
-
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
-                  <Sparkle size={22} weight="bold" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
-                    {isKo ? '맞춤 브랜드 설정' : 'ACADEMY BRANDING'}
-                  </span>
-                  <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo ? '학원 맞춤 로고 등록' : 'Custom Academy Logo'}
-                  </h3>
-                </div>
-              </div>
-
-              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                {isKo 
-                  ? '등록된 학원 로고는 모든 학부모 성적표 리포트 및 인쇄용 오답 학습지에 맞춤 헤더로 삽입됩니다.' 
-                  : 'Your custom logo will be featured on all parent progress reports and printed worksheets.'}
-              </p>
-
-              <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  localStorage.setItem('chekki_academy_logo', tempLogoUrl);
-                  setAcademyLogo(tempLogoUrl);
-                  setShowLogoModal(false);
-                  alert(isKo ? '학원 맞춤 로고가 저장되었습니다!' : 'Custom Academy Logo saved!');
-                }}
-                className="space-y-4"
-              >
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                    {isKo ? '학원 로고 이미지 등록 (파일 선택 또는 URL)' : 'Academy Brand Logo (File or URL)'}
-                  </label>
-                  
-                  {/* File Upload Zone */}
-                  <label className={`block cursor-pointer p-4 border-2 border-dashed rounded-2xl text-center transition-all ${
-                    isThemeNight ? 'border-white/10 hover:border-orange-500/50 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/50 bg-zinc-50'
-                  }`}>
-                    <input 
-                      type="file" 
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (evt) => {
-                            const res = evt.target?.result as string;
-                            if (res) setTempLogoUrl(res);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className="hidden" 
-                    />
-                    <div className="flex flex-col items-center gap-1.5">
-                      <span className="text-2xl">🖼️</span>
-                      <p className={`text-xs font-bold ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo ? '내 컴퓨터에서 로고 이미지 파일 선택' : 'Click to Upload Logo Image File'}
-                      </p>
-                      <p className="text-[10px] text-zinc-500 font-mono">
-                        {isKo ? 'PNG (투명 배경 권장), JPG, SVG, WEBP (최대 5MB)' : 'PNG (transparent), JPG, SVG, WEBP (Max 5MB)'}
-                      </p>
-                    </div>
-                  </label>
-
-                  <div className="flex items-center gap-2 my-1">
-                    <div className={`h-[1px] flex-1 ${isThemeNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase">{isKo ? '또는 URL 직접 입력' : 'OR PASTE IMAGE URL'}</span>
-                    <div className={`h-[1px] flex-1 ${isThemeNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
-                  </div>
-
-                  <input
-                    type="url"
-                    value={tempLogoUrl}
-                    onChange={(e) => setTempLogoUrl(e.target.value)}
-                    placeholder="https://example.com/school-logo.png"
-                    className={`w-full border outline-none text-xs p-3.5 rounded-2xl transition-all font-mono ${
-                      isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
-                    }`}
-                  />
-                </div>
-
-                {tempLogoUrl && (
-                  <div className={`p-4 border rounded-2xl flex items-center gap-3 ${
-                    isThemeNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'
-                  }`}>
-                    <img src={tempLogoUrl} alt="Preview" className="w-12 h-12 rounded-xl object-contain bg-white/10 border border-white/10" />
-                    <div>
-                      <p className={`text-xs font-bold ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '미리보기' : 'Logo Preview'}</p>
-                      <p className="text-[10px] text-emerald-500">{isKo ? '성적표 헤더에 적용됨' : 'Ready for report cards'}</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="pt-2 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTempLogoUrl('');
-                      setAcademyLogo('');
-                      localStorage.removeItem('chekki_academy_logo');
-                      setShowLogoModal(false);
-                    }}
-                    className="w-1/3 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-xs rounded-2xl border border-red-500/20 transition-all active:scale-[0.98] cursor-pointer"
-                  >
-                    {isKo ? '로고 초기화' : 'Remove Logo'}
-                  </button>
-                  <button
-                    type="submit"
-                    className="w-2/3 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
-                  >
-                    {isKo ? '로고 저장하기' : 'Save Logo'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+        <AcademyLogoModal
+          isThemeNight={isThemeNight}
+          isKo={isKo}
+          tempLogoUrl={tempLogoUrl}
+          setTempLogoUrl={setTempLogoUrl}
+          setAcademyLogo={setAcademyLogo}
+          onClose={() => setShowLogoModal(false)}
+        />
       )}
       {/* --- TEACHER SETTINGS MODAL --- */}
       {showSettingsModal && (
@@ -3673,353 +3588,35 @@ export default function TeacherPage({ isNight = true }: Props) {
 
       {/* --- WEEKLY CALENDAR & UPLOAD HISTORY MODAL --- */}
       {showWeekCalendarModal && (
-        <div className="fixed inset-0 z-[280] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
-            onClick={() => setShowWeekCalendarModal(false)} 
-          />
-          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh] ${
-            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
-          }`}>
-            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar transition-colors ${
-              isThemeNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
-            }`}>
-              <button
-                type="button"
-                onClick={() => setShowWeekCalendarModal(false)}
-                className={`absolute top-6 right-6 p-2 rounded-full transition-all cursor-pointer ${
-                  isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
-                }`}
-              >
-                <X size={18} weight="bold" />
-              </button>
-
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg">
-                  <Calendar size={24} weight="bold" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
-                    {isKo ? '주차별 커리큘럼 업로드 현황' : 'CURRICULUM UPLOAD CALENDAR'}
-                  </span>
-                  <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo ? `${selectedClass?.name || '학급'} 학기 주차별 캘린더` : `${selectedClass?.name || 'Class'} Weekly Curriculum Schedule`}
-                  </h3>
-                </div>
-              </div>
-
-              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                {isKo 
-                  ? '각 주차별로 교재 업로드 일시와 등록된 학습 단어를 확인하고 원클릭으로 해당 주차로 이동할 수 있습니다.'
-                  : 'Check upload timestamps and target topics per week. Click any week to make it active.'}
-              </p>
-
-              {/* 12-Week Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((weekNum) => {
-                  const isActiveWeek = selectedClass?.activeWeekNumber === weekNum;
-                  const topicName = (weekNum === selectedClass?.activeWeekNumber && curriculumTopic)
-                    ? curriculumTopic
-                    : (isKo ? '미등록 주차' : 'No Curriculum Set');
-                  const wordCount = (weekNum === selectedClass?.activeWeekNumber && curriculumVocab)
-                    ? curriculumVocab.split(',').filter(Boolean).length
-                    : 0;
-                  const hasUpload = wordCount > 0 || (weekNum === selectedClass?.activeWeekNumber && Boolean(curriculumTopic || curriculumVocab || curriculumPhonics));
-                  const uploadDate = isKo ? '실시간 연동' : 'Live Sync';
-
-                  return (
-                    <div 
-                      key={weekNum}
-                      onClick={() => {
-                        handleSelectWeek(weekNum);
-                        setShowWeekCalendarModal(false);
-                      }}
-                      className={`p-4 border rounded-2xl flex flex-col justify-between gap-3 cursor-pointer transition-all active:scale-[0.97] relative group ${
-                        isActiveWeek
-                          ? 'border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/10'
-                          : isThemeNight
-                            ? 'bg-[#050505] border-white/10 hover:border-white/20 hover:bg-white/5'
-                            : 'bg-zinc-50 border-zinc-200 hover:border-orange-300 hover:bg-orange-50/50'
-                      }`}
-                    >
-                      {isActiveWeek && (
-                        <span className="absolute top-3 right-3 px-2 py-0.5 bg-orange-500 text-white text-[9px] font-black uppercase rounded-md shadow-xs">
-                          {isKo ? '현재 주차' : 'Active'}
-                        </span>
-                      )}
-
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-mono text-xs font-black text-orange-500">
-                            Week {weekNum}
-                          </span>
-                        </div>
-                        <h4 className={`text-xs font-bold truncate ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                          {topicName}
-                        </h4>
-                      </div>
-
-                      <div className="space-y-1 pt-2 border-t border-white/5 text-[10px]">
-                        {hasUpload ? (
-                          <>
-                            <div className="flex items-center justify-between text-emerald-500 font-bold">
-                              <span>✅ {isKo ? '업로드 완료' : 'Uploaded'}</span>
-                              <span className="font-mono">{wordCount} words</span>
-                            </div>
-                            <div className="flex items-center justify-between text-zinc-500 font-mono text-[9px]">
-                              <span>📅 {uploadDate}</span>
-                              <span className="text-orange-500 font-bold group-hover:underline">
-                                {isKo ? '이동 ➔' : 'Jump ➔'}
-                              </span>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="flex items-center justify-between text-zinc-500 font-medium">
-                            <span>⏳ {isKo ? '미등록 (빈 학습지)' : 'Empty Curriculum'}</span>
-                            <span className="text-orange-500 font-bold group-hover:underline">
-                              {isKo ? '이동 ➔' : 'Jump ➔'}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className={`mt-6 pt-4 border-t flex justify-end ${isThemeNight ? 'border-white/10' : 'border-zinc-200'}`}>
-                <button
-                  type="button"
-                  onClick={() => setShowWeekCalendarModal(false)}
-                  className={`px-6 py-3 font-bold text-xs rounded-xl border transition-all cursor-pointer ${
-                    isThemeNight ? 'bg-[#050505] text-zinc-300 border-white/10 hover:bg-white/5' : 'bg-zinc-100 text-zinc-700 border-zinc-300 hover:bg-zinc-200'
-                  }`}
-                >
-                  {isKo ? '닫기' : 'Close'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <WeekCalendarModal
+          isThemeNight={isThemeNight}
+          isKo={isKo}
+          selectedClass={selectedClass}
+          curriculumTopic={curriculumTopic}
+          curriculumVocab={curriculumVocab}
+          curriculumPhonics={curriculumPhonics}
+          onSelectWeek={handleSelectWeek}
+          onClose={() => setShowWeekCalendarModal(false)}
+        />
       )}
 
       {/* --- ACADEMY BRANDED STUDENT GROWTH REPORT CARD MODAL --- */}
       {showReportCardModal && (
-        <div className="fixed inset-0 z-[330] flex items-center justify-center p-4">
-          <style>{`
-            @media print {
-              body * {
-                visibility: hidden !important;
-              }
-              .printable-report-card, .printable-report-card * {
-                visibility: visible !important;
-              }
-              .printable-report-card {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 32px !important;
-                background: #ffffff !important;
-                color: #000000 !important;
-                box-shadow: none !important;
-                border: none !important;
-              }
-              .no-print {
-                display: none !important;
-              }
-            }
-          `}</style>
-          <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-md no-print" 
-            onClick={() => setShowReportCardModal(false)} 
-          />
-          <div className="relative p-1 bg-white border border-zinc-200 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh]">
-            <div className="printable-report-card relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 bg-white text-zinc-900 overflow-y-auto custom-scrollbar">
-              <button
-                type="button"
-                onClick={() => setShowReportCardModal(false)}
-                className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-all cursor-pointer no-print"
-              >
-                <X size={18} weight="bold" />
-              </button>
-
-              {/* Student Selector Bar */}
-              {activeRoster.length > 0 && (
-                <div className="mb-6 p-3 bg-orange-50/50 border border-orange-200 rounded-2xl flex items-center justify-between no-print">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-orange-700">{isKo ? '성적표 대상 원생 선택:' : 'Select Student for Report Card:'}</span>
-                    <select
-                      value={selectedStudentDetails?.uid || ''}
-                      onChange={(e) => {
-                        const target = activeRoster.find((s) => s.uid === e.target.value);
-                        if (target) setSelectedStudentDetails(target);
-                      }}
-                      className="px-3 py-1.5 bg-white border border-orange-300 rounded-xl text-xs font-bold text-zinc-900 outline-none cursor-pointer shadow-xs"
-                    >
-                      <option value="">-- {isKo ? '원생 선택' : 'Select Student'} --</option>
-                      {activeRoster.map((s) => (
-                        <option key={s.uid} value={s.uid}>
-                          {s.studentName || s.name} ({s.email})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <span className="text-[10px] font-mono font-bold text-orange-600">
-                    Week {selectedClass?.activeWeekNumber || 1} Report Card
-                  </span>
-                </div>
-              )}
-
-              {/* Official Academy Header */}
-              <div className="border-b-2 border-zinc-900 pb-6 mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {academyLogo ? (
-                    <img src={academyLogo} alt="Logo" className="w-14 h-14 object-contain rounded-xl border border-zinc-200" />
-                  ) : (
-                    <div className="w-14 h-14 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-md">
-                      🏫
-                    </div>
-                  )}
-                  <div>
-                    <h2 className="text-xl font-black text-zinc-900 tracking-tight">{user?.schoolName || 'B2B Academy'}</h2>
-                    <p className="text-xs text-orange-600 font-bold uppercase tracking-widest">
-                      {isKo ? '공식 학부모 원생 학습 성장 리포트' : 'OFFICIAL STUDENT PROGRESS REPORT CARD'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right text-xs font-mono bg-zinc-50 p-3 rounded-xl border border-zinc-200">
-                  <p className="font-bold text-zinc-900">Student: {selectedStudentDetails?.studentName || selectedStudentDetails?.name || 'Student'}</p>
-                  <p className="text-zinc-500">Class: {selectedClass?.name || 'Assigned Class'}</p>
-                  <p className="text-zinc-500">Date: {new Date().toLocaleDateString()}</p>
-                </div>
-              </div>
-
-              {/* Weekly Curriculum Summary Section */}
-              <div className="mb-6 p-4 border border-zinc-200 rounded-2xl bg-zinc-50/80 text-xs space-y-3">
-                <h4 className="font-black text-zinc-900 uppercase tracking-widest text-[11px] flex items-center gap-1.5">
-                  <span>📚</span>
-                  <span>{isKo ? '이번 주 학습 커리큘럼 요약' : 'Weekly Curriculum Summary'}</span>
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-zinc-700">
-                  <div>
-                    <span className="font-bold text-zinc-900 block">{isKo ? '주간 주제 (Topic):' : 'Topic / Theme:'}</span>
-                    <p className="text-zinc-600">{curriculumTopic || (isKo ? '미설정' : 'Not Set')}</p>
-                  </div>
-                  <div>
-                    <span className="font-bold text-zinc-900 block">{isKo ? '파닉스 규칙 (Phonics):' : 'Phonics Targets:'}</span>
-                    <p className="text-indigo-600 font-mono font-bold">{curriculumPhonics || (isKo ? '미설정' : 'Not Set')}</p>
-                  </div>
-                  {curriculumPassage && (
-                    <div className="sm:col-span-2">
-                      <span className="font-bold text-zinc-900 block">{isKo ? '본문 지문 (Passage):' : 'Reading Story:'}</span>
-                      <p className="text-zinc-700 italic">&quot;{curriculumPassage}&quot;</p>
-                    </div>
-                  )}
-                  {curriculumOther && (
-                    <div className="sm:col-span-2 pt-1 border-t border-zinc-200">
-                      <span className="font-bold text-purple-700 block">{isKo ? '기타 추가 학습 지침 (Other Notes):' : 'Supplementary Notes (Other):'}</span>
-                      <p className="text-purple-900 font-medium">{curriculumOther}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Growth Stats Overview */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="p-4 bg-orange-50/60 border border-orange-200 rounded-2xl text-center">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-orange-700 block mb-1">
-                    {isKo ? '주간 숙제 달성률' : 'Homework Completion'}
-                  </span>
-                  <span className="text-2xl font-black text-orange-600 font-mono">100%</span>
-                </div>
-                <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl text-center">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block mb-1">
-                    {isKo ? '마스터한 타겟 단어' : 'Mastered Vocabulary'}
-                  </span>
-                  <span className="text-2xl font-black text-emerald-600 font-mono">{activeVocabWords.length || 7} words</span>
-                </div>
-                <div className="p-4 bg-purple-50/60 border border-purple-200 rounded-2xl text-center">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 block mb-1">
-                    {isKo ? '2차 재도전 정답률' : 'Rescan Correction'}
-                  </span>
-                  <span className="text-2xl font-black text-purple-600 font-mono">100%</span>
-                </div>
-              </div>
-
-              {/* Detailed Mistakes & Corrections Log */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-black text-zinc-800 uppercase tracking-widest">
-                  {isKo ? '주간 학습 도전 과제 & 오답 수정 기록' : 'Weekly Error & Correction History'}
-                </h4>
-                
-                {selectedStudentDetails?.weeklyMistakes && selectedStudentDetails.weeklyMistakes.length > 0 ? (
-                  <div className="space-y-3">
-                    {selectedStudentDetails.weeklyMistakes.map((m: any, idx: number) => (
-                      <div key={idx} className="p-4 border border-zinc-200 rounded-xl bg-zinc-50 flex items-center justify-between text-xs">
-                        <div>
-                          <p className="font-bold text-zinc-900 font-mono">Target: {m.question_text}</p>
-                          <p className="text-emerald-600 font-mono">Correct Answer: {m.correct_answer}</p>
-                        </div>
-                        <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 font-bold rounded-lg text-[10px]">
-                          ⚡ {isKo ? '2차 재도전 수정 완료' : 'Fixed on Rescan'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-600 text-center">
-                    {isKo ? '이번 주 모든 학습 항목을 첫 시도에 완벽히 마스터했습니다!' : 'Mastered all weekly items on the first attempt with 0 errors!'}
-                  </div>
-                )}
-              </div>
-
-              {/* Teacher Evaluation & Signature */}
-              <div className="mt-6 p-4 border border-zinc-200 rounded-2xl bg-zinc-50">
-                <h4 className="text-xs font-black text-zinc-800 uppercase tracking-widest mb-1">
-                  {isKo ? '담임 교사 총평 (Teacher Evaluation)' : 'Teacher Evaluation & Comments'}
-                </h4>
-                <p className="text-xs text-zinc-700 italic">
-                  {isKo 
-                    ? `${selectedStudentDetails?.studentName || '원생'}은(는) 이번 주 타겟 파닉스 규칙과 단어를 매우 훌륭하게 수행하였습니다. 가정에서의 지속적인 칭찬과 관심 부탁드립니다.`
-                    : `${selectedStudentDetails?.studentName || 'Student'} demonstrated excellent focus on target vocabulary and phonics rules this week. Great enthusiasm during home practice!`}
-                </p>
-                <div className="mt-4 pt-3 border-t border-zinc-200 flex justify-between items-center text-xs text-zinc-500 font-mono">
-                  <span>Teacher Signature: ______________________</span>
-                  <span>Academy Stamp: [ SEAL ]</span>
-                </div>
-              </div>
-
-
-              {/* Print Action Bar */}
-              <div className="mt-6 pt-4 border-t border-zinc-200 flex justify-between items-center">
-                <p className="text-[10px] text-zinc-500 font-mono">
-                  {isKo ? 'Chekki AI B2B Academy Platform 성적표' : 'Official Academy Progress Report'}
-                </p>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowReportCardModal(false)}
-                    className="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-xs rounded-xl border border-zinc-300 transition-all cursor-pointer"
-                  >
-                    {isKo ? '닫기' : 'Close'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => window.print()}
-                    className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
-                  >
-                    <Printer size={16} weight="bold" />
-                    <span>{isKo ? '성적표 인쇄 / PDF 발급' : 'Print / Export Report PDF'}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ReportCardModal
+          isKo={isKo}
+          activeRoster={activeRoster}
+          selectedStudentDetails={selectedStudentDetails}
+          setSelectedStudentDetails={setSelectedStudentDetails}
+          selectedClass={selectedClass}
+          academyLogo={academyLogo}
+          schoolName={user?.schoolName}
+          curriculumTopic={curriculumTopic}
+          curriculumPhonics={curriculumPhonics}
+          curriculumPassage={curriculumPassage}
+          curriculumOther={curriculumOther}
+          activeVocabWords={activeVocabWords}
+          onClose={() => setShowReportCardModal(false)}
+        />
       )}
 
       {/* --- SCANNED AI WORKSHEET & PICK-AND-CHOOSE MODAL --- */}
@@ -4048,68 +3645,13 @@ export default function TeacherPage({ isNight = true }: Props) {
 
       {/* --- SCANNED DOCUMENT IMAGE / PDF PREVIEW MODAL --- */}
       {showDocPreviewModal && (
-        <div className="fixed inset-0 z-[450] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
-            onClick={() => setShowDocPreviewModal(false)} 
-          />
-          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-4xl mx-4 animate-fade-in text-left max-h-[90vh] ${
-            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
-          }`}>
-            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar flex flex-col ${
-              isThemeNight ? 'bg-[#0c0c0e] text-zinc-100' : 'bg-white text-zinc-900'
-            }`}>
-              <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
-                    <Eye size={22} weight="bold" />
-                  </div>
-                  <div>
-                    <h3 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {isKo ? '스캔 원본 교재 / 워크시트 문서 미리보기' : 'Scanned Document Original Preview'}
-                    </h3>
-                    <p className="text-xs text-zinc-400">
-                      {uploadedFileName || (isKo ? '스캔된 교재 이미지/PDF' : 'Scanned Image / PDF')}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowDocPreviewModal(false)}
-                  className={`p-2 rounded-full transition-all cursor-pointer ${
-                    isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
-                  }`}
-                >
-                  <X size={18} weight="bold" />
-                </button>
-              </div>
-
-              <div className="flex-1 flex items-center justify-center p-4 bg-black/40 rounded-2xl border border-white/10 overflow-hidden min-h-[50vh]">
-                {textbookPreviewUrl ? (
-                  <img 
-                    src={textbookPreviewUrl} 
-                    alt="Scanned original document" 
-                    className="max-h-[65vh] w-auto object-contain rounded-xl shadow-2xl" 
-                  />
-                ) : (
-                  <p className="text-sm text-zinc-400 italic">
-                    {isKo ? '문서 미리보기 이미지를 로드할 수 없습니다.' : 'Document image preview unavailable.'}
-                  </p>
-                )}
-              </div>
-
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowDocPreviewModal(false)}
-                  className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer"
-                >
-                  {isKo ? '미리보기 닫기' : 'Close Preview'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <DocPreviewModal
+          isThemeNight={isThemeNight}
+          isKo={isKo}
+          uploadedFileName={uploadedFileName}
+          textbookPreviewUrl={textbookPreviewUrl}
+          onClose={() => setShowDocPreviewModal(false)}
+        />
       )}
     </div>
   );
