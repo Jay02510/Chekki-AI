@@ -64,7 +64,7 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
             const unique = Array.from(
               new Map(merged.map((item) => [item.uniqueId, item])).values()
             );
-            await db.saveUserMistakes(user.uid, unique);
+            await db.saveUserMistakes(user.uid, unique, user.classId);
             await localHistoryService.clearHistory();
             loadedMistakes = unique;
           } else {
@@ -88,7 +88,7 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       if (user?.uid) {
         // Save to Cloud
-        await db.saveUserMistakes(user.uid, updatedMistakes);
+        await db.saveUserMistakes(user.uid, updatedMistakes, user.classId);
       } else {
         // Save to Local
         const records: StruggleRecord[] = updatedMistakes.map((m) => ({

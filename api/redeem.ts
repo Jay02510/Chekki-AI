@@ -70,19 +70,37 @@ async function redeemClassCode(res: VercelResponse, uid: string, classCode: stri
     });
   }
 
-  await adminDb.collection('users').doc(uid).set(
-    {
-      schoolId,
-      schoolName,
-      classId,
-      classStatus: 'pending',
-      plan: 'pro',
-      maxScansPerDay: 9999,
-      maxQuestionsPerDay: 9999,
-      subscriptionPlatform: 'school_code',
-    },
-    { merge: true }
-  );
+  const userRef = adminDb.collection('users').doc(uid);
+  const existingUserData = (await userRef.get()).data() || {};
+
+  const updatePayload: Record<string, any> = {
+    schoolId,
+    schoolName,
+    classId,
+    plan: 'pro',
+    maxScansPerDay: 9999,
+    maxQuestionsPerDay: 9999,
+  };
+
+  // Only reset an already-approved membership back to 'pending' if this is
+  // actually a different class. Without this check, a duplicate redemption
+  // request (double-tap, a re-scanned QR code) silently kicked an already-
+  // approved family back into the teacher's approval queue for no reason
+  // (Audit: redemption idempotency).
+  if (!(existingUserData.classId === classId && existingUserData.classStatus === 'approved')) {
+    updatePayload.classStatus = 'pending';
+  }
+
+  // Don't overwrite a real, paid subscription's platform label with the
+  // school-code tag — a family with an independent RevenueCat subscription
+  // who also redeems a school code shouldn't have that hidden behind
+  // 'school_code', where it could be misread as no longer paid if the
+  // school's plan ever lapses (Audit: subscription metadata clobber).
+  if (existingUserData.subscriptionPlatform !== 'ios' && existingUserData.subscriptionPlatform !== 'android') {
+    updatePayload.subscriptionPlatform = 'school_code';
+  }
+
+  await userRef.set(updatePayload, { merge: true });
 
   return res.status(200).json({
     success: true,
@@ -111,17 +129,23 @@ async function redeemSchoolCode(res: VercelResponse, uid: string, schoolCode: st
     return res.status(400).json({ error: 'This school code has reached its maximum usage limit.' });
   }
 
-  await adminDb.collection('users').doc(uid).set(
-    {
-      schoolId: sanitized,
-      schoolName,
-      plan: 'pro',
-      maxScansPerDay: 9999,
-      maxQuestionsPerDay: 9999,
-      subscriptionPlatform: 'school_code',
-    },
-    { merge: true }
-  );
+  const userRef = adminDb.collection('users').doc(uid);
+  const existingUserData = (await userRef.get()).data() || {};
+
+  const updatePayload: Record<string, any> = {
+    schoolId: sanitized,
+    schoolName,
+    plan: 'pro',
+    maxScansPerDay: 9999,
+    maxQuestionsPerDay: 9999,
+  };
+  // See redeemClassCode above — don't clobber a real paid subscription's
+  // platform label with the school-code tag (Audit: subscription metadata clobber).
+  if (existingUserData.subscriptionPlatform !== 'ios' && existingUserData.subscriptionPlatform !== 'android') {
+    updatePayload.subscriptionPlatform = 'school_code';
+  }
+
+  await userRef.set(updatePayload, { merge: true });
 
   await adminDb.collection('schools').doc(sanitized).update({
     usedByUids: FieldValue.arrayUnion(uid),

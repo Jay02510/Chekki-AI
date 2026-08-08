@@ -86,11 +86,24 @@ service cloud.firestore {
 
     match /users/{userId}/data/{document=**} {
       allow read: if request.auth != null && (
-        request.auth.uid == userId || 
+        request.auth.uid == userId ||
         isAdmin() ||
         (
-          get(/databases/$(database)/documents/users/$(userId)).data.classId != null &&
-          isClassTeacher(get(/databases/$(database)/documents/users/$(userId)).data.classId)
+          // Prefer the classId stamped on the record itself (set at save time
+          // in services/database.ts) over the student's current, live profile
+          // classId. The live field used to be the only check, which meant a
+          // student switching classes/academies instantly granted the NEW
+          // teacher read access to their ENTIRE prior mistake history, and
+          // instantly cut off the old teacher — a data-boundary bug, not
+          // intended behavior (Audit: class-switch data boundary). Records
+          // written before this fix have no classId field, so they fall back
+          // to the old live-lookup behavior rather than becoming unreadable.
+          resource.data.classId != null
+            ? isClassTeacher(resource.data.classId)
+            : (
+                get(/databases/$(database)/documents/users/$(userId)).data.classId != null &&
+                isClassTeacher(get(/databases/$(database)/documents/users/$(userId)).data.classId)
+              )
         )
       );
       allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());

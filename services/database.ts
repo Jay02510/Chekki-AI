@@ -166,12 +166,18 @@ export const db = {
     }
   },
 
-  async saveUserMistakes(uid: string, mistakes: any[]): Promise<void> {
+  // classId is stamped onto the doc so a teacher's read access (firestore.rules
+  // users/{userId}/data/{document=**}) can check what class this data was
+  // actually saved under, instead of the student's current, live-mutable
+  // classId field — which used to mean switching classes granted the new
+  // teacher instant read access to a student's entire mistake history from
+  // a prior, unrelated academy (Audit: class-switch data boundary).
+  async saveUserMistakes(uid: string, mistakes: any[], classId?: string | null): Promise<void> {
     try {
       const docRef = doc(dbInstance, 'users', uid, 'data', 'mistakes');
       await setDoc(
         docRef,
-        { items: mistakes, updatedAt: new Date().toISOString() },
+        { items: mistakes, updatedAt: new Date().toISOString(), classId: classId ?? null },
         { merge: true }
       );
     } catch (e) {
