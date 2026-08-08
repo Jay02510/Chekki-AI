@@ -490,6 +490,29 @@ function AppContent() {
   if (showReportStudioPage && platform === 'web')
     return <ErrorBoundary><ReportStudioPage isNight={isNight} setIsNight={setIsNight} /></ErrorBoundary>;
 
+  // The FT/KT/Director dashboards only exist on web (TeacherPage etc. above
+  // are gated `platform === 'web'`) — on the downloaded native app they were
+  // silently falling straight through to the parent/consumer UI below with
+  // no explanation, a dead end for any staff account (Audit: native app
+  // covers only one of four roles). Tell them explicitly instead.
+  if (platform !== 'web' && isAuthenticated && (user?.role === 'teacher' || user?.role === 'director')) {
+    return (
+      <div className={`min-h-[100dvh] flex items-center justify-center p-6 text-center ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'}`}>
+        <div className="max-w-sm space-y-4">
+          <ChekkiMascot className="w-16 h-16 mx-auto opacity-80" />
+          <h2 className="text-lg font-black">
+            {language === 'ko' ? '교사/원장 대시보드는 웹에서만 이용 가능합니다' : 'Teacher & Director tools are web-only'}
+          </h2>
+          <p className="text-sm text-zinc-400 leading-relaxed">
+            {language === 'ko'
+              ? '이 앱은 학부모용입니다. 교사/원장 대시보드는 모바일 브라우저에서 chekki.ai/teacher 로 접속해 주세요.'
+              : 'This app is for parents. Please open chekki.ai/teacher in your mobile browser to reach your dashboard.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <div

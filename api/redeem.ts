@@ -32,7 +32,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (classCode) return await redeemClassCode(res, uid, classCode);
     if (schoolCode) return await redeemSchoolCode(res, uid, schoolCode);
-    if (teacherCode) return await redeemTeacherCode(res, uid, teacherCode);
+    if (teacherCode) return await redeemTeacherCode(res, uid, decodedToken.email, teacherCode);
     if (inviteId) return await redeemInvite(res, uid, decodedToken.email, inviteId);
 
     return res.status(400).json({ error: 'Missing classCode, schoolCode, teacherCode, or inviteId' });
@@ -134,7 +134,7 @@ async function redeemSchoolCode(res: VercelResponse, uid: string, schoolCode: st
   });
 }
 
-async function redeemTeacherCode(res: VercelResponse, uid: string, teacherCode: string) {
+async function redeemTeacherCode(res: VercelResponse, uid: string, callerEmailRaw: string | undefined, teacherCode: string) {
   const sanitized = teacherCode.toUpperCase().trim();
 
   const schoolsRef = adminDb.collection('schools');
@@ -149,16 +149,26 @@ async function redeemTeacherCode(res: VercelResponse, uid: string, teacherCode: 
   const schoolData = schoolDoc.data() || {};
   const schoolName = schoolData.name || schoolId;
 
-  const usedByUids = schoolData.usedByUids || [];
-  const maxUses = schoolData.maxUses ?? 5;
+  // Invoice-first customers (api/admin.ts confirm_invoice) only ever get a
+  // teacherCode to hand out — this is often the first time the director
+  // themselves creates an account. If their email matches the school's
+  // recorded owner and nobody has claimed it yet, grant them 'director'
+  // (and bind ownerUid) instead of silently making them a plain 'teacher'
+  // on a school they can't administer (Audit: director path divergence).
+  const callerEmail = (callerEmailRaw || '').toLowerCase();
+  const isOwnerClaim = !!callerEmail && !schoolData.ownerUid && schoolData.ownerEmail === callerEmail;
 
-  if (!usedByUids.includes(uid) && usedByUids.length >= maxUses) {
-    return res.status(400).json({ error: 'This teacher authorization code has reached its maximum usage limit.' });
+  if (!isOwnerClaim) {
+    const usedByUids = schoolData.usedByUids || [];
+    const maxUses = schoolData.maxUses ?? 5;
+    if (!usedByUids.includes(uid) && usedByUids.length >= maxUses) {
+      return res.status(400).json({ error: 'This teacher authorization code has reached its maximum usage limit.' });
+    }
   }
 
   await adminDb.collection('users').doc(uid).set(
     {
-      role: 'teacher',
+      role: isOwnerClaim ? 'director' : 'teacher',
       schoolId,
       schoolName,
       plan: 'pro',
@@ -169,15 +179,20 @@ async function redeemTeacherCode(res: VercelResponse, uid: string, teacherCode: 
     { merge: true }
   );
 
-  await adminDb.collection('schools').doc(schoolId).update({
-    usedByUids: FieldValue.arrayUnion(uid),
-  });
+  if (isOwnerClaim) {
+    await adminDb.collection('schools').doc(schoolId).update({ ownerUid: uid });
+  } else {
+    await adminDb.collection('schools').doc(schoolId).update({
+      usedByUids: FieldValue.arrayUnion(uid),
+    });
+  }
 
   return res.status(200).json({
     success: true,
     schoolId,
     schoolName,
-    message: 'Teacher registration completed successfully',
+    role: isOwnerClaim ? 'director' : 'teacher',
+    message: isOwnerClaim ? 'Director account activated successfully' : 'Teacher registration completed successfully',
   });
 }
 

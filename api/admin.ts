@@ -320,11 +320,20 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const teacherCode = `${sanitizedSchoolId.split('_')[0]}-TEACHER`;
 
       // 1. Create school in schools collection
+      // ownerEmail (not ownerUid — this director likely has no account yet,
+      // invoice-first customers pay before ever signing up) marks who should
+      // become this school's director once they do sign up or redeem the
+      // teacherCode. redeemTeacherCode (api/redeem.ts) and set-initial-role.ts
+      // both check this to claim the school instead of the invoiced director
+      // silently landing as a plain 'teacher', or minting a second, orphaned
+      // trial school for the same real business (Audit: director path divergence).
       await adminDb.collection('schools').doc(sanitizedSchoolId).set({
         name: invoiceData.academyName || 'B2B Academy',
         teacherCode: teacherCode,
         maxUses: invoiceData.teacherCount || 5,
         usedByUids: [],
+        ownerEmail: (invoiceData.email || '').toLowerCase() || null,
+        ownerUid: null,
         // Seat pool for the new director-invite system (§21) — derived from
         // the confirmed invoice's plan, same server-owned table used by
         // set-initial-role.ts, never a client-supplied number.

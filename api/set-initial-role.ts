@@ -57,30 +57,63 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // (audit §21b — this is the fix for the old sessionStorage-only
       // `chekki_teacher_seats` number that nothing ever enforced).
       const existingSchoolId = userSnap.data()?.schoolId;
-      const resolvedSchoolId: string = existingSchoolId || `school_${uid}`;
-      schoolId = resolvedSchoolId;
-      if (!existingSchoolId) {
-        const resolvedPlanId = typeof planId === 'string' ? planId : 'trial';
-        const seats = seatsForPlan(resolvedPlanId);
-        const schoolDoc: Record<string, any> = {
-          name: typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy',
-          ownerUid: uid,
-          planId: resolvedPlanId,
-          seatsTotal: seats,
-          usedByUids: [],
-          createdAt: new Date().toISOString(),
-        };
-        // The "7-day free trial" promise was previously just landing-page
-        // copy — createdAt was stored but nothing ever read it to check
-        // whether 7 days had passed. trialEndsAt is the real, checkable
-        // deadline that api/create-class.ts and api/create-teacher-invite.ts
-        // gate new actions on.
-        if (resolvedPlanId === 'trial') {
-          schoolDoc.trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      let resolvedSchoolId: string;
+      let schoolNameForUser = typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy';
+
+      if (existingSchoolId) {
+        resolvedSchoolId = existingSchoolId;
+      } else {
+        // Cross-reference by email: did this person already pay via the
+        // invoice-first path (api/admin.ts confirm_invoice) before ever
+        // creating an account? That flow can only record an ownerEmail, not
+        // an ownerUid, since the account didn't exist yet. Without this
+        // check, signing up here mints a brand-new, disconnected trial
+        // school instead of claiming the real, already-paid one — leaving
+        // two schools in Firestore for one business (Audit: director path
+        // divergence).
+        const email = (decodedToken.email || '').toLowerCase();
+        let claimedSchool: { id: string; name?: string } | null = null;
+        if (email) {
+          const pendingSnap = await adminDb.collection('schools')
+            .where('ownerEmail', '==', email)
+            .where('ownerUid', '==', null)
+            .limit(1)
+            .get();
+          if (!pendingSnap.empty) {
+            const pendingDoc = pendingSnap.docs[0];
+            claimedSchool = { id: pendingDoc.id, name: pendingDoc.data()?.name };
+            await pendingDoc.ref.update({ ownerUid: uid });
+          }
         }
-        await adminDb.collection('schools').doc(resolvedSchoolId).set(schoolDoc, { merge: true });
+
+        if (claimedSchool) {
+          resolvedSchoolId = claimedSchool.id;
+          if (claimedSchool.name) schoolNameForUser = claimedSchool.name;
+        } else {
+          resolvedSchoolId = `school_${uid}`;
+          const resolvedPlanId = typeof planId === 'string' ? planId : 'trial';
+          const seats = seatsForPlan(resolvedPlanId);
+          const schoolDoc: Record<string, any> = {
+            name: schoolNameForUser,
+            ownerUid: uid,
+            planId: resolvedPlanId,
+            seatsTotal: seats,
+            usedByUids: [],
+            createdAt: new Date().toISOString(),
+          };
+          // The "7-day free trial" promise was previously just landing-page
+          // copy — createdAt was stored but nothing ever read it to check
+          // whether 7 days had passed. trialEndsAt is the real, checkable
+          // deadline that api/create-class.ts and api/create-teacher-invite.ts
+          // gate new actions on.
+          if (resolvedPlanId === 'trial') {
+            schoolDoc.trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+          }
+          await adminDb.collection('schools').doc(resolvedSchoolId).set(schoolDoc, { merge: true });
+        }
       }
-      const schoolNameForUser = typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy';
+
+      schoolId = resolvedSchoolId;
       await userRef.update({ role, schoolId, schoolName: schoolNameForUser });
     } else {
       await userRef.update({ role });
