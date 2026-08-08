@@ -2,12 +2,23 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry.js';
 import { adminAuth } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
+import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
+
+// Unauthenticated (this IS the login flow) and each call hits Kakao's API
+// plus potentially creates a Firebase Auth user — no throttle meant it could
+// be hammered for cost/DoS (Audit: no rate limit on kakao-auth.ts).
+const checkLoginLimit = createRateLimiter('kakao_auth', 10, 60);
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { success } = await checkLoginLimit(clientIp(req));
+  if (!success) {
+    return res.status(429).json({ error: 'Too many attempts. Please wait a minute and try again.' });
+  }
 
   const { accessToken } = req.body || {};
   if (!accessToken) {

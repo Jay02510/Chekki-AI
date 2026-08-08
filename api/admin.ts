@@ -1,11 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry.js';
 import { FieldValue } from 'firebase-admin/firestore';
-import { Redis } from '@upstash/redis';
-import { Ratelimit } from '@upstash/ratelimit';
 import { adminDb, adminAuth as authDb } from './_lib/firebaseAdmin.js';
 import { seatsForPlan } from './_lib/pricingTiers.js';
 import { applyCors } from './_lib/cors.js';
+import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
 
@@ -21,16 +20,7 @@ export function sanitizeSchoolId(raw: string): string {
 // This endpoint gates account impersonation, deletion, and upgrades behind a
 // single shared passcode — rate limit failed attempts hard so it can't be
 // brute-forced (audit §15a).
-const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
-const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
-const ratelimit = redis
-  ? new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(5, '60 s'),
-      analytics: true,
-    })
-  : null;
+const checkAdminLimit = createRateLimiter('admin', 5, 60);
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res);
@@ -45,10 +35,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Admin passcode is not configured.' });
   }
 
-  if (ratelimit) {
-    const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anonymous';
-    const ipString = Array.isArray(ip) ? ip[0] : ip;
-    const { success, limit, reset, remaining } = await ratelimit.limit(`admin_${ipString}`);
+  {
+    const ipString = clientIp(req);
+    const { success, limit, reset, remaining } = await checkAdminLimit(ipString);
     res.setHeader('X-RateLimit-Limit', limit.toString());
     res.setHeader('X-RateLimit-Remaining', remaining.toString());
     res.setHeader('X-RateLimit-Reset', reset.toString());
@@ -65,17 +54,22 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // Persistent audit trail for every admin action (not just console output,
   // which is easy to lose in Vercel's rolling log retention). The passcode
   // is shared/anonymous, so this is the only record of what an admin did.
+  // Awaited (not fire-and-forget) so a frozen/terminated serverless instance
+  // can't drop the log entry after the action has already been approved
+  // (Audit: fire-and-forget audit log).
   const auditIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
-  adminDb.collection('adminAuditLog').add({
-    action,
-    uid: uid || null,
-    email: email || null,
-    schoolId: schoolId || null,
-    ip: Array.isArray(auditIp) ? auditIp[0] : auditIp,
-    at: new Date().toISOString(),
-  }).catch((auditErr) => {
+  try {
+    await adminDb.collection('adminAuditLog').add({
+      action,
+      uid: uid || null,
+      email: email || null,
+      schoolId: schoolId || null,
+      ip: Array.isArray(auditIp) ? auditIp[0] : auditIp,
+      at: new Date().toISOString(),
+    });
+  } catch (auditErr) {
     console.error('[admin.ts] Failed to write audit log:', auditErr);
-  });
+  }
 
   try {
     if (action === 'list') {
@@ -210,6 +204,34 @@ async function handler(req: VercelRequest, res: VercelResponse) {
               .update({
                 usedByUids: FieldValue.arrayRemove(uidToDeleteFromFirestore),
               });
+
+            // Mirror handleRemoveTeacher (create-teacher-invite.ts) so an
+            // admin-deleted teacher's invite/seat is actually freed instead of
+            // permanently consuming a seat: revoke their claimed invite and
+            // strip them from any class's assignedTeacherUids (Audit: admin
+            // delete doesn't free seat).
+            const inviteSnap = await adminDb
+              .collection('invites')
+              .where('schoolId', '==', userSchoolId)
+              .where('claimedByUid', '==', uidToDeleteFromFirestore)
+              .where('status', '==', 'claimed')
+              .get();
+            await Promise.all(
+              inviteSnap.docs.map((d) =>
+                d.ref.update({ status: 'revoked', revokedAt: new Date().toISOString() })
+              )
+            );
+
+            const classesSnap = await adminDb
+              .collection('classes')
+              .where('schoolId', '==', userSchoolId)
+              .where('assignedTeacherUids', 'array-contains', uidToDeleteFromFirestore)
+              .get();
+            await Promise.all(
+              classesSnap.docs.map((d) =>
+                d.ref.update({ assignedTeacherUids: FieldValue.arrayRemove(uidToDeleteFromFirestore) })
+              )
+            );
           }
         }
         await adminDb.collection('users').doc(uidToDeleteFromFirestore).delete();
@@ -311,43 +333,86 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       if (!invoiceId) return res.status(400).json({ error: 'Missing invoiceId' });
 
       const invoiceRef = adminDb.collection('school_invoices').doc(invoiceId);
-      const invoiceSnap = await invoiceRef.get();
-      if (!invoiceSnap.exists) return res.status(404).json({ error: 'Invoice not found' });
 
-      const invoiceData = invoiceSnap.data() || {};
-      const academyPrefix = sanitizeSchoolId((invoiceData.academyName || 'SCHOOL').replace(/\s+/g, '-')).slice(0, 10) || 'SCHOOL';
-      const sanitizedSchoolId = `${academyPrefix}_${Date.now().toString().slice(-4)}`;
-      const teacherCode = `${sanitizedSchoolId.split('_')[0]}-TEACHER`;
+      let invoiceData: Record<string, any>;
+      let sanitizedSchoolId: string;
+      let teacherCode: string;
+      try {
+        const result = await adminDb.runTransaction(async (t) => {
+          const invoiceSnap = await t.get(invoiceRef);
+          if (!invoiceSnap.exists) {
+            throw { httpStatus: 404, message: 'Invoice not found' };
+          }
+          const data = invoiceSnap.data() || {};
 
-      // 1. Create school in schools collection
-      // ownerEmail (not ownerUid — this director likely has no account yet,
-      // invoice-first customers pay before ever signing up) marks who should
-      // become this school's director once they do sign up or redeem the
-      // teacherCode. redeemTeacherCode (api/redeem.ts) and set-initial-role.ts
-      // both check this to claim the school instead of the invoiced director
-      // silently landing as a plain 'teacher', or minting a second, orphaned
-      // trial school for the same real business (Audit: director path divergence).
-      await adminDb.collection('schools').doc(sanitizedSchoolId).set({
-        name: invoiceData.academyName || 'B2B Academy',
-        teacherCode: teacherCode,
-        maxUses: invoiceData.teacherCount || 5,
-        usedByUids: [],
-        ownerEmail: (invoiceData.email || '').toLowerCase() || null,
-        ownerUid: null,
-        // Seat pool for the new director-invite system (§21) — derived from
-        // the confirmed invoice's plan, same server-owned table used by
-        // set-initial-role.ts, never a client-supplied number.
-        seatsTotal: seatsForPlan(invoiceData.planId),
-        createdAt: new Date().toISOString(),
-      });
+          // A double-click, timeout retry, or concurrent request against the
+          // same invoiceId used to create a second school (with its own
+          // teacherCode) every time it ran, silently orphaning the first one
+          // and its seats. Confirming is now a no-op past the first call
+          // (Audit: confirm_invoice idempotency).
+          if (data.status === 'paid') {
+            throw {
+              httpStatus: 200,
+              alreadyPaid: true,
+              schoolId: data.generatedSchoolId,
+              teacherCode: data.generatedTeacherCode,
+            };
+          }
 
-      // 2. Mark invoice as paid
-      await invoiceRef.update({
-        status: 'paid',
-        paidAt: new Date().toISOString(),
-        generatedSchoolId: sanitizedSchoolId,
-        generatedTeacherCode: teacherCode,
-      });
+          const academyPrefix = sanitizeSchoolId((data.academyName || 'SCHOOL').replace(/\s+/g, '-')).slice(0, 10) || 'SCHOOL';
+          const newSchoolId = `${academyPrefix}_${Date.now().toString().slice(-4)}`;
+          const newTeacherCode = `${newSchoolId.split('_')[0]}-TEACHER`;
+
+          // 1. Create school in schools collection
+          // ownerEmail (not ownerUid — this director likely has no account yet,
+          // invoice-first customers pay before ever signing up) marks who should
+          // become this school's director once they do sign up or redeem the
+          // teacherCode. redeemTeacherCode (api/redeem.ts) and set-initial-role.ts
+          // both check this to claim the school instead of the invoiced director
+          // silently landing as a plain 'teacher', or minting a second, orphaned
+          // trial school for the same real business (Audit: director path divergence).
+          t.set(adminDb.collection('schools').doc(newSchoolId), {
+            name: data.academyName || 'B2B Academy',
+            teacherCode: newTeacherCode,
+            maxUses: data.teacherCount || 5,
+            usedByUids: [],
+            ownerEmail: (data.email || '').toLowerCase() || null,
+            ownerUid: null,
+            // Seat pool for the new director-invite system (§21) — derived from
+            // the confirmed invoice's plan, same server-owned table used by
+            // set-initial-role.ts, never a client-supplied number.
+            seatsTotal: seatsForPlan(data.planId),
+            createdAt: new Date().toISOString(),
+          });
+
+          // 2. Mark invoice as paid
+          t.update(invoiceRef, {
+            status: 'paid',
+            paidAt: new Date().toISOString(),
+            generatedSchoolId: newSchoolId,
+            generatedTeacherCode: newTeacherCode,
+          });
+
+          return { data, schoolId: newSchoolId, teacherCode: newTeacherCode };
+        });
+
+        invoiceData = result.data;
+        sanitizedSchoolId = result.schoolId;
+        teacherCode = result.teacherCode;
+      } catch (error: any) {
+        if (error && error.alreadyPaid) {
+          return res.status(200).json({
+            success: true,
+            message: 'Invoice already confirmed',
+            schoolId: error.schoolId,
+            teacherCode: error.teacherCode,
+          });
+        }
+        if (error && typeof error.httpStatus === 'number') {
+          return res.status(error.httpStatus).json({ error: error.message });
+        }
+        throw error;
+      }
 
       // 3. Send automated activation email via Resend
       const resendApiKey = process.env.RESEND_API_KEY;

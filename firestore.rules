@@ -30,7 +30,7 @@ service cloud.firestore {
       let classData = get(/databases/$(database)/documents/classes/$(classId)).data;
       // Also requires the caller to still BE an active teacher, not just
       // once-matched a class doc's teacherUid — otherwise a director
-      // removing a teacher (api/remove-teacher.ts clears their role/schoolId)
+      // removing a teacher (api/create-teacher-invite.ts's 'remove' action clears their role/schoolId)
       // wouldn't actually revoke access to classes that teacher originally
       // created, since teacherUid alone never expires.
       return request.auth != null &&
@@ -219,7 +219,7 @@ service cloud.firestore {
     // Teacher invites (audit §21): director dashboards read these directly via
     // the client SDK to show seat usage and pending invites, but every write
     // (create on send, claim on redemption) only ever happens server-side via
-    // Admin SDK in api/create-teacher-invite.ts and api/redeem-invite.ts —
+    // Admin SDK in api/create-teacher-invite.ts and api/redeem.ts (redeemInvite) —
     // role and seat-limit enforcement live there, not in these rules.
     match /invites/{inviteId} {
       allow read: if request.auth != null && (

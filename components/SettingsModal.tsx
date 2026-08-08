@@ -30,6 +30,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
 
   const [name, setName] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [saveErrorMsg, setSaveErrorMsg] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLegal, setShowLegal] = useState<
     'privacy' | 'terms' | 'refund' | 'youth' | 'support' | null
@@ -140,6 +141,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
   };
 
   const handleSave = async () => {
+    setSaveErrorMsg('');
     try {
       await updateProfile(name);
       if (user?.schoolId && user?.classId) {
@@ -149,6 +151,12 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (e) {
       console.error('Failed to save settings:', e);
+      // updateUser/updateClassroomProfile used to swallow write failures
+      // silently, so this catch never ran and the user had no way to know
+      // their changes weren't actually saved (Audit: swallowed write errors).
+      setSaveErrorMsg(
+        language === 'ko' ? '저장에 실패했습니다. 다시 시도해주세요.' : 'Failed to save. Please try again.'
+      );
     }
   };
 
@@ -900,8 +908,12 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
             <div
               className={`${isNight ? 'bg-zinc-900/95 border-white/5' : 'bg-zinc-50/95 border-zinc-200'} backdrop-blur-md px-8 py-5 flex items-center justify-between border-t shrink-0`}
             >
-              <span className="text-emerald-500 text-xs sm:text-sm font-black uppercase tracking-wide">
-                {successMsg}
+              <span
+                className={`text-xs sm:text-sm font-black uppercase tracking-wide ${
+                  saveErrorMsg ? 'text-red-500' : 'text-emerald-500'
+                }`}
+              >
+                {saveErrorMsg || successMsg}
               </span>
               <button
                 onClick={handleSave}

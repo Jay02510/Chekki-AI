@@ -1,19 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry.js';
-import { Redis } from '@upstash/redis';
-import { Ratelimit } from '@upstash/ratelimit';
 import { adminDb } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
+import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
 
 // This endpoint is public/unauthenticated (a sales lead form) and triggers a
 // real Resend email per call — rate limit hard so it can't be used to spam
 // arbitrary inboxes or run up the Resend bill.
-const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
-const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
-const ratelimit = redis
-  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3, '3600 s'), analytics: true })
-  : null;
+const checkInvoiceLimit = createRateLimiter('invoice', 3, 3600);
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res);
@@ -21,10 +15,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (ratelimit) {
-    const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anonymous';
-    const ipString = Array.isArray(ip) ? ip[0] : ip;
-    const { success } = await ratelimit.limit(`invoice_${ipString}`);
+  {
+    const { success } = await checkInvoiceLimit(clientIp(req));
     if (!success) {
       return res.status(429).json({ error: 'Too many requests. Try again later.' });
     }
@@ -103,12 +95,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       createdAt: new Date().toISOString(),
     };
 
-    // Store in Firestore school_invoices collection (graceful fallback if admin DB creds missing)
-    try {
-      await adminDb.collection('school_invoices').doc(invoiceId).set(invoicePayload);
-    } catch (dbErr) {
-      console.warn('[request-school-invoice] Firestore admin write skipped (local dev/missing creds):', dbErr);
-    }
+    // Store in Firestore school_invoices collection. This write must succeed —
+    // confirm_invoice (api/admin.ts) looks the invoice up by this doc ID later,
+    // and there's no other record of the request. Swallowing a failure here
+    // used to mean the customer got a payment email for an invoice that was
+    // never actually persisted, so confirm_invoice would 404 once they paid
+    // (Audit: silent invoice write failure).
+    await adminDb.collection('school_invoices').doc(invoiceId).set(invoicePayload);
 
     // Send automated email via Resend
     const resendApiKey = process.env.RESEND_API_KEY;

@@ -4,6 +4,9 @@ import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
 import { maxInvitesForRole } from './_lib/seatLimits.js';
 import { applyCors } from './_lib/cors.js';
 import { FieldValue } from 'firebase-admin/firestore';
+import { createRateLimiter } from './_lib/rateLimit.js';
+
+const checkTeacherInviteLimit = createRateLimiter('teacher_invite', 20, 60);
 
 /**
  * Director-only school-membership actions: create invite (default), assign
@@ -212,6 +215,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
+
+    const { success } = await checkTeacherInviteLimit(uid);
+    if (!success) {
+      return res.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
+    }
 
     const userSnap = await adminDb.collection('users').doc(uid).get();
     const userData = userSnap.data();

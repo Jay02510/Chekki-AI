@@ -380,7 +380,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           {!selectedClass ? (
             <div className={`p-8 rounded-2xl border text-center ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
               <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No class selected</p>
-              <p className="text-xs text-zinc-400 mt-1">Select a class to see this week's vocab and student status in one view.</p>
+              <p className="text-xs text-zinc-400 mt-1">Select a class to see this week&apos;s vocab and student status in one view.</p>
             </div>
           ) : (
             <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>

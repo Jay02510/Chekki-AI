@@ -3,6 +3,9 @@ import { withSentry } from './_lib/withSentry.js';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
 import { seatsForPlan } from './_lib/pricingTiers.js';
 import { applyCors } from './_lib/cors.js';
+import { createRateLimiter } from './_lib/rateLimit.js';
+
+const checkSetRoleLimit = createRateLimiter('set_initial_role', 10, 60);
 
 // Sets a brand-new account's role (director/teacher) server-side, right after
 // signup. The client can never write `role` directly — firestore.rules blocks
@@ -34,6 +37,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
+
+    const { success } = await checkSetRoleLimit(uid);
+    if (!success) {
+      return res.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
+    }
 
     const userRef = adminDb.collection('users').doc(uid);
     const userSnap = await userRef.get();
@@ -74,16 +82,22 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         const email = (decodedToken.email || '').toLowerCase();
         let claimedSchool: { id: string; name?: string } | null = null;
         if (email) {
-          const pendingSnap = await adminDb.collection('schools')
-            .where('ownerEmail', '==', email)
-            .where('ownerUid', '==', null)
-            .limit(1)
-            .get();
-          if (!pendingSnap.empty) {
+          // Read-then-update inside a transaction — otherwise two concurrent
+          // signups for the same invoiced email could both pass the
+          // `pendingSnap.empty` check and both claim the same school (Audit:
+          // non-transactional school claim).
+          claimedSchool = await adminDb.runTransaction(async (t) => {
+            const pendingSnap = await t.get(
+              adminDb.collection('schools')
+                .where('ownerEmail', '==', email)
+                .where('ownerUid', '==', null)
+                .limit(1)
+            );
+            if (pendingSnap.empty) return null;
             const pendingDoc = pendingSnap.docs[0];
-            claimedSchool = { id: pendingDoc.id, name: pendingDoc.data()?.name };
-            await pendingDoc.ref.update({ ownerUid: uid });
-          }
+            t.update(pendingDoc.ref, { ownerUid: uid });
+            return { id: pendingDoc.id, name: pendingDoc.data()?.name };
+          });
         }
 
         if (claimedSchool) {

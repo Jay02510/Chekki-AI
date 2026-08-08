@@ -55,7 +55,9 @@ export function getOfflineDraft(): ClassLogPayload | null {
 export function clearOfflineDraft(): void {
   try {
     localStorage.removeItem(DRAFT_CACHE_KEY);
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Failed to clear offline draft:', e);
+  }
 }
 
 async function callGenerateReport(type: string, payload: unknown): Promise<any> {

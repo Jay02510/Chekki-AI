@@ -3,6 +3,9 @@ import { withSentry } from './_lib/withSentry.js';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
 import { maxClassesForSeats } from './_lib/seatLimits.js';
 import { applyCors } from './_lib/cors.js';
+import { createRateLimiter } from './_lib/rateLimit.js';
+
+const checkCreateClassLimit = createRateLimiter('create_class', 20, 60);
 
 /**
  * Server-side seat-limit enforcement on class creation (audit §2/§10/§18).
@@ -49,6 +52,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
+
+    const { success } = await checkCreateClassLimit(uid);
+    if (!success) {
+      return res.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
+    }
 
     const userSnap = await adminDb.collection('users').doc(uid).get();
     const userData = userSnap.data();

@@ -3,6 +3,14 @@ import { withSentry } from './_lib/withSentry.js';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
+import { createRateLimiter } from './_lib/rateLimit.js';
+
+// Codes (classCode/schoolCode/teacherCode) are short, guessable strings with
+// real value behind them (free pro access, class enrollment) — this endpoint
+// had no throttle, so a script could brute-force valid codes at full request
+// speed. Keyed per-uid (post auth) so it can't be dodged by rotating IPs on
+// an authenticated account (Audit: no rate limit on redeem.ts).
+const checkRedeemLimit = createRateLimiter('redeem', 10, 60);
 
 /**
  * Merged redeem-class-code / redeem-school-code / redeem-teacher-code /
@@ -12,6 +20,21 @@ import { applyCors } from './_lib/cors.js';
  * branch runs is decided by which body field is present, matching each
  * endpoint's original request shape exactly.
  */
+// Real store subscriptions are tracked in `subscriptions/{uid}`, not on the
+// `users` doc — `users.subscriptionPlatform` is only ever 'school_code',
+// 'teacher_invite', 'admin_upgrade'/'admin_assign', or unset. Checking it for
+// 'ios'/'android' (as this used to) never matches anything, so it never
+// protects a paying subscriber (Audit: subscription metadata clobber).
+async function hasActiveStoreSubscription(uid: string): Promise<boolean> {
+  const subDoc = await adminDb.collection('subscriptions').doc(uid).get();
+  if (!subDoc.exists) return false;
+  const data = subDoc.data()!;
+  return (
+    data.subscription_status === 'active' &&
+    ['apple', 'android', 'revenuecat'].includes(data.subscription_platform)
+  );
+}
+
 async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res);
 
@@ -29,6 +52,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
+
+    const { success, limit, remaining } = await checkRedeemLimit(uid);
+    res.setHeader('X-RateLimit-Limit', limit.toString());
+    res.setHeader('X-RateLimit-Remaining', remaining.toString());
+    if (!success) {
+      return res.status(429).json({ error: 'Too many attempts. Please wait a minute and try again.' });
+    }
 
     if (classCode) return await redeemClassCode(res, uid, classCode);
     if (schoolCode) return await redeemSchoolCode(res, uid, schoolCode);
@@ -58,49 +88,61 @@ async function redeemClassCode(res: VercelResponse, uid: string, classCode: stri
   const schoolId = classData.schoolId;
   const schoolName = classData.schoolName || schoolId;
 
-  // --- ANTI-FRAUD GUARDRAIL: Student Enrollment Cap ---
-  // Prevents public code leaks. Default: 30 students per class seat.
-  const maxStudents = classData.maxStudents || 30;
-  const enrolledSnapshot = await adminDb.collection('users').where('classId', '==', classId).get();
-
-  const isAlreadyEnrolled = enrolledSnapshot.docs.some((doc) => doc.id === uid);
-  if (!isAlreadyEnrolled && enrolledSnapshot.size >= maxStudents) {
-    return res.status(400).json({
-      error: `This class has reached its enrollment capacity (${maxStudents} students). Please contact your teacher.`,
-    });
-  }
-
   const userRef = adminDb.collection('users').doc(uid);
-  const existingUserData = (await userRef.get()).data() || {};
+  const hasStoreSub = await hasActiveStoreSubscription(uid);
 
-  const updatePayload: Record<string, any> = {
-    schoolId,
-    schoolName,
-    classId,
-    plan: 'pro',
-    maxScansPerDay: 9999,
-    maxQuestionsPerDay: 9999,
-  };
+  try {
+    await adminDb.runTransaction(async (t) => {
+      // --- ANTI-FRAUD GUARDRAIL: Student Enrollment Cap ---
+      // Prevents public code leaks. Default: 30 students per class seat.
+      // Read-then-write inside a transaction so two concurrent redemptions
+      // against the last open seat can't both pass the cap check (Audit:
+      // non-transactional cap checks).
+      const maxStudents = classData.maxStudents || 30;
+      const enrolledSnapshot = await t.get(adminDb.collection('users').where('classId', '==', classId));
+      const isAlreadyEnrolled = enrolledSnapshot.docs.some((doc) => doc.id === uid);
+      if (!isAlreadyEnrolled && enrolledSnapshot.size >= maxStudents) {
+        throw { httpStatus: 400, message: `This class has reached its enrollment capacity (${maxStudents} students). Please contact your teacher.` };
+      }
 
-  // Only reset an already-approved membership back to 'pending' if this is
-  // actually a different class. Without this check, a duplicate redemption
-  // request (double-tap, a re-scanned QR code) silently kicked an already-
-  // approved family back into the teacher's approval queue for no reason
-  // (Audit: redemption idempotency).
-  if (!(existingUserData.classId === classId && existingUserData.classStatus === 'approved')) {
-    updatePayload.classStatus = 'pending';
+      const existingUserSnap = await t.get(userRef);
+      const existingUserData = existingUserSnap.data() || {};
+
+      const updatePayload: Record<string, any> = {
+        schoolId,
+        schoolName,
+        classId,
+        plan: 'pro',
+        maxScansPerDay: 9999,
+        maxQuestionsPerDay: 9999,
+      };
+
+      // Only reset an already-approved membership back to 'pending' if this is
+      // actually a different class. Without this check, a duplicate redemption
+      // request (double-tap, a re-scanned QR code) silently kicked an already-
+      // approved family back into the teacher's approval queue for no reason
+      // (Audit: redemption idempotency).
+      if (!(existingUserData.classId === classId && existingUserData.classStatus === 'approved')) {
+        updatePayload.classStatus = 'pending';
+      }
+
+      // Don't overwrite a real, paid subscription's platform label with the
+      // school-code tag — a family with an independent RevenueCat subscription
+      // who also redeems a school code shouldn't have that hidden behind
+      // 'school_code', where it could be misread as no longer paid if the
+      // school's plan ever lapses (Audit: subscription metadata clobber).
+      if (!hasStoreSub) {
+        updatePayload.subscriptionPlatform = 'school_code';
+      }
+
+      t.set(userRef, updatePayload, { merge: true });
+    });
+  } catch (error: any) {
+    if (error && typeof error.httpStatus === 'number') {
+      return res.status(error.httpStatus).json({ error: error.message });
+    }
+    throw error;
   }
-
-  // Don't overwrite a real, paid subscription's platform label with the
-  // school-code tag — a family with an independent RevenueCat subscription
-  // who also redeems a school code shouldn't have that hidden behind
-  // 'school_code', where it could be misread as no longer paid if the
-  // school's plan ever lapses (Audit: subscription metadata clobber).
-  if (existingUserData.subscriptionPlatform !== 'ios' && existingUserData.subscriptionPlatform !== 'android') {
-    updatePayload.subscriptionPlatform = 'school_code';
-  }
-
-  await userRef.set(updatePayload, { merge: true });
 
   return res.status(200).json({
     success: true,
@@ -114,42 +156,52 @@ async function redeemClassCode(res: VercelResponse, uid: string, classCode: stri
 
 async function redeemSchoolCode(res: VercelResponse, uid: string, schoolCode: string) {
   const sanitized = schoolCode.toUpperCase().trim();
-
-  const schoolDoc = await adminDb.collection('schools').doc(sanitized).get();
-  if (!schoolDoc.exists) {
-    return res.status(400).json({ error: 'Invalid school code. Please check again.' });
-  }
-
-  const schoolData = schoolDoc.data() || {};
-  const schoolName = schoolData.name || sanitized;
-  const usedByUids = schoolData.usedByUids || [];
-  const maxUses = schoolData.maxUses ?? 5;
-
-  if (!usedByUids.includes(uid) && usedByUids.length >= maxUses) {
-    return res.status(400).json({ error: 'This school code has reached its maximum usage limit.' });
-  }
-
+  const schoolRef = adminDb.collection('schools').doc(sanitized);
   const userRef = adminDb.collection('users').doc(uid);
-  const existingUserData = (await userRef.get()).data() || {};
+  const hasStoreSub = await hasActiveStoreSubscription(uid);
 
-  const updatePayload: Record<string, any> = {
-    schoolId: sanitized,
-    schoolName,
-    plan: 'pro',
-    maxScansPerDay: 9999,
-    maxQuestionsPerDay: 9999,
-  };
-  // See redeemClassCode above — don't clobber a real paid subscription's
-  // platform label with the school-code tag (Audit: subscription metadata clobber).
-  if (existingUserData.subscriptionPlatform !== 'ios' && existingUserData.subscriptionPlatform !== 'android') {
-    updatePayload.subscriptionPlatform = 'school_code';
+  let schoolName = sanitized;
+  try {
+    await adminDb.runTransaction(async (t) => {
+      const schoolDoc = await t.get(schoolRef);
+      if (!schoolDoc.exists) {
+        throw { httpStatus: 400, message: 'Invalid school code. Please check again.' };
+      }
+
+      const schoolData = schoolDoc.data() || {};
+      schoolName = schoolData.name || sanitized;
+      const usedByUids = schoolData.usedByUids || [];
+      const maxUses = schoolData.maxUses ?? 5;
+
+      // Cap check moved inside the transaction so two concurrent redemptions
+      // against the last open seat can't both pass it (Audit: non-transactional
+      // cap checks).
+      if (!usedByUids.includes(uid) && usedByUids.length >= maxUses) {
+        throw { httpStatus: 400, message: 'This school code has reached its maximum usage limit.' };
+      }
+
+      const updatePayload: Record<string, any> = {
+        schoolId: sanitized,
+        schoolName,
+        plan: 'pro',
+        maxScansPerDay: 9999,
+        maxQuestionsPerDay: 9999,
+      };
+      // See redeemClassCode above — don't clobber a real paid subscription's
+      // platform label with the school-code tag (Audit: subscription metadata clobber).
+      if (!hasStoreSub) {
+        updatePayload.subscriptionPlatform = 'school_code';
+      }
+
+      t.set(userRef, updatePayload, { merge: true });
+      t.update(schoolRef, { usedByUids: FieldValue.arrayUnion(uid) });
+    });
+  } catch (error: any) {
+    if (error && typeof error.httpStatus === 'number') {
+      return res.status(error.httpStatus).json({ error: error.message });
+    }
+    throw error;
   }
-
-  await userRef.set(updatePayload, { merge: true });
-
-  await adminDb.collection('schools').doc(sanitized).update({
-    usedByUids: FieldValue.arrayUnion(uid),
-  });
 
   return res.status(200).json({
     success: true,
@@ -168,47 +220,63 @@ async function redeemTeacherCode(res: VercelResponse, uid: string, callerEmailRa
     return res.status(400).json({ error: 'Invalid teacher authorization code. Please verify.' });
   }
 
-  const schoolDoc = qSnapshot.docs[0];
-  const schoolId = schoolDoc.id;
-  const schoolData = schoolDoc.data() || {};
-  const schoolName = schoolData.name || schoolId;
-
-  // Invoice-first customers (api/admin.ts confirm_invoice) only ever get a
-  // teacherCode to hand out — this is often the first time the director
-  // themselves creates an account. If their email matches the school's
-  // recorded owner and nobody has claimed it yet, grant them 'director'
-  // (and bind ownerUid) instead of silently making them a plain 'teacher'
-  // on a school they can't administer (Audit: director path divergence).
+  const schoolRef = qSnapshot.docs[0].ref;
+  const schoolId = schoolRef.id;
   const callerEmail = (callerEmailRaw || '').toLowerCase();
-  const isOwnerClaim = !!callerEmail && !schoolData.ownerUid && schoolData.ownerEmail === callerEmail;
+  const hasStoreSub = await hasActiveStoreSubscription(uid);
 
-  if (!isOwnerClaim) {
-    const usedByUids = schoolData.usedByUids || [];
-    const maxUses = schoolData.maxUses ?? 5;
-    if (!usedByUids.includes(uid) && usedByUids.length >= maxUses) {
-      return res.status(400).json({ error: 'This teacher authorization code has reached its maximum usage limit.' });
-    }
-  }
+  let schoolName = schoolId;
+  let isOwnerClaim = false;
+  try {
+    await adminDb.runTransaction(async (t) => {
+      const schoolDoc = await t.get(schoolRef);
+      const schoolData = schoolDoc.data() || {};
+      schoolName = schoolData.name || schoolId;
 
-  await adminDb.collection('users').doc(uid).set(
-    {
-      role: isOwnerClaim ? 'director' : 'teacher',
-      schoolId,
-      schoolName,
-      plan: 'pro',
-      maxScansPerDay: 9999,
-      maxQuestionsPerDay: 9999,
-      subscriptionPlatform: 'school_code',
-    },
-    { merge: true }
-  );
+      // Invoice-first customers (api/admin.ts confirm_invoice) only ever get a
+      // teacherCode to hand out — this is often the first time the director
+      // themselves creates an account. If their email matches the school's
+      // recorded owner and nobody has claimed it yet, grant them 'director'
+      // (and bind ownerUid) instead of silently making them a plain 'teacher'
+      // on a school they can't administer (Audit: director path divergence).
+      isOwnerClaim = !!callerEmail && !schoolData.ownerUid && schoolData.ownerEmail === callerEmail;
 
-  if (isOwnerClaim) {
-    await adminDb.collection('schools').doc(schoolId).update({ ownerUid: uid });
-  } else {
-    await adminDb.collection('schools').doc(schoolId).update({
-      usedByUids: FieldValue.arrayUnion(uid),
+      if (!isOwnerClaim) {
+        const usedByUids = schoolData.usedByUids || [];
+        const maxUses = schoolData.maxUses ?? 5;
+        // Cap check moved inside the transaction so two concurrent redemptions
+        // against the last open seat can't both pass it (Audit: non-transactional
+        // cap checks).
+        if (!usedByUids.includes(uid) && usedByUids.length >= maxUses) {
+          throw { httpStatus: 400, message: 'This teacher authorization code has reached its maximum usage limit.' };
+        }
+      }
+
+      const updatePayload: Record<string, any> = {
+        role: isOwnerClaim ? 'director' : 'teacher',
+        schoolId,
+        schoolName,
+        plan: 'pro',
+        maxScansPerDay: 9999,
+        maxQuestionsPerDay: 9999,
+      };
+      if (!hasStoreSub) {
+        updatePayload.subscriptionPlatform = 'school_code';
+      }
+
+      t.set(adminDb.collection('users').doc(uid), updatePayload, { merge: true });
+
+      if (isOwnerClaim) {
+        t.update(schoolRef, { ownerUid: uid });
+      } else {
+        t.update(schoolRef, { usedByUids: FieldValue.arrayUnion(uid) });
+      }
     });
+  } catch (error: any) {
+    if (error && typeof error.httpStatus === 'number') {
+      return res.status(error.httpStatus).json({ error: error.message });
+    }
+    throw error;
   }
 
   return res.status(200).json({
@@ -248,20 +316,27 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
       const schoolSnap = await t.get(schoolRef);
       const resolvedSchoolName = schoolSnap.data()?.name || invite.schoolId;
 
-      t.set(
-        adminDb.collection('users').doc(uid),
-        {
-          role: 'teacher',
-          educatorRole: invite.role,
-          schoolId: invite.schoolId,
-          schoolName: resolvedSchoolName,
-          plan: 'pro',
-          maxScansPerDay: 9999,
-          maxQuestionsPerDay: 9999,
-          subscriptionPlatform: 'teacher_invite',
-        },
-        { merge: true }
-      );
+      const subSnap = await t.get(adminDb.collection('subscriptions').doc(uid));
+      const subData = subSnap.exists ? subSnap.data()! : null;
+      const hasStoreSub =
+        !!subData &&
+        subData.subscription_status === 'active' &&
+        ['apple', 'android', 'revenuecat'].includes(subData.subscription_platform);
+
+      const userUpdate: Record<string, any> = {
+        role: 'teacher',
+        educatorRole: invite.role,
+        schoolId: invite.schoolId,
+        schoolName: resolvedSchoolName,
+        plan: 'pro',
+        maxScansPerDay: 9999,
+        maxQuestionsPerDay: 9999,
+      };
+      if (!hasStoreSub) {
+        userUpdate.subscriptionPlatform = 'teacher_invite';
+      }
+
+      t.set(adminDb.collection('users').doc(uid), userUpdate, { merge: true });
 
       t.update(inviteRef, {
         status: 'claimed',

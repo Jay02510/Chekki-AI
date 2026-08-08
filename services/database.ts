@@ -119,6 +119,13 @@ export const db = {
       await updateDoc(userRef, updates);
     } catch (e: any) {
       console.error('Update fallback', e);
+      // Every caller (SettingsModal, ProgressiveOnboardingModal, ...) already
+      // awaits this inside its own try/catch and expects a rejected promise
+      // to mean the write failed. Swallowing it here meant those catch blocks
+      // never ran, so a rejected Firestore update (e.g. a firestore.rules
+      // field-write rejection) looked identical to success (Audit: swallowed
+      // write errors in database.ts).
+      throw e;
     }
   },
 
@@ -128,6 +135,7 @@ export const db = {
       await deleteDoc(userRef);
     } catch (e: any) {
       console.error('Failed to delete user document:', e);
+      throw e;
     }
   },
 
@@ -149,6 +157,7 @@ export const db = {
       });
     } catch (e: any) {
       console.error(e);
+      throw e;
     }
   },
 

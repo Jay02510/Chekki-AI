@@ -32,6 +32,12 @@ export const NativeKtDashboard: React.FC<Props> = ({
 }) => {
   const isKo = isKoProp !== undefined ? isKoProp : (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
   const permissions = getPermissionsForUser(userProfile);
+  // No real submitted log yet — the fields below fall back to sample copy so
+  // the KT can see what the workspace looks like. Copy/Share must not act on
+  // that sample text as if it were real, or a KT could send fabricated
+  // class/student content into a real parent chat without noticing it's a
+  // placeholder (Audit: demo data reachable via Copy/Share).
+  const isDemoContent = !generatedOutput;
   // Live Editable State for Korean Teacher Review
   const [editedKoreanSummary, setEditedKoreanSummary] = useState(
     generatedOutput?.bilingualClassSummary.korean ||
@@ -87,6 +93,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
     : [];
 
   const handleCopyKakaoScript = () => {
+    if (isDemoContent) return;
     const fullText = currentFullText;
 
     try {
@@ -138,6 +145,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
               {isKo ? `대기 중인 리포트 ${pendingCount}건 더 있음` : `${pendingCount} more waiting in queue`}
             </span>
           )}
+          {isDemoContent && (
+            <span className="mt-1 inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-purple-500/15 border border-purple-500/30 text-purple-300 font-mono">
+              {isKo ? '📋 샘플 미리보기 — 아직 실제 리포트 없음' : '📋 Sample preview — no real report yet'}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -154,7 +166,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
+              disabled={isDemoContent}
+              title={isDemoContent ? (isKo ? '실제 리포트가 없어 공유할 수 없습니다' : 'No real report to share yet') : undefined}
               onClick={() => {
+                if (isDemoContent) return;
                 if (navigator.share) {
                   navigator.share({
                     title: isKo ? '체키 학부모 상담 알림톡' : 'Chekki Parent Update',
@@ -166,18 +181,26 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   setTimeout(() => setCopied(false), 2000);
                 }
               }}
-              className="px-3.5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-zinc-900 font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
+              className={`px-3.5 py-2.5 font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0 ${
+                isDemoContent
+                  ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
+                  : 'bg-yellow-400 hover:bg-yellow-500 text-zinc-900 cursor-pointer active:scale-95'
+              }`}
             >
               <span>💬</span>
               <span>{isKo ? '카카오톡 공유' : 'Share KakaoTalk'}</span>
             </button>
             <button
               type="button"
+              disabled={isDemoContent}
+              title={isDemoContent ? (isKo ? '실제 리포트가 없어 복사할 수 없습니다' : 'No real report to copy yet') : undefined}
               onClick={handleCopyKakaoScript}
-              className={`px-4 py-2.5 rounded-xl text-xs font-black shadow-lg transition-all flex items-center gap-2 shrink-0 cursor-pointer active:scale-95 ${
-                copied
-                  ? 'bg-emerald-500 text-white shadow-emerald-500/20'
-                  : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
+              className={`px-4 py-2.5 rounded-xl text-xs font-black shadow-lg transition-all flex items-center gap-2 shrink-0 ${
+                isDemoContent
+                  ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
+                  : copied
+                  ? 'bg-emerald-500 text-white shadow-emerald-500/20 cursor-pointer active:scale-95'
+                  : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20 cursor-pointer active:scale-95'
               }`}
             >
               {copied ? <CheckCircle size={16} weight="bold" /> : <Copy size={16} weight="bold" />}

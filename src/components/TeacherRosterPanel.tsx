@@ -84,7 +84,7 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
   if (teachers.length === 0) {
     return (
       <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-zinc-400 font-bold">
-        No teachers have accepted an invite yet. Once one does, they'll appear here for class assignment.
+        No teachers have accepted an invite yet. Once one does, they&apos;ll appear here for class assignment.
       </div>
     );
   }
