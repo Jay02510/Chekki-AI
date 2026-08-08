@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ChalkboardTeacher,
   TrendUp,
   Users,
   Lightbulb,
@@ -112,35 +111,18 @@ export const NativeFtDashboard: React.FC<Props> = ({
           </div>
           {/* NOTE: Duplicate worksheet scanner that previously lived here was
               removed (Audit §7). It is now exclusively on the Homework tab.
-              This keeps Overview focused: log form + stats + carousel. */}
+              The 5-slide curriculum carousel and AI tip panel that used to
+              sit below the stats also moved out, to their own Insights tab
+              (Audit: FT overview still not simple) — a teacher checking in
+              before class shouldn't have to scroll past carousel slides to
+              reach the thing they actually came to do: log today's class.
+              Overview is now just the log form + the two stats teachers
+              actually check daily. The "Active Class" stat card was dropped
+              entirely rather than relocated — the sidebar/header already
+              shows the active class name, so it was pure duplication. */}
 
           {/* Top Double-Bezel Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            {/* Stat Card 1 */}
-            <div className={`p-1 rounded-[2rem] text-left transition-colors ${
-              isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
-            }`}>
-              <div className={`rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full transition-colors ${
-                isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
-              }`}>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-1.5">
-                    <ChalkboardTeacher size={14} weight="bold" className="text-orange-500" />
-                    <span>{isKo ? '대상 학급' : 'Active Class'}</span>
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-500 font-mono">
-                    Level: {activeClass?.level || '7-year-old'}
-                  </span>
-                </div>
-                <div>
-                  <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{activeClass?.name || 'Active Class'}</h4>
-                  <p className="text-xs text-zinc-500 mt-1">
-                    {isKo ? '선택된 가입 코드:' : 'Active join code:'} <span className={`font-mono ${isThemeNight ? 'text-zinc-300' : 'text-zinc-700'}`}>{activeClass?.joinCode || 'N/A'}</span>
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               {/* Stat Card 2 */}
               <div className={`p-1 rounded-[2rem] text-left transition-colors ${
@@ -201,7 +183,14 @@ export const NativeFtDashboard: React.FC<Props> = ({
                 </div>
               </div>
             </div>
+        </div>
+      )}
 
+      {/* Weekly curriculum carousel + AI tip panel, moved out of Overview
+          (see NOTE above) so the daily-log screen stays a quick glance
+          instead of a 5-slide scroll. Reachable any time via its own tab. */}
+      {activeTab === 'insights' && (
+        <div className="space-y-8 animate-fade-in">
             {/* Main Overview Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
