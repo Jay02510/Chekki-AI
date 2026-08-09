@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import { SubscriptionScreen } from './SubscriptionScreen';
 import { LegalModal } from './LegalModal';
 import { LegalType } from '../types';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Props {
   isNight?: boolean;
@@ -33,6 +34,11 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
     }
   }, [showPaywall]);
 
+  const dialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showPaywall && !standaloneLegal,
+    onClose: () => setShowPaywall(false),
+  });
+
   if (!showPaywall) return null;
 
   return (
@@ -43,9 +49,11 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
       />
 
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Premium subscription"
+        tabIndex={-1}
         className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter transition-opacity w-full max-w-lg md:max-w-2xl mx-2 sm:mx-4 ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
       >
         <div

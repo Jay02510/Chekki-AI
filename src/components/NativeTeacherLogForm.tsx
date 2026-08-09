@@ -3,6 +3,7 @@ import { Sparkle, Plus, X, Check, UserPlus, Lock, FloppyDisk } from '@phosphor-i
 import { ClassLogPayload, saveOfflineDraft, getOfflineDraft, clearOfflineDraft } from '../services/aiGenerator';
 import { UserProfile } from '../../types';
 import { getPermissionsForUser } from '../utils/permissions';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
 
 interface Props {
   isNight?: boolean;
@@ -11,7 +12,28 @@ interface Props {
   userProfile?: UserProfile | null;
   selectedClassName?: string;
   selectedTextbookName?: string;
+  /** Public marketing/demo showcase only. Never true for a real, authenticated teacher session. */
+  isDemo?: boolean;
 }
+
+const DEMO_CLASS_NAME = 'Apex Seocho 7A';
+const DEMO_LESSON_TOPIC = 'Unit 4: Photosynthesis & Plant Growth';
+const DEMO_TEXTBOOK = 'Bricks Reading 150 (Book 1)';
+const DEMO_ENERGY_LEVEL = 'High Energy and Engaged';
+const DEMO_ACTIVITIES = ['Reading', 'Speaking', 'Worksheet'];
+const DEMO_COMMENTS = 'Students engaged very enthusiastically with the new plant vocabulary drill. Everyone read aloud clearly.';
+const DEMO_EXCEPTIONS: Array<{ studentName: string; details: string; type?: 'praise' | 'attention' }> = [
+  {
+    studentName: 'Seo-yeon (서연)',
+    details: '⭐ Outstanding participation! Led the vocabulary team quiz and helped classmates with pronunciation.',
+    type: 'praise',
+  },
+  {
+    studentName: 'Min-jun (민준)',
+    details: '⚠️ Struggled with target word "Chloroplast" and needs 5-minute review at home.',
+    type: 'attention',
+  },
+];
 
 export const NativeTeacherLogForm: React.FC<Props> = ({
   isNight = true,
@@ -20,13 +42,14 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   userProfile,
   selectedClassName,
   selectedTextbookName,
+  isDemo = false,
 }) => {
   const permissions = getPermissionsForUser(userProfile);
-  const [className, setClassName] = useState(selectedClassName || 'Apex Seocho 7A');
+  const [className, setClassName] = useState(selectedClassName || (isDemo ? DEMO_CLASS_NAME : ''));
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [lessonTopic, setLessonTopic] = useState('Unit 4: Photosynthesis & Plant Growth');
-  const [textbook, setTextbook] = useState(selectedTextbookName || 'Bricks Reading 150 (Book 1)');
-  const [energyLevel, setEnergyLevel] = useState<string>('High Energy and Engaged');
+  const [lessonTopic, setLessonTopic] = useState(isDemo ? DEMO_LESSON_TOPIC : '');
+  const [textbook, setTextbook] = useState(selectedTextbookName || (isDemo ? DEMO_TEXTBOOK : ''));
+  const [energyLevel, setEnergyLevel] = useState<string>(isDemo ? DEMO_ENERGY_LEVEL : '');
 
   useEffect(() => {
     if (selectedClassName) setClassName(selectedClassName);
@@ -35,33 +58,27 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   useEffect(() => {
     if (selectedTextbookName) setTextbook(selectedTextbookName);
   }, [selectedTextbookName]);
-  const [activities, setActivities] = useState<string[]>(['Reading', 'Speaking', 'Worksheet']);
-  const [generalComments, setGeneralComments] = useState(
-    'Students engaged very enthusiastically with the new plant vocabulary drill. Everyone read aloud clearly.'
-  );
+  const [activities, setActivities] = useState<string[]>(isDemo ? DEMO_ACTIVITIES : []);
+  const [generalComments, setGeneralComments] = useState(isDemo ? DEMO_COMMENTS : '');
 
   // Offline Draft Notification State
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
 
   // Student Spotlight & Exception Modal State (Praise & Attention)
-  const [exceptions, setExceptions] = useState<Array<{ studentName: string; details: string; type?: 'praise' | 'attention' }>>([
-    {
-      studentName: 'Seo-yeon (서연)',
-      details: '⭐ Outstanding participation! Led the vocabulary team quiz and helped classmates with pronunciation.',
-      type: 'praise',
-    },
-    {
-      studentName: 'Min-jun (민준)',
-      details: '⚠️ Struggled with target word "Chloroplast" and needs 5-minute review at home.',
-      type: 'attention',
-    },
-  ]);
+  const [exceptions, setExceptions] = useState<Array<{ studentName: string; details: string; type?: 'praise' | 'attention' }>>(
+    isDemo ? DEMO_EXCEPTIONS : []
+  );
   const [showExceptionModal, setShowExceptionModal] = useState(false);
   const [modalStudentName, setModalStudentName] = useState('Ji-woo (지우)');
   const [modalCategory, setModalCategory] = useState<'praise' | 'attention'>('praise');
-  const [isCustomStudentName, setIsCustomStudentName] = useState(false);
+  const [isCustomStudentName, setIsCustomStudentName] = useState(!isDemo);
   const [customStudentInput, setCustomStudentInput] = useState('');
   const [modalDetails, setModalDetails] = useState('');
+
+  const exceptionDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showExceptionModal,
+    onClose: () => setShowExceptionModal(false),
+  });
 
   // Auto-save offline draft to localStorage on change
   useEffect(() => {
@@ -105,8 +122,12 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
     setExceptions((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const isRealLogIncomplete =
+    !isDemo && (!className.trim() || !lessonTopic.trim() || !textbook.trim() || !energyLevel || activities.length === 0);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isRealLogIncomplete) return;
     clearOfflineDraft();
     onSubmitLog({
       className,
@@ -141,25 +162,38 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
       </div>
 
       {/* Interactive Helper Banner */}
-      <div className="mb-6 p-3.5 bg-orange-500/10 border border-orange-500/30 rounded-2xl flex items-center justify-between text-xs font-bold text-orange-400 shadow-md">
-        <div className="flex items-center gap-2">
-          <Sparkle size={18} weight="fill" className="animate-pulse text-orange-500 shrink-0" />
-          <span>👇 Live Generator Simulator: Click any buttons below & hit orange button to test AI parent script generation!</span>
+      {isDemo && (
+        <div className="mb-6 p-3.5 bg-orange-500/10 border border-orange-500/30 rounded-2xl flex items-center justify-between text-xs font-bold text-orange-400 shadow-md">
+          <div className="flex items-center gap-2">
+            <Sparkle size={18} weight="fill" className="animate-pulse text-orange-500 shrink-0" />
+            <span>👇 Demo Preview: Click any buttons below & hit orange button to see how AI parent script generation works!</span>
+          </div>
         </div>
-      </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Class & Date */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-400 block font-mono">Class Name *</label>
+            <label htmlFor="log-class-name" className="text-xs font-bold text-zinc-400 block font-mono">Class Name *</label>
             <select
+              id="log-class-name"
               value={className}
               onChange={(e) => setClassName(e.target.value)}
+              required={!isDemo}
               className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
                 isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
               }`}
             >
+              {!isDemo && !selectedClassName && (
+                <option value="" disabled>
+                  Select a class...
+                </option>
+              )}
+              {selectedClassName &&
+                !['Apex Seocho 7A', 'Apex Seocho 6B', 'Apex Seocho 5C'].includes(selectedClassName) && (
+                  <option value={selectedClassName}>{selectedClassName}</option>
+                )}
               <option value="Apex Seocho 7A">Apex Seocho 7A (Kindergarten 7yo)</option>
               <option value="Apex Seocho 6B">Apex Seocho 6B (Kindergarten 6yo)</option>
               <option value="Apex Seocho 5C">Apex Seocho 5C (Kindergarten 5yo)</option>
@@ -167,8 +201,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-400 block font-mono">Date *</label>
+            <label htmlFor="log-date" className="text-xs font-bold text-zinc-400 block font-mono">Date *</label>
             <input
+              id="log-date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
@@ -182,8 +217,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         {/* Lesson Topic & Textbook */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-400 block font-mono">Lesson Topic *</label>
+            <label htmlFor="log-lesson-topic" className="text-xs font-bold text-zinc-400 block font-mono">Lesson Topic *</label>
             <input
+              id="log-lesson-topic"
               type="text"
               required
               value={lessonTopic}
@@ -196,8 +232,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-400 block font-mono">Textbook *</label>
+            <label htmlFor="log-textbook" className="text-xs font-bold text-zinc-400 block font-mono">Textbook *</label>
             <input
+              id="log-textbook"
               type="text"
               required
               value={textbook}
@@ -212,8 +249,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
         {/* Class Energy Level */}
         <div className="space-y-2">
-          <label className="text-xs font-bold text-zinc-400 block font-mono">Class Energy Level *</label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <span id="log-energy-label" className="text-xs font-bold text-zinc-400 block font-mono">Class Energy Level *</span>
+          <div role="group" aria-labelledby="log-energy-label" className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {energyOptions.map((opt) => (
               <button
                 key={opt}
@@ -236,8 +273,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
         {/* Daily Activities Multi-Select */}
         <div className="space-y-2">
-          <label className="text-xs font-bold text-zinc-400 block font-mono">Daily Activities (Multi-Select) *</label>
-          <div className="flex flex-wrap gap-2">
+          <span id="log-activities-label" className="text-xs font-bold text-zinc-400 block font-mono">Daily Activities (Multi-Select) *</span>
+          <div role="group" aria-labelledby="log-activities-label" className="flex flex-wrap gap-2">
             {activityOptions.map((act) => {
               const active = activities.includes(act);
               return (
@@ -264,10 +301,11 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         {/* General Class Comments */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-zinc-400 block font-mono">General Class Comments</label>
+            <label htmlFor="log-general-comments" className="text-xs font-bold text-zinc-400 block font-mono">General Class Comments</label>
             <span className="text-[10px] text-orange-400 font-mono">1-Tap Presets Below</span>
           </div>
           <textarea
+            id="log-general-comments"
             value={generalComments}
             onChange={(e) => setGeneralComments(e.target.value)}
             rows={3}
@@ -346,8 +384,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+          disabled={isSubmitting || isRealLogIncomplete}
+          className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <>
@@ -367,6 +405,11 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
       {showExceptionModal && (
         <div className="fixed inset-0 z-[400] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div
+            ref={exceptionDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="exception-modal-title"
+            tabIndex={-1}
             className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 ${
               isNight ? 'bg-[#0a0a0c] border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
             }`}
@@ -374,7 +417,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <UserPlus size={20} className="text-orange-500" weight="bold" />
-                <h3 className="font-black text-base">Flag Student Exception</h3>
+                <h3 id="exception-modal-title" className="font-black text-base">Flag Student Exception</h3>
               </div>
               <button
                 type="button"
@@ -418,7 +461,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center text-xs font-bold text-zinc-400 font-mono">
-                  <span>Student *</span>
+                  <label htmlFor="exception-student-field">Student *</label>
                   <button
                     type="button"
                     onClick={() => setIsCustomStudentName(!isCustomStudentName)}
@@ -430,6 +473,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
                 {isCustomStudentName ? (
                   <input
+                    id="exception-student-field"
                     type="text"
                     value={customStudentInput}
                     onChange={(e) => setCustomStudentInput(e.target.value)}
@@ -440,6 +484,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                   />
                 ) : (
                   <select
+                    id="exception-student-field"
                     value={modalStudentName}
                     onChange={(e) => setModalStudentName(e.target.value)}
                     className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
@@ -455,8 +500,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-400 block font-mono">Details *</label>
+                <label htmlFor="exception-details-field" className="text-xs font-bold text-zinc-400 block font-mono">Details *</label>
                 <textarea
+                  id="exception-details-field"
                   value={modalDetails}
                   onChange={(e) => setModalDetails(e.target.value)}
                   rows={4}

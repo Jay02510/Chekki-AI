@@ -3,6 +3,7 @@ import { Copy, CheckCircle, PhoneCall, Sparkle, UserCheck, X, Lock } from '@phos
 import { GeneratedReportOutput } from '../services/aiGenerator';
 import { UserProfile } from '../../types';
 import { getPermissionsForUser } from '../utils/permissions';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
 
 interface Props {
   isNight?: boolean;
@@ -17,7 +18,7 @@ interface Props {
   // so it's the record parents see — never the raw FT note. Fired when the
   // KT copies the script to send, since that's the point they've committed
   // to this version being final.
-  onApprove?: (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) => void;
+  onApprove?: (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) => Promise<boolean> | boolean | void;
 }
 
 export const NativeKtDashboard: React.FC<Props> = ({
@@ -74,12 +75,18 @@ export const NativeKtDashboard: React.FC<Props> = ({
   const charCount = currentFullText.length;
 
   const [copied, setCopied] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
 
   // Phone Consultation Drawer State
   const [activeDrawerStudent, setActiveDrawerStudent] = useState<{
     name: string;
     talkingPoints: string[];
   } | null>(null);
+
+  const drawerDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: !!activeDrawerStudent,
+    onClose: () => setActiveDrawerStudent(null),
+  });
 
   const handleTextChange = (val: string) => {
     setEditedKoreanSummary(val);
@@ -92,8 +99,8 @@ export const NativeKtDashboard: React.FC<Props> = ({
     ? generatedOutput.studentReports
     : [];
 
-  const handleCopyKakaoScript = () => {
-    if (isDemoContent) return;
+  const handleCopyKakaoScript = async () => {
+    if (isDemoContent || isApproving) return;
     const fullText = currentFullText;
 
     try {
@@ -111,14 +118,22 @@ export const NativeKtDashboard: React.FC<Props> = ({
       console.warn('Clipboard write fallback executed:', e);
     }
 
-    setCopied(true);
-    setReportStatus('copied_sent');
-    setTimeout(() => setCopied(false), 2500);
-
-    onApprove?.(
-      editedKoreanSummary,
-      displayedStudentReports.map((s) => ({ studentName: s.studentName, approvedText: s.koreanUpdate }))
-    );
+    // The approve write must resolve before we tell the KT this is sent —
+    // flipping to "sent" first meant a failed Firestore write still looked
+    // successful in this dashboard (Audit: KT "sent" fires before write resolves).
+    setIsApproving(true);
+    try {
+      const result = await onApprove?.(
+        editedKoreanSummary,
+        displayedStudentReports.map((s) => ({ studentName: s.studentName, approvedText: s.koreanUpdate }))
+      );
+      if (result === false) return;
+      setCopied(true);
+      setReportStatus('copied_sent');
+      setTimeout(() => setCopied(false), 2500);
+    } finally {
+      setIsApproving(false);
+    }
   };
 
   return (
@@ -192,19 +207,31 @@ export const NativeKtDashboard: React.FC<Props> = ({
             </button>
             <button
               type="button"
-              disabled={isDemoContent}
+              disabled={isDemoContent || isApproving}
               title={isDemoContent ? (isKo ? '실제 리포트가 없어 복사할 수 없습니다' : 'No real report to copy yet') : undefined}
               onClick={handleCopyKakaoScript}
               className={`px-4 py-2.5 rounded-xl text-xs font-black shadow-lg transition-all flex items-center gap-2 shrink-0 ${
-                isDemoContent
+                isDemoContent || isApproving
                   ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
                   : copied
                   ? 'bg-emerald-500 text-white shadow-emerald-500/20 cursor-pointer active:scale-95'
                   : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20 cursor-pointer active:scale-95'
               }`}
             >
-              {copied ? <CheckCircle size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
-              <span>{copied ? (isKo ? '복사 완료! ✅' : 'Copied! ✅') : (isKo ? '대본 1클릭 복사' : '1-Click Copy Script')}</span>
+              {isApproving ? (
+                <Sparkle size={16} weight="bold" className="animate-spin" />
+              ) : copied ? (
+                <CheckCircle size={16} weight="bold" />
+              ) : (
+                <Copy size={16} weight="bold" />
+              )}
+              <span>
+                {isApproving
+                  ? (isKo ? '저장 중...' : 'Saving...')
+                  : copied
+                  ? (isKo ? '복사 완료! ✅' : 'Copied! ✅')
+                  : (isKo ? '대본 1클릭 복사' : '1-Click Copy Script')}
+              </span>
             </button>
           </div>
         </div>
@@ -459,6 +486,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
       {activeDrawerStudent && (
         <div className="fixed inset-0 z-[450] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div
+            ref={drawerDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="phone-consult-title"
+            tabIndex={-1}
             className={`w-full max-w-lg p-6 rounded-3xl border shadow-2xl space-y-4 ${
               isNight ? 'bg-[#0a0a0c] border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
             }`}
@@ -468,7 +500,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider block">
                   PROMPT #3 • PARENT PHONE CONSULTATION PREP
                 </span>
-                <h3 className="font-black text-lg text-white">
+                <h3 id="phone-consult-title" className="font-black text-lg text-white">
                   📞 Talking Points for {activeDrawerStudent.name}
                 </h3>
               </div>

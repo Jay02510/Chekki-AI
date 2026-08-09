@@ -15,12 +15,19 @@ function detectMobilePlatform(): 'ios' | 'android' | null {
   return null;
 }
 
+interface Props {
+  // Lets the page shift fixed-position chrome (the Header) below this
+  // banner instead of letting it get covered — the banner is taller than
+  // Header's own top offset (Audit: mobile web banner covers header nav).
+  onVisibilityChange?: (visible: boolean) => void;
+}
+
 /**
  * MobileAppBanner
  * Shown ONLY when platform === 'web' and the visitor is on a mobile device.
  * Dismissed state persists for 7 days via localStorage.
  */
-export const MobileAppBanner: React.FC = () => {
+export const MobileAppBanner: React.FC<Props> = ({ onVisibilityChange }) => {
   const { language } = useLanguage();
   const [show, setShow] = useState(false);
   const [mobilePlatform, setMobilePlatform] = useState<'ios' | 'android' | null>(null);
@@ -39,12 +46,14 @@ export const MobileAppBanner: React.FC = () => {
 
     setMobilePlatform(detected);
     setShow(true);
+    onVisibilityChange?.(true);
   }, [isWeb]);
 
   const dismiss = () => {
     const sevenDays = Date.now() + 7 * 24 * 60 * 60 * 1000;
     localStorage.setItem(BANNER_DISMISSED_KEY, sevenDays.toString());
     setShow(false);
+    onVisibilityChange?.(false);
   };
 
   if (!isWeb || !show || !mobilePlatform) return null;

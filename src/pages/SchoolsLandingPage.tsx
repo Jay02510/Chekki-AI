@@ -24,6 +24,7 @@ import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { PLAN_SEATS, PLAN_LABELS } from '../../api/_lib/pricingTiers';
 import { ClassLogPayload, GeneratedReportOutput } from '../services/aiGenerator';
 import { buildDemoReportOutput } from '../data/demoReportOutput';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
 
 interface Props {
   isNight: boolean;
@@ -129,6 +130,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showConsultationModal, setShowConsultationModal] = useState(false);
   const [consultationSubmitted, setConsultationSubmitted] = useState(false);
+  const [consultationError, setConsultationError] = useState(false);
   const [consultationMessage, setConsultationMessage] = useState('');
   const [isSubmittingConsultation, setIsSubmittingConsultation] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('school_pro');
@@ -139,6 +141,19 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'kakaopay' | 'tosspay' | 'bank'>('bank');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const consultationDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showConsultationModal,
+    onClose: () => setShowConsultationModal(false),
+  });
+  const pricingDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showPricingModal,
+    onClose: () => setShowPricingModal(false),
+  });
+  const paymentDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showPaymentModal,
+    onClose: () => setShowPaymentModal(false),
+  });
 
   const openPlanModal = (planId: string, _defaultTeachers: number = 1, _minSeats: number = 1) => {
     setSelectedPlanId(planId);
@@ -301,11 +316,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 }
               }}
               className={`p-2 rounded-full border transition-colors cursor-pointer ${
-                isNight 
-                  ? 'border-white/10 hover:bg-white/10 text-white/70 hover:text-white' 
+                isNight
+                  ? 'border-white/10 hover:bg-white/10 text-white/70 hover:text-white'
                   : 'border-slate-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900'
               }`}
               title="Toggle Light / Dark Mode"
+              aria-label="Toggle light / dark mode"
             >
               {isNight ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
             </button>
@@ -324,6 +340,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
           {/* Mobile Hamburger Morph */}
           <button
+            type="button"
+            aria-label={mobileMenuOpen ? (isKo ? '메뉴 닫기' : 'Close menu') : (isKo ? '메뉴 열기' : 'Open menu')}
+            aria-expanded={mobileMenuOpen}
             className={`md:hidden relative w-9 h-9 flex items-center justify-center rounded-full outline-none ${
               isNight ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900'
             }`}
@@ -482,6 +501,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             isNight={isNight}
             onSubmitLog={handleSchoolDemoLogSubmit}
             isSubmitting={isSubmittingSchoolDemoLog}
+            isDemo
           />
         )}
         {schoolDemoTab === 'kt-review' && (
@@ -1306,7 +1326,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             className={`fixed inset-0 backdrop-blur-md transition-opacity ${isNight ? 'bg-black/85' : 'bg-zinc-900/60'}`} 
             onClick={() => setShowConsultationModal(false)} 
           />
-          <div className={`relative w-full max-w-lg p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
+          <div
+            ref={consultationDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="consultation-modal-title"
+            tabIndex={-1}
+            className={`relative w-full max-w-lg p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
             isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
           }`}>
             <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 space-y-6 transition-colors ${
@@ -1322,7 +1348,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
                       {isKo ? '1:1 맞춤 온보딩 & 청구서 문의' : '1:1 CUSTOM CONSULTATION'}
                     </span>
-                    <h3 className={`text-lg sm:text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    <h3 id="consultation-modal-title" className={`text-lg sm:text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                       {isKo ? '학원 도입 1:1 맞춤 상담 신청' : 'Schedule 1:1 Consultation'}
                     </h3>
                   </div>
@@ -1330,9 +1356,10 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 <button
                   type="button"
                   onClick={() => setShowConsultationModal(false)}
+                  aria-label={isKo ? '상담 신청 닫기' : 'Close consultation form'}
                   className={`p-2 rounded-full transition-all cursor-pointer ${
-                    isNight 
-                      ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' 
+                    isNight
+                      ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
                       : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
                   }`}
                 >
@@ -1366,8 +1393,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   onSubmit={async (e) => {
                     e.preventDefault();
                     setIsSubmittingConsultation(true);
+                    setConsultationError(false);
                     try {
-                      await fetch('/api/request-school-invoice', {
+                      const response = await fetch('/api/request-school-invoice', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1379,26 +1407,39 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                           type: '1:1-consultation',
                         }),
                       });
+                      if (!response.ok) throw new Error(`Request failed with ${response.status}`);
+                      setConsultationSubmitted(true);
                     } catch (err) {
-                      console.warn('Consultation API fallback; showing client success');
+                      console.error('Consultation request failed:', err);
+                      setConsultationError(true);
                     } finally {
                       setIsSubmittingConsultation(false);
-                      setConsultationSubmitted(true);
                     }
                   }}
                   className="space-y-4 text-left"
                 >
                   <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    {isKo 
-                      ? '원장님의 학원 명과 연락처를 입력해주시면 Chekki 운영팀에서 1:1 상담을 도와드립니다.' 
+                    {isKo
+                      ? '원장님의 학원 명과 연락처를 입력해주시면 Chekki 운영팀에서 1:1 상담을 도와드립니다.'
                       : 'Please leave your contact info below. Our team will reach out to schedule your 1:1 session.'}
                   </p>
 
+                  {consultationError && (
+                    <div role="alert" className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 flex items-center justify-between gap-3">
+                      <span>
+                        {isKo
+                          ? '신청 접수에 실패했습니다. 다시 시도해주세요.'
+                          : "Your request didn't go through. Please try again."}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                    <label htmlFor="consult-contact-name" className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
                       {isKo ? '원장님 / 담당자 성함 *' : 'Contact Name *'}
                     </label>
                     <input
+                      id="consult-contact-name"
                       type="text"
                       required
                       value={contactName}
@@ -1411,10 +1452,11 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                    <label htmlFor="consult-academy-name" className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
                       {isKo ? '학원 / 어학원 명 *' : 'Academy Name *'}
                     </label>
                     <input
+                      id="consult-academy-name"
                       type="text"
                       required
                       value={academyName}
@@ -1428,10 +1470,11 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                      <label htmlFor="consult-phone" className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
                         {isKo ? '전화번호 *' : 'Phone Number *'}
                       </label>
                       <input
+                        id="consult-phone"
                         type="tel"
                         required
                         value={phone}
@@ -1444,10 +1487,11 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                      <label htmlFor="consult-email" className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
                         {isKo ? '이메일 주소 *' : 'Email Address *'}
                       </label>
                       <input
+                        id="consult-email"
                         type="email"
                         required
                         value={email}
@@ -1461,10 +1505,11 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                    <label htmlFor="consult-message" className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
                       {isKo ? '문의 사항 및 요청 내용' : 'Message / Request Details'}
                     </label>
                     <textarea
+                      id="consult-message"
                       rows={3}
                       value={consultationMessage}
                       onChange={(e) => setConsultationMessage(e.target.value)}
@@ -1507,7 +1552,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             className={`fixed inset-0 backdrop-blur-md transition-opacity ${isNight ? 'bg-black/85' : 'bg-zinc-900/60'}`} 
             onClick={() => setShowPricingModal(false)} 
           />
-          <div className={`relative w-full max-w-2xl p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
+          <div
+            ref={pricingDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pricing-modal-title"
+            tabIndex={-1}
+            className={`relative w-full max-w-2xl p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
             isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
           }`}>
             <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 space-y-6 transition-colors ${
@@ -1523,7 +1574,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
                       {isKo ? '요금제 상세 스펙 & 핵심 기능 안내' : 'PLAN SPECIFICATIONS & INCLUDED FEATURES'}
                     </span>
-                    <h3 className={`text-xl sm:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    <h3 id="pricing-modal-title" className={`text-xl sm:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                       {isKo ? activePlan.nameKo : activePlan.nameEn}
                     </h3>
                   </div>
@@ -1531,9 +1582,10 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 <button
                   type="button"
                   onClick={() => setShowPricingModal(false)}
+                  aria-label={isKo ? '요금제 상세 닫기' : 'Close plan details'}
                   className={`p-2 rounded-full transition-all active:scale-[0.95] cursor-pointer ${
-                    isNight 
-                      ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' 
+                    isNight
+                      ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
                       : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
                   }`}
                 >
@@ -1666,7 +1718,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             className={`fixed inset-0 backdrop-blur-md transition-opacity ${isNight ? 'bg-black/85' : 'bg-zinc-900/60'}`} 
             onClick={() => setShowPaymentModal(false)} 
           />
-          <div className={`relative w-full max-w-lg p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
+          <div
+            ref={paymentDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="payment-modal-title"
+            tabIndex={-1}
+            className={`relative w-full max-w-lg p-1 border rounded-[2.5rem] shadow-2xl animate-fade-in text-left my-8 transition-colors ${
             isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
           }`}>
             <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 space-y-6 transition-colors ${
@@ -1681,7 +1739,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
                       {isKo ? '안전 결제 & 워크스페이스 생성' : 'SECURE PAYMENT & ACTIVATION'}
                     </span>
-                    <h3 className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    <h3 id="payment-modal-title" className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                       {isKo ? `${activePlan.nameKo} 결제` : `Checkout ${activePlan.nameEn}`}
                     </h3>
                   </div>
@@ -1689,9 +1747,10 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 <button
                   type="button"
                   onClick={() => setShowPaymentModal(false)}
+                  aria-label={isKo ? '결제 창 닫기' : 'Close checkout'}
                   className={`p-2 rounded-full transition-all active:scale-[0.95] cursor-pointer ${
-                    isNight 
-                      ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' 
+                    isNight
+                      ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
                       : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
                   }`}
                 >
@@ -1747,10 +1806,11 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               {/* Payment Method Details & Fields */}
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="text-[11px] font-bold text-zinc-400 block mb-1">
+                  <label htmlFor="payment-academy-name" className="text-[11px] font-bold text-zinc-400 block mb-1">
                     {isKo ? '학원 / 기관명 *' : 'Academy Name *'}
                   </label>
                   <input
+                    id="payment-academy-name"
                     type="text"
                     required
                     value={academyName}
@@ -1762,10 +1822,11 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-zinc-400 block mb-1">
+                  <label htmlFor="payment-email" className="text-[11px] font-bold text-zinc-400 block mb-1">
                     {isKo ? '원장님 이메일 (결제 영수증 & 승인 안내) *' : 'Director Email *'}
                   </label>
                   <input
+                    id="payment-email"
                     type="email"
                     required
                     value={email}

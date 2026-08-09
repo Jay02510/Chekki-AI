@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Eye } from '@phosphor-icons/react';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
 
 interface Props {
   isThemeNight: boolean;
@@ -16,10 +17,18 @@ export const DocPreviewModal: React.FC<Props> = ({
   textbookPreviewUrl,
   onClose,
 }) => {
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
+
   return (
     <div className="fixed inset-0 z-[450] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
-      <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-4xl mx-4 animate-fade-in text-left max-h-[90vh] ${
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="doc-preview-title"
+        tabIndex={-1}
+        className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-4xl mx-4 animate-fade-in text-left max-h-[90vh] ${
         isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
       }`}>
         <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar flex flex-col ${
@@ -31,7 +40,7 @@ export const DocPreviewModal: React.FC<Props> = ({
                 <Eye size={22} weight="bold" />
               </div>
               <div>
-                <h3 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                <h3 id="doc-preview-title" className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                   {isKo ? '스캔 원본 교재 / 워크시트 문서 미리보기' : 'Scanned Document Original Preview'}
                 </h3>
                 <p className="text-xs text-zinc-400">

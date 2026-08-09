@@ -8,6 +8,27 @@ import {
   signInWithCustomToken,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
+
+// Skeleton rows for these admin tables, matching the real column count, so
+// the header/search bar stay in place while data loads instead of the whole
+// table being replaced by a "LOADING..." string (Audit: spinner-text loading
+// instead of skeletons).
+function SkeletonRows({ columns, rows = 5 }: { columns: number; rows?: number }) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, r) => (
+        <tr key={r} className="border-b border-zinc-800/50">
+          {Array.from({ length: columns }).map((__, c) => (
+            <td key={c} className="py-3.5 px-4">
+              <div className="h-3.5 rounded bg-zinc-800 animate-pulse" style={{ width: `${55 + ((r + c) % 4) * 10}%` }} />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
+}
 
 export default function AdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -43,6 +64,14 @@ export default function AdminPage() {
   const [assignSchoolIdInput, setAssignSchoolIdInput] = useState('');
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showCreateSchoolModal, setShowCreateSchoolModal] = useState(false);
+  const createSchoolDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showCreateSchoolModal,
+    onClose: () => setShowCreateSchoolModal(false),
+  });
+  const assignTeacherDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showAssignModal,
+    onClose: () => setShowAssignModal(false),
+  });
 
   const handleFetchInvoices = async () => {
     setLoading(true);
@@ -679,11 +708,7 @@ export default function AdminPage() {
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium"
                 />
                 <div className="w-full overflow-x-auto">
-                  {loading ? (
-                    <div className="flex justify-center p-8 text-zinc-500 font-bold tracking-widest animate-pulse">
-                      LOADING MEMBERS...
-                    </div>
-                  ) : (
+                  {(
                     <table className="w-full text-left text-sm whitespace-nowrap">
                       <thead>
                         <tr className="border-b border-zinc-800 text-zinc-400">
@@ -697,7 +722,9 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800/50">
-                        {filteredUsers.length === 0 ? (
+                        {loading ? (
+                          <SkeletonRows columns={7} />
+                        ) : filteredUsers.length === 0 ? (
                           <tr>
                             <td colSpan={7} className="py-8 text-center text-zinc-500">
                               No members found.
@@ -824,11 +851,7 @@ export default function AdminPage() {
 
                 {/* Table View */}
                 <div className="w-full overflow-x-auto">
-                  {loading ? (
-                    <div className="flex justify-center p-8 text-zinc-500 font-bold tracking-widest animate-pulse">
-                      LOADING SCHOOLS...
-                    </div>
-                  ) : (
+                  {(
                     <table className="w-full text-left text-sm whitespace-nowrap">
                       <thead>
                         <tr className="border-b border-zinc-800 text-zinc-400">
@@ -841,7 +864,9 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800/50">
-                        {filteredSchools.length === 0 ? (
+                        {loading ? (
+                          <SkeletonRows columns={6} />
+                        ) : filteredSchools.length === 0 ? (
                           <tr>
                             <td colSpan={6} className="py-8 text-center text-zinc-500">
                               No schools found.
@@ -911,16 +936,24 @@ export default function AdminPage() {
                 {/* MODALS */}
                 {showCreateSchoolModal && (
                   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-                      <h3 className="text-lg font-black uppercase tracking-wider mb-4">
+                    <div
+                      ref={createSchoolDialogRef}
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="create-school-title"
+                      tabIndex={-1}
+                      className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative"
+                    >
+                      <h3 id="create-school-title" className="text-lg font-black uppercase tracking-wider mb-4">
                         Create New School Code
                       </h3>
                       <form onSubmit={handleCreateSchool} className="space-y-4">
                         <div>
-                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                          <label htmlFor="create-school-id" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
                             School Code (ID / Student Redemption)
                           </label>
                           <input
+                            id="create-school-id"
                             type="text"
                             required
                             placeholder="e.g. APEX10"
@@ -930,10 +963,11 @@ export default function AdminPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                          <label htmlFor="create-school-name" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
                             School Name
                           </label>
                           <input
+                            id="create-school-name"
                             type="text"
                             required
                             placeholder="e.g. Apex Seocho"
@@ -943,10 +977,11 @@ export default function AdminPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                          <label htmlFor="create-school-teacher-code" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
                             Teacher Authorization Code
                           </label>
                           <input
+                            id="create-school-teacher-code"
                             type="text"
                             required
                             placeholder="e.g. APEX10-TEACHER"
@@ -956,10 +991,11 @@ export default function AdminPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                          <label htmlFor="create-school-max-uses" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
                             Max Teacher Redemptions
                           </label>
                           <input
+                            id="create-school-max-uses"
                             type="number"
                             required
                             value={schoolMaxUsesInput}
@@ -992,16 +1028,24 @@ export default function AdminPage() {
 
                 {showAssignModal && (
                   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-                      <h3 className="text-lg font-black uppercase tracking-wider mb-4">
+                    <div
+                      ref={assignTeacherDialogRef}
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="assign-teacher-title"
+                      tabIndex={-1}
+                      className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative"
+                    >
+                      <h3 id="assign-teacher-title" className="text-lg font-black uppercase tracking-wider mb-4">
                         Assign Teacher to School
                       </h3>
                       <form onSubmit={handleAssignTeacher} className="space-y-4">
                         <div>
-                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                          <label htmlFor="assign-teacher-email" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
                             Teacher Email
                           </label>
                           <input
+                            id="assign-teacher-email"
                             type="email"
                             required
                             placeholder="teacher@school.com"
@@ -1011,11 +1055,12 @@ export default function AdminPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                          <label htmlFor="assign-teacher-school" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
                             Select School
                           </label>
                           <div className="relative">
                             <select
+                              id="assign-teacher-school"
                               required
                               value={assignSchoolIdInput}
                               onChange={(e) => setAssignSchoolIdInput(e.target.value)}
@@ -1081,11 +1126,7 @@ export default function AdminPage() {
                 </div>
 
                 <div className="w-full overflow-x-auto">
-                  {loading ? (
-                    <div className="flex justify-center p-8 text-zinc-500 font-bold tracking-widest animate-pulse">
-                      LOADING INVOICES...
-                    </div>
-                  ) : invoices.length === 0 ? (
+                  {!loading && invoices.length === 0 ? (
                     <div className="p-8 text-center text-zinc-500 text-sm">
                       No corporate bank invoice requests found.
                     </div>
@@ -1103,7 +1144,9 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800/50">
-                        {invoices.map((inv) => (
+                        {loading ? (
+                          <SkeletonRows columns={7} />
+                        ) : invoices.map((inv) => (
                           <tr key={inv.invoiceId} className="hover:bg-zinc-900/50 text-xs">
                             <td className="py-3.5 px-4 font-mono font-bold text-orange-400">
                               {inv.invoiceId}

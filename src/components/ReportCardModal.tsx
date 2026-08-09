@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Printer } from '@phosphor-icons/react';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
 
 interface Props {
   isKo: boolean;
@@ -32,6 +33,8 @@ export const ReportCardModal: React.FC<Props> = ({
   activeVocabWords,
   onClose,
 }) => {
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
+
   return (
     <div className="fixed inset-0 z-[330] flex items-center justify-center p-4">
       <style>{`
@@ -61,7 +64,14 @@ export const ReportCardModal: React.FC<Props> = ({
         }
       `}</style>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md no-print" onClick={onClose} />
-      <div className="relative p-1 bg-white border border-zinc-200 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh]">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={isKo ? '학생 성적표' : 'Student report card'}
+        tabIndex={-1}
+        className="relative p-1 bg-white border border-zinc-200 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh]"
+      >
         <div className="printable-report-card relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 bg-white text-zinc-900 overflow-y-auto custom-scrollbar">
           <button
             type="button"
@@ -75,8 +85,9 @@ export const ReportCardModal: React.FC<Props> = ({
           {activeRoster.length > 0 && (
             <div className="mb-6 p-3 bg-orange-50/50 border border-orange-200 rounded-2xl flex items-center justify-between no-print">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-orange-700">{isKo ? '성적표 대상 원생 선택:' : 'Select Student for Report Card:'}</span>
+                <label htmlFor="report-card-student-select" className="text-xs font-bold text-orange-700">{isKo ? '성적표 대상 원생 선택:' : 'Select Student for Report Card:'}</label>
                 <select
+                  id="report-card-student-select"
                   value={selectedStudentDetails?.uid || ''}
                   onChange={(e) => {
                     const target = activeRoster.find((s) => s.uid === e.target.value);

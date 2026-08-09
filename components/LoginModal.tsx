@@ -5,6 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { LegalType } from '../types';
 import { LegalModal } from './LegalModal';
 import { Capacitor } from '@capacitor/core';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Props {
   isNight?: boolean;
@@ -31,6 +32,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showLegal, setShowLegal] = useState<LegalType | null>(null);
+
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: showLoginModal, onClose: closeLoginModal });
 
   if (!showLoginModal) return null;
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,9 +173,11 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         ></div>
 
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="login-modal-title"
+          tabIndex={-1}
           className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl modal-enter w-full max-w-sm flex flex-col mx-2 sm:mx-4`}
         >
           <div

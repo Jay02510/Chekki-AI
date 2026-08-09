@@ -1,5 +1,8 @@
 import React from 'react';
 import { X, Sparkle } from '@phosphor-icons/react';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
+
+const MAX_LOGO_BYTES = 5 * 1024 * 1024;
 
 interface Props {
   isThemeNight: boolean;
@@ -18,10 +21,19 @@ export const AcademyLogoModal: React.FC<Props> = ({
   setAcademyLogo,
   onClose,
 }) => {
+  const [fileError, setFileError] = React.useState<string | null>(null);
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
+
   return (
     <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
-      <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in text-left ${
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="academy-logo-title"
+        tabIndex={-1}
+        className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in text-left ${
         isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
       }`}>
         <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 transition-colors ${
@@ -45,7 +57,7 @@ export const AcademyLogoModal: React.FC<Props> = ({
               <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
                 {isKo ? '맞춤 브랜드 설정' : 'ACADEMY BRANDING'}
               </span>
-              <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+              <h3 id="academy-logo-title" className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '학원 맞춤 로고 등록' : 'Custom Academy Logo'}
               </h3>
             </div>
@@ -60,7 +72,17 @@ export const AcademyLogoModal: React.FC<Props> = ({
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              localStorage.setItem('chekki_academy_logo', tempLogoUrl);
+              try {
+                localStorage.setItem('chekki_academy_logo', tempLogoUrl);
+              } catch (err) {
+                console.error('Failed to save academy logo:', err);
+                setFileError(
+                  isKo
+                    ? '로고 저장에 실패했습니다. 이미지 용량을 줄이거나 URL을 사용해주세요.'
+                    : "Couldn't save that logo — try a smaller image or a URL instead."
+                );
+                return;
+              }
               setAcademyLogo(tempLogoUrl);
               onClose();
               alert(isKo ? '학원 맞춤 로고가 저장되었습니다!' : 'Custom Academy Logo saved!');
@@ -81,14 +103,28 @@ export const AcademyLogoModal: React.FC<Props> = ({
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (evt) => {
-                        const res = evt.target?.result as string;
-                        if (res) setTempLogoUrl(res);
-                      };
-                      reader.readAsDataURL(file);
+                    if (!file) return;
+                    if (file.size > MAX_LOGO_BYTES) {
+                      setFileError(
+                        isKo
+                          ? '파일이 너무 큽니다. 5MB 이하의 이미지를 선택해주세요.'
+                          : 'That file is too large. Please choose an image under 5MB.'
+                      );
+                      e.target.value = '';
+                      return;
                     }
+                    setFileError(null);
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                      const res = evt.target?.result as string;
+                      if (res) setTempLogoUrl(res);
+                    };
+                    reader.onerror = () => {
+                      setFileError(
+                        isKo ? '이미지를 불러오지 못했습니다. 다시 시도해주세요.' : 'Could not read that image. Please try again.'
+                      );
+                    };
+                    reader.readAsDataURL(file);
                   }}
                   className="hidden"
                 />
@@ -103,13 +139,23 @@ export const AcademyLogoModal: React.FC<Props> = ({
                 </div>
               </label>
 
+              {fileError && (
+                <p role="alert" className="text-[11px] text-red-500 font-bold px-1">
+                  {fileError}
+                </p>
+              )}
+
               <div className="flex items-center gap-2 my-1">
                 <div className={`h-[1px] flex-1 ${isThemeNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
                 <span className="text-[10px] text-zinc-500 font-bold uppercase">{isKo ? '또는 URL 직접 입력' : 'OR PASTE IMAGE URL'}</span>
                 <div className={`h-[1px] flex-1 ${isThemeNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
               </div>
 
+              <label htmlFor="academy-logo-url" className="sr-only">
+                {isKo ? '로고 이미지 URL' : 'Logo image URL'}
+              </label>
               <input
+                id="academy-logo-url"
                 type="url"
                 value={tempLogoUrl}
                 onChange={(e) => setTempLogoUrl(e.target.value)}

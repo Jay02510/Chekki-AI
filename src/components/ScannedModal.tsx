@@ -1,5 +1,6 @@
 import React from 'react';
 import { BookOpen, Sparkle, Eye, X, Warning, Plus, Check, CheckCircle } from '@phosphor-icons/react';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
 
 const BAD_WORDS_PATTERN = /(fuck|shit|asshole|bitch|bastard|cunt|dick|cock|pussy|slut|whore|nigger|faggot|retard|damn|crap|idiot|stupid|씨발|개새끼|병신|지랄|존나|닥쳐|미친|좆|씹)/i;
 
@@ -56,10 +57,17 @@ export function ScannedModal({
       BAD_WORDS_PATTERN.test(ans.category || '')
   );
 
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
+
   return (
     <div className="fixed inset-0 z-[350] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={activeScannedModalType === 'syllabus' ? (isKo ? '스캔된 교재' : 'Scanned syllabus') : (isKo ? '스캔된 워크시트' : 'Scanned worksheet')}
+        tabIndex={-1}
         className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full ${
           activeScannedModalType === 'worksheet' ? 'max-w-6xl' : 'max-w-3xl'
         } mx-4 animate-fade-in text-left max-h-[90vh] ${

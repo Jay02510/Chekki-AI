@@ -26,12 +26,13 @@ import { UserProfile } from '../types';
 import { Capacitor } from '@capacitor/core';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDEh8M-G_2HCzBi3bU5NaRHT7XbXsXpCVM',
+  apiKey: 'AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k',
   authDomain: 'homework-assistant-c00b9.firebaseapp.com',
   projectId: 'homework-assistant-c00b9',
   storageBucket: 'homework-assistant-c00b9.firebasestorage.app',
   messagingSenderId: '123535525914',
   appId: '1:123535525914:web:decc3f5b3e3ffee4a0a9a3',
+  measurementId: 'G-8WK1D8YCGC',
 };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();

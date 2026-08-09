@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Props {
   onComplete: () => void;
@@ -45,6 +46,8 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   const [isJoiningClass, setIsJoiningClass] = useState(false);
   const [classJoinError, setClassJoinError] = useState('');
   const [classJoinSuccess, setClassJoinSuccess] = useState(false);
+
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: onSkip });
 
   const handleProfileSubmit = async () => {
     if (!selectedAge || !selectedLevel || !parentLevel) return;
@@ -374,6 +377,11 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
       {/* Outer Shell Double-Bezel */}
       <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={language === 'ko' ? '아이 프로필 설정' : 'Set up your child\'s profile'}
+        tabIndex={-1}
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}

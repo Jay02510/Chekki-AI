@@ -403,10 +403,10 @@ export const CameraView: React.FC<Props> = ({
 
                 {renderClarityGuide()}
 
-                <div
-                  role="button"
+                <button
+                  type="button"
                   onClick={handleAction}
-                  className="mt-4 md:mt-6 flex flex-col items-center gap-3 group/btn cursor-pointer"
+                  className="mt-4 md:mt-6 flex flex-col items-center gap-3 group/btn cursor-pointer bg-transparent border-0 p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-500 rounded-2xl"
                   title={t('btn_guest_scan')}
                 >
                   <div
@@ -443,7 +443,7 @@ export const CameraView: React.FC<Props> = ({
                     <span>🔒</span>
                     <span>{t('supported_formats')}</span>
                   </div>
-                </div>
+                </button>
 
                 <div className="mt-4 animate-fade-in-up">
                   <button

@@ -11,6 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import { collection, query, where, getCountFromServer } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
 import { TeacherRosterPanel } from './TeacherRosterPanel';
@@ -22,6 +23,10 @@ interface Props {
   academyName?: string;
   onOpenLogoModal?: () => void;
   schoolId?: string;
+  // Real value read from schools/{schoolId}.planId (null until that fetch
+  // resolves — treated as "not yet known" so the activation banner doesn't
+  // flash on for a paid director before their school doc has loaded).
+  planId?: string | null | undefined;
   seatsTotal?: { ft: number; kt: number };
   // Real, live-Firestore roster data -- same source TeacherPage's own
   // "Student Roster" sidebar tab uses. This tab used to hold a separate,
@@ -46,6 +51,7 @@ interface Props {
   fetchRosterAndMistakes?: () => void;
   setSelectedStudentDetails?: (student: any) => void;
   onResolveFlag?: (studentUid: string) => void;
+  onRequestSeatExpansion?: (extraSeats: number) => Promise<boolean>;
 }
 
 export const NativeDirectorPortal: React.FC<Props> = ({
@@ -54,6 +60,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   academyName = 'Apex English Academy (Seocho)',
   onOpenLogoModal,
   schoolId,
+  planId,
   seatsTotal,
   pendingRoster = [],
   activeRoster = [],
@@ -69,6 +76,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   fetchRosterAndMistakes = () => {},
   setSelectedStudentDetails = () => {},
   onResolveFlag = () => {},
+  onRequestSeatExpansion,
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'roster' | 'curriculum' | 'exceptions' | 'teachers' | 'billing'>('overview');
 
@@ -78,6 +86,11 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   const [showSeatExpansionModal, setShowSeatExpansionModal] = useState(false);
   const [requestedExtraSeats, setRequestedExtraSeats] = useState(3);
   const [seatRequestSent, setSeatRequestSent] = useState(false);
+  const [isRequestingSeats, setIsRequestingSeats] = useState(false);
+  const seatExpansionDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showSeatExpansionModal,
+    onClose: () => { setShowSeatExpansionModal(false); setSeatRequestSent(false); },
+  });
 
   // Thin visibility layer over the FT->KT log review pipeline: not the
   // content of a log (that's private teacher-to-teacher until a KT reviews
@@ -133,8 +146,15 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         isNight ? 'bg-[#060608] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
-      {/* Setup-First Activation Header Banner */}
-      {typeof window !== 'undefined' && sessionStorage.getItem('chekki_paid_active') !== 'true' && (
+      {/* Setup-First Activation Header Banner — real signal from
+          schools/{schoolId}.planId, not sessionStorage (Audit: paid/seat
+          status read from a per-tab value instead of Firestore, so a
+          director on a second device or after clearing storage saw a
+          subscription state that had nothing to do with their real record).
+          planId === null means the school doc genuinely has no plan set yet;
+          undefined means the fetch hasn't resolved, so we render nothing
+          rather than flash this at an already-paid director. */}
+      {planId === null && (
         <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-emerald-500/20 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center font-bold text-lg shrink-0">
@@ -143,9 +163,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             <div>
               <h4 className="font-black text-sm text-white flex items-center gap-2">
                 <span>{academyName || '어학원'} 캠퍼스 구축 완료!</span>
-                <span className="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 text-[10px] font-mono border border-orange-500/30">
-                  {sessionStorage.getItem('chekki_selected_plan')?.replace('_', ' ').toUpperCase() || 'MASTER SCHOOL PRO'} ({sessionStorage.getItem('chekki_teacher_seats') || '10'} SEATS ALLOWED)
-                </span>
               </h4>
               <p className="text-xs text-zinc-300 mt-0.5">
                 원생 숙제 자동 스캐너 &amp; 학부모 카카오톡 연동을 위해 결제를 완료하세요. (7일 100% 환불 보장)
@@ -670,7 +687,13 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* SEAT EXPANSION REQUEST MODAL */}
       {showSeatExpansionModal && (
         <div className="fixed inset-0 z-[550] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className={`relative w-full max-w-md p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 text-left transition-all ${
+          <div
+            ref={seatExpansionDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="seat-expansion-title"
+            tabIndex={-1}
+            className={`relative w-full max-w-md p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 text-left transition-all ${
             isNight ? 'bg-[#0a0a0d] border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
           }`}>
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -679,8 +702,8 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                   ➕
                 </div>
                 <div>
-                  <h3 className="font-black text-lg">교사 석 추가 (Seat Expansion)</h3>
-                  <p className="text-xs text-zinc-400 font-mono">Current Allowance: {sessionStorage.getItem('chekki_teacher_seats') || '10'} Seats</p>
+                  <h3 id="seat-expansion-title" className="font-black text-lg">교사 석 추가 (Seat Expansion)</h3>
+                  <p className="text-xs text-zinc-400 font-mono">Current Allowance: {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)} Seats</p>
                 </div>
               </div>
               <button 
@@ -695,10 +718,10 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             {seatRequestSent ? (
               <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
                 <span className="text-3xl block">🎉</span>
-                <h4 className="font-black text-emerald-400 text-base">교사 석 추가 청구서 발송 완료!</h4>
+                <h4 className="font-black text-emerald-400 text-base">교사 석 추가 요청 접수 완료!</h4>
                 <p className="text-xs text-zinc-300 leading-relaxed">
-                  +{requestedExtraSeats}석 추가 세금계산서 청구서가 등록되었습니다.<br />
-                  전자세금계산서 발행 후 즉시 추가 교사 계정 초대가 활성화됩니다.
+                  +{requestedExtraSeats}석 추가 요청이 등록되었고, 입금 계좌 정보를 이메일로 보내드렸습니다.<br />
+                  입금 확인 후 24시간 이내에 추가 교사 계정 초대가 활성화됩니다.
                 </p>
                 <button
                   type="button"
@@ -744,14 +767,19 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 
                 <button
                   type="button"
-                  onClick={() => {
-                    const current = Number(sessionStorage.getItem('chekki_teacher_seats') || '10');
-                    sessionStorage.setItem('chekki_teacher_seats', (current + requestedExtraSeats).toString());
-                    setSeatRequestSent(true);
+                  disabled={isRequestingSeats}
+                  onClick={async () => {
+                    setIsRequestingSeats(true);
+                    try {
+                      const ok = await onRequestSeatExpansion?.(requestedExtraSeats);
+                      if (ok) setSeatRequestSent(true);
+                    } finally {
+                      setIsRequestingSeats(false);
+                    }
                   }}
-                  className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-xl shadow-lg transition-all cursor-pointer"
+                  className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-xs rounded-xl shadow-lg transition-all cursor-pointer"
                 >
-                  ⚡ +{requestedExtraSeats}석 추가 세금계산서 청구하기 →
+                  {isRequestingSeats ? '요청 중...' : `⚡ +${requestedExtraSeats}석 추가 세금계산서 청구하기 →`}
                 </button>
               </div>
             )}

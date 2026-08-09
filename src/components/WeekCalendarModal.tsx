@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Calendar } from '@phosphor-icons/react';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
 
 interface Props {
   isThemeNight: boolean;
@@ -22,10 +23,18 @@ export const WeekCalendarModal: React.FC<Props> = ({
   onSelectWeek,
   onClose,
 }) => {
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
+
   return (
     <div className="fixed inset-0 z-[280] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
-      <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh] ${
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="week-calendar-title"
+        tabIndex={-1}
+        className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-3xl mx-4 animate-fade-in text-left max-h-[90vh] ${
         isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
       }`}>
         <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar transition-colors ${
@@ -49,7 +58,7 @@ export const WeekCalendarModal: React.FC<Props> = ({
               <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
                 {isKo ? '주차별 커리큘럼 업로드 현황' : 'CURRICULUM UPLOAD CALENDAR'}
               </span>
-              <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+              <h3 id="week-calendar-title" className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? `${selectedClass?.name || '학급'} 학기 주차별 캘린더` : `${selectedClass?.name || 'Class'} Weekly Curriculum Schedule`}
               </h3>
             </div>
@@ -75,13 +84,14 @@ export const WeekCalendarModal: React.FC<Props> = ({
               const uploadDate = isKo ? '실시간 연동' : 'Live Sync';
 
               return (
-                <div
+                <button
                   key={weekNum}
+                  type="button"
                   onClick={() => {
                     onSelectWeek(weekNum);
                     onClose();
                   }}
-                  className={`p-4 border rounded-2xl flex flex-col justify-between gap-3 cursor-pointer transition-all active:scale-[0.97] relative group ${
+                  className={`p-4 border rounded-2xl flex flex-col justify-between gap-3 text-left cursor-pointer transition-all active:scale-[0.97] relative group ${
                     isActiveWeek
                       ? 'border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/10'
                       : isThemeNight
@@ -129,7 +139,7 @@ export const WeekCalendarModal: React.FC<Props> = ({
                       </div>
                     )}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

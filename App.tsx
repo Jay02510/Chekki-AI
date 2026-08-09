@@ -156,6 +156,7 @@ function AppContent() {
 
   const [isNight, setIsNight] = useState(getInitialTheme());
   const [isSpeedMode, setIsSpeedMode] = useState(false);
+  const [isMobileBannerVisible, setIsMobileBannerVisible] = useState(false);
   const [showInAppNotice, setShowInAppNotice] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -535,6 +536,7 @@ function AppContent() {
           isSpeedMode={isSpeedMode}
           setIsSpeedMode={setIsSpeedMode}
           showSpeedToggle={analysisState.status === 'complete'}
+          pushedDownByBanner={isMobileBannerVisible}
           onOpenHelp={() => {
             // We removed activeTab state, so we just use an event or a local state here if needed
             // Actually, let's just trigger a custom event or you can manage it with a new state 'showHelp'
@@ -549,7 +551,7 @@ function AppContent() {
           }}
         />
         {/* Web-only mobile download banner */}
-        {platform === 'web' && <MobileAppBanner />}
+        {platform === 'web' && <MobileAppBanner onVisibilityChange={setIsMobileBannerVisible} />}
         <PaywallModal isNight={isNight} />
         <OdapNoteModal isNight={isNight} />
         <LoginModal isNight={isNight} />

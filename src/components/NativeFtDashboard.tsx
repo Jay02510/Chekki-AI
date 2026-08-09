@@ -42,7 +42,6 @@ interface Props {
   curriculumPassage: string;
   curriculumOther: string;
   setShowReportCardModal: (v: boolean) => void;
-  setShowReviewSheetModal: (v: boolean) => void;
   submittedLogs: any[];
 }
 
@@ -89,7 +88,6 @@ export const NativeFtDashboard: React.FC<Props> = ({
   curriculumPassage,
   curriculumOther,
   setShowReportCardModal,
-  setShowReviewSheetModal,
   submittedLogs,
 }) => {
   const isThemeNight = isNight;
@@ -306,8 +304,15 @@ export const NativeFtDashboard: React.FC<Props> = ({
                           </button>
                         </div>
                       ) : isLoadingRoster ? (
-                        <div className="flex items-center justify-center py-12">
-                          <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                        <div className="space-y-3">
+                          {[0, 1, 2].map((i) => (
+                            <div key={i} className={`flex items-center justify-between p-4 border rounded-2xl ${
+                              isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                            }`}>
+                              <div className="h-4 w-24 rounded bg-white/10 animate-pulse" />
+                              <div className="h-6 w-20 rounded-full bg-white/10 animate-pulse" />
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
@@ -630,17 +635,6 @@ export const NativeFtDashboard: React.FC<Props> = ({
                       <span>{isKo ? '📊 학부모 1초 성적표 발급 (Report Generator)' : '📊 Open Report Generator'}</span>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => setShowReviewSheetModal(true)}
-                      className={`group w-full py-3 border font-bold text-xs rounded-2xl transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer ${
-                        isThemeNight
-                          ? 'bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300'
-                          : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-300 text-zinc-800'
-                      }`}
-                    >
-                      <span>{isKo ? '🖨️ 오답 맞춤 복습 프린트 생성' : '🖨️ Generate Review Sheet'}</span>
-                    </button>
                   </div>
                 </div>
               </div>

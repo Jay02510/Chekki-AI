@@ -592,6 +592,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 setNativeDemoTab('kt-dashboard');
               }}
               isSubmitting={isSubmittingNativeLog}
+              isDemo
             />
           )}
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface ConfirmDialogProps {
   title: string;
@@ -21,44 +22,22 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  // Focus trap: keep Tab cycling within the two dialog buttons
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onCancel();
-      return;
-    }
-    if (e.key !== 'Tab') return;
-    const focusable = (e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>(
-      'button:not([disabled])'
-    );
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey) {
-      if (document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      }
-    } else {
-      if (document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-  };
-
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: onCancel });
   const isDestructive = variant === 'destructive';
   return (
-    <div
-      className="fixed inset-0 z-[10010] flex items-center justify-center p-4"
-      onKeyDown={handleKeyDown}
-    >
+    <div className="fixed inset-0 z-[10010] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/90 backdrop-blur-md"
         onClick={onCancel}
         aria-hidden="true"
       />
-      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-sm mx-2 sm:mx-4">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        tabIndex={-1}
+        className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-sm mx-2 sm:mx-4">
         <div
           className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden p-6 sm:p-8`}
         >
@@ -105,7 +84,6 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <button
               onClick={onConfirm}
               disabled={isSaving}
-              autoFocus
               className={`w-full ${isDestructive ? 'bg-red-600 hover:bg-red-700 text-white' : isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black uppercase text-xs transition-all active:scale-[0.97] disabled:opacity-50`}
             >
               {confirmText || 'Confirm'}

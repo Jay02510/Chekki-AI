@@ -8,6 +8,7 @@ import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, dele
 import { ChekkiMascot } from '../../components/Icons';
 import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
 import { compressImage, stripDataUrlPrefix } from '../../services/compressImage';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
 import ReportStudioPage from './ReportStudioPage';
 import { 
   GraduationCap, 
@@ -94,8 +95,10 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const [showActivationWizard, setShowActivationWizard] = useState(false);
   const [schoolSeatsTotal, setSchoolSeatsTotal] = useState<{ ft: number; kt: number }>({ ft: 0, kt: 0 });
+  // undefined = not fetched yet (avoids flashing the "complete payment"
+  // banner before we know); null = fetched and genuinely unset.
+  const [schoolPlanId, setSchoolPlanId] = useState<string | null | undefined>(undefined);
   const [trialStatus, setTrialStatus] = useState<{ onTrial: boolean; daysRemaining: number; expired: boolean } | null>(null);
-  const [showReviewSheetModal, setShowReviewSheetModal] = useState(false);
   const [showReportCardModal, setShowReportCardModal] = useState(false);
 
   // FT/KT first-login welcome modal state
@@ -152,8 +155,8 @@ export default function TeacherPage({ isNight = true }: Props) {
   // from real emptiness too (Audit: no loading/error state for KT queue).
   const [ktLogsLoadError, setKtLogsLoadError] = useState(false);
 
-  const handleKtApprove = async (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) => {
-    if (!activeKtLog?.id || !activeKtLog?.classId || !user?.uid) return;
+  const handleKtApprove = async (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]): Promise<boolean> => {
+    if (!activeKtLog?.id || !activeKtLog?.classId || !user?.uid) return false;
     try {
       const logRef = doc(dbInstance, 'classes', activeKtLog.classId, 'logs', activeKtLog.id);
       await updateDoc(logRef, {
@@ -164,18 +167,59 @@ export default function TeacherPage({ isNight = true }: Props) {
         sentAt: serverTimestamp(),
       });
       setKtPendingLogs((prev) => prev.filter((l) => l.id !== activeKtLog.id));
+      return true;
     } catch (err) {
       console.error('Failed to save KT-reviewed report:', err);
       // The UI (copy/share buttons) previously reported success regardless of
       // this write's outcome, so a failed approve silently never reached
       // parents with no indication to the KT that it didn't go through
-      // (Audit: silent FT->KT persist failure).
+      // (Audit: silent FT->KT persist failure). NativeKtDashboard now awaits
+      // this return value before showing its own "sent" state.
       showToast({
         type: 'error',
         message: isKo
           ? '⚠️ 학부모 전송 승인이 저장되지 않았습니다. 다시 시도해주세요.'
           : "⚠️ The approval wasn't saved — parents won't see this yet. Please try again.",
       });
+      return false;
+    }
+  };
+
+  // Files a real school_invoices record + sends the director the actual bank
+  // transfer email, same pipeline new-academy signups use. Previously this
+  // button only wrote to sessionStorage and told the director an invoice had
+  // been sent when nothing left the browser (Audit: fake seat-expansion
+  // confirmation). A human still applies the seat increase via AdminPage's
+  // upgrade_school action once payment clears — this just makes sure that
+  // request actually exists somewhere real for them to act on.
+  const handleRequestSeatExpansion = async (extraSeats: number): Promise<boolean> => {
+    const schoolId = (user as any)?.schoolId;
+    if (!schoolId) return false;
+    try {
+      const response = await fetch('/api/request-school-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          schoolId,
+          academyName: user?.schoolName || schoolId,
+          contactName: user?.name || user?.schoolName || 'Director',
+          email: user?.email || '',
+          teacherCount: extraSeats,
+          planName: `+${extraSeats} Seat Expansion`,
+          billingCycle: 'monthly',
+        }),
+      });
+      if (!response.ok) throw new Error(`Request failed with ${response.status}`);
+      return true;
+    } catch (err) {
+      console.error('Failed to submit seat expansion request:', err);
+      showToast({
+        type: 'error',
+        message: isKo
+          ? '⚠️ 석 추가 요청을 보내지 못했습니다. 다시 시도해주세요.'
+          : "⚠️ The seat request didn't go through. Please try again.",
+      });
+      return false;
     }
   };
 
@@ -405,6 +449,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         const snap = await getDoc(doc(dbInstance, 'schools', schoolId));
         const seats = snap.data()?.seatsTotal;
         if (seats) setSchoolSeatsTotal({ ft: seats.ft || 0, kt: seats.kt || 0 });
+        setSchoolPlanId(snap.data()?.planId || null);
       } catch (err) {
         console.warn('Failed to load school seat totals:', err);
       }
@@ -925,6 +970,23 @@ export default function TeacherPage({ isNight = true }: Props) {
     localStorage.setItem(`teacher_ob_done_${uid}`, 'true');
     setShowTeacherOnboarding(false);
   };
+
+  const teacherOnboardingDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showTeacherOnboarding,
+    onClose: dismissTeacherOnboarding,
+  });
+  const studentDrawerDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: !!selectedStudentDetails,
+    onClose: () => setSelectedStudentDetails(null),
+  });
+  const createClassDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showCreateClassModal,
+    onClose: () => setShowCreateClassModal(false),
+  });
+  const settingsDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showSettingsModal,
+    onClose: () => setShowSettingsModal(false),
+  });
 
   // Teacher onboarding steps config
   const teacherObSteps = [
@@ -2259,7 +2321,13 @@ export default function TeacherPage({ isNight = true }: Props) {
         return (
           <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/85 backdrop-blur-2xl" onClick={dismissTeacherOnboarding} />
-            <div className={`relative w-full max-w-[420px] p-1 border rounded-[2.5rem] shadow-2xl ${
+            <div
+              ref={teacherOnboardingDialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="teacher-onboarding-title"
+              tabIndex={-1}
+              className={`relative w-full max-w-[420px] p-1 border rounded-[2.5rem] shadow-2xl ${
               isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
             }`}>
               <div className={`rounded-[calc(2.5rem-0.25rem)] p-8 flex flex-col items-center text-center ${
@@ -2280,7 +2348,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <img src={step.img} alt="" className="w-full h-full object-contain" />
                 </div>
 
-                <h3 className={`text-2xl font-black tracking-tight mb-3 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                <h3 id="teacher-onboarding-title" className={`text-2xl font-black tracking-tight mb-3 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                   {isKo ? step.titleKo : step.titleEn}
                 </h3>
                 <p className={`text-sm leading-relaxed max-w-[300px] mb-8 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
@@ -2873,8 +2941,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                 academyName={user?.schoolName || 'Chekki Master Academy'}
                 onOpenLogoModal={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
                 schoolId={(user as any)?.schoolId}
+                planId={schoolPlanId}
                 seatsTotal={schoolSeatsTotal}
                 trialStatus={trialStatus}
+                onRequestSeatExpansion={handleRequestSeatExpansion}
                 pendingRoster={pendingRoster}
                 activeRoster={activeRoster}
                 isLoadingRoster={isLoadingRoster}
@@ -3008,7 +3078,6 @@ export default function TeacherPage({ isNight = true }: Props) {
               curriculumPassage={curriculumPassage}
               curriculumOther={curriculumOther}
               setShowReportCardModal={setShowReportCardModal}
-              setShowReviewSheetModal={setShowReviewSheetModal}
               submittedLogs={submittedLogs}
             />
 
@@ -3107,16 +3176,22 @@ export default function TeacherPage({ isNight = true }: Props) {
             className="absolute inset-0 bg-black/80 backdrop-blur-md" 
             onClick={() => setSelectedStudentDetails(null)} 
           />
-          <div className={`relative w-full max-w-lg h-full border-l p-6 sm:p-8 flex flex-col shadow-2xl animate-slide-in text-left transition-colors ${
+          <div
+            ref={studentDrawerDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="student-drawer-title"
+            tabIndex={-1}
+            className={`relative w-full max-w-lg h-full border-l p-6 sm:p-8 flex flex-col shadow-2xl animate-slide-in text-left transition-colors ${
             isThemeNight ? 'bg-[#0c0c0e] border-white/10 text-white' : 'bg-white border-zinc-200 text-zinc-900'
           }`}>
-            
+
             {/* Drawer Header */}
             <div className={`pb-6 border-b flex items-center justify-between shrink-0 ${
               isThemeNight ? 'border-white/10' : 'border-zinc-200'
             }`}>
               <div>
-                <h3 className={`text-xl font-black flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                <h3 id="student-drawer-title" className={`text-xl font-black flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                   <span>👦 {selectedStudentDetails.studentName || 'Unnamed'}</span>
                   <span className="text-xs font-normal text-zinc-400">{isKo ? '원생 학습 성장 기록' : "'s Growth & Practice Log"}</span>
                 </h3>
@@ -3303,7 +3378,13 @@ export default function TeacherPage({ isNight = true }: Props) {
             className="absolute inset-0 bg-black/80 backdrop-blur-md" 
             onClick={() => setShowCreateClassModal(false)} 
           />
-          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in ${
+          <div
+            ref={createClassDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-class-title"
+            tabIndex={-1}
+            className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in ${
             isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
           }`}>
             <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 overflow-hidden transition-colors ${
@@ -3313,7 +3394,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                   <Plus size={22} weight="bold" />
                 </div>
-                <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                <h3 id="create-class-title" className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                   {isKo ? '새 학급반 추가' : 'Add New Class'}
                 </h3>
               </div>
@@ -3326,10 +3407,11 @@ export default function TeacherPage({ isNight = true }: Props) {
 
               <form onSubmit={handleCreateClass} className="space-y-4">
                 <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                  <label htmlFor="new-class-name" className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
                     {isKo ? '반 이름' : 'Class Name'}
                   </label>
                   <input
+                    id="new-class-name"
                     type="text"
                     required
                     value={newClassName}
@@ -3342,10 +3424,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                  <label htmlFor="new-class-level" className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
                     {isKo ? '대상 학년' : 'Class Level'}
                   </label>
                   <select
+                    id="new-class-level"
                     value={newClassLevel}
                     onChange={(e) => setNewClassLevel(e.target.value)}
                     className={`w-full border outline-none text-sm p-4 rounded-2xl transition-all cursor-pointer ${
@@ -3405,7 +3488,13 @@ export default function TeacherPage({ isNight = true }: Props) {
             className="absolute inset-0 bg-black/80 backdrop-blur-md" 
             onClick={() => setShowSettingsModal(false)} 
           />
-          <div className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-lg mx-4 animate-fade-in text-left ${
+          <div
+            ref={settingsDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-modal-title"
+            tabIndex={-1}
+            className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-lg mx-4 animate-fade-in text-left ${
             isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
           }`}>
             <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 transition-colors ${
@@ -3421,7 +3510,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <X size={16} weight="bold" />
               </button>
 
-              <div className="flex items-center gap-3 mb-6">
+              <div id="settings-modal-title" className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                   <Gear size={24} weight="bold" />
                 </div>

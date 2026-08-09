@@ -35,6 +35,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       teacherCount = 1,
       studentCount = '',
       billingCycle = 'monthly',
+      // Present only when an already-onboarded director requests extra seats
+      // from their own portal (vs. a fresh pre-signup sales lead). Lets
+      // whoever reviews the resulting school_invoices doc apply the seats to
+      // this existing school (via admin.ts upgrade_school) instead of
+      // mistaking it for a brand-new academy signup.
+      schoolId,
     } = body || {};
 
     if (!academyName || !contactName || !email) {
@@ -93,6 +99,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       status: 'pending_payment',
       bankInfo,
       createdAt: new Date().toISOString(),
+      ...(schoolId ? { schoolId: String(schoolId).trim() } : {}),
     };
 
     // Store in Firestore school_invoices collection. This write must succeed —

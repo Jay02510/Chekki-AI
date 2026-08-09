@@ -6,6 +6,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
 import { toJpeg } from 'html-to-image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Particle {
   id: number;
@@ -25,6 +26,11 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [isPrinting, setIsPrinting] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  const dialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showMistakeModal,
+    onClose: () => setShowMistakeModal(false),
+  });
 
   if (!showMistakeModal) return null;
 
@@ -211,6 +217,11 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
 
         {/* Double-Bezel Modal Shell */}
         <motion.div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('review_title')}
+          tabIndex={-1}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}

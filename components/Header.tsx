@@ -21,6 +21,10 @@ interface Props {
   isSpeedMode: boolean;
   setIsSpeedMode: (val: boolean) => void;
   showSpeedToggle?: boolean;
+  // True while MobileAppBanner is showing above the page — pushes the
+  // header's own fixed offset down so the banner doesn't cover the logo,
+  // language toggle, and login button (Audit: banner covers header nav).
+  pushedDownByBanner?: boolean;
 }
 
 export const Header: React.FC<Props> = ({
@@ -32,6 +36,7 @@ export const Header: React.FC<Props> = ({
   showSpeedToggle,
   onOpenHelp,
   onOpenDashboard,
+  pushedDownByBanner,
 }) => {
   const { user, isAuthenticated, openLoginModal, logout, setShowPaywall } = useAuth();
   const { language, setLanguage, t } = useLanguage();
@@ -79,7 +84,7 @@ export const Header: React.FC<Props> = ({
       )}
       {showSupport && <LegalModal type="support" onClose={() => setShowSupport(false)} />}
 
-      <header className="fixed top-4 md:top-6 left-0 right-0 z-50 transition-all duration-200 ease-[var(--ease-premium)] px-4 flex justify-center pt-[env(safe-area-inset-top)] pointer-events-none">
+      <header className={`fixed ${pushedDownByBanner ? 'top-[76px] md:top-6' : 'top-4 md:top-6'} left-0 right-0 z-50 transition-all duration-200 ease-[var(--ease-premium)] px-4 flex justify-center pt-[env(safe-area-inset-top)] pointer-events-none`}>
         <div
           className={`p-1.5 md:p-2 rounded-full pointer-events-auto backdrop-blur-3xl shadow-2xl transition-all duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-black/20 ring-1 ring-white/10 shadow-black/80' : 'bg-black/5 ring-1 ring-black/5 shadow-zinc-300/50'}`}
         >

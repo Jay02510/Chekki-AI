@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk grep *)",
+      "Bash(cd /Users/jasonbenjamin/Projects/Chekki-AI-main *)",
+      "Read(//Users/jasonbenjamin/Library/Application Support/rtk/tee/**)",
+      "Bash(sed -n '2637,3201p' src/pages/TeacherPage.tsx)",
+      "Read(//tmp/**)",
+      "Bash(grep -n \"^          </div>$\\\\|^        </div>$\" src/pages/TeacherPage.tsx)",
+      "Bash(awk -F: '$1>4206 && $1<4600')",
+      "Bash(awk 'NR==4206{print length\\($0\\)-length\\(gensub\\(/^ */,\"\",\"g\",$0\\)\\)}' src/pages/TeacherPage.tsx)",
+      "Bash(awk 'NR>4206 && NR<4420 && /^              \\\\\\)\\\\}$/{print NR\": \"$0}' src/pages/TeacherPage.tsx)",
+      "Bash(sed -n '2637,3200p' src/pages/TeacherPage.tsx)",
+      "Bash(sed -n '4206,4289p' src/pages/TeacherPage.tsx)",
+      "Read(//private/tmp/**)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(sed -i '' 's/\"version\": \"1\\\\.2\\\\.2\"/\"version\": \"1.2.3\"/' package.json)",
+      "Bash(sed -i '' 's/versionName \"1\\\\.2\\\\.2\"/versionName \"1.2.3\"/; s/versionCode 61/versionCode 62/' android/app/build.gradle)",
+      "Bash(sed -i '' 's/MARKETING_VERSION = 1\\\\.2\\\\.2;/MARKETING_VERSION = 1.2.3;/g; s/CURRENT_PROJECT_VERSION = 51;/CURRENT_PROJECT_VERSION = 52;/g' ios/App/App.xcodeproj/project.pbxproj)"
+    ]
+  }
+}
