@@ -1,18 +1,22 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-06-05T03:39:00Z",
+  "generatedAt": "2026-08-10T00:00:00Z",
   "title": "Design System: Chekki AI",
   "extensions": {
     "colorMeta": {
       "primary": { "role": "primary", "displayName": "Brand Orange", "canonical": "oklch(67% 0.22 38)", "tonalRamp": ["#431407", "#7c2d12", "#9a3412", "#c2410c", "#ea580c", "#f97316", "#fdba74", "#ffedd5"] },
       "brand-dark": { "role": "neutral", "displayName": "Brand Dark", "canonical": "oklch(8% 0.005 240)", "tonalRamp": ["#000000", "#050505", "#09090b", "#121214", "#1c1c1f", "#27272a", "#3f3f46", "#52525b"] },
       "brand-card": { "role": "neutral", "displayName": "Brand Card Background", "canonical": "oklch(12% 0.01 240)", "tonalRamp": ["#050505", "#0F1014", "#16171b", "#222328", "#2e3037", "#3b3d45", "#484b55", "#565a65"] },
-      "accent-purple": { "role": "secondary", "displayName": "Accent Purple", "canonical": "oklch(53% 0.24 290)", "tonalRamp": ["#2e1065", "#4c1d95", "#5b21b6", "#6d28d9", "#7c3aed", "#8b5cf6", "#a78bfa", "#c4b5fd"] },
+      "accent-purple": { "role": "secondary", "displayName": "Accent Purple", "canonical": "oklch(63% 0.25 302)", "tonalRamp": ["#3b0764", "#581c87", "#6b21a8", "#7e22ce", "#9333ea", "#a855f7", "#c084fc", "#e9d5ff"] },
       "accent-pink": { "role": "secondary", "displayName": "Accent Pink", "canonical": "oklch(59% 0.23 350)", "tonalRamp": ["#500724", "#831843", "#9d174d", "#be185d", "#db2777", "#ec4899", "#f472b6", "#fbcfe8"] },
+      "success": { "role": "semantic", "displayName": "Success Emerald", "canonical": "oklch(70% 0.15 165)", "tonalRamp": ["#022c22", "#064e3b", "#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7"] },
+      "error": { "role": "semantic", "displayName": "Error Red", "canonical": "oklch(63% 0.21 25)", "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5"] },
+      "warning": { "role": "semantic", "displayName": "Warning Amber", "canonical": "oklch(76% 0.16 70)", "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d"] },
       "neutral-text": { "role": "neutral", "displayName": "Neutral Text", "canonical": "oklch(97% 0.01 70)", "tonalRamp": ["#1a1917", "#3a3835", "#5c5954", "#807c76", "#a6a29b", "#ccc8c1", "#ede9e1", "#fdfaf5"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display Font", "purpose": "Large display headers, brand titles." },
+      "display": { "displayName": "Display Font", "purpose": "Large display headers, brand titles (Space Grotesk)." },
+      "serif": { "displayName": "Serif Accent", "purpose": "Rare 'handwritten paper' register — italic quote blocks, worksheet-styled surfaces. Not a hierarchy role. Playfair Display, linked in index.html and app.html." },
       "body": { "displayName": "Body Font", "purpose": "General reading text, bilingual instructions, feedback scripts." },
       "handwritten": { "displayName": "Handwritten Annotations", "purpose": "Skeuomorphic corrections, student notes, emphasis." }
     },
@@ -20,7 +24,9 @@
       { "name": "interactive-glow", "value": "0 8px 32px rgba(249, 115, 22, 0.15)", "purpose": "Focus states for interactive items." }
     ],
     "motion": [
-      { "name": "ease-standard", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Warm, natural transition curve." }
+      { "name": "ease-standard", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Warm, natural transition curve." },
+      { "name": "ease-premium", "value": "cubic-bezier(0.32, 0.72, 0, 1)", "purpose": "Modal and toast entrance/exit (--ease-premium in index.css)." },
+      { "name": "ease-out-strong", "value": "cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Button press physics (.btn-press)." }
     ],
     "breakpoints": [
       { "name": "mobile", "value": "640px" },
@@ -46,12 +52,36 @@
       "css": ".ds-btn-secondary { background-color: #0F1014; color: #FDFAF5; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 500; border: 1px solid rgba(253, 250, 245, 0.08); border-radius: 24px; padding: 14px 28px; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover { background-color: rgba(253, 250, 245, 0.05); border-color: rgba(253, 250, 245, 0.15); }"
     },
     {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Full-width destructive confirm button used in ConfirmDialog's destructive variant.",
+      "html": "<button class=\"ds-btn-destructive\">Delete</button>",
+      "css": ".ds-btn-destructive { width: 100%; background-color: #dc2626; color: #FFFFFF; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 900; text-transform: uppercase; border: none; border-radius: 16px; padding: 16px 24px; cursor: pointer; transition: all 0.2s; } .ds-btn-destructive:hover { background-color: #b91c1c; } .ds-btn-destructive:active { transform: scale(0.97); }"
+    },
+    {
       "name": "Product Container Card",
       "kind": "card",
       "refersTo": "card-container",
       "description": "Standard container card for housing layout segments.",
       "html": "<div class=\"ds-card-container\"><h3>Card Title</h3><p>This is a standard card text content inside Chekki.</p></div>",
       "css": ".ds-card-container { background-color: #0F1014; border: 1px solid rgba(253, 250, 245, 0.08); border-radius: 16px; padding: 24px; color: #FDFAF5; font-family: 'Nunito', sans-serif; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); } .ds-card-container h3 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; margin-bottom: 8px; } .ds-card-container p { color: rgba(253, 250, 245, 0.55); font-size: 14px; line-height: 1.6; } .ds-card-container:hover { border-color: rgba(253, 250, 245, 0.15); transform: translateY(-3px); }"
+    },
+    {
+      "name": "Bezel Modal",
+      "kind": "custom",
+      "refersTo": "modal-bezel",
+      "description": "The app's single modal construction: full-screen blurred scrim, thin outer bezel, solid inner card. Used by ConfirmDialog and every extracted modal (ScannedModal, AcademyLogoModal, DocPreviewModal, WeekCalendarModal, ReportCardModal).",
+      "html": "<div class=\"ds-modal-scrim\"><div class=\"ds-modal-bezel\"><div class=\"ds-modal-inner\"><button class=\"ds-modal-close\" aria-label=\"Close\">×</button><p>Modal content</p></div></div></div>",
+      "css": ".ds-modal-scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; } .ds-modal-bezel { position: relative; padding: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; max-width: 480px; width: 100%; } .ds-modal-inner { position: relative; border-radius: 34px; background: #0c0c0e; padding: 32px; } .ds-modal-close { position: absolute; top: 24px; right: 24px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: rgba(255,255,255,0.05); color: #a1a1aa; border: none; cursor: pointer; transition: background 0.2s, color 0.2s; } .ds-modal-close:hover { background: rgba(255,255,255,0.1); color: #ffffff; }"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Bottom-center auto-dismiss feedback, replacing all native alert()/confirm() in the app.",
+      "html": "<div class=\"ds-toast ds-toast-success\"><span>✨</span><p>Saved successfully!</p></div>",
+      "css": ".ds-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 9999px; backdrop-filter: blur(20px); box-shadow: 0 25px 50px rgba(0,0,0,0.4); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; color: #ffffff; } .ds-toast-success { background: rgba(16, 185, 129, 0.9); border: 1px solid rgba(16, 185, 129, 0.2); } .ds-toast-error { background: rgba(239, 68, 68, 0.9); border: 1px solid rgba(239, 68, 68, 0.2); }"
     }
   ],
   "narrative": {
@@ -64,18 +94,25 @@
     ],
     "rules": [
       { "name": "The 10% Pop Rule", "body": "Bold, primary colors (Orange, Purple, Pink) should only cover <=10% of any screen. The dark background handles the structural weight; colors are reserved for interactive and feedback actions.", "section": "colors" },
+      { "name": "The Semantic-Never-Decorative Rule", "body": "Emerald, red, and amber are reserved for their semantic meaning (success/error/warning) and never used as arbitrary decorative accents.", "section": "colors" },
       { "name": "The Handwriting Offset Rule", "body": "Any text written in the handwritten font (Patrick Hand) should be slightly rotated (-1deg to 2deg) to feel authentically drawn on the paper.", "section": "typography" },
-      { "name": "The Tonal Depth Rule", "body": "Depth is established by color value shifts (Background at #050505 -> Cards/Modals at #0F1014 -> Buttons at #1F2937). Do not drop heavy black shadows onto dark cards.", "section": "elevation" }
+      { "name": "The Tonal Depth Rule", "body": "Depth is established by color value shifts (Background at #050505 -> Cards/Modals at #0F1014 -> Buttons at #1F2937). Do not drop heavy black shadows onto dark cards.", "section": "elevation" },
+      { "name": "The Bezel Rule", "body": "A modal is never a single flat rounded rectangle - it is always a thin outer bezel wrapping a solid inner card.", "section": "components" }
     ],
     "dos": [
       "Do wrap bilingual copy in containers that prevent alignment breakage between Korean and English line heights.",
       "Do use native browser zoom configurations by keeping the viewport tag free of user-scalable=no.",
-      "Do tilt hand-drawn annotations to preserve the 'Playful Homework Helper' feel."
+      "Do tilt hand-drawn annotations to preserve the 'Playful Homework Helper' feel.",
+      "Do give every icon-only button and modal close control a minimum 44x44px touch target (24x24px only as an accepted exception for dense inline chip-delete controls).",
+      "Do route every confirmation and status message through ConfirmDialog / useToast - never window.confirm(), confirm(), or alert().",
+      "Do show both sides of a problem/solution card at once on marketing pages - hover-only reveals never fire on touch."
     ],
     "donts": [
       "Don't use generic stark blue-to-purple CSS gradient text.",
       "Don't hide critical audience-specific entry points behind generic tab filters; stack them with clear anchors.",
-      "Don't animate image cards on hover; use border/glow highlights on the parent container instead."
+      "Don't animate image cards on hover; use border/glow highlights on the parent container instead.",
+      "Don't use emerald/red/amber for anything other than success/error/warning.",
+      "Don't use font-serif (Playfair Display) outside the rare 'handwritten paper' register - it isn't part of the standard type hierarchy."
     ]
   }
 }

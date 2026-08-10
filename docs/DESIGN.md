@@ -5,8 +5,11 @@ colors:
   primary: '#F97316'
   brand-dark: '#050505'
   brand-card: '#0F1014'
-  accent-purple: '#8B5CF6'
+  accent-purple: '#a855f7'
   accent-pink: '#EC4899'
+  success: '#10b981'
+  error: '#ef4444'
+  warning: '#f59e0b'
   landing-bg: '#0c1a2e'
   landing-accent: '#E8820C'
   landing-teacher: '#2D6A4F'
@@ -28,6 +31,7 @@ rounded:
   sm: '8px'
   md: '16px'
   lg: '24px'
+  modal: '2.5rem'
 spacing:
   xs: '4px'
   sm: '8px'
@@ -47,10 +51,24 @@ components:
     textColor: '{colors.neutral-text}'
     rounded: '{rounded.lg}'
     padding: '14px 28px'
+  button-destructive:
+    backgroundColor: '{colors.error}'
+    textColor: '#FFFFFF'
+    rounded: '{rounded.lg}'
+    padding: '16px 24px'
   card-container:
     backgroundColor: '{colors.brand-card}'
     rounded: '{rounded.md}'
     padding: '24px'
+  modal-bezel:
+    backgroundColor: 'rgba(255,255,255,0.05)'
+    rounded: '{rounded.modal}'
+    padding: '6px'
+  toast:
+    backgroundColor: '{colors.brand-dark}'
+    textColor: '{colors.neutral-text}'
+    rounded: '9999px'
+    padding: '12px 20px'
 ---
 
 # Design System: Chekki AI
@@ -81,8 +99,8 @@ The color palette uses high-contrast dark neutrals punctuated by a warm, friendl
 
 ### Secondary
 
-- **Accent Purple** (#8B5CF6): Used for secondary tags, teacher tools, and structured guidelines.
-- **Accent Pink** (#EC4899): Used for reward state indicators, dopamine hits, and badges.
+- **Accent Purple** (#a855f7 — Tailwind `purple-500`): Used for role badges (KT/director surfaces), secondary tags, and structured guidelines.
+- **Accent Pink** (#EC4899): Used for reward state indicators, dopamine hits, and rare marketing accents.
 
 ### Neutral
 
@@ -90,17 +108,25 @@ The color palette uses high-contrast dark neutrals punctuated by a warm, friendl
 - **Brand Card** (#0F1014): The container card background, providing subtle layer separation.
 - **Neutral Text** (#FDFAF5): Warm off-white for body copy, avoiding harsh pure-white reading glare.
 
+### Semantic
+
+- **Success** (#10b981 — `emerald-400`/`emerald-500`): Confirmations, toasts, correct-answer states. The single most-used non-brand color in the codebase.
+- **Error** (#ef4444 — `red-400`/`red-500`): Failures, destructive-action confirms, validation.
+- **Warning** (#f59e0b — `amber-400`/`amber-500`): Sync warnings, trial-expiry notices, caution badges.
+
 ### Named Rules
 
 **The 10% Pop Rule.** Bold, primary colors (Orange, Purple, Pink) should only cover ≤10% of any screen. The dark background handles the structural weight; colors are reserved for interactive and feedback actions.
+
+**The Semantic-Never-Decorative Rule.** Emerald, red, and amber are reserved for their semantic meaning (success/error/warning) and never used as arbitrary decorative accents — if a screen needs a fourth decorative color beyond orange/purple/pink, that is a sign the screen has too many competing accents, not a cue to reach for green.
 
 ---
 
 ## 3. Typography
 
-**Display Font:** Space Grotesk (Vite app) / Fraunces (Landing page)
-**Body Font:** Nunito / Noto Sans KR (Bilingual body copy)
-**Handwritten Font:** Patrick Hand (Cursive scripts and sheet markings)
+**Display Font:** Space Grotesk (`--font-display`, loaded app-wide via Google Fonts)
+**Body Font:** Nunito / Noto Sans KR (Bilingual body copy, `--font-sans` / `--font-korean`)
+**Handwritten Font:** Patrick Hand (Cursive scripts and sheet markings, `--font-hand`)
 
 ### Hierarchy
 
@@ -113,6 +139,8 @@ The color palette uses high-contrast dark neutrals punctuated by a warm, friendl
 ### Named Rules
 
 **The Handwriting Offset Rule.** Any text written in the handwritten font (`Patrick Hand`) should be slightly rotated (-1deg to 2deg) to feel authentically drawn on the paper.
+
+**Serif accent:** `font-serif` (Playfair Display, `--font-serif` in both `index.css` and `landing.css`) is a deliberate, rare accent — italic quote blocks and worksheet-styled surfaces (`NativeFtDashboard.tsx`, `ScannedModal.tsx`). It is not a hierarchy role on its own; don't reach for it outside that "handwritten paper" register.
 
 ---
 
@@ -151,6 +179,19 @@ The application uses tonal layering instead of traditional dropping shadows. Dep
 - **Background**: Pure white (#FFFFFF) in light modals, or dark gray (#18181b) in dark screens.
 - **Focus**: Thick outline border with the primary Brand Orange color.
 
+### Modals (The Bezel Modal)
+
+Every modal in the product — `ConfirmDialog`, `ScannedModal`, `AcademyLogoModal`, `DocPreviewModal`, `WeekCalendarModal`, `ReportCardModal`, and the rest — shares one construction: a `bg-black/80 backdrop-blur-md` full-screen scrim, then an outer wrapper (`p-1` to `p-1.5`, `border`, `rounded-[2.5rem]` or `rounded-[2rem]`) acting as a thin bezel, containing an inner surface (`rounded-[calc(2.5rem-0.25rem)]`, solid `#0c0c0e` dark / white light) that holds the actual content. Close buttons are icon-only (`X`, weight bold, size 18), sit at `min-w-11 min-h-11` (see touch-target rule below), and either float `absolute top-6 right-6` on sparse modals or sit inline in a header row when the modal has richer header content (title + secondary action).
+
+**Named Rules**
+
+**The Bezel Rule.** A modal is never a single flat rounded rectangle — it is always a thin outer bezel wrapping a solid inner card. This is what reads as "physical" rather than "web dialog."
+
+### Feedback: Toast & ConfirmDialog
+
+- **Toast** (`contexts/ToastContext.tsx`): bottom-center, `rounded-full`, `backdrop-blur-xl`, auto-dismiss (default 3s). Color signals type — `bg-zinc-900/90` info, `bg-emerald-500/90` success, `bg-red-500/90` error — each paired with an emoji (💡/✨/⚠️) since color alone shouldn't carry the meaning.
+- **ConfirmDialog** (`components/ConfirmDialog.tsx`): the Bezel Modal shape at `max-w-sm`, centered icon badge (warning triangle for `destructive` variant, question mark otherwise), then title, then two full-width stacked buttons (confirm on top, cancel below). This is the only sanctioned confirmation pattern in the app — native `window.confirm()`/`alert()` are not used anywhere in the codebase.
+
 ---
 
 ## 6. Do's and Don'ts
@@ -160,9 +201,14 @@ The application uses tonal layering instead of traditional dropping shadows. Dep
 - **Do** wrap bilingual copy in containers that prevent alignment breakage between Korean and English line heights.
 - **Do** use native browser zoom configurations by keeping the viewport tag free of `user-scalable=no`.
 - **Do** tilt hand-drawn annotations to preserve the "Playful Homework Helper" feel.
+- **Do** give every icon-only button and modal close control a minimum `44×44px` (`min-w-11 min-h-11`) touch target — the primary use case is a phone in a teacher's hand mid-class or a parent scanning homework one-handed. `24×24px` (WCAG AA minimum) is an accepted exception only for dense inline chip-delete controls where 44px would break the layout.
+- **Do** route every confirmation and status message through `ConfirmDialog` / `useToast` — never `window.confirm()`, `confirm()`, or `alert()`.
+- **Do** show both sides of a problem/solution card at once on marketing pages. Hover-only reveals never fire on touch, and touch is the primary device for this audience.
 
 ### Don't:
 
 - **Don't** use generic stark blue-to-purple CSS gradient text.
 - **Don't** hide critical audience-specific entry points behind generic tab filters; stack them with clear anchors.
 - **Don't** animate image cards on hover; use border/glow highlights on the parent container instead.
+- **Don't** use emerald/red/amber for anything other than success/error/warning — see the Semantic-Never-Decorative Rule.
+- **Don't** use `font-serif` (Playfair Display) outside the rare "handwritten paper" register (worksheet surfaces, quote blocks) — it isn't part of the standard type hierarchy.
