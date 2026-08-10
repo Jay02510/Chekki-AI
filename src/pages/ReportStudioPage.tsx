@@ -338,7 +338,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                   : 'bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-900 shadow-sm'
               }`}
             >
-              <span>{isKo ? '⚡ 1분 실시간 생성기 체험' : '⚡ Try Live Generator'}</span>
+              <span>{isKo ? '⚡ 1분 예시 생성기 체험' : '⚡ Try the Instant Generator'}</span>
               <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0 transition-transform duration-200 ease-out group-hover:scale-110">
                 <Sparkle size={18} weight="fill" className="text-orange-500" />
               </div>
@@ -553,7 +553,7 @@ ${activeReport.parentScriptKo.closing}`.trim();
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                   <span className={`font-bold ${isNight ? 'text-zinc-300' : 'text-zinc-800'}`}>
-                    {nativeDemoTab === 'ft-form' && (isKo ? '🎯 1단계: 원어민 모바일 작성 체험' : '🎯 Step 1: Submit sample 30s Foreign Teacher log below')}
+                    {nativeDemoTab === 'ft-form' && (isKo ? '🎯 1단계: 예시 원어민 모바일 작성 체험' : '🎯 Step 1: Submit sample 30s Foreign Teacher log below')}
                     {nativeDemoTab === 'kt-dashboard' && (isKo ? '⚡ 2단계: AI 알림톡 대본 검수 & 복사' : '⚡ Step 2: Review generated KakaoTalk script & 1-click copy')}
                     {nativeDemoTab === 'director-portal' && (isKo ? '🏢 3단계: 원장님 대시보드 총괄 관리 (Director Admin Overview)' : '🏢 Step 3: View Director Admin Overview & Student Rosters')}
                   </span>

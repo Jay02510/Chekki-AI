@@ -50,6 +50,7 @@ export default function AdminPage() {
   const [message, setMessage] = useState({ text: '', type: '' });
   const [confirmDialog, setConfirmDialog] = useState<{
     title: string;
+    confirmText: string;
     variant?: 'default' | 'destructive';
     onConfirm: () => void;
   } | null>(null);
@@ -104,6 +105,7 @@ export default function AdminPage() {
   const handleConfirmInvoice = async (invoiceId: string) => {
     setConfirmDialog({
       title: 'Confirm corporate bank payment received & activate teacher codes?',
+      confirmText: 'Confirm Payment',
       variant: 'default',
       onConfirm: () => {
         setConfirmDialog(null);
@@ -250,6 +252,7 @@ export default function AdminPage() {
   const handleDeleteSchool = async (schoolId: string, schoolName: string) => {
     setConfirmDialog({
       title: `Permanently delete school "${schoolName}" (${schoolId})? All associated teachers will be unassigned and downgraded to FREE.`,
+      confirmText: 'Delete School',
       onConfirm: () => {
         setConfirmDialog(null);
         void performDeleteSchool(schoolId, schoolName);
@@ -434,6 +437,7 @@ export default function AdminPage() {
     const cleanEmail = email.toLowerCase().trim();
     setConfirmDialog({
       title: `Are you sure you want to permanently delete user ${cleanEmail}?`,
+      confirmText: 'Delete User',
       onConfirm: () => {
         setConfirmDialog(null);
         void performDeleteUserByEmail(cleanEmail);
@@ -476,6 +480,7 @@ export default function AdminPage() {
   const handleDeleteUser = async (uid: string, email: string) => {
     setConfirmDialog({
       title: `Are you sure you want to permanently delete user ${email}?`,
+      confirmText: 'Delete User',
       onConfirm: () => {
         setConfirmDialog(null);
         void performDeleteUser(uid, email);
@@ -523,6 +528,7 @@ export default function AdminPage() {
   const handleDowngradeUser = async (uid: string, email: string) => {
     setConfirmDialog({
       title: `Are you sure you want to downgrade user ${email} to FREE?`,
+      confirmText: 'Downgrade User',
       onConfirm: () => {
         setConfirmDialog(null);
         void performDowngradeUser(uid, email);
@@ -554,6 +560,7 @@ export default function AdminPage() {
   const handleImpersonateUser = async (uid: string, email: string) => {
     setConfirmDialog({
       title: `Are you sure you want to log in as ${email}? This will end your current admin session.`,
+      confirmText: 'Log In As User',
       onConfirm: () => {
         setConfirmDialog(null);
         void performImpersonateUser(uid, email);
@@ -1419,6 +1426,7 @@ export default function AdminPage() {
       {confirmDialog && (
         <ConfirmDialog
           title={confirmDialog.title}
+          confirmText={confirmDialog.confirmText}
           isNight
           variant={confirmDialog.variant || 'destructive'}
           onConfirm={confirmDialog.onConfirm}

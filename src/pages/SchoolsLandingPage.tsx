@@ -526,9 +526,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             {isKo ? '선생님의 대표적인 고충을 해결하는 AI 자동화 기능' : 'Solving Top Teacher Painpoints With AI Automation'}
           </h2>
           <p className={`text-sm md:text-base max-w-2xl mx-auto ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-            {isKo 
-              ? '마우스를 올려 카드별 선생님의 고충과 채키의 명확한 해결책을 확인해보세요.' 
-              : 'Hover over any card below to see how Chekki solves top teacher painpoints.'}
+            {isKo
+              ? '카드마다 선생님의 고충과 채키의 명확한 해결책을 바로 확인하세요.'
+              : 'Each card shows a teacher painpoint and exactly how Chekki solves it.'}
           </p>
         </div>
 
@@ -541,42 +541,32 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
               <div className="flex-1">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
-                    <GraduationCap size={20} weight="bold" />
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
-                    isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-700 border-orange-200'
-                  }`}>
-                    Hover Solution
-                  </span>
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
+                  <GraduationCap size={20} weight="bold" />
                 </div>
 
-                {/* Content Container - Grid Stack */}
-                <div className="grid grid-cols-1 grid-rows-1 my-2 relative z-10">
-                  {/* Default View: Teacher Painpoint */}
-                  <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
+                <div className="space-y-3 relative z-10">
+                  <div>
                     <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
                     <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {isKo 
-                        ? '"매주 학급별 주간 단어, 파닉스, 정답지를 일일이 타이핑하느라 야근하시나요?"' 
+                      {isKo
+                        ? '"매주 학급별 주간 단어, 파닉스, 정답지를 일일이 타이핑하느라 야근하시나요?"'
                         : '"Exhausted by manually typing weekly active vocabulary lists, phonics targets, and answer keys?"'}
                     </h3>
                     <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                      {isKo 
+                      {isKo
                         ? '수업 준비만으로도 바쁜데 정답지 입력에 매주 몇 시간씩 허비되는 대표적인 선생님 행정 스트레스.'
                         : 'Teachers waste hours typing answer keys each week instead of focusing on student interactions.'}
                     </p>
                   </div>
 
-                  {/* Hover View: Chekki Solution */}
-                  <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+                  <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
                     <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
                     <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
                       {isKo ? '다중 교재 AI 스캔 & 페이지별 픽앤치즈 (정답지 기반 정밀 채점)' : 'Multi-Page AI Unit Scan & Page Picker (Ground-Truth-Matched Grading)'}
                     </h3>
                     <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                      {isKo 
+                      {isKo
                         ? '단원 전체 사진이나 PDF(최대 5장)를 한 번에 드롭하세요! AI가 페이지별로 단어, 파닉스, 정답 가이드를 추출하며 픽앤치즈 서랍에서 원하는 항목만 1클릭 적용합니다.'
                         : 'Drop up to 5 textbook photos or unit PDFs at once. Gemini AI extracts vocabulary, phonics rules, and parent answer keys page-by-page with interactive 1-click chip controls.'}
                     </p>
@@ -608,37 +598,27 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               : 'bg-white border-zinc-200/90 hover:border-purple-500/50 hover:bg-purple-50/40 shadow-sm'
           } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500">
-                  <Users size={20} weight="bold" />
-                </div>
-                <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
-                  isNight ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-purple-100 text-purple-700 border-purple-200'
-                }`}>
-                  Hover Solution
-                </span>
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500 mb-4">
+                <Users size={20} weight="bold" />
               </div>
 
-              {/* Content Container - Grid Stack */}
-              <div className="grid grid-cols-1 grid-rows-1 my-2 relative z-10">
-                {/* Default View: Teacher Painpoint */}
-                <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
+              <div className="space-y-3 relative z-10">
+                <div>
                   <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
                   <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo 
-                      ? '"매일 학생별 숙제 제출 여부를 일일이 확인하고 챙기느라 지치셨나요?"' 
+                    {isKo
+                      ? '"매일 학생별 숙제 제출 여부를 일일이 확인하고 챙기느라 지치셨나요?"'
                       : '"Tired of chasing parents individually to track daily homework completion?"'}
                   </h3>
                 </div>
 
-                {/* Hover View: Chekki Solution */}
-                <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+                <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
                   <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
                   <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-purple-300' : 'text-purple-600'}`}>
                     {isKo ? '6자리 코드로 가정 숙제 자동 연동' : '6-Digit Join Code & Auto-Sync'}
                   </h3>
                   <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                    {isKo 
+                    {isKo
                       ? '학부모가 6자리 학급 코드만 입력하면 끝. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 자동 전송됩니다.'
                       : 'Parents enter a 6-letter class code once. Homework scans & mistake data silently sync straight to your teacher dashboard.'}
                   </p>
@@ -664,37 +644,27 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
           } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
-                  <ChartBar size={20} weight="bold" />
-                </div>
-                <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
-                  isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-700 border-orange-200'
-                }`}>
-                  Hover Solution
-                </span>
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
+                <ChartBar size={20} weight="bold" />
               </div>
 
-              {/* Content Container - Grid Stack */}
-              <div className="grid grid-cols-1 grid-rows-1 my-2 relative z-10">
-                {/* Default View: Teacher Painpoint */}
-                <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
+              <div className="space-y-3 relative z-10">
+                <div>
                   <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
                   <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo 
-                      ? '"아이들이 집에서 혼자 숙제할 때 어떤 파닉스와 단어에서 막히는지 파악하기 어려우셨나요?"' 
+                    {isKo
+                      ? '"아이들이 집에서 혼자 숙제할 때 어떤 파닉스와 단어에서 막히는지 파악하기 어려우셨나요?"'
                       : '"Blind to where students struggle during home practice until test day?"'}
                   </h3>
                 </div>
 
-                {/* Hover View: Chekki Solution */}
-                <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+                <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
                   <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
                   <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
                     {isKo ? '교실 밖 학습 진단 (Visibility Beyond Classroom)' : 'Visibility Beyond the Classroom'}
                   </h3>
                   <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                    {isKo 
+                    {isKo
                       ? '가정 스캔 취약 데이터를 분석하여 다음 수업 시간에 보강해야 할 핵심 파닉스 규칙과 단어를 사전에 파악합니다.'
                       : 'Track home scan difficulty rates so you know the exact phonics rules and vocabulary items to reinforce in your next lesson.'}
                   </p>
@@ -722,37 +692,27 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
               <div className="md:col-span-7 flex flex-col justify-between h-full">
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-500">
-                      <Sparkle size={20} weight="bold" />
-                    </div>
-                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
-                      isNight ? 'bg-pink-500/20 text-pink-300 border-pink-500/30' : 'bg-pink-100 text-pink-700 border-pink-200'
-                    }`}>
-                      Hover Solution
-                    </span>
+                  <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-500 mb-4">
+                    <Sparkle size={20} weight="bold" />
                   </div>
 
-                  {/* Content Container - Grid Stack */}
-                  <div className="grid grid-cols-1 grid-rows-1 my-2 relative z-10">
-                    {/* Default View: Teacher Painpoint */}
-                    <div className="col-start-1 row-start-1 transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-y-1 group-hover:pointer-events-none">
+                  <div className="space-y-3 relative z-10">
+                    <div>
                       <span className="text-[10px] font-bold text-pink-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
                       <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo 
-                          ? '"매월 학부모 평가서 작성에 10시간 넘는 행정 시간을 쓰느라 스트레스 받으시나요?"' 
+                        {isKo
+                          ? '"매월 학부모 평가서 작성에 10시간 넘는 행정 시간을 쓰느라 스트레스 받으시나요?"'
                           : '"Dread spending 5-10+ hours every month writing manual parent evaluation report cards?"'}
                       </h3>
                     </div>
 
-                    {/* Hover View: Chekki Solution */}
-                    <div className="col-start-1 row-start-1 transition-all duration-500 ease-out opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+                    <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
                       <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
                       <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-pink-400' : 'text-pink-600'}`}>
                         {isKo ? '1초 만에 자동 생성되는 학부모 칭찬 & 성장 리포트' : '1-Click Parent Growth & Progress Report Cards'}
                       </h3>
                       <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                        {isKo 
+                        {isKo
                           ? '가정 스캔 데이터를 기반으로 아이의 긍정적 성장과 칭찬 포인트가 담긴 PDF 리포트를 1초 만에 학부모님께 발송하세요.'
                           : 'Eliminate 5-10 hours a month of manual report writing. Chekki auto-compiles home scan data into encouraging growth reports in 1 click.'}
                       </p>
