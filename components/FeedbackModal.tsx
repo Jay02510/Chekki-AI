@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useToast } from '../contexts/ToastContext';
 import { ChekkiMascot } from './Icons';
 import { db } from '../services/database';
 
@@ -13,6 +14,7 @@ interface Props {
 export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = true }) => {
   const { firebaseUser, user } = useAuth();
   const { t } = useLanguage();
+  const { showToast } = useToast();
 
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
@@ -34,7 +36,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
       setIsSuccess(true);
       setTimeout(onClose, 2500);
     } catch (e) {
-      alert('Oops! Something went wrong. Please try again.');
+      showToast({ type: 'error', message: 'Oops! Something went wrong. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }

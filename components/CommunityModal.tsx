@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { CommunityPost } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useToast } from '../contexts/ToastContext';
+import { ConfirmDialog } from './ConfirmDialog';
 
 // Keep mock posts as examples of what parents could share
 const MOCK_POSTSList = (ko: boolean): CommunityPost[] => [
@@ -51,9 +53,11 @@ interface Props {
 export const CommunityModal: React.FC<Props> = ({ onClose, isNight = true }) => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
+  const { showToast } = useToast();
   const [postContent, setPostContent] = useState('');
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [reportedPosts, setReportedPosts] = useState<string[]>([]);
+  const [reportConfirmId, setReportConfirmId] = useState<string | null>(null);
 
   const generateTemplate = (platform: 'cafe' | 'insta') => {
     const base =
@@ -78,10 +82,7 @@ export const CommunityModal: React.FC<Props> = ({ onClose, isNight = true }) => 
   };
 
   const handleReport = (postId: string) => {
-    if (confirm('Report this post for objectionable content?')) {
-      setReportedPosts((prev) => [...prev, postId]);
-      alert('Thank you. We have received your report and will review the content within 24 hours.');
-    }
+    setReportConfirmId(postId);
   };
 
   return (
@@ -237,6 +238,21 @@ export const CommunityModal: React.FC<Props> = ({ onClose, isNight = true }) => 
           </div>
         </div>
       </div>
+
+      {reportConfirmId && (
+        <ConfirmDialog
+          title="Report this post for objectionable content?"
+          confirmText="Report"
+          variant="destructive"
+          isNight={isNight}
+          onConfirm={() => {
+            setReportedPosts((prev) => [...prev, reportConfirmId]);
+            setReportConfirmId(null);
+            showToast({ type: 'success', message: 'Thank you. We have received your report and will review the content within 24 hours.' });
+          }}
+          onCancel={() => setReportConfirmId(null)}
+        />
+      )}
     </div>
   );
 };

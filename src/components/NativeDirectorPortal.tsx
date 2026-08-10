@@ -83,6 +83,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   const totalRosterCount = pendingRoster.length + activeRoster.length;
   const flaggedStudents = activeRoster.filter((s: any) => s.flaggedException);
 
+  const [phoneScriptFor, setPhoneScriptFor] = useState<string | null>(null);
   const [showSeatExpansionModal, setShowSeatExpansionModal] = useState(false);
   const [requestedExtraSeats, setRequestedExtraSeats] = useState(3);
   const [seatRequestSent, setSeatRequestSent] = useState(false);
@@ -617,16 +618,25 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                     <p>{st.flaggedException?.reason}</p>
                   </div>
 
+                  {phoneScriptFor === st.uid && (
+                    <div className={`p-4 rounded-xl border text-xs leading-relaxed space-y-1 ${isNight ? 'bg-orange-500/5 border-orange-500/20 text-zinc-300' : 'bg-orange-50 border-orange-200 text-zinc-800'}`}>
+                      <span className="text-[10px] font-bold uppercase font-mono text-orange-400 block mb-1">
+                        Phone Talking Points
+                      </span>
+                      <p>1. Acknowledge class effort</p>
+                      <p>2. Address: {st.flaggedException?.reason}</p>
+                      <p>3. Suggest 10-minute home vocabulary review.</p>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
                     <button
                       type="button"
-                      onClick={() => {
-                        alert(`Phone Talking Points for ${st.studentName || st.name}:\n1. Acknowledge class effort\n2. Address: ${st.flaggedException?.reason}\n3. Suggest 10-minute home vocabulary review.`);
-                      }}
+                      onClick={() => setPhoneScriptFor((prev) => (prev === st.uid ? null : st.uid))}
                       className="px-3 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold rounded-lg border border-orange-500/30 flex items-center gap-1.5 cursor-pointer transition-colors"
                     >
                       <span>📞</span>
-                      <span>View Phone Script</span>
+                      <span>{phoneScriptFor === st.uid ? 'Hide Phone Script' : 'View Phone Script'}</span>
                     </button>
                     <button
                       type="button"
@@ -706,10 +716,11 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                   <p className="text-xs text-zinc-400 font-mono">Current Allowance: {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)} Seats</p>
                 </div>
               </div>
-              <button 
+              <button
                 type="button"
                 onClick={() => { setShowSeatExpansionModal(false); setSeatRequestSent(false); }}
-                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                aria-label="Close"
+                className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
                 ✕
               </button>

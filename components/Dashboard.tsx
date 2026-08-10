@@ -694,7 +694,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             {/* Close */}
             <button
               onClick={handleResetPractice}
-              className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="Close"
+              className="absolute top-5 right-5 w-11 h-11 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
             >
               <X size={18} weight="bold" />
             </button>

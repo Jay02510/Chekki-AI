@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 
 // Skeleton rows for these admin tables, matching the real column count, so
 // the header/search bar stay in place while data loads instead of the whole
@@ -47,6 +48,11 @@ export default function AdminPage() {
     'create'
   );
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    variant?: 'default' | 'destructive';
+    onConfirm: () => void;
+  } | null>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -96,7 +102,17 @@ export default function AdminPage() {
   };
 
   const handleConfirmInvoice = async (invoiceId: string) => {
-    if (!window.confirm('Confirm corporate bank payment received & activate teacher codes?')) return;
+    setConfirmDialog({
+      title: 'Confirm corporate bank payment received & activate teacher codes?',
+      variant: 'default',
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performConfirmInvoice(invoiceId);
+      },
+    });
+  };
+
+  const performConfirmInvoice = async (invoiceId: string) => {
     setLoading(true);
     setMessage({ text: '', type: '' });
     try {
@@ -232,14 +248,16 @@ export default function AdminPage() {
   };
 
   const handleDeleteSchool = async (schoolId: string, schoolName: string) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to permanently delete school "${schoolName}" (${schoolId})?\nAll associated teachers will be unassigned and downgraded to FREE.`
-      )
-    ) {
-      return;
-    }
+    setConfirmDialog({
+      title: `Permanently delete school "${schoolName}" (${schoolId})? All associated teachers will be unassigned and downgraded to FREE.`,
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performDeleteSchool(schoolId, schoolName);
+      },
+    });
+  };
 
+  const performDeleteSchool = async (schoolId: string, schoolName: string) => {
     setLoading(true);
     setMessage({ text: '', type: '' });
 
@@ -411,19 +429,23 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteUserByEmail = async (e: React.FormEvent) => {
+  const handleDeleteUserByEmail = (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanEmail = email.toLowerCase().trim();
+    setConfirmDialog({
+      title: `Are you sure you want to permanently delete user ${cleanEmail}?`,
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performDeleteUserByEmail(cleanEmail);
+      },
+    });
+  };
+
+  const performDeleteUserByEmail = async (cleanEmail: string) => {
     setLoading(true);
     setMessage({ text: '', type: '' });
 
     try {
-      const cleanEmail = email.toLowerCase().trim();
-
-      if (!window.confirm(`Are you sure you want to permanently delete user ${cleanEmail}?`)) {
-        setLoading(false);
-        return;
-      }
-
       const response = await fetch('/api/admin', {
         method: 'POST',
         headers: {
@@ -452,10 +474,16 @@ export default function AdminPage() {
     }
   };
   const handleDeleteUser = async (uid: string, email: string) => {
-    if (!window.confirm(`Are you sure you want to permanently delete user ${email}?`)) {
-      return;
-    }
+    setConfirmDialog({
+      title: `Are you sure you want to permanently delete user ${email}?`,
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performDeleteUser(uid, email);
+      },
+    });
+  };
 
+  const performDeleteUser = async (uid: string, email: string) => {
     setLoading(true);
     setMessage({ text: '', type: '' });
 
@@ -493,7 +521,16 @@ export default function AdminPage() {
   };
 
   const handleDowngradeUser = async (uid: string, email: string) => {
-    if (!window.confirm(`Are you sure you want to downgrade user ${email} to FREE?`)) return;
+    setConfirmDialog({
+      title: `Are you sure you want to downgrade user ${email} to FREE?`,
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performDowngradeUser(uid, email);
+      },
+    });
+  };
+
+  const performDowngradeUser = async (uid: string, email: string) => {
     setLoading(true);
     setMessage({ text: '', type: '' });
     try {
@@ -515,12 +552,16 @@ export default function AdminPage() {
   };
 
   const handleImpersonateUser = async (uid: string, email: string) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to log in as ${email}? This will end your current admin session.`
-      )
-    )
-      return;
+    setConfirmDialog({
+      title: `Are you sure you want to log in as ${email}? This will end your current admin session.`,
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performImpersonateUser(uid, email);
+      },
+    });
+  };
+
+  const performImpersonateUser = async (uid: string, email: string) => {
     setLoading(true);
     setMessage({ text: '', type: '' });
     try {
@@ -1374,6 +1415,16 @@ export default function AdminPage() {
       >
         ← Back to App
       </a>
+
+      {confirmDialog && (
+        <ConfirmDialog
+          title={confirmDialog.title}
+          isNight
+          variant={confirmDialog.variant || 'destructive'}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
     </div>
   );
 }

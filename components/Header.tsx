@@ -117,9 +117,9 @@ export const Header: React.FC<Props> = ({
               {/* Back to Landing Page Button */}
               <a
                 href="/"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
-                  isNight 
-                    ? 'bg-white/10 hover:bg-white/20 text-white border border-white/10' 
+                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-11 rounded-full text-xs font-bold transition-all duration-200 ${
+                  isNight
+                    ? 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
                     : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200'
                 }`}
                 title={language === 'ko' ? '메인 랜딩페이지로 이동' : 'Back to Main Landing Page'}
@@ -141,7 +141,7 @@ export const Header: React.FC<Props> = ({
 
                   <button
                     onClick={() => setLanguage('en')}
-                    className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-colors duration-200 ${
+                    className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 min-h-11 flex items-center justify-center rounded-full text-[10px] md:text-xs font-black transition-colors duration-200 ${
                       language === 'en'
                         ? isNight
                           ? 'text-black'
@@ -155,7 +155,7 @@ export const Header: React.FC<Props> = ({
                   </button>
                   <button
                     onClick={() => setLanguage('ko')}
-                    className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-colors duration-200 ${
+                    className={`relative z-10 px-3 md:px-5 py-1.5 md:py-2.5 min-h-11 flex items-center justify-center rounded-full text-[10px] md:text-xs font-black transition-colors duration-200 ${
                       language === 'ko'
                         ? isNight
                           ? 'text-black'
@@ -182,7 +182,7 @@ export const Header: React.FC<Props> = ({
 
                     <button
                       onClick={() => setIsSpeedMode(false)}
-                      className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                      className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 min-h-11 rounded-full text-[10px] md:text-xs font-black transition-all duration-150 ease-out active:scale-[0.97] ${
                         !isSpeedMode
                           ? 'text-white drop-shadow-md'
                           : isNight
@@ -195,7 +195,7 @@ export const Header: React.FC<Props> = ({
                     </button>
                     <button
                       onClick={() => setIsSpeedMode(true)}
-                      className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                      className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 min-h-11 rounded-full text-[10px] md:text-xs font-black transition-all duration-150 ease-out active:scale-[0.97] ${
                         isSpeedMode
                           ? 'text-white drop-shadow-md'
                           : isNight
@@ -216,7 +216,7 @@ export const Header: React.FC<Props> = ({
                     aria-label="Open account menu"
                     aria-haspopup="true"
                     aria-expanded={showUserMenu}
-                    className="relative h-8 w-8 md:h-10 md:w-10 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer btn-press group-hover:scale-[1.02] uppercase select-none text-xs md:text-sm group"
+                    className="relative h-11 w-11 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer btn-press group-hover:scale-[1.02] uppercase select-none text-xs md:text-sm group"
                     onClick={() => setShowUserMenu(!showUserMenu)}
                   >
                     {user.plan === 'pro' ? (

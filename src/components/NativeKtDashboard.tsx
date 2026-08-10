@@ -171,7 +171,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => window.print()}
-            className="px-4 py-2.5 rounded-2xl font-bold text-xs bg-white/10 hover:bg-white/15 border border-white/15 text-white flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className="px-4 py-2.5 min-h-11 rounded-2xl font-bold text-xs bg-white/10 hover:bg-white/15 border border-white/15 text-white flex items-center justify-center gap-2 transition-all cursor-pointer"
             title={isKo ? '학원 로고 리포트 PDF 인쇄' : 'Download/Print PDF Report with Custom Academy Logo Header'}
           >
             <span>📄</span>
@@ -196,7 +196,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   setTimeout(() => setCopied(false), 2000);
                 }
               }}
-              className={`px-3.5 py-2.5 font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0 ${
+              className={`px-3.5 py-2.5 min-h-11 font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0 ${
                 isDemoContent
                   ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
                   : 'bg-yellow-400 hover:bg-yellow-500 text-zinc-900 cursor-pointer active:scale-95'
@@ -210,7 +210,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               disabled={isDemoContent || isApproving}
               title={isDemoContent ? (isKo ? '실제 리포트가 없어 복사할 수 없습니다' : 'No real report to copy yet') : undefined}
               onClick={handleCopyKakaoScript}
-              className={`px-4 py-2.5 rounded-xl text-xs font-black shadow-lg transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-4 py-2.5 min-h-11 rounded-xl text-xs font-black shadow-lg transition-all flex items-center gap-2 shrink-0 ${
                 isDemoContent || isApproving
                   ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
                   : copied
@@ -287,7 +287,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setScriptTone('formal')}
-              className={`px-3 py-1.5 rounded-xl font-bold border transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
                 scriptTone === 'formal'
                   ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
@@ -299,7 +299,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               type="button"
               onClick={() => setScriptTone('friendly')}
 
-              className={`px-3 py-1.5 rounded-xl font-bold border transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
                 scriptTone === 'friendly'
                   ? 'bg-purple-500/20 border-purple-500 text-purple-400 shadow-sm'
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
@@ -310,7 +310,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setScriptTone('concise')}
-              className={`px-3 py-1.5 rounded-xl font-bold border transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
                 scriptTone === 'concise'
                   ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm'
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
@@ -333,7 +333,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setFilterUrgentOnly(!filterUrgentOnly)}
-            className={`px-3 py-1 rounded-xl font-bold border transition-all cursor-pointer ${
+            className={`px-3 py-1 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
               filterUrgentOnly
                 ? 'bg-red-500 border-red-500 text-white shadow-md'
                 : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
@@ -361,7 +361,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                     : `[Parent Update] Hello parents! Today, ${className} students joyfully studied Unit 4 Photosynthesis vocabulary! Everyone was focused and actively engaged.`
                 );
               }}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-pink-500/10 border border-pink-500/20 text-pink-400 hover:bg-pink-500/20 transition-all"
+              className="px-2.5 py-1 min-h-11 rounded-lg text-[10px] font-bold bg-pink-500/10 border border-pink-500/20 text-pink-400 hover:bg-pink-500/20 transition-all"
             >
               🌸 {isKo ? 'Warm (다정한)' : 'Warm (Soft)'}
             </button>
@@ -374,7 +374,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                     : `[Parent Update] Greetings parents. Today's progress report for ${className}: Unit 4 vocabulary learning and error care have been successfully completed.`
                 );
               }}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-all"
+              className="px-2.5 py-1 min-h-11 rounded-lg text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-all"
             >
               🎓 {isKo ? 'Formal (정중한)' : 'Formal (Standard)'}
             </button>
@@ -387,7 +387,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                     : `[Parent Update] ${className} Summary:\n• Unit 4 target vocabulary completed\n• Error verification & pronunciation care conducted`
                 );
               }}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all"
+              className="px-2.5 py-1 min-h-11 rounded-lg text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all"
             >
               ⚡ {isKo ? 'Concise (요약)' : 'Concise (Brief)'}
             </button>
@@ -507,7 +507,8 @@ export const NativeKtDashboard: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setActiveDrawerStudent(null)}
-                className="p-1 rounded bg-white/10 hover:bg-white/20 transition-colors"
+                aria-label="Close"
+                className="min-w-11 min-h-11 flex items-center justify-center rounded bg-white/10 hover:bg-white/20 transition-colors"
               >
                 <X size={18} />
               </button>

@@ -231,7 +231,8 @@ export const NativeFtDashboard: React.FC<Props> = ({
                           <button
                             type="button"
                             onClick={() => setCurriculumSlideIndex((prev) => (prev === 0 ? 4 : prev - 1))}
-                            className={`w-8 h-8 rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+                            aria-label="Previous slide"
+                            className={`w-11 h-11 rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                               isThemeNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
                             }`}
                             title="Previous Slide"
@@ -241,7 +242,8 @@ export const NativeFtDashboard: React.FC<Props> = ({
                           <button
                             type="button"
                             onClick={() => setCurriculumSlideIndex((prev) => (prev === 4 ? 0 : prev + 1))}
-                            className={`w-8 h-8 rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+                            aria-label="Next slide"
+                            className={`w-11 h-11 rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                               isThemeNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
                             }`}
                             title="Next Slide"

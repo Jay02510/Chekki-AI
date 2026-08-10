@@ -25,6 +25,7 @@ import { PLAN_SEATS, PLAN_LABELS } from '../../api/_lib/pricingTiers';
 import { ClassLogPayload, GeneratedReportOutput } from '../services/aiGenerator';
 import { buildDemoReportOutput } from '../data/demoReportOutput';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { useToast } from '../../contexts/ToastContext';
 
 interface Props {
   isNight: boolean;
@@ -58,6 +59,7 @@ const PRICING_TIERS = Object.fromEntries(
 ) as Record<string, { id: string; nameEn: string; nameKo: string; seats: { ft: number; kt: number } } & typeof PRICING_BILLING[string]>;
 
 const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
+  const { showToast } = useToast();
   const [language, setLanguage] = useState<'ko' | 'en'>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -294,7 +296,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <button
               type="button"
               onClick={handleLangToggle}
-              className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1 min-h-11 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
                 isNight 
                   ? 'bg-white/5 border-white/15 text-white/90 hover:bg-white/15' 
                   : 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200'
@@ -315,7 +317,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   localStorage.setItem('chekki_theme', next ? 'dark' : 'light');
                 }
               }}
-              className={`p-2 rounded-full border transition-colors cursor-pointer ${
+              className={`min-w-11 min-h-11 flex items-center justify-center rounded-full border transition-colors cursor-pointer ${
                 isNight
                   ? 'border-white/10 hover:bg-white/10 text-white/70 hover:text-white'
                   : 'border-slate-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900'
@@ -343,7 +345,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             type="button"
             aria-label={mobileMenuOpen ? (isKo ? '메뉴 닫기' : 'Close menu') : (isKo ? '메뉴 열기' : 'Open menu')}
             aria-expanded={mobileMenuOpen}
-            className={`md:hidden relative w-9 h-9 flex items-center justify-center rounded-full outline-none ${
+            className={`md:hidden relative w-11 h-11 flex items-center justify-center rounded-full outline-none ${
               isNight ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900'
             }`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -1357,7 +1359,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   type="button"
                   onClick={() => setShowConsultationModal(false)}
                   aria-label={isKo ? '상담 신청 닫기' : 'Close consultation form'}
-                  className={`p-2 rounded-full transition-all cursor-pointer ${
+                  className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
                       : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
@@ -1583,7 +1585,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   type="button"
                   onClick={() => setShowPricingModal(false)}
                   aria-label={isKo ? '요금제 상세 닫기' : 'Close plan details'}
-                  className={`p-2 rounded-full transition-all active:scale-[0.95] cursor-pointer ${
+                  className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all active:scale-[0.95] cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
                       : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
@@ -1748,7 +1750,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   type="button"
                   onClick={() => setShowPaymentModal(false)}
                   aria-label={isKo ? '결제 창 닫기' : 'Close checkout'}
-                  className={`p-2 rounded-full transition-all active:scale-[0.95] cursor-pointer ${
+                  className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all active:scale-[0.95] cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
                       : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
@@ -1925,7 +1927,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   disabled={isProcessingPayment}
                   onClick={() => {
                     if (!academyName || !email) {
-                      alert(isKo ? '학원명과 이메일을 입력해주세요.' : 'Please fill out your academy name and email.');
+                      showToast({ type: 'error', message: isKo ? '학원명과 이메일을 입력해주세요.' : 'Please fill out your academy name and email.' });
                       return;
                     }
                     // Record the bank transfer request — account will be activated

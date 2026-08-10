@@ -76,7 +76,8 @@ export const ReportCardModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-all cursor-pointer no-print"
+            aria-label={isKo ? '닫기' : 'Close'}
+            className="absolute top-6 right-6 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-all cursor-pointer no-print"
           >
             <X size={18} weight="bold" />
           </button>

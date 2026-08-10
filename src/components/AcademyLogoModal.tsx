@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Sparkle } from '@phosphor-icons/react';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { useToast } from '../../contexts/ToastContext';
 
 const MAX_LOGO_BYTES = 5 * 1024 * 1024;
 
@@ -23,6 +24,7 @@ export const AcademyLogoModal: React.FC<Props> = ({
 }) => {
   const [fileError, setFileError] = React.useState<string | null>(null);
   const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
+  const { showToast } = useToast();
 
   return (
     <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
@@ -42,11 +44,12 @@ export const AcademyLogoModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={onClose}
-            className={`absolute top-6 right-6 p-2 rounded-full transition-all cursor-pointer ${
+            aria-label={isKo ? '닫기' : 'Close'}
+            className={`absolute top-6 right-6 min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
               isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
             }`}
           >
-            <X size={16} weight="bold" />
+            <X size={18} weight="bold" />
           </button>
 
           <div className="flex items-center gap-3 mb-3">
@@ -85,7 +88,7 @@ export const AcademyLogoModal: React.FC<Props> = ({
               }
               setAcademyLogo(tempLogoUrl);
               onClose();
-              alert(isKo ? '학원 맞춤 로고가 저장되었습니다!' : 'Custom Academy Logo saved!');
+              showToast({ type: 'success', message: isKo ? '학원 맞춤 로고가 저장되었습니다!' : 'Custom Academy Logo saved!' });
             }}
             className="space-y-4"
           >

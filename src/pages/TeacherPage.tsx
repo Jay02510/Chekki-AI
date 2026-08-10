@@ -54,6 +54,7 @@ import { WeekCalendarModal } from '../components/WeekCalendarModal';
 import { ReportCardModal } from '../components/ReportCardModal';
 import { CurriculumEditorForm } from '../components/CurriculumEditorForm';
 import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { 
   generateGeneralClassSummary, 
   generateStudentExceptionReport, 
@@ -71,6 +72,13 @@ export default function TeacherPage({ isNight = true }: Props) {
   const { showToast } = useToast();
   const { language, setLanguage } = useLanguage();
   const [isThemeNight, setIsThemeNight] = useState(isNight);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'default' | 'destructive';
+  } | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
   const [showWeekCalendarModal, setShowWeekCalendarModal] = useState(false);
   
@@ -633,10 +641,10 @@ export default function TeacherPage({ isNight = true }: Props) {
 
     const hasLargeFile = selectedFiles.some(f => f.size > 15 * 1024 * 1024);
     if (hasLargeFile) {
-      alert(isKo 
-        ? '💡 15MB 이상 파일이 포함되어 있습니다. 빠른 AI 분석 및 정확도를 위해 단원별(1~5페이지) PDF나 교재 사진 업로드를 권장합니다.' 
+      showToast({ type: 'info', message: isKo
+        ? '💡 15MB 이상 파일이 포함되어 있습니다. 빠른 AI 분석 및 정확도를 위해 단원별(1~5페이지) PDF나 교재 사진 업로드를 권장합니다.'
         : '💡 Large file detected. For fastest scanning & best AI accuracy, we recommend uploading single unit sections or 1–5 page PDFs.'
-      );
+      });
     }
 
     if (scanType === 'syllabus') {
@@ -1217,14 +1225,19 @@ export default function TeacherPage({ isNight = true }: Props) {
         // click away instead of a dead-end alert (server soft-locks this
         // action but a director had no way to act on it from here before).
         if (data.trialExpired) {
-          const wantsUpgrade = window.confirm(
-            (data.error || (isKo ? '7일 무료 체험이 종료되었습니다.' : 'Your 7-day trial has ended.')) +
+          setConfirmDialog({
+            title: (data.error || (isKo ? '7일 무료 체험이 종료되었습니다.' : 'Your 7-day trial has ended.')) +
               '\n\n' +
-              (isKo ? '지금 업그레이드하시겠습니까?' : 'Upgrade now?')
-          );
-          if (wantsUpgrade) window.location.href = '/schools';
+              (isKo ? '지금 업그레이드하시겠습니까?' : 'Upgrade now?'),
+            confirmText: isKo ? '업그레이드' : 'Upgrade',
+            cancelText: isKo ? '취소' : 'Cancel',
+            onConfirm: () => {
+              setConfirmDialog(null);
+              window.location.href = '/schools';
+            },
+          });
         } else {
-          alert(data.error || (isKo ? '학급 개설 한도에 도달했습니다.' : "You've reached your class limit."));
+          showToast({ type: 'error', message: data.error || (isKo ? '학급 개설 한도에 도달했습니다.' : "You've reached your class limit.") });
         }
         return;
       } else {
@@ -1281,13 +1294,13 @@ export default function TeacherPage({ isNight = true }: Props) {
         // only saved locally and needs to retry when connection is restored.
         setSyncWarning(
           isKo
-            ? '⚠️ 학급 정보가 로쫈에만 저장되었습니다. 인터넷 연결을 확인하고 페이지를 새로고침하여 클라우드에 동기화하세요.'
+            ? '⚠️ 학급 정보가 로컬에만 저장되었습니다. 인터넷 연결을 확인하고 페이지를 새로고침하여 클라우드에 동기화하세요.'
             : '⚠️ Class saved locally but not yet synced to cloud. Check your connection and refresh to re-sync.'
         );
       }
     } catch (err: any) {
       console.error('Failed to create class:', err);
-      alert(isKo ? '학급 개설 중 오류가 발생했습니다. 다시 시도해 주세요.' : `Failed to create class: ${err?.message || 'Please try again.'}`);
+      showToast({ type: 'error', message: isKo ? '학급 개설 중 오류가 발생했습니다. 다시 시도해 주세요.' : `Failed to create class: ${err?.message || 'Please try again.'}` });
     } finally {
       setIsCreatingClass(false);
     }
@@ -1304,8 +1317,19 @@ export default function TeacherPage({ isNight = true }: Props) {
       ? `'${classToDelete.name}' 학급을 정말 삭제하시겠습니까? 삭제된 학급 정보는 복구할 수 없습니다.`
       : `Are you sure you want to delete class '${classToDelete.name}'? This action cannot be undone.`;
 
-    if (!window.confirm(confirmMsg)) return;
+    setConfirmDialog({
+      title: confirmMsg,
+      confirmText: isKo ? '삭제' : 'Delete',
+      cancelText: isKo ? '취소' : 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performDeleteClass(targetId);
+      },
+    });
+  };
 
+  const performDeleteClass = async (targetId: string) => {
     setIsDeletingClass(true);
     const uid = user?.uid || 'guest';
 
@@ -1338,7 +1362,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       localStorage.setItem('teacher_classes_fallback', JSON.stringify(updatedGlobal));
     } catch (err: any) {
       console.error('Failed to delete class:', err);
-      alert(isKo ? '학급 삭제 중 오류가 발생했습니다.' : `Failed to delete class: ${err?.message || 'Please try again.'}`);
+      showToast({ type: 'error', message: isKo ? '학급 삭제 중 오류가 발생했습니다.' : `Failed to delete class: ${err?.message || 'Please try again.'}` });
     } finally {
       setIsDeletingClass(false);
     }
@@ -1348,15 +1372,26 @@ export default function TeacherPage({ isNight = true }: Props) {
     const confirmMsg = isKo
       ? '정말로 선생님 계정을 영구 삭제하시겠습니까? 이 작업은 복구할 수 없으며 모든 정보가 삭제됩니다.'
       : 'Are you sure you want to permanently delete your teacher account? This action cannot be undone.';
-    if (!window.confirm(confirmMsg)) return;
+    setConfirmDialog({
+      title: confirmMsg,
+      confirmText: isKo ? '삭제' : 'Delete',
+      cancelText: isKo ? '취소' : 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performDeleteTeacherAccount();
+      },
+    });
+  };
 
+  const performDeleteTeacherAccount = async () => {
     setIsDeletingAccount(true);
     try {
       await deleteAccount();
       setShowSettingsModal(false);
     } catch (err: any) {
       console.error('Failed to delete teacher account:', err);
-      alert(err.message || (isKo ? '계정 삭제 중 오류가 발생했습니다.' : 'Failed to delete account.'));
+      showToast({ type: 'error', message: err.message || (isKo ? '계정 삭제 중 오류가 발생했습니다.' : 'Failed to delete account.') });
     } finally {
       setIsDeletingAccount(false);
     }
@@ -1498,10 +1533,10 @@ export default function TeacherPage({ isNight = true }: Props) {
       ];
       for (const badWord of restrictedWords) {
         if (lower.includes(badWord)) {
-          alert(isKo 
-            ? `[보안 경고] 부적절한 단어("${badWord}")가 포함되어 있습니다. 학습에 적합한 언어를 사용해 주세요.` 
+          showToast({ type: 'error', message: isKo
+            ? `[보안 경고] 부적절한 단어("${badWord}")가 포함되어 있습니다. 학습에 적합한 언어를 사용해 주세요.`
             : `[Security Warning] Inappropriate term detected ("${badWord}"). Please use appropriate educational content.`
-          );
+          });
           return;
         }
       }
@@ -1509,10 +1544,10 @@ export default function TeacherPage({ isNight = true }: Props) {
       // Check for English learning relevance (must contain English letters or educational keywords)
       const hasEnglishText = /[a-zA-Z]/.test(otherText);
       if (!hasEnglishText) {
-        alert(isKo 
-          ? '[작성 안내] 기타 필드에는 영어 학습 관련 지침(예: "Speaking: Practice reading the word umbrella 3 times.")이 포함되어야 합니다.' 
+        showToast({ type: 'error', message: isKo
+          ? '[작성 안내] 기타 필드에는 영어 학습 관련 지침(예: "Speaking: Practice reading the word umbrella 3 times.")이 포함되어야 합니다.'
           : '[Content Notice] The Other field must include English instruction (e.g. "Speaking: Practice reading the word umbrella 3 times.").'
-        );
+        });
         return;
       }
     }
@@ -1561,11 +1596,11 @@ export default function TeacherPage({ isNight = true }: Props) {
             : '⚠️ Curriculum saved on this device only — it has not synced to the cloud yet.'
         );
       } else {
-        alert(isKo ? '주간 커리큘럼이 성공적으로 저장되었습니다!' : 'Weekly curriculum saved successfully!');
+        showToast({ type: 'success', message: isKo ? '주간 커리큘럼이 성공적으로 저장되었습니다!' : 'Weekly curriculum saved successfully!' });
       }
     } catch (err) {
       console.error('Failed to save curriculum:', err);
-      alert(isKo ? '저장 실패. 다시 시도해 주세요.' : 'Failed to save curriculum.');
+      showToast({ type: 'error', message: isKo ? '저장 실패. 다시 시도해 주세요.' : 'Failed to save curriculum.' });
     } finally {
       setIsSavingCurriculum(false);
     }
@@ -1710,7 +1745,19 @@ export default function TeacherPage({ isNight = true }: Props) {
   };
 
   const handleRemoveStudent = async (studentUid: string) => {
-    if (!window.confirm(isKo ? '정말 이 학생을 반에서 삭제하시겠습니까?' : 'Are you sure you want to remove this student from class?')) return;
+    setConfirmDialog({
+      title: isKo ? '정말 이 학생을 반에서 삭제하시겠습니까?' : 'Are you sure you want to remove this student from class?',
+      confirmText: isKo ? '삭제' : 'Remove',
+      cancelText: isKo ? '취소' : 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performRemoveStudent(studentUid);
+      },
+    });
+  };
+
+  const performRemoveStudent = async (studentUid: string) => {
     try {
       const userRef = doc(dbInstance, 'users', studentUid);
       await updateDoc(userRef, { classId: null, classStatus: null });
@@ -1763,7 +1810,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       );
     } catch (err) {
       console.error('Failed to update flag status:', err);
-      alert(isKo ? '플래그 상태 변경에 실패했습니다.' : 'Failed to update flag status.');
+      showToast({ type: 'error', message: isKo ? '플래그 상태 변경에 실패했습니다.' : 'Failed to update flag status.' });
     }
   };
 
@@ -2828,7 +2875,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     type="button"
                     onClick={() => handleUpdateWeek(-1)}
                     disabled={(selectedClass?.activeWeekNumber || 1) <= 1}
-                    className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-black transition-all cursor-pointer disabled:opacity-20 active:scale-95 ${
+                    className={`w-11 h-11 flex items-center justify-center rounded-xl text-sm font-black transition-all cursor-pointer disabled:opacity-20 active:scale-95 ${
                       isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
                     }`}
                     title={isKo ? '이전 주차' : 'Previous week'}
@@ -2848,7 +2895,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="button"
                     onClick={() => handleUpdateWeek(1)}
-                    className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-black transition-all cursor-pointer active:scale-95 ${
+                    className={`w-11 h-11 flex items-center justify-center rounded-xl text-sm font-black transition-all cursor-pointer active:scale-95 ${
                       isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
                     }`}
                     title={isKo ? '다음 주차' : 'Next week'}
@@ -2865,7 +2912,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             <button
               type="button"
               onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-              className={`px-3.5 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.96] ${
+              className={`px-3.5 py-2 min-h-11 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.96] ${
                 isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-200'
               }`}
               title="Switch Language / 언어 변경"
@@ -2878,7 +2925,8 @@ export default function TeacherPage({ isNight = true }: Props) {
             <button
               type="button"
               onClick={() => setIsThemeNight(!isThemeNight)}
-              className={`p-2.5 border rounded-xl transition-all cursor-pointer active:scale-[0.96] ${
+              aria-label={isThemeNight ? 'Switch to light mode' : 'Switch to dark mode'}
+              className={`min-w-11 min-h-11 flex items-center justify-center border rounded-xl transition-all cursor-pointer active:scale-[0.96] ${
                 isThemeNight ? 'bg-white/5 border-white/10 text-amber-400 hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-indigo-600 hover:bg-zinc-200'
               }`}
               title={isThemeNight ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
@@ -3202,7 +3250,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => setSelectedStudentDetails(null)}
-                className={`p-2.5 rounded-full transition-all text-sm font-bold active:scale-[0.95] cursor-pointer ${
+                aria-label={isKo ? '닫기' : 'Close'}
+                className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all text-sm font-bold active:scale-[0.95] cursor-pointer ${
                   isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
                 }`}
               >
@@ -3503,7 +3552,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className={`absolute top-6 right-6 p-2 rounded-full transition-all cursor-pointer ${
+                aria-label={isKo ? '닫기' : 'Close'}
+                className={`absolute top-6 right-6 min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
                   isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
                 }`}
               >
@@ -3740,6 +3790,18 @@ export default function TeacherPage({ isNight = true }: Props) {
           uploadedFileName={uploadedFileName}
           textbookPreviewUrl={textbookPreviewUrl}
           onClose={() => setShowDocPreviewModal(false)}
+        />
+      )}
+
+      {confirmDialog && (
+        <ConfirmDialog
+          title={confirmDialog.title}
+          confirmText={confirmDialog.confirmText}
+          cancelText={confirmDialog.cancelText}
+          variant={confirmDialog.variant}
+          isNight={isThemeNight}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
         />
       )}
     </div>

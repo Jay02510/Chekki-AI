@@ -156,20 +156,15 @@ export const WorksheetOverlay: React.FC<Props> = ({
   const resetPositions = () => {
     const title = language === 'ko' ? '정답 위치를 초기화할까요?' : 'Reset bubble positions?';
 
-    if (onConfirm) {
-      onConfirm({
-        title,
-        confirmText: language === 'ko' ? '초기화' : 'Reset',
-        cancelText: language === 'ko' ? '취소' : 'Cancel',
-        onConfirm: () => {
-          setItems(initialItems.map((i) => ({ ...i, custom_coords: undefined })));
-          setShowSettings(false);
-        },
-      });
-    } else if (window.confirm(title)) {
-      setItems(initialItems.map((i) => ({ ...i, custom_coords: undefined })));
-      setShowSettings(false);
-    }
+    onConfirm?.({
+      title,
+      confirmText: language === 'ko' ? '초기화' : 'Reset',
+      cancelText: language === 'ko' ? '취소' : 'Cancel',
+      onConfirm: () => {
+        setItems(initialItems.map((i) => ({ ...i, custom_coords: undefined })));
+        setShowSettings(false);
+      },
+    });
   };
 
   const getStyle = (item: WorksheetItem, index: number = 0) => {

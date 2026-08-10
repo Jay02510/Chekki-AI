@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface Props {
   item: WorksheetItem;
@@ -24,15 +25,12 @@ export const RefineModal: React.FC<Props> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [customReason, setCustomReason] = useState('');
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   const handleClose = () => {
     if (customReason.trim()) {
-      const confirmDiscard = window.confirm(
-        language === 'ko'
-          ? '작성 중인 내용이 있습니다. 정말 닫으시겠습니까?'
-          : 'You have unsaved text. Are you sure you want to close?'
-      );
-      if (!confirmDiscard) return;
+      setShowDiscardConfirm(true);
+      return;
     }
     onClose();
   };
@@ -258,6 +256,23 @@ export const RefineModal: React.FC<Props> = ({
           </div>
         </div>
       </div>
+
+      {showDiscardConfirm && (
+        <ConfirmDialog
+          title={language === 'ko'
+            ? '작성 중인 내용이 있습니다. 정말 닫으시겠습니까?'
+            : 'You have unsaved text. Are you sure you want to close?'}
+          confirmText={language === 'ko' ? '닫기' : 'Close'}
+          cancelText={language === 'ko' ? '취소' : 'Cancel'}
+          variant="destructive"
+          isNight={isNight}
+          onConfirm={() => {
+            setShowDiscardConfirm(false);
+            onClose();
+          }}
+          onCancel={() => setShowDiscardConfirm(false)}
+        />
+      )}
     </div>
   );
 

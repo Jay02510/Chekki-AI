@@ -43,7 +43,8 @@ export const WeekCalendarModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={onClose}
-            className={`absolute top-6 right-6 p-2 rounded-full transition-all cursor-pointer ${
+            aria-label={isKo ? '닫기' : 'Close'}
+            className={`absolute top-6 right-6 min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
               isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
             }`}
           >

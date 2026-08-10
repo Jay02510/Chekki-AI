@@ -67,6 +67,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors active:scale-[0.97]"
           >
             <X size={20} weight="bold" />

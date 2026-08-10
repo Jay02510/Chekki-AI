@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useToast } from '../contexts/ToastContext';
 import { LegalModal } from './LegalModal';
+import { ConfirmDialog } from './ConfirmDialog';
 import { FeedbackModal } from './FeedbackModal';
 import { db, dbInstance } from '../services/database';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
@@ -27,11 +29,13 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
     leaveClassroom,
   } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const { showToast } = useToast();
 
   const [name, setName] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [saveErrorMsg, setSaveErrorMsg] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLeaveClassConfirm, setShowLeaveClassConfirm] = useState(false);
   const [showLegal, setShowLegal] = useState<
     'privacy' | 'terms' | 'refund' | 'youth' | 'support' | null
   >(null);
@@ -645,17 +649,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                       {language === 'ko' ? '🏫 학교 / 학급 정보' : '🏫 School & Classroom Info'}
                     </h3>
                     <button
-                      onClick={() => {
-                        if (
-                          confirm(
-                            language === 'ko'
-                              ? '정말 학급에서 탈퇴하시겠습니까? 학원 전용 Premium 플랜도 해제됩니다.'
-                              : 'Are you sure you want to leave this class? Your premium sponsorship will be deactivated.'
-                          )
-                        ) {
-                          leaveClassroom();
-                        }
-                      }}
+                      onClick={() => setShowLeaveClassConfirm(true)}
                       className="text-[10px] font-black text-red-500 hover:text-red-400 transition-colors uppercase tracking-wider"
                     >
                       {language === 'ko' ? '학급 연동 해제' : 'Leave Class'}
@@ -884,7 +878,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                           try {
                             await deleteAccount();
                           } catch (e: any) {
-                            alert(e.message || 'Error deleting account');
+                            showToast({ type: 'error', message: e.message || 'Error deleting account' });
                             setShowDeleteConfirm(false);
                           }
                         }}
@@ -925,6 +919,23 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
           </div>
         </div>
       </div>
+
+      {showLeaveClassConfirm && (
+        <ConfirmDialog
+          title={language === 'ko'
+            ? '정말 학급에서 탈퇴하시겠습니까? 학원 전용 Premium 플랜도 해제됩니다.'
+            : 'Are you sure you want to leave this class? Your premium sponsorship will be deactivated.'}
+          confirmText={language === 'ko' ? '탈퇴' : 'Leave'}
+          cancelText={language === 'ko' ? '취소' : 'Cancel'}
+          variant="destructive"
+          isNight={isNight}
+          onConfirm={() => {
+            setShowLeaveClassConfirm(false);
+            leaveClassroom();
+          }}
+          onCancel={() => setShowLeaveClassConfirm(false)}
+        />
+      )}
     </>
   );
 };

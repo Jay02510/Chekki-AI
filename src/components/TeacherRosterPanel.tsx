@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { auth, dbInstance } from '../../services/database';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 
 interface SchoolTeacher {
   uid: string;
@@ -28,6 +29,7 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
   const [teachers, setTeachers] = useState<SchoolTeacher[]>([]);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
+  const [removeConfirm, setRemoveConfirm] = useState<{ teacherUid: string; label: string } | null>(null);
 
   useEffect(() => {
     if (!schoolId) return;
@@ -67,8 +69,11 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
     }
   };
 
-  const handleRemoveTeacher = async (teacherUid: string, label: string) => {
-    if (!window.confirm(`Remove ${label} from this school? They'll lose access to all classes immediately.`)) return;
+  const handleRemoveTeacher = (teacherUid: string, label: string) => {
+    setRemoveConfirm({ teacherUid, label });
+  };
+
+  const performRemoveTeacher = async (teacherUid: string, label: string) => {
     setBusyKey(teacherUid);
     setMessage(null);
     try {
@@ -147,6 +152,21 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
           </div>
         );
       })}
+
+      {removeConfirm && (
+        <ConfirmDialog
+          title={`Remove ${removeConfirm.label} from this school? They'll lose access to all classes immediately.`}
+          confirmText="Remove"
+          variant="destructive"
+          isNight={isNight}
+          onConfirm={() => {
+            const { teacherUid, label } = removeConfirm;
+            setRemoveConfirm(null);
+            void performRemoveTeacher(teacherUid, label);
+          }}
+          onCancel={() => setRemoveConfirm(null)}
+        />
+      )}
     </div>
   );
 };

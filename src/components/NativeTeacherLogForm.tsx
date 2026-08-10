@@ -371,7 +371,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => handleRemoveException(idx)}
-                    className="p-1 rounded bg-black/20 hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
+                    aria-label="Remove exception"
+                    className="min-w-11 min-h-11 flex items-center justify-center shrink-0 rounded bg-black/20 hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
                   >
                     <X size={14} />
                   </button>
@@ -422,7 +423,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setShowExceptionModal(false)}
-                className="p-1 rounded bg-white/10 hover:bg-white/20 transition-colors"
+                aria-label="Close"
+                className="min-w-11 min-h-11 flex items-center justify-center rounded bg-white/10 hover:bg-white/20 transition-colors"
               >
                 <X size={16} />
               </button>

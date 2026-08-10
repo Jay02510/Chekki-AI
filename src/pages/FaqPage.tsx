@@ -223,7 +223,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
             <button
               type="button"
               onClick={handleLangToggle}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-11 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                 isNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900'
               }`}
             >
@@ -237,7 +237,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
                 type="button"
                 onClick={() => setIsNight(prev => !prev)}
                 aria-label={isKo ? '테마 전환' : 'Toggle light / dark mode'}
-                className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                className={`min-w-11 min-h-11 flex items-center justify-center rounded-xl border transition-all cursor-pointer ${
                   isNight ? 'bg-white/5 border-white/10 text-amber-400 hover:bg-white/10' : 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:bg-zinc-200'
                 }`}
               >

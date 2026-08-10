@@ -11,6 +11,7 @@ import {
   Printer,
   CheckCircle,
 } from '@phosphor-icons/react';
+import { useToast } from '../../contexts/ToastContext';
 
 interface Props {
   isNight: boolean;
@@ -154,6 +155,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   isSavingCurriculum,
 }) => {
   const isThemeNight = isNight;
+  const { showToast } = useToast();
   return (
     <div className={`p-1 rounded-[2.5rem] animate-fade-in text-left transition-colors ${
       isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
@@ -670,7 +672,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                         <button
                           type="button"
                           onClick={() => handleRemoveVocabWord(idx)}
-                          className="p-0.5 hover:bg-orange-500/30 rounded-full transition-colors cursor-pointer text-orange-400 hover:text-white"
+                          className="p-1.5 hover:bg-orange-500/30 rounded-full transition-colors cursor-pointer text-orange-400 hover:text-white"
                           title={isKo ? '단어 삭제' : 'Delete word'}
                         >
                           <X size={12} weight="bold" />
@@ -743,7 +745,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                         <button
                           type="button"
                           onClick={() => handleRemovePhonicsRule(idx)}
-                          className="p-0.5 hover:bg-indigo-500/30 rounded-full transition-colors cursor-pointer text-indigo-400 hover:text-white"
+                          className="p-1.5 hover:bg-indigo-500/30 rounded-full transition-colors cursor-pointer text-indigo-400 hover:text-white"
                           title={isKo ? '파닉스 규칙 삭제' : 'Delete sound rule'}
                         >
                           <X size={12} weight="bold" />
@@ -911,7 +913,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => {
-                        alert(isKo ? '⚡ AI 맞춤 워크시트(PDF) 작성이 완료되었습니다!' : '⚡ AI Worksheet Generated Successfully!');
+                        showToast({ type: 'success', message: isKo ? '⚡ AI 맞춤 워크시트(PDF) 작성이 완료되었습니다!' : '⚡ AI Worksheet Generated Successfully!' });
                         window.print();
                       }}
                       className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 shrink-0"

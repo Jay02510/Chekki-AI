@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useMistakes } from '../contexts/MistakeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useToast } from '../contexts/ToastContext';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
@@ -22,6 +23,7 @@ interface Props {
 export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
   const { mistakes, showMistakeModal, setShowMistakeModal, removeMistake } = useMistakes();
   const { t, language } = useLanguage();
+  const { showToast } = useToast();
 
   const [particles, setParticles] = useState<Particle[]>([]);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -168,11 +170,10 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
       }
     } catch (err) {
       console.error('Print failed:', err);
-      alert(
-        language === 'ko'
-          ? '인쇄에 실패했습니다. 다시 시도해 주세요.'
-          : 'Print failed. Please try again.'
-      );
+      showToast({ type: 'error', message: language === 'ko'
+        ? '인쇄에 실패했습니다. 다시 시도해 주세요.'
+        : 'Print failed. Please try again.'
+      });
     } finally {
       setIsPrinting(false);
     }

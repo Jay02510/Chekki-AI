@@ -121,7 +121,8 @@ export function ScannedModal({
               <button
                 type="button"
                 onClick={onClose}
-                className={`p-2 rounded-full transition-all cursor-pointer ${
+                aria-label={isKo ? '닫기' : 'Close'}
+                className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
                   isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
                 }`}
               >

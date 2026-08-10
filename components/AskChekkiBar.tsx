@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatTurn } from '../services/geminiService';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useToast } from '../contexts/ToastContext';
 import { toJpeg } from 'html-to-image';
 import { renderMarkdown } from '../utils/markdownUtils';
 import { ChekkiMascot } from './Icons';
@@ -126,6 +127,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
 }) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [followUpText, setFollowUpText] = useState('');
@@ -174,7 +176,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
       return true;
     } catch (err) {
       console.error('Failed to save answer image', err);
-      alert(language === 'ko' ? '저장에 실패했습니다.' : 'Failed to save the answer.');
+      showToast({ type: 'error', message: language === 'ko' ? '저장에 실패했습니다.' : 'Failed to save the answer.' });
       return false;
     } finally {
       setIsSaving(false);

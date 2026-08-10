@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { auth, dbInstance } from '../../services/database';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 
 interface Invite {
   id: string;
@@ -25,6 +26,7 @@ interface Props {
  */
 export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = true, schoolId, seatsTotal }) => {
   const [invites, setInvites] = useState<Invite[]>([]);
+  const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
   const [role, setRole] = useState<'ft' | 'kt'>('ft');
   const [email, setEmail] = useState('');
   const [noEmailYet, setNoEmailYet] = useState(false);
@@ -74,8 +76,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         // Trial-expiry soft-lock (api/create-teacher-invite.ts) — the upgrade
         // path should be one click away here too, not just a dead-end error.
         if (data.trialExpired) {
-          const wantsUpgrade = window.confirm(isKo ? '지금 업그레이드하시겠습니까?' : 'Upgrade now?');
-          if (wantsUpgrade) window.location.href = '/schools';
+          setShowUpgradeConfirm(true);
         }
         return;
       }
@@ -192,6 +193,19 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
             </div>
           ))}
         </div>
+      )}
+
+      {showUpgradeConfirm && (
+        <ConfirmDialog
+          title={isKo ? '지금 업그레이드하시겠습니까?' : 'Upgrade now?'}
+          confirmText={isKo ? '업그레이드' : 'Upgrade'}
+          cancelText={isKo ? '취소' : 'Cancel'}
+          isNight={isNight}
+          onConfirm={() => {
+            window.location.href = '/schools';
+          }}
+          onCancel={() => setShowUpgradeConfirm(false)}
+        />
       )}
     </div>
   );
