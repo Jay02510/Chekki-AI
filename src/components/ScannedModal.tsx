@@ -265,29 +265,30 @@ export function ScannedModal({
                           <div>
                             <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold">PHYSICAL WORKSHEET SCAN</span>
                             <h4 className="text-base font-black tracking-tight text-zinc-900 font-sans">
-                              {activeDisplayObj?.topic || 'Science Unit 4 Homework'}
+                              {activeDisplayObj?.topic || (isKo ? '스캔된 자료' : 'Scanned Document')}
                             </h4>
                           </div>
                           <span className="text-[10px] font-mono text-zinc-400 border border-zinc-300 px-2 py-0.5 rounded">PAGE 1 / 1</span>
                         </div>
 
                         <div className="space-y-4 text-xs">
-                          {(activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0
-                            ? activeDisplayObj.detectedAnswers
-                            : [
-                                { questionNumber: 1, questionText: '1. Organisms that make their own food (Plants are ____).', correctAnswer: 'producers' },
-                                { questionNumber: 2, questionText: '2. Organisms that eat other living things (A rabbit is a ____).', correctAnswer: 'consumer' },
-                                { questionNumber: 3, questionText: '3. Organisms that break down dead material (Fungi are ____).', correctAnswer: 'decomposers' },
-                              ]
-                          ).map((item: any, idx: number) => (
-                            <div key={idx} className="p-3 rounded-xl bg-zinc-50 border border-zinc-200">
-                              <p className="font-semibold text-zinc-800 text-xs mb-1">{item.questionText || `Q${idx + 1}: Question ${idx + 1}`}</p>
-                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 font-mono text-xs font-bold border border-emerald-300">
-                                <span>✍️ Green Ink:</span>
-                                <span className="underline decoration-emerald-500 decoration-2">{item.correctAnswer || item.answer || 'Answer'}</span>
+                          {activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0 ? (
+                            activeDisplayObj.detectedAnswers.map((item: any, idx: number) => (
+                              <div key={idx} className="p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+                                <p className="font-semibold text-zinc-800 text-xs mb-1">{item.questionText || `Q${idx + 1}: Question ${idx + 1}`}</p>
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 font-mono text-xs font-bold border border-emerald-300">
+                                  <span>✍️ Green Ink:</span>
+                                  <span className="underline decoration-emerald-500 decoration-2">{item.correctAnswer || item.answer || 'Answer'}</span>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ))
+                          ) : (
+                            <p className="text-zinc-500 text-xs p-3">
+                              {isKo
+                                ? '이 페이지에서 문항/정답을 찾지 못했습니다. 문항이 있는 페이지인지 확인해 주세요.'
+                                : "No questions or answers detected on this page — check it's the right page, or add answers manually below."}
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}

@@ -35,6 +35,21 @@ export const ReportCardModal: React.FC<Props> = ({
 }) => {
   const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
 
+  // Real signal only — no fabricated stats. A brand-new/unselected student
+  // has no scans, so this must read as "no data yet," not a fake 100%.
+  const realScans: any[] = selectedStudentDetails?.scans || [];
+  const realMistakes: any[] = selectedStudentDetails?.mistakes || [];
+  const hasActivity = realScans.length > 0;
+  const homeworkCompletionDisplay = hasActivity ? '100%' : (isKo ? '데이터 없음' : 'No scans yet');
+  const masteredWordsCount = activeVocabWords.length;
+  const weeklyMistakes: any[] = selectedStudentDetails?.weeklyMistakes || [];
+  // Every item that reaches this list already carries the "Fixed on Rescan"
+  // badge below (real teacher-reviewed corrections), so 100% is honest
+  // *when there is data* — the fake part was showing it with zero data.
+  const rescanCorrectionDisplay = hasActivity
+    ? (weeklyMistakes.length > 0 ? '100%' : (isKo ? '해당 없음' : 'N/A'))
+    : (isKo ? '데이터 없음' : 'No data yet');
+
   return (
     <div className="fixed inset-0 z-[330] flex items-center justify-center p-4">
       <style>{`
@@ -171,19 +186,19 @@ export const ReportCardModal: React.FC<Props> = ({
               <span className="text-[10px] font-bold uppercase tracking-wider text-orange-700 block mb-1">
                 {isKo ? '주간 숙제 달성률' : 'Homework Completion'}
               </span>
-              <span className="text-2xl font-black text-orange-600 font-mono">100%</span>
+              <span className="text-2xl font-black text-orange-600 font-mono">{homeworkCompletionDisplay}</span>
             </div>
             <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl text-center">
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block mb-1">
                 {isKo ? '마스터한 타겟 단어' : 'Mastered Vocabulary'}
               </span>
-              <span className="text-2xl font-black text-emerald-600 font-mono">{activeVocabWords.length || 7} words</span>
+              <span className="text-2xl font-black text-emerald-600 font-mono">{masteredWordsCount} words</span>
             </div>
             <div className="p-4 bg-purple-50/60 border border-purple-200 rounded-2xl text-center">
               <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 block mb-1">
                 {isKo ? '2차 재도전 정답률' : 'Rescan Correction'}
               </span>
-              <span className="text-2xl font-black text-purple-600 font-mono">100%</span>
+              <span className="text-2xl font-black text-purple-600 font-mono">{rescanCorrectionDisplay}</span>
             </div>
           </div>
 
@@ -209,7 +224,9 @@ export const ReportCardModal: React.FC<Props> = ({
               </div>
             ) : (
               <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-600 text-center">
-                {isKo ? '이번 주 모든 학습 항목을 첫 시도에 완벽히 마스터했습니다!' : 'Mastered all weekly items on the first attempt with 0 errors!'}
+                {hasActivity
+                  ? (isKo ? '이번 주 모든 학습 항목을 첫 시도에 완벽히 마스터했습니다!' : 'Mastered all weekly items on the first attempt with 0 errors!')
+                  : (isKo ? '이번 주 학습 기록이 아직 없습니다.' : 'No activity recorded yet this week.')}
               </div>
             )}
           </div>
@@ -220,9 +237,13 @@ export const ReportCardModal: React.FC<Props> = ({
               {isKo ? '담임 교사 총평 (Teacher Evaluation)' : 'Teacher Evaluation & Comments'}
             </h4>
             <p className="text-xs text-zinc-700 italic">
-              {isKo
-                ? `${selectedStudentDetails?.studentName || '원생'}은(는) 이번 주 타겟 파닉스 규칙과 단어를 매우 훌륭하게 수행하였습니다. 가정에서의 지속적인 칭찬과 관심 부탁드립니다.`
-                : `${selectedStudentDetails?.studentName || 'Student'} demonstrated excellent focus on target vocabulary and phonics rules this week. Great enthusiasm during home practice!`}
+              {hasActivity
+                ? (isKo
+                    ? `${selectedStudentDetails?.studentName || '원생'}은(는) 이번 주 타겟 파닉스 규칙과 단어를 매우 훌륭하게 수행하였습니다. 가정에서의 지속적인 칭찬과 관심 부탁드립니다.`
+                    : `${selectedStudentDetails?.studentName || 'Student'} demonstrated excellent focus on target vocabulary and phonics rules this week. Great enthusiasm during home practice!`)
+                : (isKo
+                    ? '이번 주 학습 기록이 없어 담임 교사 총평을 작성할 수 없습니다. 원생을 선택하고 다시 시도해 주세요.'
+                    : 'No activity on record for this student this week — select a student with scan history to generate real comments.')}
             </p>
             <div className="mt-4 pt-3 border-t border-zinc-200 flex justify-between items-center text-xs text-zinc-500 font-mono">
               <span>Teacher Signature: ______________________</span>

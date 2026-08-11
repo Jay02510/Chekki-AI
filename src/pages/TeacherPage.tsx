@@ -918,10 +918,16 @@ export default function TeacherPage({ isNight = true }: Props) {
         setShowActivationWizard(true);
       }
     } else if (!isDirector) {
-      // FT/KT teacher — show welcome only if first login
+      // FT/KT teacher — show welcome only if first login. Wait for the real
+      // Firestore class fetch before deciding: an account that already has
+      // classes (e.g. a fresh browser/device on an existing account) must
+      // never replay this, even if this device's localStorage flag was
+      // never set — the classes themselves are the source of truth.
+      if (isLoadingClasses) return;
       const welcomeDone =
         localStorage.getItem('chekki_teacher_welcome_done') ||
-        (uid && localStorage.getItem(`chekki_teacher_welcome_done_${uid}`));
+        (uid && localStorage.getItem(`chekki_teacher_welcome_done_${uid}`)) ||
+        classes.length > 0;
       if (!welcomeDone) {
         // Pre-fill name from user profile
         setWelcomeName(user.name || user.email?.split('@')[0] || '');
@@ -933,7 +939,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         setShowTeacherWelcome(true);
       }
     }
-  }, [isAuthenticated, user?.uid]);
+  }, [isAuthenticated, user?.uid, isLoadingClasses, classes]);
 
 
 
