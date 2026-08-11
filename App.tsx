@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { Header } from './components/Header';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -18,11 +18,15 @@ import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
 import { LegalModal } from './components/LegalModal';
 import { ProgressiveOnboardingModal } from './components/ProgressiveOnboardingModal';
-import SubscribePage from './src/pages/SubscribePage';
-import AdminPage from './src/pages/AdminPage';
-import TeacherPage from './src/pages/TeacherPage';
-import SchoolsLandingPage from './src/pages/SchoolsLandingPage';
-import ReportStudioPage from './src/pages/ReportStudioPage';
+// Route-level pages are lazy-loaded — each pulls in a large, disjoint
+// dependency graph (admin tooling, the full teacher/director dashboard,
+// the B2B sales page) that a parent scanning a worksheet never needs.
+// Static imports here meant every visitor downloaded all of it up front.
+const SubscribePage = lazy(() => import('./src/pages/SubscribePage'));
+const AdminPage = lazy(() => import('./src/pages/AdminPage'));
+const TeacherPage = lazy(() => import('./src/pages/TeacherPage'));
+const SchoolsLandingPage = lazy(() => import('./src/pages/SchoolsLandingPage'));
+const ReportStudioPage = lazy(() => import('./src/pages/ReportStudioPage'));
 import { AnalysisState, LegalType } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -79,6 +83,14 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
     return this.props.children;
   }
 }
+
+// Suspense fallback for lazy-loaded route pages — brief by design, since the
+// chunk is small and usually cached after first visit.
+const RouteLoadingFallback: React.FC = () => (
+  <div className="fixed inset-0 bg-zinc-950 flex items-center justify-center z-[99999]">
+    <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+  </div>
+);
 
 // Returns true (night) if hour is between 22:00–23:59 or 00:00–06:59 local time.
 // Falls back to system dark mode if no time preference applies.
@@ -483,13 +495,16 @@ function AppContent() {
   }, [isLocked]);
 
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
-  if (showSubscribePage && platform === 'web') return <ErrorBoundary><SubscribePage /></ErrorBoundary>;
-  if (showAdminPage && platform === 'web') return <ErrorBoundary><AdminPage /></ErrorBoundary>;
-  if (showTeacherPage && platform === 'web') return <ErrorBoundary><TeacherPage isNight={isNight} /></ErrorBoundary>;
+  if (showSubscribePage && platform === 'web')
+    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><SubscribePage /></Suspense></ErrorBoundary>;
+  if (showAdminPage && platform === 'web')
+    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><AdminPage /></Suspense></ErrorBoundary>;
+  if (showTeacherPage && platform === 'web')
+    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><TeacherPage isNight={isNight} /></Suspense></ErrorBoundary>;
   if (showSchoolsPage && platform === 'web')
-    return <ErrorBoundary><SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} /></ErrorBoundary>;
+    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} /></Suspense></ErrorBoundary>;
   if (showReportStudioPage && platform === 'web')
-    return <ErrorBoundary><ReportStudioPage isNight={isNight} setIsNight={setIsNight} /></ErrorBoundary>;
+    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><ReportStudioPage isNight={isNight} setIsNight={setIsNight} /></Suspense></ErrorBoundary>;
 
   // The FT/KT/Director dashboards only exist on web (TeacherPage etc. above
   // are gated `platform === 'web'`) — on the downloaded native app they were
