@@ -1134,7 +1134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const idToken = await firebaseUser.getIdToken();
-      const response = await fetch(`${PUBLIC_APP_URL}/api/redeem-school-code`, {
+      const response = await fetch(`${API_BASE_URL}/api/redeem-school-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1170,7 +1170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const idToken = await firebaseUser.getIdToken();
-      const response = await fetch(`${PUBLIC_APP_URL}/api/redeem-class-code`, {
+      const response = await fetch(`${API_BASE_URL}/api/redeem-class-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
