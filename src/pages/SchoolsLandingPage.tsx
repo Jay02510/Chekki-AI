@@ -143,6 +143,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'kakaopay' | 'tosspay' | 'bank'>('bank');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentError, setPaymentError] = useState(false);
 
   const consultationDialogRef = useDialogA11y<HTMLDivElement>({
     isOpen: showConsultationModal,
@@ -1881,11 +1882,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
 
               {/* Complete Payment & Submit Request */}
+              {paymentMethod === 'bank' && !paymentSuccess && paymentError && (
+                <div role="alert" className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 flex items-center justify-between gap-3 mb-3">
+                  <span>
+                    {isKo
+                      ? '요청 접수에 실패했습니다. 다시 시도해주세요.'
+                      : "Your request didn't go through. Please try again."}
+                  </span>
+                </div>
+              )}
               {paymentMethod === 'bank' && !paymentSuccess && (
                 <button
                   type="button"
                   disabled={isProcessingPayment}
-                  onClick={() => {
+                  onClick={async () => {
                     if (!academyName || !email) {
                       showToast({ type: 'error', message: isKo ? '학원명과 이메일을 입력해주세요.' : 'Please fill out your academy name and email.' });
                       return;
@@ -1893,30 +1903,38 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     // Record the bank transfer request — account will be activated
                     // manually by ops team after confirming the deposit.
                     setIsProcessingPayment(true);
-                    fetch('/api/request-school-invoice', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        academyName,
-                        email,
-                        plan: selectedPlanId,
-                        teacherCount,
-                        contactName,
-                        phone,
-                        type: 'bank-transfer',
-                      }),
-                    })
-                      .catch(() => {
-                        // API may not exist yet — fall through to pending state regardless
-                        console.warn('[Payment] Invoice API not reachable, showing pending state client-side.');
-                      })
-                      .finally(() => {
-                        setIsProcessingPayment(false);
-                        setPaymentSuccess(true);
-                        // Store pending (not active) state — ops team activates after deposit confirmed
-                        sessionStorage.setItem('chekki_payment_pending', 'true');
-                        sessionStorage.setItem('chekki_paid_school', academyName);
+                    setPaymentError(false);
+                    try {
+                      const response = await fetch('/api/request-school-invoice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          academyName,
+                          contactName,
+                          email,
+                          phone,
+                          planId: selectedPlanId,
+                          teacherCount,
+                          type: 'bank-transfer',
+                        }),
                       });
+                      if (!response.ok) throw new Error(`Request failed with ${response.status}`);
+                      setPaymentSuccess(true);
+                      // Store pending (not active) state — ops team activates after deposit confirmed
+                      sessionStorage.setItem('chekki_payment_pending', 'true');
+                      sessionStorage.setItem('chekki_paid_school', academyName);
+                    } catch (err) {
+                      console.error('[Payment] Invoice request failed:', err);
+                      setPaymentError(true);
+                      showToast({
+                        type: 'error',
+                        message: isKo
+                          ? '요청 전송에 실패했습니다. 다시 시도하거나 support@chekkiai.com으로 문의해 주세요.'
+                          : 'Failed to submit your request. Please try again or contact support@chekkiai.com.',
+                      });
+                    } finally {
+                      setIsProcessingPayment(false);
+                    }
                   }}
                   className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
