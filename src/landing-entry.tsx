@@ -6,6 +6,7 @@ import Landing from './Landing';
 import App from '../App';
 import '../landing.css';
 import { initSentry } from './lib/sentry';
+import { ToastProvider } from '../contexts/ToastContext';
 
 initSentry();
 
@@ -78,7 +79,16 @@ function LandingRoot() {
     pathname.startsWith('/school/') ||
     pathname.startsWith('/schools/')
   ) {
-    return <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />;
+    // SchoolsLandingPage calls useToast() (added in b397db2 to replace native
+    // alert/confirm) but this route never mounts <App />, which is the only
+    // place ToastProvider normally wraps the tree — the page crashed on
+    // load with "useToast must be used within a ToastProvider" until this
+    // was added (Audit: /schools outreach page broken since 2026-08-10).
+    return (
+      <ToastProvider>
+        <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />
+      </ToastProvider>
+    );
   }
 
   // Default Main Page: chekkiai.com (/)
