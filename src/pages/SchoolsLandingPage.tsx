@@ -1914,7 +1914,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                           email,
                           phone,
                           planId: selectedPlanId,
+                          planName: isKo ? activePlan.nameKo : activePlan.nameEn,
                           teacherCount,
+                          billingCycle,
                           type: 'bank-transfer',
                         }),
                       });
