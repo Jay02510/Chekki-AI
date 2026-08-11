@@ -39,7 +39,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://esm.sh https://www.googletagmanager.com https://t1.kakaocdn.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com https://*.googleusercontent.com; media-src 'self' https://res.cloudinary.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.vercel.app https://chekkiai.com https://*.chekkiai.com https://www.google-analytics.com https://www.google.com https://*.kakao.com;"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://esm.sh https://www.googletagmanager.com https://t1.kakaocdn.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com https://*.googleusercontent.com; media-src 'self' https://res.cloudinary.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.vercel.app https://chekkiai.com https://*.chekkiai.com https://www.google-analytics.com https://www.google.com https://*.kakao.com https://*.ingest.us.sentry.io;"
         },
         {
           "key": "X-Frame-Options",
