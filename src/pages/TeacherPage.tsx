@@ -2168,7 +2168,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         schoolId={(user as any)?.schoolId || ''}
         seatsTotal={schoolSeatsTotal}
         trialStatus={trialStatus}
-        onComplete={(data) => {
+        onComplete={async (data) => {
           const uid = user?.uid || '';
           // Mark wizard as done so it never shows again for this account
           localStorage.setItem('chekki_wizard_done', '1');
@@ -2178,15 +2178,43 @@ export default function TeacherPage({ isNight = true }: Props) {
             localStorage.setItem('chekki_academy_name', data.academyName);
           }
           if (data.classes && data.classes.length > 0) {
-            const newClasses = data.classes.map((clsName, idx) => ({
-              id: `cls_${Date.now()}_${idx}`,
-              name: clsName,
-              level: 'Kindergarten & Elementary',
-              joinCode: `CHK${Math.floor(1000 + Math.random() * 9000)}`,
-              activeWeekNumber: 1,
-            }));
-            setClasses(newClasses);
-            setSelectedClass(newClasses[0]);
+            // Create each class through the real server-authoritative path
+            // (api/create-class.ts) instead of fabricating local-only class
+            // objects with fake `CHK####` join codes — those never existed in
+            // Firestore, so no parent could ever join with them, and the
+            // classes vanished the next time fetchClasses() ran.
+            const idToken = await auth.currentUser?.getIdToken();
+            const createdClasses: any[] = [];
+            const failedNames: string[] = [];
+            for (const clsName of data.classes) {
+              try {
+                const response = await fetch('/api/create-class', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+                  body: JSON.stringify({ name: clsName, level: 'Kindergarten & Elementary' }),
+                });
+                const resData = await response.json();
+                if (response.ok) {
+                  createdClasses.push(resData.class);
+                } else {
+                  failedNames.push(clsName);
+                }
+              } catch {
+                failedNames.push(clsName);
+              }
+            }
+            if (createdClasses.length > 0) {
+              setClasses((prev: any[]) => [...createdClasses, ...prev]);
+              setSelectedClass(createdClasses[0]);
+            }
+            if (failedNames.length > 0) {
+              showToast({
+                type: 'error',
+                message: isKo
+                  ? `일부 학급을 개설하지 못했습니다: ${failedNames.join(', ')}. 대시보드에서 다시 시도해 주세요.`
+                  : `Couldn't create: ${failedNames.join(', ')}. Please add them from the dashboard.`,
+              });
+            }
           }
           setShowActivationWizard(false);
           setActiveTab('director_hq');
@@ -2197,21 +2225,48 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   // --- FT/KT FIRST-LOGIN WELCOME MODAL ---
   if (showTeacherWelcome) {
-    const dismissWelcome = (className?: string) => {
+    // Creates the class through the same server-authoritative path as the
+    // "+ New Class" modal (api/create-class.ts). This used to fabricate a
+    // class object entirely client-side with a fake `CHK####` join code,
+    // never touching Firestore — the code "worked" in the UI but no parent
+    // could ever join with it, and the class vanished on next login since
+    // fetchClasses() (real Firestore query) correctly found nothing.
+    const dismissWelcome = async (className?: string) => {
       const uid = user?.uid || '';
       localStorage.setItem('chekki_teacher_welcome_done', '1');
       if (uid) localStorage.setItem(`chekki_teacher_welcome_done_${uid}`, '1');
-      // If a class was confirmed, save it
+
       if (className && className.trim()) {
-        const newClass = {
-          id: `cls_${Date.now()}_welcome`,
-          name: className.trim(),
-          level: 'General',
-          joinCode: `CHK${Math.floor(1000 + Math.random() * 9000)}`,
-          activeWeekNumber: 1,
-        };
-        setClasses((prev: any[]) => [newClass, ...prev]);
-        setSelectedClass(newClass);
+        setIsCreatingClass(true);
+        try {
+          const idToken = await auth.currentUser?.getIdToken();
+          const response = await fetch('/api/create-class', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+            body: JSON.stringify({ name: className.trim(), level: 'General' }),
+          });
+          const data = await response.json();
+          if (response.ok) {
+            setClasses((prev: any[]) => [data.class, ...prev]);
+            setSelectedClass(data.class);
+          } else {
+            // Real seat-limit/trial rejection or server error — surface it
+            // rather than silently handing the teacher a class that will
+            // never actually receive parent scans.
+            showToast({
+              type: 'error',
+              message: data.error || (isKo ? '학급 개설에 실패했습니다. 대시보드에서 다시 시도해 주세요.' : "Couldn't create your class. Please try again from the dashboard."),
+            });
+          }
+        } catch (err) {
+          console.error('[dismissWelcome] create-class failed:', err);
+          showToast({
+            type: 'error',
+            message: isKo ? '학급 개설에 실패했습니다. 대시보드에서 다시 시도해 주세요.' : "Couldn't create your class. Please try again from the dashboard.",
+          });
+        } finally {
+          setIsCreatingClass(false);
+        }
       }
       setShowTeacherWelcome(false);
       setActiveTab(welcomeRole === 'kt' ? 'kt_script' : 'overview');
@@ -2333,11 +2388,12 @@ export default function TeacherPage({ isNight = true }: Props) {
                   </button>
                   <button
                     type="button"
+                    disabled={isCreatingClass}
                     onClick={() => dismissWelcome(welcomeClassName)}
-                    className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                    className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                   >
                     <CheckCircle size={18} weight="bold" />
-                    <span>{isKo ? '완료 — 대시보드 입장! 🎉' : 'Done — Enter Dashboard! 🎉'}</span>
+                    <span>{isCreatingClass ? (isKo ? '생성 중...' : 'Creating...') : (isKo ? '완료 — 대시보드 입장! 🎉' : 'Done — Enter Dashboard! 🎉')}</span>
                   </button>
                 </div>
 
