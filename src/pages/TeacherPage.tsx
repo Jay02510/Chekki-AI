@@ -705,9 +705,10 @@ export default function TeacherPage({ isNight = true }: Props) {
       }
 
       // Call AI analysis with images_base64 list
+      const idToken = await auth.currentUser?.getIdToken();
       const res = await fetch('/api/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
         body: JSON.stringify({
           images_base64: cleanBase64List,
           mode: scanType === 'syllabus' ? 'syllabus_course_plan' : 'textbook_curriculum_ocr',
@@ -761,48 +762,13 @@ export default function TeacherPage({ isNight = true }: Props) {
         );
       }
     } catch (err) {
-      console.warn('API endpoint fallback; proceeding with deterministic client curriculum analysis.', err);
-      const fallbackAnswers = scanType === 'worksheet' ? [
-        { questionNumber: 1, category: 'Vocabulary', questionText: '1. Organisms that make their own food (Plants are ____).', correctAnswer: 'producers' },
-        { questionNumber: 2, category: 'Vocabulary', questionText: '2. Organisms that eat other living things (A rabbit is a ____).', correctAnswer: 'consumer' },
-        { questionNumber: 3, category: 'Vocabulary', questionText: '3. Organisms that break down dead material (Fungi are ____).', correctAnswer: 'decomposers' },
-      ] : [];
-
-      const fallbackAnalysis = {
-        scanType,
-        topic: scanType === 'syllabus' ? 'Bricks Reading 150 Course Syllabus (Units 1–8)' : 'Ecosystems & Food Chains (Unit 4)',
-        vocabWords: scanType === 'syllabus' ? ['Producer', 'Consumer', 'Decomposer', 'Prey', 'Photosynthesis', 'Chloroplast', 'Habitat', 'Ecosystem'] : ['Producer', 'Consumer', 'Decomposer'],
-        phonicsRules: ['Long E Sound (/eɪ/)', 'Compound Nouns'],
-        passage: scanType === 'syllabus' ? 'Complete multi-week course scope covering Ecosystems, Nature & Science Vocabulary across units.' : 'Plants absorb sunlight as producers. Animals consume plants as consumers.',
-        detectedAnswers: fallbackAnswers
-      };
-
-      setScannedData(fallbackAnalysis);
-      if (scanType === 'syllabus') {
-        setSyllabusScannedData(fallbackAnalysis);
-      } else {
-        setWorksheetScannedData(fallbackAnalysis);
-      }
-
-      setSelectedScannedVocab(fallbackAnalysis.vocabWords);
-      setSelectedScannedPhonics(fallbackAnalysis.phonicsRules);
-      setSelectedScannedTopic(true);
-      setSelectedScannedPassage(true);
-      setSelectedScannedOther(true);
-
-      setCurriculumTopic(fallbackAnalysis.topic);
-      setCurriculumVocab(fallbackAnalysis.vocabWords.join(', '));
-      setCurriculumPhonics(fallbackAnalysis.phonicsRules.join(', '));
-      setCurriculumPassage(fallbackAnalysis.passage);
-
-      setActiveScannedModalType(scanType);
-      setActiveScannedTab(scanType === 'syllabus' ? 'picker' : 'parentView');
-      setShowScannedModal(true);
-      setScanStatusMessage(
-        isKo 
-          ? (scanType === 'syllabus' ? `📘 교재 목차 분석 완료! 주간 커리큘럼 단어 & 파닉스 범위가 추출되었습니다.` : `📄 일간 워크시트 스캔 완료! 학부모용 정답지 가이드가 추출되었습니다.`)
-          : (scanType === 'syllabus' ? `📘 Course Syllabus scanned! Scope & Vocabulary extracted.` : `📄 Daily Worksheet scanned! Parent answer keys extracted.`)
-      );
+      console.error('Curriculum scan failed:', err);
+      showToast({
+        type: 'error',
+        message: isKo
+          ? '스캔에 실패했습니다. 이미지를 확인하고 다시 시도해 주세요.'
+          : "Scan failed — couldn't read this file. Please check the image and try again.",
+      });
     } finally {
       setIsScanningTextbook(false);
       setIsScanningSyllabus(false);
