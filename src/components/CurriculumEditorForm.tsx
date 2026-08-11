@@ -11,8 +11,6 @@ import {
   Printer,
   CheckCircle,
 } from '@phosphor-icons/react';
-import { useToast } from '../../contexts/ToastContext';
-
 interface Props {
   isNight: boolean;
   isKo: boolean;
@@ -74,6 +72,8 @@ interface Props {
   setQuestionStyle: (v: string) => void;
   loadCurriculum: () => void;
   isSavingCurriculum: boolean;
+  handleGenerateWorksheet: () => void;
+  isGeneratingWorksheet: boolean;
 }
 
 /**
@@ -153,9 +153,10 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   setQuestionStyle,
   loadCurriculum,
   isSavingCurriculum,
+  handleGenerateWorksheet,
+  isGeneratingWorksheet,
 }) => {
   const isThemeNight = isNight;
-  const { showToast } = useToast();
   return (
     <div className={`p-1 rounded-[2.5rem] animate-fade-in text-left transition-colors ${
       isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
@@ -912,14 +913,20 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     </p>
                     <button
                       type="button"
-                      onClick={() => {
-                        showToast({ type: 'success', message: isKo ? '⚡ AI 맞춤 워크시트(PDF) 작성이 완료되었습니다!' : '⚡ AI Worksheet Generated Successfully!' });
-                        window.print();
-                      }}
-                      className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                      disabled={isGeneratingWorksheet}
+                      onClick={handleGenerateWorksheet}
+                      className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 text-white font-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 shrink-0"
                     >
-                      <Printer size={15} weight="bold" />
-                      <span>{isKo ? '⚡ AI 워크시트 생성 & 오답 복습지 인쇄 (PDF)' : '⚡ Generate Printable AI Worksheet (PDF)'}</span>
+                      {isGeneratingWorksheet ? (
+                        <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <Printer size={15} weight="bold" />
+                      )}
+                      <span>
+                        {isGeneratingWorksheet
+                          ? (isKo ? '생성 중...' : 'Generating...')
+                          : (isKo ? '⚡ AI 워크시트 생성 & 오답 복습지 인쇄 (PDF)' : '⚡ Generate Printable AI Worksheet (PDF)')}
+                      </span>
                     </button>
                   </div>
                 </div>

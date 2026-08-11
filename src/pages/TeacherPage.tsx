@@ -523,6 +523,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [curriculumSlideIndex, setCurriculumSlideIndex] = useState(0);
   const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
   const [isSavingCurriculum, setIsSavingCurriculum] = useState(false);
+  const [isGeneratingWorksheet, setIsGeneratingWorksheet] = useState(false);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [isScanningTextbook, setIsScanningTextbook] = useState(false);
   const [textbookPreviewUrl, setTextbookPreviewUrl] = useState<string | null>(null);
@@ -810,6 +811,21 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [academyLogo, setAcademyLogo] = useState<string>(() => localStorage.getItem('chekki_academy_logo') || '');
   const [showLogoModal, setShowLogoModal] = useState(false);
   const [tempLogoUrl, setTempLogoUrl] = useState(academyLogo);
+
+  // Persist academy logo — the "saved" toast in AcademyLogoModal only meant
+  // something if this actually reached storage; it previously lived in React
+  // state only and vanished on refresh despite claiming to be saved.
+  useEffect(() => {
+    try {
+      if (academyLogo) {
+        localStorage.setItem('chekki_academy_logo', academyLogo);
+      } else {
+        localStorage.removeItem('chekki_academy_logo');
+      }
+    } catch (err) {
+      console.warn('Failed to persist academy logo locally:', err);
+    }
+  }, [academyLogo]);
 
   // Worksheet Format & Question Style State
   const [worksheetType, setWorksheetType] = useState<string>('daily_homework');
@@ -1575,6 +1591,105 @@ export default function TeacherPage({ isNight = true }: Props) {
       showToast({ type: 'error', message: isKo ? '저장 실패. 다시 시도해 주세요.' : 'Failed to save curriculum.' });
     } finally {
       setIsSavingCurriculum(false);
+    }
+  };
+
+  const escapeHtml = (s: string) =>
+    String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+
+  const handleGenerateWorksheet = async () => {
+    const vocabList = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+    const phonicsList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+
+    if (!curriculumTopic.trim() && vocabList.length === 0 && phonicsList.length === 0 && !curriculumPassage.trim()) {
+      showToast({
+        type: 'error',
+        message: isKo
+          ? '워크시트를 생성하려면 먼저 주제, 어휘, 파닉스 규칙 또는 지문 중 하나를 입력해 주세요.'
+          : 'Set a topic, vocabulary, phonics rules, or passage for this week before generating a worksheet.',
+      });
+      return;
+    }
+
+    setIsGeneratingWorksheet(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({
+          task: 'generate_worksheet',
+          worksheetType,
+          questionStyle,
+          language: isKo ? 'ko' : 'en',
+          curriculum: {
+            topic: curriculumTopic.trim(),
+            vocabWords: vocabList,
+            phonicsRules: phonicsList,
+            passage: curriculumPassage.trim(),
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.error || `HTTP_${res.status}`);
+      }
+
+      const { worksheet } = await res.json();
+      if (!worksheet?.questions?.length) throw new Error('EMPTY_WORKSHEET');
+
+      const title = isKo ? worksheet.title_ko || worksheet.title_en : worksheet.title_en || worksheet.title_ko;
+      const instructions = isKo ? worksheet.instructions_ko : worksheet.instructions_en;
+
+      const questionsHtml = worksheet.questions.map((q: any) => {
+        const prompt = isKo ? (q.prompt_ko || q.prompt_en) : (q.prompt_en || q.prompt_ko);
+        const choicesHtml = Array.isArray(q.choices) && q.choices.length > 0
+          ? `<div class="choices">${q.choices.map((c: string) => `<div>${escapeHtml(c)}</div>`).join('')}</div>`
+          : '<div class="answer-line"></div>';
+        return `<div class="question"><span class="qnum">${q.number}.</span> ${escapeHtml(prompt)}${choicesHtml}</div>`;
+      }).join('');
+
+      const answerKeyHtml = worksheet.questions.map((q: any) =>
+        `<div class="answer-row"><span class="qnum">${q.number}.</span> ${escapeHtml(q.answer)}</div>`
+      ).join('');
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showToast({ type: 'error', message: isKo ? '팝업이 차단되었습니다. 팝업 차단을 해제해 주세요.' : 'Pop-up blocked — please allow pop-ups to print the worksheet.' });
+        return;
+      }
+
+      printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title || 'Worksheet')}</title>
+<style>
+body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #111; }
+h1 { font-size: 22px; margin-bottom: 4px; }
+.instructions { color: #555; font-size: 13px; margin-bottom: 24px; }
+.question { margin-bottom: 18px; font-size: 14px; line-height: 1.6; }
+.qnum { font-weight: bold; margin-right: 6px; }
+.choices { margin-top: 6px; margin-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.answer-line { border-bottom: 1px solid #999; height: 24px; margin-top: 6px; margin-left: 20px; max-width: 320px; }
+.answer-key { page-break-before: always; margin-top: 40px; }
+.answer-row { font-size: 13px; margin-bottom: 6px; }
+</style></head><body>
+<h1>${escapeHtml(title || 'Worksheet')}</h1>
+${instructions ? `<p class="instructions">${escapeHtml(instructions)}</p>` : ''}
+${questionsHtml}
+<div class="answer-key"><h2>${isKo ? '정답지 (교사용)' : 'Answer Key (Teacher Copy)'}</h2>${answerKeyHtml}</div>
+</body></html>`);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => printWindow.print(), 300);
+
+      showToast({ type: 'success', message: isKo ? '⚡ AI 맞춤 워크시트(PDF)가 생성되었습니다!' : '⚡ AI Worksheet Generated Successfully!' });
+    } catch (err: any) {
+      console.error('Worksheet generation failed:', err);
+      const message = err?.message === 'GENERATE_LIMIT_REACHED'
+        ? (isKo ? '오늘의 생성 한도에 도달했습니다.' : "You've reached today's generation limit.")
+        : (isKo ? '워크시트 생성에 실패했습니다. 다시 시도해 주세요.' : 'Failed to generate worksheet. Please try again.');
+      showToast({ type: 'error', message });
+    } finally {
+      setIsGeneratingWorksheet(false);
     }
   };
 
@@ -3220,6 +3335,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                   setQuestionStyle={setQuestionStyle}
                   loadCurriculum={loadCurriculum}
                   isSavingCurriculum={isSavingCurriculum}
+                  handleGenerateWorksheet={handleGenerateWorksheet}
+                  isGeneratingWorksheet={isGeneratingWorksheet}
                 />
               )}
 
