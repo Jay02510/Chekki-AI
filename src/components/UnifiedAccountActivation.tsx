@@ -4,6 +4,7 @@ import { auth } from '../../services/database';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { useToast } from '../../contexts/ToastContext';
 import { labelsForPlan } from '../../api/_lib/pricingTiers';
+import { readAndCompressLogoFile, LogoTooLargeError } from '../utils/logoUpload';
 
 interface Props {
   isNight?: boolean;
@@ -48,11 +49,22 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
     setSelectedClasses(selectedClasses.filter((c) => c !== cls));
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setLogoPreview(url);
+    if (!file) return;
+    try {
+      const compressed = await readAndCompressLogoFile(file);
+      setLogoPreview(compressed);
+    } catch (err) {
+      showToast({
+        type: 'error',
+        message:
+          err instanceof LogoTooLargeError
+            ? (isKo ? '압축 후에도 이미지가 너무 큽니다. 더 작은 이미지를 선택해주세요.' : err.message)
+            : (isKo ? '이미지를 불러오지 못했습니다. 다시 시도해주세요.' : 'Could not read that image. Please try again.'),
+      });
+    } finally {
+      e.target.value = '';
     }
   };
 
@@ -66,7 +78,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
       const response = await fetch('/api/update-school-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ academyName: academyName.trim() }),
+        body: JSON.stringify({ academyName: academyName.trim(), logoUrl: logoPreview || undefined }),
       });
       if (!response.ok) throw new Error(await response.text());
     } catch (err) {
@@ -211,7 +223,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                       <p className="text-xs font-bold">{logoPreview ? (isKo ? '미리보기 (아직 저장되지 않음)' : 'Preview (not saved yet)') : (isKo ? '원장님 로고 이미지 첨부' : 'Attach School Logo Image')}</p>
                       <p className="text-[10px] text-zinc-400">
                         {logoPreview
-                          ? (isKo ? '로고 업로드 기능은 준비 중입니다.' : 'Logo upload isn’t saved to your account yet — coming soon.')
+                          ? (isKo ? '다음 버튼을 누르면 저장됩니다.' : 'Saved when you tap Next.')
                           : 'PNG, JPG (Transparent background recommended)'}
                       </p>
                     </div>

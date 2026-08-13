@@ -2,6 +2,8 @@ import React from 'react';
 import { X, Sparkle } from '@phosphor-icons/react';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useToast } from '../../contexts/ToastContext';
+import { auth } from '../../services/database';
+import { readAndCompressLogoFile, LogoTooLargeError } from '../utils/logoUpload';
 
 const MAX_LOGO_BYTES = 5 * 1024 * 1024;
 
@@ -12,6 +14,8 @@ interface Props {
   setTempLogoUrl: (url: string) => void;
   setAcademyLogo: (url: string) => void;
   onClose: () => void;
+  schoolId: string;
+  academyName: string;
 }
 
 export const AcademyLogoModal: React.FC<Props> = ({
@@ -21,8 +25,11 @@ export const AcademyLogoModal: React.FC<Props> = ({
   setTempLogoUrl,
   setAcademyLogo,
   onClose,
+  schoolId,
+  academyName,
 }) => {
   const [fileError, setFileError] = React.useState<string | null>(null);
+  const [isSaving, setIsSaving] = React.useState(false);
   const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
   const { showToast } = useToast();
 
@@ -73,22 +80,39 @@ export const AcademyLogoModal: React.FC<Props> = ({
           </p>
 
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
+              setIsSaving(true);
+              setFileError(null);
               try {
-                localStorage.setItem('chekki_academy_logo', tempLogoUrl);
-              } catch (err) {
+                const idToken = await auth.currentUser?.getIdToken();
+                const response = await fetch('/api/update-school-profile', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+                  body: JSON.stringify({ academyName, logoUrl: tempLogoUrl }),
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(data.error || 'Failed to save logo');
+
+                try {
+                  localStorage.setItem('chekki_academy_logo', tempLogoUrl);
+                } catch {
+                  // Best-effort local cache only — the server write above is
+                  // the source of truth now.
+                }
+                setAcademyLogo(tempLogoUrl);
+                onClose();
+                showToast({ type: 'success', message: isKo ? '학원 맞춤 로고가 저장되었습니다!' : 'Custom Academy Logo saved!' });
+              } catch (err: any) {
                 console.error('Failed to save academy logo:', err);
                 setFileError(
                   isKo
                     ? '로고 저장에 실패했습니다. 이미지 용량을 줄이거나 URL을 사용해주세요.'
-                    : "Couldn't save that logo — try a smaller image or a URL instead."
+                    : err.message || "Couldn't save that logo — try a smaller image or a URL instead."
                 );
-                return;
+              } finally {
+                setIsSaving(false);
               }
-              setAcademyLogo(tempLogoUrl);
-              onClose();
-              showToast({ type: 'success', message: isKo ? '학원 맞춤 로고가 저장되었습니다!' : 'Custom Academy Logo saved!' });
             }}
             className="space-y-4"
           >
@@ -104,7 +128,7 @@ export const AcademyLogoModal: React.FC<Props> = ({
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
                     if (file.size > MAX_LOGO_BYTES) {
@@ -117,17 +141,19 @@ export const AcademyLogoModal: React.FC<Props> = ({
                       return;
                     }
                     setFileError(null);
-                    const reader = new FileReader();
-                    reader.onload = (evt) => {
-                      const res = evt.target?.result as string;
-                      if (res) setTempLogoUrl(res);
-                    };
-                    reader.onerror = () => {
+                    try {
+                      const compressed = await readAndCompressLogoFile(file);
+                      setTempLogoUrl(compressed);
+                    } catch (err) {
                       setFileError(
-                        isKo ? '이미지를 불러오지 못했습니다. 다시 시도해주세요.' : 'Could not read that image. Please try again.'
+                        err instanceof LogoTooLargeError
+                          ? (isKo
+                              ? '압축 후에도 이미지가 너무 큽니다. 더 작은 이미지나 URL을 사용해주세요.'
+                              : err.message)
+                          : (isKo ? '이미지를 불러오지 못했습니다. 다시 시도해주세요.' : 'Could not read that image. Please try again.')
                       );
-                    };
-                    reader.readAsDataURL(file);
+                    }
+                    e.target.value = '';
                   }}
                   className="hidden"
                 />
@@ -184,21 +210,45 @@ export const AcademyLogoModal: React.FC<Props> = ({
             <div className="pt-2 flex gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  setTempLogoUrl('');
-                  setAcademyLogo('');
-                  localStorage.removeItem('chekki_academy_logo');
-                  onClose();
+                disabled={isSaving}
+                onClick={async () => {
+                  setIsSaving(true);
+                  setFileError(null);
+                  try {
+                    const idToken = await auth.currentUser?.getIdToken();
+                    const response = await fetch('/api/update-school-profile', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+                      body: JSON.stringify({ academyName, logoUrl: '' }),
+                    });
+                    if (!response.ok) {
+                      const data = await response.json().catch(() => ({}));
+                      throw new Error(data.error || 'Failed to remove logo');
+                    }
+                    setTempLogoUrl('');
+                    setAcademyLogo('');
+                    try {
+                      localStorage.removeItem('chekki_academy_logo');
+                    } catch {
+                      // best-effort local cache cleanup
+                    }
+                    onClose();
+                  } catch (err: any) {
+                    setFileError(err.message || (isKo ? '로고 삭제에 실패했습니다.' : "Couldn't remove the logo."));
+                  } finally {
+                    setIsSaving(false);
+                  }
                 }}
-                className="w-1/3 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-xs rounded-2xl border border-red-500/20 transition-all active:scale-[0.98] cursor-pointer"
+                className="w-1/3 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-xs rounded-2xl border border-red-500/20 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40"
               >
                 {isKo ? '로고 초기화' : 'Remove Logo'}
               </button>
               <button
                 type="submit"
-                className="w-2/3 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
+                disabled={isSaving}
+                className="w-2/3 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40"
               >
-                {isKo ? '로고 저장하기' : 'Save Logo'}
+                {isSaving ? (isKo ? '저장 중...' : 'Saving…') : (isKo ? '로고 저장하기' : 'Save Logo')}
               </button>
             </div>
           </form>

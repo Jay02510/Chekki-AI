@@ -1,7 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { FieldValue } from 'firebase-admin/firestore';
 import { withSentry } from './_lib/withSentry.js';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
+
+// Firestore documents cap out at 1MiB; a base64 logo data URL is the only
+// field on schools/{id} that could realistically approach that on its own,
+// so it gets its own explicit guard rather than relying on the client's
+// (bypassable) compression step.
+const MAX_LOGO_URL_LENGTH = 700_000;
 
 /**
  * Two director-only, schoolId-owner-checked actions merged into one
@@ -47,9 +54,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'Not the owner of this school' });
     }
 
-    const update: Record<string, string> = { name: academyName.trim() };
-    if (typeof logoUrl === 'string' && logoUrl.trim()) {
-      update.logoUrl = logoUrl.trim();
+    const update: Record<string, unknown> = { name: academyName.trim() };
+    if (typeof logoUrl === 'string') {
+      const trimmedLogoUrl = logoUrl.trim();
+      if (trimmedLogoUrl.length > MAX_LOGO_URL_LENGTH) {
+        return res.status(413).json({ error: 'Logo is too large to save. Try a smaller image or a URL instead.' });
+      }
+      // Explicit empty string means "clear the logo" (e.g. Remove Logo) —
+      // distinct from the field simply being absent from the request.
+      update.logoUrl = trimmedLogoUrl ? trimmedLogoUrl : FieldValue.delete();
     }
     await schoolRef.update(update);
     await adminDb.collection('users').doc(uid).update({ schoolName: academyName.trim() });

@@ -44,7 +44,7 @@ export default function AdminPage() {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('1_month');
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'create' | 'upgrade' | 'delete' | 'view_members' | 'schools' | 'invoices'>(
+  const [mode, setMode] = useState<'create' | 'upgrade' | 'delete' | 'view_members' | 'schools' | 'invoices' | 'invites'>(
     'create'
   );
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -59,6 +59,9 @@ export default function AdminPage() {
 
   // Invoices State
   const [invoices, setInvoices] = useState<any[]>([]);
+
+  // Pending Teacher Invites State (ops visibility into unclaimed invite links)
+  const [invites, setInvites] = useState<any[]>([]);
 
   // Schools State
   const [schools, setSchools] = useState<any[]>([]);
@@ -93,10 +96,37 @@ export default function AdminPage() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch invoices');
       }
-      setInvoices(data.invoices || []);
+      // Pending-first so the actionable ones aren't buried under already-paid history.
+      const sorted = [...(data.invoices || [])].sort((a: any, b: any) => {
+        if (a.status === b.status) return 0;
+        return a.status === 'paid' ? 1 : -1;
+      });
+      setInvoices(sorted);
     } catch (err: any) {
       console.error(err);
       setMessage({ text: err.message || 'Error fetching invoices', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFetchInvites = async () => {
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'list_invites' }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch invites');
+      }
+      setInvites(data.invites || []);
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error fetching invites', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -334,12 +364,21 @@ export default function AdminPage() {
         const res = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPassword);
         uid = res.user.uid;
       } catch (authErr: any) {
-        // If user already exists, we might want to just upgrade them if we could get UID
-        // But for security/simplicity, we'll just report the error.
         if (authErr.code === 'auth/email-already-in-use') {
-          throw new Error(
-            'This email is already registered. Please use the "Upgrade" feature (coming soon) or contact support.'
-          );
+          // Auth account exists — route straight into the Upgrade tab (same
+          // /api/admin action:'upgrade' flow as handleUpgradeUser) instead of
+          // dead-ending. That endpoint looks the user up by email in
+          // Firestore, so it can still 404 if the Auth account exists but
+          // never got a Firestore users/ doc (a rarer data-integrity gap) —
+          // handleUpgradeUser's own error path already surfaces that clearly.
+          setEmail(cleanEmail);
+          setMode('upgrade');
+          setMessage({
+            text: 'This email is already registered — switched you to the Upgrade tab. Just hit Upgrade to elevate it to Pro.',
+            type: 'error',
+          });
+          setLoading(false);
+          return;
         }
         throw authErr;
       }
@@ -419,6 +458,18 @@ export default function AdminPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        // This endpoint looks the user up by email in the users/ Firestore
+        // collection only — it never checks Firebase Auth. A 404 here can
+        // mean either "no account at all" or the rarer case of an Auth
+        // account that exists but never got a Firestore profile doc (e.g. a
+        // signup that was interrupted). That second case can't be fixed by
+        // retrying Upgrade — the admin needs to Delete the orphaned Auth
+        // account and have the user sign up again.
+        if (response.status === 404) {
+          throw new Error(
+            `${data.error || 'User not found.'} If you're sure this email signed up before, it may be an orphaned Auth account with no profile — use Delete, then have them sign up again.`
+          );
+        }
         throw new Error(data.error || 'Failed to upgrade user');
       }
 
@@ -598,7 +649,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-white font-sans">
       <div
-        className={`w-full bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-200 ${(mode === 'view_members' || mode === 'schools') && isAuthorized ? 'max-w-4xl' : 'max-w-md'}`}
+        className={`w-full bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-200 ${(mode === 'view_members' || mode === 'schools' || mode === 'invites') && isAuthorized ? 'max-w-4xl' : 'max-w-md'}`}
       >
         {/* Glow effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -743,6 +794,17 @@ export default function AdminPage() {
                 className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'invoices' ? 'bg-orange-500 text-white shadow font-black' : 'text-zinc-500 hover:text-white/80'}`}
               >
                 Bank Invoices 🧾
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('invites');
+                  setMessage({ text: '', type: '' });
+                  handleFetchInvites();
+                }}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'invites' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+              >
+                Pending Invites
               </button>
             </div>
 
@@ -907,21 +969,28 @@ export default function AdminPage() {
                           <th className="py-3 px-4 font-bold">School Name</th>
                           <th className="py-3 px-4 font-bold">Teacher Auth Code</th>
                           <th className="py-3 px-4 font-bold">Teacher Quota</th>
+                          <th className="py-3 px-4 font-bold">Plan / Trial</th>
                           <th className="py-3 px-4 font-bold">Created At</th>
                           <th className="py-3 px-4 font-bold text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800/50">
                         {loading ? (
-                          <SkeletonRows columns={6} />
+                          <SkeletonRows columns={7} />
                         ) : filteredSchools.length === 0 ? (
                           <tr>
-                            <td colSpan={6} className="py-8 text-center text-zinc-500">
+                            <td colSpan={7} className="py-8 text-center text-zinc-500">
                               No schools found.
                             </td>
                           </tr>
                         ) : (
-                          filteredSchools.map((school) => (
+                          filteredSchools.map((school) => {
+                            const trialEndsAtMs = school.trialEndsAt ? new Date(school.trialEndsAt).getTime() : null;
+                            const daysRemaining = trialEndsAtMs !== null ? Math.ceil((trialEndsAtMs - Date.now()) / (24 * 60 * 60 * 1000)) : null;
+                            const isTrial = school.planId === 'trial';
+                            const isExpired = isTrial && daysRemaining !== null && daysRemaining <= 0;
+                            const isExpiringSoon = isTrial && !isExpired && daysRemaining !== null && daysRemaining <= 2;
+                            return (
                             <tr
                               key={school.schoolId}
                               className="hover:bg-zinc-800/30 transition-colors"
@@ -947,6 +1016,27 @@ export default function AdminPage() {
                                       : 'None'}
                                   </span>
                                 </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                {!school.planId ? (
+                                  <span className="text-zinc-600">-</span>
+                                ) : isExpired ? (
+                                  <span className="px-2 py-1 rounded-md bg-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-wider">
+                                    Trial Expired
+                                  </span>
+                                ) : isExpiringSoon ? (
+                                  <span className="px-2 py-1 rounded-md bg-amber-500/10 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+                                    Trial: {daysRemaining}d left
+                                  </span>
+                                ) : isTrial ? (
+                                  <span className="px-2 py-1 rounded-md bg-zinc-800 text-zinc-300 text-[10px] font-bold uppercase tracking-wider">
+                                    Trial: {daysRemaining}d left
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                                    {school.planId}
+                                  </span>
+                                )}
                               </td>
                               <td className="py-3 px-4 text-zinc-500">
                                 {school.createdAt
@@ -974,7 +1064,8 @@ export default function AdminPage() {
                                 </div>
                               </td>
                             </tr>
-                          ))
+                            );
+                          })
                         )}
                       </tbody>
                     </table>
@@ -1250,6 +1341,71 @@ export default function AdminPage() {
                             </td>
                           </tr>
                         ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            ) : mode === 'invites' ? (
+              <div className="w-full flex flex-col gap-4 mt-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">
+                    Pending Teacher Invites ({invites.length})
+                  </h3>
+                  <button
+                    onClick={handleFetchInvites}
+                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-bold transition-all"
+                  >
+                    Refresh List
+                  </button>
+                </div>
+                <p className="text-[11px] text-zinc-500 -mt-2">
+                  Invite links a director sent that nobody has claimed yet, oldest first.
+                </p>
+
+                <div className="w-full overflow-x-auto">
+                  {!loading && invites.length === 0 ? (
+                    <div className="p-8 text-center text-zinc-500 text-sm">
+                      No pending invites.
+                    </div>
+                  ) : (
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead>
+                        <tr className="border-b border-zinc-800 text-zinc-400 text-xs uppercase">
+                          <th className="py-3 px-4 font-bold">Invite ID</th>
+                          <th className="py-3 px-4 font-bold">School</th>
+                          <th className="py-3 px-4 font-bold">Email</th>
+                          <th className="py-3 px-4 font-bold">Role</th>
+                          <th className="py-3 px-4 font-bold">Sent</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800/50">
+                        {loading ? (
+                          <SkeletonRows columns={5} />
+                        ) : (
+                          invites.map((inv) => {
+                            const daysOld = inv.createdAt
+                              ? Math.floor((Date.now() - new Date(inv.createdAt).getTime()) / (24 * 60 * 60 * 1000))
+                              : null;
+                            return (
+                              <tr key={inv.inviteId} className="hover:bg-zinc-900/50 text-xs">
+                                <td className="py-3.5 px-4 font-mono font-bold text-orange-400">{inv.inviteId}</td>
+                                <td className="py-3.5 px-4 text-zinc-300">{inv.schoolId || '-'}</td>
+                                <td className="py-3.5 px-4 text-zinc-300">{inv.email || '-'}</td>
+                                <td className="py-3.5 px-4 text-zinc-400 uppercase">{inv.role || '-'}</td>
+                                <td className="py-3.5 px-4">
+                                  {daysOld !== null ? (
+                                    <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                                      daysOld >= 3 ? 'bg-amber-500/10 text-amber-400' : 'bg-zinc-800 text-zinc-400'
+                                    }`}>
+                                      {daysOld}d ago
+                                    </span>
+                                  ) : '-'}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
                       </tbody>
                     </table>
                   )}

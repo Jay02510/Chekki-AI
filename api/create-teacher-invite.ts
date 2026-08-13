@@ -5,6 +5,7 @@ import { maxInvitesForRole } from './_lib/seatLimits.js';
 import { applyCors } from './_lib/cors.js';
 import { FieldValue } from 'firebase-admin/firestore';
 import { createRateLimiter } from './_lib/rateLimit.js';
+import { isValidAssignPayload, isValidRemoveTeacherPayload, canRemoveTeacher } from './_lib/rosterValidation.js';
 
 const checkTeacherInviteLimit = createRateLimiter('teacher_invite', 20, 60);
 
@@ -129,10 +130,10 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
 }
 
 async function handleAssignClassTeacher(req: VercelRequest, res: VercelResponse, schoolId: string) {
-  const { classId, teacherUid, assignAction } = req.body || {};
-  if (typeof classId !== 'string' || typeof teacherUid !== 'string' || (assignAction !== 'add' && assignAction !== 'remove')) {
+  if (!isValidAssignPayload(req.body)) {
     return res.status(400).json({ error: 'classId, teacherUid, and assignAction ("add"|"remove") are required' });
   }
+  const { classId, teacherUid, assignAction } = req.body;
 
   const classRef = adminDb.collection('classes').doc(classId);
   const classSnap = await classRef.get();
@@ -155,11 +156,11 @@ async function handleAssignClassTeacher(req: VercelRequest, res: VercelResponse,
 }
 
 async function handleRemoveTeacher(req: VercelRequest, res: VercelResponse, callerUid: string, schoolId: string) {
-  const { teacherUid } = req.body || {};
-  if (typeof teacherUid !== 'string' || !teacherUid) {
+  if (!isValidRemoveTeacherPayload(req.body)) {
     return res.status(400).json({ error: 'teacherUid is required' });
   }
-  if (callerUid === teacherUid) {
+  const { teacherUid } = req.body;
+  if (!canRemoveTeacher(callerUid, teacherUid)) {
     return res.status(400).json({ error: 'Cannot remove yourself' });
   }
 
@@ -198,6 +199,90 @@ async function handleRemoveTeacher(req: VercelRequest, res: VercelResponse, call
   return res.status(200).json({ success: true });
 }
 
+/**
+ * Best-effort: FT submits a class log → email the class's assigned KT
+ * teacher(s) (falling back to every KT at the school if the class has no
+ * assignment yet) so they know a log is waiting for review. Callable by any
+ * authenticated teacher at the school — unlike invite/assign/remove above,
+ * this doesn't require the caller to be a director.
+ */
+async function handleNotifyLogReady(req: VercelRequest, res: VercelResponse, schoolId: string) {
+  const { classId } = req.body || {};
+  if (typeof classId !== 'string' || !classId) {
+    return res.status(400).json({ error: 'classId is required' });
+  }
+
+  const classSnap = await adminDb.collection('classes').doc(classId).get();
+  if (!classSnap.exists || classSnap.data()?.schoolId !== schoolId) {
+    return res.status(404).json({ error: 'Class not found' });
+  }
+  const classData = classSnap.data() || {};
+  const assignedTeacherUids: string[] = Array.isArray(classData.assignedTeacherUids)
+    ? classData.assignedTeacherUids
+    : [];
+
+  let ktEmails: string[] = [];
+  if (assignedTeacherUids.length > 0) {
+    const assignedSnaps = await Promise.all(
+      assignedTeacherUids.map((u) => adminDb.collection('users').doc(u).get())
+    );
+    ktEmails = assignedSnaps
+      .filter((s) => s.exists && s.data()?.educatorRole === 'kt')
+      .map((s) => s.data()?.email)
+      .filter((e): e is string => typeof e === 'string' && !!e);
+  }
+
+  if (ktEmails.length === 0) {
+    // No class-specific KT assignment yet — fall back to every KT at the school.
+    const ktSnap = await adminDb
+      .collection('users')
+      .where('schoolId', '==', schoolId)
+      .where('educatorRole', '==', 'kt')
+      .get();
+    ktEmails = ktSnap.docs
+      .map((d) => d.data()?.email)
+      .filter((e): e is string => typeof e === 'string' && !!e);
+  }
+
+  if (ktEmails.length === 0) {
+    return res.status(200).json({ success: true, notified: 0 });
+  }
+
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (resendApiKey) {
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Chekki AI <billing@chekkiai.com>',
+          to: ktEmails,
+          subject: `[Chekki AI] 새 수업 일지가 검토 대기 중입니다`,
+          html: `
+            <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
+              <div style="text-align: center; margin-bottom: 24px;">
+                <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
+              </div>
+              <p style="font-size: 15px; color: #e4e4e7;">원어민 선생님이 새 수업 일지를 제출했습니다. 학부모께 발송할 알림톡 대본이 준비되었습니다.</p>
+              <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">Chekki 앱의 대시보드에서 검토 후 학부모께 발송해주세요.</p>
+              <div style="text-align: center; margin: 24px 0;">
+                <a href="https://chekkiai.com/teacher" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 검토하기</a>
+              </div>
+            </div>
+          `,
+        }),
+      });
+    } catch (emailErr) {
+      console.warn('[create-teacher-invite:notify_log_ready] Resend email failed:', emailErr);
+    }
+  }
+
+  return res.status(200).json({ success: true, notified: ktEmails.length });
+}
+
 async function handler(req: VercelRequest, res: VercelResponse) {
   const corsOrigin = applyCors(req, res);
 
@@ -223,6 +308,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     const userSnap = await adminDb.collection('users').doc(uid).get();
     const userData = userSnap.data();
+
+    // notify_log_ready is callable by any teacher at the school (e.g. the FT
+    // who just submitted a log) — every other action here is director-only.
+    if (action === 'notify_log_ready') {
+      if (!userSnap.exists || !userData?.schoolId) {
+        return res.status(403).json({ error: 'Only a member of a school can perform this action' });
+      }
+      return await handleNotifyLogReady(req, res, userData.schoolId as string);
+    }
+
     if (!userSnap.exists || userData?.role !== 'director' || !userData?.schoolId) {
       return res.status(403).json({ error: 'Only a director with a school can perform this action' });
     }

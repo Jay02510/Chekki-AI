@@ -6,6 +6,7 @@ import { Ratelimit } from '@upstash/ratelimit';
 import crypto from 'crypto';
 import { adminDb, adminAuth as adminAuthClient } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
+import { parseAiJson } from './_lib/aiJson.js';
 
 export const config = {
   maxDuration: 300,
@@ -767,7 +768,7 @@ async function handler(req: any, res: any) {
     const mode = body?.mode;
 
     // Handle Textbook Curriculum OCR extraction for Teacher Dashboard (supports single or multi-page uploads)
-    if (mode === 'textbook_curriculum_ocr') {
+    if (mode === 'textbook_curriculum_ocr' || mode === 'syllabus_course_plan') {
       const rawImageList: string[] = Array.isArray(body?.images_base64) && body.images_base64.length > 0
         ? body.images_base64
         : (body?.image_base64 || body?.image ? [body.image_base64 || body.image] : []);
@@ -785,7 +786,37 @@ async function handler(req: any, res: any) {
         }
       }));
 
-      const promptText = `You are an expert curriculum parser for English Kindergarten & Elementary textbooks and worksheets.
+      const isSyllabus = mode === 'syllabus_course_plan';
+
+      const promptText = isSyllabus
+        ? `You are an expert curriculum parser for English Kindergarten & Elementary textbooks.
+Extract a course-level overview from the provided syllabus/table-of-contents/unit-index page image(s).
+You are analyzing ${rawImageList.length} page(s)/image(s) that describe the SCOPE of a course or term (unit titles, week ranges, target vocabulary/phonics scope across many units) — NOT a single day's worksheet.
+
+Aggregate across all units visible into one overall term scope, AND provide a page-by-page breakdown for each page uploaded.
+
+Return ONLY valid JSON matching this schema:
+{
+  "topic": string (overall course/term title, e.g. "Term 2 - Phonics & Reading"),
+  "vocabWords": string[] (all target vocabulary words across the term/units shown),
+  "phonicsRules": string[] (all target phonics rules across the term/units shown),
+  "passage": string (a representative reading passage or topic description, if present),
+  "other": string (course-level notes: pacing, number of weeks, homework policy, etc.),
+  "detectedAnswers": [],
+  "pages": [
+    {
+      "pageIndex": number (1-based index: 1, 2, 3...),
+      "pageTitle": string (e.g. "Page 1 - Unit Index"),
+      "topic": string,
+      "vocabWords": string[],
+      "phonicsRules": string[],
+      "passage": string,
+      "other": string,
+      "detectedAnswers": []
+    }
+  ]
+}`
+        : `You are an expert curriculum parser for English Kindergarten & Elementary textbooks and worksheets.
 Extract the core teaching components and parent answer key from the provided textbook/worksheet page image(s).
 You are analyzing ${rawImageList.length} page(s)/image(s).
 
@@ -842,40 +873,18 @@ Return ONLY valid JSON matching this schema:
       });
 
       const rawText = response.text || '{}';
-      const cleaned = rawText.replace(/```json\n?|```/g, '').trim();
       try {
-        const parsed = JSON.parse(cleaned);
+        const parsed = parseAiJson(rawText);
         return res.status(200).json({ analysis: parsed });
       } catch (err) {
-        return res.status(200).json({
-          analysis: {
-            topic: 'Weather & Nature',
-            vocabWords: ['sunny', 'rainy', 'windy', 'cloudy', 'umbrella', 'storm'],
-            phonicsRules: ['-ai-', '-ay-', 'sh-'],
-            passage: 'The weather was rainy today. Always remember your umbrella!',
-            other: 'Homework: Practice spelling target vocabulary twice and read page 24 out loud.',
-            detectedAnswers: [
-              { questionNumber: '1', questionText: 'Look at the picture. What is the weather like?', answer: 'rainy', category: 'Vocabulary' },
-              { questionNumber: '2', questionText: 'Fill in the missing letters: r _ _ n', answer: 'rain (-ai-)', category: 'Phonics' },
-              { questionNumber: '3', questionText: 'What item do you carry when it rains?', answer: 'umbrella', category: 'Reading' }
-            ],
-            pages: [
-              {
-                pageIndex: 1,
-                pageTitle: 'Page 1 - Vocabulary & Phonics',
-                topic: 'Weather & Nature',
-                vocabWords: ['sunny', 'rainy', 'windy', 'cloudy', 'umbrella', 'storm'],
-                phonicsRules: ['-ai-', '-ay-', 'sh-'],
-                passage: '',
-                other: '',
-                detectedAnswers: [
-                  { questionNumber: '1', questionText: 'Look at the picture. What is the weather like?', answer: 'rainy', category: 'Vocabulary' },
-                  { questionNumber: '2', questionText: 'Fill in the missing letters: r _ _ n', answer: 'rain (-ai-)', category: 'Phonics' }
-                ]
-              }
-            ]
-          }
-        });
+        // Previously this fell back to hardcoded fake "Weather & Nature"
+        // curriculum data with a 200 status, which a teacher could then save
+        // as real curriculum with no indication the scan had actually
+        // failed (Audit: server-side fake-success on AI JSON parse failure).
+        // A real failure must surface as a real error — the client already
+        // treats any non-2xx as a scan failure and shows a retry toast.
+        console.error('[analyze] Failed to parse AI curriculum JSON:', err);
+        return res.status(502).json({ error: 'AI_PARSE_FAILED' });
       }
     }
 

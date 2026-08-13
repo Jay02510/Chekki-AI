@@ -284,10 +284,30 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           maxUses: data.maxUses ?? 5,
           usedByUids: data.usedByUids || [],
           createdAt: data.createdAt || null,
+          planId: data.planId || null,
+          trialEndsAt: data.trialEndsAt || null,
         };
       });
 
       return res.status(200).json({ success: true, schools });
+    } else if (action === 'list_invites') {
+      // Surfaces invites/{id}.status/createdAt — already written by
+      // api/create-teacher-invite.ts, just never queried anywhere until now
+      // — so ops can see teacher invite links a director sent that nobody
+      // has claimed yet. Sorted oldest-first in memory rather than via
+      // .orderBy('createdAt') so this single-equality-filter query doesn't
+      // require a new Firestore composite index to be deployed.
+      const invitesSnapshot = await adminDb
+        .collection('invites')
+        .where('status', '==', 'pending')
+        .limit(200)
+        .get();
+
+      const invites = invitesSnapshot.docs
+        .map((doc) => ({ inviteId: doc.id, ...doc.data() }))
+        .sort((a: any, b: any) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+
+      return res.status(200).json({ success: true, invites });
     } else if (action === 'delete_school') {
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
       const sanitizedSchoolId = sanitizeSchoolId(schoolId);

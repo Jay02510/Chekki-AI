@@ -4,6 +4,7 @@ import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
 import { maxClassesForSeats } from './_lib/seatLimits.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter } from './_lib/rateLimit.js';
+import { generateJoinCode } from './_lib/joinCode.js';
 
 const checkCreateClassLimit = createRateLimiter('create_class', 20, 60);
 
@@ -23,14 +24,6 @@ const checkCreateClassLimit = createRateLimiter('create_class', 20, 60);
  * checked the same way everywhere, instead of the old dead `seatCount` field
  * that nothing ever wrote.
  */
-function generateJoinCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-}
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res);

@@ -54,6 +54,7 @@ import { ReportCardModal } from '../components/ReportCardModal';
 import { CurriculumEditorForm } from '../components/CurriculumEditorForm';
 import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { validateCurriculumOtherField } from '../utils/curriculumGuardrail';
 import { 
   generateGeneralClassSummary, 
   generateStudentExceptionReport, 
@@ -287,6 +288,23 @@ export default function TeacherPage({ isNight = true }: Props) {
             aiEnglishSummary: summary.english,
             aiStudentReports: studentReports,
           }]);
+
+          // Best-effort email to the class's KT teacher(s) — never blocks
+          // or affects the log-submission success state above, matching
+          // how every other Resend notification in this codebase treats
+          // email as a courtesy, not a source of truth.
+          (async () => {
+            try {
+              const idToken = await auth.currentUser?.getIdToken();
+              await fetch('/api/create-teacher-invite', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+                body: JSON.stringify({ action: 'notify_log_ready', classId: selectedClass.id }),
+              });
+            } catch (notifyErr) {
+              console.warn('Failed to notify KT teacher of new log:', notifyErr);
+            }
+          })();
         } catch (persistErr) {
           console.error('Failed to save class log to Firestore:', persistErr);
           // Previously silent: the UI still switched to the "success" kt_script
@@ -825,6 +843,26 @@ export default function TeacherPage({ isNight = true }: Props) {
       console.warn('Failed to persist academy logo locally:', err);
     }
   }, [academyLogo]);
+
+  // Load the school's saved logo from Firestore (source of truth — the
+  // localStorage seed above is only a fast-paint cache for the current
+  // device/browser). Runs for every role, not just director, since FT/KT
+  // teachers also see the academy logo in the header and on report cards.
+  useEffect(() => {
+    const schoolId = (user as any)?.schoolId;
+    if (!schoolId) return;
+    (async () => {
+      try {
+        const snap = await getDoc(doc(dbInstance, 'schools', schoolId));
+        const logoUrl = snap.data()?.logoUrl;
+        if (typeof logoUrl === 'string' && logoUrl) {
+          setAcademyLogo(logoUrl);
+        }
+      } catch (err) {
+        console.warn('Failed to load academy logo from school profile:', err);
+      }
+    })();
+  }, [(user as any)?.schoolId]);
 
   // Worksheet Format & Question Style State
   const [worksheetType, setWorksheetType] = useState<string>('daily_homework');
@@ -1511,32 +1549,20 @@ export default function TeacherPage({ isNight = true }: Props) {
     const targetClass = selectedClass || fallbackDemoClass;
 
     // --- GUARDRAIL VALIDATION FOR "OTHER" FIELD ---
-    const otherText = curriculumOther.trim();
-    if (otherText) {
-      const lower = otherText.toLowerCase();
-      const restrictedWords = [
-        'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'crap', 'dick', 'pussy', 'slut', 'whore',
-        '씨발', '개새끼', '병신', '지랄', '존나', '좆', '꺼져', '미친년', '미친놈'
-      ];
-      for (const badWord of restrictedWords) {
-        if (lower.includes(badWord)) {
-          showToast({ type: 'error', message: isKo
-            ? `[보안 경고] 부적절한 단어("${badWord}")가 포함되어 있습니다. 학습에 적합한 언어를 사용해 주세요.`
-            : `[Security Warning] Inappropriate term detected ("${badWord}"). Please use appropriate educational content.`
-          });
-          return;
-        }
-      }
-
-      // Check for English learning relevance (must contain English letters or educational keywords)
-      const hasEnglishText = /[a-zA-Z]/.test(otherText);
-      if (!hasEnglishText) {
+    const guardrailResult = validateCurriculumOtherField(curriculumOther);
+    if (!guardrailResult.ok) {
+      if (guardrailResult.reason === 'restricted_word') {
+        showToast({ type: 'error', message: isKo
+          ? `[보안 경고] 부적절한 단어("${guardrailResult.badWord}")가 포함되어 있습니다. 학습에 적합한 언어를 사용해 주세요.`
+          : `[Security Warning] Inappropriate term detected ("${guardrailResult.badWord}"). Please use appropriate educational content.`
+        });
+      } else {
         showToast({ type: 'error', message: isKo
           ? '[작성 안내] 기타 필드에는 영어 학습 관련 지침(예: "Speaking: Practice reading the word umbrella 3 times.")이 포함되어야 합니다.'
           : '[Content Notice] The Other field must include English instruction (e.g. "Speaking: Practice reading the word umbrella 3 times.").'
         });
-        return;
       }
+      return;
     }
 
     setIsSavingCurriculum(true);
@@ -2262,6 +2288,9 @@ ${questionsHtml}
           dismissTeacherOnboarding();
           if (data.academyName) {
             localStorage.setItem('chekki_academy_name', data.academyName);
+          }
+          if (data.logoUrl) {
+            setAcademyLogo(data.logoUrl);
           }
           if (data.classes && data.classes.length > 0) {
             // Create each class through the real server-authoritative path
@@ -3665,6 +3694,8 @@ ${questionsHtml}
           setTempLogoUrl={setTempLogoUrl}
           setAcademyLogo={setAcademyLogo}
           onClose={() => setShowLogoModal(false)}
+          schoolId={(user as any)?.schoolId || ''}
+          academyName={user?.schoolName || 'Chekki Master Academy'}
         />
       )}
       {/* --- TEACHER SETTINGS MODAL --- */}

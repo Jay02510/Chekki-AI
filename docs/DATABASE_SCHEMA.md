@@ -139,10 +139,16 @@ Maintains hagwon / EK organization profiles and active seat allocations.
 | Field Name | Type | Description |
 | :--- | :--- | :--- |
 | `schoolId` | `string (PK)` | Unique institutional slug (e.g., `"poly_daechi"`). |
-| `schoolName` | `string` | Display name (e.g., `"Poly Academy Daechi"`). |
+| `name` | `string` | Display name, set via `api/update-school-profile.ts` (director "Change School Name/Logo"). |
+| `logoUrl` | `string` | Academy logo — base64 data URL or an external image URL. Rendered on parent report cards and the teacher header. |
+| `ownerUid` | `string` | UID of the director who owns/administers this school. |
+| `planId` | `string` | Current plan (e.g. `'trial'`, a paid tier id). Drives seat limits via `api/_lib/pricingTiers.ts`. |
+| `seatsTotal` | `{ ft: number, kt: number }` | Total FT/KT teacher seats purchased for this plan. |
+| `trialEndsAt` | `string (ISO)` | Trial expiry, present only while `planId === 'trial'`. Enforced as a soft-lock in `api/create-class.ts` / `api/create-teacher-invite.ts`. |
+| `trialReminderSentAt` | `string (ISO)` | Set once a day-5/6 trial-ending Resend email has fired, so it's idempotent (see `api/update-school-profile.ts`). |
 | `activationCodes` | `array<string>`| Active redemption codes assigned to school (e.g., `["POLY10", "POLY2026"]`). |
-| `totalSeats` | `number` | Total paid seat licenses allocated. |
-| `usedSeats` | `number` | Seats redeemed by student/parent accounts. |
+| `totalSeats` | `number` | Total paid seat licenses allocated (legacy code-redemption model). |
+| `usedSeats` | `number` | Seats redeemed by student/parent accounts (legacy code-redemption model). |
 | `created_at` | `timestamp` | School creation timestamp. |
 
 ---
