@@ -3,6 +3,7 @@ import { withSentry } from './_lib/withSentry.js';
 import { adminDb } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
+import { computeInvoicePricing } from './_lib/invoicePricing.js';
 
 // This endpoint is public/unauthenticated (a sales lead form) and triggers a
 // real Resend email per call — rate limit hard so it can't be used to spam
@@ -47,34 +48,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Missing required fields (academyName, contactName, email)' });
     }
 
-    let unitPrice = 49000;
-    let actualSeats = Math.max(1, Number(teacherCount));
+    const { unitPrice, totalAmount } = computeInvoicePricing(planId, teacherCount, billingCycle);
     const isTrial = planId === 'trial';
-
-    if (isTrial) {
-      unitPrice = 0;
-      actualSeats = 1;
-    } else if (planId === 'freelancer') {
-      unitPrice = 35000;
-      actualSeats = 1;
-    } else if (planId === 'small') {
-      unitPrice = 49000;
-      actualSeats = Math.min(2, Math.max(1, actualSeats));
-    } else if (planId === 'medium') {
-      unitPrice = 39000;
-      actualSeats = Math.max(3, actualSeats);
-    } else if (planId === 'large') {
-      unitPrice = 29000;
-      actualSeats = Math.max(6, actualSeats);
-    } else {
-      if (actualSeats >= 6) unitPrice = 29000;
-      else if (actualSeats >= 3) unitPrice = 39000;
-      else unitPrice = 49000;
-    }
-
-    const months = billingCycle === 'yearly' ? 12 : 1;
-    const discountMultiplier = billingCycle === 'yearly' ? 0.8 : 1.0; // 20% discount on yearly
-    const totalAmount = isTrial ? 0 : Math.round(unitPrice * actualSeats * months * discountMultiplier);
     const invoiceId = isTrial ? `TRIAL-${Date.now().toString().slice(-6)}` : `INV-${Date.now().toString().slice(-6)}`;
 
     const bankInfo = {
