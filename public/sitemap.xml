@@ -1,38 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://chekkiai.com/</loc>
-    <lastmod>2026-07-24</lastmod>
+    <loc>https://www.chekkiai.com/</loc>
+    <lastmod>2026-08-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://chekkiai.com/schools</loc>
-    <lastmod>2026-07-24</lastmod>
+    <loc>https://www.chekkiai.com/schools</loc>
+    <lastmod>2026-08-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://chekkiai.com/teacher</loc>
-    <lastmod>2026-07-24</lastmod>
+    <loc>https://www.chekkiai.com/teacher</loc>
+    <lastmod>2026-08-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://chekkiai.com/app</loc>
-    <lastmod>2026-07-24</lastmod>
+    <loc>https://www.chekkiai.com/faq</loc>
+    <lastmod>2026-08-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.chekkiai.com/app</loc>
+    <lastmod>2026-08-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://chekkiai.com/privacy</loc>
-    <lastmod>2026-07-24</lastmod>
+    <loc>https://www.chekkiai.com/privacy</loc>
+    <lastmod>2026-08-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://chekkiai.com/terms</loc>
-    <lastmod>2026-07-21</lastmod>
+    <loc>https://www.chekkiai.com/terms</loc>
+    <lastmod>2026-08-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

@@ -1,0 +1,23 @@
+# Chekki AI
+
+> Chekki AI is a homework and classroom automation platform for Korean families and English-language academies (hagwons). It has two products: a free/paid consumer app for parents and children (AI worksheet scanning, answer checking, pronunciation coaching), and a B2B academy platform that turns Foreign Teacher (FT) class logs into Korean-language KakaoTalk parent updates automatically, reviewed by a Korean Teacher (KT) before sending.
+
+## For families
+- Parents scan a child's completed paper worksheet with the app; Chekki AI (Google Gemini multimodal OCR) checks answers against any academy workbook or commercial publisher without fixed templates, no manual answer key needed.
+- Pronunciation coaching uses standard North American English text-to-speech and speech recognition calibrated for children's voices.
+- Free tier: 3 scans/day. Paid tier: unlimited scans.
+- Ad-free, designed for children as young as 6.
+
+## For academies (hagwons)
+- Foreign Teacher (FT) logs a class session in under 30 seconds.
+- Korean Teacher (KT) reviews an AI-drafted Korean-language KakaoTalk parent update before it's sent — human-in-the-loop, no auto-send.
+- Directors get an aggregate dashboard across classes and teachers.
+- Plans scale from solo tutors to multi-branch academy franchises.
+
+## Key pages
+- Homepage (families): https://www.chekkiai.com/
+- FAQ: https://www.chekkiai.com/faq
+- Academies / B2B: https://www.chekkiai.com/schools
+- Teacher & Director portal: https://www.chekkiai.com/teacher
+- Privacy policy: https://www.chekkiai.com/privacy
+- Terms of use: https://www.chekkiai.com/terms

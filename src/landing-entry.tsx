@@ -6,6 +6,7 @@ import Landing from './Landing';
 import App from '../App';
 import '../landing.css';
 import { initSentry } from './lib/sentry';
+import { setPageMeta } from './lib/pageMeta';
 import { ToastProvider } from '../contexts/ToastContext';
 
 initSentry();
@@ -37,6 +38,40 @@ function LandingRoot() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    if (pathname === '/faq' || pathname.startsWith('/faq')) {
+      setPageMeta({
+        title: 'FAQ | Chekki AI',
+        description: "Answers to common questions about Chekki AI's homework scanning, pronunciation coaching, safety, and pricing for families.",
+        path: '/faq',
+      });
+    } else if (
+      pathname === '/school' ||
+      pathname === '/schools' ||
+      pathname === '/for-schools' ||
+      pathname.startsWith('/school/') ||
+      pathname.startsWith('/schools/')
+    ) {
+      setPageMeta({
+        title: 'Chekki AI for Academies | Hagwon Homework & Parent Reporting Automation',
+        description: 'Chekki turns Foreign Teacher class logs into Korean KakaoTalk parent updates automatically — homework grading, curriculum tools, and reporting built for English-language academies.',
+        path: '/schools',
+      });
+    } else if (pathname.startsWith('/teacher')) {
+      setPageMeta({
+        title: 'Teacher & Director Portal | Chekki AI',
+        description: 'Sign in to the Chekki AI teacher and director dashboard to manage classes, review homework scans, and send parent reports.',
+        path: '/teacher',
+      });
+    } else if (pathname === '/' || pathname === '') {
+      setPageMeta({
+        title: 'Chekki AI: For Families and Teachers',
+        description: 'Chekki AI – AI homework help for Korean parents, and ESL lesson planning tools for teachers.',
+        path: '/',
+      });
+    }
+  }, [pathname]);
 
   const hasInviteParam = typeof window !== 'undefined' && window.location.search.includes('invite=');
 

@@ -18,4 +18,4 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://chekkiai.com/sitemap.xml
+Sitemap: https://www.chekkiai.com/sitemap.xml
