@@ -625,7 +625,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                       </span>
                       <p>1. Acknowledge class effort</p>
                       <p>2. Address: {st.flaggedException?.reason}</p>
-                      <p>3. Suggest 10-minute home vocabulary review.</p>
+                      <p>3. Agree on one concrete follow-up step with the parent before ending the call.</p>
                     </div>
                   )}
 

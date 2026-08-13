@@ -9,7 +9,6 @@ import { ChekkiMascot } from '../../components/Icons';
 import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
 import { compressImage, stripDataUrlPrefix } from '../../services/compressImage';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
-import ReportStudioPage from './ReportStudioPage';
 import { 
   GraduationCap, 
   Sparkle, 
@@ -3150,13 +3149,6 @@ ${questionsHtml}
                 setSelectedStudentDetails={setSelectedStudentDetails}
                 onResolveFlag={(uid: string) => handleToggleFlagStudent(uid)}
               />
-            )}
-
-            {/* Embedded AI Report Studio Tab */}
-            {activeTab === ('report_studio' as any) && (
-              <div className="animate-fade-in">
-                <ReportStudioPage isNight={isThemeNight} setIsNight={setIsThemeNight} />
-              </div>
             )}
 
             {/* KT KakaoTalk Script Tab */}

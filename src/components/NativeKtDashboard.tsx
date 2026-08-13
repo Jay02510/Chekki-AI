@@ -99,6 +99,40 @@ export const NativeKtDashboard: React.FC<Props> = ({
     ? generatedOutput.studentReports
     : [];
 
+  const handleShareKakaoScript = async () => {
+    if (isDemoContent || isApproving) return;
+
+    // Same rule as handleCopyKakaoScript: the approve write must resolve
+    // before we show a success state, or a failed Firestore write still
+    // looks like a sent report (Audit: Share button skipped onApprove entirely).
+    setIsApproving(true);
+    try {
+      const result = await onApprove?.(
+        editedKoreanSummary,
+        displayedStudentReports.map((s) => ({ studentName: s.studentName, approvedText: s.koreanUpdate }))
+      );
+      if (result === false) return;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: isKo ? '체키 학부모 상담 알림톡' : 'Chekki Parent Update',
+            text: editedKoreanSummary,
+          });
+        } catch (e) {
+          // user cancelled the share sheet — report is still approved/persisted
+        }
+      } else {
+        navigator.clipboard.writeText(editedKoreanSummary);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+      setReportStatus('copied_sent');
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
   const handleCopyKakaoScript = async () => {
     if (isDemoContent || isApproving) return;
     const fullText = currentFullText;
@@ -181,21 +215,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              disabled={isDemoContent}
+              disabled={isDemoContent || isApproving}
               title={isDemoContent ? (isKo ? '실제 리포트가 없어 공유할 수 없습니다' : 'No real report to share yet') : undefined}
-              onClick={() => {
-                if (isDemoContent) return;
-                if (navigator.share) {
-                  navigator.share({
-                    title: isKo ? '체키 학부모 상담 알림톡' : 'Chekki Parent Update',
-                    text: editedKoreanSummary,
-                  }).catch(() => {});
-                } else {
-                  navigator.clipboard.writeText(editedKoreanSummary);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                }
-              }}
+              onClick={handleShareKakaoScript}
               className={`px-3.5 py-2.5 min-h-11 font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0 ${
                 isDemoContent
                   ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'

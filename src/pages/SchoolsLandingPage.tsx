@@ -171,8 +171,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [teacherCount, setTeacherCount] = useState(3);
   const [studentCount, setStudentCount] = useState('');
   const [bizRegNumber, setBizRegNumber] = useState('');
-  const [invoiceResult, setInvoiceResult] = useState<any>(null);
-  const [isRequestingInvoice, setIsRequestingInvoice] = useState(false);
   const [copiedBank, setCopiedBank] = useState(false);
 
   const activePlan = PRICING_TIERS[selectedPlanId as keyof typeof PRICING_TIERS] || PRICING_TIERS.school_pro;
@@ -201,67 +199,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   };
 
 
-
-  const handleRequestBankInvoice = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!academyName || !contactName || !email) return;
-    setIsRequestingInvoice(true);
-    const unitPrice = getPlanUnitPrice(selectedPlanId, billingCycle);
-    const months = billingCycle === 'yearly' ? 12 : 1;
-    const totalAmount = selectedPlanId === 'trial' ? 0 : unitPrice * months;
-    try {
-      const res = await fetch('/api/request-school-invoice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          academyName,
-          contactName,
-          email,
-          phone,
-          bizRegNumber,
-          planId: selectedPlanId,
-          planName: isKo ? activePlan.nameKo : activePlan.nameEn,
-          teacherCount,
-          studentCount,
-          billingCycle,
-          unitPrice,
-          months,
-          totalAmount,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok && data.invoice) {
-        setInvoiceResult({
-          ...data.invoice,
-          academyName: academyName,
-          email: email,
-          teacherCount: teacherCount,
-          studentCount: studentCount,
-          billingCycle: billingCycle,
-          months: months,
-          totalAmount: data.invoice?.totalAmount || totalAmount,
-          invoiceId: data.invoice?.invoiceId || `INV-${Math.floor(100000 + Math.random() * 900000)}`
-        });
-      } else {
-        throw new Error(data.error || 'Server response error');
-      }
-    } catch (err: any) {
-      console.warn('Invoice request fallback to local confirmation:', err);
-      setInvoiceResult({
-        invoiceId: `INV-${Math.floor(100000 + Math.random() * 900000)}`,
-        academyName: academyName,
-        email: email,
-        teacherCount: teacherCount,
-        studentCount: studentCount,
-        billingCycle: billingCycle,
-        months: months,
-        totalAmount: totalAmount,
-        status: 'pending_payment'
-      });
-    } finally {
-      setIsRequestingInvoice(false);
-    }
-  };
 
   return (
     <div className={`min-h-screen ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#F8FAFC] text-zinc-900'} font-sans transition-colors duration-200 relative overflow-hidden flex flex-col`}>
