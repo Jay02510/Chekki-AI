@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { collection, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { UserPlus, UploadSimple, X, PaperPlaneTilt, Trash } from '@phosphor-icons/react';
 import { auth, dbInstance } from '../../services/database';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -43,11 +43,23 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
 
   useEffect(() => {
     if (!classId) return;
-    const q = query(collection(dbInstance, 'pendingStudents'), where('classId', '==', classId), orderBy('addedAt', 'desc'));
+    // No orderBy here on purpose — classId(==) + addedAt(orderBy) needs a
+    // composite index that was never created, which made this listener
+    // fail silently (console.warn only) and left the list stuck on "No
+    // students invited yet" even right after a successful add. Sorted
+    // client-side below instead.
+    const q = query(collection(dbInstance, 'pendingStudents'), where('classId', '==', classId));
     const unsub = onSnapshot(
       q,
-      (snap) => setPending(snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }))),
-      (err) => console.warn('Failed to load pending student invites:', err)
+      (snap) => {
+        const rows = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as PendingStudent[];
+        rows.sort((a, b) => (b.addedAt?.toMillis() || 0) - (a.addedAt?.toMillis() || 0));
+        setPending(rows);
+      },
+      (err) => {
+        console.warn('Failed to load pending student invites:', err);
+        setMessage({ text: 'Failed to load the invite list. Please refresh.', type: 'error' });
+      }
     );
     return () => unsub();
   }, [classId]);
@@ -69,7 +81,23 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
     setMessage(null);
     try {
       const data = await callEndpoint({ action: 'add_students', classId, students });
-      setMessage({ text: isKo ? `${data.added}명 초대 완료!` : `Invited ${data.added} student(s)!`, type: 'success' });
+      if (!data.resendConfigured) {
+        setMessage({
+          text: isKo
+            ? `${data.added}명 추가됨 — 이메일 발송이 설정되지 않아 코드를 직접 전달해야 합니다.`
+            : `${data.added} student(s) added — email sending isn't configured, so codes weren't sent. Share them manually.`,
+          type: 'error',
+        });
+      } else if (data.emailsSent < data.added) {
+        setMessage({
+          text: isKo
+            ? `${data.added}명 중 ${data.emailsSent}명에게만 이메일이 발송되었습니다. 실패한 초대는 재전송해주세요.`
+            : `Only ${data.emailsSent} of ${data.added} invite emails were sent. Resend the rest individually.`,
+          type: 'error',
+        });
+      } else {
+        setMessage({ text: isKo ? `${data.added}명 초대 완료!` : `Invited ${data.added} student(s)!`, type: 'success' });
+      }
       setNewName('');
       setNewEmail('');
       setShowAddForm(false);

@@ -141,11 +141,11 @@ async function sendStudentInviteEmail(opts: {
   className: string;
   schoolName: string;
   inviteCode: string;
-}) {
+}): Promise<boolean> {
   const resendApiKey = process.env.RESEND_API_KEY;
-  if (!resendApiKey) return;
+  if (!resendApiKey) return false;
   try {
-    await fetch('https://api.resend.com/emails', {
+    const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -173,8 +173,19 @@ async function sendStudentInviteEmail(opts: {
         `,
       }),
     });
+    if (!response.ok) {
+      // fetch doesn't throw on a non-2xx — a rejected Resend request (bad
+      // API key, unverified sender domain, malformed payload) used to fail
+      // completely silently here, so "Invited N student(s)!" showed in the
+      // director's UI even when zero emails actually went out.
+      const body = await response.text().catch(() => '');
+      console.error('[create-class:add_students] Resend API rejected the request:', response.status, body, opts.parentEmail);
+      return false;
+    }
+    return true;
   } catch (emailErr) {
     console.warn('[create-class:add_students] Resend email failed:', opts.parentEmail, emailErr);
+    return false;
   }
 }
 
@@ -217,13 +228,16 @@ async function handleAddStudents(req: VercelRequest, res: VercelResponse, uid: s
       status: 'invited',
       addedByUid: uid,
       addedAt: FieldValue.serverTimestamp(),
-      emailSentAt: FieldValue.serverTimestamp(),
     });
     created.push({ id: ref.id, name: student.name.trim(), parentEmail: student.parentEmail.trim().toLowerCase(), inviteCode });
   }
   await batch.commit();
 
-  await Promise.all(
+  // emailSentAt is only stamped on an actual confirmed send below — it used
+  // to be written unconditionally at creation time regardless of whether
+  // Resend accepted the request, which made a fully-silent email failure
+  // look identical to a successful one in the roster UI.
+  const emailResults = await Promise.all(
     created.map((c) =>
       sendStudentInviteEmail({
         parentEmail: c.parentEmail,
@@ -234,8 +248,21 @@ async function handleAddStudents(req: VercelRequest, res: VercelResponse, uid: s
       })
     )
   );
+  await Promise.all(
+    created.map((c, i) =>
+      emailResults[i]
+        ? adminDb.collection('pendingStudents').doc(c.id).update({ emailSentAt: FieldValue.serverTimestamp() })
+        : Promise.resolve()
+    )
+  );
 
-  return res.status(200).json({ success: true, added: created.length });
+  const emailsSent = emailResults.filter(Boolean).length;
+  return res.status(200).json({
+    success: true,
+    added: created.length,
+    emailsSent,
+    resendConfigured: !!process.env.RESEND_API_KEY,
+  });
 }
 
 async function handleResendStudentInvite(req: VercelRequest, res: VercelResponse, uid: string) {
@@ -261,13 +288,20 @@ async function handleResendStudentInvite(req: VercelRequest, res: VercelResponse
   const classSnap = await adminDb.collection('classes').doc(data.classId).get();
   const classData = classSnap.data();
 
-  await sendStudentInviteEmail({
+  const sent = await sendStudentInviteEmail({
     parentEmail: data.parentEmail,
     studentName: data.name,
     className: classData?.name || 'Class',
     schoolName: classData?.schoolName || 'Your school',
     inviteCode: data.inviteCode || '',
   });
+  if (!sent) {
+    return res.status(502).json({
+      error: process.env.RESEND_API_KEY
+        ? 'Failed to send the email. Please try again.'
+        : 'Email sending is not configured for this deployment.',
+    });
+  }
   await ref.update({ emailSentAt: FieldValue.serverTimestamp() });
 
   return res.status(200).json({ success: true });
