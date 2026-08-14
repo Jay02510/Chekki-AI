@@ -296,6 +296,7 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
   let schoolId: string;
   let schoolName: string;
   let educatorRole: string;
+  let invitedByName: string | null;
 
   try {
     const result = await adminDb.runTransaction(async (t) => {
@@ -315,6 +316,13 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
       const schoolRef = adminDb.collection('schools').doc(invite.schoolId);
       const schoolSnap = await t.get(schoolRef);
       const resolvedSchoolName = schoolSnap.data()?.name || invite.schoolId;
+
+      let invitedByName: string | null = null;
+      if (invite.createdByUid) {
+        const inviterSnap = await t.get(adminDb.collection('users').doc(invite.createdByUid));
+        const inviterData = inviterSnap.data();
+        invitedByName = inviterData?.displayName || inviterData?.name || inviterData?.email || null;
+      }
 
       const subSnap = await t.get(adminDb.collection('subscriptions').doc(uid));
       const subData = subSnap.exists ? subSnap.data()! : null;
@@ -346,12 +354,13 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
 
       t.update(schoolRef, { usedByUids: FieldValue.arrayUnion(uid) });
 
-      return { schoolId: invite.schoolId, schoolName: resolvedSchoolName, educatorRole: invite.role };
+      return { schoolId: invite.schoolId, schoolName: resolvedSchoolName, educatorRole: invite.role, invitedByName };
     });
 
     schoolId = result.schoolId;
     schoolName = result.schoolName;
     educatorRole = result.educatorRole;
+    invitedByName = result.invitedByName;
   } catch (error: any) {
     if (error && typeof error.httpStatus === 'number') {
       return res.status(error.httpStatus).json({ error: error.message });
@@ -365,6 +374,7 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
     educatorRole,
     schoolId,
     schoolName,
+    invitedByName,
   });
 }
 

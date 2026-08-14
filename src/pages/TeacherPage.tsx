@@ -117,10 +117,15 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [welcomeRole, setWelcomeRole] = useState<'ft' | 'kt'>('ft');
   const [welcomeSchool, setWelcomeSchool] = useState(() => {
     if (typeof window === 'undefined') return '';
-    // Pre-fill from invite slug in URL or localStorage (set on signup)
-    const slug = new URLSearchParams(window.location.search).get('invite') ||
-      localStorage.getItem('chekki_invite_school') || '';
-    return slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '';
+    // The real school name returned by /api/redeem-invite on signup — this
+    // used to title-case the raw invite ID slug itself (e.g. "inv_mssre11q")
+    // as a fallback "school name", which is what actually rendered here
+    // (Audit: invite welcome modal shows garbage, not the real school name).
+    return localStorage.getItem('chekki_invite_school_name') || '';
+  });
+  const [welcomeInviterName, setWelcomeInviterName] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    return localStorage.getItem('chekki_invite_by') || '';
   });
   const [welcomeClassName, setWelcomeClassName] = useState('');
 
@@ -389,6 +394,17 @@ export default function TeacherPage({ isNight = true }: Props) {
     new URLSearchParams(window.location.search).get('role') === 'director'
   );
   const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath || (user as any)?.role === 'director' ? 'director' : 'teacher');
+
+  // Direct teacher self-signup is disabled (see the Auth Mode Toggle render
+  // guard further down) — teacher accounts only exist via a director's
+  // invite link now. Without this, a bare /teacher?signup=true visit could
+  // still land in 'signup' mode for a teacher with the toggle hidden and no
+  // way back to Log In.
+  useEffect(() => {
+    if (loginRole === 'teacher' && !inviteSlug && authMode === 'signup') {
+      setAuthMode('login');
+    }
+  }, [loginRole, inviteSlug, authMode]);
   // Educator role is sourced from Firestore profile field (educatorRole) ONLY.
   // Email-substring matching ('kt' in email) is intentionally removed — it was
   // silently misclassifying FT teachers whose email happened to contain 'kt'
@@ -1224,7 +1240,14 @@ export default function TeacherPage({ isNight = true }: Props) {
             if (newUid) {
               localStorage.setItem(`chekki_user_role_${newUid}`, 'teacher');
               localStorage.setItem(`chekki_educator_role_${newUid}`, data.educatorRole);
+              if (data.schoolName) localStorage.setItem(`chekki_invite_school_name_${newUid}`, data.schoolName);
+              if (data.invitedByName) localStorage.setItem(`chekki_invite_by_${newUid}`, data.invitedByName);
             }
+            // Un-uid-keyed mirrors — read by the welcome-screen initializer,
+            // which runs on the reload right below before Firebase auth has
+            // necessarily restored `newUid` synchronously.
+            if (data.schoolName) localStorage.setItem('chekki_invite_school_name', data.schoolName);
+            if (data.invitedByName) localStorage.setItem('chekki_invite_by', data.invitedByName);
           } catch (inviteErr: any) {
             throw new Error(
               isKo
@@ -2119,7 +2142,7 @@ ${questionsHtml}
               <div className="w-full flex p-1 bg-[#050505] border border-white/10 rounded-2xl mb-4">
                 <button
                   type="button"
-                  onClick={() => { setLoginRole('teacher'); setAuthError(''); }}
+                  onClick={() => { setLoginRole('teacher'); setAuthError(''); if (!inviteSlug) setAuthMode('login'); }}
                   className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     loginRole === 'teacher'
                       ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
@@ -2163,13 +2186,20 @@ ${questionsHtml}
               </span>
             </div>
 
-            {/* Invite School Badge — shown when teacher arrives via director's invite link */}
+            {/* Invite School Badge — shown when teacher arrives via director's
+                invite link. The real school name isn't known until the invite
+                is actually redeemed (right after account creation, below) —
+                this used to title-case the raw invite ID itself as a guessed
+                "school name" (e.g. "Inv Mssre11qvg1gdh"), which is what
+                actually rendered here (Audit: invite badge shows garbage, not
+                the real school). The real name + inviter now show correctly
+                on the welcome screen right after signup completes. */}
             {inviteSlug && (
               <div className="w-full mb-4 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5">
                 <Buildings size={16} className="text-emerald-400 shrink-0" />
                 <div className="text-left">
-                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{isKo ? '초대받은 학원' : 'Invited to Academy'}</p>
-                  <p className="text-sm font-black text-white">{inviteSlug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</p>
+                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{isKo ? '초대 링크로 가입' : 'Joining via invite link'}</p>
+                  <p className="text-xs font-bold text-white">{isKo ? '가입 후 학원명이 표시됩니다' : "You'll see your academy's name once you sign up."}</p>
                 </div>
               </div>
             )}
@@ -2177,8 +2207,15 @@ ${questionsHtml}
             {/* Auth Mode Toggle (Login vs Sign Up) — hidden for a plan-linked
                 director signup, replaced by a small "already have an
                 account?" link below instead. That choice belongs to
-                returning users, not someone who just picked a plan. */}
-            {!isPlanSignup && (
+                returning users, not someone who just picked a plan.
+                Also hidden for teacher-without-invite: this used to offer a
+                self-serve "Sign Up" that promised joining a school "via
+                their authorization code," but no code field was ever wired
+                up in this form — the account it created had no schoolId, no
+                educatorRole, and no class, a permanent dead end. Teacher
+                accounts are only ever created via a director's invite link
+                now (audit §21); direct teacher signup below is disabled. */}
+            {!isPlanSignup && !(loginRole === 'teacher' && !inviteSlug) && (
               <div className="w-full flex bg-[#050505] p-1 rounded-2xl border border-white/10 mb-6">
                 <button
                   type="button"
@@ -2227,11 +2264,11 @@ ${questionsHtml}
                     ? (isKo ? '학원명을 등록하고 즉시 원장님 전용 대시보드를 개설하세요.' : 'Register your academy and activate your Director HQ Dashboard.')
                     : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
             </p>
-            {!isPlanSignup && authMode === 'signup' && loginRole === 'teacher' && !inviteSlug && (
+            {!isPlanSignup && loginRole === 'teacher' && !inviteSlug && (
               <p className="text-[10px] text-zinc-500 text-center max-w-xs -mt-4 mb-6 leading-relaxed">
                 {isKo
-                  ? '교사 계정은 별도 요금제가 없습니다 — 소속 학원의 플랜과 좌석을 인증 코드로 이용합니다.'
-                  : "Teacher accounts don't pick a plan — you'll join your school's existing plan and seats via their authorization code."}
+                  ? '교사 계정은 원장님의 초대 링크로만 생성됩니다. 초대 링크가 없다면 원장님께 요청해 주세요.'
+                  : "Teacher accounts are only created via your director's invite link. Ask them to send you one."}
               </p>
             )}
             {isPlanSignup && (
@@ -2502,6 +2539,11 @@ ${questionsHtml}
                     <div>
                       <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{isKo ? '초대받은 학원' : 'Invited Academy'}</p>
                       <p className="text-sm font-black text-white">{welcomeSchool}</p>
+                      {welcomeInviterName && (
+                        <p className="text-[11px] text-emerald-300/80 mt-0.5">
+                          {isKo ? `${welcomeInviterName} 원장님이 초대함` : `Invited by ${welcomeInviterName}`}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -3223,7 +3265,7 @@ ${questionsHtml}
               </div>
             </div>
           )}
-          {classes.length === 0 && (
+          {classes.length === 0 && (loginRole === 'director' || user?.role === 'director') && (
             <div className={`p-5 rounded-3xl border mb-6 flex flex-wrap items-center justify-between gap-4 transition-all shadow-sm ${
               isThemeNight
                 ? 'bg-orange-500/10 border-orange-500/30 text-orange-200'
@@ -3238,8 +3280,8 @@ ${questionsHtml}
                     {isKo ? '대시보드 미리보기 모드' : 'Dashboard Preview Mode'}
                   </h4>
                   <p className={`text-xs mt-0.5 ${isThemeNight ? 'text-orange-300/80' : 'text-orange-800'}`}>
-                    {isKo 
-                      ? '등록된 학급이 없어도 대시보드, 커리큘럼 관리, 원생 활동 화면을 둘러보실 수 있습니다.' 
+                    {isKo
+                      ? '등록된 학급이 없어도 대시보드, 커리큘럼 관리, 원생 활동 화면을 둘러보실 수 있습니다.'
                       : 'You can explore the dashboard, curriculum manager, and student views before creating a class.'}
                   </p>
                 </div>
@@ -3261,6 +3303,27 @@ ${questionsHtml}
                 >
                   + {isKo ? '새 학급반 만들기' : 'Create Class Now'}
                 </button>
+              </div>
+            </div>
+          )}
+          {classes.length === 0 && !(loginRole === 'director' || user?.role === 'director') && (
+            <div className={`p-5 rounded-3xl border mb-6 flex items-center gap-3.5 transition-all shadow-sm ${
+              isThemeNight
+                ? 'bg-orange-500/10 border-orange-500/30 text-orange-200'
+                : 'bg-orange-50/90 border-orange-200 text-orange-950 shadow-orange-500/5'
+            }`}>
+              <div className="w-10 h-10 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-orange-500/30">
+                ⏳
+              </div>
+              <div>
+                <h4 className="text-sm font-black tracking-tight">
+                  {isKo ? '학급 배정 대기 중' : 'Waiting on a class assignment'}
+                </h4>
+                <p className={`text-xs mt-0.5 ${isThemeNight ? 'text-orange-300/80' : 'text-orange-800'}`}>
+                  {isKo
+                    ? '학교에 가입되었지만 아직 학급이 배정되지 않았습니다. 원장님께 대시보드에서 배정을 요청해 주세요 (Teacher Assignments).'
+                    : "You've joined the school but haven't been assigned to a class yet — ask your director to assign you one from their dashboard (Teacher Assignments)."}
+                </p>
               </div>
             </div>
           )}
