@@ -140,6 +140,40 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       } catch (emailErr) {
         console.error('[request-school-invoice] Failed to send email via Resend:', emailErr);
       }
+
+      // Internal notification — the customer confirmation above was the only
+      // email this endpoint sent, so a new invoice request sat silently in
+      // school_invoices with nobody on our side pinged to go confirm it
+      // once the bank transfer actually lands.
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Chekki AI <billing@chekkiai.com>',
+            to: ['support@chekkiai.com'],
+            subject: `[Invoice Request] ${invoicePayload.academyName} — ₩${totalAmount.toLocaleString()} (${invoiceId})`,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 16px;">
+                <p>New school invoice request pending payment.</p>
+                <table style="border-collapse: collapse; font-size: 14px;">
+                  <tr><td style="padding: 4px 12px 4px 0; color: #666;">Invoice ID</td><td><strong>${invoiceId}</strong></td></tr>
+                  <tr><td style="padding: 4px 12px 4px 0; color: #666;">Academy</td><td>${invoicePayload.academyName}</td></tr>
+                  <tr><td style="padding: 4px 12px 4px 0; color: #666;">Contact</td><td>${invoicePayload.contactName} (${invoicePayload.email}${invoicePayload.phone ? `, ${invoicePayload.phone}` : ''})</td></tr>
+                  <tr><td style="padding: 4px 12px 4px 0; color: #666;">Plan</td><td>${invoicePayload.planName} · ${invoicePayload.teacherCount} teacher(s) · ${billingCycle === 'yearly' ? 'yearly' : 'monthly'}</td></tr>
+                  <tr><td style="padding: 4px 12px 4px 0; color: #666;">Total</td><td><strong>₩${totalAmount.toLocaleString()}</strong></td></tr>
+                </table>
+                <p style="color: #666; font-size: 13px;">Confirm via admin panel once the bank transfer is received.</p>
+              </div>
+            `,
+          }),
+        });
+      } catch (internalEmailErr) {
+        console.error('[request-school-invoice] Failed to send internal notification email:', internalEmailErr);
+      }
     }
 
     return res.status(200).json({

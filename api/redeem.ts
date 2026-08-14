@@ -75,16 +75,38 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 async function redeemClassCode(res: VercelResponse, uid: string, classCode: string) {
   const sanitized = classCode.toUpperCase().trim();
 
-  const classesRef = adminDb.collection('classes');
-  const qSnapshot = await classesRef.where('joinCode', '==', sanitized).limit(1).get();
+  let classId: string;
+  let classData: FirebaseFirestore.DocumentData;
+  // Set only when `sanitized` matched a single-use pushed student invite
+  // (api/create-class.ts's add_students action) rather than the class's
+  // ordinary shared joinCode — that code is meant to be reused by every
+  // parent in the class, but a pushed invite must only work once
+  // (Audit: invite links/codes must only work once), enforced below inside
+  // the transaction so it can't be redeemed twice by a race.
+  let pendingStudentRef: FirebaseFirestore.DocumentReference | null = null;
 
-  if (qSnapshot.empty) {
-    return res.status(404).json({ error: 'Invalid class code. Please check with your teacher.' });
+  const classQuery = await adminDb.collection('classes').where('joinCode', '==', sanitized).limit(1).get();
+  if (!classQuery.empty) {
+    classId = classQuery.docs[0].id;
+    classData = classQuery.docs[0].data();
+  } else {
+    const inviteQuery = await adminDb.collection('pendingStudents').where('inviteCode', '==', sanitized).limit(1).get();
+    if (inviteQuery.empty) {
+      return res.status(404).json({ error: 'Invalid class code. Please check with your teacher.' });
+    }
+    const inviteDoc = inviteQuery.docs[0];
+    if (inviteDoc.data().status !== 'invited') {
+      return res.status(400).json({ error: 'This invite code has already been used. Ask your teacher to resend it.' });
+    }
+    const classSnap = await adminDb.collection('classes').doc(inviteDoc.data().classId).get();
+    if (!classSnap.exists) {
+      return res.status(404).json({ error: 'Invalid class code. Please check with your teacher.' });
+    }
+    classId = classSnap.id;
+    classData = classSnap.data()!;
+    pendingStudentRef = inviteDoc.ref;
   }
 
-  const classDoc = qSnapshot.docs[0];
-  const classData = classDoc.data();
-  const classId = classDoc.id;
   const schoolId = classData.schoolId;
   const schoolName = classData.schoolName || schoolId;
 
@@ -93,6 +115,17 @@ async function redeemClassCode(res: VercelResponse, uid: string, classCode: stri
 
   try {
     await adminDb.runTransaction(async (t) => {
+      // Re-check the invite's single-use status inside the transaction —
+      // the lookup above ran before this transaction started, so two
+      // concurrent redemptions of the same invite code could otherwise
+      // both pass that earlier check.
+      if (pendingStudentRef) {
+        const freshInvite = await t.get(pendingStudentRef);
+        if (!freshInvite.exists || freshInvite.data()?.status !== 'invited') {
+          throw { httpStatus: 400, message: 'This invite code has already been used. Ask your teacher to resend it.' };
+        }
+      }
+
       // --- ANTI-FRAUD GUARDRAIL: Student Enrollment Cap ---
       // Prevents public code leaks. Default: 30 students per class seat.
       // Read-then-write inside a transaction so two concurrent redemptions
@@ -136,6 +169,14 @@ async function redeemClassCode(res: VercelResponse, uid: string, classCode: stri
       }
 
       t.set(userRef, updatePayload, { merge: true });
+
+      if (pendingStudentRef) {
+        t.update(pendingStudentRef, {
+          status: 'redeemed',
+          redeemedAt: FieldValue.serverTimestamp(),
+          redeemedUid: uid,
+        });
+      }
     });
   } catch (error: any) {
     if (error && typeof error.httpStatus === 'number') {

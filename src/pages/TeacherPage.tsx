@@ -46,6 +46,7 @@ import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeFtDashboard } from '../components/NativeFtDashboard';
 import { NativeDirectorStudentsTab } from '../components/NativeDirectorStudentsTab';
+import { StudentInvitePanel } from '../components/StudentInvitePanel';
 import { ScannedModal } from '../components/ScannedModal';
 import { AcademyLogoModal } from '../components/AcademyLogoModal';
 import { DocPreviewModal } from '../components/DocPreviewModal';
@@ -263,7 +264,9 @@ export default function TeacherPage({ isNight = true }: Props) {
         studentReports,
       };
       setFtLogOutput(output);
-      setActiveTab('kt_script');
+      // Stay on the FT's own dashboard after submit — the kt_script tab
+      // is the KT's review workspace, not an FT-facing "success" screen.
+      // FT gets a toast confirmation below instead of being bounced there.
 
       // Persist the log AND the AI-generated KT script so the handoff
       // survives across accounts/devices — it used to live only in
@@ -295,23 +298,18 @@ export default function TeacherPage({ isNight = true }: Props) {
             aiEnglishSummary: summary.english,
             aiStudentReports: studentReports,
           }]);
+          showToast({
+            type: 'success',
+            message: isKo
+              ? '✅ 한국인 교사에게 검토 요청을 보냈습니다!'
+              : '✅ Sent to your KT for review!',
+          });
 
-          // Best-effort email to the class's KT teacher(s) — never blocks
-          // or affects the log-submission success state above, matching
-          // how every other Resend notification in this codebase treats
-          // email as a courtesy, not a source of truth.
-          (async () => {
-            try {
-              const idToken = await auth.currentUser?.getIdToken();
-              await fetch('/api/create-teacher-invite', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-                body: JSON.stringify({ action: 'notify_log_ready', classId: selectedClass.id }),
-              });
-            } catch (notifyErr) {
-              console.warn('Failed to notify KT teacher of new log:', notifyErr);
-            }
-          })();
+          // No per-submission email to the KT here — a daily digest cron
+          // (api/create-teacher-invite.ts action=send_pending_digests)
+          // batches every pending_review log into one summary email instead
+          // of firing one email per FT submission (20 kids => 20 emails).
+          // This log is already visible in the KT's review queue above.
         } catch (persistErr) {
           console.error('Failed to save class log to Firestore:', persistErr);
           // Previously silent: the UI still switched to the "success" kt_script
@@ -3068,15 +3066,15 @@ ${questionsHtml}
             onClick={() => setShowReportCardModal(true)}
             className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
               showReportCardModal
-                ? 'bg-orange-500/20 text-orange-400 border-orange-500/50 shadow-xl shadow-orange-500/10 font-black' 
-                : isThemeNight 
-                  ? 'bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-orange-500/30 text-orange-400 hover:border-orange-500/50' 
-                  : 'bg-gradient-to-r from-orange-50 to-pink-50 border-orange-300 text-orange-600 hover:border-orange-400'
+                ? 'bg-orange-500/20 text-orange-400 border-orange-500/50 font-black'
+                : isThemeNight
+                  ? 'bg-white/5 border-white/10 text-orange-400 hover:border-orange-500/40'
+                  : 'bg-zinc-50 border-zinc-200 text-orange-600 hover:border-orange-300'
             }`}
           >
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
-                <Sparkle size={18} weight="fill" className="animate-pulse" />
+                <Sparkle size={18} weight="fill" />
               </div>
               <span>{isKo ? '📊 학부모 성적표 발급기' : '📊 Generate Weekly Report'}</span>
             </div>
@@ -3190,7 +3188,7 @@ ${questionsHtml}
                 <span className="hidden sm:inline">{isKo ? '새 학급' : 'New Class'}</span>
               </button>
             )}
-              {selectedClass && !selectedClass.isDemo && (
+              {selectedClass && !selectedClass.isDemo && (loginRole === 'director' || user?.role === 'director') && (
               <button
                 type="button"
                 onClick={handleCopyClassCode}
@@ -3528,6 +3526,7 @@ ${questionsHtml}
               user={user}
               activeClass={activeClass}
               selectedTextbookName={selectedTextbookName}
+              roster={(studentsData || []).filter((s: any) => s?.classStatus === 'active' && s?.name).map((s: any) => s.name)}
               handleFtLogSubmit={handleFtLogSubmit}
               isSubmittingFtLog={isSubmittingFtLog}
               completionRate={completionRate}
@@ -3620,6 +3619,10 @@ ${questionsHtml}
               )}
 
               {activeTab === 'students' && (
+                <div className="space-y-8">
+                {selectedClass && !selectedClass.isDemo && (loginRole === 'director' || user?.role === 'director' || educatorRole === 'kt') && (
+                  <StudentInvitePanel isNight={isThemeNight} isKo={isKo} classId={selectedClass.id} />
+                )}
                 <NativeDirectorStudentsTab
                   isNight={isThemeNight}
                   isKo={isKo}
@@ -3635,6 +3638,7 @@ ${questionsHtml}
                   fetchRosterAndMistakes={fetchRosterAndMistakes}
                   setSelectedStudentDetails={setSelectedStudentDetails}
                 />
+                </div>
               )}
 
             </div>

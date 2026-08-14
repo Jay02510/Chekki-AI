@@ -12,6 +12,8 @@ interface Props {
   userProfile?: UserProfile | null;
   selectedClassName?: string;
   selectedTextbookName?: string;
+  /** Real, approved students in the active class. Empty until the roster loads or has no one yet. */
+  roster?: string[];
   /** Public marketing/demo showcase only. Never true for a real, authenticated teacher session. */
   isDemo?: boolean;
 }
@@ -21,6 +23,7 @@ const DEMO_LESSON_TOPIC = 'Unit 4: Photosynthesis & Plant Growth';
 const DEMO_TEXTBOOK = 'Bricks Reading 150 (Book 1)';
 const DEMO_ENERGY_LEVEL = 'High Energy and Engaged';
 const DEMO_ACTIVITIES = ['Reading', 'Speaking', 'Worksheet'];
+const DEMO_ROSTER = ['Ji-woo (지우)', 'Min-jun (민준)', 'Chloe (클로이)', 'Seo-yun (서윤)'];
 const DEMO_COMMENTS = 'Students engaged very enthusiastically with the new plant vocabulary drill. Everyone read aloud clearly.';
 const DEMO_EXCEPTIONS: Array<{ studentName: string; details: string; type?: 'praise' | 'attention' }> = [
   {
@@ -42,9 +45,11 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   userProfile,
   selectedClassName,
   selectedTextbookName,
+  roster = [],
   isDemo = false,
 }) => {
   const permissions = getPermissionsForUser(userProfile);
+  const effectiveRoster = roster.length > 0 ? roster : (isDemo ? DEMO_ROSTER : []);
   const [className, setClassName] = useState(selectedClassName || (isDemo ? DEMO_CLASS_NAME : ''));
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [lessonTopic, setLessonTopic] = useState(isDemo ? DEMO_LESSON_TOPIC : '');
@@ -69,11 +74,24 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
     isDemo ? DEMO_EXCEPTIONS : []
   );
   const [showExceptionModal, setShowExceptionModal] = useState(false);
-  const [modalStudentName, setModalStudentName] = useState('Ji-woo (지우)');
+  const [modalStudentName, setModalStudentName] = useState(effectiveRoster[0] || '');
   const [modalCategory, setModalCategory] = useState<'praise' | 'attention'>('praise');
-  const [isCustomStudentName, setIsCustomStudentName] = useState(!isDemo);
+  const [isCustomStudentName, setIsCustomStudentName] = useState(effectiveRoster.length === 0);
   const [customStudentInput, setCustomStudentInput] = useState('');
   const [modalDetails, setModalDetails] = useState('');
+
+  // Roster loads asynchronously after this form mounts (class fetch on
+  // TeacherPage). Once real names arrive, switch off custom-name mode and
+  // seed a valid selection instead of leaving the dropdown pointed at
+  // whatever was available (or nothing) at mount time.
+  useEffect(() => {
+    if (effectiveRoster.length === 0) {
+      setIsCustomStudentName(true);
+      return;
+    }
+    setIsCustomStudentName(false);
+    setModalStudentName((prev) => (effectiveRoster.includes(prev) ? prev : effectiveRoster[0]));
+  }, [effectiveRoster.join('|')]);
 
   const exceptionDialogRef = useDialogA11y<HTMLDivElement>({
     isOpen: showExceptionModal,
@@ -391,12 +409,12 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           {isSubmitting ? (
             <>
               <Sparkle size={18} className="animate-spin" />
-              <span>Processing & Generating Reports...</span>
+              <span>Sending to KT...</span>
             </>
           ) : (
             <>
               <Sparkle size={18} weight="fill" />
-              <span>Submit Class Log & Trigger Dual-Branch AI</span>
+              <span>Send to KT for Review</span>
             </>
           )}
         </button>
@@ -464,16 +482,18 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center text-xs font-bold text-zinc-400 font-mono">
                   <label htmlFor="exception-student-field">Student *</label>
-                  <button
-                    type="button"
-                    onClick={() => setIsCustomStudentName(!isCustomStudentName)}
-                    className="text-orange-400 text-[10px] underline hover:text-orange-300"
-                  >
-                    {isCustomStudentName ? 'Select from Roster' : '+ Type Custom Name'}
-                  </button>
+                  {effectiveRoster.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setIsCustomStudentName(!isCustomStudentName)}
+                      className="text-orange-400 text-[10px] underline hover:text-orange-300"
+                    >
+                      {isCustomStudentName ? 'Select from Roster' : '+ Type Custom Name'}
+                    </button>
+                  )}
                 </div>
 
-                {isCustomStudentName ? (
+                {isCustomStudentName || effectiveRoster.length === 0 ? (
                   <input
                     id="exception-student-field"
                     type="text"
@@ -493,10 +513,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                       isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                     }`}
                   >
-                    <option value="Ji-woo (지우)">Ji-woo (지우)</option>
-                    <option value="Min-jun (민준)">Min-jun (민준)</option>
-                    <option value="Chloe (클로이)">Chloe (클로이)</option>
-                    <option value="Seo-yun (서윤)">Seo-yun (서윤)</option>
+                    {effectiveRoster.map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
                   </select>
                 )}
               </div>

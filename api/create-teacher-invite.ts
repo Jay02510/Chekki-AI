@@ -129,6 +129,9 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
                 <a href="${inviteUrl}" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">초대 수락하기</a>
               </div>
               <p style="font-size: 12px; color: #71717a; text-align: center;">${inviteUrl}</p>
+              <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
+                문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.
+              </p>
             </div>
           `,
         }),
@@ -239,93 +242,142 @@ async function handleRevokeInvite(req: VercelRequest, res: VercelResponse, schoo
 }
 
 /**
- * Best-effort: FT submits a class log → email the class's assigned KT
- * teacher(s) (falling back to every KT at the school if the class has no
- * assignment yet) so they know a log is waiting for review. Callable by any
- * authenticated teacher at the school — unlike invite/assign/remove above,
- * this doesn't require the caller to be a director.
+ * Cron-only (Vercel Cron, see vercel.json "crons"): one digest email per KT
+ * per day, instead of a separate email every time an FT submits a log.
+ * A school with 20 kids submitting logs used to mean 20 back-to-back emails
+ * to the KT that day — this batches everything still `pending_review` and
+ * not yet included in an earlier digest into a single summary.
+ *
+ * `digestNotifiedAt` on the log doc is the dedupe marker: once a log has
+ * been mentioned in a digest, it's not repeated in tomorrow's even though
+ * `reviewStatus` stays `pending_review` until the KT actually reviews it.
  */
-async function handleNotifyLogReady(req: VercelRequest, res: VercelResponse, schoolId: string) {
-  const { classId } = req.body || {};
-  if (typeof classId !== 'string' || !classId) {
-    return res.status(400).json({ error: 'classId is required' });
-  }
+async function handleSendPendingDigests(_req: VercelRequest, res: VercelResponse) {
+  const classesSnap = await adminDb.collection('classes').get();
 
-  const classSnap = await adminDb.collection('classes').doc(classId).get();
-  if (!classSnap.exists || classSnap.data()?.schoolId !== schoolId) {
-    return res.status(404).json({ error: 'Class not found' });
-  }
-  const classData = classSnap.data() || {};
-  const assignedTeacherUids: string[] = Array.isArray(classData.assignedTeacherUids)
-    ? classData.assignedTeacherUids
-    : [];
+  // schoolId -> Map<ktEmail, { className, count }[]>
+  const byKtEmail = new Map<string, { className: string; count: number }[]>();
+  const logRefsToMark: FirebaseFirestore.DocumentReference[] = [];
+  const ktEmailCache = new Map<string, string[]>(); // classId -> resolved KT emails
 
-  let ktEmails: string[] = [];
-  if (assignedTeacherUids.length > 0) {
-    const assignedSnaps = await Promise.all(
-      assignedTeacherUids.map((u) => adminDb.collection('users').doc(u).get())
-    );
-    ktEmails = assignedSnaps
-      .filter((s) => s.exists && s.data()?.educatorRole === 'kt')
-      .map((s) => s.data()?.email)
-      .filter((e): e is string => typeof e === 'string' && !!e);
-  }
+  for (const classDoc of classesSnap.docs) {
+    const classData = classDoc.data() || {};
+    const schoolId = classData.schoolId as string | undefined;
+    if (!schoolId) continue;
 
-  if (ktEmails.length === 0) {
-    // No class-specific KT assignment yet — fall back to every KT at the school.
-    const ktSnap = await adminDb
-      .collection('users')
-      .where('schoolId', '==', schoolId)
-      .where('educatorRole', '==', 'kt')
+    const logsSnap = await classDoc.ref
+      .collection('logs')
+      .where('reviewStatus', '==', 'pending_review')
       .get();
-    ktEmails = ktSnap.docs
-      .map((d) => d.data()?.email)
-      .filter((e): e is string => typeof e === 'string' && !!e);
-  }
+    const newLogs = logsSnap.docs.filter((d) => !d.data()?.digestNotifiedAt);
+    if (newLogs.length === 0) continue;
 
-  if (ktEmails.length === 0) {
-    return res.status(200).json({ success: true, notified: 0 });
+    let ktEmails = ktEmailCache.get(classDoc.id);
+    if (!ktEmails) {
+      const assignedTeacherUids: string[] = Array.isArray(classData.assignedTeacherUids)
+        ? classData.assignedTeacherUids
+        : [];
+      ktEmails = [];
+      if (assignedTeacherUids.length > 0) {
+        const assignedSnaps = await Promise.all(
+          assignedTeacherUids.map((u) => adminDb.collection('users').doc(u).get())
+        );
+        ktEmails = assignedSnaps
+          .filter((s) => s.exists && s.data()?.educatorRole === 'kt')
+          .map((s) => s.data()?.email)
+          .filter((e): e is string => typeof e === 'string' && !!e);
+      }
+      if (ktEmails.length === 0) {
+        const ktSnap = await adminDb
+          .collection('users')
+          .where('schoolId', '==', schoolId)
+          .where('educatorRole', '==', 'kt')
+          .get();
+        ktEmails = ktSnap.docs
+          .map((d) => d.data()?.email)
+          .filter((e): e is string => typeof e === 'string' && !!e);
+      }
+      ktEmailCache.set(classDoc.id, ktEmails);
+    }
+
+    for (const email of ktEmails) {
+      const existing = byKtEmail.get(email) || [];
+      existing.push({ className: classData.name || classDoc.id, count: newLogs.length });
+      byKtEmail.set(email, existing);
+    }
+    logRefsToMark.push(...newLogs.map((d) => d.ref));
   }
 
   const resendApiKey = process.env.RESEND_API_KEY;
+  let sent = 0;
   if (resendApiKey) {
-    try {
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Chekki AI <billing@chekkiai.com>',
-          to: ktEmails,
-          subject: `[Chekki AI] 새 수업 일지가 검토 대기 중입니다`,
-          html: `
-            <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
-              <div style="text-align: center; margin-bottom: 24px;">
-                <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
+    for (const [email, entries] of byKtEmail.entries()) {
+      const totalCount = entries.reduce((sum, e) => sum + e.count, 0);
+      const listHtml = entries
+        .map((e) => `<li style="margin-bottom:4px;">${e.className}: ${e.count}건</li>`)
+        .join('');
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Chekki AI <billing@chekkiai.com>',
+            to: [email],
+            subject: `[Chekki AI] 검토 대기 중인 수업 일지 ${totalCount}건`,
+            html: `
+              <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                  <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
+                </div>
+                <p style="font-size: 15px; color: #e4e4e7;">오늘 원어민 선생님들이 제출한 수업 일지 ${totalCount}건이 검토를 기다리고 있습니다.</p>
+                <ul style="font-size: 14px; color: #a1a1aa; line-height: 1.6; padding-left: 20px;">${listHtml}</ul>
+                <div style="text-align: center; margin: 24px 0;">
+                  <a href="https://chekkiai.com/teacher" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 검토하기</a>
+                </div>
+                <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
+                  문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.
+                </p>
               </div>
-              <p style="font-size: 15px; color: #e4e4e7;">원어민 선생님이 새 수업 일지를 제출했습니다. 학부모께 발송할 알림톡 대본이 준비되었습니다.</p>
-              <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">Chekki 앱의 대시보드에서 검토 후 학부모께 발송해주세요.</p>
-              <div style="text-align: center; margin: 24px 0;">
-                <a href="https://chekkiai.com/teacher" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 검토하기</a>
-              </div>
-            </div>
-          `,
-        }),
-      });
-    } catch (emailErr) {
-      console.warn('[create-teacher-invite:notify_log_ready] Resend email failed:', emailErr);
+            `,
+          }),
+        });
+        sent += 1;
+      } catch (emailErr) {
+        console.warn('[create-teacher-invite:send_pending_digests] Resend email failed:', email, emailErr);
+      }
     }
   }
 
-  return res.status(200).json({ success: true, notified: ktEmails.length });
+  await Promise.all(
+    logRefsToMark.map((ref) => ref.update({ digestNotifiedAt: FieldValue.serverTimestamp() }))
+  );
+
+  return res.status(200).json({ success: true, digestsSent: sent, logsMarked: logRefsToMark.length });
 }
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   const corsOrigin = applyCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // Vercel Cron hits this as a plain GET, authenticated via CRON_SECRET
+  // rather than a Firebase user token (see vercel.json "crons").
+  if (req.method === 'GET' && req.query?.action === 'send_pending_digests') {
+    const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret || req.headers.authorization !== `Bearer ${cronSecret}`) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+      return await handleSendPendingDigests(req, res);
+    } catch (error: any) {
+      console.error('[create-teacher-invite:send_pending_digests] error:', error);
+      return res.status(500).json({ error: 'Request failed' });
+    }
+  }
+
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const authHeader = req.headers.authorization;
@@ -347,15 +399,6 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     const userSnap = await adminDb.collection('users').doc(uid).get();
     const userData = userSnap.data();
-
-    // notify_log_ready is callable by any teacher at the school (e.g. the FT
-    // who just submitted a log) — every other action here is director-only.
-    if (action === 'notify_log_ready') {
-      if (!userSnap.exists || !userData?.schoolId) {
-        return res.status(403).json({ error: 'Only a member of a school can perform this action' });
-      }
-      return await handleNotifyLogReady(req, res, userData.schoolId as string);
-    }
 
     if (!userSnap.exists || userData?.role !== 'director' || !userData?.schoolId) {
       return res.status(403).json({ error: 'Only a director with a school can perform this action' });

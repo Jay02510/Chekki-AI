@@ -26,6 +26,7 @@ interface Props {
   user: any;
   activeClass: any;
   selectedTextbookName: string;
+  roster: string[];
   handleFtLogSubmit: (payload: ClassLogPayload) => void | Promise<void>;
   isSubmittingFtLog: boolean;
   completionRate: number;
@@ -72,6 +73,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
   user,
   activeClass,
   selectedTextbookName,
+  roster,
   handleFtLogSubmit,
   isSubmittingFtLog,
   completionRate,
@@ -105,6 +107,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
               userProfile={user}
               selectedClassName={activeClass?.name}
               selectedTextbookName={selectedTextbookName}
+              roster={roster}
             />
           </div>
           {/* NOTE: Duplicate worksheet scanner that previously lived here was

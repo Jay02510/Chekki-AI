@@ -229,6 +229,20 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Pre-added student invites (director/KT push a named invite to a
+    // parent's email instead of the parent self-serving a joinCode). Same
+    // shape as /invites above: director dashboards read these directly to
+    // show invited/redeemed status, but every write (create on add_students,
+    // resend, redeemed-status flip) only ever happens server-side via Admin
+    // SDK in api/create-class.ts and api/redeem.ts.
+    match /pendingStudents/{pendingStudentId} {
+      allow read: if request.auth != null && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId
+      );
+      allow write: if false;
+    }
+
     // Classes rules
     match /classes/{classId} {
       allow read: if request.auth != null;

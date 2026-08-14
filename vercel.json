@@ -77,7 +77,7 @@
       "maxDuration": 15
     },
     "api/create-teacher-invite.ts": {
-      "maxDuration": 15
+      "maxDuration": 60
     },
     "api/admin.ts": {
       "maxDuration": 15
@@ -85,5 +85,11 @@
     "api/request-school-invoice.ts": {
       "maxDuration": 15
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/create-teacher-invite?action=send_pending_digests",
+      "schedule": "0 9 * * *"
+    }
+  ]
 }

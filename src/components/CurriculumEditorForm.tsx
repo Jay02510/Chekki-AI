@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BookOpen,
   FileText,
@@ -165,6 +165,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   isGeneratingWorksheet,
 }) => {
   const isThemeNight = isNight;
+  const [showScannerTip, setShowScannerTip] = useState(true);
+  const [showOtherExample, setShowOtherExample] = useState(true);
   return (
     <div className={`p-1 rounded-[2.5rem] animate-fade-in text-left transition-colors ${
       isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
@@ -487,21 +489,30 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 </div>
 
                   {/* ③ Pro Scanner Tip Banner */}
-                  <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
-                    isThemeNight ? 'bg-orange-500/10 border-orange-500/30 text-orange-200' : 'bg-orange-50 border-orange-200 text-orange-950'
-                  }`}>
-                    <Sparkle size={20} weight="fill" className="shrink-0 text-orange-500 mt-0.5" />
-                    <div className="space-y-1">
-                      <span className="font-bold block text-xs text-orange-400">
-                        💡 {isKo ? '교재 목차(Textbook Syllabus / Index) 촬영 & 스캔 팁:' : 'Pro Tips for Textbook Syllabus / Index Photo Scanning:'}
-                      </span>
-                      <ul className={`text-[11px] space-y-1 list-disc pl-4 leading-relaxed ${isThemeNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
-                        <li>{isKo ? '교재 맨 앞쪽의 Table of Contents (목차) 및 Scope & Sequence 페이지를 평평하게 촬영하세요.' : 'Take a flat, glare-free photo of the textbook Table of Contents or Scope & Sequence page.'}</li>
-                        <li>{isKo ? '주차별/단원별(Unit 1, Unit 2) 제목과 타겟 어휘 목록이 포함되도록 구도를 맞추세요.' : 'Ensure unit headers (Unit 1, Unit 2) and target vocabulary lists are clearly framed.'}</li>
-                        <li>{isKo ? 'Chekki AI가 4주~16주 전체 과정의 주차별 어휘 및 파닉스를 자동 추출하여 대시보드에 선제 탑재합니다.' : 'Chekki AI automatically extracts multi-week vocabulary & phonics to pre-seed your entire course!'}</li>
-                      </ul>
+                  {showScannerTip && (
+                    <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
+                      isThemeNight ? 'bg-orange-500/10 border-orange-500/30 text-orange-200' : 'bg-orange-50 border-orange-200 text-orange-950'
+                    }`}>
+                      <Sparkle size={20} weight="fill" className="shrink-0 text-orange-500 mt-0.5" />
+                      <div className="space-y-1 flex-1">
+                        <span className="font-bold block text-xs text-orange-400">
+                          💡 {isKo ? '교재 목차(Textbook Syllabus / Index) 촬영 & 스캔 팁:' : 'Pro Tips for Textbook Syllabus / Index Photo Scanning:'}
+                        </span>
+                        <ul className={`text-[11px] space-y-1 list-disc pl-4 leading-relaxed ${isThemeNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                          <li>{isKo ? '교재 맨 앞쪽의 Table of Contents (목차) 및 Scope & Sequence 페이지를 평평하게 촬영하세요.' : 'Take a flat, glare-free photo of the textbook Table of Contents or Scope & Sequence page.'}</li>
+                          <li>{isKo ? '주차별/단원별(Unit 1, Unit 2) 제목과 타겟 어휘 목록이 포함되도록 구도를 맞추세요.' : 'Ensure unit headers (Unit 1, Unit 2) and target vocabulary lists are clearly framed.'}</li>
+                          <li>{isKo ? 'Chekki AI가 4주~16주 전체 과정의 주차별 어휘 및 파닉스를 자동 추출하여 대시보드에 선제 탑재합니다.' : 'Chekki AI automatically extracts multi-week vocabulary & phonics to pre-seed your entire course!'}</li>
+                        </ul>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowScannerTip(false)}
+                        className="shrink-0 p-1 rounded-full text-orange-400 hover:bg-orange-500/20 cursor-pointer"
+                      >
+                        <X size={14} weight="bold" />
+                      </button>
                     </div>
-                  </div>
+                  )}
 
                 </div>
               </div>
@@ -925,26 +936,33 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               </div>
 
               {/* Recommended Format Tooltip Box */}
-              <div className={`p-3.5 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
-                isThemeNight ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' : 'bg-purple-50 border-purple-200 text-purple-900'
-              }`}>
-                <Info size={18} weight="bold" className="shrink-0 text-purple-400 mt-0.5" />
-                <div className="space-y-1">
-                  <span className="font-bold block text-xs">
-                    {isKo ? '💡 예시:' : '💡 Example:'}
-                  </span>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <code className="px-2.5 py-1 rounded-xl bg-purple-500/20 border border-purple-500/30 text-[11px] font-mono font-bold text-purple-300">
-                      &quot;Speaking: Practice reading the word umbrella 3 times.&quot;
-                    </code>
+              {showOtherExample && (
+                <div className={`p-3.5 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
+                  isThemeNight ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' : 'bg-purple-50 border-purple-200 text-purple-900'
+                }`}>
+                  <Info size={18} weight="bold" className="shrink-0 text-purple-400 mt-0.5" />
+                  <div className="space-y-1 flex-1">
+                    <span className="font-bold block text-xs">
+                      {isKo ? '💡 예시:' : '💡 Example:'}
+                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <code className="px-2.5 py-1 rounded-xl bg-purple-500/20 border border-purple-500/30 text-[11px] font-mono font-bold text-purple-300">
+                        &quot;Speaking: Practice reading the word umbrella 3 times.&quot;
+                      </code>
+                    </div>
+                    <p className="text-[11px] text-purple-400 leading-normal">
+                      {isKo ? '자유롭게 작성하는 메모입니다.' : 'Free-form notes — write whatever\'s useful.'}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-purple-400 leading-normal">
-                    {isKo
-                      ? '자유롭게 작성하는 메모입니다. 부적절한 단어만 자동으로 차단됩니다.'
-                      : 'Free-form notes — write whatever\'s useful. Only profanity gets blocked.'}
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowOtherExample(false)}
+                    className="shrink-0 p-1 rounded-full text-purple-400 hover:bg-purple-500/20 cursor-pointer"
+                  >
+                    <X size={14} weight="bold" />
+                  </button>
                 </div>
-              </div>
+              )}
 
               <textarea
                 value={curriculumOther}
