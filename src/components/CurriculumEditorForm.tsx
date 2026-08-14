@@ -30,6 +30,10 @@ interface Props {
   isDraggingFile: boolean;
   setIsDraggingFile: (v: boolean) => void;
   handleTextbookFileUpload: (files: FileList | File[] | File, scanType?: 'syllabus' | 'worksheet') => void;
+  pendingScanFiles: { file: File; previewUrl: string }[];
+  handleStageFiles: (files: FileList | File[], scanType: 'syllabus' | 'worksheet') => void;
+  handleRemoveStagedFile: (index: number) => void;
+  handleScanStagedFiles: (scanType: 'syllabus' | 'worksheet') => void;
   isScanningSyllabus: boolean;
   syllabusPreviewUrl: string | null;
   syllabusFileName: string;
@@ -111,6 +115,10 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   isDraggingFile,
   setIsDraggingFile,
   handleTextbookFileUpload,
+  pendingScanFiles,
+  handleStageFiles,
+  handleRemoveStagedFile,
+  handleScanStagedFiles,
   isScanningSyllabus,
   syllabusPreviewUrl,
   syllabusFileName,
@@ -289,7 +297,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     e.preventDefault();
                     setIsDraggingFile(false);
                     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                      handleTextbookFileUpload(e.dataTransfer.files, 'syllabus');
+                      handleStageFiles(e.dataTransfer.files, 'syllabus');
                     }
                   }}
                   className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
@@ -304,8 +312,9 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     accept="image/*,.pdf"
                     onChange={(e) => {
                       if (e.target.files && e.target.files.length > 0) {
-                        handleTextbookFileUpload(e.target.files, 'syllabus');
+                        handleStageFiles(e.target.files, 'syllabus');
                       }
+                      e.target.value = '';
                     }}
                     className="absolute inset-0 opacity-0 cursor-pointer z-20"
                   />
@@ -395,6 +404,47 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     </div>
                   )}
                 </div>
+
+                {/* Staged pages — picked but not yet scanned. Add/remove
+                    individual pages before committing to a scan. */}
+                {uploadMode === 'syllabus' && pendingScanFiles.length > 0 && (
+                  <div className={`p-4 rounded-2xl border space-y-3 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                        {isKo ? `대기 중인 페이지 (${pendingScanFiles.length}/5)` : `Staged Pages (${pendingScanFiles.length}/5)`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleScanStagedFiles('syllabus')}
+                        disabled={isScanningSyllabus}
+                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+                      >
+                        {isKo ? `${pendingScanFiles.length}페이지 스캔 →` : `Scan ${pendingScanFiles.length} Page${pendingScanFiles.length > 1 ? 's' : ''} →`}
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {pendingScanFiles.map((p, idx) => (
+                        <div key={idx} className="relative group">
+                          {p.file.type === 'application/pdf' ? (
+                            <div className={`w-16 h-16 rounded-xl border flex items-center justify-center ${isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-500'}`}>
+                              <FileText size={20} weight="bold" />
+                            </div>
+                          ) : (
+                            <img src={p.previewUrl} alt={`Page ${idx + 1}`} className="w-16 h-16 object-cover rounded-xl border border-white/10" />
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveStagedFile(idx)}
+                            title={isKo ? '페이지 삭제' : 'Remove page'}
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-md cursor-pointer"
+                          >
+                            <X size={11} weight="bold" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* ② Course Duration Selector */}
                 <div className={`p-4 rounded-2xl border space-y-3 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
@@ -498,7 +548,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     e.preventDefault();
                     setIsDraggingFile(false);
                     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                      handleTextbookFileUpload(e.dataTransfer.files, 'worksheet');
+                      handleStageFiles(e.dataTransfer.files, 'worksheet');
                     }
                   }}
                   className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
@@ -513,8 +563,9 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     accept="image/*,.pdf"
                     onChange={(e) => {
                       if (e.target.files && e.target.files.length > 0) {
-                        handleTextbookFileUpload(e.target.files, 'worksheet');
+                        handleStageFiles(e.target.files, 'worksheet');
                       }
+                      e.target.value = '';
                     }}
                     className="absolute inset-0 opacity-0 cursor-pointer z-20"
                   />
@@ -627,6 +678,46 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     </div>
                   )}
                 </div>
+
+                {/* Staged pages — picked but not yet scanned. */}
+                {uploadMode === 'worksheet' && pendingScanFiles.length > 0 && (
+                  <div className={`p-4 rounded-2xl border space-y-3 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                        {isKo ? `대기 중인 페이지 (${pendingScanFiles.length}/5)` : `Staged Pages (${pendingScanFiles.length}/5)`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleScanStagedFiles('worksheet')}
+                        disabled={isScanningWorksheet}
+                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+                      >
+                        {isKo ? `${pendingScanFiles.length}페이지 스캔 →` : `Scan ${pendingScanFiles.length} Page${pendingScanFiles.length > 1 ? 's' : ''} →`}
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {pendingScanFiles.map((p, idx) => (
+                        <div key={idx} className="relative group">
+                          {p.file.type === 'application/pdf' ? (
+                            <div className={`w-16 h-16 rounded-xl border flex items-center justify-center ${isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-500'}`}>
+                              <FileText size={20} weight="bold" />
+                            </div>
+                          ) : (
+                            <img src={p.previewUrl} alt={`Page ${idx + 1}`} className="w-16 h-16 object-cover rounded-xl border border-white/10" />
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveStagedFile(idx)}
+                            title={isKo ? '페이지 삭제' : 'Remove page'}
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-md cursor-pointer"
+                          >
+                            <X size={11} weight="bold" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -819,7 +910,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 </label>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-[9px] text-purple-400 font-bold px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-full">
-                    🛡️ {isKo ? '영어 학습 보조 전용' : 'English Instruction Only'}
+                    ✏️ {isKo ? '자유 작성' : 'Free text'}
                   </span>
                   {curriculumOther && (
                     <button
@@ -840,7 +931,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 <Info size={18} weight="bold" className="shrink-0 text-purple-400 mt-0.5" />
                 <div className="space-y-1">
                   <span className="font-bold block text-xs">
-                    {isKo ? '💡 추천 작성 형태 (영어 학습 지침):' : '💡 Recommended Format (English Learning Focus):'}
+                    {isKo ? '💡 예시:' : '💡 Example:'}
                   </span>
                   <div className="flex items-center gap-2 flex-wrap">
                     <code className="px-2.5 py-1 rounded-xl bg-purple-500/20 border border-purple-500/30 text-[11px] font-mono font-bold text-purple-300">
@@ -849,8 +940,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   </div>
                   <p className="text-[11px] text-purple-400 leading-normal">
                     {isKo
-                      ? '원생들의 영어 학습에 직결되는 안내만 입력 가능하며, 부적절한 단어나 무관한 텍스트는 자동으로 차단됩니다.'
-                      : 'Must focus on English practice (speaking, phonics, reading). Inappropriate or non-educational text will be blocked.'}
+                      ? '자유롭게 작성하는 메모입니다. 부적절한 단어만 자동으로 차단됩니다.'
+                      : 'Free-form notes — write whatever\'s useful. Only profanity gets blocked.'}
                   </p>
                 </div>
               </div>

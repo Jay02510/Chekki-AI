@@ -615,7 +615,11 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* ========================================================================= */}
       {activeTab === 'teachers' && (
         <div className="space-y-6">
-          {schoolId ? (
+          {schoolId && classes.length === 0 ? (
+            <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400 font-bold">
+              Create at least one class before inviting teachers — invites need a class to assign the teacher to.
+            </div>
+          ) : schoolId ? (
             <TeacherInvitePanel
               isNight={isNight}
               isKo={false}

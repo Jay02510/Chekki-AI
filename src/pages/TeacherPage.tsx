@@ -86,6 +86,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   // Triggers when: ?activate=true in URL AND user is authenticated AND wizard not yet completed for this account
   const isActivateParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('activate') === 'true';
   const inviteSlug = typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('invite') || '') : '';
+  const [showInviteSessionNotice, setShowInviteSessionNotice] = useState(true);
   // Plan carried in the URL from the /schools plan modal (?plan=school_pro),
   // not just sessionStorage — sessionStorage alone breaks if this link is
   // opened in a new tab or the page is refreshed mid-signup. Mirrored into
@@ -561,7 +562,43 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [textbookPreviewUrls, setTextbookPreviewUrls] = useState<string[]>([]);
   const [selectedPageIndex, setSelectedPageIndex] = useState<number | 'all'>('all');
-  
+
+  // Staged pages picked but not yet scanned — lets teachers add/remove
+  // individual page photos before committing to a scan, instead of the
+  // previous all-or-nothing behavior where every file select immediately
+  // replaced the whole batch and re-scanned (Audit: no way to add or
+  // delete images after uploading).
+  const [pendingScanFiles, setPendingScanFiles] = useState<{ file: File; previewUrl: string }[]>([]);
+
+  const handleStageFiles = (inputFiles: FileList | File[], scanType: 'syllabus' | 'worksheet') => {
+    setUploadMode(scanType);
+    const files = inputFiles instanceof FileList ? Array.from(inputFiles) : inputFiles;
+    setPendingScanFiles((prev) => {
+      const combined = [...prev, ...files.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }))];
+      return combined.slice(0, 5);
+    });
+  };
+
+  const handleRemoveStagedFile = (index: number) => {
+    setPendingScanFiles((prev) => {
+      const target = prev[index];
+      if (target) URL.revokeObjectURL(target.previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const clearStagedFiles = () => {
+    setPendingScanFiles((prev) => {
+      prev.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      return [];
+    });
+  };
+
+  const handleScanStagedFiles = (scanType: 'syllabus' | 'worksheet') => {
+    if (pendingScanFiles.length === 0) return;
+    void handleTextbookFileUpload(pendingScanFiles.map((p) => p.file), scanType);
+  };
+
   // Separate Syllabus Upload State
   const [syllabusFileName, setSyllabusFileName] = useState<string>('');
   const [syllabusPreviewUrl, setSyllabusPreviewUrl] = useState<string | null>(null);
@@ -790,6 +827,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             ? (scanType === 'syllabus' ? `📘 교재 목차 분석 완료! 주간 커리큘럼 단어 & 파닉스 범위가 추출되었습니다.` : `📄 일간 워크시트 스캔 완료! 학부모용 정답지 가이드가 추출되었습니다.`)
             : (scanType === 'syllabus' ? `📘 Course Syllabus scanned! Scope & Vocabulary extracted.` : `📄 Daily Worksheet scanned! Parent answer keys extracted.`)
         );
+        clearStagedFiles();
       }
     } catch (err) {
       console.error('Curriculum scan failed:', err);
@@ -1497,7 +1535,11 @@ export default function TeacherPage({ isNight = true }: Props) {
       }
       return next;
     });
-    setActiveTab('syllabus');
+    // Directors don't have a syllabus-edit tab (§5: curriculum uploads are
+    // teacher-only) — only redirect FT/KT into the syllabus editor.
+    if (!(loginRole === 'director' || user?.role === 'director')) {
+      setActiveTab('syllabus');
+    }
 
     try {
       const classRef = doc(dbInstance, 'classes', selectedClass.id);
@@ -1581,17 +1623,10 @@ export default function TeacherPage({ isNight = true }: Props) {
     // --- GUARDRAIL VALIDATION FOR "OTHER" FIELD ---
     const guardrailResult = validateCurriculumOtherField(curriculumOther);
     if (!guardrailResult.ok) {
-      if (guardrailResult.reason === 'restricted_word') {
-        showToast({ type: 'error', message: isKo
-          ? `[보안 경고] 부적절한 단어("${guardrailResult.badWord}")가 포함되어 있습니다. 학습에 적합한 언어를 사용해 주세요.`
-          : `[Security Warning] Inappropriate term detected ("${guardrailResult.badWord}"). Please use appropriate educational content.`
-        });
-      } else {
-        showToast({ type: 'error', message: isKo
-          ? '[작성 안내] 기타 필드에는 영어 학습 관련 지침(예: "Speaking: Practice reading the word umbrella 3 times.")이 포함되어야 합니다.'
-          : '[Content Notice] The Other field must include English instruction (e.g. "Speaking: Practice reading the word umbrella 3 times.").'
-        });
-      }
+      showToast({ type: 'error', message: isKo
+        ? `[보안 경고] 부적절한 단어("${guardrailResult.badWord}")가 포함되어 있습니다. 학습에 적합한 언어를 사용해 주세요.`
+        : `[Security Warning] Inappropriate term detected ("${guardrailResult.badWord}"). Please use appropriate educational content.`
+      });
       return;
     }
 
@@ -2729,29 +2764,6 @@ ${questionsHtml}
                 </span>
 
                 <button
-                  onClick={() => setActiveTab('syllabus')}
-                  className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                    activeTab === 'syllabus'
-                      ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                      : isThemeNight
-                        ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl transition-colors ${
-                      activeTab === 'syllabus'
-                        ? 'bg-orange-500/20 text-orange-500'
-                        : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
-                    }`}>
-                      <BookOpen size={18} weight="bold" />
-                    </div>
-                    <span>{isKo ? '📘 교재 목차 등록 (Curriculum)' : '📘 Curriculum Preseed'}</span>
-                  </div>
-                  <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-                </button>
-
-                <button
                   onClick={() => setActiveTab('students')}
                   className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
                     activeTab === 'students'
@@ -2878,19 +2890,42 @@ ${questionsHtml}
               </button>
 
               <button
-                onClick={() => setActiveTab('homework')}
+                onClick={() => setActiveTab('syllabus')}
                 className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'homework'
+                  activeTab === 'syllabus'
                     ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight 
+                    : isThemeNight
                       ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
                       : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'homework' 
-                      ? 'bg-orange-500/20 text-orange-500' 
+                    activeTab === 'syllabus'
+                      ? 'bg-orange-500/20 text-orange-500'
+                      : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
+                  }`}>
+                    <BookOpen size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '📘 교재 목차 등록 (Curriculum)' : '📘 Curriculum Preseed'}</span>
+                </div>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+
+              <button
+                onClick={() => setActiveTab('homework')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'homework'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'homework'
+                      ? 'bg-orange-500/20 text-orange-500'
                       : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
                   }`}>
                     <FileText size={18} weight="bold" />
@@ -3154,6 +3189,40 @@ ${questionsHtml}
 
         {/* Tab Content Rendering Container */}
         <section className="p-6 md:p-8 flex-1 relative z-10">
+          {/* Someone opened a teacher/director invite link while already
+              signed into a different account in this browser — invites are
+              only redeemed by the unauthenticated signup form (see
+              `if (!isAuthenticated)` above), so this landed on the existing
+              session's own dashboard with the invite silently ignored
+              (Audit: invite link "just takes you back to the director
+              dashboard" — same-browser session, not a broken role lock). */}
+          {inviteSlug && showInviteSessionNotice && (
+            <div className={`p-4 rounded-2xl border mb-6 flex flex-wrap items-center justify-between gap-3 transition-all ${
+              isThemeNight ? 'bg-amber-500/10 border-amber-500/30 text-amber-200' : 'bg-amber-50 border-amber-200 text-amber-900'
+            }`}>
+              <p className="text-xs font-semibold flex-1 min-w-[240px]">
+                {isKo
+                  ? `이 초대 링크는 새 계정 생성용입니다. 현재 ${(user as any)?.email || ''} 계정으로 로그인되어 있어 초대가 적용되지 않았습니다. 초대를 수락하려면 먼저 로그아웃하세요.`
+                  : `This invite link is for creating a new account. You're signed in as ${(user as any)?.email || 'another user'} in this browser, so the invite wasn't applied. Log out first to accept it.`}
+              </p>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => logout()}
+                  className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  {isKo ? '로그아웃' : 'Log out'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowInviteSessionNotice(false)}
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  {isKo ? '닫기' : 'Dismiss'}
+                </button>
+              </div>
+            </div>
+          )}
           {classes.length === 0 && (
             <div className={`p-5 rounded-3xl border mb-6 flex flex-wrap items-center justify-between gap-4 transition-all shadow-sm ${
               isThemeNight
@@ -3332,7 +3401,7 @@ ${questionsHtml}
             />
 
 
-              {(activeTab === 'syllabus' || activeTab === 'homework') && (
+              {(activeTab === 'syllabus' || activeTab === 'homework') && !(loginRole === 'director' || user?.role === 'director') && (
                 <CurriculumEditorForm
                   isNight={isThemeNight}
                   isKo={isKo}
@@ -3352,6 +3421,10 @@ ${questionsHtml}
                   isDraggingFile={isDraggingFile}
                   setIsDraggingFile={setIsDraggingFile}
                   handleTextbookFileUpload={handleTextbookFileUpload}
+                  pendingScanFiles={pendingScanFiles}
+                  handleStageFiles={handleStageFiles}
+                  handleRemoveStagedFile={handleRemoveStagedFile}
+                  handleScanStagedFiles={handleScanStagedFiles}
                   isScanningSyllabus={isScanningSyllabus}
                   syllabusPreviewUrl={syllabusPreviewUrl}
                   syllabusFileName={syllabusFileName}

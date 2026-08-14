@@ -1,7 +1,9 @@
 /**
- * Validation for the curriculum "Other" field (supplementary homework /
- * speaking instructions), extracted from TeacherPage.tsx's
- * handleSaveCurriculum so the rules themselves are directly testable.
+ * Validation for the curriculum "Other" field — free text for teachers to
+ * add whatever supplementary notes they need, extracted from
+ * TeacherPage.tsx's handleSaveCurriculum so the rules themselves are
+ * directly testable. Only a profanity filter applies; there is no
+ * English-only requirement (Audit: KT teachers write notes in Korean).
  */
 const RESTRICTED_WORDS = [
   'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'crap', 'dick', 'pussy', 'slut', 'whore',
@@ -10,8 +12,7 @@ const RESTRICTED_WORDS = [
 
 export type CurriculumOtherFieldResult =
   | { ok: true }
-  | { ok: false; reason: 'restricted_word'; badWord: string }
-  | { ok: false; reason: 'not_english' };
+  | { ok: false; reason: 'restricted_word'; badWord: string };
 
 /**
  * Validates the free-text "Other" curriculum field. An empty/whitespace-only
@@ -26,11 +27,6 @@ export function validateCurriculumOtherField(otherText: string): CurriculumOther
     if (lower.includes(badWord)) {
       return { ok: false, reason: 'restricted_word', badWord };
     }
-  }
-
-  const hasEnglishText = /[a-zA-Z]/.test(trimmed);
-  if (!hasEnglishText) {
-    return { ok: false, reason: 'not_english' };
   }
 
   return { ok: true };

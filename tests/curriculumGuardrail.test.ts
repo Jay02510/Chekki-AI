@@ -21,8 +21,8 @@ describe('validateCurriculumOtherField', () => {
     expect(result).toEqual({ ok: false, reason: 'restricted_word', badWord: '씨발' });
   });
 
-  it('rejects text with no English letters', () => {
+  it('accepts Korean-only text (free text, no English requirement)', () => {
     const result = validateCurriculumOtherField('오늘 숙제는 여기 있습니다');
-    expect(result).toEqual({ ok: false, reason: 'not_english' });
+    expect(result).toEqual({ ok: true });
   });
 });
