@@ -92,11 +92,13 @@
   }
   </script>
 </head>
-<body class="antialiased selection:bg-brand selection:text-white overscroll-none">
+<body class="antialiased selection:bg-brand selection:text-white overscroll-none bg-[#050505] text-zinc-100">
   <div id="root">
     <!-- Static fallback for crawlers that don't execute JavaScript (e.g. GPTBot).
-         React replaces this content on mount; real users never see it. -->
-    <main>
+         sr-only: was unstyled black-on-white text, visible as a flash before
+         React mounts and replaces it — hidden from sighted users, still in the
+         DOM for crawlers. -->
+    <main class="sr-only">
       <h1>Chekki AI: AI Homework Help for Korean Families and English-Language Academies</h1>
       <p>Chekki AI helps parents check their child's paper homework in seconds using AI-powered worksheet scanning and pronunciation coaching, and helps English-language academies (hagwons) automate class logging and Korean-language parent reporting.</p>
       <ul>

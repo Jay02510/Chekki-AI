@@ -531,7 +531,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   }, [activeTab]);
 
   // Curriculum state
-  const [selectedTextbookName, setSelectedTextbookName] = useState<string>('Bricks Reading 150 (Book 1)');
+  const [selectedTextbookName, setSelectedTextbookName] = useState<string>('');
   const [curriculumTopic, setCurriculumTopic] = useState('');
   const [curriculumVocab, setCurriculumVocab] = useState('');
   const [curriculumPhonics, setCurriculumPhonics] = useState('');
@@ -559,12 +559,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [syllabusScannedData, setSyllabusScannedData] = useState<any>(null);
   const [syllabusWeeks, setSyllabusWeeks] = useState<number>(4);
   const [isScanningSyllabus, setIsScanningSyllabus] = useState(false);
-  const [syllabusWeeklySchedule, setSyllabusWeeklySchedule] = useState<Array<{ week: number; topic: string; vocab: string; phonics: string }>>([
-    { week: 1, topic: 'Weather & Nature', vocab: 'sunny, rainy, windy, cloudy', phonics: '-ai-, -ay-' },
-    { week: 2, topic: 'Animals & Habitats', vocab: 'elephant, giraffe, ocean', phonics: '-th-, -ph-' },
-    { week: 3, topic: 'Food & Nutrition', vocab: 'apple, banana, vegetable', phonics: '-ch-, -sh-' },
-    { week: 4, topic: 'Family & Friends', vocab: 'father, mother, friend', phonics: '-ee-, -ea-' }
-  ]);
+  const [syllabusWeeklySchedule, setSyllabusWeeklySchedule] = useState<Array<{ week: number; topic: string; vocab: string; phonics: string }>>([]);
 
   // Separate Worksheet Upload State
   const [worksheetFileName, setWorksheetFileName] = useState<string>('');
@@ -657,12 +652,20 @@ export default function TeacherPage({ isNight = true }: Props) {
     // Cap at 5 files max per scan batch
     const selectedFiles = fileList.slice(0, 5);
 
-    const hasLargeFile = selectedFiles.some(f => f.size > 15 * 1024 * 1024);
-    if (hasLargeFile) {
-      showToast({ type: 'info', message: isKo
-        ? '💡 15MB 이상 파일이 포함되어 있습니다. 빠른 AI 분석 및 정확도를 위해 단원별(1~5페이지) PDF나 교재 사진 업로드를 권장합니다.'
-        : '💡 Large file detected. For fastest scanning & best AI accuracy, we recommend uploading single unit sections or 1–5 page PDFs.'
+    // The backend (api/analyze.ts) hard-caps the request body at 10MB, and
+    // base64 encoding inflates raw file bytes by ~33% on top of that. This
+    // must block (not just warn) and check the COMBINED batch size, not each
+    // file individually — a previous 15MB-per-file, warning-only check let
+    // real PDFs (and multi-file batches) sail past it and fail server-side
+    // with a generic "couldn't read this file" message that gave no reason.
+    const totalBytes = selectedFiles.reduce((sum, f) => sum + f.size, 0);
+    const SAFE_RAW_BYTES_LIMIT = 6 * 1024 * 1024; // leaves room for base64 (+33%) + JSON envelope under the 10MB server cap
+    if (totalBytes > SAFE_RAW_BYTES_LIMIT) {
+      showToast({ type: 'error', message: isKo
+        ? `⚠️ 파일 용량이 너무 큽니다 (${(totalBytes / (1024 * 1024)).toFixed(1)}MB, 최대 6MB). 단원별로 나누거나 페이지 수를 줄여 다시 시도해 주세요.`
+        : `⚠️ File too large (${(totalBytes / (1024 * 1024)).toFixed(1)}MB combined, 6MB max). Split into smaller sections or fewer pages and try again.`
       });
+      return;
     }
 
     if (scanType === 'syllabus') {
@@ -781,6 +784,19 @@ export default function TeacherPage({ isNight = true }: Props) {
       }
     } catch (err) {
       console.error('Curriculum scan failed:', err);
+      // Clear the optimistic file-name/preview state set before the scan started —
+      // otherwise a failed file stays listed as if it were successfully stored,
+      // with only a transient toast (which disappears) explaining why.
+      setUploadedFileName('');
+      setTextbookPreviewUrl(null);
+      setTextbookPreviewUrls([]);
+      if (scanType === 'syllabus') {
+        setSyllabusFileName('');
+        setSyllabusPreviewUrl(null);
+      } else {
+        setWorksheetFileName('');
+        setWorksheetPreviewUrl(null);
+      }
       showToast({
         type: 'error',
         message: isKo
@@ -932,10 +948,13 @@ export default function TeacherPage({ isNight = true }: Props) {
     })();
   }, [selectedClass?.id]);
 
-  // Show teacher onboarding once when first authenticated with no classes
+  // Show teacher onboarding once when first authenticated with no classes.
+  // Directors get their own dedicated activation wizard (see the effect below) —
+  // showing this generic tour to them too produced two stacked onboarding
+  // overlays on a fresh director signup, so this tour is FT/KT-only.
   useEffect(() => {
     const uid = user?.uid || 'guest';
-    if (!isLoadingClasses && isAuthenticated && (user?.role === 'teacher' || user?.role === 'director' || loginRole === 'director')) {
+    if (!isLoadingClasses && isAuthenticated && user?.role === 'teacher') {
       if (classes.length === 0) {
         const obDone =
           localStorage.getItem('chekki_teacher_ob_done') ||
@@ -2162,6 +2181,13 @@ ${questionsHtml}
                     ? (isKo ? '학원명을 등록하고 즉시 원장님 전용 대시보드를 개설하세요.' : 'Register your academy and activate your Director HQ Dashboard.')
                     : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
             </p>
+            {!isPlanSignup && authMode === 'signup' && loginRole === 'teacher' && !inviteSlug && (
+              <p className="text-[10px] text-zinc-500 text-center max-w-xs -mt-4 mb-6 leading-relaxed">
+                {isKo
+                  ? '교사 계정은 별도 요금제가 없습니다 — 소속 학원의 플랜과 좌석을 인증 코드로 이용합니다.'
+                  : "Teacher accounts don't pick a plan — you'll join your school's existing plan and seats via their authorization code."}
+              </p>
+            )}
             {isPlanSignup && (
               <button
                 type="button"
@@ -2658,23 +2684,25 @@ ${questionsHtml}
 
         {/* Navigation Tabs (Scoped by Role) */}
         <nav className="p-4 flex-1 space-y-2">
-          {/* Director HQ Tab (Director Only) */}
+          {/* Director Tabs (Director Only) — grouped: hub first, setup tasks
+              below with a labeled break, matching the tight-within/generous-
+              between rhythm used elsewhere in the app. */}
           {(loginRole === 'director' || user?.role === 'director') && (
             <>
               <button
                 onClick={() => setActiveTab('director_hq')}
                 className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
                   activeTab === 'director_hq'
-                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-xl shadow-amber-500/10'
-                    : isThemeNight 
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight
                       ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
                       : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'director_hq' 
-                      ? 'bg-amber-500/20 text-amber-500' 
+                    activeTab === 'director_hq'
+                      ? 'bg-orange-500/20 text-orange-500'
                       : isThemeNight ? 'bg-white/5 text-amber-400 group-hover:text-white' : 'bg-amber-100 text-amber-600 group-hover:text-zinc-900'
                   }`}>
                     <Buildings size={18} weight="bold" />
@@ -2684,51 +2712,57 @@ ${questionsHtml}
                 <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'director_hq' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
               </button>
 
-              <button
-                onClick={() => setActiveTab('syllabus')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'syllabus'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight 
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'syllabus' 
-                      ? 'bg-orange-500/20 text-orange-500' 
-                      : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
-                  }`}>
-                    <BookOpen size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '📘 교재 목차 등록 (Curriculum)' : '📘 Curriculum Preseed'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
+              <div className="pt-6 mt-2 border-t border-white/5 space-y-2">
+                <span className="block px-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                  {isKo ? '설정' : 'Setup'}
+                </span>
 
-              <button
-                onClick={() => setActiveTab('students')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'students'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight 
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'students' 
-                      ? 'bg-orange-500/20 text-orange-500' 
-                      : isThemeNight ? 'bg-white/5 text-purple-400 group-hover:text-white' : 'bg-purple-100 text-purple-600 group-hover:text-zinc-900'
-                  }`}>
-                    <Users size={18} weight="bold" />
+                <button
+                  onClick={() => setActiveTab('syllabus')}
+                  className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                    activeTab === 'syllabus'
+                      ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                      : isThemeNight
+                        ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-xl transition-colors ${
+                      activeTab === 'syllabus'
+                        ? 'bg-orange-500/20 text-orange-500'
+                        : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
+                    }`}>
+                      <BookOpen size={18} weight="bold" />
+                    </div>
+                    <span>{isKo ? '📘 교재 목차 등록 (Curriculum)' : '📘 Curriculum Preseed'}</span>
                   </div>
-                  <span>{isKo ? '👥 원생 명단 관리 (Roster)' : '👥 Student Roster'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
+                  <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('students')}
+                  className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                    activeTab === 'students'
+                      ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                      : isThemeNight
+                        ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-xl transition-colors ${
+                      activeTab === 'students'
+                        ? 'bg-orange-500/20 text-orange-500'
+                        : isThemeNight ? 'bg-white/5 text-purple-400 group-hover:text-white' : 'bg-purple-100 text-purple-600 group-hover:text-zinc-900'
+                    }`}>
+                      <Users size={18} weight="bold" />
+                    </div>
+                    <span>{isKo ? '👥 원생 명단 관리 (Roster)' : '👥 Student Roster'}</span>
+                  </div>
+                  <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+                </button>
+              </div>
             </>
           )}
 
@@ -2896,7 +2930,7 @@ ${questionsHtml}
               <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
                 <Sparkle size={18} weight="fill" className="animate-pulse" />
               </div>
-              <span>{isKo ? '📊 학부모 성적표 발급기' : '📊 AI Report Studio'}</span>
+              <span>{isKo ? '📊 학부모 성적표 발급기' : '📊 Generate Weekly Report'}</span>
             </div>
             <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
               GENERATE
@@ -2986,7 +3020,7 @@ ${questionsHtml}
                   type="button"
                   onClick={() => setShowCreateClassModal(true)}
                   className="group px-3.5 py-2.5 border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 rounded-2xl transition-all font-bold text-xs shrink-0 active:scale-[0.97] flex items-center gap-1.5 cursor-pointer"
-                  title="Add New Class"
+                  title={isKo ? '새 학급 추가' : 'Add New Class'}
                 >
                   <Plus size={16} weight="bold" className="group-hover:rotate-90 transition-transform" />
                   <span className="hidden sm:inline">{isKo ? '새 학급' : 'New Class'}</span>
@@ -3002,7 +3036,7 @@ ${questionsHtml}
                     ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
                     : 'bg-orange-500/10 border-orange-500/20 text-orange-500 hover:bg-orange-500/20'
                 }`}
-                title="Click to copy 6-digit parent join code"
+                title={isKo ? '클릭하여 6자리 학부모 코드 복사' : 'Click to copy 6-digit parent join code'}
               >
                 <Key size={14} weight="bold" />
                 <span className="hidden md:inline">{isKo ? '학급 코드' : 'Code'}:</span>
@@ -3166,16 +3200,9 @@ ${questionsHtml}
                 onRequestSeatExpansion={handleRequestSeatExpansion}
                 pendingRoster={pendingRoster}
                 activeRoster={activeRoster}
-                isLoadingRoster={isLoadingRoster}
                 classes={classes}
                 selectedClass={selectedClass}
                 weeklyVocabWords={getWeeklyVocabWords()}
-                handleApproveStudent={handleApproveStudent}
-                handleDeclineStudent={handleDeclineStudent}
-                handleRemoveStudent={handleRemoveStudent}
-                handleMoveStudent={handleMoveStudent}
-                fetchRosterAndMistakes={fetchRosterAndMistakes}
-                setSelectedStudentDetails={setSelectedStudentDetails}
                 onResolveFlag={(uid: string) => handleToggleFlagStudent(uid)}
               />
             )}

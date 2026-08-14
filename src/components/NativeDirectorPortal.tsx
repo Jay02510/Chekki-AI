@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Buildings,
-  Users,
   WarningCircle,
   UserGear,
   PlusCircle,
@@ -13,7 +12,6 @@ import { collection, query, where, getCountFromServer } from 'firebase/firestore
 import { dbInstance } from '../../services/database';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
-import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
 import { TeacherRosterPanel } from './TeacherRosterPanel';
 import { SchoolBillingPanel } from './SchoolBillingPanel';
 
@@ -35,7 +33,6 @@ interface Props {
   // actual roster (see NativeDirectorStudentsTab.tsx).
   pendingRoster?: any[];
   activeRoster?: any[];
-  isLoadingRoster?: boolean;
   trialStatus?: { onTrial: boolean; daysRemaining: number; expired: boolean } | null;
   classes?: any[];
   selectedClass?: any;
@@ -44,12 +41,6 @@ interface Props {
   // (getWeeklyVocabWords). Passed down so the Overview tab can show real
   // "this unit, at a glance" data without a second source of truth.
   weeklyVocabWords?: string[];
-  handleApproveStudent?: (uid: string) => void;
-  handleDeclineStudent?: (uid: string) => void;
-  handleRemoveStudent?: (uid: string) => void;
-  handleMoveStudent?: (uid: string, targetClassId: string) => void;
-  fetchRosterAndMistakes?: () => void;
-  setSelectedStudentDetails?: (student: any) => void;
   onResolveFlag?: (studentUid: string) => void;
   onRequestSeatExpansion?: (extraSeats: number) => Promise<boolean>;
 }
@@ -64,21 +55,14 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   seatsTotal,
   pendingRoster = [],
   activeRoster = [],
-  isLoadingRoster = false,
   trialStatus = null,
   classes = [],
   selectedClass,
   weeklyVocabWords = [],
-  handleApproveStudent = () => {},
-  handleDeclineStudent = () => {},
-  handleRemoveStudent = () => {},
-  handleMoveStudent = () => {},
-  fetchRosterAndMistakes = () => {},
-  setSelectedStudentDetails = () => {},
   onResolveFlag = () => {},
   onRequestSeatExpansion,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'roster' | 'curriculum' | 'exceptions' | 'teachers' | 'billing'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'exceptions' | 'teachers' | 'billing'>('overview');
 
   const totalRosterCount = pendingRoster.length + activeRoster.length;
   const flaggedStudents = activeRoster.filter((s: any) => s.flaggedException);
@@ -280,22 +264,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             }`}
           >
             <FolderUser size={16} weight="bold" className="text-orange-400" />
-            <span>Curriculum &amp; Homework Stream</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('roster')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
-              activeTab === 'roster'
-                ? 'bg-orange-500 border-orange-500 text-white shadow-md'
-                : isNight
-                ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-            }`}
-          >
-            <Users size={16} weight="bold" />
-            <span>Class Rosters ({totalRosterCount})</span>
+            <span>Submission Status</span>
           </button>
 
           <button
@@ -364,13 +333,19 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">STAFF SEAT QUOTA</span>
-            <button
-              type="button"
-              onClick={() => setShowSeatExpansionModal(true)}
-              className="text-[10px] font-bold text-orange-400 hover:underline cursor-pointer"
-            >
-              + Add Seats
-            </button>
+            {planId === 'trial' ? (
+              <span className="text-[10px] font-bold text-zinc-500" title="Paid seat expansion isn't available during the free trial">
+                Upgrade to add seats
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowSeatExpansionModal(true)}
+                className="text-[10px] font-bold text-orange-400 hover:underline cursor-pointer"
+              >
+                + Add Seats
+              </button>
+            )}
           </div>
           <h4 className="text-2xl font-black text-emerald-400 mt-1">
             {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)} <span className="text-xs font-normal text-zinc-400">Total ({seatsTotal?.ft || 0} FT / {seatsTotal?.kt || 0} KT)</span>
@@ -478,7 +453,10 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 0: CURRICULUM & HOMEWORK STREAM (Syllabus & Worksheet Oversight) */}
+      {/* TAB 0: SUBMISSION STATUS — read-only oversight of what teachers have
+          uploaded (not the editing tool itself; that's the outer sidebar's
+          Curriculum Preseed tab). Named "Submission Status" specifically to
+          not collide with that tab's name. */}
       {/* ========================================================================= */}
       {activeTab === 'curriculum' && (
         <div className="space-y-6 animate-fade-in text-left">
@@ -531,27 +509,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             </div>
           </div>
         </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* TAB 1: CLASS ROSTERS & STUDENT MANAGEMENT */}
-      {/* ========================================================================= */}
-      {activeTab === 'roster' && (
-        <NativeDirectorStudentsTab
-          isNight={isNight}
-          isKo={isKo}
-          pendingRoster={pendingRoster}
-          activeRoster={activeRoster}
-          isLoadingRoster={isLoadingRoster}
-          classes={classes}
-          selectedClass={selectedClass}
-          handleApproveStudent={handleApproveStudent}
-          handleDeclineStudent={handleDeclineStudent}
-          handleRemoveStudent={handleRemoveStudent}
-          handleMoveStudent={handleMoveStudent}
-          fetchRosterAndMistakes={fetchRosterAndMistakes}
-          setSelectedStudentDetails={setSelectedStudentDetails}
-        />
       )}
 
       {/* ========================================================================= */}

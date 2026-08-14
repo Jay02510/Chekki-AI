@@ -105,8 +105,9 @@
     </script>
     <div id="root">
       <!-- Static fallback for crawlers that don't execute JavaScript. React
-           replaces this content on mount; real users never see it. -->
-      <main>
+           replaces this content on mount; sr-only hides it from sighted users
+           so it doesn't flash before mount, while staying in the DOM for crawlers. -->
+      <main class="sr-only">
         <h1>Chekki AI — Homework Helper &amp; Teacher/Director Portal</h1>
         <p>Sign in to scan and check homework, or to manage classes, review homework scans, and send parent reports as a teacher or academy director.</p>
       </main>

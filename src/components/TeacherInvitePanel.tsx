@@ -33,6 +33,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
   const [isSending, setIsSending] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
   const [lastLink, setLastLink] = useState<string | null>(null);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!schoolId) return;
@@ -93,6 +94,26 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
       setMessage({ text: isKo ? '네트워크 오류가 발생했습니다.' : 'Network error — please try again.', type: 'error' });
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleRevokeInvite = async (inviteId: string) => {
+    setRevokingId(inviteId);
+    setMessage(null);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch('/api/create-teacher-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ action: 'revoke_invite', inviteId }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Failed to revoke invite.');
+      setMessage({ text: isKo ? '초대가 취소되었고 좌석이 반환되었습니다.' : 'Invite revoked — the seat is free again.', type: 'success' });
+    } catch (err: any) {
+      setMessage({ text: err.message || (isKo ? '초대 취소에 실패했습니다.' : 'Failed to revoke invite.'), type: 'error' });
+    } finally {
+      setRevokingId(null);
     }
   };
 
@@ -182,14 +203,24 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
       {invites.filter((inv) => inv.status !== 'revoked').length > 0 && (
         <div className="pt-2 border-t border-white/10 space-y-1.5 max-h-40 overflow-y-auto">
           {invites.filter((inv) => inv.status !== 'revoked').map((inv) => (
-            <div key={inv.id} className="flex items-center justify-between text-[11px]">
+            <div key={inv.id} className="flex items-center justify-between text-[11px] gap-2">
               <span className="text-zinc-400 truncate">{inv.email || (isKo ? '(링크 전용)' : '(link only)')}</span>
-              <span className={`font-mono font-bold px-1.5 py-0.5 rounded ${inv.role === 'ft' ? 'text-orange-400' : 'text-blue-400'}`}>
+              <span className={`font-mono font-bold px-1.5 py-0.5 rounded shrink-0 ${inv.role === 'ft' ? 'text-orange-400' : 'text-blue-400'}`}>
                 {inv.role.toUpperCase()}
               </span>
-              <span className={`font-bold ${inv.status === 'claimed' ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              <span className={`font-bold shrink-0 ${inv.status === 'claimed' ? 'text-emerald-400' : 'text-zinc-500'}`}>
                 {inv.status === 'claimed' ? (isKo ? '수락됨' : 'claimed') : (isKo ? '대기중' : 'pending')}
               </span>
+              {inv.status === 'pending' && (
+                <button
+                  type="button"
+                  onClick={() => handleRevokeInvite(inv.id)}
+                  disabled={revokingId === inv.id}
+                  className="shrink-0 text-rose-400 hover:text-rose-300 font-bold disabled:opacity-40 cursor-pointer"
+                >
+                  {revokingId === inv.id ? (isKo ? '취소 중…' : 'Revoking…') : (isKo ? '취소' : 'Revoke')}
+                </button>
+              )}
             </div>
           ))}
         </div>

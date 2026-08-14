@@ -200,6 +200,33 @@ async function handleRemoveTeacher(req: VercelRequest, res: VercelResponse, call
 }
 
 /**
+ * Cancels a pending (never-claimed) invite so it stops occupying a seat.
+ * handleRemoveTeacher above only unlinks a teacher who already claimed their
+ * invite — there was no way to cancel one that's still sitting unclaimed,
+ * so a mistyped/duplicate invite permanently ate a seat with no fix but
+ * contacting support.
+ */
+async function handleRevokeInvite(req: VercelRequest, res: VercelResponse, schoolId: string) {
+  const { inviteId } = req.body || {};
+  if (typeof inviteId !== 'string' || !inviteId) {
+    return res.status(400).json({ error: 'inviteId is required' });
+  }
+
+  const inviteRef = adminDb.collection('invites').doc(inviteId);
+  const inviteSnap = await inviteRef.get();
+  const inviteData = inviteSnap.data();
+  if (!inviteSnap.exists || inviteData?.schoolId !== schoolId) {
+    return res.status(404).json({ error: 'Invite not found' });
+  }
+  if (inviteData?.status !== 'pending') {
+    return res.status(400).json({ error: 'Only a pending invite can be revoked' });
+  }
+
+  await inviteRef.update({ status: 'revoked', revokedAt: new Date().toISOString() });
+  return res.status(200).json({ success: true });
+}
+
+/**
  * Best-effort: FT submits a class log → email the class's assigned KT
  * teacher(s) (falling back to every KT at the school if the class has no
  * assignment yet) so they know a log is waiting for review. Callable by any
@@ -325,6 +352,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (action === 'assign') return await handleAssignClassTeacher(req, res, schoolId);
     if (action === 'remove') return await handleRemoveTeacher(req, res, uid, schoolId);
+    if (action === 'revoke_invite') return await handleRevokeInvite(req, res, schoolId);
     return await handleCreateInvite(req, res, corsOrigin, uid, schoolId);
   } catch (error: any) {
     console.error('[create-teacher-invite] error:', error);
