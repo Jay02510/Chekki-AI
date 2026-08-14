@@ -682,6 +682,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               isKo={false}
               schoolId={schoolId}
               seatsTotal={seatsTotal || { ft: 0, kt: 0 }}
+              classes={classes.filter((c: any) => !c.isDemo).map((c: any) => ({ id: c.id, name: c.name }))}
             />
           ) : (
             <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">

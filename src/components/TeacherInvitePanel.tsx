@@ -8,6 +8,7 @@ interface Invite {
   role: 'ft' | 'kt';
   status: 'pending' | 'claimed' | 'revoked';
   email: string | null;
+  classId?: string;
 }
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
   isKo?: boolean;
   schoolId: string;
   seatsTotal: { ft: number; kt: number };
+  classes: { id: string; name: string }[];
 }
 
 /**
@@ -24,10 +26,11 @@ interface Props {
  * invite here is role-locked and seat-checked server-side by
  * api/create-teacher-invite.ts before it's ever created.
  */
-export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = true, schoolId, seatsTotal }) => {
+export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = true, schoolId, seatsTotal, classes }) => {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
   const [role, setRole] = useState<'ft' | 'kt'>('ft');
+  const [classId, setClassId] = useState(classes[0]?.id || '');
   const [email, setEmail] = useState('');
   const [noEmailYet, setNoEmailYet] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -67,6 +70,12 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
   };
 
   useEffect(() => {
+    if (!classes.some((c) => c.id === classId)) {
+      setClassId(classes[0]?.id || '');
+    }
+  }, [classes, classId]);
+
+  useEffect(() => {
     if (!schoolId) return;
     const q = query(collection(dbInstance, 'invites'), where('schoolId', '==', schoolId));
     const unsub = onSnapshot(
@@ -94,13 +103,17 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
       setMessage({ text: isKo ? '이메일을 입력하거나 "아직 없음"을 선택하세요.' : 'Enter an email or check "no email yet".', type: 'error' });
       return;
     }
+    if (!classId) {
+      setMessage({ text: isKo ? '배정할 학급을 선택하세요.' : 'Pick a class for this teacher to join.', type: 'error' });
+      return;
+    }
     setIsSending(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch('/api/create-teacher-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ role, email: noEmailYet ? undefined : email.trim() }),
+        body: JSON.stringify({ role, email: noEmailYet ? undefined : email.trim(), classId }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -183,6 +196,24 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         </button>
       </div>
 
+      <div className="space-y-1.5">
+        <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">
+          {isKo ? '배정할 학급' : 'Assign to class'}
+        </label>
+        <select
+          value={classId}
+          onChange={(e) => setClassId(e.target.value)}
+          className={`w-full p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 ${
+            isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+          }`}
+        >
+          {classes.length === 0 && <option value="">{isKo ? '학급 없음' : 'No classes yet'}</option>}
+          {classes.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="space-y-2">
         <input
           type="email"
@@ -203,7 +234,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
       <button
         type="button"
         onClick={handleSendInvite}
-        disabled={isSending || (role === 'ft' ? remainingFt <= 0 : remainingKt <= 0)}
+        disabled={isSending || !classId || (role === 'ft' ? remainingFt <= 0 : remainingKt <= 0)}
         className="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all"
       >
         {isSending

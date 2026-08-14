@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Buildings, CheckCircle, FolderUser, UserGear, UploadSimple } from '@phosphor-icons/react';
 import { auth } from '../../services/database';
-import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { useToast } from '../../contexts/ToastContext';
 import { labelsForPlan } from '../../api/_lib/pricingTiers';
 import { readAndCompressLogoFile, LogoTooLargeError } from '../utils/logoUpload';
@@ -353,13 +352,19 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className="space-y-4">
-              <TeacherInvitePanel isNight={isNight} isKo={isKo} schoolId={schoolId} seatsTotal={seatsTotal} />
-              <p className="text-[11px] text-zinc-500 text-center">
-                {isKo
-                  ? '지금 초대하지 않아도 괜찮습니다 — 대시보드에서 언제든 선생님을 초대할 수 있습니다.'
-                  : "You don't have to invite anyone right now — you can send invites anytime from your dashboard."}
-              </p>
+            {/* Invites now require picking a real class (audit: teacher
+                landed with no class after accepting an invite, then either
+                self-served a disconnected standalone class or waited on a
+                separate after-the-fact assignment). The classes typed in
+                Step 2 are still just local names at this point — they don't
+                become real Firestore docs with real IDs until Finish below
+                — so there's nothing yet to assign an invite to. Send
+                director straight to the dashboard's invite panel instead,
+                which has real classes to pick from. */}
+            <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400 font-bold text-center">
+              {isKo
+                ? '설정을 마치면 학급이 개설됩니다. 대시보드에서 선생님을 초대하고 담당 학급을 바로 배정하세요.'
+                : "Your classes will be created once you finish setup. Invite teachers from your dashboard afterward — you'll assign them straight to a class as part of sending the invite."}
             </div>
 
             <div className="flex gap-3">

@@ -34,9 +34,20 @@ function generateInviteId(): string {
 }
 
 async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsOrigin: string, uid: string, schoolId: string) {
-  const { role, email } = req.body || {};
+  const { role, email, classId } = req.body || {};
   if (!ALLOWED_ROLES.has(role)) {
     return res.status(400).json({ error: 'role must be "ft" or "kt"' });
+  }
+  // A teacher used to land with no class after accepting an invite — either
+  // self-serving a standalone class disconnected from the director's real
+  // roster, or waiting on a separate after-the-fact assignment step. The
+  // class is now picked here, before the invite exists, same as role.
+  if (typeof classId !== 'string' || !classId) {
+    return res.status(400).json({ error: 'classId is required — pick the class this teacher will join' });
+  }
+  const classSnap = await adminDb.collection('classes').doc(classId).get();
+  if (!classSnap.exists || classSnap.data()?.schoolId !== schoolId) {
+    return res.status(404).json({ error: 'That class does not belong to your school' });
   }
   const cleanEmail = typeof email === 'string' && email.trim() ? email.trim().toLowerCase() : undefined;
 
@@ -76,6 +87,7 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
   const invitePayload = {
     schoolId,
     role,
+    classId,
     status: 'pending' as const,
     email: cleanEmail || null,
     claimedByUid: null,

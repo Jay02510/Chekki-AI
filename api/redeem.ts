@@ -297,6 +297,7 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
   let schoolName: string;
   let educatorRole: string;
   let invitedByName: string | null;
+  let className: string | null;
 
   try {
     const result = await adminDb.runTransaction(async (t) => {
@@ -316,6 +317,23 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
       const schoolRef = adminDb.collection('schools').doc(invite.schoolId);
       const schoolSnap = await t.get(schoolRef);
       const resolvedSchoolName = schoolSnap.data()?.name || invite.schoolId;
+
+      // The director now picks the class at invite-creation time (see
+      // api/create-teacher-invite.ts) instead of the teacher landing with
+      // no class and either self-serving a disconnected one or waiting on
+      // a separate after-the-fact assignment step. Reads happen before any
+      // writes below per Firestore's transaction read-before-write rule.
+      let classRef: FirebaseFirestore.DocumentReference | null = null;
+      let resolvedClassName: string | null = null;
+      if (invite.classId) {
+        classRef = adminDb.collection('classes').doc(invite.classId);
+        const classSnap = await t.get(classRef);
+        if (classSnap.exists && classSnap.data()?.schoolId === invite.schoolId) {
+          resolvedClassName = classSnap.data()?.name || null;
+        } else {
+          classRef = null;
+        }
+      }
 
       let invitedByName: string | null = null;
       if (invite.createdByUid) {
@@ -354,13 +372,18 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
 
       t.update(schoolRef, { usedByUids: FieldValue.arrayUnion(uid) });
 
-      return { schoolId: invite.schoolId, schoolName: resolvedSchoolName, educatorRole: invite.role, invitedByName };
+      if (classRef) {
+        t.update(classRef, { assignedTeacherUids: FieldValue.arrayUnion(uid) });
+      }
+
+      return { schoolId: invite.schoolId, schoolName: resolvedSchoolName, educatorRole: invite.role, invitedByName, className: resolvedClassName };
     });
 
     schoolId = result.schoolId;
     schoolName = result.schoolName;
     educatorRole = result.educatorRole;
     invitedByName = result.invitedByName;
+    className = result.className;
   } catch (error: any) {
     if (error && typeof error.httpStatus === 'number') {
       return res.status(error.httpStatus).json({ error: error.message });
@@ -375,6 +398,7 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
     schoolId,
     schoolName,
     invitedByName,
+    className,
   });
 }
 
