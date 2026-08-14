@@ -1011,9 +1011,20 @@ export default function TeacherPage({ isNight = true }: Props) {
   // Directors get their own dedicated activation wizard (see the effect below) —
   // showing this generic tour to them too produced two stacked onboarding
   // overlays on a fresh director signup, so this tour is FT/KT-only.
+  //
+  // This tour's final step is a self-serve "Create First Class" button —
+  // separate from (and missed by) the fix that stopped the OTHER
+  // welcome-screen from offering that to invited teachers. A director now
+  // assigns the class at invite time, so an invited FT/KT with zero
+  // classes is just waiting on that assignment, not missing a class they
+  // need to create themselves — this tour must not auto-show for them
+  // (audit: KT stuck on "Add Class" popup, could never reach the
+  // dashboard, because this second onboarding flow still offered to let
+  // them create their own disconnected class).
   useEffect(() => {
     const uid = user?.uid || 'guest';
-    if (!isLoadingClasses && isAuthenticated && user?.role === 'teacher') {
+    const isInvitedWaitingOnAssignment = !!(user as any)?.schoolId;
+    if (!isLoadingClasses && isAuthenticated && user?.role === 'teacher' && !isInvitedWaitingOnAssignment) {
       if (classes.length === 0) {
         const obDone =
           localStorage.getItem('chekki_teacher_ob_done') ||
