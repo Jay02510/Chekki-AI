@@ -258,13 +258,19 @@ service cloud.firestore {
         isAdmin()
       );
 
-      // Class logs (FT/KT daily log entries). Readable by the teacher(s) and
-      // director who own the class, plus parents whose enrolled child belongs
-      // to this class — closes the loop between what a teacher records and
-      // what the parent sees. Written only by the class's own teacher(s).
+      // Class logs (FT/KT daily log entries). One log doc covers the WHOLE
+      // class for that day — approvedExceptions is an array of every
+      // enrolled student's note, not just one. Parent read access (via
+      // userBelongsToClass) used to be granted on the whole doc, which
+      // would leak every other kid's private note to any parent in the
+      // class. No parent-facing UI reads this collection today, so nothing
+      // in-app currently uses that access — removed it here so the rule
+      // can't be exploited directly against Firestore in the meantime.
+      // Re-add parent access only once logs are split per-student (e.g. a
+      // studentNotes subcollection) so a parent can be scoped to their own
+      // kid's entry, not the whole class-day doc.
       match /logs/{logId} {
         allow read: if request.auth != null && (
-          userBelongsToClass(classId) ||
           isClassTeacher(classId) ||
           isSchoolDirectorOfClass(classId) ||
           isAdmin()
