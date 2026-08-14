@@ -740,18 +740,18 @@ export default function AdminPage() {
     }
   };
 
-  const handleImpersonateUser = async (uid: string, email: string) => {
+  const handleImpersonateUser = async (uid: string, email: string, role?: string) => {
     setConfirmDialog({
       title: `Are you sure you want to log in as ${email}? This will end your current admin session.`,
       confirmText: 'Log In As User',
       onConfirm: () => {
         setConfirmDialog(null);
-        void performImpersonateUser(uid, email);
+        void performImpersonateUser(uid, email, role);
       },
     });
   };
 
-  const performImpersonateUser = async (uid: string, email: string) => {
+  const performImpersonateUser = async (uid: string, email: string, role?: string) => {
     setLoading(true);
     setMessage({ text: '', type: '' });
     try {
@@ -764,7 +764,13 @@ export default function AdminPage() {
       if (!response.ok) throw new Error(data.error || 'Failed to get custom token');
 
       await signInWithCustomToken(auth, data.customToken);
-      window.location.href = '/app.html';
+      // /app.html mounts the same <App/> root, but its internal routing
+      // decides teacher/director portal vs. the consumer scanning app purely
+      // from window.location.pathname (checked once at mount) — landing on
+      // the bare "/app.html" path matches none of its routes and fell
+      // through to the consumer app, not the teacher/director dashboard
+      // (Audit: "Login as user" via admin always opens the web app).
+      window.location.href = role === 'teacher' || role === 'director' ? '/teacher' : '/app.html';
     } catch (err: any) {
       console.error(err);
       setMessage({ text: err.message || 'Error impersonating user', type: 'error' });
@@ -1064,7 +1070,7 @@ export default function AdminPage() {
                                     Reset PW
                                   </button>
                                   <button
-                                    onClick={() => handleImpersonateUser(user.uid, user.email)}
+                                    onClick={() => handleImpersonateUser(user.uid, user.email, user.role)}
                                     className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors text-[10px] font-bold uppercase tracking-wider"
                                     title="Log in as user"
                                   >

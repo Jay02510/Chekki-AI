@@ -16,6 +16,7 @@ interface Props {
   onClose: () => void;
   schoolId: string;
   academyName: string;
+  onAcademyNameSaved: (name: string) => void;
 }
 
 export const AcademyLogoModal: React.FC<Props> = ({
@@ -27,9 +28,16 @@ export const AcademyLogoModal: React.FC<Props> = ({
   onClose,
   schoolId,
   academyName,
+  onAcademyNameSaved,
 }) => {
   const [fileError, setFileError] = React.useState<string | null>(null);
   const [isSaving, setIsSaving] = React.useState(false);
+  // /api/update-school-profile's `academyName` field is the school's actual
+  // rename target, not just an identifier — this modal used to always send
+  // the existing name back unchanged, so a director stuck with the "New
+  // Academy" signup fallback (audit: no academy-name step, no way to change
+  // it after) had no way to rename it anywhere in the app.
+  const [nameInput, setNameInput] = React.useState(academyName);
   const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
   const { showToast } = useToast();
 
@@ -68,15 +76,15 @@ export const AcademyLogoModal: React.FC<Props> = ({
                 {isKo ? '맞춤 브랜드 설정' : 'ACADEMY BRANDING'}
               </span>
               <h3 id="academy-logo-title" className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '학원 맞춤 로고 등록' : 'Custom Academy Logo'}
+                {isKo ? '학원 정보 설정' : 'Academy Settings'}
               </h3>
             </div>
           </div>
 
           <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
             {isKo
-              ? '등록된 학원 로고는 모든 학부모 성적표 리포트 및 인쇄용 오답 학습지에 맞춤 헤더로 삽입됩니다.'
-              : 'Your custom logo will be featured on all parent progress reports and printed worksheets.'}
+              ? '학원명과 로고는 모든 학부모 성적표 리포트 및 인쇄용 오답 학습지에 맞춤 헤더로 삽입됩니다.'
+              : 'Your academy name and logo appear on every parent progress report and printed worksheet.'}
           </p>
 
           <form
@@ -84,12 +92,17 @@ export const AcademyLogoModal: React.FC<Props> = ({
               e.preventDefault();
               setIsSaving(true);
               setFileError(null);
+              const trimmedName = nameInput.trim();
+              if (!trimmedName) {
+                setFileError(isKo ? '학원명을 입력해 주세요.' : 'Please enter an academy name.');
+                return;
+              }
               try {
                 const idToken = await auth.currentUser?.getIdToken();
                 const response = await fetch('/api/update-school-profile', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-                  body: JSON.stringify({ academyName, logoUrl: tempLogoUrl }),
+                  body: JSON.stringify({ academyName: trimmedName, logoUrl: tempLogoUrl }),
                 });
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || 'Failed to save logo');
@@ -101,8 +114,9 @@ export const AcademyLogoModal: React.FC<Props> = ({
                   // the source of truth now.
                 }
                 setAcademyLogo(tempLogoUrl);
+                onAcademyNameSaved(trimmedName);
                 onClose();
-                showToast({ type: 'success', message: isKo ? '학원 맞춤 로고가 저장되었습니다!' : 'Custom Academy Logo saved!' });
+                showToast({ type: 'success', message: isKo ? '학원 정보가 저장되었습니다!' : 'Academy settings saved!' });
               } catch (err: any) {
                 console.error('Failed to save academy logo:', err);
                 setFileError(
@@ -116,6 +130,23 @@ export const AcademyLogoModal: React.FC<Props> = ({
             }}
             className="space-y-4"
           >
+            <div className="space-y-1.5">
+              <label htmlFor="academy-name-input" className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                {isKo ? '학원명' : 'Academy Name'}
+              </label>
+              <input
+                id="academy-name-input"
+                type="text"
+                required
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder={isKo ? '예: 첵키 잉글리시 아카데미' : 'e.g. Chekki English Academy'}
+                className={`w-full border outline-none text-sm p-3.5 rounded-2xl transition-all font-bold ${
+                  isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                }`}
+              />
+            </div>
+
             <div className="space-y-3">
               <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
                 {isKo ? '학원 로고 이미지 등록 (파일 선택 또는 URL)' : 'Academy Brand Logo (File or URL)'}
@@ -219,7 +250,7 @@ export const AcademyLogoModal: React.FC<Props> = ({
                     const response = await fetch('/api/update-school-profile', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-                      body: JSON.stringify({ academyName, logoUrl: '' }),
+                      body: JSON.stringify({ academyName: nameInput.trim() || academyName, logoUrl: '' }),
                     });
                     if (!response.ok) {
                       const data = await response.json().catch(() => ({}));
@@ -248,7 +279,7 @@ export const AcademyLogoModal: React.FC<Props> = ({
                 disabled={isSaving}
                 className="w-2/3 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40"
               >
-                {isSaving ? (isKo ? '저장 중...' : 'Saving…') : (isKo ? '로고 저장하기' : 'Save Logo')}
+                {isSaving ? (isKo ? '저장 중...' : 'Saving…') : (isKo ? '저장하기' : 'Save Changes')}
               </button>
             </div>
           </form>

@@ -147,6 +147,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     return 'login';
   });
   const [name, setName] = useState('');
+  const [academyNameInput, setAcademyNameInput] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -905,6 +906,11 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [showTeacherOnboarding, setShowTeacherOnboarding] = useState(false);
   const [teacherObStep, setTeacherObStep] = useState(0);
   const [academyLogo, setAcademyLogo] = useState<string>(() => localStorage.getItem('chekki_academy_logo') || '');
+  // `user` from useAuth isn't a live Firestore subscription, so a rename via
+  // AcademyLogoModal wouldn't otherwise show up until a full reload — this
+  // local override mirrors the academyLogo pattern above.
+  const [academyNameOverride, setAcademyNameOverride] = useState<string | null>(null);
+  const displayedAcademyName = academyNameOverride || user?.schoolName || 'Chekki Master Academy';
   const [showLogoModal, setShowLogoModal] = useState(false);
   const [tempLogoUrl, setTempLogoUrl] = useState(academyLogo);
 
@@ -1268,7 +1274,15 @@ export default function TeacherPage({ isNight = true }: Props) {
               const response = await fetch('/api/set-initial-role', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-                body: JSON.stringify({ role: assignedRole, planId }),
+                body: JSON.stringify({
+                  role: assignedRole,
+                  planId,
+                  // The signup form never sent this, so every new director's
+                  // school silently fell back to the server's "New Academy"
+                  // placeholder with no way to rename it afterward (Audit:
+                  // dashboard shows "New Academy", no academy-name step).
+                  academyName: assignedRole === 'director' ? academyNameInput.trim() || undefined : undefined,
+                }),
               });
               if (!response.ok) {
                 console.warn('Server-side role assignment failed, using localStorage fallback:', await response.text());
@@ -1302,6 +1316,11 @@ export default function TeacherPage({ isNight = true }: Props) {
       let msg = err.message;
       if (err.code === 'auth/user-not-found') msg = isKo ? '등록되지 않은 이메일입니다.' : 'No account found with this email.';
       if (err.code === 'auth/wrong-password') msg = isKo ? '비밀번호가 올바르지 않습니다.' : 'Incorrect password.';
+      // Newer Firebase Auth SDK versions collapse both wrong-password and
+      // user-not-found into this single code — without this branch, the
+      // raw "Firebase: Error (auth/invalid-credential)." SDK string leaked
+      // straight to the login screen (Audit: unfriendly error on login).
+      if (err.code === 'auth/invalid-credential') msg = isKo ? '이메일 또는 비밀번호가 올바르지 않습니다.' : 'Incorrect email or password.';
       if (err.code === 'auth/email-already-in-use') msg = isKo ? '이미 가입된 이메일입니다. 로그인해 주세요.' : 'Email already registered. Please log in.';
       setAuthError(msg || (authMode === 'signup' ? 'Sign up failed.' : 'Login failed. Please check your credentials.'));
     } finally {
@@ -2298,6 +2317,22 @@ ${questionsHtml}
                 </div>
               )}
 
+              {authMode === 'signup' && loginRole === 'director' && (
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                    {isKo ? '학원명' : 'Academy Name'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={academyNameInput}
+                    onChange={(e) => setAcademyNameInput(e.target.value)}
+                    placeholder={isKo ? '예: 첵키 잉글리시 아카데미' : 'e.g. Chekki English Academy'}
+                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                  />
+                </div>
+              )}
+
               <div className="space-y-1.5 text-left">
                 <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
                   Email
@@ -2759,7 +2794,7 @@ ${questionsHtml}
               <button
                 type="button"
                 onClick={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
-                title={isKo ? '원장님 전용 학원 로고 설정' : 'Director Logo Settings'}
+                title={isKo ? '학원명 및 로고 설정' : 'Academy Name & Logo Settings'}
                 className={`p-2 rounded-xl transition-all text-xs font-bold active:scale-[0.95] cursor-pointer ${
                   isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
                 }`}
@@ -3334,7 +3369,7 @@ ${questionsHtml}
               <NativeDirectorPortal
                 isNight={isThemeNight}
                 isKo={isKo}
-                academyName={user?.schoolName || 'Chekki Master Academy'}
+                academyName={displayedAcademyName}
                 onOpenLogoModal={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
                 schoolId={(user as any)?.schoolId}
                 planId={schoolPlanId}
@@ -3365,7 +3400,7 @@ ${questionsHtml}
                 key={activeKtLog?.id || 'empty'}
                 isNight={isThemeNight}
                 className={activeClass?.name || '7세반 (샘플)'}
-                academyName={user?.schoolName || 'Chekki Master Academy'}
+                academyName={displayedAcademyName}
                 userProfile={user}
                 generatedOutput={
                   activeKtLog
@@ -3869,7 +3904,8 @@ ${questionsHtml}
           setAcademyLogo={setAcademyLogo}
           onClose={() => setShowLogoModal(false)}
           schoolId={(user as any)?.schoolId || ''}
-          academyName={user?.schoolName || 'Chekki Master Academy'}
+          academyName={displayedAcademyName}
+          onAcademyNameSaved={setAcademyNameOverride}
         />
       )}
       {/* --- TEACHER SETTINGS MODAL --- */}
