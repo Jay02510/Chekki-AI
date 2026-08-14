@@ -100,6 +100,7 @@ function LandingRoot() {
     pathname.startsWith('/refund') ||
     pathname.startsWith('/youth') ||
     pathname.startsWith('/support') ||
+    pathname.startsWith('/insights') ||
     pathname.startsWith('/reports') ||
     pathname.startsWith('/report-studio')
   ) {

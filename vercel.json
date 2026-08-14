@@ -37,7 +37,7 @@
       "destination": "/privacy.html"
     },
     {
-      "source": "/(refund|youth|support|subscribe|admin|teacher|school|schools|for-schools|faq|reports|report-studio)",
+      "source": "/(refund|youth|support|subscribe|admin|teacher|school|schools|for-schools|faq|insights|reports|report-studio)",
       "destination": "/index.html"
     }
   ],

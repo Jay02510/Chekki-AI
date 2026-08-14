@@ -218,9 +218,11 @@ function AppContent() {
     const { pathname, search } = window.location;
     return !search.includes('invite=') && (pathname === '/schools' || pathname === '/for-schools');
   });
+  // Canonical path is /insights; /report, /reports, /report-studio kept working
+  // for anyone with an old link bookmarked.
   const [showReportStudioPage, setShowReportStudioPage] = useState(() =>
     typeof window !== 'undefined' &&
-    (window.location.pathname.startsWith('/report') || window.location.pathname.startsWith('/reports'))
+    (window.location.pathname === '/insights' || window.location.pathname.startsWith('/report'))
   );
   const [showHelp, setShowHelp] = useState(false);
   const platform = Capacitor.getPlatform();
@@ -260,7 +262,7 @@ function AppContent() {
       setShowAdminPage(path === '/admin');
       setShowTeacherPage(isInvite || path === '/teacher' || path === '/director' || path === '/director-hq' || path.includes('/schools/login'));
       setShowSchoolsPage(!isInvite && (path === '/schools' || path === '/for-schools'));
-      setShowReportStudioPage(path === '/reports' || path === '/report-studio');
+      setShowReportStudioPage(path === '/insights' || path.startsWith('/report'));
     };
 
     window.addEventListener('popstate', handleLocationChange);

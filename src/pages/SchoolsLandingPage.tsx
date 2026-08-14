@@ -356,18 +356,18 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
             </button>
             <a
-              href="/reports"
+              href="/insights"
               onClick={(e) => {
                 e.preventDefault();
-                window.location.href = '/reports';
+                window.location.href = '/insights';
               }}
               className={`w-full sm:w-auto px-8 py-4 font-black text-sm rounded-3xl border transition-all active:scale-[0.97] text-center ${
-                isNight 
-                  ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white' 
+                isNight
+                  ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
                   : 'bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-900 shadow-sm'
               }`}
             >
-              {isKo ? '리포트 스튜디오 체험' : 'Try Report Studio'}
+              {isKo ? '리포트 생성기 체험하기' : 'Try the Report Generator'}
             </a>
           </div>
         </div>
@@ -709,17 +709,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
             <div className="shrink-0 w-full md:w-auto">
               <a
-                href="/reports"
+                href="/insights"
                 onClick={(e) => {
                   e.preventDefault();
                   window.scrollTo({ top: 0, behavior: 'instant' });
-                  window.history.pushState({}, '', '/reports');
+                  window.history.pushState({}, '', '/insights');
                   window.dispatchEvent(new PopStateEvent('popstate'));
                 }}
                 className="w-full md:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer group"
               >
                 <Sparkle size={16} weight="fill" className="group-hover:rotate-12 transition-transform" />
-                <span>{isKo ? '리포트 생성기 체험하기 →' : 'Try Report Generator →'}</span>
+                <span>{isKo ? '리포트 생성기 체험하기 →' : 'Try the Report Generator →'}</span>
               </a>
             </div>
           </div>
@@ -835,14 +835,14 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
           <div className="mb-10">
             <a
-              href="/report-studio"
+              href="/insights"
               className={`inline-flex items-center gap-1.5 text-xs font-bold transition-all px-4 py-2 rounded-full border ${
-                isNight 
-                  ? 'bg-white/5 border-white/10 hover:bg-white/15 text-orange-400 hover:text-orange-300' 
+                isNight
+                  ? 'bg-white/5 border-white/10 hover:bg-white/15 text-orange-400 hover:text-orange-300'
                   : 'bg-zinc-100 border-zinc-300 hover:bg-zinc-200 text-orange-600 hover:text-orange-500 shadow-sm'
               }`}
             >
-              <span>{isKo ? '⚡ 학부모 알림톡 AI 생성기 1분 체험하기' : '⚡ Try AI Parent Report Generator (1 Min)'}</span>
+              <span>{isKo ? '리포트 생성기 체험하기' : 'Try the Report Generator'}</span>
               <span className="text-[10px]">→</span>
             </a>
           </div>
