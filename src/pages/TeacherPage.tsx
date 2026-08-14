@@ -356,32 +356,20 @@ export default function TeacherPage({ isNight = true }: Props) {
     activeWeekNumber: 1,
   };
 
-  // Class state (Persists created classes in localStorage)
-  const [classes, setClassesState] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('chekki_academy_classes');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-      } catch (e) {
-        console.error('Failed to load saved classes', e);
-      }
-    }
-    return [fallbackDemoClass];
-  });
+  // Class state. This used to seed from and persist to a single unscoped
+  // 'chekki_academy_classes' localStorage key shared by every account in
+  // this browser — the very first render (before auth/Firestore resolve)
+  // could briefly show a PREVIOUS account's class list on this device
+  // (Audit: cross-account class-list flash on login). Real persistence and
+  // instant-paint already happen correctly via the per-uid
+  // `teacher_classes_${uid}` key (see the initial-load effect and
+  // fetchClasses below), so this now always starts from the safe demo
+  // placeholder instead of reading anyone's cached data at mount.
+  const [classes, setClassesState] = useState<any[]>(() => [fallbackDemoClass]);
 
   const setClasses = (action: any) => {
     setClassesState((prev) => {
       const next = typeof action === 'function' ? action(prev) : action;
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem('chekki_academy_classes', JSON.stringify(next));
-        } catch (e) {
-          console.error('Failed to save classes to localStorage', e);
-        }
-      }
       return next;
     });
   };
@@ -1149,17 +1137,17 @@ export default function TeacherPage({ isNight = true }: Props) {
     if (isAuthenticated) {
       const uid = user?.uid || 'guest';
       const localKey = `teacher_classes_${uid}`;
+      // A global, un-scoped 'teacher_classes_fallback' key used to be merged
+      // in here (and written on every class create/delete/week-change) as
+      // an offline safety net — but being unscoped meant it leaked class
+      // rosters and names between completely unrelated accounts sharing a
+      // browser (Audit: cross-account data leak — one director's classes
+      // appeared on another's fresh dashboard). Removed; per-uid caching
+      // below plus the real Firestore fetch already cover the offline case.
       const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
-      const globalSaved = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
-      
-      const map = new Map();
-      localSaved.forEach((c: any) => map.set(c.id, c));
-      globalSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
-      
-      const combined = Array.from(map.values());
-      if (combined.length > 0) {
-        setClasses(combined);
-        setSelectedClass(combined[0]);
+      if (localSaved.length > 0) {
+        setClasses(localSaved);
+        setSelectedClass(localSaved[0]);
       }
     }
   }, [isAuthenticated, user?.uid]);
@@ -1195,13 +1183,10 @@ export default function TeacherPage({ isNight = true }: Props) {
     } finally {
       const localKey = `teacher_classes_${uid}`;
       const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
-      const isDemoUser = user?.email?.includes('demo') || user?.email?.includes('test');
-      const globalSaved = isDemoUser ? JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]') : [];
 
       const map = new Map();
       fetchedFromFirestore.forEach(c => map.set(c.id, c));
       localSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
-      globalSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
 
       const combined = Array.from(map.values());
       setClasses(combined);
@@ -1408,15 +1393,12 @@ export default function TeacherPage({ isNight = true }: Props) {
         };
       }
 
-      // Persist in localStorage under user-specific and fallback keys
+      // Persist in localStorage under the user-specific key only — see the
+      // initial-load effect above for why the old global fallback key is gone.
       const localKey = `teacher_classes_${uid}`;
       const existingLocal = JSON.parse(localStorage.getItem(localKey) || '[]');
       const updatedLocal = [newClass, ...existingLocal.filter((c: any) => c.id !== newClass.id)];
       localStorage.setItem(localKey, JSON.stringify(updatedLocal));
-
-      const existingGlobal = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
-      const updatedGlobal = [newClass, ...existingGlobal.filter((c: any) => c.id !== newClass.id)];
-      localStorage.setItem('teacher_classes_fallback', JSON.stringify(updatedGlobal));
 
       localStorage.setItem('chekki_teacher_ob_done', '1');
       localStorage.setItem(`chekki_teacher_ob_done_${uid}`, '1');
@@ -1499,10 +1481,6 @@ export default function TeacherPage({ isNight = true }: Props) {
 
       const localKey = `teacher_classes_${uid}`;
       localStorage.setItem(localKey, JSON.stringify(updatedClasses));
-
-      const existingGlobal = JSON.parse(localStorage.getItem('teacher_classes_fallback') || '[]');
-      const updatedGlobal = existingGlobal.filter((c: any) => c.id !== targetId);
-      localStorage.setItem('teacher_classes_fallback', JSON.stringify(updatedGlobal));
     } catch (err: any) {
       console.error('Failed to delete class:', err);
       showToast({ type: 'error', message: isKo ? '학급 삭제 중 오류가 발생했습니다.' : `Failed to delete class: ${err?.message || 'Please try again.'}` });
@@ -1550,7 +1528,6 @@ export default function TeacherPage({ isNight = true }: Props) {
       const uid = user?.uid || 'guest';
       try {
         localStorage.setItem(`teacher_classes_${uid}`, JSON.stringify(next));
-        localStorage.setItem('teacher_classes_fallback', JSON.stringify(next));
       } catch (e) {
         console.warn('Failed to cache classes to localStorage:', e);
       }
@@ -1579,7 +1556,6 @@ export default function TeacherPage({ isNight = true }: Props) {
       const uid = user?.uid || 'guest';
       try {
         localStorage.setItem(`teacher_classes_${uid}`, JSON.stringify(next));
-        localStorage.setItem('teacher_classes_fallback', JSON.stringify(next));
       } catch (e) {
         console.warn('Failed to cache classes to localStorage:', e);
       }
@@ -3403,6 +3379,9 @@ ${questionsHtml}
                 classes={classes}
                 selectedClass={selectedClass}
                 weeklyVocabWords={getWeeklyVocabWords()}
+                weeklyPhonicsRules={getWeeklyPhonicsRules()}
+                curriculumTopic={curriculumTopic}
+                curriculumPassage={curriculumPassage}
                 onResolveFlag={(uid: string) => handleToggleFlagStudent(uid)}
               />
             )}

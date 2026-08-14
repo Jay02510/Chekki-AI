@@ -57,6 +57,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUids, setSelectedUids] = useState<Set<string>>(new Set());
+  const [isPurgingDemoData, setIsPurgingDemoData] = useState(false);
 
   // Invoices State
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -698,6 +699,69 @@ export default function AdminPage() {
     setLoading(false);
   };
 
+  const handlePurgeDemoData = async () => {
+    setIsPurgingDemoData(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'purge_demo_data', dryRun: true }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to scan for demo data');
+
+      const userCount = data.users?.length || 0;
+      const curriculumCount = data.curriculumDocIds?.length || 0;
+      if (userCount === 0 && curriculumCount === 0) {
+        setMessage({ text: 'No demo/test users or leftover demo curriculum docs found.', type: 'success' });
+        setIsPurgingDemoData(false);
+        return;
+      }
+
+      const emailPreview = (data.users || []).slice(0, 8).map((u: any) => u.email).join(', ');
+      const moreCount = userCount > 8 ? ` +${userCount - 8} more` : '';
+
+      setConfirmDialog({
+        title: `Permanently delete ${userCount} demo/test user${userCount !== 1 ? 's' : ''} (${emailPreview}${moreCount}) and ${curriculumCount} leftover curriculum doc${curriculumCount !== 1 ? 's' : ''}? This cannot be undone.`,
+        confirmText: `Delete ${userCount + curriculumCount} Item${userCount + curriculumCount !== 1 ? 's' : ''}`,
+        variant: 'destructive',
+        onConfirm: () => {
+          setConfirmDialog(null);
+          void performPurgeDemoData();
+        },
+      });
+    } catch (err: any) {
+      setMessage({ text: err.message || 'Error scanning for demo data', type: 'error' });
+    } finally {
+      setIsPurgingDemoData(false);
+    }
+  };
+
+  const performPurgeDemoData = async () => {
+    setIsPurgingDemoData(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'purge_demo_data', dryRun: false }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to purge demo data');
+
+      setMessage({
+        text: `✅ Deleted ${data.deletedUsers} demo/test user${data.deletedUsers !== 1 ? 's' : ''} and ${data.deletedCurriculums} leftover curriculum doc${data.deletedCurriculums !== 1 ? 's' : ''}.`,
+        type: 'success',
+      });
+      await handleFetchUsers();
+    } catch (err: any) {
+      setMessage({ text: err.message || 'Error purging demo data', type: 'error' });
+    } finally {
+      setIsPurgingDemoData(false);
+    }
+  };
+
   const handleResetPassword = async (email: string) => {
     try {
       await sendPasswordResetEmail(auth, email);
@@ -955,6 +1019,15 @@ export default function AdminPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium"
                 />
+                <button
+                  type="button"
+                  onClick={handlePurgeDemoData}
+                  disabled={isPurgingDemoData}
+                  className="self-start px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-xs font-bold border border-purple-500/30 disabled:opacity-40 transition-colors"
+                  title="Find and delete every user whose email contains 'demo' or 'test', plus leftover demo curriculum docs"
+                >
+                  {isPurgingDemoData ? 'Scanning…' : '🧹 Purge Demo/Test Data'}
+                </button>
                 {selectedUids.size > 0 && (
                   <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20">
                     <span className="text-xs font-bold text-red-400">

@@ -41,6 +41,9 @@ interface Props {
   // (getWeeklyVocabWords). Passed down so the Overview tab can show real
   // "this unit, at a glance" data without a second source of truth.
   weeklyVocabWords?: string[];
+  weeklyPhonicsRules?: string[];
+  curriculumTopic?: string;
+  curriculumPassage?: string;
   onResolveFlag?: (studentUid: string) => void;
   onRequestSeatExpansion?: (extraSeats: number) => Promise<boolean>;
 }
@@ -59,6 +62,9 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   classes = [],
   selectedClass,
   weeklyVocabWords = [],
+  weeklyPhonicsRules = [],
+  curriculumTopic = '',
+  curriculumPassage = '',
   onResolveFlag = () => {},
   onRequestSeatExpansion,
 }) => {
@@ -97,7 +103,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       try {
         const results = await Promise.all(
           classes.map(async (cls: any) => {
-            if (!cls?.id || cls.id === 'demo') return { classId: cls?.id, className: cls?.name, pending: 0, sent: 0 };
+            if (!cls?.id || cls.isDemo) return { classId: cls?.id, className: cls?.name, pending: 0, sent: 0 };
             const logsRef = collection(dbInstance, 'classes', cls.id, 'logs');
             const [pendingSnap, sentSnap] = await Promise.all([
               getCountFromServer(query(logsRef, where('reviewStatus', '==', 'pending_review'))),
@@ -476,13 +482,54 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 </div>
               </div>
 
-              <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
-                  <PlusCircle size={24} weight="bold" />
+              {curriculumTopic || weeklyVocabWords.length > 0 || weeklyPhonicsRules.length > 0 || curriculumPassage ? (
+                <div className="space-y-4 text-left">
+                  {curriculumTopic && (
+                    <div>
+                      <span className="text-[10px] font-bold text-blue-400 uppercase font-mono tracking-wider block mb-1">Weekly Topic</span>
+                      <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{curriculumTopic}</p>
+                    </div>
+                  )}
+                  {weeklyVocabWords.length > 0 && (
+                    <div>
+                      <span className="text-[10px] font-bold text-orange-400 uppercase font-mono tracking-wider block mb-2">Target Vocabulary ({weeklyVocabWords.length})</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {weeklyVocabWords.map((word) => (
+                          <span key={word} className={`px-2 py-1 rounded-md text-xs font-bold border ${isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-800 border-orange-200'}`}>
+                            {word}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {weeklyPhonicsRules.length > 0 && (
+                    <div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase font-mono tracking-wider block mb-2">Phonics Rules / Sounds ({weeklyPhonicsRules.length})</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {weeklyPhonicsRules.map((rule) => (
+                          <span key={rule} className={`px-2 py-1 rounded-md text-xs font-bold border ${isNight ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-indigo-100 text-indigo-800 border-indigo-200'}`}>
+                            {rule}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {curriculumPassage && (
+                    <div>
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase font-mono tracking-wider block mb-1">Reading Passage</span>
+                      <p className="text-xs text-zinc-400 leading-relaxed line-clamp-3">{curriculumPassage}</p>
+                    </div>
+                  )}
                 </div>
-                <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No syllabi uploaded yet</p>
-                <p className="text-xs text-zinc-400 max-w-[200px]">Teachers can upload course syllabi from the Manage Syllabus tab to populate this stream.</p>
-              </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
+                    <PlusCircle size={24} weight="bold" />
+                  </div>
+                  <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No syllabus set for this week yet</p>
+                  <p className="text-xs text-zinc-400 max-w-[200px]">Teachers upload it from their Curriculum Preseed tab — it'll show here once saved.</p>
+                </div>
+              )}
             </div>
 
             {/* CARD 2: Daily Homework Worksheets Stream */}

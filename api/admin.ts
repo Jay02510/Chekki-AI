@@ -671,6 +671,60 @@ https://urlgeni.us/chekki
       if (!uid) return res.status(400).json({ error: 'Missing uid' });
       const customToken = await authDb.createCustomToken(uid);
       return res.status(200).json({ success: true, customToken });
+    } else if (action === 'purge_demo_data') {
+      // Finds and (only when dryRun === false) deletes: (1) any user whose
+      // email contains "demo" or "test", and (2) orphaned curriculums/demo_*
+      // docs — leftovers from the shared placeholder id bug where every
+      // account's empty-state preview used the literal id "demo" (fixed
+      // client-side, but past writes under that id are still sitting in
+      // Firestore). Defaults to a dry run so the caller always sees exactly
+      // what would be deleted before committing to it.
+      const dryRun = req.body?.dryRun !== false;
+      const DEMO_EMAIL_PATTERN = /demo|test/i;
+
+      const usersSnap = await adminDb.collection('users').get();
+      const matchedUsers = usersSnap.docs.filter((d) => DEMO_EMAIL_PATTERN.test(d.data()?.email || ''));
+
+      const curriculumsSnap = await adminDb.collection('curriculums').get();
+      const matchedCurriculums = curriculumsSnap.docs.filter((d) => d.id.startsWith('demo_') || d.id.startsWith('demo_week_'));
+
+      if (dryRun) {
+        return res.status(200).json({
+          success: true,
+          dryRun: true,
+          users: matchedUsers.map((d) => ({ uid: d.id, email: d.data()?.email || null })),
+          curriculumDocIds: matchedCurriculums.map((d) => d.id),
+        });
+      }
+
+      let deletedUsers = 0;
+      for (const userDoc of matchedUsers) {
+        try {
+          await adminDb.collection('users').doc(userDoc.id).delete();
+          deletedUsers++;
+        } catch (e) {
+          console.error('[purge_demo_data] Failed to delete user doc:', userDoc.id, e);
+        }
+        try {
+          await authDb.deleteUser(userDoc.id);
+        } catch (e: any) {
+          if (e.code !== 'auth/user-not-found') {
+            console.error('[purge_demo_data] Failed to delete Auth user:', userDoc.id, e);
+          }
+        }
+      }
+
+      let deletedCurriculums = 0;
+      for (const curriculumDoc of matchedCurriculums) {
+        try {
+          await adminDb.collection('curriculums').doc(curriculumDoc.id).delete();
+          deletedCurriculums++;
+        } catch (e) {
+          console.error('[purge_demo_data] Failed to delete curriculum doc:', curriculumDoc.id, e);
+        }
+      }
+
+      return res.status(200).json({ success: true, dryRun: false, deletedUsers, deletedCurriculums });
     } else {
       return res.status(400).json({ error: 'Invalid action' });
     }
