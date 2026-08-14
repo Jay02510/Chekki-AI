@@ -443,7 +443,16 @@ export default function TeacherPage({ isNight = true }: Props) {
       const firestoreRole = (user as any).role;
       const localRole = uid ? localStorage.getItem(`chekki_user_role_${uid}`) : null;
       const resolvedRole = firestoreRole || localRole || loginRole;
-      const isDirector = resolvedRole === 'director' || isDirectorPath;
+      // Deliberately NOT `|| isDirectorPath` here: isDirectorPath just checks
+      // whether the URL contains "director" (e.g. /director-hq), which any
+      // authenticated teacher can end up on. Falling back to it once a real
+      // user is signed in let the URL override their actual Firestore role,
+      // showing a real KT/FT account the full Director HQ shell. A brand-new
+      // director already resolves correctly via loginRole (set at signup) or
+      // localRole (written at signup) above, so this fallback was only ever
+      // needed pre-auth (see the activeTab/loginRole useState defaults, which
+      // legitimately use isDirectorPath as a loading-state guess).
+      const isDirector = resolvedRole === 'director';
       // Educator role: always read from Firestore field first.
       // Do NOT use email.includes('kt') — see comment on educatorRole state above.
       const isKtRole = (user as any).educatorRole === 'kt';
@@ -463,7 +472,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         }
       }
     }
-  }, [user?.uid, (user as any)?.educatorRole, (user as any)?.role, isDirectorPath]);
+  }, [user?.uid, (user as any)?.educatorRole, (user as any)?.role]);
 
   // Load the school's seat pool for the director invite panel (wizard + dashboard).
   useEffect(() => {
@@ -979,7 +988,9 @@ export default function TeacherPage({ isNight = true }: Props) {
     const localRole = uid ? localStorage.getItem(`chekki_user_role_${uid}`) : null;
     const resolvedRole = firestoreRole || localRole || loginRole;
 
-    const isDirector = resolvedRole === 'director' || isDirectorPath;
+    // See the matching comment on the other role-resolution effect above —
+    // not falling back to isDirectorPath here for the same reason.
+    const isDirector = resolvedRole === 'director';
 
     if (isDirector && isActivateParam) {
       // Director with ?activate=true — show wizard only if first time
