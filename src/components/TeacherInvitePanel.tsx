@@ -34,6 +34,37 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
   const [lastLink, setLastLink] = useState<string | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [justCopied, setJustCopied] = useState(false);
+
+  const copyInviteLink = async (link: string) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        throw new Error('clipboard API unavailable');
+      }
+    } catch {
+      // Fallback for webviews/browsers that block navigator.clipboard
+      // (e.g. no clipboard-write permission) — silent failure was the
+      // bug reported: button did nothing with no error either.
+      const textarea = document.createElement('textarea');
+      textarea.value = link;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch {
+        setMessage({ text: isKo ? '복사에 실패했습니다. 링크를 직접 선택해 복사하세요.' : 'Copy failed — select the link text manually.', type: 'error' });
+        document.body.removeChild(textarea);
+        return;
+      }
+      document.body.removeChild(textarea);
+    }
+    setJustCopied(true);
+    setTimeout(() => setJustCopied(false), 2000);
+  };
 
   useEffect(() => {
     if (!schoolId) return;
@@ -192,10 +223,10 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
           <input readOnly value={lastLink} className="flex-1 p-2 rounded-lg bg-black/30 border border-white/10 text-[10px] font-mono text-zinc-300" />
           <button
             type="button"
-            onClick={() => navigator.clipboard.writeText(lastLink)}
+            onClick={() => copyInviteLink(lastLink)}
             className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold shrink-0"
           >
-            {isKo ? '복사' : 'Copy'}
+            {justCopied ? (isKo ? '복사됨!' : 'Copied!') : (isKo ? '복사' : 'Copy')}
           </button>
         </div>
       )}

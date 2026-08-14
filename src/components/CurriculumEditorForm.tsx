@@ -355,6 +355,11 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                               ? (isKo ? '독립 저장됨: 클릭하여 새 시라버스 스캔' : 'Stored independently. Click to rescan syllabus.')
                               : (isKo ? '목차 페이지 사진이나 PDF를 드롭하면 주차별 어휘 및 파닉스 범위를 자동 생성합니다.' : 'Drag & drop syllabus. AI extracts course-wide vocabulary scope.')}
                           </p>
+                          {!syllabusFileName && (
+                            <p className={`text-[10px] mt-1 ${isThemeNight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                              {isKo ? '이미지 또는 PDF · 최대 6MB (여러 페이지 사진 촬영도 가능)' : 'Images or PDF · up to 6MB total (or snap multiple page photos instead)'}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -812,9 +817,20 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   <Notebook size={14} weight="bold" className="text-purple-400" />
                   <span>{isKo ? '기타 추가 학습 내용 및 숙제 가이드 (Other)' : 'Other Supplementary Notes & Rules (Other)'}</span>
                 </label>
-                <span className="text-[9px] text-purple-400 font-bold px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-full">
-                  🛡️ {isKo ? '영어 학습 보조 전용' : 'English Instruction Only'}
-                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[9px] text-purple-400 font-bold px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-full">
+                    🛡️ {isKo ? '영어 학습 보조 전용' : 'English Instruction Only'}
+                  </span>
+                  {curriculumOther && (
+                    <button
+                      type="button"
+                      onClick={() => setCurriculumOther('')}
+                      className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-white/10 text-zinc-400 hover:text-white hover:border-white/30 transition-colors cursor-pointer"
+                    >
+                      {isKo ? '지우기' : 'Clear'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Recommended Format Tooltip Box */}

@@ -2714,7 +2714,7 @@ ${questionsHtml}
                   <div className={`p-2 rounded-xl transition-colors ${
                     activeTab === 'director_hq'
                       ? 'bg-orange-500/20 text-orange-500'
-                      : isThemeNight ? 'bg-white/5 text-amber-400 group-hover:text-white' : 'bg-amber-100 text-amber-600 group-hover:text-zinc-900'
+                      : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
                   }`}>
                     <Buildings size={18} weight="bold" />
                   </div>
