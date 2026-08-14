@@ -3021,7 +3021,12 @@ ${questionsHtml}
             </>
           )}
 
-          {/* AI Report Studio Generator Trigger Button */}
+          {/* AI Report Studio Generator Trigger Button — parent report
+              cards are per-student teacher output, not a director task
+              (director stays overview-only per prior decision), and this
+              button had no role gate so it rendered (always-orange CTA)
+              on the director's sidebar too. */}
+          {!(loginRole === 'director' || user?.role === 'director') && (
           <button
             type="button"
             onClick={() => setShowReportCardModal(true)}
@@ -3043,6 +3048,7 @@ ${questionsHtml}
               GENERATE
             </span>
           </button>
+          )}
         </nav>
 
         {/* Sidebar Footer / User Info */}
@@ -3148,7 +3154,7 @@ ${questionsHtml}
                 <span className="hidden sm:inline">{isKo ? '새 학급' : 'New Class'}</span>
               </button>
             )}
-              {selectedClass && (
+              {selectedClass && !selectedClass.isDemo && (
               <button
                 type="button"
                 onClick={handleCopyClassCode}
@@ -3172,7 +3178,7 @@ ${questionsHtml}
               </button>
               )}
 
-            {selectedClass && (loginRole === 'director' || user?.role === 'director') && (
+            {selectedClass && !selectedClass.isDemo && (loginRole === 'director' || user?.role === 'director') && (
               <button
                 type="button"
                 onClick={() => handleDeleteClass(selectedClass.id)}
@@ -3192,7 +3198,7 @@ ${questionsHtml}
 
           {/* Right Controls: Active Week Counter + Language Switcher + Theme Toggle */}
           <div className="flex items-center gap-3">
-            {selectedClass && (
+            {selectedClass && !selectedClass.isDemo && (
               <div className="flex items-center gap-2">
                 <div className={`border rounded-2xl flex items-center overflow-hidden p-1 shadow-inner ${
                   isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-100 border-zinc-300'
