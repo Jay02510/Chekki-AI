@@ -376,10 +376,20 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* ========================================================================= */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-fade-in text-left">
-          {!selectedClass ? (
+          {/* selectedClass is never actually null — TeacherPage always falls
+              back to a placeholder "Sample Class" object so the rest of the
+              page can safely read .joinCode etc without null checks
+              everywhere. That placeholder used to render here as if it were
+              a real class (fake name, fake "This Week" card) the moment a
+              brand-new director signed in with zero real classes — showing
+              demo content that looked exactly like the director's own data
+              (Audit: "demo data that loads when a director signs in without
+              a class"). Checking isDemo instead of truthiness shows the
+              genuine empty state until a real class exists. */}
+          {!selectedClass || selectedClass.isDemo ? (
             <div className={`p-8 rounded-2xl border text-center ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No class selected</p>
-              <p className="text-xs text-zinc-400 mt-1">Select a class to see this week&apos;s vocab and student status in one view.</p>
+              <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No class yet</p>
+              <p className="text-xs text-zinc-400 mt-1">Create your first class to see this week&apos;s vocab and student status here.</p>
             </div>
           ) : (
             <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
@@ -482,7 +492,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 </div>
               </div>
 
-              {curriculumTopic || weeklyVocabWords.length > 0 || weeklyPhonicsRules.length > 0 || curriculumPassage ? (
+              {!selectedClass?.isDemo && (curriculumTopic || weeklyVocabWords.length > 0 || weeklyPhonicsRules.length > 0 || curriculumPassage) ? (
                 <div className="space-y-4 text-left">
                   {curriculumTopic && (
                     <div>
