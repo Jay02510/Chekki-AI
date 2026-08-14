@@ -130,9 +130,9 @@ export const REPORT_TRANSLATIONS = {
       subheading: 'Select a sample student scenario or type custom foreign teacher notes to generate a bilingual parent script.',
       selectPreset: 'Select Sample Student Case:',
       customInputLabel: 'Foreign Teacher Notes (English):',
-      generateBtn: 'Generate Dual-Branch Parent Script',
+      generateBtn: 'Generate Parent Script',
       rawSource: 'Original English Teacher Log',
-      translatedSummary: 'Normalized Korean Academic Summary (Airtable DB)',
+      translatedSummary: 'Korean Academic Summary',
       scriptSectionsHeading: '5-Part Korean Parent Consultation Script (KakaoTalk)',
       scriptSections: {
         greeting: '1. Polite Opening Greeting (인사말)',
@@ -313,9 +313,9 @@ export const REPORT_TRANSLATIONS = {
       subheading: '샘플 학생 케이스를 선택하거나 원어민 교사의 메모를 입력하여 1초 만에 카카오톡 발송용 대본을 생성하세요.',
       selectPreset: '샘플 학생 케이스 선택:',
       customInputLabel: '원어민 교사 수업 코멘트 (영문):',
-      generateBtn: 'AI 이중 학부모 리포트 생성',
+      generateBtn: '학부모 리포트 생성',
       rawSource: '원어민 교사 영문 원문',
-      translatedSummary: '학원 DB 저장용 학업 요약문 (Airtable)',
+      translatedSummary: '한국어 학업 요약문',
       scriptSectionsHeading: '5단계 학부모 상담 & 카카오톡 발송 대본',
       scriptSections: {
         greeting: '1단계: 다정한 정중 인사말 (인사말)',

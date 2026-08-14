@@ -175,7 +175,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           </h2>
         </div>
         <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-mono font-bold">
-          ⚡ 30s Quick Fill
+          ⚡ Takes about 30 seconds
         </span>
       </div>
 
@@ -359,7 +359,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           <div className="flex items-center justify-between">
             <div>
               <label className="text-xs font-bold text-orange-400 uppercase font-mono block">
-                Student Exceptions (Path 2 Trigger)
+                Student Notes
               </label>
               <span className="text-[11px] text-zinc-500 font-mono">Flag specific students needing tailored parent updates</span>
             </div>

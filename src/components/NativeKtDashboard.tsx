@@ -207,7 +207,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">
-              {isKo ? '한국인 교사 검수 워크스페이스' : 'KT REVIEW WORKSPACE (HUMAN-IN-THE-LOOP)'}
+              {isKo ? '검토 및 발송' : 'REVIEW & SEND'}
             </span>
             <span className="text-[10px] text-amber-400 font-mono font-bold">
               {isKo ? '🔒 자동발송 없음 (검수 후 복사)' : '🔒 No Auto-Send (Edit First)'}
