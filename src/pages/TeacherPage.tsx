@@ -901,7 +901,13 @@ export default function TeacherPage({ isNight = true }: Props) {
   // Teacher onboarding & Academy Branding & Settings
   const [showTeacherOnboarding, setShowTeacherOnboarding] = useState(false);
   const [teacherObStep, setTeacherObStep] = useState(0);
-  const [academyLogo, setAcademyLogo] = useState<string>(() => localStorage.getItem('chekki_academy_logo') || '');
+  // Was seeded from an unscoped 'chekki_academy_logo' localStorage key and
+  // only ever overwritten (never cleared) when the Firestore fetch below
+  // found no logo — so one director's logo leaked onto a different
+  // director's dashboard on the same browser (e.g. admin impersonating
+  // school A, then school B: B saw A's logo) until B happened to have a
+  // logo of their own to overwrite it. Firestore is the only source now.
+  const [academyLogo, setAcademyLogo] = useState<string>('');
   // `user` from useAuth isn't a live Firestore subscription, so a rename via
   // AcademyLogoModal wouldn't otherwise show up until a full reload — this
   // local override mirrors the academyLogo pattern above.
@@ -910,37 +916,25 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [showLogoModal, setShowLogoModal] = useState(false);
   const [tempLogoUrl, setTempLogoUrl] = useState(academyLogo);
 
-  // Persist academy logo — the "saved" toast in AcademyLogoModal only meant
-  // something if this actually reached storage; it previously lived in React
-  // state only and vanished on refresh despite claiming to be saved.
-  useEffect(() => {
-    try {
-      if (academyLogo) {
-        localStorage.setItem('chekki_academy_logo', academyLogo);
-      } else {
-        localStorage.removeItem('chekki_academy_logo');
-      }
-    } catch (err) {
-      console.warn('Failed to persist academy logo locally:', err);
-    }
-  }, [academyLogo]);
-
-  // Load the school's saved logo from Firestore (source of truth — the
-  // localStorage seed above is only a fast-paint cache for the current
-  // device/browser). Runs for every role, not just director, since FT/KT
-  // teachers also see the academy logo in the header and on report cards.
+  // Load the school's saved logo from Firestore — the only source of truth.
+  // Runs for every role, not just director, since FT/KT teachers also see
+  // the academy logo in the header and on report cards. Always sets state
+  // (even to '') so switching accounts/schools in the same browser can't
+  // leave a previous school's logo on screen.
   useEffect(() => {
     const schoolId = (user as any)?.schoolId;
-    if (!schoolId) return;
+    if (!schoolId) {
+      setAcademyLogo('');
+      return;
+    }
     (async () => {
       try {
         const snap = await getDoc(doc(dbInstance, 'schools', schoolId));
         const logoUrl = snap.data()?.logoUrl;
-        if (typeof logoUrl === 'string' && logoUrl) {
-          setAcademyLogo(logoUrl);
-        }
+        setAcademyLogo(typeof logoUrl === 'string' ? logoUrl : '');
       } catch (err) {
         console.warn('Failed to load academy logo from school profile:', err);
+        setAcademyLogo('');
       }
     })();
   }, [(user as any)?.schoolId]);
@@ -1049,10 +1043,13 @@ export default function TeacherPage({ isNight = true }: Props) {
     const isDirector = resolvedRole === 'director';
 
     if (isDirector && isActivateParam) {
-      // Director with ?activate=true — show wizard only if first time
-      const wizardDone =
-        localStorage.getItem('chekki_wizard_done') ||
-        (uid && localStorage.getItem(`chekki_wizard_done_${uid}`));
+      // Director with ?activate=true — show wizard only if first time.
+      // Unscoped 'chekki_wizard_done' used to be checked here too — once
+      // ANY director finished the wizard on a device, a second, different
+      // director signing up on that same device never saw it again (audit:
+      // multi-account-same-device suppression, same shape as the earlier
+      // unscoped-localStorage class/curriculum leaks).
+      const wizardDone = uid && localStorage.getItem(`chekki_wizard_done_${uid}`);
       if (!wizardDone) {
         setShowActivationWizard(true);
       }
@@ -1064,7 +1061,6 @@ export default function TeacherPage({ isNight = true }: Props) {
       // never set — the classes themselves are the source of truth.
       if (isLoadingClasses) return;
       const welcomeDone =
-        localStorage.getItem('chekki_teacher_welcome_done') ||
         (uid && localStorage.getItem(`chekki_teacher_welcome_done_${uid}`)) ||
         classes.length > 0;
       if (!welcomeDone) {
@@ -2414,7 +2410,6 @@ ${questionsHtml}
         onComplete={async (data) => {
           const uid = user?.uid || '';
           // Mark wizard as done so it never shows again for this account
-          localStorage.setItem('chekki_wizard_done', '1');
           if (uid) localStorage.setItem(`chekki_wizard_done_${uid}`, '1');
           dismissTeacherOnboarding();
           if (data.academyName) {
@@ -2479,7 +2474,6 @@ ${questionsHtml}
     // fetchClasses() (real Firestore query) correctly found nothing.
     const dismissWelcome = async (className?: string) => {
       const uid = user?.uid || '';
-      localStorage.setItem('chekki_teacher_welcome_done', '1');
       if (uid) localStorage.setItem(`chekki_teacher_welcome_done_${uid}`, '1');
 
       if (className && className.trim()) {
