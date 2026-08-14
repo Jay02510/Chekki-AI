@@ -286,6 +286,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           createdAt: data.createdAt || null,
           planId: data.planId || null,
           trialEndsAt: data.trialEndsAt || null,
+          // Real seat pool (director-invite system, §21) — was silently
+          // dropped here even though every school has it, so the admin
+          // schools table couldn't show FT/KT seat counts at all.
+          seatsTotal: data.seatsTotal || { ft: 0, kt: 0 },
         };
       });
 
@@ -308,6 +312,22 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         .sort((a: any, b: any) => (a.createdAt || '').localeCompare(b.createdAt || ''));
 
       return res.status(200).json({ success: true, invites });
+    } else if (action === 'revoke_invite') {
+      // Admin-side cancel for a stale/test invite — the director-facing
+      // equivalent (api/create-teacher-invite.ts) requires a real director
+      // Firebase session, which ops doesn't have. This is passcode-gated
+      // instead, same as every other action on this endpoint.
+      const { inviteId } = req.body || {};
+      if (typeof inviteId !== 'string' || !inviteId) {
+        return res.status(400).json({ error: 'Missing inviteId' });
+      }
+      const inviteRef = adminDb.collection('invites').doc(inviteId);
+      const inviteSnap = await inviteRef.get();
+      if (!inviteSnap.exists) {
+        return res.status(404).json({ error: 'Invite not found' });
+      }
+      await inviteRef.update({ status: 'revoked', revokedAt: new Date().toISOString() });
+      return res.status(200).json({ success: true });
     } else if (action === 'delete_school') {
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
       const sanitizedSchoolId = sanitizeSchoolId(schoolId);
@@ -546,6 +566,16 @@ https://urlgeni.us/chekki
         schoolId: sanitizedSchoolId,
         teacherCode: teacherCode,
       });
+    } else if (action === 'delete_invoice') {
+      // Dismiss a test/erroneous invoice request. Only removes the request
+      // record itself — if it was already confirmed (status: 'paid'), the
+      // school it generated is untouched; use delete_school separately for that.
+      const { invoiceId } = req.body || {};
+      if (typeof invoiceId !== 'string' || !invoiceId) {
+        return res.status(400).json({ error: 'Missing invoiceId' });
+      }
+      await adminDb.collection('school_invoices').doc(invoiceId).delete();
+      return res.status(200).json({ success: true });
     } else if (action === 'upgrade_school') {
       // The missing half of confirm_invoice: that action activates a
       // brand-new school from a pre-signup invoice, but nothing updated an

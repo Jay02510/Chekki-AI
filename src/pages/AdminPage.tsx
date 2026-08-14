@@ -56,6 +56,7 @@ export default function AdminPage() {
   } | null>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUids, setSelectedUids] = useState<Set<string>>(new Set());
 
   // Invoices State
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -132,6 +133,39 @@ export default function AdminPage() {
     }
   };
 
+  const handleRevokeInvite = (inviteId: string, email: string | null) => {
+    setConfirmDialog({
+      title: `Revoke the pending invite for ${email || 'this address'}? The seat it was holding becomes available again.`,
+      confirmText: 'Revoke Invite',
+      variant: 'destructive',
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performRevokeInvite(inviteId);
+      },
+    });
+  };
+
+  const performRevokeInvite = async (inviteId: string) => {
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'revoke_invite', inviteId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to revoke invite');
+      setMessage({ text: '✅ Invite revoked.', type: 'success' });
+      handleFetchInvites();
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error revoking invite', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleConfirmInvoice = async (invoiceId: string) => {
     setConfirmDialog({
       title: 'Confirm corporate bank payment received & activate teacher codes?',
@@ -162,6 +196,39 @@ export default function AdminPage() {
     } catch (err: any) {
       console.error(err);
       setMessage({ text: err.message || 'Error confirming invoice', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteInvoice = (invoiceId: string, academyName: string) => {
+    setConfirmDialog({
+      title: `Dismiss the invoice request from "${academyName}"? This only removes the request record — if it was already confirmed, the school it created is untouched.`,
+      confirmText: 'Delete Invoice',
+      variant: 'destructive',
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performDeleteInvoice(invoiceId);
+      },
+    });
+  };
+
+  const performDeleteInvoice = async (invoiceId: string) => {
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'delete_invoice', invoiceId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to delete invoice');
+      setMessage({ text: '✅ Invoice deleted.', type: 'success' });
+      handleFetchInvoices();
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error deleting invoice', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -566,6 +633,68 @@ export default function AdminPage() {
     }
   };
 
+  const toggleUserSelected = (uid: string) => {
+    setSelectedUids((prev) => {
+      const next = new Set(prev);
+      if (next.has(uid)) next.delete(uid);
+      else next.add(uid);
+      return next;
+    });
+  };
+
+  const toggleSelectAllVisible = (visibleUids: string[]) => {
+    setSelectedUids((prev) => {
+      const allSelected = visibleUids.length > 0 && visibleUids.every((uid) => prev.has(uid));
+      return allSelected ? new Set() : new Set(visibleUids);
+    });
+  };
+
+  const handleBulkDeleteUsers = () => {
+    const count = selectedUids.size;
+    if (count === 0) return;
+    setConfirmDialog({
+      title: `Permanently delete ${count} selected user${count > 1 ? 's' : ''}? This cannot be undone.`,
+      confirmText: `Delete ${count} User${count > 1 ? 's' : ''}`,
+      variant: 'destructive',
+      onConfirm: () => {
+        setConfirmDialog(null);
+        void performBulkDeleteUsers();
+      },
+    });
+  };
+
+  const performBulkDeleteUsers = async () => {
+    const uids = Array.from(selectedUids);
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    let succeeded = 0;
+    const failed: string[] = [];
+
+    for (const uid of uids) {
+      try {
+        const response = await fetch('/api/admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ passcode, action: 'delete', uid }),
+        });
+        if (!response.ok) throw new Error();
+        succeeded++;
+      } catch {
+        failed.push(uid);
+      }
+    }
+
+    setUsers((prev) => prev.filter((u) => !uids.includes(u.uid) || failed.includes(u.uid)));
+    setSelectedUids(new Set(failed));
+    setMessage({
+      text: failed.length === 0
+        ? `✅ Deleted ${succeeded} user${succeeded !== 1 ? 's' : ''}.`
+        : `Deleted ${succeeded}, failed on ${failed.length}. Failed ones stay selected — try again.`,
+      type: failed.length === 0 ? 'success' : 'error',
+    });
+    setLoading(false);
+  };
+
   const handleResetPassword = async (email: string) => {
     try {
       await sendPasswordResetEmail(auth, email);
@@ -649,7 +778,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-white font-sans">
       <div
-        className={`w-full bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-200 ${(mode === 'view_members' || mode === 'schools' || mode === 'invites') && isAuthorized ? 'max-w-4xl' : 'max-w-md'}`}
+        className={`w-full bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-200 ${isAuthorized ? 'max-w-4xl' : 'max-w-md'}`}
       >
         {/* Glow effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -731,7 +860,7 @@ export default function AdminPage() {
           </form>
         ) : (
           <div className="w-full relative z-10 animate-fade-in">
-            <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 mb-6">
+            <div className="flex flex-wrap gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800 mb-6">
               <button
                 type="button"
                 onClick={() => {
@@ -817,11 +946,43 @@ export default function AdminPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium"
                 />
+                {selectedUids.size > 0 && (
+                  <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20">
+                    <span className="text-xs font-bold text-red-400">
+                      {selectedUids.size} selected
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedUids(new Set())}
+                        className="text-xs font-bold text-zinc-400 hover:text-white transition-colors"
+                      >
+                        Clear
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleBulkDeleteUsers}
+                        className="px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-colors"
+                      >
+                        Delete {selectedUids.size} Selected
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="w-full overflow-x-auto">
                   {(
                     <table className="w-full text-left text-sm whitespace-nowrap">
                       <thead>
                         <tr className="border-b border-zinc-800 text-zinc-400">
+                          <th className="py-3 px-4 font-bold w-8">
+                            <input
+                              type="checkbox"
+                              aria-label="Select all visible members"
+                              checked={filteredUsers.length > 0 && filteredUsers.every((u: any) => selectedUids.has(u.uid))}
+                              onChange={() => toggleSelectAllVisible(filteredUsers.map((u: any) => u.uid))}
+                              className="w-4 h-4 rounded border-zinc-700 bg-zinc-950 accent-orange-500 cursor-pointer"
+                            />
+                          </th>
                           <th className="py-3 px-4 font-bold">Name</th>
                           <th className="py-3 px-4 font-bold">Email</th>
                           <th className="py-3 px-4 font-bold">Role / School</th>
@@ -833,16 +994,25 @@ export default function AdminPage() {
                       </thead>
                       <tbody className="divide-y divide-zinc-800/50">
                         {loading ? (
-                          <SkeletonRows columns={7} />
+                          <SkeletonRows columns={8} />
                         ) : filteredUsers.length === 0 ? (
                           <tr>
-                            <td colSpan={7} className="py-8 text-center text-zinc-500">
+                            <td colSpan={8} className="py-8 text-center text-zinc-500">
                               No members found.
                             </td>
                           </tr>
                         ) : (
                           filteredUsers.map((user) => (
-                            <tr key={user.uid} className="hover:bg-zinc-800/30 transition-colors">
+                            <tr key={user.uid} className={`transition-colors ${selectedUids.has(user.uid) ? 'bg-red-500/5' : 'hover:bg-zinc-800/30'}`}>
+                              <td className="py-3 px-4">
+                                <input
+                                  type="checkbox"
+                                  aria-label={`Select ${user.name || user.email}`}
+                                  checked={selectedUids.has(user.uid)}
+                                  onChange={() => toggleUserSelected(user.uid)}
+                                  className="w-4 h-4 rounded border-zinc-700 bg-zinc-950 accent-orange-500 cursor-pointer"
+                                />
+                              </td>
                               <td className="py-3 px-4 text-white font-medium">{user.name}</td>
                               <td className="py-3 px-4 text-zinc-400">{user.email}</td>
                               <td className="py-3 px-4 text-zinc-400">
@@ -969,6 +1139,7 @@ export default function AdminPage() {
                           <th className="py-3 px-4 font-bold">School Name</th>
                           <th className="py-3 px-4 font-bold">Teacher Auth Code</th>
                           <th className="py-3 px-4 font-bold">Teacher Quota</th>
+                          <th className="py-3 px-4 font-bold">FT / KT Seats</th>
                           <th className="py-3 px-4 font-bold">Plan / Trial</th>
                           <th className="py-3 px-4 font-bold">Created At</th>
                           <th className="py-3 px-4 font-bold text-right">Actions</th>
@@ -976,10 +1147,10 @@ export default function AdminPage() {
                       </thead>
                       <tbody className="divide-y divide-zinc-800/50">
                         {loading ? (
-                          <SkeletonRows columns={7} />
+                          <SkeletonRows columns={8} />
                         ) : filteredSchools.length === 0 ? (
                           <tr>
-                            <td colSpan={7} className="py-8 text-center text-zinc-500">
+                            <td colSpan={8} className="py-8 text-center text-zinc-500">
                               No schools found.
                             </td>
                           </tr>
@@ -1016,6 +1187,9 @@ export default function AdminPage() {
                                       : 'None'}
                                   </span>
                                 </div>
+                              </td>
+                              <td className="py-3 px-4 text-zinc-400 font-mono">
+                                <span className="text-orange-400 font-bold">{school.seatsTotal?.ft ?? 0}</span> FT / <span className="text-blue-400 font-bold">{school.seatsTotal?.kt ?? 0}</span> KT
                               </td>
                               <td className="py-3 px-4">
                                 {!school.planId ? (
@@ -1325,19 +1499,28 @@ export default function AdminPage() {
                               </span>
                             </td>
                             <td className="py-3.5 px-4 text-right">
-                              {inv.status !== 'paid' && (
+                              <div className="flex items-center justify-end gap-2">
+                                {inv.status !== 'paid' && (
+                                  <button
+                                    onClick={() => handleConfirmInvoice(inv.invoiceId)}
+                                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs shadow transition-all active:scale-[0.95]"
+                                  >
+                                    Confirm Bank Payment & Activate
+                                  </button>
+                                )}
+                                {inv.status === 'paid' && (
+                                  <span className="text-[11px] font-mono text-zinc-500">
+                                    Code: {inv.generatedTeacherCode}
+                                  </span>
+                                )}
                                 <button
-                                  onClick={() => handleConfirmInvoice(inv.invoiceId)}
-                                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs shadow transition-all active:scale-[0.95]"
+                                  onClick={() => handleDeleteInvoice(inv.invoiceId, inv.academyName)}
+                                  className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-xs font-bold"
+                                  title="Delete this invoice request"
                                 >
-                                  Confirm Bank Payment & Activate
+                                  Delete
                                 </button>
-                              )}
-                              {inv.status === 'paid' && (
-                                <span className="text-[11px] font-mono text-zinc-500">
-                                  Code: {inv.generatedTeacherCode}
-                                </span>
-                              )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -1377,11 +1560,12 @@ export default function AdminPage() {
                           <th className="py-3 px-4 font-bold">Email</th>
                           <th className="py-3 px-4 font-bold">Role</th>
                           <th className="py-3 px-4 font-bold">Sent</th>
+                          <th className="py-3 px-4 font-bold text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800/50">
                         {loading ? (
-                          <SkeletonRows columns={5} />
+                          <SkeletonRows columns={6} />
                         ) : (
                           invites.map((inv) => {
                             const daysOld = inv.createdAt
@@ -1401,6 +1585,14 @@ export default function AdminPage() {
                                       {daysOld}d ago
                                     </span>
                                   ) : '-'}
+                                </td>
+                                <td className="py-3.5 px-4 text-right">
+                                  <button
+                                    onClick={() => handleRevokeInvite(inv.inviteId, inv.email)}
+                                    className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-xs font-bold"
+                                  >
+                                    Revoke
+                                  </button>
                                 </td>
                               </tr>
                             );
