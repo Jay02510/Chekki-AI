@@ -198,45 +198,54 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           const userData = userDoc.data();
           const userSchoolId = userData?.schoolId;
           if (userSchoolId) {
-            await adminDb
-              .collection('schools')
-              .doc(userSchoolId)
-              .update({
-                usedByUids: FieldValue.arrayRemove(uidToDeleteFromFirestore),
-              });
+            // Best-effort seat/invite cleanup — must not block the actual user
+            // doc delete below. A failure here (e.g. missing school doc) used
+            // to throw into the outer catch and skip .delete() entirely,
+            // so the API returned "success" while the user doc still existed
+            // (Audit: admin delete says success, user reappears in list).
+            try {
+              await adminDb
+                .collection('schools')
+                .doc(userSchoolId)
+                .update({
+                  usedByUids: FieldValue.arrayRemove(uidToDeleteFromFirestore),
+                });
 
-            // Mirror handleRemoveTeacher (create-teacher-invite.ts) so an
-            // admin-deleted teacher's invite/seat is actually freed instead of
-            // permanently consuming a seat: revoke their claimed invite and
-            // strip them from any class's assignedTeacherUids (Audit: admin
-            // delete doesn't free seat).
-            const inviteSnap = await adminDb
-              .collection('invites')
-              .where('schoolId', '==', userSchoolId)
-              .where('claimedByUid', '==', uidToDeleteFromFirestore)
-              .where('status', '==', 'claimed')
-              .get();
-            await Promise.all(
-              inviteSnap.docs.map((d) =>
-                d.ref.update({ status: 'revoked', revokedAt: new Date().toISOString() })
-              )
-            );
+              // Mirror handleRemoveTeacher (create-teacher-invite.ts) so an
+              // admin-deleted teacher's invite/seat is actually freed instead of
+              // permanently consuming a seat: revoke their claimed invite and
+              // strip them from any class's assignedTeacherUids.
+              const inviteSnap = await adminDb
+                .collection('invites')
+                .where('schoolId', '==', userSchoolId)
+                .where('claimedByUid', '==', uidToDeleteFromFirestore)
+                .where('status', '==', 'claimed')
+                .get();
+              await Promise.all(
+                inviteSnap.docs.map((d) =>
+                  d.ref.update({ status: 'revoked', revokedAt: new Date().toISOString() })
+                )
+              );
 
-            const classesSnap = await adminDb
-              .collection('classes')
-              .where('schoolId', '==', userSchoolId)
-              .where('assignedTeacherUids', 'array-contains', uidToDeleteFromFirestore)
-              .get();
-            await Promise.all(
-              classesSnap.docs.map((d) =>
-                d.ref.update({ assignedTeacherUids: FieldValue.arrayRemove(uidToDeleteFromFirestore) })
-              )
-            );
+              const classesSnap = await adminDb
+                .collection('classes')
+                .where('schoolId', '==', userSchoolId)
+                .where('assignedTeacherUids', 'array-contains', uidToDeleteFromFirestore)
+                .get();
+              await Promise.all(
+                classesSnap.docs.map((d) =>
+                  d.ref.update({ assignedTeacherUids: FieldValue.arrayRemove(uidToDeleteFromFirestore) })
+                )
+              );
+            } catch (seatErr) {
+              console.error('Error freeing seat/invite for deleted user:', seatErr);
+            }
           }
         }
         await adminDb.collection('users').doc(uidToDeleteFromFirestore).delete();
       } catch (dbErr) {
         console.error('Error deleting user from Firestore:', dbErr);
+        throw dbErr;
       }
 
       // Delete from Auth (using authUid if we looked up by email, otherwise targetUid)

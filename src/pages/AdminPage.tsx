@@ -623,8 +623,10 @@ export default function AdminPage() {
       }
 
       setMessage({ text: `✅ User ${email} deleted successfully!`, type: 'success' });
-      // Remove from local state immediately to avoid another fetch, or re-fetch
-      setUsers(users.filter((u) => u.uid !== uid));
+      // Re-fetch instead of local filter-by-uid: duplicate-email seed rows can
+      // resolve to a different uid server-side than the row's displayed uid,
+      // which left the row visibly stuck after a real successful delete.
+      await handleFetchUsers();
     } catch (err: any) {
       console.error(err);
       setMessage({ text: err.message || 'Error deleting user', type: 'error' });
@@ -684,7 +686,6 @@ export default function AdminPage() {
       }
     }
 
-    setUsers((prev) => prev.filter((u) => !uids.includes(u.uid) || failed.includes(u.uid)));
     setSelectedUids(new Set(failed));
     setMessage({
       text: failed.length === 0
@@ -692,6 +693,8 @@ export default function AdminPage() {
         : `Deleted ${succeeded}, failed on ${failed.length}. Failed ones stay selected — try again.`,
       type: failed.length === 0 ? 'success' : 'error',
     });
+    // Re-fetch instead of local filter-by-uid — see performDeleteUser for why.
+    await handleFetchUsers();
     setLoading(false);
   };
 
