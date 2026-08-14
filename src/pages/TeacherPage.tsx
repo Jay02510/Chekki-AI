@@ -1298,6 +1298,18 @@ export default function TeacherPage({ isNight = true }: Props) {
           const uid = auth.currentUser?.uid || '';
           if (uid) localStorage.setItem(`chekki_invite_school_${uid}`, inviteSlug);
           localStorage.setItem('chekki_invite_school', inviteSlug);
+
+          // The `?invite=` param never got cleared after a successful
+          // redemption, so it stuck around through the reload below and
+          // every reload after that — the "you're signed in as a different
+          // account, invite wasn't applied" banner is gated on nothing but
+          // that param being present (see showInviteSessionNotice), so it
+          // kept flashing on the account that had JUST correctly redeemed
+          // the invite (audit: session-mismatch banner shows for the right
+          // account too, not just a genuine mismatch).
+          const url = new URL(window.location.href);
+          url.searchParams.delete('invite');
+          window.history.replaceState({}, '', url.toString());
         }
 
         window.location.reload();
@@ -3295,8 +3307,14 @@ ${questionsHtml}
               `if (!isAuthenticated)` above), so this landed on the existing
               session's own dashboard with the invite silently ignored
               (Audit: invite link "just takes you back to the director
-              dashboard" — same-browser session, not a broken role lock). */}
-          {inviteSlug && showInviteSessionNotice && (
+              dashboard" — same-browser session, not a broken role lock).
+              This banner used to key off inviteSlug alone with no actual
+              mismatch check, so it also flashed for the account that had
+              JUST correctly redeemed this very invite (the `?invite=` param
+              is now stripped right after signup, but this check is a
+              backstop for any link that stuck around from before that
+              fix). */}
+          {inviteSlug && showInviteSessionNotice && !(user?.uid && localStorage.getItem(`chekki_invite_school_${user.uid}`) === inviteSlug) && (
             <div className={`p-4 rounded-2xl border mb-6 flex flex-wrap items-center justify-between gap-3 transition-all ${
               isThemeNight ? 'bg-amber-500/10 border-amber-500/30 text-amber-200' : 'bg-amber-50 border-amber-200 text-amber-900'
             }`}>
