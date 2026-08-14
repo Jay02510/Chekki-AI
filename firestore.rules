@@ -243,6 +243,25 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Director-visible activity feed (roster approve/decline/remove/move,
+    // for now) — unlike /invites and /pendingStudents above, these entries
+    // are written directly from the client at the moment of the action
+    // (handleApproveStudent etc. in TeacherPage.tsx already write straight
+    // to Firestore, no Admin SDK endpoint exists for them), so create is
+    // allowed here rather than locked to server-only. Scoped so a caller can
+    // only log an action as themselves, for their own school — never spoof
+    // another actor or write into a school they don't belong to.
+    match /activityLog/{logId} {
+      allow read: if request.auth != null && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId
+      );
+      allow create: if request.auth != null &&
+        request.resource.data.actorUid == request.auth.uid &&
+        request.resource.data.schoolId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId;
+      allow update, delete: if false;
+    }
+
     // Classes rules
     match /classes/{classId} {
       allow read: if request.auth != null;
@@ -302,7 +321,7 @@ service cloud.firestore {
           (
             isClassTeacher(classId) &&
             request.resource.data.diff(resource.data).affectedKeys().hasOnly(
-              ['approvedSummary', 'approvedExceptions', 'reviewStatus', 'reviewedByUid', 'sentAt']
+              ['approvedSummary', 'approvedExceptions', 'reviewStatus', 'reviewedByUid', 'reviewedByName', 'sentAt']
             )
           )
         );

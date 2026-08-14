@@ -718,13 +718,25 @@ export const NativeFtDashboard: React.FC<Props> = ({
                           <span className="font-bold text-sm text-orange-400">{log.className || 'Class'}</span>
                           <span className="text-xs text-zinc-500 font-mono">• {log.date}</span>
                         </div>
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-                          {isKo ? '대본 생성 완료' : 'Script Ready'}
-                        </span>
+                        {log.reviewStatus === 'sent' ? (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                            {isKo ? '학부모 발송 완료' : 'Sent to Parents'}
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                            {isKo ? 'KT 검토 대기 중' : 'Waiting on KT Review'}
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-zinc-300 pt-3 leading-relaxed">
                         {log.generalComments || log.lessonTopic}
                       </p>
+                      {log.reviewStatus === 'sent' && log.reviewedByName && (
+                        <p className="text-[10px] text-zinc-500 pt-2 mt-2 border-t border-white/5">
+                          {isKo ? '검토 및 발송: ' : 'Reviewed & sent by '}
+                          <span className="font-bold text-zinc-400">{log.reviewedByName}</span>
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>

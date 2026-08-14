@@ -70,6 +70,8 @@ interface Props {
   setCurriculumPassage: (v: string) => void;
   curriculumOther: string;
   setCurriculumOther: (v: string) => void;
+  curriculumLastEditedByName?: string;
+  curriculumLastEditedAt?: string;
   worksheetType: string;
   setWorksheetType: (v: string) => void;
   questionStyle: string;
@@ -155,6 +157,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   setCurriculumPassage,
   curriculumOther,
   setCurriculumOther,
+  curriculumLastEditedByName,
+  curriculumLastEditedAt,
   worksheetType,
   setWorksheetType,
   questionStyle,
@@ -1058,7 +1062,17 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               </div>
             )}
 
-            <div className={`flex gap-4 justify-end pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
+            <div className={`flex items-center gap-4 justify-between pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
+              {curriculumLastEditedByName ? (
+                <p className="text-[11px] text-zinc-500">
+                  {isKo ? '마지막 수정: ' : 'Last edited by '}
+                  <span className="font-bold text-zinc-400">{curriculumLastEditedByName}</span>
+                  {curriculumLastEditedAt && (
+                    <span> · {new Date(curriculumLastEditedAt).toLocaleString(isKo ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+                  )}
+                </p>
+              ) : <span />}
+              <div className="flex gap-4">
               <button
                 type="button"
                 onClick={loadCurriculum}
@@ -1086,6 +1100,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   </>
                 )}
               </button>
+              </div>
             </div>
           </form>
         )}

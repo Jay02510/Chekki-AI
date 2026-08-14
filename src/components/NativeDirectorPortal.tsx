@@ -14,6 +14,7 @@ import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { TeacherRosterPanel } from './TeacherRosterPanel';
 import { SchoolBillingPanel } from './SchoolBillingPanel';
+import { ActivityFeed } from './ActivityFeed';
 
 interface Props {
   isNight?: boolean;
@@ -465,6 +466,8 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               </div>
             </div>
           )}
+
+          {schoolId && <ActivityFeed isNight={isNight} isKo={isKo} schoolId={schoolId} />}
         </div>
       )}
 

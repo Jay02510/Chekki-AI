@@ -170,6 +170,33 @@ export const NativeKtDashboard: React.FC<Props> = ({
     }
   };
 
+  // Nothing pending — the fabricated placeholder text below (sample Korean
+  // summary, sample student names) used to fill the whole editable workspace
+  // regardless, distinguishable only by a small badge easy to miss at a
+  // glance. A KT landing here with an empty queue should see plainly that
+  // there's nothing to review, not a screen that looks like a real report.
+  if (isDemoContent && pendingCount === 0) {
+    return (
+      <div
+        className={`p-8 sm:p-12 rounded-3xl border shadow-2xl max-w-4xl mx-auto w-full text-center space-y-4 transition-all ${
+          isNight ? 'bg-[#060608] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+        }`}
+      >
+        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+          <CheckCircle size={28} weight="bold" />
+        </div>
+        <h2 className="text-xl font-black tracking-tight">
+          {isKo ? '검토할 리포트가 없습니다' : "You're all caught up"}
+        </h2>
+        <p className={`text-sm max-w-sm mx-auto ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+          {isKo
+            ? '원어민 선생님이 일지를 제출하면 여기에서 검토 후 학부모께 전달할 수 있습니다.'
+            : "When a foreign teacher submits a daily log, it'll show up here for you to review and send to parents."}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 max-w-4xl mx-auto w-full transition-all ${

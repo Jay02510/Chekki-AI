@@ -180,6 +180,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         approvedExceptions,
         reviewStatus: 'sent',
         reviewedByUid: user.uid,
+        reviewedByName: (user as any)?.name || user?.email || 'Unknown teacher',
         sentAt: serverTimestamp(),
       });
       setKtPendingLogs((prev) => prev.filter((l) => l.id !== activeKtLog.id));
@@ -558,6 +559,8 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [curriculumPhonics, setCurriculumPhonics] = useState('');
   const [curriculumPassage, setCurriculumPassage] = useState('');
   const [curriculumOther, setCurriculumOther] = useState('');
+  const [curriculumLastEditedByName, setCurriculumLastEditedByName] = useState('');
+  const [curriculumLastEditedAt, setCurriculumLastEditedAt] = useState('');
   const [curriculumSlideIndex, setCurriculumSlideIndex] = useState(0);
   const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
   const [isSavingCurriculum, setIsSavingCurriculum] = useState(false);
@@ -1619,12 +1622,16 @@ export default function TeacherPage({ isNight = true }: Props) {
         setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : data.phonicsRules || '');
         setCurriculumPassage(data.passage || '');
         setCurriculumOther(data.other || '');
+        setCurriculumLastEditedByName(data.lastEditedByName || '');
+        setCurriculumLastEditedAt(data.lastEditedAt || '');
       } else {
         setCurriculumTopic('');
         setCurriculumVocab('');
         setCurriculumPhonics('');
         setCurriculumPassage('');
         setCurriculumOther('');
+        setCurriculumLastEditedByName('');
+        setCurriculumLastEditedAt('');
       }
     } catch (e) {
       console.warn('LocalStorage curriculum load error:', e);
@@ -1641,6 +1648,8 @@ export default function TeacherPage({ isNight = true }: Props) {
         setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : data.phonicsRules || '');
         setCurriculumPassage(data.passage || '');
         setCurriculumOther(data.other || '');
+        setCurriculumLastEditedByName(data.lastEditedByName || '');
+        setCurriculumLastEditedAt(data.lastEditedAt || '');
         try {
           localStorage.setItem(localKey, JSON.stringify(data));
         } catch (e) {
@@ -1681,6 +1690,13 @@ export default function TeacherPage({ isNight = true }: Props) {
       const vocabList = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
       const phonicsList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
 
+      // Multiple FTs can share a class (assignedTeacherUids), so a save here
+      // silently overwrites whatever a co-teacher last wrote with no trace
+      // of who or when — this stamps both so a conflict is at least visible
+      // after the fact, not a lock (Audit: no lock/attribution on shared
+      // curriculum edits).
+      const editedByName = (user as any)?.name || user?.email || 'Unknown teacher';
+      const editedAt = new Date().toISOString();
       const payload = {
         classId: targetClass.id,
         teacherUid: user?.uid || targetClass.teacherUid || '',
@@ -1690,7 +1706,10 @@ export default function TeacherPage({ isNight = true }: Props) {
         phonicsRules: phonicsList,
         passage: curriculumPassage.trim(),
         other: curriculumOther.trim(),
-        updatedAt: new Date().toISOString()
+        updatedAt: editedAt,
+        lastEditedByUid: user?.uid || '',
+        lastEditedByName: editedByName,
+        lastEditedAt: editedAt,
       };
 
       // 1. Dual-persist to local storage immediately
@@ -1709,6 +1728,9 @@ export default function TeacherPage({ isNight = true }: Props) {
         console.warn('Firestore curriculum write warning (saved locally):', firestoreErr);
         curriculumFirestoreFailed = true;
       }
+
+      setCurriculumLastEditedByName(editedByName);
+      setCurriculumLastEditedAt(editedAt);
 
       if (curriculumFirestoreFailed) {
         setSyncWarning(
@@ -1941,10 +1963,35 @@ ${questionsHtml}
     }
   };
 
+  // Roster approve/decline/remove/move used to leave zero trace of who did
+  // it or when — director asked "who approved this student" and there was
+  // genuinely no answer anywhere. Best-effort: never blocks or fails the
+  // roster action itself if the log write fails.
+  const logActivity = async (type: string, targetLabel: string) => {
+    const schoolId = (user as any)?.schoolId;
+    if (!schoolId || !user?.uid) return;
+    try {
+      await addDoc(collection(dbInstance, 'activityLog'), {
+        schoolId,
+        type,
+        targetLabel,
+        actorUid: user.uid,
+        actorName: (user as any)?.name || user?.email || 'Unknown',
+        createdAt: serverTimestamp(),
+      });
+    } catch (err) {
+      console.warn('Failed to write activity log entry:', err);
+    }
+  };
+
+  const findStudentLabel = (studentUid: string) =>
+    (studentsData || []).find((s: any) => s?.uid === studentUid)?.studentName || studentUid;
+
   const handleApproveStudent = async (studentUid: string) => {
     try {
       const userRef = doc(dbInstance, 'users', studentUid);
       await updateDoc(userRef, { classStatus: 'active' });
+      void logActivity('student_approved', findStudentLabel(studentUid));
       await fetchRosterAndMistakes();
       showToast({ type: 'success', message: isKo ? '원생 승인이 완료되었습니다.' : 'Student approved successfully.' });
     } catch (err) {
@@ -1955,8 +2002,10 @@ ${questionsHtml}
 
   const handleDeclineStudent = async (studentUid: string) => {
     try {
+      const label = findStudentLabel(studentUid);
       const userRef = doc(dbInstance, 'users', studentUid);
       await updateDoc(userRef, { classId: null, classStatus: null });
+      void logActivity('student_declined', label);
       await fetchRosterAndMistakes();
     } catch (err) {
       console.error('Failed to decline student:', err);
@@ -1979,8 +2028,10 @@ ${questionsHtml}
 
   const performRemoveStudent = async (studentUid: string) => {
     try {
+      const label = findStudentLabel(studentUid);
       const userRef = doc(dbInstance, 'users', studentUid);
       await updateDoc(userRef, { classId: null, classStatus: null });
+      void logActivity('student_removed', label);
       await fetchRosterAndMistakes();
     } catch (err) {
       console.error('Failed to remove student:', err);
@@ -1991,8 +2042,11 @@ ${questionsHtml}
   const handleMoveStudent = async (studentUid: string, targetClassId: string) => {
     if (!targetClassId) return;
     try {
+      const label = findStudentLabel(studentUid);
+      const targetClassName = classes.find((c: any) => c.id === targetClassId)?.name || targetClassId;
       const userRef = doc(dbInstance, 'users', studentUid);
       await updateDoc(userRef, { classId: targetClassId, classStatus: 'active' });
+      void logActivity('student_moved', `${label} → ${targetClassName}`);
       await fetchRosterAndMistakes();
       showToast({ type: 'success', message: isKo ? '학급 이동이 완료되었습니다.' : 'Student transferred successfully.' });
     } catch (err) {
@@ -3055,12 +3109,12 @@ ${questionsHtml}
             </>
           )}
 
-          {/* AI Report Studio Generator Trigger Button — parent report
-              cards are per-student teacher output, not a director task
-              (director stays overview-only per prior decision), and this
-              button had no role gate so it rendered (always-orange CTA)
-              on the director's sidebar too. */}
-          {!(loginRole === 'director' || user?.role === 'director') && (
+          {/* AI Report Studio Generator Trigger Button — parent-facing report
+              generation is KT's job (they're the one who reviews/sends
+              parent communication), not FT's or the director's. Previously
+              shown to any non-director, including FT, who has no reason to
+              trigger a parent report from their own dashboard. */}
+          {loginRole !== 'director' && educatorRole === 'kt' && (
           <button
             type="button"
             onClick={() => setShowReportCardModal(true)}
@@ -3607,6 +3661,8 @@ ${questionsHtml}
                   setCurriculumPassage={setCurriculumPassage}
                   curriculumOther={curriculumOther}
                   setCurriculumOther={setCurriculumOther}
+                  curriculumLastEditedByName={curriculumLastEditedByName}
+                  curriculumLastEditedAt={curriculumLastEditedAt}
                   worksheetType={worksheetType}
                   setWorksheetType={setWorksheetType}
                   questionStyle={questionStyle}
