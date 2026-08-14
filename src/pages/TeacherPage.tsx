@@ -2903,7 +2903,7 @@ ${questionsHtml}
                       ? 'bg-orange-500/20 text-orange-500' 
                       : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
                   }`}>
-                    <Sparkle size={18} weight="fill" className="animate-pulse" />
+                    <Sparkle size={18} weight="fill" />
                   </div>
                   <span>{isKo ? '⚡ 알림톡 대본 & 1클릭 복사' : '⚡ KakaoTalk Parent Script'}</span>
                 </div>

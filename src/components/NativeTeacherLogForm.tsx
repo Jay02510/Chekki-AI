@@ -212,9 +212,13 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 !['Apex Seocho 7A', 'Apex Seocho 6B', 'Apex Seocho 5C'].includes(selectedClassName) && (
                   <option value={selectedClassName}>{selectedClassName}</option>
                 )}
-              <option value="Apex Seocho 7A">Apex Seocho 7A (Kindergarten 7yo)</option>
-              <option value="Apex Seocho 6B">Apex Seocho 6B (Kindergarten 6yo)</option>
-              <option value="Apex Seocho 5C">Apex Seocho 5C (Kindergarten 5yo)</option>
+              {isDemo && (
+                <>
+                  <option value="Apex Seocho 7A">Apex Seocho 7A (Kindergarten 7yo)</option>
+                  <option value="Apex Seocho 6B">Apex Seocho 6B (Kindergarten 6yo)</option>
+                  <option value="Apex Seocho 5C">Apex Seocho 5C (Kindergarten 5yo)</option>
+                </>
+              )}
             </select>
           </div>
 
