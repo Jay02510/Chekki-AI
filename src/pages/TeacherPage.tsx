@@ -2169,41 +2169,30 @@ ${questionsHtml}
                 </button>
               </div>
             )}
-            {inviteSlug && authMode === 'signup' && (
-              <div className="mb-4 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-xs font-bold text-orange-400 text-center">
-                {isKo ? '✉️ 초대받은 선생님 계정을 생성합니다.' : "✉️ You're creating a teacher account from an invite."}
-              </div>
-            )}
-
-
-            <div className={`mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold ${
-              loginRole === 'director'
-                ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
-                : 'bg-orange-500/10 border border-orange-500/20 text-orange-400'
-            }`}>
-              {loginRole === 'director' ? <Buildings size={12} weight="bold" /> : <ChalkboardTeacher size={12} weight="bold" />}
-              <span>
-                {loginRole === 'director'
-                  ? (isKo ? '원장님 전용 HQ 관리자 포털' : 'Director HQ Admin Access')
-                  : (isKo ? '교사 전용 포털' : 'Teacher Access Portal')}
-              </span>
-            </div>
-
-            {/* Invite School Badge — shown when teacher arrives via director's
-                invite link. The real school name isn't known until the invite
-                is actually redeemed (right after account creation, below) —
-                this used to title-case the raw invite ID itself as a guessed
-                "school name" (e.g. "Inv Mssre11qvg1gdh"), which is what
-                actually rendered here (Audit: invite badge shows garbage, not
-                the real school). The real name + inviter now show correctly
-                on the welcome screen right after signup completes. */}
-            {inviteSlug && (
+            {/* Invited signup gets ONE badge, not three stacked banners that
+                all said the same thing (audit: "Teacher Access Portal" pill +
+                "Joining via invite link" card + "creating account from an
+                invite" banner all rendered together, looking cluttered). */}
+            {inviteSlug && authMode === 'signup' ? (
               <div className="w-full mb-4 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5">
                 <Buildings size={16} className="text-emerald-400 shrink-0" />
                 <div className="text-left">
-                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{isKo ? '초대 링크로 가입' : 'Joining via invite link'}</p>
+                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{isKo ? '초대받은 선생님 계정 생성' : "You're creating a teacher account from an invite"}</p>
                   <p className="text-xs font-bold text-white">{isKo ? '가입 후 학원명이 표시됩니다' : "You'll see your academy's name once you sign up."}</p>
                 </div>
+              </div>
+            ) : (
+              <div className={`mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold ${
+                loginRole === 'director'
+                  ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+                  : 'bg-orange-500/10 border border-orange-500/20 text-orange-400'
+              }`}>
+                {loginRole === 'director' ? <Buildings size={12} weight="bold" /> : <ChalkboardTeacher size={12} weight="bold" />}
+                <span>
+                  {loginRole === 'director'
+                    ? (isKo ? '원장님 전용 HQ 관리자 포털' : 'Director HQ Admin Access')
+                    : (isKo ? '교사 전용 포털' : 'Teacher Access Portal')}
+                </span>
               </div>
             )}
 
@@ -2218,7 +2207,7 @@ ${questionsHtml}
                 educatorRole, and no class, a permanent dead end. Teacher
                 accounts are only ever created via a director's invite link
                 now (audit §21); direct teacher signup below is disabled. */}
-            {!isPlanSignup && !(loginRole === 'teacher' && !inviteSlug) && (
+            {!isPlanSignup && !(loginRole === 'teacher' && !inviteSlug) && !inviteSlug && (
               <div className="w-full flex bg-[#050505] p-1 rounded-2xl border border-white/10 mb-6">
                 <button
                   type="button"
@@ -2265,6 +2254,8 @@ ${questionsHtml}
                     : (isKo ? '학습지 관리 및 분석을 위해 교사 계정으로 로그인해 주세요.' : 'Log in with your teacher credentials to access your dashboard.'))
                 : (loginRole === 'director'
                     ? (isKo ? '학원명을 등록하고 즉시 원장님 전용 대시보드를 개설하세요.' : 'Register your academy and activate your Director HQ Dashboard.')
+                    : inviteSlug
+                    ? (isKo ? '아래 정보를 입력해 계정을 만드세요.' : 'Fill in your details below to create your account.')
                     : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
             </p>
             {!isPlanSignup && loginRole === 'teacher' && !inviteSlug && (
@@ -2319,7 +2310,7 @@ ${questionsHtml}
 
               <div className="space-y-1.5 text-left">
                 <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                  Email
+                  {inviteSlug && authMode === 'signup' ? (isKo ? '이메일 확인' : 'Confirm your email') : 'Email'}
                 </label>
                 <input
                   type="email"
@@ -2607,8 +2598,35 @@ ${questionsHtml}
               </div>
             )}
 
-            {/* Step 2 — Confirm / create class */}
+            {/* Step 2 — invited teachers join a school, not a class: only the
+                director assigns classes (via Teacher Assignments), so
+                letting an invited FT/KT type a class name here created a
+                standalone class of their own, disconnected from the
+                director's real roster (audit: teacher ends up on a
+                different class than the one the director set up). Anyone
+                who signed up WITHOUT an invite (no welcomeSchool) still
+                gets the self-serve class-creation form. */}
             {teacherWelcomeStep === 2 && (
+              welcomeSchool ? (
+                <div className="w-full space-y-5">
+                  <div className="text-center mb-2">
+                    <h2 className="text-2xl font-black tracking-tight text-white mb-1">{isKo ? '거의 다 됐어요!' : "You're all set!"}</h2>
+                    <p className="text-zinc-400 text-xs leading-relaxed">
+                      {isKo
+                        ? '원장님이 담당 학급을 배정하면 대시보드에 표시됩니다.'
+                        : 'Your director will assign you to a class — it\'ll show up on your dashboard once they do.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => dismissWelcome('')}
+                    className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                  >
+                    <CheckCircle size={18} weight="bold" />
+                    <span>{isKo ? '완료 — 대시보드 입장! 🎉' : 'Done — Enter Dashboard! 🎉'}</span>
+                  </button>
+                </div>
+              ) : (
               <div className="w-full space-y-5">
                 <div className="text-center mb-2">
                   <h2 className="text-2xl font-black tracking-tight text-white mb-1">{isKo ? '담당 학급반을 알려주세요' : 'Your Class Assignment'}</h2>
@@ -2653,6 +2671,7 @@ ${questionsHtml}
                   {isKo ? '나중에 설정하기' : 'Skip for now'}
                 </button>
               </div>
+              )
             )}
           </div>
         </div>
