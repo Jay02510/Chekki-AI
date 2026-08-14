@@ -273,7 +273,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       // parents of enrolled students. Best-effort — an AI report was
       // already generated and shown, so a Firestore hiccup here shouldn't
       // block the teacher.
-      if (selectedClass?.id && selectedClass.id !== 'demo' && user?.uid) {
+      if (selectedClass?.id && !selectedClass.isDemo && user?.uid) {
         try {
           const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
           const docRef = await addDoc(logsRef, {
@@ -340,8 +340,16 @@ export default function TeacherPage({ isNight = true }: Props) {
   };
 
 
+  // id used to be the bare literal 'demo', which meant curriculum saved
+  // while previewing with no real class yet (curriculums/demo_week_1) was
+  // ONE SHARED Firestore document for every account on the entire app —
+  // any director who scanned a syllabus before creating their first class
+  // leaked that content into every other new director's empty-state
+  // preview (Audit: brand-new academy shows another school's curriculum).
+  // Scoping the id per-uid gives each account its own private doc.
   const fallbackDemoClass = {
-    id: 'demo',
+    id: `demo_${user?.uid || 'guest'}`,
+    isDemo: true,
     name: 'Sample Class (7-year-old)',
     level: '7-year-old',
     joinCode: 'DEMO01',
@@ -991,7 +999,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   // Load previously submitted logs for the selected class (history tab),
   // and the queue of logs still awaiting KT review for that class.
   useEffect(() => {
-    if (!selectedClass?.id || selectedClass.id === 'demo') {
+    if (!selectedClass?.id || selectedClass.isDemo) {
       setSubmittedLogs([]);
       setKtPendingLogs([]);
       setKtLogsLoadError(false);
