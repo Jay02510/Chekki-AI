@@ -29,15 +29,7 @@
       "destination": "/app.html"
     },
     {
-      "source": "/terms",
-      "destination": "/terms.html"
-    },
-    {
-      "source": "/privacy",
-      "destination": "/privacy.html"
-    },
-    {
-      "source": "/(refund|youth|support|subscribe|admin|teacher|school|schools|for-schools|faq|insights|reports|report-studio)",
+      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher|school|schools|for-schools|faq|insights|reports|report-studio)",
       "destination": "/index.html"
     }
   ],

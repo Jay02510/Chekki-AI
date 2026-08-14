@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LegalType } from '../types';
 
 interface Props {
@@ -33,6 +33,19 @@ export const LegalModal: React.FC<Props> = ({
 
   const { title, icon } = getHeader();
   const date = '최종 수정일: 2025년 10월 24일';
+
+  // This is a client-rendered SPA, so a URL fragment like /privacy#deletion
+  // points at an element that doesn't exist yet when the browser tries its
+  // default scroll-on-load — it only works once React has actually
+  // rendered the target. Required by Google Play's Data Safety form, which
+  // links directly to the account-deletion section (audit: 404'd entirely
+  // before this route even resolved, see vercel.json).
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.location.hash) return;
+    const id = window.location.hash.slice(1);
+    const el = document.getElementById(id);
+    el?.scrollIntoView({ block: 'start' });
+  }, [type]);
 
   return (
     <div
@@ -267,11 +280,12 @@ export const LegalModal: React.FC<Props> = ({
                       <br />- AI Processing: Google Gemini API
                     </p>
 
-                    <p>
+                    <p id="deletion">
                       <strong className={isNight ? 'text-white' : 'text-zinc-900'}>4. Data Retention & Deletion</strong>
                       <br />
                       User data is retained until account deletion. You may delete your account and
-                      all associated data at any time through the app settings.
+                      all associated data at any time through the app settings, or by emailing{' '}
+                      support@chekkiai.com to request deletion.
                     </p>
 
                     <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>Data Protection Officer: Benjamin Jason (support@chekkiai.com / Biz Reg No: 814-14-03096)</p>
