@@ -9,7 +9,6 @@ import {
   FileText,
   Warning,
   Check,
-  Printer,
 } from '@phosphor-icons/react';
 import { NativeTeacherLogForm } from './NativeTeacherLogForm';
 import { ClassLogPayload } from '../services/aiGenerator';
@@ -42,7 +41,6 @@ interface Props {
   curriculumPhonics: string;
   curriculumPassage: string;
   curriculumOther: string;
-  setShowReportCardModal: (v: boolean) => void;
   submittedLogs: any[];
 }
 
@@ -89,7 +87,6 @@ export const NativeFtDashboard: React.FC<Props> = ({
   curriculumPhonics,
   curriculumPassage,
   curriculumOther,
-  setShowReportCardModal,
   submittedLogs,
 }) => {
   const isThemeNight = isNight;
@@ -593,13 +590,13 @@ export const NativeFtDashboard: React.FC<Props> = ({
                         <BookOpen size={20} weight="bold" />
                       </div>
                       <h4 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo ? '교사 복습 가이드 & 성적표' : 'Review & Report Generator'}
+                        {isKo ? '교사 복습 가이드' : 'Weekly Review Tips'}
                       </h4>
                     </div>
                     <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
                       {isKo
-                        ? '오답 통계 기반 맞춤 복습 프린트 및 학부모 1초 리포트를 즉시 발행하세요.'
-                        : 'AI-generated instruction guide and instant 1-click parent progress report generator.'}
+                        ? '오답 통계 기반 맞춤 복습 가이드입니다. 학부모 리포트는 KT가 검토 후 발송합니다.'
+                        : "AI-generated review guide based on this week's mistakes. Parent reports are sent by your KT after review."}
                     </p>
 
                     <div className="space-y-4 text-xs leading-relaxed text-zinc-300 font-medium">
@@ -629,18 +626,6 @@ export const NativeFtDashboard: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  {/* Dual Action Buttons: Review Sheet + Report Card Generator */}
-                  <div className={`pt-6 border-t mt-6 space-y-3 ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
-                    <button
-                      type="button"
-                      onClick={() => setShowReportCardModal(true)}
-                      className="group w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2.5 cursor-pointer"
-                    >
-                      <Printer size={16} weight="bold" />
-                      <span>{isKo ? '📊 학부모 1초 성적표 발급 (Report Generator)' : '📊 Open Report Generator'}</span>
-                    </button>
-
-                  </div>
                 </div>
               </div>
 

@@ -324,6 +324,17 @@ export default function TeacherPage({ isNight = true }: Props) {
               : "⚠️ This log wasn't saved to the cloud — it may not reach your co-teacher on another device.",
           });
         }
+      } else {
+        // No real class yet (demo/placeholder class, or classes still
+        // loading) — the AI preview above is real, but there's nothing to
+        // send to a KT. Without this the button looked broken: the form
+        // just sat there with no toast and no visible change.
+        showToast({
+          type: 'error',
+          message: isKo
+            ? '아직 등록된 학급이 없어 저장되지 않았습니다. 원장님께 학급 등록을 요청하세요.'
+            : "This is a preview only — you're not assigned to a real class yet, so nothing was sent. Ask your director to add you to a class.",
+        });
       }
     } catch (err) {
       console.error('Failed to generate AI report from FT log:', err);
@@ -797,8 +808,8 @@ export default function TeacherPage({ isNight = true }: Props) {
         }),
       });
 
-      if (!res.ok) throw new Error('API failed');
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `Scan request failed (${res.status})`);
 
       if (data.analysis) {
         const analysisData = {
@@ -858,11 +869,12 @@ export default function TeacherPage({ isNight = true }: Props) {
         setWorksheetFileName('');
         setWorksheetPreviewUrl(null);
       }
+      const detail = err instanceof Error && err.message && err.message !== 'Failed to fetch' ? ` (${err.message})` : '';
       showToast({
         type: 'error',
         message: isKo
-          ? '스캔에 실패했습니다. 이미지를 확인하고 다시 시도해 주세요.'
-          : "Scan failed — couldn't read this file. Please check the image and try again.",
+          ? `스캔에 실패했습니다. 이미지를 확인하고 다시 시도해 주세요.${detail}`
+          : `Scan failed — couldn't read this file. Please check the image and try again.${detail}`,
       });
     } finally {
       setIsScanningTextbook(false);
@@ -3056,7 +3068,7 @@ ${questionsHtml}
                   }`}>
                     <BookOpen size={18} weight="bold" />
                   </div>
-                  <span>{isKo ? '📘 교재 목차 등록 (Curriculum)' : '📘 Curriculum Preseed'}</span>
+                  <span>{isKo ? '📘 교재 목차 등록' : '📘 Curriculum Setup'}</span>
                 </div>
                 <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
               </button>
@@ -3597,7 +3609,6 @@ ${questionsHtml}
               curriculumPhonics={curriculumPhonics}
               curriculumPassage={curriculumPassage}
               curriculumOther={curriculumOther}
-              setShowReportCardModal={setShowReportCardModal}
               submittedLogs={submittedLogs}
             />
 

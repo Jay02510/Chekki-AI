@@ -547,7 +547,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                     <PlusCircle size={24} weight="bold" />
                   </div>
                   <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No syllabus set for this week yet</p>
-                  <p className="text-xs text-zinc-400 max-w-[200px]">Teachers upload it from their Curriculum Preseed tab — it'll show here once saved.</p>
+                  <p className="text-xs text-zinc-400 max-w-[200px]">Teachers upload it from their Curriculum Setup tab — it'll show here once saved.</p>
                 </div>
               )}
             </div>
