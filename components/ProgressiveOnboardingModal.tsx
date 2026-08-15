@@ -33,7 +33,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   initialStep = 0,
 }) => {
   const { language, setLanguage } = useLanguage();
-  const { updateChildProfile, joinClassWithCode } = useAuth();
+  const { updateChildProfile, redeemClassCodeDetailed } = useAuth();
 
   const [step, setStep] = useState(initialStep);
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
@@ -69,15 +69,19 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
     setIsJoiningClass(true);
     setClassJoinError('');
     try {
-      const success = await joinClassWithCode(code);
-      if (success) {
+      const result = await redeemClassCodeDetailed(code);
+      if (result.success) {
         setClassJoinSuccess(true);
         setTimeout(() => onComplete(), 1200);
       } else {
+        // Previously a hardcoded "invalid code" regardless of actual cause
+        // (wrong code, already redeemed, requires a personal invite from
+        // the teacher) — now shows the server's real reason.
         setClassJoinError(
-          language === 'ko'
+          result.error ||
+          (language === 'ko'
             ? '올바르지 않은 코드입니다. 다시 확인해 주세요.'
-            : 'Invalid code. Please double-check with your teacher.'
+            : 'Invalid code. Please double-check with your teacher.')
         );
       }
     } catch {
