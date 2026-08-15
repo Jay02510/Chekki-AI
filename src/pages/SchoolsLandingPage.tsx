@@ -190,7 +190,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     setTeacherCount(safeCount);
     
     if (safeCount <= 3) {
-      setSelectedPlanId('report_studio');
+      setSelectedPlanId('starter');
     } else if (safeCount <= 10) {
       setSelectedPlanId('school_pro');
     } else {
@@ -1010,7 +1010,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </li>
                 <li className="flex items-center gap-1.5 font-bold text-orange-500">
                   <Sparkle size={14} weight="bold" className="flex-shrink-0" />
-                  <span>{isKo ? '리포트 스튜디오의 모든 기능 포함' : 'Includes Everything in Report Studio'}</span>
+                  <span>{isKo ? 'AI 학부모 리포트 생성 (강사 로그 → 검수 → 발송)' : 'AI Parent Report Generation (Teacher Log → Review → Send)'}</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
@@ -1484,16 +1484,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     </div>
                     <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                       {isKo ? '교사 초청 링크 1클릭 발급, 반별 출석 & 수업 보고 실시간 통계' : '1-click staff invite link generator, class attendance & real-time analytics'}
-                    </p>
-                  </div>
-
-                  <div className={`p-3 rounded-xl border ${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <CheckCircle size={16} weight="bold" className="text-emerald-400 shrink-0" />
-                      <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '학원 맞춤 브랜딩 로고 박음질' : 'Custom School Brand Header'}</p>
-                    </div>
-                    <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                      {isKo ? '성적표 및 학부모 리포트 상단 원장님 학원 로고 정밀 적용' : 'Presents your academy logo on all digital and printable parent report cards'}
                     </p>
                   </div>
 
