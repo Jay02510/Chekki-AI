@@ -148,6 +148,7 @@ export const db = {
       context?: any;
       userEmail?: string;
       userName?: string;
+      userRole?: string;
     }
   ): Promise<void> {
     try {

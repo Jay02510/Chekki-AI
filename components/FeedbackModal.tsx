@@ -32,6 +32,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
         context,
         userEmail: user?.email, // Added for easier admin identification in DB
         userName: user?.name,
+        userRole: user?.role, // Now submitted from parent AND staff (director/teacher) dashboards — role lets admins triage which surface a report came from
       });
       setIsSuccess(true);
       setTimeout(onClose, 2500);
@@ -72,7 +73,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                 >
                   {t('fb_success')}
                 </h3>
-                <p className="text-zinc-500 text-sm">You are doing an amazing job, Mom!</p>
+                <p className="text-zinc-500 text-sm">Thanks for letting us know!</p>
               </div>
             ) : (
               <>

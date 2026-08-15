@@ -47,6 +47,9 @@ import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeFtDashboard } from '../components/NativeFtDashboard';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
+import { FeedbackModal } from '../../components/FeedbackModal';
+import { asString, asJoinedString } from '../../utils/validate';
+import { parseApiError } from '../../utils/describeError';
 import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { NativeDirectorStudentsTab } from '../components/NativeDirectorStudentsTab';
 import { StudentInvitePanel } from '../components/StudentInvitePanel';
@@ -824,7 +827,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.details || data?.error || `Scan request failed (${res.status})`);
+      if (!res.ok) throw parseApiError(res, data);
 
       if (data.analysis) {
         const analysisData = {
@@ -901,7 +904,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const applyScannedSelectionToCurriculum = () => {
     if (!scannedData) return;
     if (selectedScannedTopic && scannedData.topic) {
-      setCurriculumTopic(typeof scannedData.topic === 'string' ? scannedData.topic : String(scannedData.topic));
+      setCurriculumTopic(asString(scannedData.topic, String(scannedData.topic)));
     }
     if (selectedScannedVocab.length > 0) {
       setCurriculumVocab(selectedScannedVocab.join(', '));
@@ -910,10 +913,10 @@ export default function TeacherPage({ isNight = true }: Props) {
       setCurriculumPhonics(selectedScannedPhonics.join(', '));
     }
     if (selectedScannedPassage && scannedData.passage) {
-      setCurriculumPassage(typeof scannedData.passage === 'string' ? scannedData.passage : String(scannedData.passage));
+      setCurriculumPassage(asString(scannedData.passage, String(scannedData.passage)));
     }
     if (selectedScannedOther && scannedData.other) {
-      setCurriculumOther(typeof scannedData.other === 'string' ? scannedData.other : String(scannedData.other));
+      setCurriculumOther(asString(scannedData.other, String(scannedData.other)));
     }
     setShowScannedModal(false);
     setScanStatusMessage(isKo ? '선택한 학급 커리큘럼 항목이 성공적으로 적용되었습니다!' : 'Selected items successfully applied to your weekly curriculum!');
@@ -975,6 +978,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [resetPwStatus, setResetPwStatus] = useState<{ text: string; isError?: boolean } | null>(null);
   const [isSendingReset, setIsSendingReset] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const isKo = language === 'ko';
 
@@ -1644,13 +1648,13 @@ export default function TeacherPage({ isNight = true }: Props) {
       const cached = localStorage.getItem(localKey);
       if (cached) {
         const data = JSON.parse(cached);
-        setCurriculumTopic(typeof data.topic === 'string' ? data.topic : '');
-        setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : (typeof data.vocabWords === 'string' ? data.vocabWords : ''));
-        setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : (typeof data.phonicsRules === 'string' ? data.phonicsRules : ''));
-        setCurriculumPassage(typeof data.passage === 'string' ? data.passage : '');
-        setCurriculumOther(typeof data.other === 'string' ? data.other : '');
-        setCurriculumLastEditedByName(data.lastEditedByName || '');
-        setCurriculumLastEditedAt(data.lastEditedAt || '');
+        setCurriculumTopic(asString(data.topic));
+        setCurriculumVocab(asJoinedString(data.vocabWords));
+        setCurriculumPhonics(asJoinedString(data.phonicsRules));
+        setCurriculumPassage(asString(data.passage));
+        setCurriculumOther(asString(data.other));
+        setCurriculumLastEditedByName(asString(data.lastEditedByName));
+        setCurriculumLastEditedAt(asString(data.lastEditedAt));
       } else {
         setCurriculumTopic('');
         setCurriculumVocab('');
@@ -1670,13 +1674,13 @@ export default function TeacherPage({ isNight = true }: Props) {
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         const data = snap.data();
-        setCurriculumTopic(typeof data.topic === 'string' ? data.topic : '');
-        setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : (typeof data.vocabWords === 'string' ? data.vocabWords : ''));
-        setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : (typeof data.phonicsRules === 'string' ? data.phonicsRules : ''));
-        setCurriculumPassage(typeof data.passage === 'string' ? data.passage : '');
-        setCurriculumOther(typeof data.other === 'string' ? data.other : '');
-        setCurriculumLastEditedByName(data.lastEditedByName || '');
-        setCurriculumLastEditedAt(data.lastEditedAt || '');
+        setCurriculumTopic(asString(data.topic));
+        setCurriculumVocab(asJoinedString(data.vocabWords));
+        setCurriculumPhonics(asJoinedString(data.phonicsRules));
+        setCurriculumPassage(asString(data.passage));
+        setCurriculumOther(asString(data.other));
+        setCurriculumLastEditedByName(asString(data.lastEditedByName));
+        setCurriculumLastEditedAt(asString(data.lastEditedAt));
         try {
           localStorage.setItem(localKey, JSON.stringify(data));
         } catch (e) {
@@ -4294,6 +4298,31 @@ ${questionsHtml}
                   </button>
                 </div>
 
+                {/* Report a Bug / Send Feedback — staff dashboard had no path to
+                    reach us at all; only the parent-facing app did. */}
+                <div className={`flex items-center justify-between p-4 border rounded-2xl ${
+                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                }`}>
+                  <div>
+                    <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                      {isKo ? '버그 신고 / 의견 보내기' : 'Report a Bug / Send Feedback'}
+                    </h4>
+                    <p className="text-[11px] text-zinc-400">
+                      {isKo ? '문제를 발견하셨나요? 팀에게 바로 알려주세요.' : 'Found something broken? Let us know directly.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSettingsModal(false);
+                      setShowFeedbackModal(true);
+                    }}
+                    className="px-3.5 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 font-bold text-xs rounded-xl border border-orange-500/20 transition-all whitespace-nowrap cursor-pointer"
+                  >
+                    {isKo ? '보내기' : 'Send'}
+                  </button>
+                </div>
+
                 {/* Account Actions: Delete Account & Log Out */}
                 <div className="pt-2 flex flex-col gap-2.5">
                   <button
@@ -4324,6 +4353,10 @@ ${questionsHtml}
             </div>
           </div>
         </div>
+      )}
+
+      {showFeedbackModal && (
+        <FeedbackModal isNight={isThemeNight} onClose={() => setShowFeedbackModal(false)} />
       )}
 
       {/* --- WEEKLY CALENDAR & UPLOAD HISTORY MODAL --- */}
