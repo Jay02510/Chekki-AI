@@ -20,6 +20,7 @@ interface Props {
   isNight?: boolean;
   isKo?: boolean;
   academyName?: string;
+  academyLogo?: string;
   onOpenLogoModal?: () => void;
   schoolId?: string;
   // Real value read from schools/{schoolId}.planId (null until that fetch
@@ -53,6 +54,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   isNight = true,
   isKo = false,
   academyName = 'Apex English Academy (Seocho)',
+  academyLogo,
   onOpenLogoModal,
   schoolId,
   planId,
@@ -199,12 +201,13 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 : (isKo ? '체험 종료 후에도 기존 데이터는 유지되며, 새 학급/초대만 제한됩니다.' : "New classes and invites will pause when it ends — your existing data isn't affected.")}
             </p>
           </div>
-          <a
-            href="/schools"
+          <button
+            type="button"
+            onClick={() => setActiveTab('billing')}
             className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all shrink-0 cursor-pointer whitespace-nowrap"
           >
             {isKo ? '플랜 업그레이드 →' : 'Upgrade Plan →'}
-          </a>
+          </button>
         </div>
       )}
 
@@ -221,7 +224,11 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           </div>
           <div className="flex items-center gap-3">
             <h3 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-              <Buildings size={24} className="text-orange-500" />
+              {academyLogo ? (
+                <img src={academyLogo} alt="" className="w-6 h-6 rounded-lg object-cover" />
+              ) : (
+                <Buildings size={24} className="text-orange-500" />
+              )}
               <span>{academyName}</span>
             </h3>
             <button

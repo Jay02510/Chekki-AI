@@ -48,20 +48,47 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
     // fail silently (console.warn only) and left the list stuck on "No
     // students invited yet" even right after a successful add. Sorted
     // client-side below instead.
-    const q = query(collection(dbInstance, 'pendingStudents'), where('classId', '==', classId));
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        const rows = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as PendingStudent[];
-        rows.sort((a, b) => (b.addedAt?.toMillis() || 0) - (a.addedAt?.toMillis() || 0));
-        setPending(rows);
-      },
-      (err) => {
-        console.warn('Failed to load pending student invites:', err);
-        setMessage({ text: 'Failed to load the invite list. Please refresh.', type: 'error' });
-      }
-    );
-    return () => unsub();
+    let cancelled = false;
+    let retried = false;
+    let unsub: (() => void) | undefined;
+
+    const attach = () => {
+      const q = query(collection(dbInstance, 'pendingStudents'), where('classId', '==', classId));
+      unsub = onSnapshot(
+        q,
+        (snap) => {
+          if (cancelled) return;
+          const rows = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as PendingStudent[];
+          rows.sort((a, b) => (b.addedAt?.toMillis() || 0) - (a.addedAt?.toMillis() || 0));
+          setPending(rows);
+          setMessage(null);
+        },
+        (err) => {
+          console.warn('Failed to load pending student invites:', err?.code, err);
+          // firestore.rules re-reads the caller's own user doc on every
+          // attach to check schoolId; right after creating a brand-new
+          // class that read can transiently permission-deny before the
+          // director's session settles. One silent retry avoids scaring
+          // staff with an error on a class that's a second old.
+          if (err?.code === 'permission-denied' && !retried) {
+            retried = true;
+            unsub?.();
+            setTimeout(() => {
+              if (!cancelled) attach();
+            }, 1500);
+            return;
+          }
+          if (cancelled) return;
+          setMessage({ text: 'Failed to load the invite list. Please refresh.', type: 'error' });
+        }
+      );
+    };
+    attach();
+
+    return () => {
+      cancelled = true;
+      unsub?.();
+    };
   }, [classId]);
 
   const callEndpoint = async (body: unknown) => {

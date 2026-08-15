@@ -30,6 +30,14 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
   const [removeConfirm, setRemoveConfirm] = useState<{ teacherUid: string; label: string } | null>(null);
+  // classes prop comes from a one-time getDocs() fetch in the parent, not a
+  // live listener, and the parent has no callback to refetch after a toggle.
+  // Mirror it into local state so a successful assign/remove can update the
+  // button state immediately instead of silently doing nothing until reload.
+  const [localClasses, setLocalClasses] = useState<any[]>(classes);
+  useEffect(() => {
+    setLocalClasses(classes);
+  }, [classes]);
 
   useEffect(() => {
     if (!schoolId) return;
@@ -62,6 +70,14 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
     setMessage(null);
     try {
       await callEndpoint('/api/create-teacher-invite', { action: 'assign', classId, teacherUid, assignAction: isAssigned ? 'remove' : 'add' });
+      setLocalClasses((prev) =>
+        prev.map((c: any) => {
+          if (c.id !== classId) return c;
+          const current = new Set(c.assignedTeacherUids || []);
+          if (isAssigned) current.delete(teacherUid); else current.add(teacherUid);
+          return { ...c, assignedTeacherUids: Array.from(current) };
+        })
+      );
     } catch (err: any) {
       setMessage({ text: err.message || 'Failed to update assignment.', type: 'error' });
     } finally {
@@ -101,7 +117,7 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
       )}
       {teachers.map((t) => {
         const label = t.name || t.email || t.uid;
-        const assignedClassIds = new Set(classes.filter((c: any) => (c.assignedTeacherUids || []).includes(t.uid)).map((c: any) => c.id));
+        const assignedClassIds = new Set(localClasses.filter((c: any) => (c.assignedTeacherUids || []).includes(t.uid)).map((c: any) => c.id));
         return (
           <div key={t.uid} className={`p-4 rounded-2xl border space-y-3 ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
             <div className="flex items-center justify-between">
@@ -121,11 +137,11 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
               </button>
             </div>
 
-            {classes.length === 0 ? (
+            {localClasses.length === 0 ? (
               <p className="text-[11px] text-zinc-500">No classes to assign yet.</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
-                {classes.map((c: any) => {
+                {localClasses.map((c: any) => {
                   const isAssigned = assignedClassIds.has(c.id);
                   const key = `${c.id}_${t.uid}`;
                   return (

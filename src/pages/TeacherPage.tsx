@@ -3468,6 +3468,7 @@ ${questionsHtml}
                 isNight={isThemeNight}
                 isKo={isKo}
                 academyName={displayedAcademyName}
+                academyLogo={academyLogo}
                 onOpenLogoModal={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
                 schoolId={(user as any)?.schoolId}
                 planId={schoolPlanId}
