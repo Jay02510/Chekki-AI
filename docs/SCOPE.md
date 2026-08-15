@@ -16,7 +16,7 @@ Everything in [`PRD.md` §4](./PRD.md#4-the-core-loop):
 3. Mistake flagging → teacher visibility
 4. Syllabus/textbook upload (term-level scope, distinct from #2)
 5. FT log → AI translation → KT review → parent send
-6. Access: director invite links + self-serve class codes (both, for now — see `DECISIONS.md`)
+6. Access: director-generated invite links only (self-serve class codes were cut — see `DECISIONS.md` #001, and "Resolved" note below)
 
 Plus the three staff dashboards (Director/KT/FT) that serve #2–5, and the parent-app features that serve #1 directly:
 
