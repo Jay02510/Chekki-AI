@@ -1450,9 +1450,13 @@ CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
     });
   } catch (error: any) {
     console.error('[Backend Security Error]:', error);
+    // error.message is the AI provider's own rejection reason (bad/undecodable
+    // image, unsupported mimeType, etc.) — surfacing it lets the client show
+    // something more actionable than a bare "ANALYSIS_FAILED" code, without
+    // leaking stack traces or internal details.
     return res.status(500).json({
       error: 'ANALYSIS_FAILED',
-      details: 'An unexpected error occurred during analysis.',
+      details: typeof error?.message === 'string' ? error.message.slice(0, 300) : 'An unexpected error occurred during analysis.',
     });
   }
 }

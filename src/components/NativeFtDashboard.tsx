@@ -34,6 +34,7 @@ interface Props {
   curriculumSlideIndex: number;
   setCurriculumSlideIndex: React.Dispatch<React.SetStateAction<number>>;
   activeVocabWords: string[];
+  hasVocabData: boolean;
   isLoadingRoster: boolean;
   sortedTroubleWords: TroubleWord[];
   setActiveTab: (tab: any) => void;
@@ -80,6 +81,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
   curriculumSlideIndex,
   setCurriculumSlideIndex,
   activeVocabWords,
+  hasVocabData,
   isLoadingRoster,
   sortedTroubleWords,
   setActiveTab,
@@ -96,7 +98,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
         <div className="space-y-8 animate-fade-in">
 
           {/* 30s Foreign Teacher Mobile Class Log Entry */}
-          <div className="mb-8">
+          <div id="interactive" className="mb-8">
             <NativeTeacherLogForm
               isNight={isThemeNight}
               onSubmitLog={handleFtLogSubmit}
@@ -596,11 +598,18 @@ export const NativeFtDashboard: React.FC<Props> = ({
                     <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
                       {isKo
                         ? '오답 통계 기반 맞춤 복습 가이드입니다. 학부모 리포트는 KT가 검토 후 발송합니다.'
-                        : "AI-generated review guide based on this week's mistakes. Parent reports are sent by your KT after review."}
+                        : "Rule-based review guide from this week's scanned mistakes. Parent reports are sent by your KT after review."}
                     </p>
 
                     <div className="space-y-4 text-xs leading-relaxed text-zinc-300 font-medium">
-                      {sortedTroubleWords.some(w => w.count > 0) ? (
+                      {!hasVocabData ? (
+                        <div className={`p-6 rounded-2xl border text-center text-xs text-zinc-500 flex flex-col items-center gap-2 ${
+                          isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                        }`}>
+                          <BookOpen size={24} weight="bold" />
+                          <span>{isKo ? '이번 주 등록된 어휘가 없습니다. 커리큘럼 탭에서 단어를 추가해 주세요.' : 'No vocabulary words set for this week yet — add some on the Curriculum tab to get tips here.'}</span>
+                        </div>
+                      ) : sortedTroubleWords.some(w => w.count > 0) ? (
                         <>
                           <p className={`font-semibold ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>
                             {isKo
@@ -620,7 +629,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                           isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-emerald-50/50 border-emerald-200'
                         }`}>
                           <Sparkle size={24} weight="bold" />
-                          <span>{isKo ? '모든 아이들이 숙제를 완벽히 소화하고 있습니다!' : 'All children have mastered the weekly vocabulary!'}</span>
+                          <span>{isKo ? '아직 채점된 오답이 없습니다 (또는 모든 아이들이 완벽히 소화했습니다!)' : 'No mistakes scanned against this week\'s words yet — or everyone nailed it!'}</span>
                         </div>
                       )}
                     </div>

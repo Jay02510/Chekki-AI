@@ -73,3 +73,15 @@ export function stripDataUrlPrefix(dataUrl: string): string {
   if (idx === -1) return dataUrl;
   return dataUrl.substring(idx + 1);
 }
+
+/**
+ * Reads the actual MIME type off a data URL prefix (e.g. "image/png" from
+ * "data:image/png;base64,..."). compressImage() above re-encodes to JPEG on
+ * success, but falls back to returning the ORIGINAL bytes unchanged if the
+ * browser can't decode the source image (e.g. HEIC) — callers must not
+ * assume the result is always JPEG just because compression was attempted.
+ */
+export function getMimeTypeFromDataUrl(dataUrl: string): string {
+  const match = /^data:([^;,]+)[;,]/.exec(dataUrl);
+  return match ? match[1] : 'image/jpeg';
+}

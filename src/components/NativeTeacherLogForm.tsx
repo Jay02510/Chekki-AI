@@ -194,32 +194,37 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label htmlFor="log-class-name" className="text-xs font-bold text-zinc-400 block font-mono">Class Name *</label>
-            <select
-              id="log-class-name"
-              value={className}
-              onChange={(e) => setClassName(e.target.value)}
-              required={!isDemo}
-              className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
-                isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-              }`}
-            >
-              {!isDemo && !selectedClassName && (
-                <option value="" disabled>
-                  Select a class...
-                </option>
-              )}
-              {selectedClassName &&
-                !['Apex Seocho 7A', 'Apex Seocho 6B', 'Apex Seocho 5C'].includes(selectedClassName) && (
-                  <option value={selectedClassName}>{selectedClassName}</option>
-                )}
-              {isDemo && (
-                <>
-                  <option value="Apex Seocho 7A">Apex Seocho 7A (Kindergarten 7yo)</option>
-                  <option value="Apex Seocho 6B">Apex Seocho 6B (Kindergarten 6yo)</option>
-                  <option value="Apex Seocho 5C">Apex Seocho 5C (Kindergarten 5yo)</option>
-                </>
-              )}
-            </select>
+            {isDemo ? (
+              <select
+                id="log-class-name"
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
+                className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
+                  isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                }`}
+              >
+                <option value="Apex Seocho 7A">Apex Seocho 7A (Kindergarten 7yo)</option>
+                <option value="Apex Seocho 6B">Apex Seocho 6B (Kindergarten 6yo)</option>
+                <option value="Apex Seocho 5C">Apex Seocho 5C (Kindergarten 5yo)</option>
+              </select>
+            ) : (
+              // Not a picker — always the same class you have active in the
+              // top class switcher, on purpose (prevents logging against the
+              // wrong class). It used to render as a <select> with exactly
+              // one option, which looked broken since a dropdown implies
+              // there should be more to pick from.
+              <div
+                className={`w-full p-3 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 ${
+                  isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                }`}
+              >
+                <span>{selectedClassName || 'No class selected'}</span>
+                <span className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wide text-zinc-500 shrink-0">
+                  <Lock size={12} weight="bold" />
+                  Synced
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">

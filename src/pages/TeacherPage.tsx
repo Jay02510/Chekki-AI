@@ -7,7 +7,7 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc, addDoc, orderBy, limit as fbLimit, serverTimestamp } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
 import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
-import { compressImage, stripDataUrlPrefix } from '../../services/compressImage';
+import { compressImage, stripDataUrlPrefix, getMimeTypeFromDataUrl } from '../../services/compressImage';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { 
   GraduationCap, 
@@ -46,6 +46,7 @@ import {
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeFtDashboard } from '../components/NativeFtDashboard';
+import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { NativeDirectorStudentsTab } from '../components/NativeDirectorStudentsTab';
 import { StudentInvitePanel } from '../components/StudentInvitePanel';
@@ -818,12 +819,12 @@ export default function TeacherPage({ isNight = true }: Props) {
         body: JSON.stringify({
           images_base64: cleanBase64List,
           mode: scanType === 'syllabus' ? 'syllabus_course_plan' : 'textbook_curriculum_ocr',
-          mimeType: isPdf ? 'application/pdf' : 'image/jpeg'
+          mimeType: isPdf ? 'application/pdf' : getMimeTypeFromDataUrl(mainPreview || '')
         }),
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || `Scan request failed (${res.status})`);
+      if (!res.ok) throw new Error(data?.details || data?.error || `Scan request failed (${res.status})`);
 
       if (data.analysis) {
         const analysisData = {
@@ -900,7 +901,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const applyScannedSelectionToCurriculum = () => {
     if (!scannedData) return;
     if (selectedScannedTopic && scannedData.topic) {
-      setCurriculumTopic(scannedData.topic);
+      setCurriculumTopic(typeof scannedData.topic === 'string' ? scannedData.topic : String(scannedData.topic));
     }
     if (selectedScannedVocab.length > 0) {
       setCurriculumVocab(selectedScannedVocab.join(', '));
@@ -909,10 +910,10 @@ export default function TeacherPage({ isNight = true }: Props) {
       setCurriculumPhonics(selectedScannedPhonics.join(', '));
     }
     if (selectedScannedPassage && scannedData.passage) {
-      setCurriculumPassage(scannedData.passage);
+      setCurriculumPassage(typeof scannedData.passage === 'string' ? scannedData.passage : String(scannedData.passage));
     }
     if (selectedScannedOther && scannedData.other) {
-      setCurriculumOther(scannedData.other);
+      setCurriculumOther(typeof scannedData.other === 'string' ? scannedData.other : String(scannedData.other));
     }
     setShowScannedModal(false);
     setScanStatusMessage(isKo ? '선택한 학급 커리큘럼 항목이 성공적으로 적용되었습니다!' : 'Selected items successfully applied to your weekly curriculum!');
@@ -1643,11 +1644,11 @@ export default function TeacherPage({ isNight = true }: Props) {
       const cached = localStorage.getItem(localKey);
       if (cached) {
         const data = JSON.parse(cached);
-        setCurriculumTopic(data.topic || '');
-        setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : data.vocabWords || '');
-        setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : data.phonicsRules || '');
-        setCurriculumPassage(data.passage || '');
-        setCurriculumOther(data.other || '');
+        setCurriculumTopic(typeof data.topic === 'string' ? data.topic : '');
+        setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : (typeof data.vocabWords === 'string' ? data.vocabWords : ''));
+        setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : (typeof data.phonicsRules === 'string' ? data.phonicsRules : ''));
+        setCurriculumPassage(typeof data.passage === 'string' ? data.passage : '');
+        setCurriculumOther(typeof data.other === 'string' ? data.other : '');
         setCurriculumLastEditedByName(data.lastEditedByName || '');
         setCurriculumLastEditedAt(data.lastEditedAt || '');
       } else {
@@ -1669,11 +1670,11 @@ export default function TeacherPage({ isNight = true }: Props) {
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         const data = snap.data();
-        setCurriculumTopic(data.topic || '');
-        setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : data.vocabWords || '');
-        setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : data.phonicsRules || '');
-        setCurriculumPassage(data.passage || '');
-        setCurriculumOther(data.other || '');
+        setCurriculumTopic(typeof data.topic === 'string' ? data.topic : '');
+        setCurriculumVocab(Array.isArray(data.vocabWords) ? data.vocabWords.join(', ') : (typeof data.vocabWords === 'string' ? data.vocabWords : ''));
+        setCurriculumPhonics(Array.isArray(data.phonicsRules) ? data.phonicsRules.join(', ') : (typeof data.phonicsRules === 'string' ? data.phonicsRules : ''));
+        setCurriculumPassage(typeof data.passage === 'string' ? data.passage : '');
+        setCurriculumOther(typeof data.other === 'string' ? data.other : '');
         setCurriculumLastEditedByName(data.lastEditedByName || '');
         setCurriculumLastEditedAt(data.lastEditedAt || '');
         try {
@@ -3684,6 +3685,7 @@ ${questionsHtml}
             )}
 
             {educatorRole !== 'kt' && (
+            <ErrorBoundary>
             <NativeFtDashboard
               isNight={isThemeNight}
               isKo={isKo}
@@ -3700,6 +3702,7 @@ ${questionsHtml}
               curriculumSlideIndex={curriculumSlideIndex}
               setCurriculumSlideIndex={setCurriculumSlideIndex}
               activeVocabWords={activeVocabWords}
+              hasVocabData={activeVocabWords.length > 0}
               isLoadingRoster={isLoadingRoster}
               sortedTroubleWords={sortedTroubleWords}
               setActiveTab={setActiveTab}
@@ -3709,6 +3712,7 @@ ${questionsHtml}
               curriculumOther={curriculumOther}
               submittedLogs={submittedLogs}
             />
+            </ErrorBoundary>
             )}
 
               {(activeTab === 'syllabus' || activeTab === 'homework') && !(loginRole === 'director' || user?.role === 'director') && (
