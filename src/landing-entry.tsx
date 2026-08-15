@@ -91,21 +91,18 @@ function LandingRoot() {
   }
 
 
-  // Web App route: chekkiai.com/app (also teacher portal, admin, subscribe, legal, report studio, OR any invite link)
+  // Web App route: chekkiai.com/app (also teacher portal, admin, subscribe, legal, OR any invite link)
   if (
     hasInviteParam ||
-    pathname.startsWith('/app') || 
-    pathname.startsWith('/teacher') || 
-    pathname.startsWith('/admin') || 
+    pathname.startsWith('/app') ||
+    pathname.startsWith('/teacher') ||
+    pathname.startsWith('/admin') ||
     pathname.startsWith('/subscribe') ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/refund') ||
     pathname.startsWith('/youth') ||
-    pathname.startsWith('/support') ||
-    pathname.startsWith('/insights') ||
-    pathname.startsWith('/reports') ||
-    pathname.startsWith('/report-studio')
+    pathname.startsWith('/support')
   ) {
     return <App />;
   }
