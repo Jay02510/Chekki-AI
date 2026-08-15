@@ -6,6 +6,19 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 007 — KT report delivery stays manual copy-paste; dropped the KakaoTalk share-sheet button
+
+**Date:** 2026-08-15
+**Status:** Resolved
+
+**Context:** `NativeKtDashboard.tsx` had two ways to get an approved report to a parent: a "Share KakaoTalk" button (`navigator.share()` — the OS share sheet, which can target KakaoTalk if installed) and a "1-Click Copy Script" clipboard button. The share path only worked meaningfully on mobile with KakaoTalk installed, fell back to clipboard anyway on desktop, and — more importantly — routes through whatever Kakao account is logged into the KT's personal device. There's no business/official-channel integration; it's the KT's own personal app.
+
+**Decision:** Removed the Share KakaoTalk button and its handler. Manual copy-paste (the existing 1-Click Copy button) is the sole, permanent send mechanism for now, not a placeholder for a future integration.
+
+**Consequences:** One less inconsistent code path (`navigator.share` support varies by platform/browser). Sending a report is now unambiguously "KT copies it, pastes it wherever they actually message the parent" — which is what was already happening in practice, since the share button's KakaoTalk target still required the KT's personal login either way. If a real KakaoTalk Business API integration (or similar) is ever prioritized, it should be scoped fresh rather than reviving this button — the old approach never had one.
+
+---
+
 ## 006 — Consolidate documentation into PRD/Scope/Decisions
 
 **Date:** 2026-08-15
