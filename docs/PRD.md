@@ -1,160 +1,102 @@
-# 🦅 Chekki AI - Product Requirements Document (PRD)
+# Chekki AI — Product Requirements Document
 
-**Document Version:** 2.0  
-**Status:** Approved / Active  
-**Author:** Product & Engineering Team  
-**Target Audience:** Engineering, Product, Design, QA, Business Development  
-
----
-
-## 1. Executive Summary
-
-**Chekki AI** is an AI-powered EdTech application designed to bridge physical learning materials with digital intelligence. Operating primarily in South Korea, Chekki AI empowers parents of children (aged 5–7) attending English Kindergarten (EK) and elementary hagwons (private academies) to instantly scan, evaluate, and coach their children on English homework—without needing fluent English skills themselves.
-
-By transforming a routine paper worksheet into an interactive, digital workspace with real-time answer verification, contextual Korean parenting scripts, native voice coaching, and adaptive AI practice sheet generation, Chekki AI transforms daily "homework battles" into positive parent-child bonding moments.
+**Version:** 3.0
+**Status:** Active / Canonical
+**Supersedes:** `docs/archive/PRD.md`, `PRODUCT.md`, `CHEKKI_OVERVIEW.md`, `CHEKKI_MASTER_SPECIFICATION.md`, `PROJECT_OVERSIGHT.md`, `CHEKKI_ACADEMY_PRODUCT_PROFILE.md`, `CHEKKI_EDTECH_PROFILE.md`, `FEATURES_TO_ADD.md`, `USER_FLOW.md` (see `docs/archive/` — kept for history, no longer authoritative)
+**Companion docs:** [`SCOPE.md`](./SCOPE.md) (what's in/out and why), [`DECISIONS.md`](./DECISIONS.md) (open questions and past trade-offs)
 
 ---
 
-## 2. Problem Statement & User Personas
+## Why this document exists
 
-### 2.1 Problem Statement
-1. **Parent-Child Homework Friction:** Parents in high-density Korean education zones (e.g., Daechi, Mok-dong, Haeundae) experience high stress managing late-afternoon homework. Correcting mistakes in a second language often leads to emotional exhaustion and parent-child conflict.
-2. **Language Barrier for Parents:** Many non-native English-speaking parents struggle to understand nuance in complex phonics, reading comprehension, or grammar worksheets, making them hesitant to help.
-3. **Teacher Prep Load:** Hagwon and EK teachers spend excessive hours generating supplementary drill sheets and manually grading repetitive paper homework.
-
-### 2.2 User Personas
-
-#### Primary Persona: Korean EK Parent ("Min-ji", 34)
-* **Demographics:** Mother of a 6-year-old child in an English Kindergarten (Seoul/Busan).
-* **Goals:** Wants to ensure her child completes homework accurately while fostering confidence and a loving relationship.
-* **Pain Points:** Low English fluency, exhausted after work, worried about giving incorrect explanations or scolding her child.
-* **Key Needs:** Instant worksheet checking, Korean translation, exact words to say ("what to speak"), warmth and empathy.
-
-#### Secondary Persona: Hagwon ESL Teacher ("David", 28)
-* **Demographics:** Native English instructor at a Seoul Hagwon.
-* **Goals:** Efficiently grade student assignments, track recurring student errors, and quickly generate customized extra practice sheets.
-* **Pain Points:** Time wasted on repetitive grading, difficulty giving personalized feedback to 20+ students daily.
+As of this version, Chekki AI had accumulated nine overlapping, partially-contradictory product documents — some unedited since the project's original scaffolding, one explicitly labeled "authoritative" while describing features that had since been cut. This document replaces all of them with a single current source of truth. When code and doc disagree, trust the code and file a correction here, not the other way around.
 
 ---
 
-## 3. Product Vision & Value Propositions
+## 1. Tagline & Vision
 
-### 3.1 Product Vision
-To be the ultimate AI learning companion for physical workbooks worldwide, making early childhood education stress-free, engaging, and personalized.
+**Tagline:** "채점은 채키가, 칭찬은 엄마가" — *"Grading by Chekki, Praise by Mom."*
 
-### 3.2 Key Value Propositions
-* **Bonding Over Correction:** Replaces red-ink grading with gentle, encouraging Korean parenting scripts.
-* **Paper-to-Digital Bridge:** Keeps the tactile magic of paper worksheets by preserving photo alignment with digital highlight overlays rather than plain database tables.
-* **Instant Multimodal Intelligence:** Powered by Google Gemini 3 (Flash & Pro), providing sub-3-second OCR and deep reasoning.
-* **Adaptive Mastery Loop:** Automatically tracks weak points and generates tailored PDF practice sheets for offline or digital drill.
+**Vision:** Turn the nightly English-homework battle between tired Korean parents and their kids into a bonding moment, by taking grading and explanation off the parent's plate — then extend the same relief to the teachers and academies those kids attend.
 
----
+**Origin:** The product started as a pure parent-facing tool. A parent — often exhausted after work, not fluent in English herself — points her phone at her child's English homework. Chekki grades it, explains every mistake in warm Korean, and tells her exactly what to say to her child. No English fluency required, no red pen, no fight.
 
-## 4. Feature Specifications
-
-### 4.1 Feature 1: Magic Scan (Multimodal OCR & Answer Verification)
-* **Description:** Real-time camera capture of physical worksheets with automatic boundary detection, lighting check, and AI analysis.
-* **Requirements:**
-  * Support image capture via camera or file upload (PNG/JPG/HEIC).
-  * Send image payload to Gemini 3 API to return structured JSON containing:
-    * `worksheet_summary`: Title, overview, score, legibility flag.
-    * `items`: Bounding boxes `[ymin, xmin, ymax, xmax]`, questions, correct answers, student response, Korean teaching script (`teaching_script_ko`), and handwriting quality tips.
-  * Render Interactive Skeuomorphic Overlays directly on top of the original image at matching coordinates.
-  * Interactive Tapping: Tapping any highlighted bounding box opens the detail drawer with step-by-step guidance.
-
-### 4.2 Feature 2: Korean Parenting Script Engine ("What to Say")
-* **Description:** Translates technical corrections into warm, empathetic scripts for parents to read aloud to their child.
-* **Requirements:**
-  * For every incorrect item, present `teaching_script_ko` formatted as direct speech quotes (e.g., *"괜찮아! 'cat'에서 'c' 소리를 다시 들어볼까?"*).
-  * Provide praise options for correct answers to reinforce child confidence.
-
-### 4.3 Feature 3: AI Practice Sheet Generator (Pro Feature)
-* **Description:** On-demand generation of custom practice worksheets targeting specific student weaknesses.
-* **Requirements:**
-  * Analyze student `mistakes` collection filtered by error types (Phonics, Vocabulary, Grammar).
-  * Generate fresh, original exercises matching the curriculum standard.
-  * Export clean printable PDF sheets formatted for home printing (A4/Letter).
-
-### 4.4 Feature 4: Native Pronunciation & Voice Coach (Pro Feature)
-* **Description:** Native-speaker TTS audio playback and STT speech analysis.
-* **Requirements:**
-  * **TTS (Text-to-Speech):** High-fidelity audio playback for question prompts and correct answers using natural English voices.
-  * **STT (Speech-to-Text) / Coaching:** Allow child to speak into the microphone, score pronunciation match, and provide gentle encouragement.
-
-### 4.5 Feature 5: Gamified Engagement & Badges
-* **Description:** Motivational system for young learners.
-* **Requirements:**
-  * Daily scan streak tracking.
-  * Unlockable badges (e.g., "Phonics Explorer", "Star Scanner", "Master Reader").
-  * Distinguish Standard vs Pro Exclusive Badges.
-
-### 4.6 Feature 6: School & Organization Portal (Unified Invite Link Architecture)
-* **Description:** Institutional tier for schools, English Kindergartens, and hagwons.
-* **Requirements:**
-  * **Option A Unified Invite Link System:** Directors register campus profiles via `/teacher?activate=true` and generate unique academy invite links (`/teacher?invite=school-slug&role=ft|kt`). Eliminates manual, error-prone authorization codes (`APEX10-TEACHER`).
-  * **Role-Based Post-Auth Routing:** Brand-new Director signups automatically trigger the 3-step Academy Setup Wizard. Teacher signups via invite links trigger a tailored 2-step FT/KT Welcome Modal.
-  * **Teacher Classroom View & Director HQ:** Directors access campus oversight (`NativeDirectorPortal`); Foreign Teachers submit 30s checkmark logs (`NativeTeacherLogForm`); Korean Teachers review bilingual parent KakaoTalk scripts (`NativeKtDashboard`).
-
-### 4.7 Feature 7: Teacher Curriculum Pre-Seeding Module
-* **Description:** Allows hagwon teachers to pre-upload weekly textbook topics, passage texts, and target vocabulary to pre-seed the AI's context window.
-* **Requirements:**
-  * Support teacher pre-seeding of weekly units (e.g., *Poly 6A Week 4 Phonics & Reading*).
-  * Automatically inject active class curriculum context into Gemini 3 prompt calls when a student from that class scans a sheet.
-  * Elevate OCR recognition and answer verification accuracy to near 100% for specific school workbooks.
-
-### 4.8 Feature 8: Automated Weekly/Monthly Parent Report & Report Studio Sandbox
-* **Description:** Generates beautifully structured, printable/shareable bilingual growth reports for parents and teachers, previewed via an interactive live sandbox (`/report-studio`).
-* **Requirements:**
-  * **Interactive Report Studio Sandbox (`/report-studio`):** Allows prospective directors to test the 3-stage pipeline live on web landing pages without signing up.
-  * **Bilingual Parent KakaoTalk Script Engine:** Transforms foreign teacher class energy notes and student exception tags into polite Korean honorific KakaoTalk parent messages via Gemini AI.
-  * Aggregate home scan accuracy, phonics mastery percentages, and weekly vocabulary acquisition.
-  * Highlight 3 specific review focus words/rules (e.g., *silent 'e' long vowels, consonant blends*).
-  * Include custom **Teacher Evaluation Notes** input box for hagwon instructors.
-  * Provide personalized **Mom's Praise Script** tailored to the child's monthly achievements.
-  * Export as clean PDF or KakaoTalk shareable mobile card.
+It later grew a second half: academies (hagwons/English Kindergartens) wanted the same relief for their teachers, and a way to close the loop between what a child got wrong at home and what happens in class the next day. That's the current product: **two connected surfaces — a parent-facing app and a staff-facing dashboard — joined by one core loop.**
 
 ---
 
-## 5. Monetization & Tiering Architecture
+## 2. Problem Statement
 
-| Feature / Capability | Free Explorer Tier | Chekki Pro Tier | School / Enterprise Tier |
-| :--- | :--- | :--- | :--- |
-| **Daily Scans** | 2 Scans / Day | Unlimited (9,999/day) | Unlimited |
-| **AI Model Engine** | Gemini 3 Flash | **Gemini 3 Pro** (Deep Reasoning) | Gemini 3 Pro |
-| **Parent Guidance Script** | Basic | Advanced + Contextual | Advanced + Contextual |
-| **Audio Pronunciation** | Restricted | Native TTS & STT Coach | Native TTS & STT Coach |
-| **Practice Generator** | None | Unlimited Sheet Generation | Class Bulk Sheet Generation |
-| **Curriculum Pre-Seeding**| Read Only | Standard Pre-Seeding | **Full School Pre-Seeding** |
-| **Parent Growth Reports** | Basic Summary | Weekly Personal Report | **Automated Class Report Generator** |
-| **Analytics Dashboard** | Personal History | Mistake Vault + Insights | Class-level Analytics |
-| **Price Point** | Free | ₩14,900 / month ($9.99/mo) | Custom Contract Pricing |
+1. **Parent-child homework friction.** Parents managing English homework in a language they don't speak fluently experience real stress; correcting mistakes badly (or not explaining them at all) creates conflict and erodes the child's confidence.
+2. **Disconnected loop.** A mistake made at home was invisible to the teacher, and what happened in class was invisible to the parent. Without a channel between the two, exactly the moments that matter most for a kid to actually learn something get lost.
+3. **Teacher grading load.** Academy teachers spend real hours grading repetitive homework and writing individual parent updates by hand, in a second language (English-speaking foreign teachers writing for Korean-speaking parents).
 
 ---
 
-## 6. Non-Functional Requirements
+## 3. User Personas & Roles
 
-### 6.1 Performance & Latency
-* Camera capture to initial overlay render: **< 3.5 seconds** (on LTE/5G).
-* Client-side UI responsiveness: 60 FPS animation during drawer drag and image zoom.
+| Role | Who | Core need |
+|---|---|---|
+| **Parent** ("Min-ji," 34) | Mother of a 5–7yo in an English Kindergarten/hagwon. Not fluent in English, tired after work. | Instant grading + Korean explanation + exact words to say to her kid. |
+| **Foreign Teacher (FT)** ("David," 28) | Native-English instructor, teaches the class. | Fast way to log what happened in class and flag which kids need help — without writing Korean. |
+| **Korean Teacher (KT)** | Bilingual staff member, liaises with parents. | Review the FT's log, make sure the Korean parent-facing version is right, send it. |
+| **Director** | Academy owner/admin. | Set up classes, invite staff and parents, see the whole campus at a glance. |
 
-### 6.2 Reliability & Availability
-* Uptime Target: **99.9%** hosted on Vercel Edge and Firebase Cloud Functions.
-* Graceful fallback when Gemini API encounters high load or rate limits.
-
-### 6.3 Accessibility & Internationalization (i18n)
-* **WCAG 1.4.4 (Pinch-to-Zoom):** Mobile viewport must permit multi-touch zooming and panning to read fine text on scanned paper.
-* **Bicultural Typography:** Flawless dual rendering of Korean (`Noto Sans KR`) and English (`Space Grotesk`, `Nunito`).
-
-### 6.4 Security & Compliance
-* Full COPPA & Korean PII Compliance (Children's Privacy Protection).
-* Strict Firestore Security Rules ensuring users access only their own scans and authorized class records.
+Each role gets its own dashboard (`NativeFtDashboard`, `NativeKtDashboard`, `NativeDirectorPortal`) rendered from one shared router (`src/pages/TeacherPage.tsx`), gated by `user.role` / `educatorRole`. The parent-facing app is a separate surface entirely (`App.tsx` root, mobile-first).
 
 ---
 
-## 7. Success Metrics & Key Performance Indicators (KPIs)
+## 4. The Core Loop
 
-1. **Daily Active Users (DAU) & Monthly Active Users (MAU)**
-2. **Scan Completion Rate:** % of scans that successfully produce a valid bounding box analysis (>98% target).
-3. **Free-to-Pro Conversion Rate:** Target > 6% conversion driven by scan limits and practice generator value.
-4. **Parent Satisfaction (CSAT):** >4.8 / 5.0 rating on "Parent Script Usefulness".
-5. **7-Day & 30-Day Retention Rates.**
+This is the product. Everything else is in service of this loop or it's scope creep (see `SCOPE.md`).
+
+```mermaid
+flowchart TD
+    A[Teacher uploads week's worksheet /\nanswer key] --> B[AI grades parent scans\nagainst that real answer key\ninstead of guessing]
+    B --> C[Parent scans homework at home]
+    C --> D[Parent gets EN+KO explanation\n+ correct answer, instantly]
+    D --> E[Mistakes flagged and\naggregated by class/week]
+    E --> F[Teacher sees what the class\nis struggling with]
+    F --> G[Teacher addresses it in class]
+    A2[FT logs what happened in class] --> H[AI translates to Korean]
+    H --> I[KT reviews + sends to parent]
+    I --> D
+    G --> A2
+```
+
+**Stage-by-stage requirements:**
+
+1. **Scan → explanation (parent app).** Camera or file upload (PNG/JPG/HEIC/PDF) → `/api/analyze` → Gemini vision → structured JSON (bounding boxes, correct answer, Korean teaching script, English explanation) → rendered as overlays on the original image. This is the most mature, most heavily-hardened path in the codebase — treat changes here with the most caution.
+2. **Teacher answer-key upload → grading context.** FT/KT uploads the week's worksheet (`CurriculumEditorForm`, `mode: 'textbook_curriculum_ocr'`) → extracted into a `curriculums` Firestore doc keyed by class + week → injected into the grading prompt for any student scan against that class/week, so the AI grades against a real answer key instead of inferring one. This is what makes the school product materially more accurate than the standalone parent app.
+3. **Mistake flagging → teacher visibility.** Red-bordered mistakes from student scans aggregate into a "trouble words" view and a flagged-exceptions list on the Director/FT dashboards, so a teacher can see what the whole class is missing without reading every scan individually.
+4. **Syllabus/textbook upload.** Separate from #2 — FT/KT can upload a syllabus, table of contents, or textbook index (`mode: 'syllabus_course_plan'`) to set the term-level scope (vocab/phonics range across many units), distinct from a single week's answer key.
+5. **FT log → KT review → parent send.** FT fills a ~30-second form (`NativeTeacherLogForm`) describing the day's class. AI translates/drafts a Korean parent update. KT reviews, edits if needed, and sends (`NativeKtDashboard`, states: `pending_review` → `edited_by_kt` → `copied_sent`).
+6. **Access.** A parent or teacher gets into a class two ways, both currently live — a director-generated invite link (pre-seeds an allowlist entry, tightest security) and a self-serve 6-digit class code (works for anyone who already knows it). See `DECISIONS.md` — whether to keep both indefinitely is an open question.
+
+---
+
+## 5. Non-Functional Requirements
+
+- **Latency:** camera capture → first rendered overlay in well under 5s on a normal connection. Grading is the product; if it's slow, there is no product.
+- **Reliability of failure, not just success.** This was a real gap surfaced during an August 2026 bug-fixing pass: errors from `/api/analyze` and Firestore reads were being swallowed into generic or misleading messages (e.g. a bare `ANALYSIS_FAILED` code, or an invite panel silently showing "0 invited" while actually still loading). `utils/describeError.ts` and `utils/validate.ts` exist to standardize this going forward — new code touching an API call or a Firestore read should use them rather than inventing another one-off error path.
+- **i18n:** full Korean/English parity throughout; Korean is not a secondary/fallback language, it's the primary language for roughly half the user base (parents).
+- **Security:** Firestore rules scope every read to the caller's own school/class; server-only writes (Admin SDK) for anything security-sensitive (invite codes, class membership).
+
+---
+
+## 6. Success Metrics
+
+Carried forward from the prior PRD as directional targets — **not yet validated against real usage data**, and worth revisiting once there's actual traffic to measure against:
+
+- Scan completion rate (successful structured-analysis result): >98% target
+- 7-day and 30-day parent retention
+- FT log → KT send turnaround time (proxy for whether the report-generation loop is actually saving KT time, its core value prop)
+- Free → paid conversion rate for the parent app
+
+Whoever owns this next should treat these as hypotheses to instrument for, not settled numbers.
+
+---
+
+## 7. Out of Scope
+
+See [`SCOPE.md`](./SCOPE.md) for the full list of what's deliberately not built or was cut, and why.
