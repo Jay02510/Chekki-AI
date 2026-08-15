@@ -1209,7 +1209,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // email deep link (App.tsx), which needs to show the real reason a code
   // failed (already used, requires a personal invite, etc.) instead of a
   // generic "something went wrong."
-  const redeemClassCodeDetailed = async (
+  const redeemClassCodeDetailed = useCallback(async (
     classCode: string
   ): Promise<{ success: boolean; schoolName?: string; className?: string; error?: string; wrongAccount?: boolean }> => {
     if (!firebaseUser || !userProfile) return { success: false, error: 'Not signed in.' };
@@ -1248,7 +1248,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('redeemClassCodeDetailed error:', err);
       return { success: false, error: 'Network error — please try again.' };
     }
-  };
+  }, [firebaseUser, userProfile, setUserProfile]);
 
   const leaveClassroom = async () => {
     if (!firebaseUser || !userProfile) return;
@@ -1342,8 +1342,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return res;
   };
 
-  const openLoginModal = () => setShowLoginModal(true);
-  const closeLoginModal = () => setShowLoginModal(false);
+  // useCallback matters here, not just style: these get put in other
+  // components' useEffect dependency arrays (e.g. App.tsx's invite-link
+  // redemption effect). A plain arrow function gets a new reference on
+  // every AuthProvider render, which made that effect re-fire on every
+  // unrelated re-render and immediately reopen the login modal right after
+  // the user closed it — it looked like the X button was broken (Audit:
+  // invite-link login modal impossible to dismiss).
+  const openLoginModal = useCallback(() => setShowLoginModal(true), []);
+  const closeLoginModal = useCallback(() => setShowLoginModal(false), []);
 
   return (
     <AuthContext.Provider

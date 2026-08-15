@@ -36,6 +36,17 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
   const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: showLoginModal, onClose: closeLoginModal });
 
   if (!showLoginModal) return null;
+
+  // If this modal was opened because of a ?classCode= invite link, say so —
+  // otherwise it looks like a generic login screen with no way to enter the
+  // code, when in fact no entry is needed: App.tsx redeems the stashed code
+  // automatically once sign-in/signup here completes.
+  let pendingClassCode: string | null = null;
+  try {
+    pendingClassCode = sessionStorage.getItem('chekki_pending_class_code');
+  } catch (e) {
+    // ignore
+  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -216,6 +227,12 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                   {getSubtitle()}
                 </p>
               </div>
+
+              {pendingClassCode && (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-2xl text-emerald-500 text-[11px] mb-5 font-semibold break-keep text-center">
+                  🎓 {viewMode === 'signup' ? 'Sign up' : 'Sign in'} with the email your teacher invited to finish joining your class — no code needed here, it'll link automatically.
+                </div>
+              )}
 
               {error && (
                 <div className="bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-2xl text-red-500 text-[11px] mb-5 font-semibold animate-shake flex items-start gap-2.5 break-keep">
