@@ -52,6 +52,6 @@ If one of these gets prioritized, it belongs in a new `DECISIONS.md` entry with 
 
 ---
 
-## A known, unresolved redundancy inside the core loop
+## Resolved: the dual access-path redundancy
 
-Not cut, but worth flagging here rather than treating as settled: parents currently reach a class two different ways (self-serve 6-digit code, director-pushed invite link), both fully live. This isn't scope creep — real users use both — but it's the kind of duplication that produces exactly the class of bugs found in this stabilization pass (login modal defaulting to the wrong mode, invite visibility gaps). See `DECISIONS.md` for the open question of whether to designate one as canonical.
+A parent used to be able to reach a class two ways (self-serve 6-digit code, director-pushed invite link). This was resolved (`DECISIONS.md` #001): the shared class code is gone, invite-only is canonical. See `PRD.md` §4.6.

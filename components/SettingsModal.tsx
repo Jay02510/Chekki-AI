@@ -98,14 +98,14 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
         setRedeemSuccess(
           language === 'ko'
             ? '학습지 파트너십 인증에 성공했습니다!'
-            : 'Academy code redeemed successfully!'
+            : 'Invite code redeemed successfully!'
         );
         setClassJoinCode('');
       } else {
         setRedeemError(
           language === 'ko'
-            ? '올바르지 않은 코드이거나 활성화되지 않은 학급 코드입니다.'
-            : 'Invalid or inactive class code.'
+            ? '올바르지 않거나 이미 사용된 초대 코드입니다.'
+            : 'Invalid or already-used invite code.'
         );
       }
     } catch (err: any) {
@@ -587,16 +587,16 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                   >
                     <p className="text-xs text-zinc-400 font-medium leading-relaxed break-keep">
                       {language === 'ko'
-                        ? '다니고 계신 어학원(Poly, GATE, ECC 등) 담당 선생님께 발급받은 6자리 학급 코드가 있으신가요? 코드를 입력해 Premium 혜택과 맞춤형 숙제 관리를 시작하세요.'
-                        : 'Enter the 6-character class code shared by your teacher (Poly, GATE, ECC, etc.) to activate premium grading and sync homework.'}
+                        ? '다니고 계신 어학원(Poly, GATE, ECC 등) 담당 선생님께 초대받으셨나요? 초대 코드를 입력해 Premium 혜택과 맞춤형 숙제 관리를 시작하세요.'
+                        : "Were you invited by your child's teacher (Poly, GATE, ECC, etc.)? Enter your invite code to activate premium grading and sync homework."}
                     </p>
 
                     {user?.plan === 'pro' && (
                       <div className="p-3 bg-orange-500/5 border border-orange-500/15 text-orange-400 text-[10px] sm:text-xs font-semibold rounded-xl leading-normal font-korean">
                         ⚠️{' '}
                         {language === 'ko'
-                          ? '주의: 현재 유료 정기 결제 플랜을 사용 중이십니다. 학원 코드를 등록해도 자동 정기 결제는 연동되지 않으므로, 이중 청구를 방지하기 위해 App Store 또는 Google Play에서 구독을 수동으로 취소해 주세요.'
-                          : 'Note: You have an active Premium plan. Joining via school code transitions your account sponsorship. Please cancel your App Store or Play Store subscription manually to avoid duplicate billing.'}
+                          ? '주의: 현재 유료 정기 결제 플랜을 사용 중이십니다. 초대 코드를 등록해도 자동 정기 결제는 연동되지 않으므로, 이중 청구를 방지하기 위해 App Store 또는 Google Play에서 구독을 수동으로 취소해 주세요.'
+                          : 'Note: You have an active Premium plan. Joining via an invite code transitions your account sponsorship. Please cancel your App Store or Play Store subscription manually to avoid duplicate billing.'}
                       </div>
                     )}
 
@@ -605,8 +605,8 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                         className={`block text-xs font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}
                       >
                         {language === 'ko'
-                          ? '학급 코드 입력 (6자리)'
-                          : 'Enter Class Code (6 chars)'}
+                          ? '초대 코드 입력'
+                          : 'Enter Invite Code'}
                       </label>
                       <div className="flex gap-2">
                         <input

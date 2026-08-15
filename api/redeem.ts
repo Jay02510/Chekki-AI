@@ -75,87 +75,38 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 async function redeemClassCode(res: VercelResponse, uid: string, email: string | undefined, classCode: string) {
   const sanitized = classCode.toUpperCase().trim();
 
-  let classId: string;
-  let classData: FirebaseFirestore.DocumentData;
-  // Doc to flip to 'redeemed' once enrollment succeeds, and whether that
-  // flip is load-bearing (must reject if it's already redeemed) or just
-  // best-effort status bookkeeping. Set two ways:
-  //  - matched a single-use pushed invite code directly -> load-bearing,
-  //    re-checked inside the transaction (Audit: invite codes must only
-  //    work once).
-  //  - matched the shared joinCode, but this parent has a pendingStudents
-  //    entry for the class -> not load-bearing, just marks that entry
-  //    joined so the roster's status column stays accurate either way the
-  //    parent actually redeemed.
-  let pendingStudentRef: FirebaseFirestore.DocumentReference | null = null;
-  let requireInviteStillPending = false;
-  // Name the director/KT entered when pushing the invite (pendingStudents.name)
-  // — carried onto the redeemed user doc below so the roster/report views
-  // don't show "Unnamed" for every pushed-invite student (Audit: redeemed
-  // invites never copied the student's name onto their account).
-  let invitedStudentName: string | undefined;
-
-  const classQuery = await adminDb.collection('classes').where('joinCode', '==', sanitized).limit(1).get();
-  if (!classQuery.empty) {
-    classId = classQuery.docs[0].id;
-    classData = classQuery.docs[0].data();
-
-    // Gate: the shared joinCode used to let anyone who had the string join,
-    // not just families the school actually knows about (Audit: joinCode
-    // has no identity check — no requirement the redeemer is one of the
-    // class's own students). Skip the gate for someone who's already a
-    // member of this exact class (re-redemption on reinstall/re-login).
-    const existingUserSnap = await adminDb.collection('users').doc(uid).get();
-    const alreadyMember = existingUserSnap.exists && existingUserSnap.data()?.classId === classId;
-    if (!alreadyMember) {
-      const allowlistSnap = email
-        ? await adminDb
-            .collection('pendingStudents')
-            .where('classId', '==', classId)
-            .where('parentEmail', '==', email.toLowerCase().trim())
-            .limit(1)
-            .get()
-        : null;
-      if (!allowlistSnap || allowlistSnap.empty) {
-        return res.status(403).json({
-          error: 'This class requires an invite from your teacher. Contact your teacher, or support@chekkiai.com if you think this is a mistake.',
-        });
-      }
-      if (allowlistSnap.docs[0].data().status === 'invited') {
-        pendingStudentRef = allowlistSnap.docs[0].ref;
-      }
-      invitedStudentName = allowlistSnap.docs[0].data().name || undefined;
-    }
-  } else {
-    const inviteQuery = await adminDb.collection('pendingStudents').where('inviteCode', '==', sanitized).limit(1).get();
-    if (inviteQuery.empty) {
-      return res.status(404).json({ error: 'Invalid class code. Please check with your teacher.' });
-    }
-    const inviteDoc = inviteQuery.docs[0];
-    if (inviteDoc.data().status !== 'invited') {
-      return res.status(400).json({ error: 'This invite code has already been used. Ask your teacher to resend it.' });
-    }
-    // A single-use invite code was previously redeemable by ANY signed-in
-    // account, not just the parent it was actually emailed to — no email
-    // check existed on this path at all (only the shared joinCode+allowlist
-    // path checked identity). That let an unrelated account burn someone
-    // else's one-time code and get attached to the class in their place.
-    const invitedEmail = (inviteDoc.data().parentEmail || '').toLowerCase().trim();
-    if (invitedEmail && email?.toLowerCase().trim() !== invitedEmail) {
-      return res.status(403).json({
-        error: `This invite was sent to ${invitedEmail}. Please sign in with that email, or ask your teacher to resend it.`,
-      });
-    }
-    const classSnap = await adminDb.collection('classes').doc(inviteDoc.data().classId).get();
-    if (!classSnap.exists) {
-      return res.status(404).json({ error: 'Invalid class code. Please check with your teacher.' });
-    }
-    classId = classSnap.id;
-    classData = classSnap.data()!;
-    pendingStudentRef = inviteDoc.ref;
-    requireInviteStillPending = true;
-    invitedStudentName = inviteDoc.data().name || undefined;
+  // Only the single-use, director-pushed invite code is accepted here —
+  // the shared, class-wide joinCode path was removed (Decision 001,
+  // docs/DECISIONS.md): every parent now arrives via a personal invite
+  // from their director, never a code that could be shared/guessed/passed
+  // around. classes.joinCode may still exist on older docs but is inert;
+  // nothing writes or checks it anymore.
+  const inviteQuery = await adminDb.collection('pendingStudents').where('inviteCode', '==', sanitized).limit(1).get();
+  if (inviteQuery.empty) {
+    return res.status(404).json({ error: 'Invalid invite code. Please check with your teacher, or ask them to resend your invite.' });
   }
+  const inviteDoc = inviteQuery.docs[0];
+  if (inviteDoc.data().status !== 'invited') {
+    return res.status(400).json({ error: 'This invite code has already been used. Ask your teacher to resend it.' });
+  }
+  // A single-use invite code was previously redeemable by ANY signed-in
+  // account, not just the parent it was actually emailed to — no email
+  // check existed on this path at all. That let an unrelated account burn
+  // someone else's one-time code and get attached to the class in their place.
+  const invitedEmail = (inviteDoc.data().parentEmail || '').toLowerCase().trim();
+  if (invitedEmail && email?.toLowerCase().trim() !== invitedEmail) {
+    return res.status(403).json({
+      error: `This invite was sent to ${invitedEmail}. Please sign in with that email, or ask your teacher to resend it.`,
+    });
+  }
+  const classSnap = await adminDb.collection('classes').doc(inviteDoc.data().classId).get();
+  if (!classSnap.exists) {
+    return res.status(404).json({ error: 'Invalid invite code. Please check with your teacher.' });
+  }
+  const classId = classSnap.id;
+  const classData = classSnap.data()!;
+  const pendingStudentRef: FirebaseFirestore.DocumentReference = inviteDoc.ref;
+  const invitedStudentName: string | undefined = inviteDoc.data().name || undefined;
 
   const schoolId = classData.schoolId;
   const schoolName = classData.schoolName || schoolId;
@@ -168,14 +119,10 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
       // Re-check the invite's single-use status inside the transaction —
       // the lookup above ran before this transaction started, so two
       // concurrent redemptions of the same invite code could otherwise
-      // both pass that earlier check. Only load-bearing for the direct
-      // inviteCode path; the joinCode+allowlist path just skips the status
-      // flip below if it's stale, it doesn't reject the redemption.
-      if (pendingStudentRef && requireInviteStillPending) {
-        const freshInvite = await t.get(pendingStudentRef);
-        if (!freshInvite.exists || freshInvite.data()?.status !== 'invited') {
-          throw { httpStatus: 400, message: 'This invite code has already been used. Ask your teacher to resend it.' };
-        }
+      // both pass that earlier check.
+      const freshInvite = await t.get(pendingStudentRef);
+      if (!freshInvite.exists || freshInvite.data()?.status !== 'invited') {
+        throw { httpStatus: 400, message: 'This invite code has already been used. Ask your teacher to resend it.' };
       }
 
       // --- ANTI-FRAUD GUARDRAIL: Student Enrollment Cap ---

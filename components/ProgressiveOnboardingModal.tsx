@@ -569,12 +569,12 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 </motion.div>
 
                 <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight mb-4">
-                  {language === 'ko' ? '학원 코드가 있으신가요?' : 'Got a Class Code?'}
+                  {language === 'ko' ? '초대 코드가 있으신가요?' : 'Got an Invite Code?'}
                 </h3>
                 <p className="text-base text-zinc-400 leading-relaxed max-w-[260px] mb-6">
                   {language === 'ko'
-                    ? '선생님께 받은 6자리 학급 코드를 입력하면 숙제 채점이 교재에 맞게 자동 조정됩니다.'
-                    : "Enter the 6-letter code from your teacher to sync homework grading with your child's class curriculum."}
+                    ? '원장님/선생님께 초대받은 코드를 입력하면 숙제 채점이 교재에 맞게 자동 조정됩니다.'
+                    : "Enter the invite code your child's teacher sent you to sync homework grading with their class curriculum."}
                 </p>
 
                 {classJoinSuccess ? (

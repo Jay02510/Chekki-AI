@@ -71,16 +71,13 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
-## 001 — Open question: two parent access paths, no canonical one
+## 001 — Deprecate the shared class code; director invite is the only access path
 
 **Date:** 2026-08-15
-**Status:** Open — not yet decided
+**Status:** Resolved
 
-**Context:** A parent can join a class two ways: a self-serve 6-digit class code (entered manually, works for anyone who has it), or a director-generated invite link (pre-seeds an allowlist entry, tighter security, no typing required). Both are fully live. Several bugs fixed in this session lived exactly at the seam between the two (login modal not knowing which case it's in, invite panel not reflecting redemption state clearly).
+**Context:** A parent could join a class two ways: a self-serve 6-digit class code (entered manually, shared class-wide), or a director-generated invite link (single-use, tied to one specific parent). Both were fully live. Several bugs fixed earlier in this session lived exactly at the seam between the two (login modal not knowing which case it's in, invite panel not reflecting redemption state clearly). On inspection, the shared class code was already gated behind a director-created allowlist entry (a prior audit fix) — so it wasn't actually open self-serve access, just a second, more confusing way to redeem something that already required an invite to exist first.
 
-**Options considered, not yet chosen between:**
-- **Keep both indefinitely**, treat the redundancy as intentional (different parents prefer different paths — some get a physical code from the academy, some get an emailed link).
-- **Designate the invite link as canonical**, keep the class code as a documented fallback for parents who lose the link or whose director prefers the low-tech option.
-- **Deprecate the class code entirely**, push everyone through invite links, accept the loss of the walk-up "just type this code" simplicity that was the product's original access model.
+**Decision:** Removed the shared class-code path entirely. `api/redeem.ts` now only accepts a single-use, per-parent invite code (`pendingStudents.inviteCode`); the `classes.joinCode` branch, its allowlist-gate logic, and the "Code: XXXXXX" display on the director dashboard are gone. `api/create-class.ts` no longer generates a `joinCode` on new classes. Parent-facing copy (onboarding modal, settings, camera banner, landing/schools/FAQ pages) reworded from "enter your class code" to "enter your invite code" / "tap your invite link."
 
-**Why this isn't resolved yet:** it's a product call about who the target user actually is (a parent who wants zero friction vs. an academy that wants access control), not an engineering one. Needs the founder's input before either path gets deprecated.
+**Consequences:** One access path instead of two — closes the seam that was producing bugs. `redeem.ts`'s `redeemClassCode` function is meaningfully simpler (one lookup instead of two branches). Directors lose the "just hand out this code" low-tech option; every parent now needs an actual invite pushed to their email (`StudentInvitePanel`) before they can join, no exceptions. Existing `classes` docs may still carry a stale `joinCode` field — harmless, nothing reads it anymore. If this turns out to be too much friction for directors who preferred handing out a physical code/QR at orientation, revisit — but the option to do so is gone from the code now, not just de-emphasized.

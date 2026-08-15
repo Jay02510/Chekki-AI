@@ -94,7 +94,9 @@ async function handleCreateClassAction(req: VercelRequest, res: VercelResponse, 
     teacherUid: uid,
     assignedTeacherUids: [uid],
     activeWeekNumber: 1,
-    joinCode: generateJoinCode(),
+    // No shared joinCode anymore (Decision 001, docs/DECISIONS.md) — every
+    // parent joins via a personal, single-use invite from the director
+    // instead of a class-wide code that could be shared or guessed.
     createdAt: new Date().toISOString(),
   };
 

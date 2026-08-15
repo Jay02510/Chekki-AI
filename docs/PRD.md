@@ -71,7 +71,7 @@ flowchart TD
 3. **Mistake flagging → teacher visibility.** Red-bordered mistakes from student scans aggregate into a "trouble words" view and a flagged-exceptions list on the Director/FT dashboards, so a teacher can see what the whole class is missing without reading every scan individually.
 4. **Syllabus/textbook upload.** Separate from #2 — FT/KT can upload a syllabus, table of contents, or textbook index (`mode: 'syllabus_course_plan'`) to set the term-level scope (vocab/phonics range across many units), distinct from a single week's answer key.
 5. **FT log → KT review → parent send.** FT fills a ~30-second form (`NativeTeacherLogForm`) describing the day's class. AI translates/drafts a Korean parent update. KT reviews, edits if needed, and sends (`NativeKtDashboard`, states: `pending_review` → `edited_by_kt` → `copied_sent`).
-6. **Access.** A parent or teacher gets into a class two ways, both currently live — a director-generated invite link (pre-seeds an allowlist entry, tightest security) and a self-serve 6-digit class code (works for anyone who already knows it). See `DECISIONS.md` — whether to keep both indefinitely is an open question.
+6. **Access.** A parent or teacher gets into a class exactly one way: a director-generated, single-use invite (email link, with the code as a manual-entry fallback if the link doesn't open). The old self-serve shared class code was removed — see `DECISIONS.md` #001.
 
 ---
 

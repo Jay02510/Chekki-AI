@@ -772,7 +772,7 @@ export const CameraView: React.FC<Props> = ({
       </div>
 
       <div className="w-full max-w-4xl mx-auto px-4">
-        {/* Class Code Prompt Banner */}
+        {/* Invite Code Prompt Banner */}
         {isAuthenticated && !user?.schoolId && !user?.classId && !classCodeBannerDismissed && (
           <div
             className={`mb-4 flex items-center gap-3 px-4 py-3 rounded-2xl border ${
@@ -787,8 +787,8 @@ export const CameraView: React.FC<Props> = ({
                 className={`text-xs font-black uppercase tracking-wider ${isNight ? 'text-orange-400' : 'text-orange-600'}`}
               >
                 {language === 'ko'
-                  ? '학원 코드가 있으신가요?'
-                  : 'Got a class code from your teacher?'}
+                  ? '초대 코드가 있으신가요?'
+                  : 'Got an invite code from your teacher?'}
               </p>
               <p
                 className={`text-[11px] font-medium mt-0.5 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}

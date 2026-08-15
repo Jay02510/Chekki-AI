@@ -20,14 +20,14 @@ interface Props {
 }
 
 /**
- * Director/KT-facing "push an invite" enrollment path, alongside the
- * existing self-serve joinCode flow (parent types the class's 6-digit
- * code themselves). Staff can add a student one at a time or bulk-upload
- * an Excel/CSV roster; each row becomes a `pendingStudents` doc (server-
- * side only, see api/create-class.ts's add_students action) that flips
- * from "Invited" to "Joined" once api/redeem.ts's redeemClassCode matches
- * the redeeming parent's email against it — so staff can see who still
- * hasn't redeemed instead of guessing.
+ * Director/KT-facing "push an invite" enrollment path — the only way a
+ * parent joins a class (Decision 001, docs/DECISIONS.md; the old self-serve
+ * shared joinCode was removed). Staff can add a student one at a time or
+ * bulk-upload an Excel/CSV roster; each row becomes a `pendingStudents` doc
+ * (server-side only, see api/create-class.ts's add_students action) that
+ * flips from "Invited" to "Joined" once api/redeem.ts's redeemClassCode
+ * matches the redeeming parent's email against it — so staff can see who
+ * still hasn't redeemed instead of guessing.
  */
 export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = false, classId }) => {
   const [pending, setPending] = useState<PendingStudent[]>([]);

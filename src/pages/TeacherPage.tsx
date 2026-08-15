@@ -20,9 +20,8 @@ import {
   ArrowLeft,
   Eye,
   CheckCircle, 
-  Plus, 
-  Key, 
-  Calendar, 
+  Plus,
+  Calendar,
   BookOpen,
   Printer,
   SignOut, 
@@ -85,7 +84,6 @@ export default function TeacherPage({ isNight = true }: Props) {
     cancelText?: string;
     variant?: 'default' | 'destructive';
   } | null>(null);
-  const [copiedCode, setCopiedCode] = useState(false);
   const [showWeekCalendarModal, setShowWeekCalendarModal] = useState(false);
   
   // Account Activation Wizard State for new directors
@@ -135,13 +133,6 @@ export default function TeacherPage({ isNight = true }: Props) {
   });
   const [welcomeClassName, setWelcomeClassName] = useState('');
 
-  const handleCopyClassCode = () => {
-    if (!selectedClass?.joinCode) return;
-    navigator.clipboard.writeText(selectedClass.joinCode);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  };
-  
   // Auth state - Defaults to 'signup' if coming from setup CTA or invite link
   const [authMode, setAuthMode] = useState<'login' | 'signup'>(() => {
     if (typeof window !== 'undefined') {
@@ -1421,9 +1412,6 @@ export default function TeacherPage({ isNight = true }: Props) {
         firestoreFailed = true;
         const schoolId = user?.schoolId || `school_${uid.slice(0, 8)}`;
         const sanitizedName = newClassName.trim().replace(/\s+/g, '-');
-        let joinCode = '';
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        for (let i = 0; i < 6; i++) joinCode += chars.charAt(Math.floor(Math.random() * chars.length));
         newClass = {
           id: `${schoolId}_${sanitizedName}_${Date.now()}`,
           schoolId,
@@ -1432,7 +1420,6 @@ export default function TeacherPage({ isNight = true }: Props) {
           level: newClassLevel,
           teacherUid: uid,
           activeWeekNumber: 1,
-          joinCode,
           createdAt: new Date().toISOString(),
         };
       }
@@ -3308,30 +3295,6 @@ ${questionsHtml}
                 <span className="hidden sm:inline">{isKo ? '새 학급' : 'New Class'}</span>
               </button>
             )}
-              {selectedClass && !selectedClass.isDemo && (loginRole === 'director' || user?.role === 'director') && (
-              <button
-                type="button"
-                onClick={handleCopyClassCode}
-                className={`text-xs font-bold px-3.5 py-2 border rounded-2xl flex items-center gap-2 transition-all cursor-pointer active:scale-[0.97] ${
-                  copiedCode 
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
-                    : 'bg-orange-500/10 border-orange-500/20 text-orange-500 hover:bg-orange-500/20'
-                }`}
-                title={isKo ? '클릭하여 6자리 학부모 코드 복사' : 'Click to copy 6-digit parent join code'}
-              >
-                <Key size={14} weight="bold" />
-                <span className="hidden md:inline">{isKo ? '학급 코드' : 'Code'}:</span>
-                <span className={`font-mono font-black text-xs px-2 py-0.5 rounded-md border ${
-                  isThemeNight ? 'bg-black/50 border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900 shadow-xs'
-                }`}>
-                  {selectedClass?.joinCode || 'N/A'}
-                </span>
-                <span className="text-[10px] font-bold">
-                  {copiedCode ? '✅' : '📋'}
-                </span>
-              </button>
-              )}
-
             {selectedClass && !selectedClass.isDemo && (loginRole === 'director' || user?.role === 'director') && (
               <button
                 type="button"

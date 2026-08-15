@@ -525,32 +525,32 @@ export default function Home() {
             {isKo ? '엄마표 영어 숙제 지도, 부담 없는 구독 플랜' : 'Simple & Flexible Parent Subscriptions'}
           </h2>
           <p className="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto">
-            {isKo 
-              ? 'iOS App Store & Google Play Store 구독 또는 다니는 학원의 6자리 코드로 100% 무료 이용이 가능합니다.'
-              : 'Available via iOS App Store & Google Play Store subscriptions, or 100% FREE with your school code.'}
+            {isKo
+              ? 'iOS App Store & Google Play Store 구독 또는 다니는 학원의 초대로 100% 무료 이용이 가능합니다.'
+              : 'Available via iOS App Store & Google Play Store subscriptions, or 100% FREE if your school invites you.'}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
-          {/* Tier 1: School Director Code (FREE) */}
+          {/* Tier 1: School Director Invite (FREE) */}
           <div className={`p-8 border rounded-3xl flex flex-col justify-between transition-all relative ${
             isNight ? 'bg-white/5 border-emerald-500/30' : 'bg-white border-zinc-200'
           }`}>
             <div>
               <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase rounded-full font-mono">
-                {isKo ? '학원 6자리 코드 연동' : 'SCHOOL CODE USER'}
+                {isKo ? '학원 초대 연동' : 'SCHOOL INVITE USER'}
               </span>
               <h3 className={`text-xl font-black mt-4 mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '학원 연동 무제한 무료' : 'School Code Free Access'}
+                {isKo ? '학원 연동 무제한 무료' : 'School Invite Free Access'}
               </h3>
               <div className="mb-4">
                 <span className="text-4xl font-black text-emerald-400 font-mono">₩0</span>
                 <span className="text-xs text-zinc-400 ml-2">{isKo ? '/평생 무료' : '/Forever Free'}</span>
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mb-6">
-                {isKo 
-                  ? '아이가 다니는 어학원/공부방 원장님이 체키 스쿨 프로를 도입하면 6자리 학급 코드로 100% 무료 전면 개방됩니다.'
-                  : '100% FREE if your child\'s English academy uses Chekki School Pro. Simply enter your 6-digit class code.'}
+                {isKo
+                  ? '아이가 다니는 어학원/공부방 원장님이 체키 스쿨 프로를 도입하면, 원장님의 초대 링크로 100% 무료 전면 개방됩니다.'
+                  : "100% FREE if your child's English academy uses Chekki School Pro. Just tap the invite link your academy sends you."}
               </p>
               <ul className={`space-y-3 text-xs border-t border-white/10 pt-4 ${isNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
                 <li className="flex items-center gap-2 font-bold text-emerald-400">
@@ -872,9 +872,9 @@ export default function Home() {
                 {isKo ? '원장님께 체키 스쿨 프로 추천하기' : 'Invite Your School Director'}
               </h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                {isKo 
-                  ? '원장님이 체키 스쿨 프로를 도입하면 학원 수강생 학부모님은 100% 무료로 6자리 코드가 제공됩니다.'
-                  : 'If your academy director adopts Chekki School Pro, all parents get 100% free access via class code!'}
+                {isKo
+                  ? '원장님이 체키 스쿨 프로를 도입하면 학원 수강생 학부모님은 원장님 초대로 100% 무료 이용이 가능합니다.'
+                  : 'If your academy director adopts Chekki School Pro, all parents get 100% free access via a personal invite!'}
               </p>
             </div>
 
@@ -885,7 +885,7 @@ export default function Home() {
               </p>
               <p className="text-xs text-zinc-300 leading-relaxed font-sans">
                 {isKo 
-                  ? '안녕하세요 원장님! 우리 학원 교재 목차 자동 등록 및 AI 정밀 숙제 채점 시스템 "체키 스쿨 프로" 도입을 추천드려요. 학원도 편해지고 학부모 앱 6자리 무료 코드도 제공됩니다! https://chekki.app/schools'
+                  ? '안녕하세요 원장님! 우리 학원 교재 목차 자동 등록 및 AI 정밀 숙제 채점 시스템 "체키 스쿨 프로" 도입을 추천드려요. 학원도 편해지고 학부모님들도 초대만 하면 무료로 이용하실 수 있어요! https://chekki.app/schools'
                   : 'Hello Director! I recommend implementing "Chekki School Pro" for textbook syllabus auto-seeding and AI autograding. Check out https://chekki.app/schools'}
               </p>
             </div>
@@ -896,7 +896,7 @@ export default function Home() {
                 type="button"
                 onClick={() => {
                   const inviteMsg = isKo
-                    ? '안녕하세요 원장님! 우리 학원 교재 목차 자동 등록 및 AI 정밀 숙제 채점 시스템 "체키 스쿨 프로" 도입을 추천드려요. 학원도 편해지고 학부모 앱 6자리 무료 코드도 제공됩니다! https://chekki.app/schools'
+                    ? '안녕하세요 원장님! 우리 학원 교재 목차 자동 등록 및 AI 정밀 숙제 채점 시스템 "체키 스쿨 프로" 도입을 추천드려요. 학원도 편해지고 학부모님들도 초대만 하면 무료로 이용하실 수 있어요! https://chekki.app/schools'
                     : 'Hello Director! Check out Chekki School Pro for textbook syllabus auto-seeding and AI autograding: https://chekki.app/schools';
                   navigator.clipboard.writeText(inviteMsg);
                   setCopiedInvite(true);

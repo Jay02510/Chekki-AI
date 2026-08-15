@@ -68,8 +68,8 @@ const FAQ_DATA: FaqItem[] = [
     tagEn: 'Academy Key Sync',
     questionKo: '영유/어학원 교재 정답지와 AI 채점 결과가 일치하나요?',
     questionEn: 'Does Chekki sync with English Kindergarten & Academy textbook answer keys?',
-    answerKo: '네, 정확하게 연동됩니다. 다니고 계신 학원의 6자리 학급 코드를 등록하면, 학원에서 입력한 이번 주 타겟 단어, 파닉스 규칙, 읽기 지문과 100% 연동되어 일반 AI의 환각 오류 없이 채점됩니다.',
-    answerEn: 'Yes! By entering your academy\'s 6-digit class code, Chekki evaluates scans against the teacher\'s active textbook keys, eliminating false AI grading errors.'
+    answerKo: '네, 정확하게 연동됩니다. 다니고 계신 학원의 초대를 받아 연동하면, 학원에서 입력한 이번 주 타겟 단어, 파닉스 규칙, 읽기 지문과 100% 연동되어 일반 AI의 환각 오류 없이 채점됩니다.',
+    answerEn: "Yes! Once your academy invites you, Chekki evaluates scans against the teacher's active textbook keys, eliminating false AI grading errors."
   },
   {
     id: 'p5',
@@ -96,12 +96,12 @@ const FAQ_DATA: FaqItem[] = [
   {
     id: 't2',
     category: 'teacher',
-    tagKo: '6자리 학급 코드',
-    tagEn: '6-Digit Join Code',
+    tagKo: '초대 링크 연동',
+    tagEn: 'Invite-Link Sync',
     questionKo: '가정에서 학부모가 스캔한 오답 데이터는 어떻게 선생님께 전송되나요?',
     questionEn: 'How do parent homework scans sync to the Teacher Dashboard?',
-    answerKo: '학부모님이 Chekki 앱에 학원의 6자리 커스텀 코드를 입력하면 자동 연동됩니다. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 전송되어 개별 원생 활동에서 확인하실 수 있습니다.',
-    answerEn: 'Parents enter a 6-digit class code once in the Chekki App. Homework scans and red-bordered mistake data silently sync straight to your teacher dashboard in real-time.'
+    answerKo: '학부모님이 원장님/선생님께 받은 초대 링크로 Chekki 앱에 연동하면 자동으로 동기화됩니다. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 전송되어 개별 원생 활동에서 확인하실 수 있습니다.',
+    answerEn: "Parents link their account via the invite their teacher sends them. Homework scans and red-bordered mistake data silently sync straight to your teacher dashboard in real-time."
   },
   {
     id: 't3',

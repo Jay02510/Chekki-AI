@@ -539,12 +539,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
                   <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
                   <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-purple-300' : 'text-purple-600'}`}>
-                    {isKo ? '6자리 코드로 가정 숙제 자동 연동' : '6-Digit Join Code & Auto-Sync'}
+                    {isKo ? '초대 링크로 가정 숙제 자동 연동' : 'Invite-Link Join & Auto-Sync'}
                   </h3>
                   <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {isKo
-                      ? '학부모가 6자리 학급 코드만 입력하면 끝. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 자동 전송됩니다.'
-                      : 'Parents enter a 6-letter class code once. Homework scans & mistake data silently sync straight to your teacher dashboard.'}
+                      ? '학부모는 원장님이 보내주신 초대 링크만 누르면 끝. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 자동 전송됩니다.'
+                      : "Parents tap the invite link their academy sends — no typing required. Homework scans & mistake data silently sync straight to your teacher dashboard."}
                   </p>
                 </div>
               </div>
@@ -704,8 +704,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             }`}>
               <p className={`text-sm leading-relaxed mb-6 font-medium italic ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 {isKo 
-                  ? '"숙제 검사에 걸리던 잡무가 완전히 사라졌습니다. 학부모님들께서 스스로 아이의 주간 진도를 앱에서 확인하시고, 승인 처리도 학급 코드로 깔끔하게 끝나서 원생 관리가 편해졌습니다."'
-                  : '"Parents check target curriculums on their own app. Approval flow with class codes works beautifully. It saves countless administrative phone calls."'}
+                  ? '"숙제 검사에 걸리던 잡무가 완전히 사라졌습니다. 학부모님들께서 스스로 아이의 주간 진도를 앱에서 확인하시고, 초대 링크로 승인 처리도 깔끔하게 끝나서 원생 관리가 편해졌습니다."'
+                  : '"Parents check target curriculums on their own app. The invite-link approval flow works beautifully. It saves countless administrative phone calls."'}
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center font-bold text-sm">
@@ -788,7 +788,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </h4>
                 <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {isKo 
-                    ? '신용카드 등록 없이 7일간 무료. 학부모는 Chekki 모바일 앱(무료) 다운로드 후 6자리 코드로 연동됩니다.' 
+                    ? '신용카드 등록 없이 7일간 무료. 학부모는 Chekki 모바일 앱(무료) 다운로드 후 초대 링크로 연동됩니다.'
                     : 'No credit card required. 1 Teacher seat + 30 Students for 7 days. Parents download the free Chekki app to sync scans.'}
                 </p>
               </div>
