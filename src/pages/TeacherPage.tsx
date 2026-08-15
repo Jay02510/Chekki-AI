@@ -422,11 +422,23 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>(
     firestoreEducatorRole === 'kt' ? 'kt' : 'ft'
   );
-  const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum' | 'director_hq' | 'kt_script' | 'kt_log'>(
-    isDirectorPath || (user as any)?.role === 'director'
-      ? 'director_hq'
-      : (firestoreEducatorRole === 'kt' ? 'kt_script' : 'overview')
-  );
+  type TabId = 'overview' | 'insights' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum' | 'director_hq' | 'kt_script' | 'kt_log';
+  const isDirectorUser = isDirectorPath || (user as any)?.role === 'director';
+  // Director/KT/FT used to share one activeTab state — since they're all
+  // rendered from the same TeacherPage switchboard with role-gated JSX
+  // rather than separate pages, a shared tab id (e.g. both KT and FT using
+  // 'overview') meant switching to one role's tab silently also selected
+  // the other role's content underneath. Splitting the state per role kills
+  // that collision without needing a full separate-pages route split.
+  const [directorActiveTab, setDirectorActiveTab] = useState<TabId>('director_hq');
+  const [ktActiveTab, setKtActiveTab] = useState<TabId>('kt_script');
+  const [ftActiveTab, setFtActiveTab] = useState<TabId>('overview');
+  const activeTab: TabId = isDirectorUser ? directorActiveTab : (educatorRole === 'kt' ? ktActiveTab : ftActiveTab);
+  const setActiveTab = (tab: TabId) => {
+    if (isDirectorUser) setDirectorActiveTab(tab);
+    else if (educatorRole === 'kt') setKtActiveTab(tab);
+    else setFtActiveTab(tab);
+  };
   const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
   const [submittedLogs, setSubmittedLogs] = useState<any[]>([]);
 
