@@ -6,6 +6,32 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 012 — Answer-key entries can now be deleted individually
+
+**Date:** 2026-08-15
+**Status:** Resolved
+
+**Context:** Decision 009 persisted worksheet-scanned answer-key entries but shipped with no way to remove a wrong one — re-scanning was the only path, and the merge/dedupe logic in Decision 008 means a bad entry just sits there permanently once saved.
+
+**Decision:** Added a delete button per entry in the "Saved Answer Key" list (`CurriculumEditorForm.tsx`), wired to a new `handleRemoveAnswerKeyEntry` handler in `TeacherPage.tsx` that filters the entry out of `curriculumAnswerKey` state. Same pattern as the existing vocab/phonics chip removal.
+
+**Consequences:** Closes the gap flagged as a known limitation in Decision 009. No confirmation dialog — consistent with how vocab/phonics removal already works (low-stakes, easily re-added by rescanning).
+
+---
+
+## 011 — Class-creation limit stays coupled to combined FT+KT seat count
+
+**Date:** 2026-08-15
+**Status:** Resolved (accepted as-is)
+
+**Context:** `maxClassesForSeats` (`api/_lib/seatLimits.ts`) caps a school's total classes at `ft_seats + kt_seats` from its plan (e.g. Starter = 2 FT + 1 KT = 3 classes total, school-wide). Teacher *invites* are correctly gated per-role and independently (`maxInvitesForRole`), but the class cap itself has no separate configuration — it's a straight sum of seats, even though a single teacher can be assigned multiple classes (per the confirmed end-to-end role flow). A school with few teachers running many small sections (common for hagwons splitting large groups by level) could hit the class ceiling well before hiring enough staff to justify a plan upgrade.
+
+**Decision:** Keep the current 1:1 seat-sum-to-class-cap coupling. At this stage (early, few real paying academies), it's an acceptable proxy for account size rather than a precisely-tuned limit, and changing it is a pricing/business call, not just an engineering one. Confirmed intentional-for-now rather than fixed blind.
+
+**Consequences:** If a real academy hits this ceiling with an obvious legitimate need (few teachers, many class sections), it's a pricing-tier problem, not a bug report — revisit `PLAN_SEATS` in `api/_lib/pricingTiers.ts` then, either via a per-seat multiplier or a separate `classesTotal` field decoupled from teacher headcount. No code changed this round.
+
+---
+
 ## 010 — Director Overview aggregated to campus-wide, not per-selected-class
 
 **Date:** 2026-08-15

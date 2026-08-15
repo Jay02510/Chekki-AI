@@ -71,6 +71,7 @@ interface Props {
   curriculumOther: string;
   setCurriculumOther: (v: string) => void;
   curriculumAnswerKey?: Array<{ questionText: string; answer: string }>;
+  handleRemoveAnswerKeyEntry?: (index: number) => void;
   curriculumLastEditedByName?: string;
   curriculumLastEditedAt?: string;
   worksheetType: string;
@@ -159,6 +160,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   curriculumOther,
   setCurriculumOther,
   curriculumAnswerKey = [],
+  handleRemoveAnswerKeyEntry,
   curriculumLastEditedByName,
   curriculumLastEditedAt,
   worksheetType,
@@ -989,14 +991,26 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 </label>
                 <p className="text-[11px] text-zinc-400 leading-normal">
                   {isKo
-                    ? '워크시트 스캔에서 추출된 정답입니다. 채점 시 AI가 이 정답을 우선적으로 참고합니다.'
-                    : "Extracted from your worksheet scans. Grading checks against these directly instead of guessing."}
+                    ? '워크시트 스캔에서 추출된 정답입니다. 채점 시 AI가 이 정답을 우선적으로 참고합니다. 잘못된 항목은 삭제할 수 있습니다.'
+                    : "Extracted from your worksheet scans. Grading checks against these directly instead of guessing. Remove any entry that's wrong."}
                 </p>
                 <ul className="space-y-1 max-h-40 overflow-y-auto text-xs">
                   {curriculumAnswerKey.map((entry, i) => (
                     <li key={i} className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl ${isThemeNight ? 'bg-black/30' : 'bg-white'}`}>
                       <span className="truncate">{entry.questionText}</span>
-                      <span className="font-mono font-bold text-emerald-500 shrink-0">{entry.answer}</span>
+                      <span className="flex items-center gap-2 shrink-0">
+                        <span className="font-mono font-bold text-emerald-500">{entry.answer}</span>
+                        {handleRemoveAnswerKeyEntry && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAnswerKeyEntry(i)}
+                            title={isKo ? '정답 삭제' : 'Remove entry'}
+                            className="p-1 hover:bg-rose-500/20 rounded-full transition-colors cursor-pointer text-zinc-400 hover:text-rose-400"
+                          >
+                            <X size={12} weight="bold" />
+                          </button>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>

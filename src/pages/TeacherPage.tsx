@@ -725,6 +725,10 @@ export default function TeacherPage({ isNight = true }: Props) {
     setCurriculumPhonics(updated.join(', '));
   };
 
+  const handleRemoveAnswerKeyEntry = (indexToRemove: number) => {
+    setCurriculumAnswerKey((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   const handleTextbookFileUpload = async (inputFiles: FileList | File[] | File, scanType: 'syllabus' | 'worksheet' = uploadMode) => {
     const fileList: File[] = inputFiles instanceof FileList 
       ? Array.from(inputFiles) 
@@ -3738,6 +3742,7 @@ ${questionsHtml}
                   curriculumOther={curriculumOther}
                   setCurriculumOther={setCurriculumOther}
                   curriculumAnswerKey={curriculumAnswerKey}
+                  handleRemoveAnswerKeyEntry={handleRemoveAnswerKeyEntry}
                   curriculumLastEditedByName={curriculumLastEditedByName}
                   curriculumLastEditedAt={curriculumLastEditedAt}
                   worksheetType={worksheetType}
