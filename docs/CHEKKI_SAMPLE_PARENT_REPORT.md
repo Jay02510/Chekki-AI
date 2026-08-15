@@ -3,7 +3,6 @@
 > **Student Name**: Minjun Kim (김민준) — 6-Year-Old Class (Poly 6A)  
 > **Target Academy**: Daechi Poly English Kindergarten  
 > **Report Date**: July 24, 2026  
-> **Class Code**: `POLY6A`  
 > **Teacher**: Ms. Sarah Jenkins  
 
 ---

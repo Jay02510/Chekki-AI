@@ -26,9 +26,9 @@
 - Enter Teacher Authorization Code: **`TEACH-POLY-2026`**
 - Click **Activate Teacher Account**. Your account will instantly upgrade to **Pro Status**.
 
-### Step 3: Create Your First Class & Share 6-Digit Code
+### Step 3: Create Your First Class & Invite Parents
 - Click **+ New Class** (e.g. Class Name: `Poly 6A`, Level: `7-year-old`).
-- Share your class's **6-digit join code** with parents so home scans sync automatically!
+- Add each parent's email in the class roster — Chekki sends them a one-tap invite link so home scans sync automatically!
 
 ---
 
