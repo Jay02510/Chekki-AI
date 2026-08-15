@@ -99,7 +99,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                       {activeTab === 'korean' ? '체키의 따뜻한 솔루션' : 'Chekki Solution'}
                     </span>
                     <h3 className={`text-sm sm:text-base font-bold mb-1 leading-snug ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                      {activeTab === 'korean' ? '10초 오답 채점 & 엄마의 5초 칭찬 가이드' : 'Instant AI Grading & Praise Guide'}
+                      {activeTab === 'korean' ? '5초 이내 오답 채점 & 엄마의 칭찬 가이드' : 'Instant AI Grading & Praise Guide'}
                     </h3>
                     <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                       {activeTab === 'korean'
@@ -151,11 +151,11 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                     {activeTab === 'korean' ? '체키의 따뜻한 솔루션' : 'Chekki Solution'}
                   </span>
                   <h3 className={`text-sm sm:text-base font-bold mb-1 leading-snug ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                    {activeTab === 'korean' ? '사진 1장이면 끝! 손글씨 위 오답 빨간상자 표시' : '10-Sec Snap & Answer Key Sync'}
+                    {activeTab === 'korean' ? '사진 1장이면 끝! 손글씨 위 오답 빨간상자 표시' : 'Instant Snap & Answer Key Sync'}
                   </h3>
                   <p className={`text-xs leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {activeTab === 'korean'
-                      ? '숙제 사진 1장이면 삐뚤빼뚤 손글씨 위 오답을 빨간상자로 정확하게 10초 만에 표시합니다.'
+                      ? '숙제 사진 1장이면 삐뚤빼뚤 손글씨 위 오답을 빨간상자로 정확하게 5초 이내에 표시합니다.'
                       : 'Snap 1 photo of homework. Chekki highlights handwriting errors in seconds, matched against the real answer key.'}
                   </p>
                 </div>

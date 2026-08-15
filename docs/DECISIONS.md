@@ -6,6 +6,19 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 013 — Landing pages: fixed stale claims, aligned speed messaging, removed unverified testimonials
+
+**Date:** 2026-08-15
+**Status:** Resolved
+
+**Context:** An audit of `Landing.tsx`, `SchoolsLandingPage.tsx`, and `FaqPage.tsx` against PRD.md §2's three pain points found: (1) a real bug — `handleTeacherCountChange` assigned plan id `'report_studio'` (a leftover from the cut demo page) for academies with ≤3 teachers, which doesn't exist in `PRICING_TIERS` and silently fell back to the pricier `school_pro` plan; (2) two pricing-card bullets marketing the cut Report Studio page by name and a "Custom School Brand Header" as an active feature, though the logo editor was cut this session; (3) a live screenshot on the schools page (`schools_bento_join_code*.png`) still showing the removed 6-digit join-code screen; (4) grading-speed claims contradicting each other across pages (10-second vs. 3-second, for what looked like the same `/api/analyze` pipeline); (5) specific unbacked percentage claims (95%, 90%) presented as fact despite PRD §6 stating success metrics are "not yet validated against real usage data"; (6) two named, titled testimonials with specific numeric claims and no support anywhere in the docs — the same "mock content presented as real" pattern Decision 005/SCOPE.md flagged when cutting the Community feature.
+
+**Decision:** Fixed the plan-id bug and the two stale feature bullets. Aligned all grading-speed copy to PRD §5's own stated target ("well under 5 seconds") instead of two conflicting specific numbers. Softened the two unbacked percentage claims to directional language. Removed the testimonials section entirely rather than just softening it, given the higher bar a named-person quote implies versus a percentage claim.
+
+**Consequences:** The stale join-code screenshot (`schools_bento_join_code.png` / `_light.png`) was **not** fixed — replacing it requires a real screenshot of the current invite-link flow, which needs to be captured from the live app, not fabricated. Flagged here so it isn't lost. If real pilot testimonials become available, add them back with attribution that can actually be stood behind.
+
+---
+
 ## 012 — Answer-key entries can now be deleted individually
 
 **Date:** 2026-08-15

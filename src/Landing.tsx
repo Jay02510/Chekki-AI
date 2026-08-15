@@ -601,7 +601,7 @@ export default function Home() {
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mb-6">
                 {isKo 
-                  ? '집에서 프롬프트 입력 없이 사진 한 장으로 10초 채점과 원어민 음성 답변을 이용하는 월간 요금제.'
+                  ? '집에서 프롬프트 입력 없이 사진 한 장으로 5초 이내 채점과 원어민 음성 답변을 이용하는 월간 요금제.'
                   : 'Zero prompts or typing required. Instant photo-based autograding & native voice answers.'}
               </p>
               <ul className={`space-y-3 text-xs border-t border-white/10 pt-4 ${isNight ? 'text-zinc-300' : 'text-zinc-600'}`}>

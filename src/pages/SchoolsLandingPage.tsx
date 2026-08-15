@@ -337,8 +337,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Subtext */}
           <p className={`text-base sm:text-lg max-w-xl leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'} break-keep`}>
             {isKo 
-              ? '교재 PDF/이미지 등록 한 번으로 끝. 3초 원생 손글씨 채점부터 매월 칭찬 성장 리포트 자동 발송까지, 선생님의 단순 채점·행정 업무를 완벽히 자동화하세요.'
-              : 'Upload weekly textbooks once, autograde student handwriting in 3 seconds, and deliver encouraging progress reports to parents in 1 click.'}
+              ? '교재 PDF/이미지 등록 한 번으로 끝. 5초 이내 원생 손글씨 채점부터 매월 칭찬 성장 리포트 자동 발송까지, 선생님의 단순 채점·행정 업무를 완벽히 자동화하세요.'
+              : 'Upload weekly textbooks once, autograde student handwriting in well under 5 seconds, and deliver encouraging progress reports to parents in 1 click.'}
           </p>
 
           {/* CTAs */}
@@ -510,7 +510,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </div>
 
             <div className={`mt-6 pt-4 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-2 text-xs font-bold text-orange-500`}>
-              <span>{isKo ? '다중 페이지 AI 스캔 & 1클릭 칩 조작으로 교인 작성 시간 95% 단축' : 'Multi-page AI unit scans cut curriculum setup time by 95%'}</span>
+              <span>{isKo ? '다중 페이지 AI 스캔 & 1클릭 칩 조작으로 교재 등록 시간을 대폭 단축' : 'Multi-page AI unit scans cut curriculum setup time dramatically'}</span>
               <Sparkle size={12} weight="bold" />
             </div>
           </div>
@@ -646,7 +646,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
                 <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-1.5 text-xs font-bold text-pink-500 mt-6`}>
                   <CheckCircle size={14} weight="bold" />
-                  <span>{isKo ? '선생님 행정 부담 90% 감소 & 재원율 증가' : 'Reduces teacher admin work by 90% & boosts retention'}</span>
+                  <span>{isKo ? '선생님 행정 부담 대폭 감소 & 재원율 증가' : 'Cuts teacher admin work & boosts retention'}</span>
                 </div>
               </div>
 
@@ -658,67 +658,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   className="w-full max-w-[300px] h-auto object-contain rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
                   loading="lazy" 
                 />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* --- REVIEWS / TESTIMONIALS --- */}
-      <section className={`py-20 border-t border-b transition-colors ${
-        isNight ? 'border-white/5 bg-white/[0.01]' : 'border-zinc-200/80 bg-zinc-100/50'
-      }`}>
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className={`font-display text-2xl sm:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-              {isKo ? '원장님들과 영어 강사들의 실사용 리뷰' : 'Proven to Save Hours for Teachers Weekly'}
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className={`p-6 rounded-2xl border transition-colors ${
-              isNight ? 'bg-zinc-950/80 border-white/5' : 'bg-white border-zinc-200/80 shadow-sm'
-            }`}>
-              <p className={`text-sm leading-relaxed mb-6 font-medium italic ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                {isKo 
-                  ? '"매달 나가는 종이 오답노트 작성 시간이 90% 이상 줄어들었습니다. 아이들의 취약 어휘 통계가 자동으로 모이니 보강 준비가 훨씬 수월해졌고 학부모님들의 피드백 만족도가 정말 대단해요."'
-                  : '"Creating monthly review worksheets took forever. Chekki automatically tracks and compiles vocabulary mistakes in the background. Highly recommend it to any academy director."'}
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-sm">
-                  정
-                </div>
-                <div>
-                  <h4 className={`font-display text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo ? '정유선 원장' : 'Yuseon Jeong'}
-                  </h4>
-                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isNight ? 'text-zinc-500' : 'text-zinc-500'}`}>
-                    {isKo ? '강남 대형 어학원 초등부 원장' : 'Director of Elementary Division'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className={`p-6 rounded-2xl border transition-colors ${
-              isNight ? 'bg-zinc-950/80 border-white/5' : 'bg-white border-zinc-200/80 shadow-sm'
-            }`}>
-              <p className={`text-sm leading-relaxed mb-6 font-medium italic ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                {isKo 
-                  ? '"숙제 검사에 걸리던 잡무가 완전히 사라졌습니다. 학부모님들께서 스스로 아이의 주간 진도를 앱에서 확인하시고, 초대 링크로 승인 처리도 깔끔하게 끝나서 원생 관리가 편해졌습니다."'
-                  : '"Parents check target curriculums on their own app. The invite-link approval flow works beautifully. It saves countless administrative phone calls."'}
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center font-bold text-sm">
-                  K
-                </div>
-                <div>
-                  <h4 className={`font-display text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo ? 'Kelly Kim 강사' : 'Kelly Kim'}
-                  </h4>
-                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isNight ? 'text-zinc-500' : 'text-zinc-500'}`}>
-                    {isKo ? '초등 영어 파닉스반 담임 교사' : 'Phonics Lead Teacher'}
-                  </p>
-                </div>
               </div>
             </div>
           </div>
