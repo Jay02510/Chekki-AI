@@ -129,6 +129,17 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
     if (inviteDoc.data().status !== 'invited') {
       return res.status(400).json({ error: 'This invite code has already been used. Ask your teacher to resend it.' });
     }
+    // A single-use invite code was previously redeemable by ANY signed-in
+    // account, not just the parent it was actually emailed to — no email
+    // check existed on this path at all (only the shared joinCode+allowlist
+    // path checked identity). That let an unrelated account burn someone
+    // else's one-time code and get attached to the class in their place.
+    const invitedEmail = (inviteDoc.data().parentEmail || '').toLowerCase().trim();
+    if (invitedEmail && email?.toLowerCase().trim() !== invitedEmail) {
+      return res.status(403).json({
+        error: `This invite was sent to ${invitedEmail}. Please sign in with that email, or ask your teacher to resend it.`,
+      });
+    }
     const classSnap = await adminDb.collection('classes').doc(inviteDoc.data().classId).get();
     if (!classSnap.exists) {
       return res.status(404).json({ error: 'Invalid class code. Please check with your teacher.' });
