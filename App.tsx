@@ -31,7 +31,7 @@ import { AnalysisState, LegalType } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { MistakeProvider } from './contexts/MistakeContext';
-import { ToastProvider } from './contexts/ToastContext';
+import { ToastProvider, useToast } from './contexts/ToastContext';
 import { ChekkiMascot } from './components/Icons';
 import { db } from './services/database';
 import { Capacitor } from '@capacitor/core';
@@ -153,9 +153,11 @@ function AppContent() {
     checkScanLimit,
     setShowPaywall,
     isLoading: isAuthLoading,
+    redeemClassCodeDetailed,
   } = useAuth();
   const { t, language } = useLanguage();
   const isInApp = useInAppBrowser();
+  const { showToast } = useToast();
 
   const {
     analysisState,
@@ -306,8 +308,61 @@ function AppContent() {
       );
       setTimeout(openLoginModal, 1500);
     }
+
+    // Handle the invite-email "join this class" deep link (?classCode=XXXXXX).
+    // Previously this param was never read anywhere — clicking the button in
+    // the invite email just landed on the marketing page with no next step.
+    // Stash the code and, if not signed in yet, prompt sign-in/signup; the
+    // effect below redeems it once auth resolves (covers both "already
+    // logged in" and "just signed up because of this link" cases).
+    const classCodeParam = params.get('classCode');
+    if (classCodeParam) {
+      window.history.replaceState({}, '', window.location.pathname);
+      try {
+        sessionStorage.setItem('chekki_pending_class_code', classCodeParam.toUpperCase().trim());
+      } catch (e) {
+        console.warn('Failed to stash pending class code:', e);
+      }
+      if (!isAuthLoading && !isAuthenticated) {
+        openLoginModal();
+      }
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language, openLoginModal]);
+
+  // Redeem a pending class-code deep link once auth state is known — covers
+  // both an already-signed-in parent clicking the link, and someone who just
+  // signed up because of it (the modal opened by the effect above).
+  useEffect(() => {
+    if (isAuthLoading || !isAuthenticated) return;
+    let pending: string | null = null;
+    try {
+      pending = sessionStorage.getItem('chekki_pending_class_code');
+    } catch (e) {
+      return;
+    }
+    if (!pending) return;
+    try {
+      sessionStorage.removeItem('chekki_pending_class_code');
+    } catch (e) {
+      // ignore
+    }
+    (async () => {
+      const result = await redeemClassCodeDetailed(pending!);
+      if (result.success) {
+        setSuccessDialog(
+          language === 'ko'
+            ? `🎉 ${result.schoolName || '학원'}${result.className ? ` · ${result.className}` : ''} 반에 가입되었습니다!`
+            : `🎉 You're enrolled in ${result.className || 'the class'}${result.schoolName ? ` at ${result.schoolName}` : ''}!`
+        );
+      } else {
+        showToast({
+          type: 'error',
+          message: result.error || (language === 'ko' ? '코드를 확인할 수 없습니다. 선생님께 문의해주세요.' : "Couldn't redeem that code. Please check with your teacher."),
+        });
+      }
+    })();
+  }, [isAuthLoading, isAuthenticated, language, redeemClassCodeDetailed, showToast]);
 
   useEffect(() => {
     // Initialize RevenueCat

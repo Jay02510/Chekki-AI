@@ -95,6 +95,7 @@ interface AuthContextType {
   ) => Promise<void>;
   updateClassroomProfile: (classId: string, studentName: string) => Promise<void>;
   joinClassWithCode: (classCode: string) => Promise<boolean>;
+  redeemClassCodeDetailed: (classCode: string) => Promise<{ success: boolean; schoolName?: string; className?: string; error?: string }>;
   leaveClassroom: () => Promise<void>;
 }
 
@@ -1203,6 +1204,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Same endpoint as joinClassWithCode, but returns the server's actual
+  // success/error detail instead of a bare boolean — used by the invite-
+  // email deep link (App.tsx), which needs to show the real reason a code
+  // failed (already used, requires a personal invite, etc.) instead of a
+  // generic "something went wrong."
+  const redeemClassCodeDetailed = async (
+    classCode: string
+  ): Promise<{ success: boolean; schoolName?: string; className?: string; error?: string }> => {
+    if (!firebaseUser || !userProfile) return { success: false, error: 'Not signed in.' };
+
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      const response = await fetch(`${API_BASE_URL}/api/redeem-class-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ classCode }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && data.success) {
+        const updates: Partial<UserProfile> = {
+          schoolId: data.schoolId,
+          schoolName: data.schoolName,
+          classId: data.classId,
+          classStatus: 'pending',
+          plan: 'pro',
+          maxScansPerDay: 9999,
+          maxQuestionsPerDay: 9999,
+          subscriptionPlatform: 'school_code',
+        };
+        setUserProfile({ ...userProfile, ...updates });
+        return { success: true, schoolName: data.schoolName, className: data.className };
+      }
+      return { success: false, error: data.error || 'This code could not be redeemed.' };
+    } catch (err) {
+      console.error('redeemClassCodeDetailed error:', err);
+      return { success: false, error: 'Network error — please try again.' };
+    }
+  };
+
   const leaveClassroom = async () => {
     if (!firebaseUser || !userProfile) return;
     const isPaidUser = subscriptionRecord && subscriptionRecord.subscription_status === 'active';
@@ -1335,6 +1378,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateChildProfile,
         updateClassroomProfile,
         joinClassWithCode,
+        redeemClassCodeDetailed,
         leaveClassroom,
       }}
     >

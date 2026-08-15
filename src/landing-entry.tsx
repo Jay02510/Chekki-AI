@@ -73,7 +73,10 @@ function LandingRoot() {
     }
   }, [pathname]);
 
-  const hasInviteParam = typeof window !== 'undefined' && window.location.search.includes('invite=');
+  // classCode= is the invite-email "join this class" link (api/create-class.ts's
+  // sendStudentInviteEmail) — without this it fell through to the marketing
+  // <Landing /> page below with no indication anything was wrong.
+  const hasInviteParam = typeof window !== 'undefined' && (window.location.search.includes('invite=') || window.location.search.includes('classCode='));
 
   // Legacy redirect: /schools/login → /teacher (old links and bookmarks)
   if (pathname === '/schools/login' || pathname.startsWith('/schools/login')) {
