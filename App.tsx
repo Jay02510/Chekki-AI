@@ -154,6 +154,7 @@ function AppContent() {
     setShowPaywall,
     isLoading: isAuthLoading,
     redeemClassCodeDetailed,
+    logout,
   } = useAuth();
   const { t, language } = useLanguage();
   const isInApp = useInAppBrowser();
@@ -342,27 +343,44 @@ function AppContent() {
       return;
     }
     if (!pending) return;
-    try {
-      sessionStorage.removeItem('chekki_pending_class_code');
-    } catch (e) {
-      // ignore
-    }
     (async () => {
       const result = await redeemClassCodeDetailed(pending!);
       if (result.success) {
+        try { sessionStorage.removeItem('chekki_pending_class_code'); } catch (e) { /* ignore */ }
         setSuccessDialog(
           language === 'ko'
             ? `🎉 ${result.schoolName || '학원'}${result.className ? ` · ${result.className}` : ''} 반에 가입되었습니다!`
             : `🎉 You're enrolled in ${result.className || 'the class'}${result.schoolName ? ` at ${result.schoolName}` : ''}!`
         );
+      } else if (result.wrongAccount) {
+        // The code was rejected because it's tied to a different email than
+        // whoever is currently signed in — very likely someone already had
+        // an account logged in on this device/browser when they clicked the
+        // invite link. Keep the code stashed (don't clear it) and offer to
+        // sign out, so signing back in with the right email retries
+        // automatically instead of the code silently going nowhere.
+        setConfirmDialog({
+          title: language === 'ko'
+            ? `${user?.email || '현재 계정'}(으)로 로그인되어 있어 코드를 사용할 수 없습니다. 초대받은 이메일로 로그아웃 후 다시 로그인해주세요.`
+            : `This code isn't for the account you're signed in as (${user?.email || 'current account'}). Sign out and log back in with the email the invite was sent to.`,
+          confirmText: language === 'ko' ? '로그아웃' : 'Sign Out',
+          cancelText: language === 'ko' ? '나중에' : 'Later',
+          onConfirm: () => {
+            setConfirmDialog(null);
+            logout();
+            setTimeout(openLoginModal, 300);
+          },
+        });
       } else {
+        try { sessionStorage.removeItem('chekki_pending_class_code'); } catch (e) { /* ignore */ }
         showToast({
           type: 'error',
           message: result.error || (language === 'ko' ? '코드를 확인할 수 없습니다. 선생님께 문의해주세요.' : "Couldn't redeem that code. Please check with your teacher."),
         });
       }
     })();
-  }, [isAuthLoading, isAuthenticated, language, redeemClassCodeDetailed, showToast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthLoading, isAuthenticated, language, redeemClassCodeDetailed, showToast, user]);
 
   useEffect(() => {
     // Initialize RevenueCat

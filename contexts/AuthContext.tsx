@@ -95,7 +95,7 @@ interface AuthContextType {
   ) => Promise<void>;
   updateClassroomProfile: (classId: string, studentName: string) => Promise<void>;
   joinClassWithCode: (classCode: string) => Promise<boolean>;
-  redeemClassCodeDetailed: (classCode: string) => Promise<{ success: boolean; schoolName?: string; className?: string; error?: string }>;
+  redeemClassCodeDetailed: (classCode: string) => Promise<{ success: boolean; schoolName?: string; className?: string; error?: string; wrongAccount?: boolean }>;
   leaveClassroom: () => Promise<void>;
 }
 
@@ -1211,7 +1211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // generic "something went wrong."
   const redeemClassCodeDetailed = async (
     classCode: string
-  ): Promise<{ success: boolean; schoolName?: string; className?: string; error?: string }> => {
+  ): Promise<{ success: boolean; schoolName?: string; className?: string; error?: string; wrongAccount?: boolean }> => {
     if (!firebaseUser || !userProfile) return { success: false, error: 'Not signed in.' };
 
     try {
@@ -1239,7 +1239,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserProfile({ ...userProfile, ...updates });
         return { success: true, schoolName: data.schoolName, className: data.className };
       }
-      return { success: false, error: data.error || 'This code could not be redeemed.' };
+      // 403 here means "signed in as the wrong account" (either the
+      // joinCode+allowlist gate or the invite-code email check rejected it)
+      // — distinct from a genuinely bad/expired code, so the caller can
+      // offer "sign out and try again" instead of just an error toast.
+      return { success: false, error: data.error || 'This code could not be redeemed.', wrongAccount: response.status === 403 };
     } catch (err) {
       console.error('redeemClassCodeDetailed error:', err);
       return { success: false, error: 'Network error — please try again.' };
