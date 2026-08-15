@@ -89,6 +89,11 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
   //    parent actually redeemed.
   let pendingStudentRef: FirebaseFirestore.DocumentReference | null = null;
   let requireInviteStillPending = false;
+  // Name the director/KT entered when pushing the invite (pendingStudents.name)
+  // — carried onto the redeemed user doc below so the roster/report views
+  // don't show "Unnamed" for every pushed-invite student (Audit: redeemed
+  // invites never copied the student's name onto their account).
+  let invitedStudentName: string | undefined;
 
   const classQuery = await adminDb.collection('classes').where('joinCode', '==', sanitized).limit(1).get();
   if (!classQuery.empty) {
@@ -119,6 +124,7 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
       if (allowlistSnap.docs[0].data().status === 'invited') {
         pendingStudentRef = allowlistSnap.docs[0].ref;
       }
+      invitedStudentName = allowlistSnap.docs[0].data().name || undefined;
     }
   } else {
     const inviteQuery = await adminDb.collection('pendingStudents').where('inviteCode', '==', sanitized).limit(1).get();
@@ -148,6 +154,7 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
     classData = classSnap.data()!;
     pendingStudentRef = inviteDoc.ref;
     requireInviteStillPending = true;
+    invitedStudentName = inviteDoc.data().name || undefined;
   }
 
   const schoolId = classData.schoolId;
@@ -194,6 +201,9 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
         maxScansPerDay: 9999,
         maxQuestionsPerDay: 9999,
       };
+      if (invitedStudentName && !existingUserData.studentName) {
+        updatePayload.studentName = invitedStudentName;
+      }
 
       // Only reset an already-approved membership back to 'pending' if this is
       // actually a different class. Without this check, a duplicate redemption
