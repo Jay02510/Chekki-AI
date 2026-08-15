@@ -337,8 +337,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Subtext */}
           <p className={`text-base sm:text-lg max-w-xl leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'} break-keep`}>
             {isKo 
-              ? '정답지를 한 번 등록하면, 학생이 집에서 스캔한 숙제가 그 정답지 기준으로 채점되고 취약 어휘는 선생님 대시보드에 쌓입니다. 무엇을 보강해야 할지 다음 수업 전에 미리 알고, 그 결과는 학부모 리포트로 자동 정리되어 나갑니다.'
-              : "Upload the week's answer key once. Every home scan grades against it, and flagged mistakes land on your dashboard — so you know what to reteach before class starts, and it's already summarized for the parent report."}
+              ? '정답지는 한 번만 등록하세요. 가정 숙제 스캔은 그 정답지 기준으로 자동 채점되고, 보강할 내용은 다음 수업 전에 미리 파악되며, 학부모 리포트까지 한 번에 정리됩니다.'
+              : "Upload the week's answer key once, autograde every home scan against it, and know exactly what to reteach — before the parent report even goes out."}
           </p>
 
           {/* CTAs */}

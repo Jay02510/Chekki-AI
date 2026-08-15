@@ -391,8 +391,8 @@ export default function Home() {
             }`}
           >
             {(isKo
-              ? '집에서 틀린 문제, 선생님도 알게 됩니다.'
-              : "A mistake at home shouldn't be invisible at school."
+              ? '집에서 놓친 문제, 교실까지 이어집니다.'
+              : "What's missed at home connects to the classroom."
             ).split(' ').map((word, i) => (
               <span key={i} className="reveal-word inline-block mr-[0.3em]">
                 {word}
@@ -404,8 +404,8 @@ export default function Home() {
             isNight ? 'text-white/60' : 'text-slate-600'
           }`}>
             {isKo
-              ? '체키와 연동된 학원이라면, 아이가 집에서 스캔한 오답이 선생님 대시보드로 전달되어 다음 수업에 반영됩니다. 그리고 수업에서 있었던 일은 다시 한국어로 정리되어 부모님께 돌아옵니다.'
-              : "At a Chekki-connected academy, mistakes your child scans at home reach their teacher's dashboard — and what happens in class next comes back to you in Korean. One loop, not two disconnected apps."}
+              ? '아이가 집에서 놓친 문제는 선생님에게, 수업에서 있었던 일은 다시 부모님에게. 체키와 연동된 학원이라면, 이 흐름이 자동으로 이어집니다.'
+              : "What your child misses at home reaches the teacher. What happens in class comes back to you — in Korean. At a Chekki-connected academy, that loop runs on its own."}
           </p>
 
           {/* FOR SCHOOLS CTA BUTTON IN THE SECOND SECTION (PER USER REQUEST) */}
