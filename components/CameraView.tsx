@@ -9,7 +9,6 @@ import { SCREENSHOT_MODE } from '../config';
 import { FeedbackModal } from './FeedbackModal';
 import { LegalType } from '../types';
 import { LegalModal } from './LegalModal';
-import { FlyerModal } from './FlyerModal';
 import { ScreenshotCarousel } from './ScreenshotCarousel';
 import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 import { renderMarkdown } from '../utils/markdownUtils';
@@ -51,7 +50,6 @@ export const CameraView: React.FC<Props> = ({
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showLegal, setShowLegal] = useState<LegalType | null>(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
-  const [showFlyerModal, setShowFlyerModal] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
 
   const { t, language } = useLanguage();
@@ -495,15 +493,6 @@ export const CameraView: React.FC<Props> = ({
         onClick: () => setShowVideoModal(true),
         color: 'text-indigo-400',
       },
-      {
-        id: 'resource',
-        label: t('lbl_resource'),
-        title: t('res_title'),
-        tooltip: t('tt_resource'),
-        emoji: '📢',
-        onClick: () => setShowFlyerModal(true),
-        color: 'text-orange-400',
-      },
     ];
 
     return (
@@ -574,9 +563,6 @@ export const CameraView: React.FC<Props> = ({
         )}
         {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
         {showVideoModal && renderVideoWalkthroughModal()}
-        {showFlyerModal && (
-          <FlyerModal onClose={() => setShowFlyerModal(false)} isNight={isNight} />
-        )}
         <AskChekkiAnswerModal
           answer={askAnswer}
           isAsking={isAskAsking}
@@ -725,7 +711,6 @@ export const CameraView: React.FC<Props> = ({
         <LegalModal type={showLegal} onClose={() => setShowLegal(null)} isNight={isNight} />
       )}
       {showVideoModal && renderVideoWalkthroughModal()}
-      {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} isNight={isNight} />}
       <AskChekkiAnswerModal
         answer={askAnswer}
         isAsking={isAskAsking}

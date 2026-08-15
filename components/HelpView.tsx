@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { ASSETS } from '../constants';
 import { FeedbackModal } from './FeedbackModal';
 import { LegalType } from '../types';
-import { FlyerModal } from './FlyerModal';
 import { ScreenshotCarousel } from './ScreenshotCarousel';
 
 interface HelpViewProps {
@@ -18,7 +17,6 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
 
   // Modals
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [showFlyerModal, setShowFlyerModal] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
   return (
@@ -26,7 +24,6 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
       {showFeedbackModal && (
         <FeedbackModal onClose={() => setShowFeedbackModal(false)} isNight={isNight} />
       )}
-      {showFlyerModal && <FlyerModal onClose={() => setShowFlyerModal(false)} isNight={isNight} />}
       {showVideoModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div
@@ -140,13 +137,6 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
               korean: '사용 가이드',
               onClick: () => setShowVideoModal(true),
               color: 'text-indigo-400',
-            },
-            {
-              icon: '📢',
-              label: 'Official Flyer',
-              korean: '공식 전단지',
-              onClick: () => setShowFlyerModal(true),
-              color: 'text-orange-400',
             },
             {
               icon: '💬',

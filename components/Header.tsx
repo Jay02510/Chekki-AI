@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useMistakes } from '../contexts/MistakeContext';
 import { ChekkiMascot } from './Icons';
-import { CommunityModal } from './CommunityModal';
 import { SettingsModal } from './SettingsModal';
 import { BillingModal } from './BillingModal';
 import { ProgressiveOnboardingModal } from './ProgressiveOnboardingModal';
@@ -42,7 +41,6 @@ export const Header: React.FC<Props> = ({
   const { language, setLanguage, t } = useLanguage();
   const { setShowMistakeModal, mistakes } = useMistakes();
 
-  const [showCommunity, setShowCommunity] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showBilling, setShowBilling] = useState(false);
@@ -62,9 +60,6 @@ export const Header: React.FC<Props> = ({
 
   return (
     <>
-      {showCommunity && (
-        <CommunityModal onClose={() => setShowCommunity(false)} isNight={isNight} />
-      )}
       {showSettings && (
         <SettingsModal
           onClose={() => setShowSettings(false)}

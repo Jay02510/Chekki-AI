@@ -54,7 +54,6 @@ import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { NativeDirectorStudentsTab } from '../components/NativeDirectorStudentsTab';
 import { StudentInvitePanel } from '../components/StudentInvitePanel';
 import { ScannedModal } from '../components/ScannedModal';
-import { AcademyLogoModal } from '../components/AcademyLogoModal';
 import { DocPreviewModal } from '../components/DocPreviewModal';
 import { WeekCalendarModal } from '../components/WeekCalendarModal';
 import { ReportCardModal } from '../components/ReportCardModal';
@@ -939,13 +938,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   // school A, then school B: B saw A's logo) until B happened to have a
   // logo of their own to overwrite it. Firestore is the only source now.
   const [academyLogo, setAcademyLogo] = useState<string>('');
-  // `user` from useAuth isn't a live Firestore subscription, so a rename via
-  // AcademyLogoModal wouldn't otherwise show up until a full reload — this
-  // local override mirrors the academyLogo pattern above.
-  const [academyNameOverride, setAcademyNameOverride] = useState<string | null>(null);
-  const displayedAcademyName = academyNameOverride || user?.schoolName || 'Chekki Master Academy';
-  const [showLogoModal, setShowLogoModal] = useState(false);
-  const [tempLogoUrl, setTempLogoUrl] = useState(academyLogo);
+  const displayedAcademyName = user?.schoolName || 'Chekki Master Academy';
 
   // Load the school's saved logo from Firestore — the only source of truth.
   // Runs for every role, not just director, since FT/KT teachers also see
@@ -1940,22 +1933,9 @@ ${questionsHtml}
           }
         });
 
-        // Also fetch legacy mistakes collection
-        let legacyMistakes: any[] = [];
-        try {
-          const mistakesQ = query(
-            collection(dbInstance, 'mistakes'),
-            where('userUid', '==', student.uid)
-          );
-          const mistakesSnap = await getDocs(mistakesQ);
-          mistakesSnap.forEach(mDoc => legacyMistakes.push({ id: mDoc.id, ...mDoc.data() }));
-        } catch (mErr) {
-          legacyMistakes = [];
-        }
-
         // Combine all mistake items
         student.scans = studentScans;
-        student.mistakes = [...scanMistakes, ...legacyMistakes];
+        student.mistakes = scanMistakes;
         if (studentScans.length > 0) {
           student.lastScanDate = studentScans[0].scannedAt;
         }
@@ -2892,20 +2872,6 @@ ${questionsHtml}
             </div>
           </div>
 
-          {loginRole === 'director' && (
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                type="button"
-                onClick={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
-                title={isKo ? '학원명 및 로고 설정' : 'Academy Name & Logo Settings'}
-                className={`p-2 rounded-xl transition-all text-xs font-bold active:scale-[0.95] cursor-pointer ${
-                  isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
-                }`}
-              >
-                🖼️
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Navigation Tabs (Scoped by Role) */}
@@ -3569,7 +3535,6 @@ ${questionsHtml}
                 isKo={isKo}
                 academyName={displayedAcademyName}
                 academyLogo={academyLogo}
-                onOpenLogoModal={() => { setTempLogoUrl(academyLogo); setShowLogoModal(true); }}
                 schoolId={(user as any)?.schoolId}
                 planId={schoolPlanId}
                 seatsTotal={schoolSeatsTotal}
@@ -4121,20 +4086,6 @@ ${questionsHtml}
           </div>
         </div>
       )}
-      {/* --- CUSTOM ACADEMY LOGO CONFIGURATION MODAL --- */}
-      {showLogoModal && (
-        <AcademyLogoModal
-          isThemeNight={isThemeNight}
-          isKo={isKo}
-          tempLogoUrl={tempLogoUrl}
-          setTempLogoUrl={setTempLogoUrl}
-          setAcademyLogo={setAcademyLogo}
-          onClose={() => setShowLogoModal(false)}
-          schoolId={(user as any)?.schoolId || ''}
-          academyName={displayedAcademyName}
-          onAcademyNameSaved={setAcademyNameOverride}
-        />
-      )}
       {/* --- TEACHER SETTINGS MODAL --- */}
       {showSettingsModal && (
         <div className="fixed inset-0 z-[260] flex items-center justify-center p-4">
@@ -4213,31 +4164,6 @@ ${questionsHtml}
                     <span className="text-zinc-400">{isKo ? '소속 학원' : 'Assigned School'}:</span>
                     <strong className="text-orange-500">{user?.schoolName || 'B2B Academy'}</strong>
                   </div>
-                </div>
-
-                {/* Custom Branding Quick Option */}
-                <div className={`p-4 border rounded-2xl flex items-center justify-between gap-3 ${
-                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
-                }`}>
-                  <div>
-                    <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {isKo ? '맞춤 학원 로고' : 'Custom Academy Logo'}
-                    </h4>
-                    <p className="text-[11px] text-zinc-400">
-                      {isKo ? '성적표 및 인쇄 학습지에 학원 전용 로고 표시' : 'Show your academy logo on student report cards.'}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowSettingsModal(false);
-                      setTempLogoUrl(academyLogo);
-                      setShowLogoModal(true);
-                    }}
-                    className="px-3.5 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 font-bold text-xs rounded-xl border border-orange-500/20 transition-all whitespace-nowrap cursor-pointer"
-                  >
-                    {isKo ? '로고 변경' : 'Edit Logo'}
-                  </button>
                 </div>
 
                 {/* Password Reset */}

@@ -355,20 +355,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <span>{isKo ? '⚡ 60초 무료 캠퍼스 구축 시작하기 →' : 'Start Free 60-Second Campus Setup →'}</span>
               <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
             </button>
-            <a
-              href="/insights"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.href = '/insights';
-              }}
-              className={`w-full sm:w-auto px-8 py-4 font-black text-sm rounded-3xl border transition-all active:scale-[0.97] text-center ${
-                isNight
-                  ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
-                  : 'bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-900 shadow-sm'
-              }`}
-            >
-              {isKo ? '리포트 생성기 체험하기' : 'Try the Report Generator'}
-            </a>
           </div>
         </div>
 
@@ -678,54 +664,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
-      {/* --- REPORT STUDIO FEATURE SHOWCASE & LIVE DEMO CTA --- */}
-      <section className="relative px-6 py-12 max-w-5xl mx-auto w-full">
-        <div className={`p-8 md:p-10 border rounded-3xl relative overflow-hidden transition-all duration-500 shadow-xl ${
-          isNight 
-            ? 'bg-gradient-to-br from-zinc-950 via-zinc-900 to-orange-950/30 border-white/10' 
-            : 'bg-gradient-to-br from-white via-orange-50/40 to-white border-zinc-200'
-        }`}>
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-            <div className="space-y-4 max-w-xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20 text-xs font-black uppercase tracking-widest">
-                <Sparkle size={14} weight="fill" />
-                <span>{isKo ? '학부모 상담 알림톡 리포트' : 'Bilingual Parent Updates'}</span>
-              </div>
-
-              <h2 className={`font-display text-2xl sm:text-3xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? (
-                  <>학부모 상담 <span className="text-orange-500">알림톡 대본 리포트</span>를 체험해보세요.</>
-                ) : (
-                  <>Try <span className="text-orange-500">Chekki Report Generator</span>.</>
-                )}
-              </h2>
-
-              <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {isKo 
-                  ? '원어민 강사 코멘트를 30초 만에 정갈한 학부모 상담 알림톡 대본으로 변환해보세요.'
-                  : 'Turn Foreign Teacher class logs into polished Korean KakaoTalk updates in seconds.'}
-              </p>
-            </div>
-
-            <div className="shrink-0 w-full md:w-auto">
-              <a
-                href="/insights"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.scrollTo({ top: 0, behavior: 'instant' });
-                  window.history.pushState({}, '', '/insights');
-                  window.dispatchEvent(new PopStateEvent('popstate'));
-                }}
-                className="w-full md:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer group"
-              >
-                <Sparkle size={16} weight="fill" className="group-hover:rotate-12 transition-transform" />
-                <span>{isKo ? '리포트 생성기 체험하기 →' : 'Try the Report Generator →'}</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* --- REVIEWS / TESTIMONIALS --- */}
       <section className={`py-20 border-t border-b transition-colors ${
         isNight ? 'border-white/5 bg-white/[0.01]' : 'border-zinc-200/80 bg-zinc-100/50'
@@ -833,19 +771,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </button>
           </div>
 
-          <div className="mb-10">
-            <a
-              href="/insights"
-              className={`inline-flex items-center gap-1.5 text-xs font-bold transition-all px-4 py-2 rounded-full border ${
-                isNight
-                  ? 'bg-white/5 border-white/10 hover:bg-white/15 text-orange-400 hover:text-orange-300'
-                  : 'bg-zinc-100 border-zinc-300 hover:bg-zinc-200 text-orange-600 hover:text-orange-500 shadow-sm'
-              }`}
-            >
-              <span>{isKo ? '리포트 생성기 체험하기' : 'Try the Report Generator'}</span>
-              <span className="text-[10px]">→</span>
-            </a>
-          </div>
 
           {/* 14-Day Free Teacher Trial Banner with Theme Adaptation */}
           <div className={`max-w-2xl mx-auto p-4 border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left transition-colors ${

@@ -21,7 +21,6 @@ interface Props {
   isKo?: boolean;
   academyName?: string;
   academyLogo?: string;
-  onOpenLogoModal?: () => void;
   schoolId?: string;
   // Real value read from schools/{schoolId}.planId (null until that fetch
   // resolves — treated as "not yet known" so the activation banner doesn't
@@ -55,7 +54,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   isKo = false,
   academyName = 'Apex English Academy (Seocho)',
   academyLogo,
-  onOpenLogoModal,
   schoolId,
   planId,
   seatsTotal,
@@ -231,21 +229,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               )}
               <span>{academyName}</span>
             </h3>
-            <button
-              type="button"
-              onClick={() => {
-                if (onOpenLogoModal) {
-                  onOpenLogoModal();
-                } else {
-                  const evt = new CustomEvent('open_logo_modal');
-                  window.dispatchEvent(evt);
-                }
-              }}
-              className="px-3 py-1 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[11px] font-bold rounded-xl border border-orange-500/20 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95"
-            >
-              <span>🖼️</span>
-              <span>원장님 맞춤 로고 등록</span>
-            </button>
           </div>
         </div>
 

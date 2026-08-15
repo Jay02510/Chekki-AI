@@ -26,7 +26,6 @@ const SubscribePage = lazy(() => import('./src/pages/SubscribePage'));
 const AdminPage = lazy(() => import('./src/pages/AdminPage'));
 const TeacherPage = lazy(() => import('./src/pages/TeacherPage'));
 const SchoolsLandingPage = lazy(() => import('./src/pages/SchoolsLandingPage'));
-const ReportStudioPage = lazy(() => import('./src/pages/ReportStudioPage'));
 import { AnalysisState, LegalType } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -221,12 +220,6 @@ function AppContent() {
     const { pathname, search } = window.location;
     return !search.includes('invite=') && (pathname === '/schools' || pathname === '/for-schools');
   });
-  // Canonical path is /insights; /report, /reports, /report-studio kept working
-  // for anyone with an old link bookmarked.
-  const [showReportStudioPage, setShowReportStudioPage] = useState(() =>
-    typeof window !== 'undefined' &&
-    (window.location.pathname === '/insights' || window.location.pathname.startsWith('/report'))
-  );
   const [showHelp, setShowHelp] = useState(false);
   const platform = Capacitor.getPlatform();
 
@@ -265,7 +258,6 @@ function AppContent() {
       setShowAdminPage(path === '/admin');
       setShowTeacherPage(isInvite || path === '/teacher' || path === '/director' || path === '/director-hq' || path.includes('/schools/login'));
       setShowSchoolsPage(!isInvite && (path === '/schools' || path === '/for-schools'));
-      setShowReportStudioPage(path === '/insights' || path.startsWith('/report'));
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -297,7 +289,7 @@ function AppContent() {
     // wasn't mounted yet and the sign-in prompt silently never appeared.
     if (
       showSubscribePage || showAdminPage || showTeacherPage ||
-      showSchoolsPage || showReportStudioPage ||
+      showSchoolsPage ||
       window.location.search.includes('classCode=')
     ) {
       setShowSplash(false);
@@ -591,8 +583,6 @@ function AppContent() {
     return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><TeacherPage isNight={isNight} /></Suspense></ErrorBoundary>;
   if (showSchoolsPage && platform === 'web')
     return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} /></Suspense></ErrorBoundary>;
-  if (showReportStudioPage && platform === 'web')
-    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><ReportStudioPage isNight={isNight} setIsNight={setIsNight} /></Suspense></ErrorBoundary>;
 
   // The FT/KT/Director dashboards only exist on web (TeacherPage etc. above
   // are gated `platform === 'web'`) — on the downloaded native app they were
