@@ -31,6 +31,7 @@ interface Props {
  */
 export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = false, classId }) => {
   const [pending, setPending] = useState<PendingStudent[]>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
@@ -43,6 +44,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
 
   useEffect(() => {
     if (!classId) return;
+    setHasLoaded(false);
     // No orderBy here on purpose — classId(==) + addedAt(orderBy) needs a
     // composite index that was never created, which made this listener
     // fail silently (console.warn only) and left the list stuck on "No
@@ -62,6 +64,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
           rows.sort((a, b) => (b.addedAt?.toMillis() || 0) - (a.addedAt?.toMillis() || 0));
           setPending(rows);
           setMessage(null);
+          setHasLoaded(true);
         },
         (err) => {
           console.warn('Failed to load pending student invites:', err?.code, err);
@@ -79,6 +82,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
             return;
           }
           if (cancelled) return;
+          setHasLoaded(true);
           setMessage({ text: 'Failed to load the invite list. Please refresh.', type: 'error' });
         }
       );
@@ -309,7 +313,11 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
           </div>
         )}
 
-        {pending.length === 0 ? (
+        {!hasLoaded ? (
+          <p className="text-xs text-zinc-500 text-center py-6">
+            {isKo ? '초대 목록 불러오는 중...' : 'Loading invite list...'}
+          </p>
+        ) : pending.length === 0 ? (
           <p className="text-xs text-zinc-500 text-center py-6">
             {isKo ? '아직 초대한 학생이 없습니다.' : 'No students invited yet.'}
           </p>

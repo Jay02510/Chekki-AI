@@ -540,7 +540,7 @@ export default function Home() {
               <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase rounded-full font-mono">
                 {isKo ? '학원 6자리 코드 연동' : 'SCHOOL CODE USER'}
               </span>
-              <h3 className="text-xl font-black text-white mt-4 mb-2">
+              <h3 className={`text-xl font-black mt-4 mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '학원 연동 무제한 무료' : 'School Code Free Access'}
               </h3>
               <div className="mb-4">
@@ -552,7 +552,7 @@ export default function Home() {
                   ? '아이가 다니는 어학원/공부방 원장님이 체키 스쿨 프로를 도입하면 6자리 학급 코드로 100% 무료 전면 개방됩니다.'
                   : '100% FREE if your child\'s English academy uses Chekki School Pro. Simply enter your 6-digit class code.'}
               </p>
-              <ul className="space-y-3 text-xs text-zinc-300 border-t border-white/10 pt-4">
+              <ul className={`space-y-3 text-xs border-t border-white/10 pt-4 ${isNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
                 <li className="flex items-center gap-2 font-bold text-emerald-400">
                   <CheckCircle size={16} weight="fill" className="flex-shrink-0" />
                   <span>{isKo ? '📸 프롬프트 작성 0회 • 사진 1장 즉시 채점' : '📸 No Typing Needed • Just Snap 1 Photo'}</span>
@@ -592,11 +592,11 @@ export default function Home() {
               <span className="px-3 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[10px] font-black uppercase rounded-full font-mono">
                 {isKo ? 'App Store / Play Store 월간' : 'MONTHLY PARENT PASS'}
               </span>
-              <h3 className="text-xl font-black text-white mt-4 mb-2">
+              <h3 className={`text-xl font-black mt-4 mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '월간 학부모 패스' : 'Monthly Parent Pass'}
               </h3>
               <div className="mb-4">
-                <span className="text-4xl font-black text-white font-mono">₩9,900</span>
+                <span className={`text-4xl font-black font-mono ${isNight ? 'text-white' : 'text-zinc-900'}`}>₩9,900</span>
                 <span className="text-xs text-zinc-400 ml-2">{isKo ? '/월 (월간 정기결제)' : '/month'}</span>
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mb-6">
@@ -604,7 +604,7 @@ export default function Home() {
                   ? '집에서 프롬프트 입력 없이 사진 한 장으로 10초 채점과 원어민 음성 답변을 이용하는 월간 요금제.'
                   : 'Zero prompts or typing required. Instant photo-based autograding & native voice answers.'}
               </p>
-              <ul className="space-y-3 text-xs text-zinc-300 border-t border-white/10 pt-4">
+              <ul className={`space-y-3 text-xs border-t border-white/10 pt-4 ${isNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
                 <li className="flex items-center gap-2 font-bold text-orange-400">
                   <CheckCircle size={16} weight="fill" className="flex-shrink-0" />
                   <span>{isKo ? '📸 프롬프트 작성 0회 • 모든 교재 무제한 스캔' : '📸 No Prompts Required • Unlimited Scans'}</span>
@@ -652,7 +652,7 @@ export default function Home() {
               <span className="px-3 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[10px] font-black uppercase rounded-full font-mono mt-2 inline-block">
                 {isKo ? 'App Store / Play Store 연간' : 'ANNUAL PARENT PASS'}
               </span>
-              <h3 className="text-xl font-black text-white mt-4 mb-2">
+              <h3 className={`text-xl font-black mt-4 mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {isKo ? '연간 학부모 패스 (BEST)' : 'Annual Parent Pass'}
               </h3>
               <div className="mb-4">
@@ -664,7 +664,7 @@ export default function Home() {
                   ? '1년 내내 숙제 실랑이 없이 완벽한 영어 습관을 형성하는 가장 경제적인 연간 요금제.'
                   : 'Best value annual pass for building lasting English homework habits all year long.'}
               </p>
-              <ul className="space-y-3 text-xs text-zinc-200 border-t border-white/10 pt-4">
+              <ul className={`space-y-3 text-xs border-t border-white/10 pt-4 ${isNight ? 'text-zinc-200' : 'text-zinc-600'}`}>
                 <li className="flex items-center gap-2 font-bold text-orange-400">
                   <Sparkle size={16} weight="fill" className="flex-shrink-0" />
                   <span>{isKo ? '📸 프롬프트 작성 0회 • 모든 교재 무제한 스캔' : '📸 Zero Typing/Prompts Needed • Unlimited Scans'}</span>

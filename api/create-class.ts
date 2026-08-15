@@ -158,13 +158,13 @@ async function sendStudentInviteEmail(opts: {
               <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
             </div>
             <p style="font-size: 15px; color: #e4e4e7;"><strong>${opts.schoolName}</strong>에서 <strong>${opts.studentName}</strong> 학생을 <strong>${opts.className}</strong> 학급에 등록했습니다.</p>
-            <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 가입 코드를 Chekki AI 앱(또는 chekkiai.com)에서 입력하면 자녀의 학습 리포트를 받아보실 수 있습니다. 이 코드는 1회만 사용할 수 있습니다.</p>
-            <div style="background-color: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
-              <p style="font-size: 11px; font-weight: bold; color: #fb923c; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px;">가입 코드 (1회용)</p>
-              <p style="margin: 0; font-size: 28px; font-weight: 900; color: #ffffff; letter-spacing: 4px; font-family: monospace;">${opts.inviteCode}</p>
-            </div>
+            <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 버튼을 누르면 가입 코드가 자동으로 연결됩니다 — 따로 입력하실 필요 없습니다. 계정이 없으시면 버튼을 누른 뒤 뜨는 화면에서 <strong>"Sign Up"</strong>을 눌러 새로 만들어 주시면 됩니다. 이미 계정이 있으시면 그 이메일로 로그인만 하시면 자동으로 연결됩니다.</p>
             <div style="text-align: center; margin: 24px 0;">
               <a href="https://chekkiai.com/?classCode=${opts.inviteCode}" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 가입하기</a>
+            </div>
+            <p style="font-size: 12px; color: #71717a; text-align: center; margin: 0 0 8px 0;">버튼이 안 열리면 이 코드를 앱/사이트에 직접 입력해 주세요 (1회용):</p>
+            <div style="background-color: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 12px; padding: 16px; margin: 0 0 24px 0; text-align: center;">
+              <p style="margin: 0; font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 4px; font-family: monospace;">${opts.inviteCode}</p>
             </div>
             <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
               문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.

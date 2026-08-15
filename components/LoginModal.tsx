@@ -23,7 +23,18 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
     sendResetEmail,
   } = useAuth();
   const { t } = useLanguage();
-  const [viewMode, setViewMode] = useState<'login' | 'signup' | 'forgot'>('login');
+  const [viewMode, setViewMode] = useState<'login' | 'signup' | 'forgot'>(() => {
+    // Director-pushed invites almost always target a parent who has never
+    // signed up (see StudentInvitePanel doc comment) — defaulting to Login
+    // here made most invited parents hit "no account found" and get stuck
+    // on the wrong form. They can still tap "Already have an account?" to
+    // switch to Sign In if they do.
+    try {
+      return sessionStorage.getItem('chekki_pending_class_code') ? 'signup' : 'login';
+    } catch (e) {
+      return 'login';
+    }
+  });
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -68,11 +79,29 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
       }
     } catch (err: any) {
       let msg = err.message;
-      if (err.code === 'auth/user-not-found') msg = 'No account found with this email.';
+      if (err.code === 'auth/user-not-found') {
+        if (viewMode === 'login' && pendingClassCode) {
+          // Invited parents usually don't have an account yet — send them
+          // straight to Sign Up instead of leaving them stuck on Sign In.
+          setViewMode('signup');
+          msg = "No account found with this email yet — let's create one to join your class.";
+        } else {
+          msg = 'No account found with this email.';
+        }
+      }
       if (err.code === 'auth/wrong-password') msg = 'Incorrect password.';
       if (err.code === 'auth/invalid-credential')
         msg = 'Invalid email or password. Please try again.';
-      if (err.code === 'auth/email-already-in-use') msg = 'Email already registered.';
+      if (err.code === 'auth/email-already-in-use') {
+        if (viewMode === 'signup' && pendingClassCode) {
+          // Symmetric case: defaulted to Sign Up for the invite but this
+          // parent already has an account — flip them to Sign In instead.
+          setViewMode('login');
+          msg = 'You already have an account with this email — sign in instead.';
+        } else {
+          msg = 'Email already registered.';
+        }
+      }
       if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
       if (err.code === 'auth/too-many-requests')
         msg = 'Too many attempts. Please wait and try again.';
