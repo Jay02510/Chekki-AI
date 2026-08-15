@@ -263,14 +263,22 @@ const CONSOLIDATED_SCHEMA = {
 
 async function generateGeneralClassSummary(
   ai: GoogleGenAI,
-  payload: { className: string; date: string; lessonTopic: string; textbook: string; energyLevel: string; activities: string[]; generalComments: string }
+  payload: { className: string; date: string; lessonTopic: string; textbook: string; energyLevel: string; activities: string[]; generalComments: string; authorRole?: 'ft' | 'kt' }
 ): Promise<{ korean: string; english: string }> {
   try {
+    // FT notes are always English and need translating into Korean. A KT
+    // writes their own log in Korean already — running that through a
+    // "translate from English" prompt produces garbled or mistranslated
+    // output, so the KT branch asks the model to polish Korean input
+    // instead of assuming it needs translating.
+    const roleInstructions = payload.authorRole === 'kt'
+      ? `You are an expert, highly empathetic Korean educational coordinator. The notes below were written directly by the Korean Teacher (KT) in Korean — they do NOT need translating from English. Polish and lightly formalize the Korean into a warm, parent-ready update, then provide a natural English translation of that same polished text below it. The students are 5-7 years old in an English Kindergarten program.`
+      : `You are an expert, highly empathetic Korean educational coordinator. Your job is to translate and refine notes from Foreign Teachers into polished updates for Korean mothers. The students are 5-7 years old in an English Kindergarten program.`;
     const prompt = `System Prompt / Instructions:
 You are drafting a daily class summary for a Kindergarten / Elementary class. This message will be reviewed by the Korean Teacher (KT) before being sent to parents.
 
 CRITICAL RULES:
-You are an expert, highly empathetic Korean educational coordinator. Your job is to translate and refine notes from Foreign Teachers into polished updates for Korean mothers. The students are 5-7 years old in an English Kindergarten program.
+${roleInstructions}
 
 You are a silent partner. Never mention AI, Chekki, or that this was automated. Write from the warm, professional perspective of the teaching team.
 
@@ -280,7 +288,7 @@ Tone Guidelines:
 Warm, encouraging, professional, and never condescending. Soften any harsh feedback into constructive next steps.
 
 Format:
-Bilingual. Always provide the Korean translation first, followed immediately by the English original below it.
+Bilingual. Always provide the Korean version first, followed immediately by the English version below it.
 
 INPUT DATA:
 Class Name: ${payload.className}

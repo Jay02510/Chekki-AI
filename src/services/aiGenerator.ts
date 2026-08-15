@@ -16,6 +16,11 @@ export interface ClassLogPayload {
     studentName: string;
     details: string;
   }>;
+  // Who wrote the notes — the AI prompt assumes English FT notes by default;
+  // a KT authoring their own log writes in Korean already, so the summary
+  // prompt needs to polish instead of "translate from English" (that framing
+  // would otherwise garble/mistranslate input that's already Korean).
+  authorRole?: 'ft' | 'kt';
 }
 
 export interface GeneratedReportOutput {

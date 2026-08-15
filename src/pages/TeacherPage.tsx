@@ -40,11 +40,13 @@ import {
   Sun,
   Moon,
   Trash,
-  Buildings
+  Buildings,
+  Notebook
 } from '@phosphor-icons/react';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { NativeFtDashboard } from '../components/NativeFtDashboard';
+import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { NativeDirectorStudentsTab } from '../components/NativeDirectorStudentsTab';
 import { StudentInvitePanel } from '../components/StudentInvitePanel';
 import { ScannedModal } from '../components/ScannedModal';
@@ -243,7 +245,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const handleFtLogSubmit = async (payload: ClassLogPayload) => {
     setIsSubmittingFtLog(true);
     try {
-      const summary = await generateGeneralClassSummary(payload);
+      const summary = await generateGeneralClassSummary({ ...payload, authorRole: educatorRole });
       const studentReports = await Promise.all(
         payload.exceptions.map(async (ex) => {
           const updateText = await generateStudentExceptionReport(
@@ -301,9 +303,9 @@ export default function TeacherPage({ isNight = true }: Props) {
           }]);
           showToast({
             type: 'success',
-            message: isKo
-              ? '✅ 한국인 교사에게 검토 요청을 보냈습니다!'
-              : '✅ Sent to your KT for review!',
+            message: educatorRole === 'kt'
+              ? (isKo ? '✅ 일지가 저장되었습니다. 알림톡 대본 탭에서 검토 후 발송하세요.' : '✅ Log saved — review and send it from the Parent Script tab.')
+              : (isKo ? '✅ 한국인 교사에게 검토 요청을 보냈습니다!' : '✅ Sent to your KT for review!'),
           });
 
           // No per-submission email to the KT here — a daily digest cron
@@ -420,7 +422,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>(
     firestoreEducatorRole === 'kt' ? 'kt' : 'ft'
   );
-  const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum' | 'director_hq' | 'kt_script'>(
+  const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum' | 'director_hq' | 'kt_script' | 'kt_log'>(
     isDirectorPath || (user as any)?.role === 'director'
       ? 'director_hq'
       : (firestoreEducatorRole === 'kt' ? 'kt_script' : 'overview')
@@ -2998,6 +3000,75 @@ ${questionsHtml}
                 </div>
                 <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
               </button>
+
+              <button
+                onClick={() => setActiveTab('kt_log')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'kt_log'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'kt_log'
+                      ? 'bg-orange-500/20 text-orange-500'
+                      : isThemeNight ? 'bg-white/5 text-orange-400 group-hover:text-white' : 'bg-orange-100 text-orange-600 group-hover:text-zinc-900'
+                  }`}>
+                    <Notebook size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '✏️ 오늘 수업 일지 작성' : "✏️ Submit Today's Log"}</span>
+                </div>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'kt_log' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+
+              <button
+                onClick={() => setActiveTab('syllabus')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'syllabus'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'syllabus'
+                      ? 'bg-orange-500/20 text-orange-500'
+                      : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
+                  }`}>
+                    <BookOpen size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '📘 교재 목차 등록' : '📘 Curriculum Setup'}</span>
+                </div>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
+
+              <button
+                onClick={() => setActiveTab('homework')}
+                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+                  activeTab === 'homework'
+                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+                    : isThemeNight
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    activeTab === 'homework'
+                      ? 'bg-orange-500/20 text-orange-500'
+                      : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
+                  }`}>
+                    <FileText size={18} weight="bold" />
+                  </div>
+                  <span>{isKo ? '📄 워크시트 채점기' : '📄 Worksheet Scanner'}</span>
+                </div>
+                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'homework' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+              </button>
             </>
           )}
 
@@ -3551,8 +3622,7 @@ ${questionsHtml}
 
             {activeTab === 'overview' && educatorRole === 'kt' && (
               // KT Overview: lightweight summary only — stat cards + navigation hints.
-              // The worksheet scanner and log-form are FT tools, not KT's job.
-              // KT's primary tool is the kt_script tab. (Audit §9)
+              // The class log form lives on its own kt_log tab now, not here.
               <div className="space-y-6 animate-fade-in">
                 <div className={`p-5 rounded-3xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
                   <p className={`text-sm font-bold mb-1 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
@@ -3584,6 +3654,20 @@ ${questionsHtml}
                     {isKo ? '알림톡 작성하기 →' : 'Go to Script →'}
                   </button>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'kt_log' && educatorRole === 'kt' && (
+              <div className="animate-fade-in">
+                <NativeTeacherLogForm
+                  isNight={isThemeNight}
+                  onSubmitLog={handleFtLogSubmit}
+                  isSubmitting={isSubmittingFtLog}
+                  userProfile={user}
+                  selectedClassName={activeClass?.name}
+                  selectedTextbookName={selectedTextbookName}
+                  roster={(studentsData || []).filter((s: any) => s?.classStatus === 'active' && s?.name).map((s: any) => s.name)}
+                />
               </div>
             )}
 
