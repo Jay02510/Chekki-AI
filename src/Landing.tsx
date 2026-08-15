@@ -390,15 +390,23 @@ export default function Home() {
               isNight ? 'text-white' : 'text-slate-900'
             }`}
           >
-            {(isKo 
-              ? '학교와 가정, 학원 사이의 문화적 장벽을 연결합니다.' 
-              : 'Bridging the cultural gap between school and home.'
+            {(isKo
+              ? '집에서 틀린 문제, 선생님도 알게 됩니다.'
+              : "A mistake at home shouldn't be invisible at school."
             ).split(' ').map((word, i) => (
               <span key={i} className="reveal-word inline-block mr-[0.3em]">
                 {word}
               </span>
             ))}
           </h2>
+
+          <p className={`mt-8 text-base md:text-lg max-w-2xl mx-auto leading-relaxed relative z-20 ${
+            isNight ? 'text-white/60' : 'text-slate-600'
+          }`}>
+            {isKo
+              ? '체키와 연동된 학원이라면, 아이가 집에서 스캔한 오답이 선생님 대시보드로 전달되어 다음 수업에 반영됩니다. 그리고 수업에서 있었던 일은 다시 한국어로 정리되어 부모님께 돌아옵니다.'
+              : "At a Chekki-connected academy, mistakes your child scans at home reach their teacher's dashboard — and what happens in class next comes back to you in Korean. One loop, not two disconnected apps."}
+          </p>
 
           {/* FOR SCHOOLS CTA BUTTON IN THE SECOND SECTION (PER USER REQUEST) */}
           <div className="mt-12 flex justify-center">

@@ -337,8 +337,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Subtext */}
           <p className={`text-base sm:text-lg max-w-xl leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'} break-keep`}>
             {isKo 
-              ? '교재 PDF/이미지 등록 한 번으로 끝. 5초 이내 원생 손글씨 채점부터 매월 칭찬 성장 리포트 자동 발송까지, 선생님의 단순 채점·행정 업무를 완벽히 자동화하세요.'
-              : 'Upload weekly textbooks once, autograde student handwriting in well under 5 seconds, and deliver encouraging progress reports to parents in 1 click.'}
+              ? '정답지를 한 번 등록하면, 학생이 집에서 스캔한 숙제가 그 정답지 기준으로 채점되고 취약 어휘는 선생님 대시보드에 쌓입니다. 무엇을 보강해야 할지 다음 수업 전에 미리 알고, 그 결과는 학부모 리포트로 자동 정리되어 나갑니다.'
+              : "Upload the week's answer key once. Every home scan grades against it, and flagged mistakes land on your dashboard — so you know what to reteach before class starts, and it's already summarized for the parent report."}
           </p>
 
           {/* CTAs */}
