@@ -290,10 +290,15 @@ function AppContent() {
       setStandaloneLegal(path);
     }
 
-    // Suppress splash for any recognized non-parent route (already set correctly via lazy init)
+    // Suppress splash for any recognized non-parent route (already set correctly via lazy init).
+    // Also suppress it for a classCode invite link — the splash screen fully
+    // replaces the render tree (including LoginModal) until its own timer
+    // finishes, so openLoginModal() below was firing into a component that
+    // wasn't mounted yet and the sign-in prompt silently never appeared.
     if (
       showSubscribePage || showAdminPage || showTeacherPage ||
-      showSchoolsPage || showReportStudioPage
+      showSchoolsPage || showReportStudioPage ||
+      window.location.search.includes('classCode=')
     ) {
       setShowSplash(false);
     }
@@ -313,9 +318,12 @@ function AppContent() {
     // Handle the invite-email "join this class" deep link (?classCode=XXXXXX).
     // Previously this param was never read anywhere — clicking the button in
     // the invite email just landed on the marketing page with no next step.
-    // Stash the code and, if not signed in yet, prompt sign-in/signup; the
-    // effect below redeems it once auth resolves (covers both "already
-    // logged in" and "just signed up because of this link" cases).
+    // Just stash the code here and strip the URL — whether to prompt sign-in
+    // or redeem immediately depends on auth state, which isn't resolved yet
+    // on first mount, so that decision lives in the effect below instead
+    // (this effect's deps don't include isAuthLoading/isAuthenticated, so it
+    // would never re-run once auth resolved — openLoginModal() here was
+    // effectively dead code).
     const classCodeParam = params.get('classCode');
     if (classCodeParam) {
       window.history.replaceState({}, '', window.location.pathname);
@@ -324,18 +332,19 @@ function AppContent() {
       } catch (e) {
         console.warn('Failed to stash pending class code:', e);
       }
-      if (!isAuthLoading && !isAuthenticated) {
-        openLoginModal();
-      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language, openLoginModal]);
 
   // Redeem a pending class-code deep link once auth state is known — covers
-  // both an already-signed-in parent clicking the link, and someone who just
-  // signed up because of it (the modal opened by the effect above).
+  // both an already-signed-in parent clicking the link, and someone who
+  // still needs to sign in/sign up first. This is deliberately the effect
+  // that decides whether to prompt sign-in (not the mount effect that
+  // stashes the code) because it depends on isAuthLoading/isAuthenticated
+  // and re-runs whenever those resolve or change — the mount effect only
+  // ever runs once, before Firebase has had a chance to say who's signed in.
   useEffect(() => {
-    if (isAuthLoading || !isAuthenticated) return;
+    if (isAuthLoading) return;
     let pending: string | null = null;
     try {
       pending = sessionStorage.getItem('chekki_pending_class_code');
@@ -343,6 +352,10 @@ function AppContent() {
       return;
     }
     if (!pending) return;
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
     (async () => {
       const result = await redeemClassCodeDetailed(pending!);
       if (result.success) {
@@ -380,7 +393,7 @@ function AppContent() {
       }
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthLoading, isAuthenticated, language, redeemClassCodeDetailed, showToast, user]);
+  }, [isAuthLoading, isAuthenticated, language, redeemClassCodeDetailed, showToast, user, openLoginModal]);
 
   useEffect(() => {
     // Initialize RevenueCat
