@@ -8,7 +8,7 @@ import {
   SquaresFour,
   CheckCircle
 } from '@phosphor-icons/react';
-import { collection, query, where, getCountFromServer } from 'firebase/firestore';
+import { collection, query, where, getCountFromServer, getDocs } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
@@ -71,8 +71,60 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'exceptions' | 'teachers' | 'billing'>('overview');
 
-  const totalRosterCount = pendingRoster.length + activeRoster.length;
-  const flaggedStudents = activeRoster.filter((s: any) => s.flaggedException);
+  // Campus-wide roster + flag counts — previously TOTAL ROSTER and FLAGGED
+  // EXCEPTIONS only reflected whichever single class was selected
+  // (pendingRoster/activeRoster are TeacherPage's per-selectedClass roster),
+  // so a director had to click through every class one at a time to find
+  // flags elsewhere in their school. Mirrors the logReviewStats pattern
+  // below: one query per class, aggregated client-side.
+  const [campusRoster, setCampusRoster] = useState<{
+    activeCount: number;
+    pendingCount: number;
+    flagged: any[];
+  }>({ activeCount: 0, pendingCount: 0, flagged: [] });
+
+  useEffect(() => {
+    if (classes.length === 0) {
+      setCampusRoster({ activeCount: 0, pendingCount: 0, flagged: [] });
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const results = await Promise.all(
+          classes.map(async (cls: any) => {
+            if (!cls?.id || cls.isDemo) return { active: 0, pending: 0, flagged: [] as any[] };
+            const usersSnap = await getDocs(query(collection(dbInstance, 'users'), where('classId', '==', cls.id)));
+            let active = 0;
+            let pending = 0;
+            const flagged: any[] = [];
+            usersSnap.forEach((d) => {
+              const data = d.data();
+              if (data.classStatus === 'active') {
+                active++;
+                if (data.flaggedException) flagged.push({ uid: d.id, ...data });
+              } else if (data.classStatus === 'pending') {
+                pending++;
+              }
+            });
+            return { active, pending, flagged };
+          })
+        );
+        if (cancelled) return;
+        setCampusRoster({
+          activeCount: results.reduce((sum, r) => sum + r.active, 0),
+          pendingCount: results.reduce((sum, r) => sum + r.pending, 0),
+          flagged: results.flatMap((r) => r.flagged),
+        });
+      } catch (err) {
+        console.error('Failed to load campus roster stats:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [classes]);
+
+  const totalRosterCount = campusRoster.activeCount + campusRoster.pendingCount;
+  const flaggedStudents = campusRoster.flagged;
 
   const [phoneScriptFor, setPhoneScriptFor] = useState<string | null>(null);
   const [showSeatExpansionModal, setShowSeatExpansionModal] = useState(false);
@@ -647,7 +699,13 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => onResolveFlag(st.uid)}
+                      onClick={() => {
+                        onResolveFlag(st.uid);
+                        // Optimistic — onResolveFlag only refreshes TeacherPage's
+                        // own selectedClass roster, not this component's separate
+                        // campus-wide fetch above.
+                        setCampusRoster((prev) => ({ ...prev, flagged: prev.flagged.filter((f) => f.uid !== st.uid) }));
+                      }}
                       className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold rounded-lg border border-emerald-500/30 cursor-pointer transition-colors"
                     >
                       Resolve

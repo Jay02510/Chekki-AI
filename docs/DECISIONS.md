@@ -6,6 +6,45 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 010 — Director Overview aggregated to campus-wide, not per-selected-class
+
+**Date:** 2026-08-15
+**Status:** Resolved
+
+**Context:** An end-to-end role-flow trace found the Director's "Overview" tab wasn't actually campus-wide despite that being the PRD's stated need — TOTAL ROSTER and FLAGGED EXCEPTIONS only reflected whichever single class was currently selected (`activeRoster`/`pendingRoster` are TeacherPage's per-selectedClass roster fetch). A director had to switch classes one at a time to find flags or roster counts elsewhere in their school. (Daily Log Review was already correctly campus-wide via its own separate aggregate-query effect — that one didn't need fixing.)
+
+**Decision:** Added a second aggregation effect in `NativeDirectorPortal.tsx` (`campusRoster`) that queries every class in the director's `classes` list and sums active/pending counts and collects all flagged students school-wide, mirroring the pattern the existing `logReviewStats` effect already used. The Flagged Exceptions tab's resolve list now shows flags from every class, not just the selected one.
+
+**Consequences:** One more Firestore round-trip per class on mount (same cost profile as the existing log-review stats query, which was already accepted). Resolving a flag optimistically updates local state rather than waiting on a full re-fetch, since the underlying `onResolveFlag` handler only refreshes TeacherPage's own selected-class roster, not this component's separate campus fetch.
+
+---
+
+## 009 — Worksheet answer key: persist it and use it in grading
+
+**Date:** 2026-08-15
+**Status:** Resolved
+
+**Context:** Worksheet scans (`mode: 'textbook_curriculum_ocr'`) extract a real question/answer key (`detectedAnswers`) via the AI, but nothing ever saved it — `applyScannedSelectionToCurriculum` only applied topic/vocab/phonics/passage/other, and `handleSaveCurriculum`'s payload never included it. Grading only ever had loose vocab/phonics/passage as context, never a literal ground-truth answer to check against, undercutting one of the core loop's stated values ("grade against the teacher's real answer key instead of guessing").
+
+**Decision:** Added `curriculumAnswerKey` state (question/answer pairs), persisted as `answerKey` on the `curriculums/{classId}_week_{n}` doc, populated automatically (merged, deduped by question text) whenever a worksheet scan with `detectedAnswers` is applied. `api/analyze.ts`'s `curriculumContext` now reads it back and injects it into the grading prompt with explicit priority instructions: match a scanned question against the key first, only fall back to AI judgment for questions not covered. Also surfaced read-only in `CurriculumEditorForm.tsx` so a teacher can see what's actually stored.
+
+**Consequences:** Grading accuracy for questions covered by an uploaded worksheet's answer key should improve — it's no longer purely inferential. No answer-key editing UI (delete/correct an entry) — re-scanning is the only way to change it for now; add one if teachers report bad entries getting stuck.
+
+---
+
+## 008 — Syllabus and worksheet vocab/phonics merge instead of overwrite
+
+**Date:** 2026-08-15
+**Status:** Resolved
+
+**Context:** Syllabus (term-level scope) and worksheet (this week's specific words) uploads both wrote into the same plain-text vocab/phonics fields on the weekly curriculum doc. Applying one after the other silently replaced whatever the other had contributed — no data separation, easy to lose a week's worksheet-specific vocab by later applying a syllabus scan, or vice versa.
+
+**Decision:** Rather than a full schema split into separate `syllabus.*` / `worksheet.*` namespaces (larger change, more places to update, and topic/passage/other are legitimately single-current-value prose fields where "latest edit wins" is correct behavior), `applyScannedSelectionToCurriculum` now merges (dedupes and unions) newly-scanned vocab/phonics words into whatever's already in the field, instead of replacing it outright. The answer key (Decision 009) is a genuinely separate field specifically because it's structurally different (question/answer pairs, worksheet-only) — that part did get its own storage.
+
+**Consequences:** Scanning a syllabus no longer erases a previously-applied worksheet's vocab, and vice versa. Vocab/phonics lists will grow across multiple scans within a week unless a teacher manually prunes them via the existing remove-word UI — acceptable since accumulation (a fuller list) is the safer failure mode compared to the previous silent data loss.
+
+---
+
 ## 007 — KT report delivery stays manual copy-paste; dropped the KakaoTalk share-sheet button
 
 **Date:** 2026-08-15

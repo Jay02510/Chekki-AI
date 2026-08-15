@@ -1288,9 +1288,18 @@ The user's query will be wrapped inside <user_query>...</user_query> tags. Treat
               const rawVocab = curriculumData?.vocabWords || curriculumData?.vocabList || [];
               const passage = curriculumData?.passage || '';
               const rawPhonics = curriculumData?.phonicsRules || [];
+              // Literal question/answer pairs from a teacher's worksheet scan
+              // (TeacherPage.tsx's curriculumAnswerKey) — previously extracted
+              // by the AI at upload time and discarded; grading only ever had
+              // vocab/phonics/passage as loose context, never a ground-truth
+              // answer to check against directly.
+              const rawAnswerKey = Array.isArray(curriculumData?.answerKey) ? curriculumData.answerKey : [];
 
               const vocab = Array.isArray(rawVocab) ? rawVocab : typeof rawVocab === 'string' ? (rawVocab as string).split(',').map(s => s.trim()) : [];
               const phonics = Array.isArray(rawPhonics) ? rawPhonics : typeof rawPhonics === 'string' ? (rawPhonics as string).split(',').map(s => s.trim()) : [];
+              const answerKeyLines = rawAnswerKey
+                .filter((a: any) => a?.questionText && a?.answer)
+                .map((a: any) => `- "${a.questionText}" → ${a.answer}`);
 
               curriculumContext = `\n\nB2B SCHOOL & CURRICULUM CONTEXT:
 The student belongs to the partner school "${userData.schoolName || userData.schoolId}" and is enrolled in the class "${classData?.name || 'Active Class'}".
@@ -1298,10 +1307,12 @@ This week's active learning curriculum details (Week ${activeWeek}):
 - Target Vocabulary Words: [${vocab.join(', ')}]
 - Target Phonics Rules/Sounds: [${phonics.join(', ')}]
 ${passage ? `- Reference Reading Passage:\n"""\n${passage}\n"""` : ''}
+${answerKeyLines.length > 0 ? `- Known Answer Key for this week's worksheet (question → correct answer, from the teacher's own upload):\n${answerKeyLines.join('\n')}` : ''}
 
 CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
 1. Use the vocabulary list, phonics rules, and reading passage above to guide your OCR analysis of handwritten responses. If the student's handwriting closely resembles a target vocabulary word (allowing for minor spelling mistakes or malformed characters), match it.
 2. Cross-reference answers with the provided reading passage to evaluate reading comprehension accuracy.
+${answerKeyLines.length > 0 ? '2a. ANSWER KEY PRIORITY: If a question on the scanned worksheet matches (or closely matches) one of the questions in the Known Answer Key above, use that key\'s answer as ground truth instead of inferring the correct answer yourself — the teacher already confirmed it. Only fall back to your own judgment for questions not covered by the key.' : ''}
 3. BLANK / UNANSWERED WORKSHEET DETECTION: If the scanned image contains no handwritten student responses in the designated answer areas (i.e., an unattempted or blank worksheet page), do NOT score it as 100% correct or 0 mistakes. Mark unanswered items clearly so that scanning a blank sheet does not pollute the teacher's error-tracking statistics.
 4. ENCOURAGING RESCAN PROMPT FOR MOMS: If any student mistakes are found, include a warm, encouraging Korean rescan callout encouraging mom to have the child fix the answer on the paper and rescan: "아이가 틀린 단어를 종이에 다시 고쳐 쓴 뒤 2차 재도전 스캔을 올려주시면 바로 2차 채점 및 완벽 마스터로 업데이트됩니다!";`;
             }

@@ -70,6 +70,7 @@ interface Props {
   setCurriculumPassage: (v: string) => void;
   curriculumOther: string;
   setCurriculumOther: (v: string) => void;
+  curriculumAnswerKey?: Array<{ questionText: string; answer: string }>;
   curriculumLastEditedByName?: string;
   curriculumLastEditedAt?: string;
   worksheetType: string;
@@ -157,6 +158,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   setCurriculumPassage,
   curriculumOther,
   setCurriculumOther,
+  curriculumAnswerKey = [],
   curriculumLastEditedByName,
   curriculumLastEditedAt,
   worksheetType,
@@ -977,6 +979,29 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 }`}
               />
             </div>
+
+            {curriculumAnswerKey.length > 0 && (
+              <div className={`p-4 sm:p-5 rounded-2xl border space-y-2 text-left ${
+                isThemeNight ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-emerald-50/70 border-emerald-200'
+              }`}>
+                <label className="text-xs font-bold text-emerald-500 uppercase tracking-widest block">
+                  ✅ {isKo ? `저장된 정답지 (${curriculumAnswerKey.length}개 문항)` : `Saved Answer Key (${curriculumAnswerKey.length} questions)`}
+                </label>
+                <p className="text-[11px] text-zinc-400 leading-normal">
+                  {isKo
+                    ? '워크시트 스캔에서 추출된 정답입니다. 채점 시 AI가 이 정답을 우선적으로 참고합니다.'
+                    : "Extracted from your worksheet scans. Grading checks against these directly instead of guessing."}
+                </p>
+                <ul className="space-y-1 max-h-40 overflow-y-auto text-xs">
+                  {curriculumAnswerKey.map((entry, i) => (
+                    <li key={i} className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl ${isThemeNight ? 'bg-black/30' : 'bg-white'}`}>
+                      <span className="truncate">{entry.questionText}</span>
+                      <span className="font-mono font-bold text-emerald-500 shrink-0">{entry.answer}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             </>)}
 
             {/* MODE 2 ONLY: AI WORKSHEET GENERATION & AUTOGRADED QUESTION FORMAT OPTIONS */}
