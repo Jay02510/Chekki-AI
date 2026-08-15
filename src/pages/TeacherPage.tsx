@@ -3513,6 +3513,7 @@ ${questionsHtml}
               <NativeKtDashboard
                 key={activeKtLog?.id || 'empty'}
                 isNight={isThemeNight}
+                isKo={isKo}
                 className={activeClass?.name || '7세반 (샘플)'}
                 academyName={displayedAcademyName}
                 userProfile={user}
@@ -3586,6 +3587,7 @@ ${questionsHtml}
               </div>
             )}
 
+            {educatorRole !== 'kt' && (
             <NativeFtDashboard
               isNight={isThemeNight}
               isKo={isKo}
@@ -3611,7 +3613,7 @@ ${questionsHtml}
               curriculumOther={curriculumOther}
               submittedLogs={submittedLogs}
             />
-
+            )}
 
               {(activeTab === 'syllabus' || activeTab === 'homework') && !(loginRole === 'director' || user?.role === 'director') && (
                 <CurriculumEditorForm

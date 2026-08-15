@@ -465,7 +465,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   <span>{std.studentName}</span>
                 </span>
                 <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
-                  Flagged Exception
+                  {isKo ? '플래그됨' : 'Flagged'}
                 </span>
               </div>
 
@@ -482,7 +482,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
               >
                 <PhoneCall size={14} weight="bold" />
-                <span>📞 Open Phone Consultation Prep Talking Points</span>
+                <span>{isKo ? '📞 학부모 전화 상담 가이드 보기' : '📞 Open Phone Consultation Talking Points'}</span>
               </button>
             </div>
           ))}
@@ -505,16 +505,16 @@ export const NativeKtDashboard: React.FC<Props> = ({
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div>
                 <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider block">
-                  PROMPT #3 • PARENT PHONE CONSULTATION PREP
+                  {isKo ? '학부모 전화 상담 가이드' : 'Parent Phone Consultation Prep'}
                 </span>
                 <h3 id="phone-consult-title" className="font-black text-lg text-white">
-                  📞 Talking Points for {activeDrawerStudent.name}
+                  📞 {isKo ? `${activeDrawerStudent.name} 상담 요점` : `Talking Points for ${activeDrawerStudent.name}`}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setActiveDrawerStudent(null)}
-                aria-label="Close"
+                aria-label={isKo ? '닫기' : 'Close'}
                 className="min-w-11 min-h-11 flex items-center justify-center rounded bg-white/10 hover:bg-white/20 transition-colors"
               >
                 <X size={18} />
@@ -543,7 +543,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 onClick={() => setActiveDrawerStudent(null)}
                 className="w-full py-2.5 bg-orange-500 text-white font-bold text-xs rounded-xl"
               >
-                Close Drawer
+                {isKo ? '닫기' : 'Close'}
               </button>
             </div>
           </div>
