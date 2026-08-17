@@ -72,6 +72,7 @@ interface Props {
   setCurriculumOther: (v: string) => void;
   curriculumAnswerKey?: Array<{ questionText: string; answer: string }>;
   handleRemoveAnswerKeyEntry?: (index: number) => void;
+  handleEditAnswerKeyEntry?: (index: number, field: 'questionText' | 'answer', value: string) => void;
   curriculumLastEditedByName?: string;
   curriculumLastEditedAt?: string;
   worksheetType: string;
@@ -161,6 +162,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   setCurriculumOther,
   curriculumAnswerKey = [],
   handleRemoveAnswerKeyEntry,
+  handleEditAnswerKeyEntry,
   curriculumLastEditedByName,
   curriculumLastEditedAt,
   worksheetType,
@@ -991,26 +993,36 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 </label>
                 <p className="text-[11px] text-zinc-400 leading-normal">
                   {isKo
-                    ? '워크시트 스캔에서 추출된 정답입니다. 채점 시 AI가 이 정답을 우선적으로 참고합니다. 잘못된 항목은 삭제할 수 있습니다.'
-                    : "Extracted from your worksheet scans. Grading checks against these directly instead of guessing. Remove any entry that's wrong."}
+                    ? '워크시트 스캔에서 추출된 정답입니다. 채점 시 AI가 이 정답을 우선적으로 참고합니다. 잘못 인식된 항목은 직접 수정하거나 삭제할 수 있습니다.'
+                    : "Extracted from your worksheet scans. Grading checks against these directly instead of guessing. Fix a misread entry in place, or remove it."}
                 </p>
-                <ul className="space-y-1 max-h-40 overflow-y-auto text-xs">
+                <ul className="space-y-1 max-h-48 overflow-y-auto text-xs">
                   {curriculumAnswerKey.map((entry, i) => (
-                    <li key={i} className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl ${isThemeNight ? 'bg-black/30' : 'bg-white'}`}>
-                      <span className="truncate">{entry.questionText}</span>
-                      <span className="flex items-center gap-2 shrink-0">
-                        <span className="font-mono font-bold text-emerald-500">{entry.answer}</span>
-                        {handleRemoveAnswerKeyEntry && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveAnswerKeyEntry(i)}
-                            title={isKo ? '정답 삭제' : 'Remove entry'}
-                            className="p-1 hover:bg-rose-500/20 rounded-full transition-colors cursor-pointer text-zinc-400 hover:text-rose-400"
-                          >
-                            <X size={12} weight="bold" />
-                          </button>
-                        )}
-                      </span>
+                    <li key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl ${isThemeNight ? 'bg-black/30' : 'bg-white'}`}>
+                      <input
+                        type="text"
+                        value={entry.questionText}
+                        onChange={(e) => handleEditAnswerKeyEntry?.(i, 'questionText', e.target.value)}
+                        disabled={!handleEditAnswerKeyEntry}
+                        className={`flex-1 min-w-0 bg-transparent outline-none truncate focus:underline decoration-dotted ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}
+                      />
+                      <input
+                        type="text"
+                        value={entry.answer}
+                        onChange={(e) => handleEditAnswerKeyEntry?.(i, 'answer', e.target.value)}
+                        disabled={!handleEditAnswerKeyEntry}
+                        className="w-24 shrink-0 bg-transparent outline-none font-mono font-bold text-emerald-500 focus:underline decoration-dotted"
+                      />
+                      {handleRemoveAnswerKeyEntry && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAnswerKeyEntry(i)}
+                          title={isKo ? '정답 삭제' : 'Remove entry'}
+                          className="p-1 hover:bg-rose-500/20 rounded-full transition-colors cursor-pointer text-zinc-400 hover:text-rose-400 shrink-0"
+                        >
+                          <X size={12} weight="bold" />
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -1018,8 +1030,11 @@ export const CurriculumEditorForm: React.FC<Props> = ({
             )}
             </>)}
 
-            {/* MODE 2 ONLY: AI WORKSHEET GENERATION & AUTOGRADED QUESTION FORMAT OPTIONS */}
-            {uploadMode === 'worksheet' && (
+            {/* DEMO: AI Worksheet Generator (generate-new-worksheet, distinct
+                from the answer-key scan above) hidden — newest, least
+                battle-tested feature, not needed for the class-form +
+                weekly-homework-upload demo loop. Re-enable by uncommenting. */}
+            {false && uploadMode === 'worksheet' && (
               <div className={`p-4 sm:p-5 rounded-2xl border space-y-4 text-left transition-all ${
                 isThemeNight ? 'bg-orange-500/5 border-orange-500/20' : 'bg-orange-50/70 border-orange-200'
               }`}>

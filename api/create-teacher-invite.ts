@@ -252,13 +252,28 @@ async function handleRevokeInvite(req: VercelRequest, res: VercelResponse, schoo
  * been mentioned in a digest, it's not repeated in tomorrow's even though
  * `reviewStatus` stays `pending_review` until the KT actually reviews it.
  */
+interface KtDigestRecipient {
+  email: string;
+  enabled: boolean;
+  hourKst: number;
+}
+
+// Cron now runs hourly (see vercel.json) so it can serve each KT's own
+// preferred hour instead of one fixed daily slot for everyone — this
+// computes which hour it currently is in KST to filter against.
+function currentKstHour(): number {
+  const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000); // UTC+9, no DST
+  return kstNow.getUTCHours();
+}
+
 async function handleSendPendingDigests(_req: VercelRequest, res: VercelResponse) {
   const classesSnap = await adminDb.collection('classes').get();
+  const thisHourKst = currentKstHour();
 
   // schoolId -> Map<ktEmail, { className, count }[]>
   const byKtEmail = new Map<string, { className: string; count: number }[]>();
   const logRefsToMark: FirebaseFirestore.DocumentReference[] = [];
-  const ktEmailCache = new Map<string, string[]>(); // classId -> resolved KT emails
+  const ktRecipientCache = new Map<string, KtDigestRecipient[]>(); // classId -> resolved KT recipients
 
   for (const classDoc of classesSnap.docs) {
     const classData = classDoc.data() || {};
@@ -272,35 +287,54 @@ async function handleSendPendingDigests(_req: VercelRequest, res: VercelResponse
     const newLogs = logsSnap.docs.filter((d) => !d.data()?.digestNotifiedAt);
     if (newLogs.length === 0) continue;
 
-    let ktEmails = ktEmailCache.get(classDoc.id);
-    if (!ktEmails) {
+    let ktRecipients = ktRecipientCache.get(classDoc.id);
+    if (!ktRecipients) {
+      const toRecipient = (data: FirebaseFirestore.DocumentData | undefined): KtDigestRecipient | null => {
+        const email = data?.email;
+        if (typeof email !== 'string' || !email) return null;
+        return {
+          email,
+          enabled: data?.notifyDigestEnabled !== false, // absent = enabled, matches the pre-existing always-9am default
+          hourKst: typeof data?.notifyDigestHourKst === 'number' ? data.notifyDigestHourKst : 9,
+        };
+      };
+
       const assignedTeacherUids: string[] = Array.isArray(classData.assignedTeacherUids)
         ? classData.assignedTeacherUids
         : [];
-      ktEmails = [];
+      ktRecipients = [];
       if (assignedTeacherUids.length > 0) {
         const assignedSnaps = await Promise.all(
           assignedTeacherUids.map((u) => adminDb.collection('users').doc(u).get())
         );
-        ktEmails = assignedSnaps
+        ktRecipients = assignedSnaps
           .filter((s) => s.exists && s.data()?.educatorRole === 'kt')
-          .map((s) => s.data()?.email)
-          .filter((e): e is string => typeof e === 'string' && !!e);
+          .map((s) => toRecipient(s.data()))
+          .filter((r): r is KtDigestRecipient => !!r);
       }
-      if (ktEmails.length === 0) {
+      if (ktRecipients.length === 0) {
         const ktSnap = await adminDb
           .collection('users')
           .where('schoolId', '==', schoolId)
           .where('educatorRole', '==', 'kt')
           .get();
-        ktEmails = ktSnap.docs
-          .map((d) => d.data()?.email)
-          .filter((e): e is string => typeof e === 'string' && !!e);
+        ktRecipients = ktSnap.docs
+          .map((d) => toRecipient(d.data()))
+          .filter((r): r is KtDigestRecipient => !!r);
       }
-      ktEmailCache.set(classDoc.id, ktEmails);
+      ktRecipientCache.set(classDoc.id, ktRecipients);
     }
 
-    for (const email of ktEmails) {
+    // Only recipients whose preference is enabled and whose preferred hour
+    // is right now. Known limitation: digestNotifiedAt is a per-log flag,
+    // not per-recipient — if this class has two KTs on different preferred
+    // hours, whichever hour's run marks these logs first suppresses the
+    // digest for the other KT's later hour. Fine for the common one-KT-
+    // per-class case; a real fix needs a per-recipient marker.
+    const eligibleThisHour = ktRecipients.filter((r) => r.enabled && r.hourKst === thisHourKst);
+    if (eligibleThisHour.length === 0) continue; // leave newLogs unmarked so a later hour can still catch them
+
+    for (const { email } of eligibleThisHour) {
       const existing = byKtEmail.get(email) || [];
       existing.push({ className: classData.name || classDoc.id, count: newLogs.length });
       byKtEmail.set(email, existing);

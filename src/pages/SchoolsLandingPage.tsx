@@ -17,13 +17,8 @@ import {
   List,
   ShieldCheck
 } from '@phosphor-icons/react';
-import { NativeCurriculumPreseed } from '../components/NativeCurriculumPreseed';
-import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
-import { NativeKtDashboard } from '../components/NativeKtDashboard';
-import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
+import { SchoolLoopDiagram } from '../components/SchoolLoopDiagram';
 import { PLAN_SEATS, PLAN_LABELS } from '../../api/_lib/pricingTiers';
-import { ClassLogPayload, GeneratedReportOutput } from '../services/aiGenerator';
-import { buildDemoReportOutput } from '../data/demoReportOutput';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -84,20 +79,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
   const isKo = language === 'ko';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [schoolDemoTab, setSchoolDemoTab] = useState<'syllabus' | 'ft-log' | 'kt-review' | 'director'>('syllabus');
-  const [isSubmittingSchoolDemoLog, setIsSubmittingSchoolDemoLog] = useState(false);
-  const [schoolDemoOutput, setSchoolDemoOutput] = useState<GeneratedReportOutput | null>(null);
-  const schoolDemoAcademyName = 'Apex English Academy (Seocho)';
-
-  const handleSchoolDemoLogSubmit = (payload: ClassLogPayload) => {
-    setIsSubmittingSchoolDemoLog(true);
-    // Canned, offline example output — no live AI call from this public page.
-    setTimeout(() => {
-      setSchoolDemoOutput(buildDemoReportOutput(payload));
-      setSchoolDemoTab('kt-review');
-      setIsSubmittingSchoolDemoLog(false);
-    }, 600);
-  };
 
   // Theme Persistence
   useEffect(() => {
@@ -370,78 +351,14 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
-      {/* --- CHEKKI SCHOOL PACKAGE LIVE PRODUCT PREVIEW (real components, not mockups) --- */}
-      <section id="demo" className="py-12 md:py-16 px-4 md:px-8 max-w-7xl mx-auto w-full space-y-6">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="px-3 py-1 bg-orange-500/10 border border-orange-500/30 text-orange-500 text-[10px] font-mono font-black uppercase tracking-widest rounded-full inline-block">
-            {isKo ? '실제 제품 화면 체험' : 'LIVE PRODUCT WALKTHROUGH'}
-          </span>
-          <h3 className={`font-display text-xl sm:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-            {isKo ? '교재 목차 탑재 ➔ 교사 기록 제출 ➔ AI 리포트 ➔ 원장님 대시보드' : 'Curriculum Preseed ➔ Teacher Log ➔ AI Report ➔ Director Dashboard'}
-          </h3>
-          <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-            {isKo
-              ? '아래는 실제 제품 컴포넌트입니다 — 마케팅용으로 따로 만든 화면이 아닙니다.'
-              : 'This is the real product below, not a separate marketing mockup.'}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto font-sans">
-          {([
-            { id: 'syllabus' as const, step: '01', emoji: '📸', titleKo: '교재 목차 스캔', titleEn: 'Curriculum Scan', descKo: '교재 사진으로 어휘/정답지 선제 탑재', descEn: 'Scan syllabus, AI preseeds vocab & answer keys' },
-            { id: 'ft-log' as const, step: '02', emoji: '📱', titleKo: '교사 30초 기록', titleEn: 'Teacher 30s Log', descKo: '수업 후 모바일에서 30초 기록 제출', descEn: 'Teacher submits quick mobile class log' },
-            { id: 'kt-review' as const, step: '03', emoji: '⚡', titleKo: 'AI 리포트 생성', titleEn: 'AI Report', descKo: '기록을 존댓말 알림톡 리포트로 자동 변환', descEn: 'AI turns log into bilingual parent report' },
-            { id: 'director' as const, step: '04', emoji: '🏢', titleKo: '원장님 대시보드', titleEn: 'Director Dashboard', descKo: '반별 명단, 교재, 이상 징후, 교사 총괄 관리', descEn: 'Rosters, curriculum, exceptions & teacher management' },
-          ]).map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setSchoolDemoTab(s.id)}
-              className={`p-3 md:p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-1.5 ${
-                schoolDemoTab === s.id
-                  ? 'bg-orange-500/15 border-orange-500 shadow-lg shadow-orange-500/10 scale-[1.02]'
-                  : isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase ${
-                  schoolDemoTab === s.id ? 'bg-orange-500 text-white' : isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-700'
-                }`}>
-                  STEP {s.step}
-                </span>
-                <span className="text-sm">{s.emoji}</span>
-              </div>
-              <h4 className="font-bold text-xs sm:text-sm">{isKo ? s.titleKo : s.titleEn}</h4>
-              <p className={`text-[11px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                {isKo ? s.descKo : s.descEn}
-              </p>
-            </button>
-          ))}
-        </div>
-
-        {schoolDemoTab === 'syllabus' && (
-          <NativeCurriculumPreseed isNight={isNight} />
-        )}
-        {schoolDemoTab === 'ft-log' && (
-          <NativeTeacherLogForm
-            isNight={isNight}
-            onSubmitLog={handleSchoolDemoLogSubmit}
-            isSubmitting={isSubmittingSchoolDemoLog}
-            isDemo
-          />
-        )}
-        {schoolDemoTab === 'kt-review' && (
-          <NativeKtDashboard
-            isNight={isNight}
-            generatedOutput={schoolDemoOutput}
-            className="Apex Seocho 7A"
-            academyName={schoolDemoAcademyName}
-          />
-        )}
-        {schoolDemoTab === 'director' && (
-          <NativeDirectorPortal isNight={isNight} academyName={schoolDemoAcademyName} />
-        )}
-      </section>
+      {/* --- CORE LOOP DIAGRAM: establishes the mental model --- */}
+      <SchoolLoopDiagram isNight={isNight} isKo={isKo} />
+      {/* Interactive live-preview widget removed — its 'syllabus' tab
+          (NativeCurriculumPreseed) was demo-only marketing theater sitting
+          under a "real components, not mockups" label that wasn't true for
+          that tab, and promoted curriculum/syllabus scanning we've since
+          disabled in the live app. Replaced by real screenshots in the bento
+          cards below instead of an interactive tour. */}
 
       {/* --- BENTO GRID FEATURES --- */}
       <section className="py-16 md:py-24 px-4 md:px-8 max-w-7xl mx-auto w-full">
@@ -463,101 +380,77 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-brand-dark-elevated' 
               : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
           } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
-            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
-              <div className="flex-1">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
-                  <GraduationCap size={20} weight="bold" />
-                </div>
-
-                <div className="space-y-3 relative z-10">
-                  <div>
-                    <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
-                    <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {isKo
-                        ? '"매주 학급별 주간 단어, 파닉스, 정답지를 일일이 타이핑하느라 야근하시나요?"'
-                        : '"Exhausted by manually typing weekly active vocabulary lists, phonics targets, and answer keys?"'}
-                    </h3>
-                    <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                      {isKo
-                        ? '수업 준비만으로도 바쁜데 정답지 입력에 매주 몇 시간씩 허비되는 대표적인 선생님 행정 스트레스.'
-                        : 'Teachers waste hours typing answer keys each week instead of focusing on student interactions.'}
-                    </p>
-                  </div>
-
-                  <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
-                    <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
-                      {isKo ? '다중 교재 AI 스캔 & 페이지별 픽앤치즈 (정답지 기반 정밀 채점)' : 'Multi-Page AI Unit Scan & Page Picker (Ground-Truth-Matched Grading)'}
-                    </h3>
-                    <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                      {isKo
-                        ? '단원 전체 사진이나 PDF(최대 5장)를 한 번에 드롭하세요! AI가 페이지별로 단어, 파닉스, 정답 가이드를 추출하며 픽앤치즈 서랍에서 원하는 항목만 1클릭 적용합니다.'
-                        : 'Drop up to 5 textbook photos or unit PDFs at once. Gemini AI extracts vocabulary, phonics rules, and parent answer keys page-by-page with interactive 1-click chip controls.'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Side image container */}
-              <div className="w-full md:w-1/2 flex justify-center items-center overflow-hidden rounded-2xl p-2">
-                <img 
-                  src={isNight ? "/assets/schools/schools_bento_curriculum.png" : "/assets/schools/schools_bento_curriculum_light.png"} 
-                  alt="Curriculum seeding interface" 
-                  className="w-full h-auto object-cover rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
-                  loading="lazy" 
-                />
-              </div>
-            </div>
-
-            <div className={`mt-6 pt-4 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-2 text-xs font-bold text-orange-500`}>
-              <span>{isKo ? '다중 페이지 AI 스캔 & 1클릭 칩 조작으로 교재 등록 시간을 대폭 단축' : 'Multi-page AI unit scans cut curriculum setup time dramatically'}</span>
-              <Sparkle size={12} weight="bold" />
-            </div>
-          </div>
-
-          {/* Bento Cell 2: Roster approvals (1 column) */}
-          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ${
-            isNight 
-              ? 'bg-brand-dark border-white/10 hover:border-purple-500/50 hover:bg-brand-dark-elevated' 
-              : 'bg-white border-zinc-200/90 hover:border-purple-500/50 hover:bg-purple-50/40 shadow-sm'
-          } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div>
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500 mb-4">
-                <Users size={20} weight="bold" />
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
+                <GraduationCap size={20} weight="bold" />
               </div>
 
-              <div className="space-y-3 relative z-10">
+              <div className="space-y-3 relative z-10 max-w-2xl">
                 <div>
-                  <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
-                  <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
+                  <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                     {isKo
-                      ? '"매일 학생별 숙제 제출 여부를 일일이 확인하고 챙기느라 지치셨나요?"'
-                      : '"Tired of chasing parents individually to track daily homework completion?"'}
+                      ? '"매일 학생별 정답지를 손으로 채점하느라 밤늦게까지 남으시나요?"'
+                      : '"Grading every student\'s notebook by hand, every single night?"'}
                   </h3>
+                  <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    {isKo
+                      ? '숙제 채점에 매일 몇 시간씩 쓰는 대신, 수업 준비와 학생들에게 집중하세요.'
+                      : 'Grading eats hours every week that could go toward lesson prep and actual teaching.'}
+                  </p>
                 </div>
 
                 <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
                   <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
-                  <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-purple-300' : 'text-purple-600'}`}>
-                    {isKo ? '초대 링크로 가정 숙제 자동 연동' : 'Invite-Link Join & Auto-Sync'}
+                  <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
+                    {isKo ? '이번 주 숙제, 한 번만 업로드' : 'Upload This Week\'s Homework, Once'}
                   </h3>
-                  <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {isKo
-                      ? '학부모는 원장님이 보내주신 초대 링크만 누르면 끝. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 자동 전송됩니다.'
-                      : "Parents tap the invite link their academy sends — no typing required. Homework scans & mistake data silently sync straight to your teacher dashboard."}
+                      ? '이번 주 숙제 사진 한 장이면 충분해요. AI가 정답지를 추출하고, 학생별 오답까지 자동으로 채점합니다.'
+                      : "Snap a photo of this week's completed worksheet once. AI extracts the answer key and grades every student's scan against it automatically."}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Clean image container */}
-            <div className="mt-6 w-full flex justify-center items-center overflow-hidden rounded-2xl p-2">
-              <img 
-                src={isNight ? "/assets/schools/schools_bento_join_code.png" : "/assets/schools/schools_bento_join_code_light.png"} 
-                alt="Class join code entry UI" 
-                className="w-full max-w-[280px] h-auto object-contain rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
-                loading="lazy" 
-              />
+            <div className={`mt-6 pt-4 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-2 text-xs font-bold text-orange-500`}>
+              <span>{isKo ? '한 번 업로드로 매주 반복되는 수기 채점 시간을 없애세요' : 'One upload replaces every week of hand-grading'}</span>
+              <Sparkle size={12} weight="bold" />
+            </div>
+          </div>
+
+          {/* Bento Cell 2: Roster approvals (1 column) */}
+          <div className={`p-6 md:p-8 border rounded-3xl transition-all duration-500 ${
+            isNight
+              ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-brand-dark-elevated'
+              : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
+          } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
+              <Users size={20} weight="bold" />
+            </div>
+
+            <div className="space-y-3 relative z-10">
+              <div>
+                <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
+                <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo
+                    ? '"매일 학생별 숙제 제출 여부를 일일이 확인하고 챙기느라 지치셨나요?"'
+                    : '"Tired of chasing parents individually to track daily homework completion?"'}
+                </h3>
+              </div>
+
+              <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                <h3 className={`font-display text-lg font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
+                  {isKo ? '초대 링크로 가정 숙제 자동 연동' : 'Invite-Link Join & Auto-Sync'}
+                </h3>
+                <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  {isKo
+                    ? '학부모는 원장님이 보내주신 초대 링크만 누르면 끝. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 자동 전송됩니다.'
+                    : "Parents tap the invite link their academy sends — no typing required. Homework scans & mistake data silently sync straight to your teacher dashboard."}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -595,70 +488,44 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </div>
               </div>
             </div>
-
-            {/* Clean image container */}
-            <div className="mt-6 w-full flex justify-center items-center overflow-hidden rounded-2xl p-2">
-              <img 
-                src={isNight ? "/assets/schools/schools_bento_diagnostics.png" : "/assets/schools/schools_bento_diagnostics_light.png"} 
-                alt="Classroom diagnostics dashboard" 
-                className="w-full max-w-[280px] h-auto object-contain rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
-                loading="lazy" 
-              />
-            </div>
           </div>
 
           {/* Bento Cell 4: Parent Sync (Spans 2 columns) */}
           <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl transition-all duration-500 ${
             isNight 
               ? 'bg-brand-dark border-white/10 hover:border-pink-500/50 hover:bg-brand-dark-elevated' 
-              : 'bg-white border-zinc-200/90 hover:border-pink-500/50 hover:bg-pink-50/40 shadow-sm'
+              : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
           } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
-              <div className="md:col-span-7 flex flex-col justify-between h-full">
-                <div>
-                  <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-500 mb-4">
-                    <Sparkle size={20} weight="bold" />
-                  </div>
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
+              <Sparkle size={20} weight="bold" />
+            </div>
 
-                  <div className="space-y-3 relative z-10">
-                    <div>
-                      <span className="text-[10px] font-bold text-pink-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
-                      <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo
-                          ? '"매월 학부모 평가서 작성에 10시간 넘는 행정 시간을 쓰느라 스트레스 받으시나요?"'
-                          : '"Dread spending 5-10+ hours every month writing manual parent evaluation report cards?"'}
-                      </h3>
-                    </div>
-
-                    <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
-                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
-                      <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-pink-400' : 'text-pink-600'}`}>
-                        {isKo ? '1초 만에 자동 생성되는 학부모 칭찬 & 성장 리포트' : '1-Click Parent Growth & Progress Report Cards'}
-                      </h3>
-                      <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                        {isKo
-                          ? '가정 스캔 데이터를 기반으로 아이의 긍정적 성장과 칭찬 포인트가 담긴 PDF 리포트를 1초 만에 학부모님께 발송하세요.'
-                          : 'Eliminate 5-10 hours a month of manual report writing. Chekki auto-compiles home scan data into encouraging growth reports in 1 click.'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-1.5 text-xs font-bold text-pink-500 mt-6`}>
-                  <CheckCircle size={14} weight="bold" />
-                  <span>{isKo ? '선생님 행정 부담 대폭 감소 & 재원율 증가' : 'Cuts teacher admin work & boosts retention'}</span>
-                </div>
+            <div className="space-y-3 relative z-10">
+              <div>
+                <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1">Teacher Painpoint</span>
+                <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo
+                    ? '"매일 저녁 학부모님께 보낼 리포트 쓰느라 퇴근이 늦으시나요?"'
+                    : '"Staying late every day to write the parent update?"'}
+                </h3>
               </div>
 
-              {/* Clean side image container */}
-              <div className="md:col-span-5 flex items-center justify-center overflow-hidden rounded-2xl p-2">
-                <img 
-                  src={isNight ? "/assets/schools/schools_bento_parent_care_dark.png" : "/assets/schools/schools_bento_parent_care_light.png"} 
-                  alt="Parent homework report UI" 
-                  className="w-full max-w-[300px] h-auto object-contain rounded-xl group-hover:scale-[1.03] transition-all duration-500 ease-out filter drop-shadow-md" 
-                  loading="lazy" 
-                />
+              <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'}`}>
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Chekki Solution</span>
+                <h3 className={`font-display text-lg md:text-xl font-black mb-2 ${isNight ? 'text-orange-400' : 'text-orange-600'}`}>
+                  {isKo ? '30초 기록, AI 초안, KT 검토 후 발송' : '30-Second Log, AI Draft, KT-Reviewed Send'}
+                </h3>
+                <p className={`text-xs md:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  {isKo
+                    ? '교사는 하루 기록만 30초면 끝. AI가 한국어 리포트 초안을 작성하고, KT가 검토 후 학부모님께 전달합니다.'
+                    : "Teacher logs the day in 30 seconds. AI drafts the Korean update, KT reviews it, then sends it on to parents."}
+                </p>
               </div>
+            </div>
+
+            <div className={`pt-3 border-t ${isNight ? 'border-white/10' : 'border-zinc-100'} flex items-center gap-1.5 text-xs font-bold text-orange-500 mt-6`}>
+              <CheckCircle size={14} weight="bold" />
+              <span>{isKo ? '매일 밤 리포트 작성 시간을 없애세요' : 'No more writing parent updates every evening'}</span>
             </div>
           </div>
         </div>
@@ -1053,7 +920,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       </section>
 
       {/* --- GET IN TOUCH & CONSULTATION SECTION --- */}
-      <section id="demo" className={`py-20 px-6 max-w-4xl mx-auto w-full text-center rounded-3xl my-12 border transition-colors ${
+      <section id="talk-to-us" className={`py-20 px-6 max-w-4xl mx-auto w-full text-center rounded-3xl my-12 border transition-colors ${
         isNight ? 'bg-gradient-to-b from-zinc-950 to-brand-dark border-white/10' : 'bg-gradient-to-b from-orange-50/70 to-white border-zinc-200 shadow-md'
       }`}>
         <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">

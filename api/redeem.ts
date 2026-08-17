@@ -147,6 +147,14 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
         plan: 'pro',
         maxScansPerDay: 9999,
         maxQuestionsPerDay: 9999,
+        // Back-pointer to the pendingStudents doc this account redeemed
+        // from — that doc's ID is the stable identity FT/KT logs can
+        // reference for this student even before this signup happened (see
+        // TeacherPage.tsx's roster, which lists not-yet-redeemed students
+        // under a `pending:${id}` key). Lets a future migration reconcile
+        // pre-redemption log history with this real account; not attempted
+        // automatically here.
+        pendingStudentId: pendingStudentRef.id,
       };
       if (invitedStudentName && !existingUserData.studentName) {
         updatePayload.studentName = invitedStudentName;

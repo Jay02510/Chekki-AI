@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import ChekkiAiBentoGrid from './components/ChekkiAiBentoGrid';
+import ParentReliefStrip from './components/ParentReliefStrip';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from 'framer-motion';
@@ -288,7 +289,7 @@ export default function Home() {
       <section
         id="main-content"
         ref={heroRef}
-        className="relative pt-32 md:pt-40 pb-32 md:pb-48 px-4 md:px-8 max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-12 md:gap-8 min-h-[100dvh]"
+        className="relative pt-28 md:pt-36 pb-16 md:pb-24 px-4 md:px-8 max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-12 md:gap-8 min-h-[85dvh]"
       >
         <div className="flex-1 flex flex-col items-start z-10 w-full">
           <div className={`hero-text mb-6 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold border ${
@@ -349,11 +350,13 @@ export default function Home() {
               </div>
             </a>
           </div>
+
+          <ParentReliefStrip isNight={isNight} isKo={isKo} />
         </div>
 
         {/* Hero Transparent Mascot Image */}
         <div className="hero-mascot flex-1 w-full relative h-[400px] md:h-[650px] flex justify-center md:justify-end items-center">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[480px] aspect-square bg-brand/20 rounded-full blur-[120px]" />
+          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[480px] aspect-square rounded-full blur-[120px] ${isNight ? 'bg-brand/20' : 'bg-brand/35'}`} />
           <img
             src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png"
             alt="Chekki Mascot"
@@ -529,7 +532,7 @@ export default function Home() {
           <span className="px-3 py-1 bg-brand/10 border border-brand/30 text-brand text-xs font-mono font-black uppercase tracking-widest rounded-full inline-block">
             {isKo ? '학부모용 모바일 구독 안내' : 'CHEKKI PARENT MOBILE APP PRICING'}
           </span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+          <h2 className={`text-3xl sm:text-5xl font-black tracking-tight ${isNight ? 'text-white' : 'text-slate-900'}`}>
             {isKo ? '엄마표 영어 숙제 지도, 부담 없는 구독 플랜' : 'Simple & Flexible Parent Subscriptions'}
           </h2>
           <p className="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto">

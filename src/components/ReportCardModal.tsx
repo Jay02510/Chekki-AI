@@ -1,13 +1,16 @@
-import React from 'react';
-import { X, Printer } from '@phosphor-icons/react';
+import React, { useState, useEffect } from 'react';
+import { X, Printer, Sparkle, PhoneCall } from '@phosphor-icons/react';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { dbInstance } from '../../services/database';
+import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
+import { generatePhoneConsultationPrep } from '../services/aiGenerator';
 
 interface Props {
   isKo: boolean;
   activeRoster: any[];
   selectedStudentDetails: any | null;
   setSelectedStudentDetails: (student: any) => void;
-  selectedClass: { name?: string; activeWeekNumber?: number } | null;
+  selectedClass: { id?: string; name?: string; activeWeekNumber?: number } | null;
   academyLogo: string;
   schoolName?: string | null;
   curriculumTopic: string;
@@ -34,6 +37,58 @@ export const ReportCardModal: React.FC<Props> = ({
   onClose,
 }) => {
   const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
+
+  // Weekly consultation talking points — real AI, generated on demand from
+  // this student's actual daily logs over the past 7 days (general class
+  // paragraphs + any exception notes), not the printable stats below. This
+  // is what "Generate Weekly Report" was supposed to mean: talking points
+  // for a parent conversation, not a re-render of homework-scan percentages.
+  const [talkingPoints, setTalkingPoints] = useState<string[] | null>(null);
+  const [isGeneratingTalkingPoints, setIsGeneratingTalkingPoints] = useState(false);
+  const [talkingPointsError, setTalkingPointsError] = useState(false);
+
+  useEffect(() => {
+    setTalkingPoints(null);
+    setTalkingPointsError(false);
+  }, [selectedStudentDetails?.uid]);
+
+  const handleGenerateTalkingPoints = async () => {
+    const studentUid = selectedStudentDetails?.uid;
+    const classId = selectedClass?.id;
+    const studentName = selectedStudentDetails?.studentName || selectedStudentDetails?.name || 'Student';
+    if (!studentUid || !classId) return;
+    setIsGeneratingTalkingPoints(true);
+    setTalkingPointsError(false);
+    try {
+      const sevenDaysAgo = Timestamp.fromMillis(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const logsRef = collection(dbInstance, 'classes', classId, 'logs');
+      const logsQuery = query(logsRef, where('createdAt', '>=', sevenDaysAgo), orderBy('createdAt', 'asc'));
+      const snap = await getDocs(logsQuery);
+      const weekLogs = snap.docs
+        .map((d) => d.data() as any)
+        .filter((l) => (l.enrolledStudentUids || []).includes(studentUid) || (l.aiStudentReports || []).some((r: any) => r.studentUid === studentUid));
+
+      const historicalLogs = weekLogs
+        .map((l) => {
+          const exception = (l.aiStudentReports || []).find((r: any) => r.studentUid === studentUid);
+          return [l.date, l.aiKoreanSummary, exception?.koreanUpdate].filter(Boolean).join(' — ');
+        })
+        .filter(Boolean)
+        .join('\n');
+
+      if (!historicalLogs) {
+        setTalkingPoints([]);
+        return;
+      }
+      const points = await generatePhoneConsultationPrep(studentName, historicalLogs);
+      setTalkingPoints(points);
+    } catch (err) {
+      console.error('Failed to generate weekly talking points:', err);
+      setTalkingPointsError(true);
+    } finally {
+      setIsGeneratingTalkingPoints(false);
+    }
+  };
 
   // Real signal only — no fabricated stats. A brand-new/unselected student
   // has no scans, so this must read as "no data yet," not a fake 100%.
@@ -148,6 +203,54 @@ export const ReportCardModal: React.FC<Props> = ({
               <p className="text-zinc-500">Class: {selectedClass?.name || 'Assigned Class'}</p>
               <p className="text-zinc-500">Date: {new Date().toLocaleDateString()}</p>
             </div>
+          </div>
+
+          {/* Weekly Consultation Talking Points — real AI, generated on demand
+              from this student's actual logs this week. Kept separate from
+              the printed report below (no-print): this is a live call-prep
+              aid for the teacher/KT, not part of the parent-facing PDF. */}
+          <div className="mb-6 p-4 border border-orange-200 rounded-2xl bg-orange-50/50 space-y-3 no-print">
+            <div className="flex items-center justify-between">
+              <h4 className="font-black text-zinc-900 uppercase tracking-widest text-[11px] flex items-center gap-1.5">
+                <PhoneCall size={14} weight="bold" className="text-orange-600" />
+                <span>{isKo ? '학부모 상담 talking points (최근 7일)' : 'Parent Consultation Talking Points (Last 7 Days)'}</span>
+              </h4>
+              <button
+                type="button"
+                onClick={handleGenerateTalkingPoints}
+                disabled={!selectedStudentDetails?.uid || isGeneratingTalkingPoints}
+                className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Sparkle size={13} weight="bold" className={isGeneratingTalkingPoints ? 'animate-spin' : ''} />
+                <span>
+                  {isGeneratingTalkingPoints
+                    ? (isKo ? '생성 중...' : 'Generating...')
+                    : (isKo ? '생성하기' : 'Generate')}
+                </span>
+              </button>
+            </div>
+            {!selectedStudentDetails?.uid ? (
+              <p className="text-xs text-zinc-500">{isKo ? '먼저 원생을 선택하세요.' : 'Select a student first.'}</p>
+            ) : talkingPointsError ? (
+              <p className="text-xs text-rose-600">{isKo ? '생성에 실패했습니다. 다시 시도해주세요.' : 'Generation failed — please try again.'}</p>
+            ) : talkingPoints === null ? (
+              <p className="text-xs text-zinc-500">
+                {isKo
+                  ? '이번 주 일일 기록(수업 코멘트 + 특이사항)을 바탕으로 실제 AI가 상담 포인트를 생성합니다.'
+                  : "Pulls this student's real daily logs (class comments + exceptions) from this week and generates real AI talking points — not the stats below."}
+              </p>
+            ) : talkingPoints.length === 0 ? (
+              <p className="text-xs text-zinc-500">{isKo ? '이번 주 기록된 일지가 없습니다.' : 'No logs recorded for this student this week.'}</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {talkingPoints.map((point, i) => (
+                  <li key={i} className="text-xs text-zinc-800 flex items-start gap-2">
+                    <span className="text-orange-500 font-bold shrink-0">{i + 1}.</span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Weekly Curriculum Summary Section */}

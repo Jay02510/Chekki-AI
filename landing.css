@@ -5,9 +5,33 @@
 
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-hand: 'Patrick Hand', cursive;
+  --font-korean: 'Noto Sans KR', sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --color-brand: #EA580C; /* Vibrant Orange */
   --color-brand-hover: #C2410C;
+
+  /* Mirrored from index.css's @theme block — landing-entry.tsx (this file's
+     consumer) renders Landing.tsx, SchoolsLandingPage.tsx, and the shared
+     Native*Dashboard components used inside SchoolsLandingPage's live-preview
+     widget, all of which reference these tokens. Without them here,
+     utilities like bg-brand-dark silently generate no CSS on the landing
+     bundle — invisible in dark mode only by coincidence (transparent over an
+     already-dark page), exposed as blank white cards in light mode. Keep in
+     sync with index.css if either changes. */
+  --color-zinc-850: #1f2937;
+  --color-zinc-900: #18181b;
+  --color-zinc-950: #09090b;
+
+  --color-brand-dark: #050505;
+  --color-brand-card: #0f1014;
+  --color-brand-orange: #f97316;
+  --color-brand-purple: #7f77dd;
+  --color-brand-pink: #ec4899;
+
+  --color-brand-dark-elevated: #0f0814;
+  --color-brand-dark-elevated-alt: #0a0714;
 }
 
 @layer base {

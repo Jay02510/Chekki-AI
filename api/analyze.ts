@@ -82,7 +82,8 @@ If handwriting is detected, evaluate if it is legible. If the handwriting is ext
 TASK 2: FULL ANSWER KEY AND GRADING
 Extract every question with its coordinates (normalized 0-1000) and provide the correct pedagogical answer.
 Also provide a direct Korean translation of the question in 'question_translation'.
-CRUCIAL NEW STEP: You must also extract the student's handwritten answer. Compare the student's handwritten answer to the correct pedagogical answer, and determine if it is correct. Set 'is_correct' to true or false. 
+CRUCIAL NEW STEP: You must also extract the student's handwritten answer. Compare the student's handwritten answer to the correct pedagogical answer, and determine if it is correct. Set 'is_correct' to true or false.
+ANSWER EQUIVALENCE: Judge correctness by meaning, not exact string match. Accept a differently-formatted-but-equivalent answer as correct (e.g. "3" vs "three", different capitalization, extra/missing spacing, a synonym that fully answers the question). When handwriting is ambiguous or a stroke could plausibly form the correct letter/word, give the student the benefit of the doubt rather than defaulting to incorrect.
 WARNING: Do NOT mistake printed multiple-choice options for a student's answer.
 If 'has_handwriting' is false (meaning the entire worksheet is blank), you MUST set 'student_response' to an empty string and 'is_correct' to true for ALL questions to prevent hallucinated errors.
 Provide a Guide for the parent and a Teaching Script to say to the child, strictly using the existing JSON fields.
@@ -297,6 +298,8 @@ ${roleInstructions}
 You are a silent partner. Never mention AI, Chekki, or that this was automated. Write from the warm, professional perspective of the teaching team.
 
 Combine the provided inputs into a single, cohesive paragraph (3-4 sentences max).
+
+Do NOT open with the date, the academy/class name, or a generic greeting ("Hello parents", "Today in [class]..."). A separate shared header already carries that — start straight into the substance: what was covered, how the class engaged, and anything specific worth noting. This paragraph may be stacked alongside other same-day paragraphs for a student in multiple classes, so it needs to stand on its own content without restating context every other paragraph in that stack will also restate.
 
 Tone Guidelines:
 Warm, encouraging, professional, and never condescending. Soften any harsh feedback into constructive next steps.

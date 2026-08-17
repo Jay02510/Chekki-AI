@@ -4,7 +4,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../../contexts/ToastContext';
 import { dbInstance, auth } from '../../services/database';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc, addDoc, orderBy, limit as fbLimit, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc, addDoc, orderBy, limit as fbLimit, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
 import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
 import { compressImage, stripDataUrlPrefix, getMimeTypeFromDataUrl } from '../../services/compressImage';
@@ -62,13 +62,13 @@ import { CurriculumEditorForm } from '../components/CurriculumEditorForm';
 import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { validateCurriculumOtherField } from '../utils/curriculumGuardrail';
-import { 
-  generateGeneralClassSummary, 
-  generateStudentExceptionReport, 
-  generatePhoneConsultationPrep, 
-  ClassLogPayload, 
-  GeneratedReportOutput 
+import {
+  generateGeneralClassSummary,
+  generateStudentExceptionReport,
+  ClassLogPayload,
+  GeneratedReportOutput
 } from '../services/aiGenerator';
+import { consolidateStudentReports, formatConsolidatedDraft, ConsolidatedStudentDay } from '../services/consolidateStudentReports';
 
 interface Props {
   isNight?: boolean;
@@ -166,20 +166,6 @@ export default function TeacherPage({ isNight = true }: Props) {
   // oldest one — falls back to the first pending log when nothing's been
   // clicked yet (e.g. right after a class switch).
   const [activeKtLogId, setActiveKtLogId] = useState<string | null>(null);
-  const activeKtLog = ktPendingLogs.find((l) => l.id === activeKtLogId) || ktPendingLogs[0] || null;
-  // KtReviewQueue is memoized, but a fresh .map() literal built inline in JSX
-  // on every render would defeat that regardless — this is the one place the
-  // derived shape actually needs to be recomputed (audit action #6).
-  const ktQueueLogs = useMemo(
-    () =>
-      ktPendingLogs.map((l) => ({
-        id: l.id,
-        lessonTopic: l.lessonTopic,
-        date: l.date,
-        flaggedCount: (l.aiStudentReports || []).length,
-      })),
-    [ktPendingLogs]
-  );
   // Brief "copied ✓" confirmation on the queue chip before the log actually
   // drops out of ktPendingLogs, so approving doesn't just make it vanish
   // with no visible trail of what was just sent.
@@ -196,26 +182,36 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [ktLogsLoadError, setKtLogsLoadError] = useState(false);
 
   const handleKtApprove = async (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]): Promise<boolean> => {
-    if (!activeKtLog?.id || !activeKtLog?.classId || !user?.uid) return false;
+    if (!activeKtGroup || activeKtGroup.entries.length === 0 || !user?.uid) return false;
+    const activeGroupKey = groupKey(activeKtGroup);
     try {
-      const logRef = doc(dbInstance, 'classes', activeKtLog.classId, 'logs', activeKtLog.id);
-      await updateDoc(logRef, {
-        approvedSummary,
-        approvedExceptions,
-        reviewStatus: 'sent',
-        reviewedByUid: user.uid,
-        reviewedByName: (user as any)?.name || user?.email || 'Unknown teacher',
-        sentAt: serverTimestamp(),
-      });
+      // A consolidated student-day draft can be assembled from multiple
+      // source logs across different classes — approving it has to mark
+      // every one of them "sent", not just one, or the others would still
+      // show up as pending next time the queue loads.
+      await Promise.all(
+        activeKtGroup.entries.map((e) => {
+          const logRef = doc(dbInstance, 'classes', e.classId, 'logs', e.logId);
+          return updateDoc(logRef, {
+            approvedSummary,
+            approvedExceptions,
+            reviewStatus: 'sent',
+            reviewedByUid: user.uid,
+            reviewedByName: (user as any)?.name || user?.email || 'Unknown teacher',
+            sentAt: serverTimestamp(),
+          });
+        })
+      );
       // Show the checkmark on the queue chip first, then remove it — an
       // instant vanish left no visible confirmation of what had just been
       // sent (same short-lived-success pattern NativeKtDashboard already
       // uses for its own "Copied!" button state).
-      setJustCopiedLogId(activeKtLog.id);
+      const sentLogIds = new Set(activeKtGroup.sourceLogIds);
+      setJustCopiedLogId(activeGroupKey);
       if (ktApproveTimeoutRef.current) clearTimeout(ktApproveTimeoutRef.current);
       ktApproveTimeoutRef.current = setTimeout(() => {
-        setKtPendingLogs((prev) => prev.filter((l) => l.id !== activeKtLog.id));
-        setJustCopiedLogId((cur) => (cur === activeKtLog.id ? null : cur));
+        setKtPendingLogs((prev) => prev.filter((l) => !sentLogIds.has(l.id)));
+        setJustCopiedLogId((cur) => (cur === activeGroupKey ? null : cur));
         ktApproveTimeoutRef.current = null;
       }, 1400);
       return true;
@@ -286,11 +282,16 @@ export default function TeacherPage({ isNight = true }: Props) {
             payload.textbook,
             ex.details
           );
-          const points = await generatePhoneConsultationPrep(ex.studentName, ex.details);
+          // No per-exception phoneTalkingPoints call here anymore — the old
+          // same-day phone-consult drawer that displayed it was removed in
+          // favor of ReportCardModal's weekly consolidated talking points
+          // (strictly more context, same purpose), so generating this per
+          // submission was a wasted AI call with nothing left to read it.
           return {
             studentName: ex.studentName,
+            studentUid: ex.studentUid ?? null,
             koreanUpdate: updateText,
-            phoneTalkingPoints: points,
+            phoneTalkingPoints: [],
             category: ex.type,
           };
         })
@@ -768,6 +769,10 @@ export default function TeacherPage({ isNight = true }: Props) {
     setCurriculumAnswerKey((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
+  const handleEditAnswerKeyEntry = (index: number, field: 'questionText' | 'answer', value: string) => {
+    setCurriculumAnswerKey((prev) => prev.map((entry, idx) => idx === index ? { ...entry, [field]: value } : entry));
+  };
+
   const handleTextbookFileUpload = async (inputFiles: FileList | File[] | File, scanType: 'syllabus' | 'worksheet' = uploadMode) => {
     const fileList: File[] = inputFiles instanceof FileList 
       ? Array.from(inputFiles) 
@@ -983,6 +988,40 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   // Student roster & analytics state
   const [studentsData, setStudentsData] = useState<any[]>([]);
+
+  // Roster uid -> display name, for consolidation: a log doc only carries a
+  // name for students it flagged that day (aiStudentReports); an enrolled-
+  // but-not-flagged student has no name anywhere in the log itself, only
+  // their uid in enrolledStudentUids, so this resolves it from the roster
+  // instead of falling back to the raw uid string.
+  const studentNamesByUid = useMemo(
+    () => Object.fromEntries((studentsData || []).filter((s: any) => s?.uid && s?.name).map((s: any) => [s.uid, s.name])),
+    [studentsData]
+  );
+  // Consolidated per-student-per-day view of the cross-class pending queue
+  // — a student in two classes with two different FTs used to produce two
+  // entirely separate review items; this groups everything touching them
+  // that day (keyed on studentUid, see consolidateStudentReports) into one
+  // review unit instead of leaving the KT to notice and merge by hand.
+  const ktConsolidatedGroups = useMemo(
+    () => consolidateStudentReports(ktPendingLogs, user?.schoolName || 'Chekki Master Academy', studentNamesByUid),
+    [ktPendingLogs, user, studentNamesByUid]
+  );
+  const groupKey = (g: ConsolidatedStudentDay) => g.studentUid || `custom:${g.studentName.trim().toLowerCase()}:${g.date}`;
+  const activeKtGroup = ktConsolidatedGroups.find((g) => groupKey(g) === activeKtLogId) || ktConsolidatedGroups[0] || null;
+  // KtReviewQueue is memoized, but a fresh .map() literal built inline in JSX
+  // on every render would defeat that regardless — this is the one place the
+  // derived shape actually needs to be recomputed (audit action #6).
+  const ktQueueLogs = useMemo(
+    () =>
+      ktConsolidatedGroups.map((g) => ({
+        id: groupKey(g),
+        lessonTopic: g.studentName,
+        date: g.date,
+        flaggedCount: g.entries.filter((e) => !!e.exceptionParagraph).length,
+      })),
+    [ktConsolidatedGroups]
+  );
   const [isLoadingRoster, setIsLoadingRoster] = useState(false);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState<any | null>(null);
   const [flagReasonInput, setFlagReasonInput] = useState('');
@@ -1063,36 +1102,77 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   }, [isAuthenticated, user, loginRole]);
 
-  // Load previously submitted logs for the selected class (history tab),
-  // and the queue of logs still awaiting KT review for that class.
+  // Load previously submitted logs for the selected class (history tab).
+  // For a KT, the review queue itself is populated by the separate
+  // cross-class effect below instead — a student can be enrolled in more
+  // than one of the KT's classes, so a queue scoped to whichever class
+  // happens to be selected would hide that student's other same-day logs
+  // from consolidation entirely.
   useEffect(() => {
     if (!selectedClass?.id || selectedClass.isDemo) {
       setSubmittedLogs([]);
-      setKtPendingLogs([]);
-      setActiveKtLogId(null);
+      if (educatorRole !== 'kt') {
+        setKtPendingLogs([]);
+        setActiveKtLogId(null);
+      }
       setKtLogsLoadError(false);
       return;
     }
     setKtLogsLoadError(false);
-    setActiveKtLogId(null);
+    if (educatorRole !== 'kt') setActiveKtLogId(null);
     (async () => {
       try {
         const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
         const logsQuery = query(logsRef, orderBy('createdAt', 'desc'), fbLimit(50));
         const snap = await getDocs(logsQuery);
-        const allLogs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as any));
+        const allLogs = snap.docs.map((d) => ({ id: d.id, classId: selectedClass.id, ...d.data() } as any));
         setSubmittedLogs(allLogs);
-        setKtPendingLogs(
-          allLogs
-            .filter((l) => l.reviewStatus === 'pending_review')
-            .reverse() // oldest pending first
-        );
+        if (educatorRole !== 'kt') {
+          setKtPendingLogs(
+            allLogs
+              .filter((l) => l.reviewStatus === 'pending_review')
+              .reverse() // oldest pending first
+          );
+        }
       } catch (err) {
         console.error('Failed to load class log history:', err);
         setKtLogsLoadError(true);
       }
     })();
-  }, [selectedClass?.id]);
+  }, [selectedClass?.id, educatorRole]);
+
+  // KT review queue, cross-class: every pending log from every class this
+  // KT has access to (`classes`, already loaded via fetchClasses's
+  // owned+assigned query), not just whichever class is currently selected —
+  // required so a student in two classes with two different FTs shows up
+  // for consolidation under one student-day card instead of two invisible
+  // halves.
+  useEffect(() => {
+    if (educatorRole !== 'kt') return;
+    const realClasses = classes.filter((c: any) => c?.id && !c.isDemo);
+    if (realClasses.length === 0) {
+      setKtPendingLogs([]);
+      setActiveKtLogId(null);
+      return;
+    }
+    setKtLogsLoadError(false);
+    (async () => {
+      try {
+        const perClassLogs = await Promise.all(
+          realClasses.map(async (c: any) => {
+            const logsRef = collection(dbInstance, 'classes', c.id, 'logs');
+            const logsQuery = query(logsRef, where('reviewStatus', '==', 'pending_review'), orderBy('createdAt', 'desc'), fbLimit(50));
+            const snap = await getDocs(logsQuery);
+            return snap.docs.map((d) => ({ id: d.id, classId: c.id, className: c.name, ...d.data() } as any));
+          })
+        );
+        setKtPendingLogs(perClassLogs.flat().reverse()); // oldest pending first
+      } catch (err) {
+        console.error('Failed to load cross-class KT review queue:', err);
+        setKtLogsLoadError(true);
+      }
+    })();
+  }, [educatorRole, classes.map((c: any) => c?.id).join('|')]);
 
   // Cancel any pending KT-approve "remove from queue" timeout when switching
   // classes or unmounting, so it can't fire against a different class's
@@ -1682,7 +1762,8 @@ export default function TeacherPage({ isNight = true }: Props) {
     // Directors don't have a syllabus-edit tab (§5: curriculum uploads are
     // teacher-only) — only redirect FT/KT into the syllabus editor.
     if (!(loginRole === 'director' || user?.role === 'director')) {
-      setActiveTab('syllabus');
+      // Demo build: Syllabus tab hidden (see nav below) — land on Homework instead.
+      setActiveTab('homework');
     }
 
     try {
@@ -2284,13 +2365,52 @@ ${questionsHtml}
     [vocabMistakeCounts]
   );
 
-  // Same reasoning — NativeFtDashboard's roster prop.
+  // Students invited into this class but whose parent hasn't redeemed the
+  // invite yet — no `users/{uid}` doc exists for them (see api/redeem.ts),
+  // so they'd otherwise be invisible to the FT/KT log form's student picker
+  // even though the classroom loop (daily notes) doesn't actually depend on
+  // the parent having joined the app. Same query pattern as
+  // StudentInvitePanel.tsx. Keyed with a `pending:` prefix so it can never
+  // collide with a real Firebase Auth uid.
+  const [pendingStudentsForRoster, setPendingStudentsForRoster] = useState<{ uid: string; name: string }[]>([]);
+  useEffect(() => {
+    if (!selectedClass?.id || selectedClass.isDemo) {
+      setPendingStudentsForRoster([]);
+      return;
+    }
+    const q = query(collection(dbInstance, 'pendingStudents'), where('classId', '==', selectedClass.id));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setPendingStudentsForRoster(
+          snap.docs
+            .map((d) => ({ id: d.id, ...d.data() } as any))
+            .filter((d) => d?.status === 'invited' && d?.name)
+            .map((d) => ({ uid: `pending:${d.id}`, name: d.name as string }))
+        );
+      },
+      (err) => console.warn('Failed to load pending students for roster:', err)
+    );
+    return () => unsub();
+  }, [selectedClass?.id, selectedClass?.isDemo]);
+
+  // Same reasoning — NativeFtDashboard's roster prop. Carries uid alongside
+  // name so exception flags and consolidation can join on a stable key
+  // instead of matching free-text names across classes/logs. Merges in
+  // not-yet-redeemed students (pendingStudentsForRoster) so the classroom
+  // log loop isn't gated on parent-app adoption.
   const ftDashboardRoster = useMemo(
-    () =>
-      (studentsData || [])
-        .filter((s: any) => s?.classStatus === 'active' && s?.name)
-        .map((s: any) => s.name),
-    [studentsData]
+    () => [
+      ...(studentsData || [])
+        .filter((s: any) => s?.classStatus === 'active' && s?.name && s?.uid)
+        .map((s: any) => ({ uid: s.uid as string, name: s.name as string, isPending: false })),
+      // isPending is a display-only flag — the stored `name` stays clean
+      // (no "(pending)" text baked in) since this same name ends up saved
+      // onto the exception/log and eventually a parent-facing report; only
+      // the picker's rendered label should show the pending marker.
+      ...pendingStudentsForRoster.map((s) => ({ uid: s.uid, name: s.name, isPending: true })),
+    ],
+    [studentsData, pendingStudentsForRoster]
   );
 
   // --- RENDER AUTH (LOGIN / SIGN UP) VIEW ---
@@ -3137,6 +3257,12 @@ ${questionsHtml}
                 <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'kt_log' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
               </button>
 
+              {/* DEMO: Syllabus/Curriculum Setup tab hidden — OCR scan flow
+                  not battle-tested enough for live demo. Manual entry (topic
+                  /vocab/phonics/passage) lives here too; only the OCR trigger
+                  was the risk, but this tab is cut wholesale to keep the nav
+                  simple. Re-enable by uncommenting. */}
+              {/*
               <button
                 onClick={() => setActiveTab('syllabus')}
                 className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
@@ -3159,6 +3285,7 @@ ${questionsHtml}
                 </div>
                 <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
               </button>
+              */}
 
               <button
                 onClick={() => setActiveTab('homework')}
@@ -3234,6 +3361,9 @@ ${questionsHtml}
                 <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'insights' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
               </button>
 
+              {/* DEMO: Syllabus/Curriculum Setup tab hidden — see KT nav above
+                  for rationale. Re-enable by uncommenting. */}
+              {/*
               <button
                 onClick={() => setActiveTab('syllabus')}
                 className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
@@ -3256,6 +3386,7 @@ ${questionsHtml}
                 </div>
                 <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
               </button>
+              */}
 
               <button
                 onClick={() => setActiveTab('homework')}
@@ -3318,17 +3449,25 @@ ${questionsHtml}
               showReportCardModal
                 ? 'bg-orange-500/20 text-orange-400 border-orange-500/50 font-black'
                 : isThemeNight
-                  ? 'bg-white/5 border-white/10 text-orange-400 hover:border-orange-500/40'
-                  : 'bg-zinc-50 border-zinc-200 text-orange-600 hover:border-orange-300'
+                  ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:border-orange-500/40'
+                  : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:border-orange-300'
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
+              <div className={`p-2 rounded-xl transition-colors ${
+                showReportCardModal
+                  ? 'bg-orange-500/20 text-orange-400'
+                  : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-600 group-hover:text-zinc-900'
+              }`}>
                 <Sparkle size={18} weight="fill" />
               </div>
               <span>{isKo ? '📊 학부모 성적표 발급기' : '📊 Generate Weekly Report'}</span>
             </div>
-            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
+            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
+              showReportCardModal
+                ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                : isThemeNight ? 'bg-white/5 text-zinc-500 border-white/10' : 'bg-zinc-100 text-zinc-500 border-zinc-200'
+            }`}>
               GENERATE
             </span>
           </button>
@@ -3683,7 +3822,7 @@ ${questionsHtml}
               <div className="mb-4 max-w-4xl mx-auto w-full">
                 <KtReviewQueue
                   logs={ktQueueLogs}
-                  activeId={activeKtLog?.id || null}
+                  activeId={activeKtGroup ? groupKey(activeKtGroup) : null}
                   justCopiedId={justCopiedLogId}
                   onSelect={setActiveKtLogId}
                   isNight={isThemeNight}
@@ -3693,23 +3832,31 @@ ${questionsHtml}
             )}
             {activeTab === 'kt_script' && (
               <NativeKtDashboard
-                key={activeKtLog?.id || 'empty'}
+                key={activeKtGroup ? groupKey(activeKtGroup) : 'empty'}
                 isNight={isThemeNight}
                 isKo={isKo}
-                className={activeClass?.name || '7세반 (샘플)'}
+                className={activeKtGroup ? activeKtGroup.studentName : (activeClass?.name || '7세반 (샘플)')}
                 academyName={displayedAcademyName}
                 userProfile={user}
                 generatedOutput={
-                  activeKtLog
+                  activeKtGroup
                     ? {
                         bilingualClassSummary: {
-                          korean: activeKtLog.aiKoreanSummary,
-                          english: activeKtLog.aiEnglishSummary,
+                          // Consolidated draft: shared intro + every source
+                          // paragraph (general + exception) stacked below it,
+                          // already separated by blank lines — see
+                          // formatConsolidatedDraft. Exceptions are baked in
+                          // here rather than left to the exceptions-append
+                          // step below, so skipInlineExceptions avoids
+                          // duplicating them.
+                          korean: formatConsolidatedDraft(activeKtGroup, isKo),
+                          english: '',
                         },
-                        studentReports: activeKtLog.aiStudentReports || [],
+                        studentReports: [],
                       }
                     : ftLogOutput
                 }
+                skipInlineExceptions={!!activeKtGroup}
                 pendingCount={ktPendingLogs.length}
                 onApprove={handleKtApprove}
               />
@@ -3872,6 +4019,7 @@ ${questionsHtml}
                   setCurriculumOther={setCurriculumOther}
                   curriculumAnswerKey={curriculumAnswerKey}
                   handleRemoveAnswerKeyEntry={handleRemoveAnswerKeyEntry}
+                  handleEditAnswerKeyEntry={handleEditAnswerKeyEntry}
                   curriculumLastEditedByName={curriculumLastEditedByName}
                   curriculumLastEditedAt={curriculumLastEditedAt}
                   worksheetType={worksheetType}

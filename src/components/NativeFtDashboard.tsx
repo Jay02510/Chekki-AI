@@ -27,7 +27,7 @@ interface Props {
   user: any;
   activeClass: any;
   selectedTextbookName: string;
-  roster: string[];
+  roster: { uid: string; name: string; isPending?: boolean }[];
   handleFtLogSubmit: (payload: ClassLogPayload) => void | Promise<void>;
   isSubmittingFtLog: boolean;
   completionRate: number;

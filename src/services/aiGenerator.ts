@@ -14,9 +14,18 @@ export interface ClassLogPayload {
   generalComments: string;
   exceptions: Array<{
     studentName: string;
+    // Roster-matched student identity, when known — the join key daily/
+    // weekly consolidation groups on. Null for a custom-typed name not yet
+    // in the roster (no stable key to join across logs, so it's still sent
+    // standalone rather than silently dropped or mis-grouped).
+    studentUid?: string | null;
     details: string;
     type?: 'praise' | 'attention';
   }>;
+  // Every roster-approved student enrolled in this class at submission time
+  // — lets consolidation attach the general class-summary paragraph to
+  // every enrolled student's daily report, not just the ones flagged.
+  enrolledStudentUids?: string[];
   // Who wrote the notes — the AI prompt assumes English FT notes by default;
   // a KT authoring their own log writes in Korean already, so the summary
   // prompt needs to polish instead of "translate from English" (that framing
@@ -33,6 +42,7 @@ export interface GeneratedReportOutput {
   };
   studentReports: Array<{
     studentName: string;
+    studentUid?: string | null;
     koreanUpdate: string;
     phoneTalkingPoints: string[];
     category?: 'praise' | 'attention';

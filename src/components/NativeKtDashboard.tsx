@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Copy, CheckCircle, PhoneCall, Sparkle, UserCheck, X, Lock } from '@phosphor-icons/react';
+import { Copy, CheckCircle, Sparkle, UserCheck, X, Lock, Bell, BellSlash } from '@phosphor-icons/react';
 import { GeneratedReportOutput } from '../services/aiGenerator';
 import { UserProfile } from '../../types';
 import { getPermissionsForUser } from '../utils/permissions';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { dbInstance } from '../../services/database';
+import { doc, updateDoc } from 'firebase/firestore';
 
 interface Props {
   isNight?: boolean;
@@ -14,6 +16,11 @@ interface Props {
   userProfile?: UserProfile | null;
   // Number of other logs still waiting behind this one in the review queue.
   pendingCount?: number;
+  // True when `generatedOutput.bilingualClassSummary.korean` is already a
+  // fully-assembled consolidated draft (see formatConsolidatedDraft) with
+  // any exception paragraphs baked in — skips getFormattedScript()'s own
+  // exceptions-append step so they aren't duplicated.
+  skipInlineExceptions?: boolean;
   // Persists the KT-reviewed version to Firestore (classes/{id}/logs/{id})
   // so it's the record parents see — never the raw FT note. Fired when the
   // KT copies the script to send, since that's the point they've committed
@@ -29,10 +36,36 @@ export const NativeKtDashboard: React.FC<Props> = ({
   academyName = 'POLY Academy (Seocho)',
   userProfile,
   pendingCount = 0,
+  skipInlineExceptions = false,
   onApprove,
 }) => {
   const isKo = isKoProp !== undefined ? isKoProp : (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
   const permissions = getPermissionsForUser(userProfile);
+
+  // Digest-email notification preferences (per-KT, not a school-wide
+  // policy) — read from the user profile with the same defaults the cron
+  // (api/create-teacher-invite.ts) falls back to when these are absent, so
+  // this UI and the actual send logic never disagree about what "default"
+  // means.
+  const [notifyEnabled, setNotifyEnabled] = useState(userProfile?.notifyDigestEnabled !== false);
+  const [notifyHour, setNotifyHour] = useState(userProfile?.notifyDigestHourKst ?? 9);
+  const [showNotifySettings, setShowNotifySettings] = useState(false);
+  const [isSavingNotifyPrefs, setIsSavingNotifyPrefs] = useState(false);
+
+  const saveNotifyPrefs = async (enabled: boolean, hourKst: number) => {
+    if (!userProfile?.uid) return;
+    setIsSavingNotifyPrefs(true);
+    try {
+      await updateDoc(doc(dbInstance, 'users', userProfile.uid), {
+        notifyDigestEnabled: enabled,
+        notifyDigestHourKst: hourKst,
+      });
+    } catch (err) {
+      console.warn('Failed to save KT notification preferences:', err);
+    } finally {
+      setIsSavingNotifyPrefs(false);
+    }
+  };
   // No real submitted log yet — the fields below fall back to sample copy so
   // the KT can see what the workspace looks like. Copy/Share must not act on
   // that sample text as if it were real, or a KT could send fabricated
@@ -68,7 +101,18 @@ export const NativeKtDashboard: React.FC<Props> = ({
   };
 
   const getFormattedScript = () => {
-    return `${getToneHeader()}\n${isKo ? '학급' : 'Class'}: ${className}\n\n${editedKoreanSummary}\n\n-----------------------------------\n[Original Teacher Note]\n${englishSummary}`.trim();
+    // Exceptions (praise/attention flags) used to render only in this KT's
+    // own review cards, never in what actually gets copied to parents — the
+    // whole point of an FT flagging a kid silently never reached that kid's
+    // parent. Appended here so a flagged update is part of the sent message,
+    // not just internal call-prep. The raw English FT note is intentionally
+    // NOT included below — it stays visible in this dashboard's own review
+    // UI, but pasting untranslated English into a Korean parent chat isn't
+    // useful to the parent it's meant for.
+    const exceptionsBlock = !skipInlineExceptions && displayedStudentReports.length > 0
+      ? `\n\n${displayedStudentReports.map((s) => `[${s.studentName}]\n${s.koreanUpdate}`).join('\n\n')}`
+      : '';
+    return `${getToneHeader()}\n${isKo ? '학급' : 'Class'}: ${className}\n\n${editedKoreanSummary}${exceptionsBlock}`.trim();
   };
 
   const currentFullText = getFormattedScript();
@@ -76,17 +120,6 @@ export const NativeKtDashboard: React.FC<Props> = ({
 
   const [copied, setCopied] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
-
-  // Phone Consultation Drawer State
-  const [activeDrawerStudent, setActiveDrawerStudent] = useState<{
-    name: string;
-    talkingPoints: string[];
-  } | null>(null);
-
-  const drawerDialogRef = useDialogA11y<HTMLDivElement>({
-    isOpen: !!activeDrawerStudent,
-    onClose: () => setActiveDrawerStudent(null),
-  });
 
   const handleTextChange = (val: string) => {
     setEditedKoreanSummary(val);
@@ -194,7 +227,71 @@ export const NativeKtDashboard: React.FC<Props> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 relative">
+          {userProfile?.role === 'korean_teacher' && (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowNotifySettings((prev) => !prev)}
+                className={`w-11 h-11 rounded-2xl flex items-center justify-center border transition-all cursor-pointer shrink-0 ${
+                  notifyEnabled
+                    ? 'bg-white/10 hover:bg-white/15 border-white/15 text-white'
+                    : 'bg-white/5 border-white/10 text-zinc-500'
+                }`}
+                title={isKo ? '알림 설정' : 'Notification settings'}
+                aria-label={isKo ? '알림 설정' : 'Notification settings'}
+              >
+                {notifyEnabled ? <Bell size={16} weight="bold" /> : <BellSlash size={16} weight="bold" />}
+              </button>
+              {showNotifySettings && (
+                <div className={`absolute top-full right-0 mt-2 z-30 w-72 p-4 rounded-2xl border shadow-2xl space-y-3 text-xs ${
+                  isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold">{isKo ? '검토 대기 알림 이메일' : 'Pending-review digest email'}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = !notifyEnabled;
+                        setNotifyEnabled(next);
+                        saveNotifyPrefs(next, notifyHour);
+                      }}
+                      className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${notifyEnabled ? 'bg-orange-500' : 'bg-zinc-500/40'}`}
+                      aria-label={isKo ? '알림 켜기/끄기' : 'Toggle notifications'}
+                    >
+                      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${notifyEnabled ? 'left-[18px]' : 'left-0.5'}`} />
+                    </button>
+                  </div>
+                  {notifyEnabled && (
+                    <div className="space-y-1.5">
+                      <label htmlFor="kt-notify-hour" className="text-zinc-400 font-mono block">
+                        {isKo ? '선호 시간 (한국 시간)' : 'Preferred time (KST)'}
+                      </label>
+                      <select
+                        id="kt-notify-hour"
+                        value={notifyHour}
+                        onChange={(e) => {
+                          const next = Number(e.target.value);
+                          setNotifyHour(next);
+                          saveNotifyPrefs(notifyEnabled, next);
+                        }}
+                        className={`w-full p-2 rounded-xl border text-xs font-bold outline-none ${
+                          isNight ? 'bg-white/5 border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                        }`}
+                      >
+                        {Array.from({ length: 24 }, (_, h) => (
+                          <option key={h} value={h}>{String(h).padStart(2, '0')}:00 KST</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {isSavingNotifyPrefs && (
+                    <p className="text-[10px] text-zinc-500">{isKo ? '저장 중...' : 'Saving...'}</p>
+                  )}
+                </div>
+              )}
+            </>
+          )}
           <button
             type="button"
             onClick={() => window.print()}
@@ -280,10 +377,13 @@ export const NativeKtDashboard: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* 3-Tone Script Switcher & Character Counter Bar */}
+      {/* Greeting Style & Character Counter Bar — only the header line
+          changes below (getToneHeader()); the AI-generated body text is the
+          same regardless of which option is picked. Labeled accordingly so
+          it doesn't imply a full re-tone of the message that isn't happening. */}
       <div className="p-4 rounded-2xl border bg-white/[0.02] border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs font-mono">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-zinc-400">💬 {isKo ? '대본 어조 선택:' : 'Script Tone:'}</span>
+          <span className="font-bold text-zinc-400">💬 {isKo ? '인사말 스타일 (본문은 동일):' : 'Greeting Style (body text unchanged):'}</span>
           <div className="flex items-center gap-1.5">
             <button
               type="button"
@@ -294,7 +394,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
               }`}
             >
-              🎩 {isKo ? '정중한 톤 (Standard)' : 'Formal Tone (Standard)'}
+              🎩 {isKo ? '정중한 인사말 (기본)' : 'Formal Greeting (Standard)'}
             </button>
             <button
               type="button"
@@ -306,7 +406,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
               }`}
             >
-              🌸 친근한 톤 (Soft)
+              🌸 {isKo ? '친근한 인사말' : 'Soft Greeting'}
             </button>
             <button
               type="button"
@@ -317,7 +417,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
               }`}
             >
-              ⚡ 간결한 톤 (Concise)
+              ⚡ {isKo ? '간결한 인사말' : 'Concise Greeting'}
             </button>
           </div>
         </div>
@@ -430,85 +530,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
               </div>
 
               <p className="text-xs leading-relaxed text-zinc-300">{std.koreanUpdate}</p>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setActiveDrawerStudent({
-                    name: std.studentName,
-                    talkingPoints: std.phoneTalkingPoints,
-                  })
-                }
-                className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-              >
-                <PhoneCall size={14} weight="bold" />
-                <span>{isKo ? '📞 학부모 전화 상담 가이드 보기' : '📞 Open Phone Consultation Talking Points'}</span>
-              </button>
             </div>
           ))}
         </div>
       </div>
-
-      {/* Phone Consultation Talking Points Drawer */}
-      {activeDrawerStudent && (
-        <div className="fixed inset-0 z-[450] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div
-            ref={drawerDialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="phone-consult-title"
-            tabIndex={-1}
-            className={`w-full max-w-lg p-6 rounded-3xl border shadow-2xl space-y-4 ${
-              isNight ? 'bg-brand-dark border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-            }`}
-          >
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div>
-                <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider block">
-                  {isKo ? '학부모 전화 상담 가이드' : 'Parent Phone Consultation Prep'}
-                </span>
-                <h3 id="phone-consult-title" className="font-black text-lg text-white">
-                  📞 {isKo ? `${activeDrawerStudent.name} 상담 요점` : `Talking Points for ${activeDrawerStudent.name}`}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveDrawerStudent(null)}
-                aria-label={isKo ? '닫기' : 'Close'}
-                className="min-w-11 min-h-11 flex items-center justify-center rounded bg-white/10 hover:bg-white/20 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="space-y-3 font-mono text-xs">
-              {activeDrawerStudent.talkingPoints.map((pt, i) => (
-                <div
-                  key={i}
-                  className={`p-3.5 rounded-xl border leading-relaxed font-bold flex items-start gap-2 ${
-                    isNight
-                      ? 'bg-amber-500/10 border-amber-500/20 text-amber-200'
-                      : 'bg-amber-50 border-amber-300 text-amber-950 shadow-sm'
-                  }`}
-                >
-                  <span className={isNight ? 'text-amber-400 font-black' : 'text-amber-700 font-black'}>▶</span>
-                  <span>{pt}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setActiveDrawerStudent(null)}
-                className="w-full py-2.5 bg-orange-500 text-white font-bold text-xs rounded-xl"
-              >
-                {isKo ? '닫기' : 'Close'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

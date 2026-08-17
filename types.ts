@@ -57,6 +57,14 @@ export interface UserProfile {
   classId?: string | null;
   studentName?: string | null;
   classStatus?: 'pending' | 'active' | null;
+  // Back-pointer to the pendingStudents doc this account redeemed from, if
+  // any — see api/redeem.ts's redeemClassCode.
+  pendingStudentId?: string | null;
+  // KT-only digest email preferences. Absent means the pre-existing default
+  // behavior: enabled, 9am KST — see api/create-teacher-invite.ts's
+  // handleSendPendingDigests cron.
+  notifyDigestEnabled?: boolean;
+  notifyDigestHourKst?: number;
 }
 
 // --- Subscription System ---

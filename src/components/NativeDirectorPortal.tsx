@@ -527,70 +527,11 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {activeTab === 'curriculum' && (
         <div className="space-y-6 animate-fade-in text-left">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CARD 1: Course Syllabus Scope Stream */}
-            <div className={`p-6 rounded-2xl border space-y-4 ${
-              isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
-            }`}>
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold text-xs">📘 SYLLABUS</span>
-                  <div>
-                    <h5 className={`font-bold text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Course Syllabus Stream</h5>
-                    <p className="text-[10px] text-zinc-400">Multi-Week Vocabulary &amp; Phonics Scope per Class</p>
-                  </div>
-                </div>
-              </div>
-
-              {!selectedClass?.isDemo && (curriculumTopic || weeklyVocabWords.length > 0 || weeklyPhonicsRules.length > 0 || curriculumPassage) ? (
-                <div className="space-y-4 text-left">
-                  {curriculumTopic && (
-                    <div>
-                      <span className="text-[10px] font-bold text-blue-400 uppercase font-mono tracking-wider block mb-1">Weekly Topic</span>
-                      <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{curriculumTopic}</p>
-                    </div>
-                  )}
-                  {weeklyVocabWords.length > 0 && (
-                    <div>
-                      <span className="text-[10px] font-bold text-orange-400 uppercase font-mono tracking-wider block mb-2">Target Vocabulary ({weeklyVocabWords.length})</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {weeklyVocabWords.map((word) => (
-                          <span key={word} className={`px-2 py-1 rounded-md text-xs font-bold border ${isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-800 border-orange-200'}`}>
-                            {word}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {weeklyPhonicsRules.length > 0 && (
-                    <div>
-                      <span className="text-[10px] font-bold text-indigo-400 uppercase font-mono tracking-wider block mb-2">Phonics Rules / Sounds ({weeklyPhonicsRules.length})</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {weeklyPhonicsRules.map((rule) => (
-                          <span key={rule} className={`px-2 py-1 rounded-md text-xs font-bold border ${isNight ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-indigo-100 text-indigo-800 border-indigo-200'}`}>
-                            {rule}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {curriculumPassage && (
-                    <div>
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase font-mono tracking-wider block mb-1">Reading Passage</span>
-                      <p className="text-xs text-zinc-400 leading-relaxed line-clamp-3">{curriculumPassage}</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
-                    <PlusCircle size={24} weight="bold" />
-                  </div>
-                  <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No syllabus set for this week yet</p>
-                  <p className="text-xs text-zinc-400 max-w-[200px]">Teachers upload it from their Curriculum Setup tab — it'll show here once saved.</p>
-                </div>
-              )}
-            </div>
+          <div className="grid grid-cols-1 gap-6">
+            {/* CARD 1 (Course Syllabus Scope Stream) hidden for demo build —
+                its source, the Curriculum Setup / Syllabus tab, is disabled
+                in TeacherPage.tsx (KT/FT nav) since the OCR scan flow isn't
+                battle-tested enough for a live demo. Re-enable both together. */}
 
             {/* CARD 2: Daily Homework Worksheets Stream */}
             <div className={`p-6 rounded-2xl border space-y-4 ${
