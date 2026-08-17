@@ -124,7 +124,10 @@ export async function generateStudentExceptionReport(
     const { text } = await callGenerateReport('exception', { studentName, classTopic, textbook, exceptionDetails });
     return text || `${studentName} 원생은 오늘 ${textbook} (${classTopic}) 수업에 참여하였습니다. ${exceptionDetails}`;
   } catch (err) {
-    return `${studentName} 원생은 오늘 ${textbook} (${classTopic}) 수업을 진지하게 이수하였습니다. 담임 교사 소견: ${exceptionDetails}`;
+    // API route itself unreachable — same flagged-fallback shape as the
+    // server-side retry exhaustion in api/analyze.ts, so a KT never sees
+    // raw English disguised as translated Korean either way.
+    return `⚠️ ${studentName} — 자동 번역 실패, 아래 원문을 직접 번역해 주세요 (auto-translation failed, please translate manually):\n${exceptionDetails}`;
   }
 }
 

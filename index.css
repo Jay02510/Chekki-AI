@@ -2,8 +2,8 @@
 @custom-variant dark (&:is(.dark, .dark *));
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Space Grotesk', sans-serif;
+  --font-sans: 'Onest', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', sans-serif;
   --font-hand: 'Patrick Hand', cursive;
   --font-korean: 'Noto Sans KR', sans-serif;
   --font-serif: 'Playfair Display', Georgia, serif;

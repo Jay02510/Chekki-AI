@@ -295,7 +295,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => window.print()}
-            className="px-4 py-2.5 min-h-11 rounded-2xl font-bold text-xs bg-white/10 hover:bg-white/15 border border-white/15 text-white flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className={`px-4 py-2.5 min-h-11 rounded-2xl font-bold text-xs border flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              isNight
+                ? 'bg-white/10 hover:bg-white/15 border-white/15 text-white'
+                : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-300 text-zinc-900'
+            }`}
             title={isKo ? '학원 로고 리포트 PDF 인쇄' : 'Download/Print PDF Report with Custom Academy Logo Header'}
           >
             <span>📄</span>
@@ -399,10 +403,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setScriptTone('friendly')}
-
               className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
                 scriptTone === 'friendly'
-                  ? 'bg-purple-500/20 border-purple-500 text-purple-400 shadow-sm'
+                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
               }`}
             >
@@ -413,13 +416,18 @@ export const NativeKtDashboard: React.FC<Props> = ({
               onClick={() => setScriptTone('concise')}
               className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
                 scriptTone === 'concise'
-                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm'
+                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
               }`}
             >
               ⚡ {isKo ? '간결한 인사말' : 'Concise Greeting'}
             </button>
           </div>
+        </div>
+        <div className={`w-full md:w-auto px-3 py-1.5 rounded-xl border font-bold whitespace-nowrap overflow-x-auto ${
+          isNight ? 'bg-white/5 border-white/10 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-700'
+        }`}>
+          {getToneHeader()}
         </div>
 
         <div className="flex items-center gap-3">
@@ -482,10 +490,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
         <p className="text-zinc-300 font-mono leading-relaxed">{englishSummary}</p>
       </div>
 
-      {/* Flagged Student Exception Section with Phone Consultation Prep Drawer Trigger */}
+      {/* Flagged Student Exceptions */}
       <div className="space-y-4 pt-4 border-t border-white/10">
         <span className="text-xs font-bold text-amber-400 uppercase font-mono block">
-          ⚠️ {isKo ? '주의 필요 학생 집중 케어 & 전화 상담 대본' : 'Flagged Student Exceptions & Phone Consultation Prep'}
+          ⚠️ {isKo ? '주의 필요 학생 집중 케어' : 'Flagged Student Exceptions'}
         </span>
 
 

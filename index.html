@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+  <script>
+    // Set html.dark and body colors before first paint, using the saved
+    // preference — avoids a dark-then-light (or vice versa) flash on every
+    // hard navigation, since the theme-sync effect in App.tsx/landing-entry
+    // only runs after React mounts.
+    (function () {
+      try {
+        var isLight = localStorage.getItem('chekki_theme') === 'light';
+        if (isLight) {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.colorScheme = 'light';
+        } else {
+          document.documentElement.style.colorScheme = 'dark';
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    html:not(.dark) body { background-color: #fafafa; color: #18181b; }
+  </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="google-site-verification" content="googlec1811764640ede22">
@@ -14,7 +34,7 @@
   <title>ChekkiAI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300..700&family=Patrick+Hand&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300..800&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Patrick+Hand&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_dropshadow:azimuth_220;elevation_60;spread_20/f_png,e_improve,e_sharpen/v1765769939/chekki-logo_q5xeux.png" />
   <script type="application/ld+json">
   {

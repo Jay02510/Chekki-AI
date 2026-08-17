@@ -5,7 +5,7 @@ import { maxClassesForSeats } from './_lib/seatLimits.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter } from './_lib/rateLimit.js';
 import { generateJoinCode } from './_lib/joinCode.js';
-import { isValidAddStudentsPayload } from './_lib/rosterValidation.js';
+import { isValidAddStudentsPayload, EMAIL_RE } from './_lib/rosterValidation.js';
 import { FieldValue } from 'firebase-admin/firestore';
 
 const checkCreateClassLimit = createRateLimiter('create_class', 20, 60);
@@ -217,30 +217,36 @@ async function handleAddStudents(req: VercelRequest, res: VercelResponse, uid: s
   const created: { id: string; name: string; parentEmail: string; inviteCode: string }[] = [];
   // Sequential (not Promise.all): generateUniqueInviteCode reads Firestore
   // before this batch has committed, so concurrent generation for a large
-  // bulk upload could hand out the same "unique" code to two students.
+  // bulk upload could hand out the same "unique" code to two students. Every
+  // student gets a real inviteCode regardless of whether an email is on
+  // file — a director with no parent email yet can still add the student to
+  // the class-facing roster now and hand the code out in person later.
   for (const student of students) {
     const ref = adminDb.collection('pendingStudents').doc();
     const inviteCode = await generateUniqueInviteCode();
+    const parentEmail = (student.parentEmail || '').trim().toLowerCase();
     batch.set(ref, {
       classId,
       schoolId: caller.schoolId,
       name: student.name.trim(),
-      parentEmail: student.parentEmail.trim().toLowerCase(),
+      parentEmail,
       inviteCode,
       status: 'invited',
       addedByUid: uid,
       addedAt: FieldValue.serverTimestamp(),
     });
-    created.push({ id: ref.id, name: student.name.trim(), parentEmail: student.parentEmail.trim().toLowerCase(), inviteCode });
+    created.push({ id: ref.id, name: student.name.trim(), parentEmail, inviteCode });
   }
   await batch.commit();
 
   // emailSentAt is only stamped on an actual confirmed send below — it used
   // to be written unconditionally at creation time regardless of whether
   // Resend accepted the request, which made a fully-silent email failure
-  // look identical to a successful one in the roster UI.
+  // look identical to a successful one in the roster UI. Students added
+  // without an email skip this entirely — nothing to send yet.
+  const withEmail = created.filter((c) => c.parentEmail);
   const emailResults = await Promise.all(
-    created.map((c) =>
+    withEmail.map((c) =>
       sendStudentInviteEmail({
         parentEmail: c.parentEmail,
         studentName: c.name,
@@ -251,7 +257,7 @@ async function handleAddStudents(req: VercelRequest, res: VercelResponse, uid: s
     )
   );
   await Promise.all(
-    created.map((c, i) =>
+    withEmail.map((c, i) =>
       emailResults[i]
         ? adminDb.collection('pendingStudents').doc(c.id).update({ emailSentAt: FieldValue.serverTimestamp() })
         : Promise.resolve()
@@ -262,6 +268,7 @@ async function handleAddStudents(req: VercelRequest, res: VercelResponse, uid: s
   return res.status(200).json({
     success: true,
     added: created.length,
+    addedWithoutEmail: created.length - withEmail.length,
     emailsSent,
     resendConfigured: !!process.env.RESEND_API_KEY,
   });
@@ -272,9 +279,15 @@ async function handleResendStudentInvite(req: VercelRequest, res: VercelResponse
   if (!caller) {
     return res.status(403).json({ error: 'Only a director or Korean Teacher with a school can resend invites' });
   }
-  const { pendingStudentId } = req.body || {};
+  const { pendingStudentId, parentEmail: newParentEmail } = req.body || {};
   if (typeof pendingStudentId !== 'string' || !pendingStudentId) {
     return res.status(400).json({ error: 'pendingStudentId is required' });
+  }
+  // Also doubles as "send the first invite" for a student who was added by
+  // name only — if this student has no email on file yet, a new one can be
+  // supplied here rather than needing a separate endpoint.
+  if (newParentEmail !== undefined && (typeof newParentEmail !== 'string' || !EMAIL_RE.test(newParentEmail.trim()))) {
+    return res.status(400).json({ error: 'parentEmail must be a valid email address' });
   }
 
   const ref = adminDb.collection('pendingStudents').doc(pendingStudentId);
@@ -286,12 +299,19 @@ async function handleResendStudentInvite(req: VercelRequest, res: VercelResponse
   if (data?.status !== 'invited') {
     return res.status(400).json({ error: 'This student has already joined' });
   }
+  const parentEmail = (newParentEmail ? newParentEmail.trim().toLowerCase() : data.parentEmail) || '';
+  if (!parentEmail) {
+    return res.status(400).json({ error: 'This student has no parent email on file yet — provide one to send an invite.' });
+  }
+  if (newParentEmail) {
+    await ref.update({ parentEmail });
+  }
 
   const classSnap = await adminDb.collection('classes').doc(data.classId).get();
   const classData = classSnap.data();
 
   const sent = await sendStudentInviteEmail({
-    parentEmail: data.parentEmail,
+    parentEmail,
     studentName: data.name,
     className: classData?.name || 'Class',
     schoolName: classData?.schoolName || 'Your school',

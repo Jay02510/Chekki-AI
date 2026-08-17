@@ -56,6 +56,21 @@
         ],
         "createdAt": "2026-08-17T06:52:01.223Z",
         "reason": "light-mode textarea: text-zinc-900 (near-black) on bg-orange-50/50 (light orange tint) is high-contrast dark-on-light, not washed-out gray-on-saturated-color — detector's heuristic treats any zinc-* text class as gray regardless of shade"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#ffffff",
+        "createdAt": "2026-08-17T13:49:47.899Z"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "onest",
+        "createdAt": "2026-08-17T14:52:18.925Z"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "bricolage grotesque",
+        "createdAt": "2026-08-17T14:52:28.565Z"
       }
     ]
   }

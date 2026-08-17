@@ -1016,7 +1016,11 @@ export default function TeacherPage({ isNight = true }: Props) {
     () =>
       ktConsolidatedGroups.map((g) => ({
         id: groupKey(g),
-        lessonTopic: g.studentName,
+        studentName: g.studentName,
+        // A student can appear in more than one class the same day (see
+        // consolidateStudentReports) — join every distinct source class name
+        // so the queue's class filter can match on any of them.
+        className: [...new Set(g.entries.map((e) => e.className).filter(Boolean))].join(', '),
         date: g.date,
         flaggedCount: g.entries.filter((e) => !!e.exceptionParagraph).length,
       })),
@@ -3854,10 +3858,10 @@ ${questionsHtml}
                         },
                         studentReports: [],
                       }
-                    : ftLogOutput
+                    : null
                 }
                 skipInlineExceptions={!!activeKtGroup}
-                pendingCount={ktPendingLogs.length}
+                pendingCount={Math.max(0, ktConsolidatedGroups.length - 1)}
                 onApprove={handleKtApprove}
               />
             )}
@@ -4585,11 +4589,6 @@ ${questionsHtml}
           selectedClass={selectedClass}
           academyLogo={academyLogo}
           schoolName={user?.schoolName}
-          curriculumTopic={curriculumTopic}
-          curriculumPhonics={curriculumPhonics}
-          curriculumPassage={curriculumPassage}
-          curriculumOther={curriculumOther}
-          activeVocabWords={activeVocabWords}
           onClose={() => setShowReportCardModal(false)}
         />
       )}

@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
   <head>
+    <script>
+      // Set html.dark and body colors before first paint — see index.html
+      // for why (avoids theme flash on hard navigation).
+      (function () {
+        try {
+          var isLight = localStorage.getItem('chekki_theme') === 'light';
+          if (isLight) {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.colorScheme = 'light';
+          } else {
+            document.documentElement.style.colorScheme = 'dark';
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html:not(.dark) body { background-color: #fafafa; color: #18181b; }
+    </style>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="google-site-verification" content="googlec1811764640ede22" />
@@ -9,7 +27,7 @@
     <title>Chekki AI - Your Homework Helper</title>
     <link rel="canonical" href="https://www.chekkiai.com/app" />
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_dropshadow:azimuth_220;elevation_60;spread_20/f_png,e_improve,e_sharpen/v1765769939/chekki-logo_q5xeux.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nunito:wght@400;600;700;800&family=Patrick+Hand&family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Onest:wght@300..800&family=Patrick+Hand&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",

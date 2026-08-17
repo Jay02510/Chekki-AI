@@ -394,8 +394,8 @@ export default function Home() {
             }`}
           >
             {(isKo
-              ? '집에서 놓친 문제, 교실까지 이어집니다.'
-              : "What's missed at home connects to the classroom."
+              ? '영어 숙제, 더 이상 추측하지 마세요.'
+              : "Never guess at English homework again."
             ).split(' ').map((word, i) => (
               <span key={i} className="reveal-word inline-block mr-[0.3em]">
                 {word}

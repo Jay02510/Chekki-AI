@@ -6,6 +6,19 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 017 — Parent email is optional when adding a student; partially reopens Decision 001
+
+**Date:** 2026-08-17
+**Status:** Resolved
+
+**Context:** `StudentInvitePanel.tsx` required a parent email just to add a student to a class at all — a leftover of Decision 001 (which correctly removed the shared, class-wide join code as a security seam) that also, as a side effect, made a parent's email a hard prerequisite for a student to exist in the system at all. This conflated two independent loops: the class-facing loop (FT/KT daily logging, exceptions, KT report consolidation) only ever needs a name + a stable ID to attach data to, never touches Firebase Auth; the parent-facing loop (scanning homework, receiving Korean reports) is the only one that actually needs an account, which needs an email to redeem. A director without a parent's email on hand — same-day enrollment, orientation before contact info is collected, etc. — couldn't add that student at all, not even to the class roster for logging purposes.
+
+**Decision:** Made `parentEmail` optional on `pendingStudents` creation (`api/create-class.ts`'s `add_students` action, validated in `api/_lib/rosterValidation.ts`). A student added by name alone is immediately usable in FT/KT logging via the `pending:${id}` roster keying already built earlier in the session, and shows a distinct "Class roster only" status in `StudentInvitePanel.tsx` (vs. "Invited"/"Joined"). Redemption stays exactly as Decision 001 left it — email-invite only, no code ever surfaced to staff for manual/in-person sharing; an `inviteCode` still exists on every `pendingStudents` doc (unchanged internal plumbing for the emailed link), it's just never shown or handed out. `api/create-class.ts`'s `resend_student_invite` action doubles as "send the first invite," accepting an optional `parentEmail` so a director can add that email later and the same email-only flow takes over from there.
+
+**Consequences:** Decision 001's model is otherwise untouched: one access path (email invite), no shared/guessable codes, nothing for staff to hand out. What's reopened is narrower still than the first pass at this decision — a director can register a student and start the class-facing loop before a parent email exists, but the parent-facing loop remains exactly "give an email, get a free signup" with no alternate path. Bulk Excel/CSV upload (`handleFileChange`) also no longer filters out rows missing an email column.
+
+---
+
 ## 016 — KT review queue and bulk teacher invite: reused existing data shape, didn't restructure
 
 **Date:** 2026-08-17

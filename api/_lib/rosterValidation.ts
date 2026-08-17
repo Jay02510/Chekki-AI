@@ -32,14 +32,19 @@ export function canRemoveTeacher(callerUid: string, teacherUid: string): boolean
   return callerUid !== teacherUid;
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface PendingStudentInput {
   name: string;
-  parentEmail: string;
+  // Optional: a student can be added to the class-facing roster (FT/KT
+  // logging, exceptions) by name alone, with no parent contact yet. The
+  // parent-facing loop (account redemption) only needs this once someone
+  // actually has it — see Decision 001/DECISIONS.md for why this used to be
+  // mandatory and Decision 017 for why it's now optional.
+  parentEmail?: string;
 }
 
-/** classId + 1-200 {name, parentEmail} rows, each with a non-empty name and a plausible email. */
+/** classId + 1-200 {name, parentEmail?} rows, each with a non-empty name and, if present, a plausible email. */
 export function isValidAddStudentsPayload(
   body: unknown
 ): body is { classId: string; students: PendingStudentInput[] } {
@@ -50,9 +55,8 @@ export function isValidAddStudentsPayload(
   return students.every((s) => {
     if (!s || typeof s !== 'object') return false;
     const { name, parentEmail } = s as Record<string, unknown>;
-    return (
-      typeof name === 'string' && name.trim().length > 0 && name.trim().length <= 100 &&
-      typeof parentEmail === 'string' && EMAIL_RE.test(parentEmail.trim())
-    );
+    if (typeof name !== 'string' || name.trim().length === 0 || name.trim().length > 100) return false;
+    if (parentEmail === undefined || parentEmail === null || parentEmail === '') return true;
+    return typeof parentEmail === 'string' && EMAIL_RE.test(parentEmail.trim());
   });
 }

@@ -343,8 +343,7 @@ async function generateStudentExceptionReport(
   textbook: string,
   exceptionDetails: string
 ): Promise<string> {
-  try {
-    const prompt = `System Prompt / Instructions:
+  const prompt = `System Prompt / Instructions:
 You are drafting a personalized daily update for a specific student's parents. This will be reviewed by the Korean Teacher (KT).
 
 CRITICAL RULES:
@@ -362,12 +361,28 @@ Class Topic: ${classTopic}
 Textbook: ${textbook}
 Teacher Note: ${exceptionDetails}
 `;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-    logUsage('generate_report:exception', response);
-    return response.text?.trim() || `${studentName} 원생은 오늘 ${textbook} (${classTopic}) 수업에 참여하였습니다. ${exceptionDetails}`;
-  } catch (err) {
-    return `${studentName} 원생은 오늘 ${textbook} (${classTopic}) 수업을 진지하게 이수하였습니다. 담임 교사 소견: ${exceptionDetails}`;
+  // One retry before giving up — a single transient Gemini error used to
+  // fall straight through to the raw-English fallback below, which was
+  // showing up in real KT drafts as an untranslated sentence spliced into
+  // an otherwise Korean paragraph (Audit: exception fallback reads as
+  // AI output, not as a flagged failure).
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+      logUsage('generate_report:exception', response);
+      const text = response.text?.trim();
+      if (text) return text;
+    } catch (err) {
+      if (attempt === 1) {
+        console.error('generateStudentExceptionReport: both attempts failed, using flagged fallback:', err);
+      }
+    }
   }
+  // Both attempts failed (or returned empty) — the KT still needs to see
+  // this student was flagged, but the raw English note must not be
+  // disguised as translated Korean. Clearly marked so it stands out for
+  // manual translation before it's copied to a parent.
+  return `⚠️ ${studentName} — 자동 번역 실패, 아래 원문을 직접 번역해 주세요 (auto-translation failed, please translate manually):\n${exceptionDetails}`;
 }
 
 async function generatePhoneConsultationPrep(ai: GoogleGenAI, studentName: string, historicalLogs: string): Promise<string[]> {

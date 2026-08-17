@@ -8,6 +8,7 @@ interface PendingStudent {
   id: string;
   name: string;
   parentEmail: string;
+  inviteCode?: string;
   status: 'invited' | 'redeemed';
   addedAt?: Timestamp;
   redeemedAt?: Timestamp;
@@ -41,6 +42,8 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
   const [removeConfirm, setRemoveConfirm] = useState<{ id: string; label: string } | null>(null);
   const [previewRows, setPreviewRows] = useState<{ name: string; parentEmail: string }[] | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [addEmailForId, setAddEmailForId] = useState<string | null>(null);
+  const [addEmailValue, setAddEmailValue] = useState('');
 
   useEffect(() => {
     if (!classId) return;
@@ -112,18 +115,26 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
     setMessage(null);
     try {
       const data = await callEndpoint({ action: 'add_students', classId, students });
-      if (!data.resendConfigured) {
+      const withEmail = data.added - (data.addedWithoutEmail || 0);
+      if (data.addedWithoutEmail > 0 && withEmail === 0) {
+        setMessage({
+          text: isKo
+            ? `${data.added}명이 학급 명단에 추가되었습니다. 이메일이 없어 초대는 발송되지 않았습니다 — 나중에 이메일을 추가하거나 코드를 직접 전달하세요.`
+            : `${data.added} student(s) added to the class roster. No email on file, so no invite was sent — add one later or share the code directly.`,
+          type: 'success',
+        });
+      } else if (!data.resendConfigured && withEmail > 0) {
         setMessage({
           text: isKo
             ? `${data.added}명 추가됨 — 이메일 발송이 설정되지 않아 코드를 직접 전달해야 합니다.`
             : `${data.added} student(s) added — email sending isn't configured, so codes weren't sent. Share them manually.`,
           type: 'error',
         });
-      } else if (data.emailsSent < data.added) {
+      } else if (data.emailsSent < withEmail) {
         setMessage({
           text: isKo
             ? `${data.added}명 중 ${data.emailsSent}명에게만 이메일이 발송되었습니다. 실패한 초대는 재전송해주세요.`
-            : `Only ${data.emailsSent} of ${data.added} invite emails were sent. Resend the rest individually.`,
+            : `Only ${data.emailsSent} of ${withEmail} invite emails were sent. Resend the rest individually.`,
           type: 'error',
         });
       } else {
@@ -143,7 +154,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
 
   const handleAddSingle = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName.trim() || !newEmail.trim()) return;
+    if (!newName.trim()) return;
     void submitStudents([{ name: newName.trim(), parentEmail: newEmail.trim() }]);
   };
 
@@ -168,13 +179,13 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
           name: findCol(row, ['student', 'name']),
           parentEmail: findCol(row, ['email']),
         }))
-        .filter((r) => r.name && r.parentEmail);
+        .filter((r) => r.name);
 
       if (parsed.length === 0) {
         setMessage({
           text: isKo
-            ? '학생 이름과 학부모 이메일 열을 찾을 수 없습니다. 헤더를 확인해주세요 (예: Name, Email).'
-            : "Couldn't find name/email columns. Check your header row (e.g. Name, Email).",
+            ? '학생 이름 열을 찾을 수 없습니다. 헤더를 확인해주세요 (예: Name). 이메일 열은 선택 사항입니다.'
+            : "Couldn't find a name column. Check your header row (e.g. Name). Email column is optional.",
           type: 'error',
         });
         return;
@@ -193,6 +204,26 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
       setMessage({ text: isKo ? '초대를 재전송했습니다.' : 'Invite resent.', type: 'success' });
     } catch (err: any) {
       setMessage({ text: err.message || 'Failed to resend invite.', type: 'error' });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // A student added by name only gets their first invite sent here — same
+  // endpoint as resend, which also accepts a parentEmail to set for the
+  // first time (api/create-class.ts's handleResendStudentInvite).
+  const handleSendFirstInvite = async (id: string) => {
+    const email = addEmailValue.trim();
+    if (!email) return;
+    setBusyId(id);
+    setMessage(null);
+    try {
+      await callEndpoint({ action: 'resend_student_invite', pendingStudentId: id, parentEmail: email });
+      setMessage({ text: isKo ? '초대를 발송했습니다.' : 'Invite sent.', type: 'success' });
+      setAddEmailForId(null);
+      setAddEmailValue('');
+    } catch (err: any) {
+      setMessage({ text: err.message || 'Failed to send invite.', type: 'error' });
     } finally {
       setBusyId(null);
     }
@@ -264,13 +295,14 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
               />
             </div>
             <div className="flex-1 min-w-[180px]">
-              <label className="text-[10px] font-bold text-zinc-400 uppercase block mb-1">{isKo ? '학부모 이메일' : 'Parent Email'}</label>
+              <label className="text-[10px] font-bold text-zinc-400 uppercase block mb-1">
+                {isKo ? '학부모 이메일 (선택)' : 'Parent Email (optional)'}
+              </label>
               <input
                 type="email"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="parent@email.com"
-                required
                 className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
               />
             </div>
@@ -279,7 +311,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
               disabled={isSubmitting}
               className="px-4 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white text-xs font-bold cursor-pointer transition-colors"
             >
-              {isSubmitting ? '...' : isKo ? '초대 발송' : 'Send Invite'}
+              {isSubmitting ? '...' : newEmail.trim() ? (isKo ? '초대 발송' : 'Send Invite') : (isKo ? '명단에 추가' : 'Add to Roster')}
             </button>
           </form>
         )}
@@ -298,7 +330,11 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
               {previewRows.map((r, i) => (
                 <div key={i} className="text-[11px] text-zinc-400 flex gap-2">
                   <span className="font-bold text-zinc-200">{r.name}</span>
-                  <span className="font-mono">{r.parentEmail}</span>
+                  {r.parentEmail ? (
+                    <span className="font-mono">{r.parentEmail}</span>
+                  ) : (
+                    <span className="italic text-zinc-500">{isKo ? '이메일 없음 — 명단에만 추가' : 'no email — roster only'}</span>
+                  )}
                 </div>
               ))}
             </div>
@@ -334,43 +370,97 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
               </thead>
               <tbody className={`divide-y ${isNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
                 {pending.map((s) => (
-                  <tr key={s.id}>
-                    <td className={`py-3 pl-1 font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{s.name}</td>
-                    <td className="py-3 font-mono text-zinc-400">{s.parentEmail}</td>
-                    <td className="py-3">
-                      {s.status === 'redeemed' ? (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                          ✓ {isKo ? '가입됨' : 'Joined'}
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                          ⏳ {isKo ? '초대됨' : 'Invited'}
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3 text-right pr-1 space-x-2 whitespace-nowrap">
-                      {s.status === 'invited' && (
+                  <React.Fragment key={s.id}>
+                    <tr>
+                      <td className={`py-3 pl-1 font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{s.name}</td>
+                      <td className="py-3 font-mono text-zinc-400">
+                        {s.parentEmail || <span className="italic text-zinc-600">{isKo ? '이메일 없음' : 'no email yet'}</span>}
+                      </td>
+                      <td className="py-3">
+                        {s.status === 'redeemed' ? (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                            ✓ {isKo ? '가입됨' : 'Joined'}
+                          </span>
+                        ) : s.parentEmail ? (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                            ⏳ {isKo ? '초대됨' : 'Invited'}
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                            📋 {isKo ? '학급 명단만' : 'Class roster only'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 text-right pr-1 space-x-2 whitespace-nowrap">
+                        {s.status === 'invited' && s.parentEmail && (
+                          <button
+                            type="button"
+                            onClick={() => handleResend(s.id)}
+                            disabled={busyId === s.id}
+                            title={isKo ? '재전송' : 'Resend'}
+                            className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
+                          >
+                            <PaperPlaneTilt size={12} weight="bold" />
+                          </button>
+                        )}
+                        {s.status === 'invited' && !s.parentEmail && (
+                          <button
+                            type="button"
+                            onClick={() => { setAddEmailForId(s.id); setAddEmailValue(''); }}
+                            disabled={busyId === s.id}
+                            title={isKo ? '이메일 추가하고 초대 발송' : 'Add email and send invite'}
+                            className="px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center gap-1"
+                          >
+                            <PaperPlaneTilt size={12} weight="bold" />
+                            <span className="text-[10px] font-bold">{isKo ? '이메일 추가' : 'Add Email'}</span>
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => handleResend(s.id)}
+                          onClick={() => setRemoveConfirm({ id: s.id, label: s.name })}
                           disabled={busyId === s.id}
-                          title={isKo ? '재전송' : 'Resend'}
-                          className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
+                          title={isKo ? '삭제' : 'Remove'}
+                          className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
                         >
-                          <PaperPlaneTilt size={12} weight="bold" />
+                          <Trash size={12} weight="bold" />
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setRemoveConfirm({ id: s.id, label: s.name })}
-                        disabled={busyId === s.id}
-                        title={isKo ? '삭제' : 'Remove'}
-                        className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
-                      >
-                        <Trash size={12} weight="bold" />
-                      </button>
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
+                    {addEmailForId === s.id && (
+                      <tr>
+                        <td colSpan={4} className="pb-3">
+                          <form
+                            onSubmit={(e) => { e.preventDefault(); void handleSendFirstInvite(s.id); }}
+                            className="flex items-center gap-2 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20"
+                          >
+                            <input
+                              type="email"
+                              autoFocus
+                              value={addEmailValue}
+                              onChange={(e) => setAddEmailValue(e.target.value)}
+                              placeholder="parent@email.com"
+                              required
+                              className={`flex-1 p-2 rounded-lg border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'}`}
+                            />
+                            <button
+                              type="submit"
+                              disabled={busyId === s.id}
+                              className="px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white text-[11px] font-bold cursor-pointer transition-colors"
+                            >
+                              {isKo ? '발송' : 'Send'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setAddEmailForId(null); setAddEmailValue(''); }}
+                              className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 text-[11px] font-bold cursor-pointer transition-colors"
+                            >
+                              {isKo ? '취소' : 'Cancel'}
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

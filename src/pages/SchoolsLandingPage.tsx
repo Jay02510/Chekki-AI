@@ -309,9 +309,9 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Headline */}
           <h1 className={`font-display text-3xl sm:text-5xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] mb-6 text-balance ${isNight ? 'text-white' : 'text-zinc-900'} break-keep`}>
             {isKo ? (
-              <>강사 행정 업무를 <span className="text-orange-500">한층 더 간단하게</span>,<br />학부모와의 소통은 <span className="text-orange-500">더 빠르고 편하게</span>.</>
+              <>숙제 채점, 학부모 안내. <span className="text-orange-500">모두 자동으로.</span></>
             ) : (
-              <>Make grading admin <span className="text-orange-500">far simpler</span>.<br />Keep parents informed with <span className="text-orange-500">clearer, faster updates</span>.</>
+              <>Homework graded. Parents updated. <span className="text-orange-500">Automatically.</span></>
             )}
           </h1>
 
