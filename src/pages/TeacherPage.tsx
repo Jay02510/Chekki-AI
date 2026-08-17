@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -27,11 +27,12 @@ import {
   SignOut, 
   ChalkboardTeacher, 
   CaretRight, 
-  Warning, 
+  Warning,
   Check,
   Funnel,
   ShieldCheck,
   X,
+  List,
   Gear,
   UploadSimple,
   Image,
@@ -45,7 +46,7 @@ import {
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
 import { KtReviewQueue } from '../components/KtReviewQueue';
-import { NativeFtDashboard } from '../components/NativeFtDashboard';
+import { NativeFtDashboard, FtStatCards } from '../components/NativeFtDashboard';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { FeedbackModal } from '../../components/FeedbackModal';
 import { asString, asJoinedString } from '../../utils/validate';
@@ -166,6 +167,19 @@ export default function TeacherPage({ isNight = true }: Props) {
   // clicked yet (e.g. right after a class switch).
   const [activeKtLogId, setActiveKtLogId] = useState<string | null>(null);
   const activeKtLog = ktPendingLogs.find((l) => l.id === activeKtLogId) || ktPendingLogs[0] || null;
+  // KtReviewQueue is memoized, but a fresh .map() literal built inline in JSX
+  // on every render would defeat that regardless — this is the one place the
+  // derived shape actually needs to be recomputed (audit action #6).
+  const ktQueueLogs = useMemo(
+    () =>
+      ktPendingLogs.map((l) => ({
+        id: l.id,
+        lessonTopic: l.lessonTopic,
+        date: l.date,
+        flaggedCount: (l.aiStudentReports || []).length,
+      })),
+    [ktPendingLogs]
+  );
   // Brief "copied ✓" confirmation on the queue chip before the log actually
   // drops out of ktPendingLogs, so approving doesn't just make it vanish
   // with no visible trail of what was just sent.
@@ -277,6 +291,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             studentName: ex.studentName,
             koreanUpdate: updateText,
             phoneTalkingPoints: points,
+            category: ex.type,
           };
         })
       );
@@ -1194,6 +1209,13 @@ export default function TeacherPage({ isNight = true }: Props) {
     isOpen: showSettingsModal,
     onClose: () => setShowSettingsModal(false),
   });
+  // Mobile off-canvas nav drawer — on md+ the sidebar is always a static
+  // column and this state is simply never set true, so it's a no-op there.
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const sidebarDialogRef = useDialogA11y<HTMLElement>({
+    isOpen: isSidebarOpen,
+    onClose: () => setIsSidebarOpen(false),
+  });
 
   // Teacher onboarding steps config
   const teacherObSteps = [
@@ -2051,8 +2073,13 @@ ${questionsHtml}
     }
   };
 
+  // Falls back to a generic label, never the raw UID — that UID gets written
+  // permanently into activityLog.targetLabel and rendered straight to the
+  // director in ActivityFeed; a student record with no name set (seed/test
+  // data, or a student whose profile write hasn't landed yet) shouldn't leak
+  // an internal Firebase identifier into that feed.
   const findStudentLabel = (studentUid: string) =>
-    (studentsData || []).find((s: any) => s?.uid === studentUid)?.studentName || studentUid;
+    (studentsData || []).find((s: any) => s?.uid === studentUid)?.studentName || 'Unnamed Student';
 
   const handleApproveStudent = async (studentUid: string) => {
     try {
@@ -2245,9 +2272,26 @@ ${questionsHtml}
     ? Math.round((completedHomeworkCount / activeStudentsCount) * 100) 
     : 0;
 
-  const sortedTroubleWords = Object.keys(vocabMistakeCounts)
-    .map(word => ({ word, count: vocabMistakeCounts[word] }))
-    .sort((a, b) => b.count - a.count);
+  // Feeds NativeFtDashboard, which is now React.memo'd — an inline .map()
+  // here would rebuild a new array reference every render regardless of
+  // whether vocabMistakeCounts actually changed, defeating that memo the
+  // same way the KtReviewQueue logs prop did (audit action #6).
+  const sortedTroubleWords = useMemo(
+    () =>
+      Object.keys(vocabMistakeCounts)
+        .map((word) => ({ word, count: vocabMistakeCounts[word] }))
+        .sort((a, b) => b.count - a.count),
+    [vocabMistakeCounts]
+  );
+
+  // Same reasoning — NativeFtDashboard's roster prop.
+  const ftDashboardRoster = useMemo(
+    () =>
+      (studentsData || [])
+        .filter((s: any) => s?.classStatus === 'active' && s?.name)
+        .map((s: any) => s.name),
+    [studentsData]
+  );
 
   // --- RENDER AUTH (LOGIN / SIGN UP) VIEW ---
   if (!isAuthenticated) {
@@ -2259,10 +2303,10 @@ ${questionsHtml}
     const planSeats = seatsForPlan(activationPlanId);
     const planLabel = labelsForPlan(activationPlanId);
     return (
-      <div className="fixed inset-0 z-[500] overflow-y-auto bg-[#050505] text-zinc-200 flex items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
+      <div className="fixed inset-0 z-[500] overflow-y-auto bg-brand-dark text-zinc-200 flex items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
         <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
         <div className="relative w-full max-w-md p-1.5 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col">
-          <div className="bg-[#0c0c0e] rounded-[calc(2.5rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center">
+          <div className="bg-brand-dark rounded-[calc(2.5rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center">
             <div className="w-full flex justify-start mb-2">
               <button
                 type="button"
@@ -2280,7 +2324,7 @@ ${questionsHtml}
                 also hidden for a plan-linked director signup (picked a plan
                 on /schools) since that's already role-locked to director. */}
             {!(inviteSlug && authMode === 'signup') && !isPlanSignup && (
-              <div className="w-full flex p-1 bg-[#050505] border border-white/10 rounded-2xl mb-4">
+              <div className="w-full flex p-1 bg-brand-dark border border-white/10 rounded-2xl mb-4">
                 <button
                   type="button"
                   onClick={() => { setLoginRole('teacher'); setAuthError(''); if (!inviteSlug) setAuthMode('login'); }}
@@ -2346,7 +2390,7 @@ ${questionsHtml}
                 accounts are only ever created via a director's invite link
                 now (audit §21); direct teacher signup below is disabled. */}
             {!isPlanSignup && !(loginRole === 'teacher' && !inviteSlug) && !inviteSlug && (
-              <div className="w-full flex bg-[#050505] p-1 rounded-2xl border border-white/10 mb-6">
+              <div className="w-full flex bg-brand-dark p-1 rounded-2xl border border-white/10 mb-6">
                 <button
                   type="button"
                   onClick={() => { setAuthMode('login'); setAuthError(''); }}
@@ -2425,7 +2469,7 @@ ${questionsHtml}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={loginRole === 'director' ? (isKo ? "김원장 원장님" : "Director Jane Smith") : (isKo ? "김철수 선생님" : "Jane Doe")}
-                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                    className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
                   />
                 </div>
               )}
@@ -2441,7 +2485,7 @@ ${questionsHtml}
                     value={academyNameInput}
                     onChange={(e) => setAcademyNameInput(e.target.value)}
                     placeholder={isKo ? '예: 첵키 잉글리시 아카데미' : 'e.g. Chekki English Academy'}
-                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                    className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
                   />
                 </div>
               )}
@@ -2456,7 +2500,7 @@ ${questionsHtml}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={loginRole === 'director' ? "director@school.com" : "teacher@school.com"}
-                  className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                  className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
                 />
               </div>
 
@@ -2470,7 +2514,7 @@ ${questionsHtml}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                  className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
                 />
               </div>
 
@@ -2485,7 +2529,7 @@ ${questionsHtml}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-[#050505] border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
+                    className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-all text-white placeholder:text-zinc-600"
                   />
                 </div>
               )}
@@ -2642,10 +2686,10 @@ ${questionsHtml}
       setActiveTab(welcomeRole === 'kt' ? 'kt_script' : 'overview');
     };
     return (
-      <div className={`min-h-screen flex items-center justify-center p-4 font-sans ${isThemeNight ? 'bg-[#030305] text-zinc-100' : 'bg-zinc-50 text-zinc-900'}`}>
+      <div className={`min-h-screen flex items-center justify-center p-4 font-sans ${isThemeNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'}`}>
         <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/8 via-transparent to-transparent blur-[100px] pointer-events-none" />
         <div className={`relative w-full max-w-md rounded-[2rem] border shadow-2xl p-1.5 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-          <div className={`rounded-[calc(2rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center ${isThemeNight ? 'bg-[#0c0c0e]' : 'bg-white'}`}>
+          <div className={`rounded-[calc(2rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center ${isThemeNight ? 'bg-brand-dark' : 'bg-white'}`}>
 
             {/* Mascot + Badge */}
             <div className="w-16 h-16 mb-5 drop-shadow-[0_8px_20px_rgba(249,115,22,0.25)]">
@@ -2675,7 +2719,7 @@ ${questionsHtml}
                     value={welcomeName}
                     onChange={(e) => setWelcomeName(e.target.value)}
                     placeholder={isKo ? '홍길동 선생님' : 'Jane Doe'}
-                    className={`w-full p-4 rounded-2xl border text-sm font-bold outline-none focus:border-orange-500 transition-all ${isThemeNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
+                    className={`w-full p-4 rounded-2xl border text-sm font-bold outline-none focus:border-orange-500 transition-all ${isThemeNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
                   />
                 </div>
 
@@ -2776,7 +2820,7 @@ ${questionsHtml}
                     value={welcomeClassName}
                     onChange={(e) => setWelcomeClassName(e.target.value)}
                     placeholder={isKo ? '예: 7B Sunshine / 초등 3반' : 'E.g. 7B Sunshine / Level 3 Advanced'}
-                    className={`w-full p-4 rounded-2xl border text-sm font-bold outline-none focus:border-orange-500 transition-all ${isThemeNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
+                    className={`w-full p-4 rounded-2xl border text-sm font-bold outline-none focus:border-orange-500 transition-all ${isThemeNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
                   />
                 </div>
 
@@ -2818,7 +2862,7 @@ ${questionsHtml}
 
   // --- RENDER CORE DASHBOARD LAYOUT SHELL ---
   return (
-    <div className={`min-h-screen ${isThemeNight ? 'bg-[#050505] text-zinc-100' : 'bg-[#f8fafc] text-zinc-900'} flex flex-col md:flex-row selection:bg-orange-500 selection:text-white`}>
+    <div className={`min-h-screen ${isThemeNight ? 'bg-brand-dark text-zinc-100' : 'bg-slate-50 text-zinc-900'} flex flex-col md:flex-row selection:bg-orange-500 selection:text-white`}>
 
       {/* Teacher Onboarding Modal */}
       {showTeacherOnboarding && (() => {
@@ -2837,7 +2881,7 @@ ${questionsHtml}
               isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
             }`}>
               <div className={`rounded-[calc(2.5rem-0.25rem)] p-8 flex flex-col items-center text-center ${
-                isThemeNight ? 'bg-[#0c0c0e] text-white' : 'bg-white text-zinc-900'
+                isThemeNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'
               }`}>
                 <button
                   onClick={dismissTeacherOnboarding}
@@ -2849,7 +2893,7 @@ ${questionsHtml}
                 </button>
 
                 <div className={`w-44 h-44 mb-6 rounded-3xl overflow-hidden p-2 flex items-center justify-center shadow-xl ${
-                  isThemeNight ? 'bg-black/40 border border-white/10 shadow-[0_20px_40px_rgba(249,115,22,0.15)]' : 'bg-[#0a0a0c] border border-zinc-300/80 shadow-orange-500/10'
+                  isThemeNight ? 'bg-black/40 border border-white/10 shadow-[0_20px_40px_rgba(249,115,22,0.15)]' : 'bg-brand-dark border border-zinc-300/80 shadow-orange-500/10'
                 }`}>
                   <img src={step.img} alt="" className="w-full h-full object-contain" />
                 </div>
@@ -2897,21 +2941,36 @@ ${questionsHtml}
       })()}
 
 
-      {/* Sidebar Navigation */}
-      <aside className={`w-full md:w-72 border-b md:border-b-0 md:border-r flex flex-col shrink-0 transition-colors ${
-        isThemeNight ? 'bg-[#08080a] border-white/5' : 'bg-white border-zinc-200 shadow-xs'
-      }`}>
-        
+      {/* Mobile-only backdrop for the off-canvas drawer */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-[350] bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Navigation — static column on md+, off-canvas drawer below md */}
+      <aside
+        ref={sidebarDialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={isKo ? '탐색 메뉴' : 'Navigation menu'}
+        tabIndex={-1}
+        className={`fixed inset-y-0 left-0 z-[360] w-[85vw] max-w-sm transform transition-transform duration-300 ease-out md:static md:z-auto md:w-72 md:h-screen md:sticky md:top-0 md:translate-x-0 md:transform-none border-b md:border-b-0 md:border-r flex flex-col shrink-0 transition-colors ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } ${isThemeNight ? 'bg-brand-dark border-white/5' : 'bg-white border-zinc-200 shadow-xs'}`}
+      >
+
         {/* Sidebar Header / Brand */}
-        <div className={`p-6 border-b transition-colors flex items-center justify-between gap-3 ${
-          isThemeNight ? 'border-white/5 bg-[#08080a]' : 'border-zinc-200 bg-white'
+        <div className={`p-6 border-b transition-colors flex items-center justify-between gap-3 shrink-0 ${
+          isThemeNight ? 'border-white/5 bg-brand-dark' : 'border-zinc-200 bg-white'
         }`}>
           <div className="flex items-center gap-3.5 min-w-0">
             {academyLogo ? (
-              <img 
-                src={academyLogo} 
-                alt="Academy Logo" 
-                className="w-10 h-10 rounded-2xl object-cover border border-white/10 shadow-md bg-white/5" 
+              <img
+                src={academyLogo}
+                alt="Academy Logo"
+                className="w-10 h-10 rounded-2xl object-cover border border-white/10 shadow-md bg-white/5"
               />
             ) : (
               <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-center text-orange-500 shadow-lg shrink-0">
@@ -2928,10 +2987,25 @@ ${questionsHtml}
             </div>
           </div>
 
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-label={isKo ? '메뉴 닫기' : 'Close menu'}
+            className={`md:hidden p-2 rounded-xl transition-all active:scale-[0.95] cursor-pointer shrink-0 ${
+              isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
+            }`}
+          >
+            <X size={18} weight="bold" />
+          </button>
         </div>
 
         {/* Navigation Tabs (Scoped by Role) */}
-        <nav className="p-4 flex-1 space-y-2">
+        <nav
+          className="p-4 flex-1 space-y-2 overflow-y-auto"
+          onClick={(e) => {
+            if ((e.target as HTMLElement).closest('button')) setIsSidebarOpen(false);
+          }}
+        >
           {/* Director Tabs (Director Only) — grouped: hub first, setup tasks
               below with a labeled break, matching the tight-within/generous-
               between rhythm used elsewhere in the app. */}
@@ -3263,7 +3337,7 @@ ${questionsHtml}
 
         {/* Sidebar Footer / User Info */}
         <div className={`p-4 border-t flex items-center justify-between gap-3 shrink-0 transition-colors ${
-          isThemeNight ? 'border-white/5 bg-[#050505]/60' : 'border-zinc-200 bg-zinc-50'
+          isThemeNight ? 'border-white/5 bg-brand-dark/60' : 'border-zinc-200 bg-zinc-50'
         }`}>
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-500 flex items-center justify-center font-bold text-xs shrink-0">
@@ -3299,15 +3373,26 @@ ${questionsHtml}
 
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col min-w-0 relative overflow-y-auto transition-colors ${
-        isThemeNight ? 'bg-[#050505] text-white' : 'bg-[#F8FAFC] text-zinc-900'
+        isThemeNight ? 'bg-brand-dark text-white' : 'bg-slate-50 text-zinc-900'
       }`}>
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent pointer-events-none" />
         
         {/* Top Header Control Bar */}
         <header className={`p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-4 relative z-10 shrink-0 transition-colors ${
-          isThemeNight ? 'bg-[#08080a]/90 border-white/5 text-white' : 'bg-white/90 border-zinc-200 text-zinc-900 shadow-xs'
+          isThemeNight ? 'bg-brand-dark/90 border-white/5 text-white' : 'bg-white/90 border-zinc-200 text-zinc-900 shadow-xs'
         }`}>
           <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              aria-label={isKo ? '메뉴 열기' : 'Open menu'}
+              className={`md:hidden p-2.5 rounded-xl transition-all active:scale-[0.95] cursor-pointer shrink-0 border ${
+                isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900'
+              }`}
+            >
+              <List size={20} weight="bold" />
+            </button>
+
             {/* Class switcher — this used to be hidden for directors
                 entirely, which was fine while the Curriculum Preseed tab's
                 own "Target Class" selector gave them a second way to switch.
@@ -3329,7 +3414,7 @@ ${questionsHtml}
                     if (found) setSelectedClass(found);
                   }}
                   className={`font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
-                    isThemeNight ? 'bg-[#050505] border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
+                    isThemeNight ? 'bg-brand-dark border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
                   }`}
                 >
                   {classes.map((cls) => (
@@ -3387,7 +3472,7 @@ ${questionsHtml}
             {selectedClass && !selectedClass.isDemo && (
               <div className="flex items-center gap-2">
                 <div className={`border rounded-2xl flex items-center overflow-hidden p-1 shadow-inner ${
-                  isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-100 border-zinc-300'
+                  isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-100 border-zinc-300'
                 }`}>
                   <button
                     type="button"
@@ -3597,12 +3682,7 @@ ${questionsHtml}
             {activeTab === 'kt_script' && ktPendingLogs.length > 0 && (
               <div className="mb-4 max-w-4xl mx-auto w-full">
                 <KtReviewQueue
-                  logs={ktPendingLogs.map((l) => ({
-                    id: l.id,
-                    lessonTopic: l.lessonTopic,
-                    date: l.date,
-                    flaggedCount: (l.aiStudentReports || []).length,
-                  }))}
+                  logs={ktQueueLogs}
                   activeId={activeKtLog?.id || null}
                   justCopiedId={justCopiedLogId}
                   onSelect={setActiveKtLogId}
@@ -3663,16 +3743,13 @@ ${questionsHtml}
                     {isKo ? '선택된 반:' : 'Active class:'} <span className="font-mono font-bold">{activeClass?.name || '—'}</span>
                   </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className={`p-6 rounded-3xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
-                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">{isKo ? '등록 원생 수' : 'Enrolled Students'}</p>
-                    <p className={`text-3xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{activeStudentsCount}</p>
-                  </div>
-                  <div className={`p-6 rounded-3xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
-                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">{isKo ? '숙제 완료율' : 'Homework Rate'}</p>
-                    <p className={`text-3xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{completionRate}%</p>
-                  </div>
-                </div>
+                <FtStatCards
+                  isNight={isThemeNight}
+                  isKo={isKo}
+                  completionRate={completionRate}
+                  completedHomeworkCount={completedHomeworkCount}
+                  activeStudentsCount={activeStudentsCount}
+                />
                 <div className={`p-5 rounded-3xl border flex items-center justify-between ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
                   <p className={`text-sm ${isThemeNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                     {isKo ? '학부모 알림톡 작성 & 1클릭 복사' : 'Write & copy parent KakaoTalk script'}
@@ -3697,7 +3774,7 @@ ${questionsHtml}
                   userProfile={user}
                   selectedClassName={activeClass?.name}
                   selectedTextbookName={selectedTextbookName}
-                  roster={(studentsData || []).filter((s: any) => s?.classStatus === 'active' && s?.name).map((s: any) => s.name)}
+                  roster={ftDashboardRoster}
                 />
               </div>
             )}
@@ -3711,7 +3788,7 @@ ${questionsHtml}
               user={user}
               activeClass={activeClass}
               selectedTextbookName={selectedTextbookName}
-              roster={(studentsData || []).filter((s: any) => s?.classStatus === 'active' && s?.name).map((s: any) => s.name)}
+              roster={ftDashboardRoster}
               handleFtLogSubmit={handleFtLogSubmit}
               isSubmittingFtLog={isSubmittingFtLog}
               completionRate={completionRate}
@@ -3849,7 +3926,7 @@ ${questionsHtml}
             aria-labelledby="student-drawer-title"
             tabIndex={-1}
             className={`relative w-full max-w-lg h-full border-l p-6 sm:p-8 flex flex-col shadow-2xl animate-slide-in text-left transition-colors ${
-            isThemeNight ? 'bg-[#0c0c0e] border-white/10 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+            isThemeNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-200 text-zinc-900'
           }`}>
 
             {/* Drawer Header */}
@@ -3909,7 +3986,7 @@ ${questionsHtml}
                     onChange={(e) => setFlagReasonInput(e.target.value)}
                     placeholder={isKo ? '플래그 사유를 입력하세요 (학습/행동 이슈 등)' : 'Reason for flagging (academic or behavioral issue)...'}
                     className={`w-full h-20 p-3 rounded-xl border text-xs outline-none resize-none ${
-                      isThemeNight ? 'bg-[#050505] border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
+                      isThemeNight ? 'bg-brand-dark border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
                     }`}
                   />
                   <div className="flex gap-2">
@@ -3962,7 +4039,7 @@ ${questionsHtml}
                   <div className="space-y-4">
                     {selectedStudentDetails.weeklyMistakes.map((m: any, idx: number) => (
                       <div key={m.uniqueId || idx} className={`p-5 border rounded-2xl flex flex-col gap-3 ${
-                        isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-200 shadow-xs'
+                        isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200 shadow-xs'
                       }`}>
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-1.5 flex-wrap">
@@ -4028,7 +4105,7 @@ ${questionsHtml}
                 type="button"
                 onClick={() => setSelectedStudentDetails(null)}
                 className={`w-1/2 py-4 font-bold text-xs rounded-2xl transition-all border active:scale-[0.98] cursor-pointer ${
-                  isThemeNight ? 'bg-[#050505] hover:bg-white/5 text-zinc-300 border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                  isThemeNight ? 'bg-brand-dark hover:bg-white/5 text-zinc-300 border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
                 }`}
               >
                 {isKo ? '닫기' : 'Close'}
@@ -4055,7 +4132,7 @@ ${questionsHtml}
             isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
           }`}>
             <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 overflow-hidden transition-colors ${
-              isThemeNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+              isThemeNight ? 'bg-brand-dark text-zinc-200' : 'bg-white text-zinc-900'
             }`}>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
@@ -4085,7 +4162,7 @@ ${questionsHtml}
                     onChange={(e) => setNewClassName(e.target.value)}
                     placeholder="E.g. 7-Mercury"
                     className={`w-full border outline-none text-sm p-4 rounded-2xl transition-all ${
-                      isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                      isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
                     }`}
                   />
                 </div>
@@ -4099,7 +4176,7 @@ ${questionsHtml}
                     value={newClassLevel}
                     onChange={(e) => setNewClassLevel(e.target.value)}
                     className={`w-full border outline-none text-sm p-4 rounded-2xl transition-all cursor-pointer ${
-                      isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900'
+                      isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900'
                     }`}
                   >
                     <option value="5-year-old">{isKo ? '5세반' : '5-year-old'}</option>
@@ -4115,7 +4192,7 @@ ${questionsHtml}
                     type="button"
                     onClick={() => setShowCreateClassModal(false)}
                     className={`flex-1 py-4 font-bold text-xs rounded-2xl border transition-all active:scale-[0.98] cursor-pointer ${
-                      isThemeNight ? 'bg-[#050505] hover:bg-white/5 text-zinc-400 hover:text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                      isThemeNight ? 'bg-brand-dark hover:bg-white/5 text-zinc-400 hover:text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
                     }`}
                   >
                     {isKo ? '취소' : 'Cancel'}
@@ -4154,7 +4231,7 @@ ${questionsHtml}
             isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
           }`}>
             <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 transition-colors ${
-              isThemeNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+              isThemeNight ? 'bg-brand-dark text-zinc-200' : 'bg-white text-zinc-900'
             }`}>
               <button
                 type="button"
@@ -4194,7 +4271,7 @@ ${questionsHtml}
               <div className="space-y-6">
                 {/* Profile Info */}
                 <div className={`p-4 border rounded-2xl space-y-2 ${
-                  isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-200'
+                  isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
                 }`}>
                   <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">
                     {isKo ? '계정 프로필 정보' : 'ACCOUNT PROFILE'}

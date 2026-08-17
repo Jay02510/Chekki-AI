@@ -73,7 +73,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               : 'bg-white border border-zinc-200/90 shadow-xl shadow-zinc-200/40 hover:border-orange-400/50'
           }`}>
             <div className={`rounded-[calc(2.25rem-0.375rem)] p-6 min-h-[220px] flex flex-col justify-between relative overflow-hidden transition-all duration-500 ${
-              isNight ? 'bg-[#050505] group-hover:bg-[#0F0814]' : 'bg-white group-hover:bg-orange-50/40'
+              isNight ? 'bg-brand-dark group-hover:bg-brand-dark-elevated' : 'bg-white group-hover:bg-orange-50/40'
             }`}>
               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-[40px] group-hover:bg-orange-500/30 transition-colors pointer-events-none" />
               
@@ -128,7 +128,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               : 'bg-white border border-zinc-200/90 shadow-xl shadow-zinc-200/40 hover:border-orange-400/50'
           }`}>
             <div className={`rounded-[calc(2.25rem-0.375rem)] p-6 flex flex-col justify-between relative overflow-hidden min-h-[190px] transition-all duration-500 ${
-              isNight ? 'bg-[#050505] group-hover:bg-[#0F0814]' : 'bg-white group-hover:bg-orange-50/40'
+              isNight ? 'bg-brand-dark group-hover:bg-brand-dark-elevated' : 'bg-white group-hover:bg-orange-50/40'
             }`}>
               <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500 mb-3 relative z-10">
                 <Camera size={22} weight="fill" />
@@ -209,7 +209,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
           
           {/* Inner Card Double-Bezel */}
           <div className={`rounded-[calc(2.5rem-0.5rem)] p-8 md:p-10 h-full flex flex-col justify-between relative overflow-hidden ${
-            isNight ? 'bg-[#050505]' : 'bg-white'
+            isNight ? 'bg-brand-dark' : 'bg-white'
           }`}>
             
             {/* Top Hub Header */}
@@ -337,7 +337,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               : 'bg-white border border-zinc-200/90 shadow-xl shadow-zinc-200/40 hover:border-orange-400/50'
           }`}>
             <div className={`rounded-[calc(2.25rem-0.375rem)] p-5 flex flex-col justify-between min-h-[140px] relative overflow-hidden transition-all duration-500 ${
-              isNight ? 'bg-[#050505] group-hover:bg-[#0F0814]' : 'bg-white group-hover:bg-orange-50/40'
+              isNight ? 'bg-brand-dark group-hover:bg-brand-dark-elevated' : 'bg-white group-hover:bg-orange-50/40'
             }`}>
               <span className="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest block mb-2 relative z-10">
                 {activeTab === 'korean' ? '엄마의 매일 밤 고민' : "Mom's Painpoint"}
@@ -374,7 +374,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               : 'bg-white border border-zinc-200/90 shadow-xl shadow-zinc-200/40 hover:border-emerald-500/50'
           }`}>
             <div className={`rounded-[calc(2.25rem-0.375rem)] p-6 relative overflow-hidden flex flex-col justify-between min-h-[175px] transition-all duration-500 ${
-              isNight ? 'bg-[#050505] group-hover:bg-[#06140A]' : 'bg-white group-hover:bg-emerald-50/40'
+              isNight ? 'bg-brand-dark group-hover:bg-[#06140A]' : 'bg-white group-hover:bg-emerald-50/40'
             }`}>
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 mb-3 relative z-10">
                 <Lightning size={22} weight="fill" />
@@ -416,7 +416,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               : 'bg-white border border-zinc-200/90 shadow-xl shadow-zinc-200/40 hover:border-orange-400/50'
           }`}>
             <div className={`rounded-[calc(2.25rem-0.375rem)] p-6 h-full flex flex-col justify-between relative overflow-hidden transition-all duration-500 ${
-              isNight ? 'bg-[#050505] group-hover:bg-[#0F0814]' : 'bg-white group-hover:bg-orange-50/40'
+              isNight ? 'bg-brand-dark group-hover:bg-brand-dark-elevated' : 'bg-white group-hover:bg-orange-50/40'
             }`}>
               <div className="space-y-2 relative z-10">
                 <div>

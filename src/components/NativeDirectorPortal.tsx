@@ -187,7 +187,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   return (
     <div
       className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-8 font-sans transition-all ${
-        isNight ? 'bg-[#060608] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+        isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
       {/* Setup-First Activation Header Banner — real signal from
@@ -366,52 +366,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* High-Level Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
-        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">CAMPUS CLASSES</span>
-          <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-            {classes.length}{' '}
-            <span className="text-xs font-normal text-zinc-400">Active</span>
-          </h4>
-        </div>
-        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">TOTAL ROSTER</span>
-          <h4 className="text-2xl font-black text-orange-400 mt-1">{totalRosterCount} <span className="text-xs font-normal text-zinc-400">Enrolled</span></h4>
-        </div>
-        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">STAFF SEAT QUOTA</span>
-            {planId === 'trial' ? (
-              <span className="text-[10px] font-bold text-zinc-500" title="Paid seat expansion isn't available during the free trial">
-                Upgrade to add seats
-              </span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowSeatExpansionModal(true)}
-                className="text-[10px] font-bold text-orange-400 hover:underline cursor-pointer"
-              >
-                + Add Seats
-              </button>
-            )}
-          </div>
-          <h4 className="text-2xl font-black text-emerald-400 mt-1">
-            {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)} <span className="text-xs font-normal text-zinc-400">Total ({seatsTotal?.ft || 0} FT / {seatsTotal?.kt || 0} KT)</span>
-          </h4>
-        </div>
-        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">FLAGGED EXCEPTIONS</span>
-          <h4 className="text-2xl font-black text-amber-400 mt-1">{flaggedStudents.length} <span className="text-xs font-normal text-zinc-400">Unresolved</span></h4>
-        </div>
-        <div className={`p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">DAILY LOG REVIEW</span>
-          <h4 className={`text-2xl font-black mt-1 ${logReviewStats.pending > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
-            {logReviewStats.pending} <span className="text-xs font-normal text-zinc-400">Awaiting KT Review ({logReviewStats.sent} sent)</span>
-          </h4>
-        </div>
-      </div>
-
       {/* ========================================================================= */}
       {/* TAB OVERVIEW: THIS UNIT, AT A GLANCE (selectedClass's active week: real */}
       {/* target vocab + real per-student sync status, both already computed by */}
@@ -419,6 +373,57 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* ========================================================================= */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-fade-in text-left">
+          {/* High-Level Metric Cards — Overview-only (previously shown above
+              every tab, wrapping to 3 rows on mobile and pushing each tab's
+              own content down; every other tab already has its own more-
+              detailed view of the same numbers, so this is now a one-line
+              horizontally-scrollable strip, same pattern as KtReviewQueue's
+              chip list, scoped to the tab where it's actually a summary. */}
+          <div className="flex items-center gap-3 overflow-x-auto pb-1">
+            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">CAMPUS CLASSES</span>
+              <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {classes.length}{' '}
+                <span className="text-xs font-normal text-zinc-400">Active</span>
+              </h4>
+            </div>
+            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">TOTAL ROSTER</span>
+              <h4 className="text-2xl font-black text-orange-400 mt-1">{totalRosterCount} <span className="text-xs font-normal text-zinc-400">Enrolled</span></h4>
+            </div>
+            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">STAFF SEAT QUOTA</span>
+                {planId === 'trial' ? (
+                  <span className="text-[10px] font-bold text-zinc-500 whitespace-nowrap" title="Paid seat expansion isn't available during the free trial">
+                    Upgrade to add seats
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowSeatExpansionModal(true)}
+                    className="text-[10px] font-bold text-orange-400 hover:underline cursor-pointer whitespace-nowrap"
+                  >
+                    + Add Seats
+                  </button>
+                )}
+              </div>
+              <h4 className="text-2xl font-black text-emerald-400 mt-1 whitespace-nowrap">
+                {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)} <span className="text-xs font-normal text-zinc-400">Total ({seatsTotal?.ft || 0} FT / {seatsTotal?.kt || 0} KT)</span>
+              </h4>
+            </div>
+            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">FLAGGED EXCEPTIONS</span>
+              <h4 className="text-2xl font-black text-amber-400 mt-1">{flaggedStudents.length} <span className="text-xs font-normal text-zinc-400">Unresolved</span></h4>
+            </div>
+            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">DAILY LOG REVIEW</span>
+              <h4 className={`text-2xl font-black mt-1 whitespace-nowrap ${logReviewStats.pending > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                {logReviewStats.pending} <span className="text-xs font-normal text-zinc-400">Awaiting KT Review ({logReviewStats.sent} sent)</span>
+              </h4>
+            </div>
+          </div>
+
           {/* selectedClass is never actually null — TeacherPage always falls
               back to a placeholder "Sample Class" object so the rest of the
               page can safely read .joinCode etc without null checks
@@ -430,12 +435,12 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               a class"). Checking isDemo instead of truthiness shows the
               genuine empty state until a real class exists. */}
           {!selectedClass || selectedClass.isDemo ? (
-            <div className={`p-8 rounded-2xl border text-center ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+            <div className={`p-8 rounded-2xl border text-center ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
               <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No class yet</p>
               <p className="text-xs text-zinc-400 mt-1">Create your first class to see this week&apos;s vocab and student status here.</p>
             </div>
           ) : (
-            <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+            <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
                 <div>
                   <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">This Week</span>
@@ -475,8 +480,8 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-purple-400 uppercase font-mono tracking-wider block mb-2">
-                  Roster Sync Status ({activeRoster.length})
+                <span className="text-[10px] font-bold text-orange-400 uppercase font-mono tracking-wider block mb-2">
+                  Student Status ({activeRoster.length})
                 </span>
                 {activeRoster.length === 0 ? (
                   <p className="text-xs text-zinc-400">No active students in this class yet.</p>
@@ -525,7 +530,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* CARD 1: Course Syllabus Scope Stream */}
             <div className={`p-6 rounded-2xl border space-y-4 ${
-              isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'
+              isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
             }`}>
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
@@ -589,7 +594,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 
             {/* CARD 2: Daily Homework Worksheets Stream */}
             <div className={`p-6 rounded-2xl border space-y-4 ${
-              isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'
+              isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
             }`}>
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
@@ -657,7 +662,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 <div
                   key={st.uid}
                   className={`p-6 rounded-2xl border space-y-4 ${
-                    isNight ? 'bg-[#08080c] border-white/10' : 'bg-white border-zinc-200 shadow-sm'
+                    isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200 shadow-sm'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -670,7 +675,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                     </span>
                   </div>
 
-                  <div className={`p-4 rounded-xl border text-xs leading-relaxed ${isNight ? 'bg-[#030305] border-white/5 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-800'}`}>
+                  <div className={`p-4 rounded-xl border text-xs leading-relaxed ${isNight ? 'bg-brand-dark border-white/5 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-800'}`}>
                     <span className="text-[10px] font-bold uppercase font-mono text-zinc-500 block mb-1">
                       Flagged Reason by {st.flaggedException?.teacherName}:
                     </span>

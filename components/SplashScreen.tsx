@@ -44,7 +44,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] bg-[#050505] flex flex-col items-center justify-center transition-opacity duration-200 ${isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+      className={`fixed inset-0 z-[100] bg-brand-dark flex flex-col items-center justify-center transition-opacity duration-200 ${isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-orange-500/10 rounded-full blur-[100px] animate-pulse"></div>

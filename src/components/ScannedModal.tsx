@@ -76,7 +76,7 @@ export function ScannedModal({
       >
         <div
           className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar ${
-            isThemeNight ? 'bg-[#0c0c0e] text-zinc-100' : 'bg-white text-zinc-900'
+            isThemeNight ? 'bg-brand-dark text-zinc-100' : 'bg-white text-zinc-900'
           }`}
         >
           {/* Header */}
@@ -373,7 +373,7 @@ export function ScannedModal({
                                 itemHasBadWord
                                   ? 'bg-red-950/40 border-red-500 text-red-200'
                                   : isThemeNight
-                                  ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-zinc-200'
+                                  ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-zinc-200'
                                   : 'bg-white border-zinc-300 focus:border-orange-500 text-zinc-800'
                               }`}
                               placeholder={isKo ? '문제 지문을 입력하세요' : 'Enter question text'}
@@ -395,7 +395,7 @@ export function ScannedModal({
                                     return { ...prev, detectedAnswers: list };
                                   });
                                 }}
-                                className={`bg-[#050505] border outline-none px-3 py-1.5 rounded-lg font-mono font-black text-xs w-full max-w-[220px] ${
+                                className={`bg-brand-dark border outline-none px-3 py-1.5 rounded-lg font-mono font-black text-xs w-full max-w-[220px] ${
                                   BAD_WORDS_PATTERN.test(item.correctAnswer || item.answer || '')
                                     ? 'border-red-500 text-red-300'
                                     : 'border-emerald-500/50 focus:border-emerald-400 text-emerald-300'

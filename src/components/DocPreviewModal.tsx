@@ -32,7 +32,7 @@ export const DocPreviewModal: React.FC<Props> = ({
         isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
       }`}>
         <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar flex flex-col ${
-          isThemeNight ? 'bg-[#0c0c0e] text-zinc-100' : 'bg-white text-zinc-900'
+          isThemeNight ? 'bg-brand-dark text-zinc-100' : 'bg-white text-zinc-900'
         }`}>
           <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
             <div className="flex items-center gap-3">

@@ -185,9 +185,14 @@ export const WorksheetOverlay: React.FC<Props> = ({
       left: `${left}%`,
       zIndex: isDragging ? 1000 : 10 + (item.id || 0),
       transform: `translate3d(-50%, -50%, 0) scale(${bubbleScale * (isDragging ? 1.2 : 1)})`,
+      // Every tap on a bubble briefly sets/clears draggingId, so this curve
+      // fires on the highest-frequency interaction in the app (select, drag
+      // settle) — a spring overshoot there reads as unintentional bounce, not
+      // a rare celebratory moment. Strong ease-out, under 300ms (audit: P1
+      // finding, bounce-easing misapplied to routine UI).
       transition: isDragging
         ? 'none'
-        : 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.2s, left 0.2s',
+        : 'transform 220ms var(--ease-out-strong), top 0.2s, left 0.2s',
       willChange: 'top, left, transform',
       touchAction: 'none',
       WebkitUserSelect: 'none',
@@ -261,15 +266,44 @@ export const WorksheetOverlay: React.FC<Props> = ({
               const displayValue = removeMarkdown(item.correct_answer || '');
               const isDragging = draggingId === item.id;
 
+              // Bubbles are the graded output itself — a screen-reader/keyboard
+              // user with no way to reach this content couldn't use the core
+              // product at all (audit: P0 finding, WorksheetOverlay a11y gap).
+              const correctnessLabel = isBlankKeyMode
+                ? ''
+                : item.is_correct === true
+                  ? language === 'ko'
+                    ? ', 정답'
+                    : ', correct'
+                  : item.is_correct === false
+                    ? language === 'ko'
+                      ? ', 오답'
+                      : ', incorrect'
+                    : '';
+              const bubbleAriaLabel =
+                (language === 'ko'
+                  ? `${item.id}번 문제, 정답: ${displayValue}`
+                  : `Question ${item.id}, answer: ${displayValue}`) + correctnessLabel;
+
               return (
                 <div
                   key={item.id}
                   style={getStyle(item, idx)}
                   className={`absolute pointer-events-auto transform-gpu animate-[fadeIn_200ms_ease-out] ${isFocused ? 'opacity-100' : 'opacity-20 blur-[2px]'}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={bubbleAriaLabel}
+                  aria-pressed={isExplicitlyFocused}
                   onPointerDown={(e) => handlePointerDown(e, item)}
                   onPointerUp={handlePointerUp}
                   onPointerCancel={handlePointerUp}
                   onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelect?.(item.id);
+                    }
+                  }}
                 >
                   <div
                     className={`

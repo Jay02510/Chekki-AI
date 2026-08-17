@@ -393,7 +393,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         className="relative w-full max-w-[420px] h-[750px] max-h-[90vh] bg-white/5 ring-1 ring-white/10 p-2 sm:p-2.5 rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.8)]"
       >
         {/* Inner Core */}
-        <div className="relative w-full h-full bg-[#050505] rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
+        <div className="relative w-full h-full bg-brand-dark rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
           {step < 6 && (
             <motion.div
               initial={{ opacity: 0 }}

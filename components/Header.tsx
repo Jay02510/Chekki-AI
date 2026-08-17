@@ -84,7 +84,7 @@ export const Header: React.FC<Props> = ({
           className={`p-1.5 md:p-2 rounded-full pointer-events-auto backdrop-blur-3xl shadow-2xl transition-all duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-black/20 ring-1 ring-white/10 shadow-black/80' : 'bg-black/5 ring-1 ring-black/5 shadow-zinc-300/50'}`}
         >
           <div
-            className={`relative w-full max-w-3xl h-12 md:h-14 flex items-center justify-between gap-2 px-3 md:px-5 rounded-full border transition-all duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-[#111111]/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]' : 'bg-white/90 border-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]'}`}
+            className={`relative w-full max-w-3xl h-12 md:h-14 flex items-center justify-between gap-2 px-3 md:px-5 rounded-full border transition-all duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-brand-dark/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]' : 'bg-white/90 border-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]'}`}
           >
             <div
               role="button"

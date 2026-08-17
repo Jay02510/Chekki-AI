@@ -108,14 +108,14 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
               : 'bg-white border-orange-500 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]'
             : item.is_correct === false && hasHandwriting !== false
               ? isNight
-                ? 'bg-[#111111]/80 border-red-500/30 hover:border-red-500/50 shadow-[0_4px_20px_rgba(239,68,68,0.05)]'
+                ? 'bg-brand-dark/80 border-red-500/30 hover:border-red-500/50 shadow-[0_4px_20px_rgba(239,68,68,0.05)]'
                 : 'bg-white/80 border-red-300 hover:border-red-400 shadow-[0_4px_20px_rgba(239,68,68,0.05)]'
               : item.is_correct === true
                 ? isNight
-                  ? 'bg-[#111111]/80 border-emerald-500/20 hover:border-emerald-500/40 shadow-[0_4px_20px_rgba(16,185,129,0.02)]'
+                  ? 'bg-brand-dark/80 border-emerald-500/20 hover:border-emerald-500/40 shadow-[0_4px_20px_rgba(16,185,129,0.02)]'
                   : 'bg-white/80 border-emerald-200 hover:border-emerald-300 shadow-[0_4px_20px_rgba(16,185,129,0.02)]'
                 : isNight
-                  ? 'bg-[#111111]/80 border-white/5 hover:border-white/10'
+                  ? 'bg-brand-dark/80 border-white/5 hover:border-white/10'
                   : 'bg-white/80 border-zinc-200 hover:border-zinc-300 shadow-sm hover:shadow-lg'
         }`}
         style={style}
@@ -124,9 +124,24 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
           className={`w-full h-full rounded-[calc(2.5rem-0.375rem)] ${isNight ? 'bg-[#0A0A0A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)]'} transition-all duration-300 ease-in-out`}
         >
           <div
+            role="button"
+            tabIndex={0}
+            aria-expanded={isActive}
+            aria-label={
+              language === 'ko'
+                ? `${item.id}번 문제 ${isActive ? '접기' : '펼치기'}`
+                : `${isActive ? 'Collapse' : 'Expand'} question ${item.id}`
+            }
             onClick={(e) => {
               e.stopPropagation();
               onToggleActive();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                onToggleActive();
+              }
             }}
             className="p-4 md:p-8 flex items-start gap-4 md:gap-8 cursor-pointer"
           >
@@ -302,7 +317,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                             {language === 'ko' ? '티칭 스크립트' : 'Teacher Script'}
                           </h5>
                           <div
-                            className={`teaching-script-text text-base md:text-xl ${isNight ? 'text-zinc-100' : 'text-zinc-800'} font-korean leading-relaxed font-bold italic border-l-4 border-orange-500 pl-4`}
+                            className={`teaching-script-text text-base md:text-xl ${isNight ? 'text-zinc-100' : 'text-zinc-800'} font-korean leading-relaxed font-bold italic`}
                             dangerouslySetInnerHTML={{
                               __html: renderMarkdown(`&quot;${displayScript || ''}&quot;`),
                             }}
@@ -424,7 +439,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                               </svg>
                             )}
                             {index === 0 && !isListening && (
-                              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-[#FAFAFB] animate-ping" />
+                              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-zinc-50 animate-ping" />
                             )}
                           </button>
                           <div className="flex-1">

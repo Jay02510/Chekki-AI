@@ -15,6 +15,7 @@ export interface ClassLogPayload {
   exceptions: Array<{
     studentName: string;
     details: string;
+    type?: 'praise' | 'attention';
   }>;
   // Who wrote the notes — the AI prompt assumes English FT notes by default;
   // a KT authoring their own log writes in Korean already, so the summary
@@ -34,6 +35,7 @@ export interface GeneratedReportOutput {
     studentName: string;
     koreanUpdate: string;
     phoneTalkingPoints: string[];
+    category?: 'praise' | 'attention';
   }>;
 }
 

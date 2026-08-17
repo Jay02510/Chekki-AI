@@ -69,10 +69,10 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
 
   return (
     <div
-      className={`fixed inset-0 ${isNight ? 'bg-[#030305]' : 'bg-[#FAFAFB]'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}
+      className={`fixed inset-0 ${isNight ? 'bg-brand-dark' : 'bg-zinc-50'} z-[100] flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000`}
     >
       <div
-        className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-indigo-900/20 to-purple-900/20' : 'from-orange-500/10 to-purple-500/10'} opacity-50`}
+        className={`absolute inset-0 bg-gradient-to-br ${isNight ? 'from-orange-900/20 to-zinc-900/20' : 'from-orange-500/10 to-zinc-200/10'} opacity-50`}
       ></div>
 
       <div className="absolute inset-0 pointer-events-none">
@@ -137,7 +137,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
       </div>
 
       <div className="flex flex-col items-center justify-center z-20 max-w-lg w-full px-4">
-        <div className="h-24 flex items-center justify-center mb-6">
+        <div className="h-24 flex items-center justify-center mb-6" role="status" aria-live="polite">
           <h2
             className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-korean animate-fade-in-up tracking-tight drop-shadow-md break-keep text-balance`}
             key={textIndex}

@@ -491,17 +491,36 @@ const VOICE_LOG_FILL_SCHEMA = {
 async function handleVoiceLogFillTask(res: any, body: any) {
   if (!process.env.API_KEY) return res.status(500).json({ error: 'API_KEY_MISSING' });
 
-  const { audio, mimeType, history, currentFields, language = 'ko' } = body || {};
+  const { audio, mimeType, history, currentFields, language = 'ko', phase = 'general' } = body || {};
   if (!audio || typeof audio !== 'string') return res.status(400).json({ error: 'INVALID_AUDIO_DATA' });
   if (audio.length > 9 * 1024 * 1024) return res.status(413).json({ error: 'PAYLOAD_TOO_LARGE' });
 
   const safeHistory = Array.isArray(history) ? history.slice(-10) : [];
   const safeCurrentFields = currentFields && typeof currentFields === 'object' ? currentFields : {};
+  const isExceptionsPhase = phase === 'exceptions';
 
   const languageInstruction =
     language === 'ko' ? 'Speak to the teacher in natural Korean.' : 'Speak to the teacher in natural English.';
 
-  const systemInstruction = `You are Chekki's voice assistant helping a Foreign Teacher (FT) at a Korean English kindergarten fill out their Daily Classroom Log by speaking instead of typing.
+  // Two distinct instructions, not one unified conversation state machine —
+  // the client (VoiceFillAssistant.tsx) owns which phase this turn belongs
+  // to and drives the transition between them; the model never needs to
+  // infer "which phase am I in," which was the source of the old one-
+  // field-at-a-time follow-up loop (the model deciding, turn by turn,
+  // whether to keep asking).
+  const systemInstruction = isExceptionsPhase
+    ? `You are Chekki's voice assistant helping a Foreign Teacher (FT) at a Korean English kindergarten. You are in the STUDENT NOTES phase: the general class-log fields are already captured — your only job now is listening for specific students the teacher wants to flag.
+
+YOUR JOB, THIS TURN:
+1. Transcribe the teacher's spoken audio accurately into "transcript".
+2. If the teacher names a SPECIFIC student together with praise ("Seo-yeon did amazing on the quiz") or a concern ("Min-jun struggled with pronunciation and needs review"), extract it into "newExceptions" as {studentName, details, category: "praise"|"attention"}. Never invent a student name that wasn't said.
+3. If the teacher says there's nothing to add — "none," "no one," "nothing today," or the turn is otherwise empty/off-topic — return "newExceptions": [] and a brief closing "assistantReplyForHistory" (e.g. "Got it — no exceptions today.").
+4. Set "updatedFields" to {} and "missingRequired" to [] always — this phase never touches the class-log fields.
+5. Set "nextQuestion" to an empty string always — this phase is exactly one turn, never a follow-up.
+6. ${languageInstruction}
+
+LANGUAGE STANDARD: This content is read by a Korean Teacher and then relayed to parents. Transcribe accurately even if the source audio contains profanity, but NEVER carry profanity, slurs, or inappropriate language into "newExceptions" or "assistantReplyForHistory" — rephrase professionally instead.`
+    : `You are Chekki's voice assistant helping a Foreign Teacher (FT) at a Korean English kindergarten fill out their Daily Classroom Log by speaking instead of typing. You are in the GENERAL NOTES phase: listen for the whole-class fields below. Student-specific notes are handled in a separate phase later, not this one, but if the teacher happens to name a student here anyway, still capture it (see step 3).
 
 FORM FIELDS (this is the complete schema you are filling):
 - lessonTopic (required, free text): the lesson topic covered today.
@@ -514,21 +533,18 @@ CURRENT FIELD VALUES ALREADY CAPTURED (do not ask about fields that already have
 ${JSON.stringify(safeCurrentFields)}
 
 STUDENT-SPECIFIC NOTES ARE SEPARATE FROM generalComments:
-generalComments is ONLY for whole-class remarks with no individual student named. If the teacher mentions a SPECIFIC student by name together with praise ("Seo-yeon did amazing on the quiz") or a concern ("Min-jun struggled with pronunciation and needs review"), that is a "newException" — extract it as {studentName, details, category: "praise"|"attention"} instead. Never fold a named student's note into generalComments, and never invent a student name that wasn't said.
+generalComments is ONLY for whole-class remarks with no individual student named. If the teacher mentions a SPECIFIC student by name together with praise or a concern, that is a "newException" — extract it as {studentName, details, category: "praise"|"attention"} instead. Never fold a named student's note into generalComments.
 
 YOUR JOB, EACH TURN:
 1. Transcribe the teacher's spoken audio accurately into "transcript".
-2. Extract field values into "updatedFields". Teachers often describe their whole class in one long turn, covering several fields in a single breath — you MUST check the transcript against EVERY ONE of the 5 fields individually (lessonTopic, textbook, energyLevel, activities, generalComments), not just the first one or two mentioned. Missing a field the teacher already stated means they get asked a question they already answered, which is the exact friction this feature exists to remove. For each field: did the transcript say something that maps to it? If yes, include it in updatedFields (matching the exact allowed values above — map casual speech to the closest allowed energyLevel/activities option; never invent new option strings). If genuinely not mentioned, omit that key.
-3. Extract any student-specific mentions into "newExceptions" per the rule above (omit the key or use an empty array if none this turn).
+2. Extract field values into "updatedFields". Teachers often describe their whole class in one long turn, covering several fields in a single breath — you MUST check the transcript against EVERY ONE of the 5 fields individually (lessonTopic, textbook, energyLevel, activities, generalComments), not just the first one or two mentioned. Missing a field the teacher already stated means they get asked about it again, which is the exact friction this feature exists to remove. For each field: did the transcript say something that maps to it? If yes, include it in updatedFields (matching the exact allowed values above — map casual speech to the closest allowed energyLevel/activities option; never invent new option strings). If genuinely not mentioned, omit that key.
+3. Extract any incidental student-specific mentions into "newExceptions" per the rule above (omit the key or use an empty array if none this turn).
 4. Recompute which required fields (lessonTopic, textbook, energyLevel, activities) are still empty after merging updatedFields into the current values, and list their exact key names in "missingRequired".
-5. Decide "nextQuestion":
-   - If any required field is still missing, ask ONE short, natural, friendly follow-up question for the single most important missing field.
-   - Otherwise, if you have NOT already asked about specific students in this conversation (check the conversation history below for a prior question resembling this), ask exactly once: a short, warm question inviting the teacher to mention any student who did especially well or needs extra attention today — e.g. "Any students who stood out today, good or needing a bit more support?"
-   - Otherwise (required fields done AND the student-notes question was already asked in a previous turn, regardless of how the teacher answered it) set "nextQuestion" to an empty string — the conversation is complete.
+5. Decide "nextQuestion": if ANY required fields are still missing, ask exactly ONE natural, friendly follow-up question that names ALL of them together — e.g. "What textbook did you use, and how was the class energy today?" — never a separate question per missing field, and never more than this one combined follow-up. If nothing is missing, set "nextQuestion" to an empty string.
 6. ${languageInstruction}
-7. "assistantReplyForHistory" is a short plain-text version of what you'd say back (your question, or a brief confirmation if nothing is missing) — this gets stored as conversation history for the next turn, and is also what you check against in step 5 to avoid re-asking the student-notes question.
+7. "assistantReplyForHistory" is a short plain-text version of what you'd say back (your combined follow-up question, or a brief confirmation if nothing is missing) — this gets stored as conversation history for the next turn.
 
-EXAMPLE — a teacher says, in one turn: "Today we learned about photosynthesis from our Bricks Reading 150 textbook. The class's energy was very high energy and engaged. Our daily activities included a reading exercise, speaking exercise and also a worksheet. Nothing to note really, everybody did a great job." This mentions FIVE general things — extract all five, then since no student was named, ask the student-notes follow-up next:
+EXAMPLE — a teacher says, in one turn: "Today we learned about photosynthesis from our Bricks Reading 150 textbook. The class's energy was very high energy and engaged. Our daily activities included a reading exercise, speaking exercise and also a worksheet. Nothing to note really, everybody did a great job." This mentions FIVE general things — extract all five:
 updatedFields = {
   "lessonTopic": "Photosynthesis",
   "textbook": "Bricks Reading 150",
@@ -536,15 +552,13 @@ updatedFields = {
   "activities": ["Reading", "Speaking", "Worksheet"],
   "generalComments": "Everybody did a great job."
 }
-newExceptions = [], missingRequired = [], nextQuestion = "Any students who stood out today, good or needing a bit more support?"
+newExceptions = [], missingRequired = [], nextQuestion = ""
 Do NOT stop after extracting just lessonTopic and textbook from an utterance like this — that under-extraction is the specific mistake to avoid.
 
-EXAMPLE (continuing the same conversation) — teacher then says: "Seo-yeon did amazing, led the vocab quiz. Min-jun struggled with the word chloroplast, needs review." Both fields are already filled from the previous turn, so updatedFields = {} this time, but:
-newExceptions = [
-  {"studentName": "Seo-yeon", "details": "Led the vocab quiz — amazing participation.", "category": "praise"},
-  {"studentName": "Min-jun", "details": "Struggled with the word 'chloroplast', needs review.", "category": "attention"}
-]
-missingRequired = [], nextQuestion = "" (student-notes question was already asked and just answered — do not ask again).
+EXAMPLE — a teacher only says: "We covered photosynthesis today from the Bricks Reading book." Two fields are missing:
+updatedFields = { "lessonTopic": "Photosynthesis", "textbook": "Bricks Reading" }
+missingRequired = ["energyLevel", "activities"]
+nextQuestion = "Got it! How was the class energy today, and what activities did you do?" — ONE combined question, not two separate ones.
 
 Never ask about a "class name" or "date" — those are already fixed elsewhere and not part of your job. Never hallucinate a field value or student name the teacher didn't say.
 

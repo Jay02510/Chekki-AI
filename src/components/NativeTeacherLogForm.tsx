@@ -284,7 +284,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   return (
     <div
       className={`p-6 sm:p-8 rounded-3xl border shadow-2xl transition-all max-w-3xl mx-auto w-full ${
-        isNight ? 'bg-[#060608] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+        isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
       <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
@@ -368,7 +368,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
                 className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
-                  isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                  isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                 }`}
               >
                 <option value="Apex Seocho 7A">Apex Seocho 7A (Kindergarten 7yo)</option>
@@ -383,7 +383,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               // there should be more to pick from.
               <div
                 className={`w-full p-3 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 ${
-                  isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                  isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                 }`}
               >
                 <span>{selectedClassName || 'No class selected'}</span>
@@ -403,7 +403,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
-                isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
               }`}
             />
           </div>
@@ -421,7 +421,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               onChange={(e) => setLessonTopic(e.target.value)}
               placeholder="e.g. Unit 4: Photosynthesis"
               className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
-                isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
               }`}
             />
           </div>
@@ -436,7 +436,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               onChange={(e) => setTextbook(e.target.value)}
               placeholder="e.g. Bricks Reading 150"
               className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
-                isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
               }`}
             />
           </div>
@@ -505,7 +505,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             onChange={(e) => setGeneralComments(e.target.value)}
             rows={3}
             className={`w-full p-3.5 rounded-xl border text-xs leading-relaxed focus:outline-none focus:border-orange-500 font-mono ${
-              isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+              isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
             }`}
             placeholder="Type general class notes here..."
           />
@@ -622,7 +622,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             aria-labelledby="exception-modal-title"
             tabIndex={-1}
             className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 ${
-              isNight ? 'bg-[#0a0a0c] border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+              isNight ? 'bg-brand-dark border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
             }`}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -698,7 +698,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     onChange={(e) => setCustomStudentInput(e.target.value)}
                     placeholder="Enter student name (e.g. David / 김다윗)..."
                     className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                     }`}
                   />
                 ) : (
@@ -707,7 +707,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     value={modalStudentName}
                     onChange={(e) => setModalStudentName(e.target.value)}
                     className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                     }`}
                   >
                     {effectiveRoster.map((name) => (
@@ -731,7 +731,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                       : 'Explain focus issue (e.g. missing homework, tardy, hesitant during speaking drill)...'
                   }
                   className={`w-full p-3 rounded-xl border text-xs font-medium focus:outline-none ${
-                    isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                    isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                   }`}
                 />
               </div>

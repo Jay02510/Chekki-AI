@@ -1,5 +1,6 @@
 import React from 'react';
 import { Warning, UserCheck, CheckCircle, MagnifyingGlass, DownloadSimple } from '@phosphor-icons/react';
+import { StatTile } from './ui/StatTile';
 
 // Escapes a CSV field per RFC 4180: wraps in quotes and doubles any embedded
 // quotes whenever the value contains a comma, quote, or newline.
@@ -98,7 +99,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
           isThemeNight ? 'bg-orange-500/10 border border-orange-500/30 shadow-2xl' : 'bg-orange-50/60 border border-orange-200 shadow-md'
         }`}>
           <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
-            isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+            isThemeNight ? 'bg-brand-dark' : 'bg-white'
           }`}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-2xl bg-orange-500/20 border border-orange-500/30 text-orange-500 flex items-center justify-center">
@@ -139,7 +140,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                         <button
                           onClick={() => handleDeclineStudent(student.uid)}
                           className={`px-4 py-2 border font-bold rounded-xl transition-all text-xs active:scale-[0.97] cursor-pointer ${
-                            isThemeNight ? 'border-white/10 hover:border-white/20 bg-[#050505] text-zinc-400 hover:text-zinc-200' : 'border-zinc-300 hover:border-zinc-400 bg-zinc-100 text-zinc-700'
+                            isThemeNight ? 'border-white/10 hover:border-white/20 bg-brand-dark text-zinc-400 hover:text-zinc-200' : 'border-zinc-300 hover:border-zinc-400 bg-zinc-100 text-zinc-700'
                           }`}
                         >
                           ✕ {isKo ? '거절' : 'Decline'}
@@ -165,11 +166,11 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
         isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
       }`}>
         <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
-          isThemeNight ? 'bg-[#0a0a0c] text-white' : 'bg-white text-zinc-900'
+          isThemeNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'
         }`}>
           <div className={`flex items-center justify-between mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                 <UserCheck size={22} weight="bold" />
               </div>
               <div>
@@ -210,6 +211,27 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
               </button>
             </div>
           </div>
+
+          {!isLoadingRoster && activeRoster.length > 0 && (
+            <div className="mb-6 max-w-xs">
+              <StatTile
+                isNight={isThemeNight}
+                label={isKo ? '이번 주 스캔 완료' : 'Scanned This Week'}
+                icon={<CheckCircle size={14} weight="bold" className="text-orange-500" />}
+                ring={{
+                  value: Math.round(
+                    (activeRoster.filter((s) => s.hasScannedThisWeek).length / activeRoster.length) * 100
+                  ),
+                }}
+                value={
+                  <>
+                    {activeRoster.filter((s) => s.hasScannedThisWeek).length}
+                    <span className="text-sm font-normal text-zinc-500"> / {activeRoster.length}</span>
+                  </>
+                }
+              />
+            </div>
+          )}
 
           {isLoadingRoster ? (
             <div className="flex items-center justify-center min-h-[30vh]">
@@ -273,7 +295,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                           onChange={(e) => handleMoveStudent(student.uid, e.target.value)}
                           value=""
                           className={`text-[10px] font-bold px-3 py-2 rounded-xl cursor-pointer outline-none focus:border-orange-500 appearance-none transition-colors ${
-                            isThemeNight ? 'bg-[#050505] border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
+                            isThemeNight ? 'bg-brand-dark border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
                           }`}
                         >
                           <option value="">{isKo ? '반 이동' : 'Move Class'}</option>
@@ -294,7 +316,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                         <button
                           onClick={() => setSelectedStudentDetails(student)}
                           className={`px-4 py-2 border font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] flex items-center gap-1.5 cursor-pointer ${
-                            isThemeNight ? 'border-white/10 bg-[#050505] hover:bg-white/5 text-orange-400 hover:text-orange-300' : 'border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-orange-600'
+                            isThemeNight ? 'border-white/10 bg-brand-dark hover:bg-white/5 text-orange-400 hover:text-orange-300' : 'border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-orange-600'
                           }`}
                         >
                           <MagnifyingGlass size={12} weight="bold" />

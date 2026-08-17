@@ -275,7 +275,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
           value={classId}
           onChange={(e) => setClassId(e.target.value)}
           className={`w-full p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 ${
-            isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+            isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
           }`}
         >
           {classes.length === 0 && <option value="">{isKo ? '학급 없음' : 'No classes yet'}</option>}
@@ -294,7 +294,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
             onChange={(e) => setEmail(e.target.value)}
             placeholder={isKo ? '선생님 이메일 주소' : "Teacher's email address"}
             className={`w-full p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 disabled:opacity-40 ${
-              isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+              isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
             }`}
           />
           <label className="flex items-center gap-2 text-[11px] text-zinc-400 font-bold cursor-pointer">
@@ -310,7 +310,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
             rows={5}
             placeholder={isKo ? '이메일을 한 줄에 하나씩 붙여넣으세요\nteacher1@example.com\nteacher2@example.com' : 'Paste one email per line\nteacher1@example.com\nteacher2@example.com'}
             className={`w-full p-3 rounded-xl border text-xs font-mono outline-none focus:border-orange-500 ${
-              isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+              isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
             }`}
           />
           {bulkProgress && (

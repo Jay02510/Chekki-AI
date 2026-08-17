@@ -60,7 +60,7 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentName, languag
 
   return (
     <div className="mb-6 p-1 rounded-[2rem] bg-white/5 border border-white/10 shadow-lg">
-      <div className="rounded-[calc(2rem-0.25rem)] p-5 md:p-6 bg-[#0a0a0c]">
+      <div className="rounded-[calc(2rem-0.25rem)] p-5 md:p-6 bg-brand-dark">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
             <ChalkboardTeacher size={20} weight="bold" />
@@ -81,7 +81,7 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentName, languag
               ? log.approvedExceptions?.find((ex) => ex.studentName === studentName)
               : undefined;
             return (
-              <div key={log.id} className="p-4 rounded-2xl border border-white/10 bg-[#050505]">
+              <div key={log.id} className="p-4 rounded-2xl border border-white/10 bg-brand-dark">
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/5">
                   <span className="font-bold text-sm text-blue-400">{log.className}</span>
                   <span className="text-xs text-zinc-500 font-mono">{log.date}</span>

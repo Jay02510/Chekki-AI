@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChatCircleDots, PaperPlaneTilt, Sparkle } from '@phosphor-icons/react';
 import { askChekkiQuestion, ChatTurn } from '../../services/geminiService';
+import { TypingIndicator } from './ui/TypingIndicator';
 
 interface TroubleWord {
   word: string;
@@ -78,7 +79,7 @@ export const InsightsChatPanel: React.FC<Props> = ({
     >
       <div
         className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 text-left transition-colors ${
-          isNight ? 'bg-[#0a0a0c]' : 'bg-white'
+          isNight ? 'bg-brand-dark' : 'bg-white'
         }`}
       >
         <div className="flex items-center gap-3 mb-4">
@@ -97,8 +98,8 @@ export const InsightsChatPanel: React.FC<Props> = ({
           </div>
         </div>
 
-        {messages.length > 0 && (
-          <div className="space-y-2.5 mb-4 max-h-64 overflow-y-auto pr-1">
+        {(messages.length > 0 || isLoading) && (
+          <div className="space-y-2.5 mb-4 max-h-64 overflow-y-auto pr-1" aria-live="polite">
             {messages.map((m, idx) => (
               <div
                 key={idx}
@@ -111,6 +112,9 @@ export const InsightsChatPanel: React.FC<Props> = ({
                 {m.text}
               </div>
             ))}
+            {isLoading && (
+              <TypingIndicator isNight={isNight} label={isKo ? '생각 중…' : 'Thinking…'} />
+            )}
           </div>
         )}
 
@@ -126,7 +130,7 @@ export const InsightsChatPanel: React.FC<Props> = ({
             }}
             placeholder={isKo ? '예: 이번 주 무엇에 집중해야 할까요?' : 'e.g. What should I focus on this week?'}
             className={`flex-1 p-3 rounded-xl border text-xs outline-none focus:border-orange-500 ${
-              isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+              isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
             }`}
           />
           <button

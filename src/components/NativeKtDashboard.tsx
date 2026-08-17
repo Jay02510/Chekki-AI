@@ -145,7 +145,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
     return (
       <div
         className={`p-8 sm:p-12 rounded-3xl border shadow-2xl max-w-4xl mx-auto w-full text-center space-y-4 transition-all ${
-          isNight ? 'bg-[#060608] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+          isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
         }`}
       >
         <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
@@ -166,7 +166,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
   return (
     <div
       className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 max-w-4xl mx-auto w-full transition-all ${
-        isNight ? 'bg-[#060608] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+        isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
@@ -362,7 +362,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             !permissions.canEditReports ? 'opacity-60 cursor-not-allowed' : ''
           } ${
             isNight
-              ? 'bg-[#030305] border-orange-500/30 text-white focus:border-orange-500'
+              ? 'bg-brand-dark border-orange-500/30 text-white focus:border-orange-500'
               : 'bg-orange-50/50 border-orange-200 text-zinc-900 focus:border-orange-500'
           }`}
         />
@@ -416,8 +416,16 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   <UserCheck size={16} weight="bold" />
                   <span>{std.studentName}</span>
                 </span>
-                <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
-                  {isKo ? '플래그됨' : 'Flagged'}
+                <span
+                  className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                    (std as GeneratedReportOutput['studentReports'][number]).category === 'praise'
+                      ? 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30'
+                      : 'text-amber-400 bg-amber-500/20 border-amber-500/30'
+                  }`}
+                >
+                  {(std as GeneratedReportOutput['studentReports'][number]).category === 'praise'
+                    ? (isKo ? '칭찬' : 'Praise')
+                    : (isKo ? '주의 필요' : 'Attention')}
                 </span>
               </div>
 
@@ -451,7 +459,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             aria-labelledby="phone-consult-title"
             tabIndex={-1}
             className={`w-full max-w-lg p-6 rounded-3xl border shadow-2xl space-y-4 ${
-              isNight ? 'bg-[#0a0a0c] border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+              isNight ? 'bg-brand-dark border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
             }`}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">

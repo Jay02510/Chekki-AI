@@ -17,15 +17,23 @@ interface Props {
   isKo?: boolean;
 }
 
-export const KtReviewQueue: React.FC<Props> = ({
+export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue({
   logs,
   activeId,
   justCopiedId,
   onSelect,
   isNight = true,
   isKo = false,
-}) => {
-  if (logs.length === 0) return null;
+}) {
+  if (logs.length === 0) {
+    return (
+      <div className={`px-4 py-3 rounded-2xl border text-xs font-medium ${
+        isNight ? 'bg-white/5 border-white/10 text-zinc-500' : 'bg-zinc-50 border-zinc-200 text-zinc-500'
+      }`}>
+        {isKo ? '모두 검토 완료! 대기 중인 항목이 없습니다.' : "All caught up — nothing waiting for review."}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -41,11 +49,11 @@ export const KtReviewQueue: React.FC<Props> = ({
               key={log.id}
               type="button"
               onClick={() => onSelect(log.id)}
-              className={`shrink-0 px-3.5 py-2.5 min-h-11 rounded-2xl border text-left transition-all cursor-pointer ${
+              className={`shrink-0 px-3.5 py-2.5 min-h-11 rounded-2xl border text-left transition-all cursor-pointer active:scale-[0.97] ${
                 isCopied
                   ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
                   : isActive
-                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-md'
+                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_20px_50px_rgba(249,115,22,0.2)]'
                   : isNight
                   ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
                   : 'bg-zinc-50 border-zinc-300 text-zinc-700 hover:text-zinc-900'
@@ -74,4 +82,4 @@ export const KtReviewQueue: React.FC<Props> = ({
       </div>
     </div>
   );
-};
+});

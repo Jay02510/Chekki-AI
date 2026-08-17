@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChekkiMascot } from '../../components/Icons';
 import { auth, dbInstance } from '../../services/database';
 import {
@@ -10,6 +10,7 @@ import {
 import { doc, setDoc } from 'firebase/firestore';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { StatTile } from '../components/ui/StatTile';
 
 // Skeleton rows for these admin tables, matching the real column count, so
 // the header/search bar stay in place while data loads instead of the whole
@@ -384,11 +385,18 @@ export default function AdminPage() {
     }
   };
 
-  const filteredSchools = schools.filter(
-    (s) =>
-      s.name.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
-      s.schoolId.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
-      s.teacherCode.toLowerCase().includes(schoolSearchQuery.toLowerCase())
+  // schools/users are plain fetched state (no mutation-accumulator pattern),
+  // so unlike TeacherPage's derived roster these are safe to memoize as-is
+  // (audit action #6).
+  const filteredSchools = useMemo(
+    () =>
+      schools.filter(
+        (s) =>
+          s.name.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
+          s.schoolId.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
+          s.teacherCode.toLowerCase().includes(schoolSearchQuery.toLowerCase())
+      ),
+    [schools, schoolSearchQuery]
   );
 
   const handleAuthorize = async (e: React.FormEvent) => {
@@ -842,10 +850,14 @@ export default function AdminPage() {
     }
   };
 
-  const filteredUsers = users.filter(
-    (u) =>
-      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = useMemo(
+    () =>
+      users.filter(
+        (u) =>
+          u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          u.name.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [users, searchQuery]
   );
 
   return (
@@ -1012,6 +1024,9 @@ export default function AdminPage() {
 
             {mode === 'view_members' ? (
               <div className="w-full flex flex-col gap-4 mt-4">
+                <div className="max-w-xs">
+                  <StatTile label="Total Users" value={users.length} />
+                </div>
                 <input
                   type="text"
                   placeholder="Search by name or email..."
@@ -1069,8 +1084,12 @@ export default function AdminPage() {
                           <th className="py-3 px-4 font-bold">Email</th>
                           <th className="py-3 px-4 font-bold">Role / School</th>
                           <th className="py-3 px-4 font-bold">Plan</th>
-                          <th className="py-3 px-4 font-bold">Insights</th>
-                          <th className="py-3 px-4 font-bold">Billing Date</th>
+                          {/* Secondary columns hidden below md — an admin on a phone gets the
+                              identity/action columns without a horizontal-scroll table
+                              (audit action #7). Still real DOM columns, so colSpan={8} below
+                              stays correct. */}
+                          <th className="py-3 px-4 font-bold hidden md:table-cell">Insights</th>
+                          <th className="py-3 px-4 font-bold hidden md:table-cell">Billing Date</th>
                           <th className="py-3 px-4 font-bold text-right">Actions</th>
                         </tr>
                       </thead>
@@ -1118,7 +1137,7 @@ export default function AdminPage() {
                                   {user.plan || 'FREE'}
                                 </span>
                               </td>
-                              <td className="py-3 px-4 text-zinc-500">
+                              <td className="py-3 px-4 text-zinc-500 hidden md:table-cell">
                                 <div className="flex flex-col">
                                   <span className="text-xs">
                                     Scans: {user.scansUsedToday} / {user.maxScansPerDay}
@@ -1128,7 +1147,7 @@ export default function AdminPage() {
                                   </span>
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-zinc-500">
+                              <td className="py-3 px-4 text-zinc-500 hidden md:table-cell">
                                 {user.nextBillingDate
                                   ? new Date(user.nextBillingDate).toLocaleDateString()
                                   : '-'}
@@ -1176,6 +1195,9 @@ export default function AdminPage() {
               </div>
             ) : mode === 'schools' ? (
               <div className="w-full flex flex-col gap-4 mt-4 animate-fade-in">
+                <div className="max-w-xs">
+                  <StatTile label="Total Schools" value={schools.length} />
+                </div>
                 {/* School List Header & Control Bar */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                   <input
@@ -1220,10 +1242,11 @@ export default function AdminPage() {
                           <th className="py-3 px-4 font-bold">School Code (ID)</th>
                           <th className="py-3 px-4 font-bold">School Name</th>
                           <th className="py-3 px-4 font-bold">Teacher Auth Code</th>
-                          <th className="py-3 px-4 font-bold">Teacher Quota</th>
-                          <th className="py-3 px-4 font-bold">FT / KT Seats</th>
+                          {/* Secondary columns hidden below md (audit action #7) */}
+                          <th className="py-3 px-4 font-bold hidden md:table-cell">Teacher Quota</th>
+                          <th className="py-3 px-4 font-bold hidden md:table-cell">FT / KT Seats</th>
                           <th className="py-3 px-4 font-bold">Plan / Trial</th>
-                          <th className="py-3 px-4 font-bold">Created At</th>
+                          <th className="py-3 px-4 font-bold hidden md:table-cell">Created At</th>
                           <th className="py-3 px-4 font-bold text-right">Actions</th>
                         </tr>
                       </thead>
@@ -1255,7 +1278,7 @@ export default function AdminPage() {
                               <td className="py-3 px-4 text-orange-400 font-mono font-bold">
                                 {school.teacherCode}
                               </td>
-                              <td className="py-3 px-4 text-zinc-400">
+                              <td className="py-3 px-4 text-zinc-400 hidden md:table-cell">
                                 <div className="flex flex-col">
                                   <span>
                                     {school.usedByUids?.length || 0} / {school.maxUses} used
@@ -1270,7 +1293,7 @@ export default function AdminPage() {
                                   </span>
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-zinc-400 font-mono">
+                              <td className="py-3 px-4 text-zinc-400 font-mono hidden md:table-cell">
                                 <span className="text-orange-400 font-bold">{school.seatsTotal?.ft ?? 0}</span> FT / <span className="text-blue-400 font-bold">{school.seatsTotal?.kt ?? 0}</span> KT
                               </td>
                               <td className="py-3 px-4">
@@ -1294,7 +1317,7 @@ export default function AdminPage() {
                                   </span>
                                 )}
                               </td>
-                              <td className="py-3 px-4 text-zinc-500">
+                              <td className="py-3 px-4 text-zinc-500 hidden md:table-cell">
                                 {school.createdAt
                                   ? new Date(school.createdAt).toLocaleDateString()
                                   : '-'}
@@ -1533,7 +1556,8 @@ export default function AdminPage() {
                           <th className="py-3 px-4 font-bold">Academy & Contact</th>
                           <th className="py-3 px-4 font-bold">Plan & Seats</th>
                           <th className="py-3 px-4 font-bold">Amount</th>
-                          <th className="py-3 px-4 font-bold">Biz Reg No.</th>
+                          {/* Secondary column hidden below md (audit action #7) */}
+                          <th className="py-3 px-4 font-bold hidden md:table-cell">Biz Reg No.</th>
                           <th className="py-3 px-4 font-bold">Status</th>
                           <th className="py-3 px-4 font-bold text-right">Actions</th>
                         </tr>
@@ -1568,7 +1592,7 @@ export default function AdminPage() {
                             <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
                               ₩{(inv.totalAmount || 0).toLocaleString()}
                             </td>
-                            <td className="py-3.5 px-4 font-mono text-zinc-400">
+                            <td className="py-3.5 px-4 font-mono text-zinc-400 hidden md:table-cell">
                               {inv.bizRegNumber || '-'}
                             </td>
                             <td className="py-3.5 px-4">
@@ -1638,9 +1662,10 @@ export default function AdminPage() {
                       <thead>
                         <tr className="border-b border-zinc-800 text-zinc-400 text-xs uppercase">
                           <th className="py-3 px-4 font-bold">Invite ID</th>
-                          <th className="py-3 px-4 font-bold">School</th>
+                          {/* Secondary columns hidden below md (audit action #7) */}
+                          <th className="py-3 px-4 font-bold hidden md:table-cell">School</th>
                           <th className="py-3 px-4 font-bold">Email</th>
-                          <th className="py-3 px-4 font-bold">Role</th>
+                          <th className="py-3 px-4 font-bold hidden md:table-cell">Role</th>
                           <th className="py-3 px-4 font-bold">Sent</th>
                           <th className="py-3 px-4 font-bold text-right">Actions</th>
                         </tr>
@@ -1656,9 +1681,9 @@ export default function AdminPage() {
                             return (
                               <tr key={inv.inviteId} className="hover:bg-zinc-900/50 text-xs">
                                 <td className="py-3.5 px-4 font-mono font-bold text-orange-400">{inv.inviteId}</td>
-                                <td className="py-3.5 px-4 text-zinc-300">{inv.schoolId || '-'}</td>
+                                <td className="py-3.5 px-4 text-zinc-300 hidden md:table-cell">{inv.schoolId || '-'}</td>
                                 <td className="py-3.5 px-4 text-zinc-300">{inv.email || '-'}</td>
-                                <td className="py-3.5 px-4 text-zinc-400 uppercase">{inv.role || '-'}</td>
+                                <td className="py-3.5 px-4 text-zinc-400 uppercase hidden md:table-cell">{inv.role || '-'}</td>
                                 <td className="py-3.5 px-4">
                                   {daysOld !== null ? (
                                     <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${

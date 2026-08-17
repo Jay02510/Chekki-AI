@@ -703,7 +703,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
       )}
 
       <div
-        className={`flex flex-col lg:flex-row w-full ${isNight ? 'bg-[#030305]' : 'bg-white'} min-h-0`}
+        className={`flex flex-col lg:flex-row w-full ${isNight ? 'bg-brand-dark' : 'bg-white'} min-h-0`}
       >
         {/* Left side: Image (Scrolls with page on mobile, fixed height on desktop) */}
         <div
@@ -723,7 +723,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
         </div>
 
         <div
-          className={`w-full lg:w-1/2 min-w-0 flex flex-col ${isNight ? 'bg-[#111111]/80 border-white/10 shadow-black/80' : 'bg-white/80 border-zinc-200 shadow-zinc-300/50'} backdrop-blur-2xl rounded-[2.5rem] border lg:overflow-hidden relative lg:h-screen`}
+          className={`w-full lg:w-1/2 min-w-0 flex flex-col ${isNight ? 'bg-brand-dark/80 border-white/10 shadow-black/80' : 'bg-white/80 border-zinc-200 shadow-zinc-300/50'} backdrop-blur-2xl rounded-[2.5rem] border lg:overflow-hidden relative lg:h-screen`}
           onClick={() => setActiveItemId(null)}
         >
           <div

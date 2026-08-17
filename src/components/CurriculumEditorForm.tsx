@@ -180,7 +180,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
       isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
     }`}>
       <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
-        isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+        isThemeNight ? 'bg-brand-dark' : 'bg-white'
       }`}>
         <div className={`flex items-center justify-between mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
           <div className="flex items-center gap-3">
@@ -264,7 +264,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       if (target) setSelectedClass(target);
                     }}
                     className={`w-full p-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 cursor-pointer ${
-                      isThemeNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+                      isThemeNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
                     }`}
                   >
                     {classes.map((c) => (
@@ -287,7 +287,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     onChange={(e) => setSelectedTextbookName(e.target.value)}
                     placeholder="E.g. Bricks Reading 150 (Book 1)"
                     className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 ${
-                      isThemeNight ? 'bg-[#050505] border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
+                      isThemeNight ? 'bg-brand-dark border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
                     }`}
                   />
                 </div>
@@ -313,7 +313,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
                     isDraggingFile
                       ? 'border-orange-500 bg-orange-500/10 scale-[1.01]'
-                      : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
+                      : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-brand-dark' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
                   }`}
                 >
                   <input
@@ -436,7 +436,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       {pendingScanFiles.map((p, idx) => (
                         <div key={idx} className="relative group">
                           {p.file.type === 'application/pdf' ? (
-                            <div className={`w-16 h-16 rounded-xl border flex items-center justify-center ${isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-500'}`}>
+                            <div className={`w-16 h-16 rounded-xl border flex items-center justify-center ${isThemeNight ? 'bg-brand-dark border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-500'}`}>
                               <FileText size={20} weight="bold" />
                             </div>
                           ) : (
@@ -573,7 +573,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
                     isDraggingFile
                       ? 'border-orange-500 bg-orange-500/10 scale-[1.01]'
-                      : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-[#050505]' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
+                      : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-brand-dark' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
                   }`}
                 >
                   <input
@@ -718,7 +718,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       {pendingScanFiles.map((p, idx) => (
                         <div key={idx} className="relative group">
                           {p.file.type === 'application/pdf' ? (
-                            <div className={`w-16 h-16 rounded-xl border flex items-center justify-center ${isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-500'}`}>
+                            <div className={`w-16 h-16 rounded-xl border flex items-center justify-center ${isThemeNight ? 'bg-brand-dark border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-500'}`}>
                               <FileText size={20} weight="bold" />
                             </div>
                           ) : (
@@ -752,7 +752,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 onChange={(e) => setCurriculumTopic(e.target.value)}
                 placeholder={isKo ? '예: Weather & Nature (날씨와 자연)' : 'E.g. Weather & Nature'}
                 className={`w-full border outline-none text-sm p-4 rounded-2xl transition-all ${
-                  isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                  isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
                 }`}
               />
             </div>
@@ -772,7 +772,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
                 {/* Chip Badges Container */}
                 <div className={`p-3.5 rounded-2xl border min-h-[90px] flex flex-wrap gap-2 items-center transition-all ${
-                  isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-300'
+                  isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-300'
                 }`}>
                   {curriculumVocab.split(/[,\n]/).filter(s => s.trim()).length === 0 ? (
                     <p className="text-xs text-zinc-500 italic p-1">
@@ -812,7 +812,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     }}
                     placeholder={isKo ? '새 단어 입력 후 Enter...' : 'Type a word & press Enter...'}
                     className={`flex-1 border outline-none text-xs p-3.5 rounded-xl transition-all ${
-                      isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                      isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
                     }`}
                   />
                   <button
@@ -845,7 +845,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
                 {/* Chip Badges Container */}
                 <div className={`p-3.5 rounded-2xl border min-h-[90px] flex flex-wrap gap-2 items-center transition-all ${
-                  isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-300'
+                  isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-300'
                 }`}>
                   {curriculumPhonics.split(/[,\n]/).filter(s => s.trim()).length === 0 ? (
                     <p className="text-xs text-zinc-500 italic p-1">
@@ -885,7 +885,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     }}
                     placeholder={isKo ? '파닉스 입력 (예: -ai-) 후 Enter...' : 'Type a sound (e.g. -ai-) & press Enter...'}
                     className={`flex-1 border outline-none text-xs p-3.5 rounded-xl transition-all ${
-                      isThemeNight ? 'bg-[#050505] border-white/10 focus:border-indigo-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-indigo-500 text-zinc-900 placeholder:text-zinc-400'
+                      isThemeNight ? 'bg-brand-dark border-white/10 focus:border-indigo-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-indigo-500 text-zinc-900 placeholder:text-zinc-400'
                     }`}
                   />
                   <button
@@ -915,7 +915,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 onChange={(e) => setCurriculumPassage(e.target.value)}
                 placeholder={isKo ? '이번 주 교재에 수록된 본문 이야기를 입력해 주세요.' : 'Paste the reference reading text here.'}
                 className={`w-full h-36 border outline-none text-sm p-4 rounded-2xl transition-all resize-y ${
-                  isThemeNight ? 'bg-[#050505] border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                  isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
                 }`}
               />
             </div>
@@ -977,7 +977,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 onChange={(e) => setCurriculumOther(e.target.value)}
                 placeholder={isKo ? '예: Speaking: Practice reading the word umbrella 3 times.' : 'E.g. Speaking: Practice reading the word umbrella 3 times.'}
                 className={`w-full h-32 border outline-none text-sm p-4 rounded-2xl transition-all resize-y ${
-                  isThemeNight ? 'bg-[#050505] border-white/10 focus:border-purple-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-purple-500 text-zinc-900 placeholder:text-zinc-400'
+                  isThemeNight ? 'bg-brand-dark border-white/10 focus:border-purple-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-purple-500 text-zinc-900 placeholder:text-zinc-400'
                 }`}
               />
             </div>
@@ -1044,7 +1044,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       value={worksheetType}
                       onChange={(e) => setWorksheetType(e.target.value)}
                       className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 cursor-pointer ${
-                        isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
+                        isThemeNight ? 'bg-brand-dark border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
                       }`}
                     >
                       <option value="daily_homework">📄 {isKo ? '일간 워크시트 (Daily Homework)' : 'Daily Homework'}</option>
@@ -1063,7 +1063,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       value={questionStyle}
                       onChange={(e) => setQuestionStyle(e.target.value)}
                       className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 cursor-pointer ${
-                        isThemeNight ? 'bg-[#050505] border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
+                        isThemeNight ? 'bg-brand-dark border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
                       }`}
                     >
                       <option value="multiple_choice">☑️ {isKo ? '4지 선다형 (Multiple Choice)' : 'Multiple Choice'}</option>
@@ -1117,7 +1117,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 onClick={loadCurriculum}
                 disabled={isSavingCurriculum}
                 className={`px-6 py-3.5 rounded-2xl text-xs font-bold border transition-all active:scale-[0.98] cursor-pointer ${
-                  isThemeNight ? 'bg-[#050505] hover:bg-white/5 text-zinc-400 hover:text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                  isThemeNight ? 'bg-brand-dark hover:bg-white/5 text-zinc-400 hover:text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
                 }`}
               >
                 {isKo ? '초기화' : 'Reset'}

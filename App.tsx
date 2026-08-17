@@ -591,7 +591,7 @@ function AppContent() {
   // covers only one of four roles). Tell them explicitly instead.
   if (platform !== 'web' && isAuthenticated && (user?.role === 'teacher' || user?.role === 'director')) {
     return (
-      <div className={`min-h-[100dvh] flex items-center justify-center p-6 text-center ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'}`}>
+      <div className={`min-h-[100dvh] flex items-center justify-center p-6 text-center ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'}`}>
         <div className="max-w-sm space-y-4">
           <ChekkiMascot className="w-16 h-16 mx-auto opacity-80" />
           <h2 className="text-lg font-black">
@@ -610,7 +610,7 @@ function AppContent() {
   return (
     <ErrorBoundary>
       <div
-        className={`min-h-[100dvh] ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#FAFAFB] text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-200 flex flex-col`}
+        className={`min-h-[100dvh] ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-200 flex flex-col`}
       >
         {standaloneLegal && (
           <div className="fixed inset-0 z-[200]">

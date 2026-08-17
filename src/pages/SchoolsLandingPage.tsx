@@ -201,7 +201,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
 
   return (
-    <div className={`min-h-screen ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#F8FAFC] text-zinc-900'} font-sans transition-colors duration-200 relative overflow-hidden flex flex-col`}>
+    <div className={`min-h-screen ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-slate-50 text-zinc-900'} font-sans transition-colors duration-200 relative overflow-hidden flex flex-col`}>
       {/* Background radial glows */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[100px] pointer-events-none" />
@@ -460,7 +460,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Bento Cell 1: Curriculum Pre-seeding (Spans 2 columns) */}
           <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-[#0F0814]' 
+              ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-brand-dark-elevated' 
               : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
           } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
@@ -518,7 +518,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Bento Cell 2: Roster approvals (1 column) */}
           <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-purple-500/50 hover:bg-[#0F0814]' 
+              ? 'bg-brand-dark border-white/10 hover:border-purple-500/50 hover:bg-brand-dark-elevated' 
               : 'bg-white border-zinc-200/90 hover:border-purple-500/50 hover:bg-purple-50/40 shadow-sm'
           } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div>
@@ -564,7 +564,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Bento Cell 3: Analytics (1 column) */}
           <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-[#0F0814]' 
+              ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-brand-dark-elevated' 
               : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
           } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div>
@@ -610,7 +610,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Bento Cell 4: Parent Sync (Spans 2 columns) */}
           <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl transition-all duration-500 ${
             isNight 
-              ? 'bg-[#050505] border-white/10 hover:border-pink-500/50 hover:bg-[#0F0814]' 
+              ? 'bg-brand-dark border-white/10 hover:border-pink-500/50 hover:bg-brand-dark-elevated' 
               : 'bg-white border-zinc-200/90 hover:border-pink-500/50 hover:bg-pink-50/40 shadow-sm'
           } group relative overflow-hidden cursor-pointer min-h-[280px]`}>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
@@ -681,7 +681,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
           {/* Monthly / Yearly Billing Toggle with Theme Adaptation */}
           <div className={`inline-flex items-center p-1.5 border rounded-full shadow-inner mb-6 transition-colors ${
-            isNight ? 'bg-[#0a0a0c] border-white/10' : 'bg-zinc-200/70 border-zinc-300/80'
+            isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-200/70 border-zinc-300/80'
           }`}>
             <button
               type="button"
@@ -748,7 +748,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             onClick={() => openPlanModal('solo', 1, 1)}
             className={`p-5 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
               isNight 
-                ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
+                ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
                 : 'bg-white border-zinc-200 hover:border-orange-500/50 hover:shadow-xl shadow-sm'
             }`}
           >
@@ -825,7 +825,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             onClick={() => openPlanModal('starter', 3, 1)}
             className={`p-5 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
               isNight 
-                ? 'bg-[#050505] border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
+                ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
                 : 'bg-white border-zinc-200 hover:border-orange-500/50 hover:shadow-xl shadow-sm'
             }`}
           >
@@ -978,7 +978,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             onClick={() => openPlanModal('enterprise', 20, 10)}
             className={`p-5 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
               isNight 
-                ? 'bg-[#050505] border-white/10 hover:border-purple-500/50 hover:bg-zinc-900/30' 
+                ? 'bg-brand-dark border-white/10 hover:border-purple-500/50 hover:bg-zinc-900/30' 
                 : 'bg-white border-zinc-200 hover:border-purple-500/50 hover:shadow-xl shadow-sm'
             }`}
           >
@@ -1054,7 +1054,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
       {/* --- GET IN TOUCH & CONSULTATION SECTION --- */}
       <section id="demo" className={`py-20 px-6 max-w-4xl mx-auto w-full text-center rounded-3xl my-12 border transition-colors ${
-        isNight ? 'bg-gradient-to-b from-zinc-950 to-[#050505] border-white/10' : 'bg-gradient-to-b from-orange-50/70 to-white border-zinc-200 shadow-md'
+        isNight ? 'bg-gradient-to-b from-zinc-950 to-brand-dark border-white/10' : 'bg-gradient-to-b from-orange-50/70 to-white border-zinc-200 shadow-md'
       }`}>
         <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">
           {isKo ? '학원 도입 & 맞춤 상담' : 'CUSTOM ONBOARDING & CONSULTATION'}
@@ -1100,7 +1100,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
           }`}>
             <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 space-y-6 transition-colors ${
-              isNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+              isNight ? 'bg-brand-dark text-zinc-200' : 'bg-white text-zinc-900'
             }`}>
               {/* Header */}
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -1210,7 +1210,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       onChange={(e) => setContactName(e.target.value)}
                       placeholder={isKo ? '예: 김원장' : 'E.g. Director Kim'}
                       className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
-                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                        isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                       }`}
                     />
                   </div>
@@ -1227,7 +1227,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       onChange={(e) => setAcademyName(e.target.value)}
                       placeholder={isKo ? '예: 서초 에이펙스 어학원' : 'E.g. Apex Academy Seocho'}
                       className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
-                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                        isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                       }`}
                     />
                   </div>
@@ -1245,7 +1245,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="010-0000-0000"
                         className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
-                          isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                          isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                         }`}
                       />
                     </div>
@@ -1262,7 +1262,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="director@academy.com"
                         className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
-                          isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                          isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                         }`}
                       />
                     </div>
@@ -1279,7 +1279,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       onChange={(e) => setConsultationMessage(e.target.value)}
                       placeholder={isKo ? '예: 강사 5명, 원생 150명 규모 세팅 및 계좌이체 청구서 발행 문의' : 'E.g. 5 teachers, 150 students, bank invoice setup'}
                       className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all font-sans ${
-                        isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                        isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                       }`}
                     />
                   </div>
@@ -1326,7 +1326,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
           }`}>
             <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 space-y-6 transition-colors ${
-              isNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+              isNight ? 'bg-brand-dark text-zinc-200' : 'bg-white text-zinc-900'
             }`}>
               {/* Header */}
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -1359,7 +1359,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
               {/* Price & Seats Overview */}
               <div className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                isNight ? 'bg-[#050505] border-white/10' : 'bg-orange-50/50 border-orange-200'
+                isNight ? 'bg-brand-dark border-white/10' : 'bg-orange-50/50 border-orange-200'
               }`}>
                 <div>
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block font-mono">
@@ -1482,7 +1482,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             isNight ? 'bg-white/5 border-white/10' : 'bg-white/90 border-zinc-200'
           }`}>
             <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 space-y-6 transition-colors ${
-              isNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+              isNight ? 'bg-brand-dark text-zinc-200' : 'bg-white text-zinc-900'
             }`}>
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3">
@@ -1513,7 +1513,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
 
               {/* Order Summary Box */}
-              <div className={`p-4 rounded-2xl border ${isNight ? 'bg-[#050505] border-white/10' : 'bg-orange-50/50 border-orange-200'}`}>
+              <div className={`p-4 rounded-2xl border ${isNight ? 'bg-brand-dark border-white/10' : 'bg-orange-50/50 border-orange-200'}`}>
                 <div className="flex justify-between items-center text-xs pb-2 border-b border-white/10 mb-2">
                   <span className="text-zinc-400 font-bold">{isKo ? '선택한 플랜' : 'Selected Plan'}:</span>
                   <span className="font-bold text-orange-400">{isKo ? activePlan.nameKo : activePlan.nameEn}</span>
@@ -1571,7 +1571,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     onChange={(e) => setAcademyName(e.target.value)}
                     placeholder={isKo ? '예: 대치 럭스 어학원' : 'E.g. Chekki Seocho Academy'}
                     className={`w-full p-3 rounded-xl border outline-none ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                     }`}
                   />
                 </div>
@@ -1587,7 +1587,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="director@academy.com"
                     className={`w-full p-3 rounded-xl border outline-none ${
-                      isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                     }`}
                   />
                 </div>

@@ -59,7 +59,7 @@ export const ActivityFeed: React.FC<Props> = ({ isNight = true, isKo = false, sc
   if (entries.length === 0) return null;
 
   return (
-    <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+    <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
       <div className="flex items-center gap-2">
         <ClockCounterClockwise size={16} weight="bold" className="text-zinc-400" />
         <span className="text-[10px] font-bold text-zinc-400 uppercase font-mono tracking-wider">

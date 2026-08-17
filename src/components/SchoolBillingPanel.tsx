@@ -64,7 +64,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
 
   return (
     <div className="space-y-6 animate-fade-in text-left">
-      <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+      <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div>
             <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">Current Plan</span>

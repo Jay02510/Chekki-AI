@@ -19,11 +19,18 @@
   --color-brand-purple: #7f77dd;
   --color-brand-pink: #ec4899;
 
+  /* Deliberate hover-elevated dark surfaces, paired with an accent-colored
+     border on the same card (bento tiles, landing cards, FAQ role cards) —
+     distinct from brand-dark, not a duplicate of it. Named during the token
+     extraction pass so ~9 hand-typed hex instances of each become traceable
+     (audit action #3). */
+  --color-brand-dark-elevated: #0f0814;
+  --color-brand-dark-elevated-alt: #0a0714;
+
   /* Premium Easing (Emil-tier) */
   --ease-premium: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   @keyframes fade-in {
     from {

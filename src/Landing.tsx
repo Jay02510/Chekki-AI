@@ -131,7 +131,7 @@ export default function Home() {
 
   return (
     <main className={`overflow-x-hidden w-full max-w-full min-h-screen transition-colors duration-500 selection:bg-brand selection:text-white ${
-      isNight ? 'bg-[#050505] text-slate-50' : 'bg-slate-50 text-slate-900'
+      isNight ? 'bg-brand-dark text-slate-50' : 'bg-slate-50 text-slate-900'
     }`}>
       {/* Accessibility: Skip to Content */}
       <a
@@ -364,11 +364,11 @@ export default function Home() {
 
       {/* GSAP Scrubbing Text Reveal with Video Background + FOR SCHOOLS BUTTON IN SECOND SECTION */}
       <section className={`py-32 md:py-48 px-4 border-y relative overflow-hidden flex flex-col items-center justify-center min-h-[100dvh] ${
-        isNight ? 'bg-[#050505] border-white/5' : 'bg-slate-100 border-slate-200'
+        isNight ? 'bg-brand-dark border-white/5' : 'bg-slate-100 border-slate-200'
       }`}>
         {/* Cinematic Video Background */}
         <div className="absolute inset-0 z-0">
-          <div className={`absolute inset-0 z-10 ${isNight ? 'bg-[#050505]/80' : 'bg-slate-100/80'}`} />
+          <div className={`absolute inset-0 z-10 ${isNight ? 'bg-brand-dark/80' : 'bg-slate-100/80'}`} />
           <video
             autoPlay
             loop
@@ -452,8 +452,8 @@ export default function Home() {
               isNight ? 'bg-white/[0.02] border-white/5 hover:border-brand/40' : 'bg-white border-slate-300 hover:border-brand/60 shadow-slate-200'
             }`}
           >
-            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-[320px] flex flex-col justify-end p-8 text-white">
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-brand-dark relative h-[320px] flex flex-col justify-end p-8 text-white">
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/youtube_bg.png')] bg-cover bg-center mix-blend-screen" />
               <div className="relative z-20">
                 <PlayCircle weight="fill" className="text-5xl text-brand mb-4 drop-shadow-xl" />
@@ -478,8 +478,8 @@ export default function Home() {
               isNight ? 'bg-white/[0.02] border-white/5 hover:border-brand/40' : 'bg-white border-slate-300 hover:border-brand/60 shadow-slate-200'
             }`}
           >
-            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-[320px] flex flex-col justify-end p-8 text-white">
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-brand-dark relative h-[320px] flex flex-col justify-end p-8 text-white">
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('https://res.cloudinary.com/dginphpy4/image/upload/v1771381888/Chekki_Splash_1_nrpzaj.png')] bg-cover bg-center mix-blend-screen" />
               <div className="relative z-20">
                 <GraduationCap weight="fill" className="text-5xl text-blue-400 mb-4 drop-shadow-xl" />
@@ -504,8 +504,8 @@ export default function Home() {
               isNight ? 'bg-white/[0.02] border-white/5 hover:border-red-500/40' : 'bg-white border-slate-300 hover:border-red-500/50 shadow-slate-200'
             }`}
           >
-            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-[#090a10] relative h-[320px] flex flex-col justify-end p-8 text-white">
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090a10] via-[#090a10]/50 to-transparent z-10 pointer-events-none" />
+            <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-brand-dark relative h-[320px] flex flex-col justify-end p-8 text-white">
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/grammar_bg.png')] bg-cover bg-center mix-blend-screen" />
               <div className="relative z-20">
                 <FilePdf weight="fill" className="text-5xl text-red-500 mb-4 drop-shadow-xl" />

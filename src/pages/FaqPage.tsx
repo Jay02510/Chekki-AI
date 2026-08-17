@@ -190,13 +190,13 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
   };
 
   return (
-    <div className={`min-h-screen ${isNight ? 'bg-[#030305] text-zinc-100' : 'bg-[#F8FAFC] text-zinc-900'} font-sans transition-colors duration-300 relative flex flex-col`}>
+    <div className={`min-h-screen ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-slate-50 text-zinc-900'} font-sans transition-colors duration-300 relative flex flex-col`}>
       {/* Background radial glows */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-orange-500/5 rounded-full blur-[140px] pointer-events-none z-0" />
 
       {/* Header Bar */}
       <header className={`relative z-20 w-full border-b backdrop-blur-xl transition-colors ${
-        isNight ? 'bg-[#030305]/80 border-white/10' : 'bg-white/80 border-zinc-200 shadow-xs'
+        isNight ? 'bg-brand-dark/80 border-white/10' : 'bg-white/80 border-zinc-200 shadow-xs'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -280,7 +280,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
               placeholder={isKo ? '질문 내용 검색 (예: 재도전, 교재 등록, 성적표)...' : 'Search questions (e.g., rescan, textbook, reports)...'}
               className={`w-full pl-11 pr-4 py-4 rounded-2xl border text-sm outline-none transition-all ${
                 isNight 
-                  ? 'bg-[#050505] border-white/10 text-white placeholder-zinc-500 focus:border-orange-500/50' 
+                  ? 'bg-brand-dark border-white/10 text-white placeholder-zinc-500 focus:border-orange-500/50' 
                   : 'bg-white border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:border-orange-500 shadow-xs'
               }`}
             />
@@ -329,7 +329,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
         {/* FAQ Accordion List */}
         <div className="space-y-4">
           {filteredFaqs.length === 0 ? (
-            <div className={`p-12 text-center rounded-3xl border ${isNight ? 'bg-[#050505] border-white/5 text-zinc-500' : 'bg-white border-zinc-200 text-zinc-500'}`}>
+            <div className={`p-12 text-center rounded-3xl border ${isNight ? 'bg-brand-dark border-white/5 text-zinc-500' : 'bg-white border-zinc-200 text-zinc-500'}`}>
               <Question size={32} className="mx-auto mb-3 opacity-50" />
               <p className="text-sm">{isKo ? '검색 결과와 일치하는 FAQ 질문이 없습니다.' : 'No matching FAQ questions found.'}</p>
             </div>
@@ -343,10 +343,10 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
                   className={`border rounded-2xl sm:rounded-3xl transition-all duration-300 overflow-hidden ${
                     isOpen 
                       ? isNight 
-                        ? isTeacher ? 'bg-[#0A0714] border-purple-500/40 shadow-xl' : 'bg-[#0F0814] border-orange-500/40 shadow-xl' 
+                        ? isTeacher ? 'bg-brand-dark-elevated-alt border-purple-500/40 shadow-xl' : 'bg-brand-dark-elevated border-orange-500/40 shadow-xl' 
                         : isTeacher ? 'bg-purple-50/40 border-purple-200 shadow-md' : 'bg-orange-50/40 border-orange-200 shadow-md'
                       : isNight 
-                        ? 'bg-[#050505] border-white/10 hover:border-white/20' 
+                        ? 'bg-brand-dark border-white/10 hover:border-white/20' 
                         : 'bg-white border-zinc-200 hover:border-zinc-300 shadow-2xs'
                   }`}
                 >
@@ -391,7 +391,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
 
         {/* Contact Assistance CTA Card */}
         <div className={`mt-16 p-8 sm:p-10 rounded-3xl border text-center relative overflow-hidden ${
-          isNight ? 'bg-gradient-to-b from-[#0F0814] to-[#050505] border-orange-500/20' : 'bg-gradient-to-b from-orange-50 to-white border-orange-200'
+          isNight ? 'bg-gradient-to-b from-brand-dark-elevated to-brand-dark border-orange-500/20' : 'bg-gradient-to-b from-orange-50 to-white border-orange-200'
         }`}>
           <h3 className={`text-xl sm:text-2xl font-black mb-2 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
             {isKo ? '찾으시는 답변이 없으신가요?' : 'Still Have Questions?'}

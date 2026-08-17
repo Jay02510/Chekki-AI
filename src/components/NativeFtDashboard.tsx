@@ -12,6 +12,7 @@ import {
 } from '@phosphor-icons/react';
 import { NativeTeacherLogForm } from './NativeTeacherLogForm';
 import { InsightsChatPanel } from './InsightsChatPanel';
+import { StatTile } from './ui/StatTile';
 import { ClassLogPayload } from '../services/aiGenerator';
 
 interface TroubleWord {
@@ -66,7 +67,7 @@ interface Props {
  * sidebar nav lives there) — this component just reads which of its own
  * two views to show.
  */
-export const NativeFtDashboard: React.FC<Props> = ({
+export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDashboard({
   isNight,
   isKo,
   activeTab,
@@ -91,7 +92,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
   curriculumPassage,
   curriculumOther,
   submittedLogs,
-}) => {
+}) {
   const isThemeNight = isNight;
   return (
     <>
@@ -124,67 +125,13 @@ export const NativeFtDashboard: React.FC<Props> = ({
               shows the active class name, so it was pure duplication. */}
 
           {/* Top Double-Bezel Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-              {/* Stat Card 2 */}
-              <div className={`p-1 rounded-[2rem] text-left transition-colors ${
-                isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
-              }`}>
-                <div className={`rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full transition-colors ${
-                  isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
-                }`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] flex items-center gap-1.5">
-                      <TrendUp size={14} weight="bold" />
-                      <span>{isKo ? '숙제 완료율' : 'Completion Rate'}</span>
-                    </span>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-mono">
-                      {completionRate}%
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {completedHomeworkCount} <span className="text-sm font-normal text-zinc-500">/ {activeStudentsCount} {isKo ? '명 완료' : 'Students'}</span>
-                    </h4>
-                    <div className={`w-full h-2 rounded-full mt-4 overflow-hidden p-0.5 border ${
-                      isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-100 border-zinc-200'
-                    }`}>
-                      <div
-                        className="bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-400 h-full rounded-full transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
-                        style={{ width: `${completionRate}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stat Card 3 */}
-              <div className={`p-1 rounded-[2rem] text-left transition-colors ${
-                isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
-              }`}>
-                <div className={`rounded-[calc(2rem-0.25rem)] p-6 flex flex-col justify-between h-full transition-colors ${
-                  isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
-                }`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-1.5">
-                      <Users size={14} weight="bold" className="text-purple-500" />
-                      <span>{isKo ? '등록 원생 수' : 'Enrolled Students'}</span>
-                    </span>
-                    <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-500/20 text-purple-500 font-mono">
-                      Active Roster
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className={`text-2xl font-black tracking-tight ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {activeStudentsCount} <span className="text-sm font-normal text-zinc-500">{isKo ? '명 등록' : 'Children'}</span>
-                    </h4>
-                    <p className="text-xs text-zinc-500 mt-1">
-                      {isKo ? '가입 승인 완료된 활동 원생 수' : 'Approved active student profiles'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <FtStatCards
+            isNight={isThemeNight}
+            isKo={isKo}
+            completionRate={completionRate}
+            completedHomeworkCount={completedHomeworkCount}
+            activeStudentsCount={activeStudentsCount}
+          />
         </div>
       )}
 
@@ -201,7 +148,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                 isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
               }`}>
                 <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 flex flex-col justify-between h-full text-left transition-colors ${
-                  isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                  isThemeNight ? 'bg-brand-dark' : 'bg-white'
                 }`}>
                   <div>
                     {/* Header: Title + Slide Nav Controls */}
@@ -291,7 +238,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                     <div className="animate-fade-in">
                       {activeVocabWords.length === 0 ? (
                         <div className={`py-12 px-6 rounded-2xl border flex flex-col items-center justify-center text-center ${
-                          isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                          isThemeNight ? 'bg-brand-dark border-white/5' : 'bg-zinc-50 border-zinc-200'
                         }`}>
                           <div className="w-14 h-14 mb-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                             <Notebook size={28} weight="bold" />
@@ -313,7 +260,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                         <div className="space-y-3">
                           {[0, 1, 2].map((i) => (
                             <div key={i} className={`flex items-center justify-between p-4 border rounded-2xl ${
-                              isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                              isThemeNight ? 'bg-brand-dark border-white/5' : 'bg-zinc-50 border-zinc-200'
                             }`}>
                               <div className="h-4 w-24 rounded bg-white/10 animate-pulse" />
                               <div className="h-6 w-20 rounded-full bg-white/10 animate-pulse" />
@@ -324,7 +271,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                         <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
                           {sortedTroubleWords.map(({ word, count }) => (
                             <div key={word} className={`flex items-center justify-between p-4 border rounded-2xl transition-all ${
-                              isThemeNight ? 'bg-[#050505] border-white/5 hover:border-white/10' : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300'
+                              isThemeNight ? 'bg-brand-dark border-white/5 hover:border-white/10' : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300'
                             }`}>
                               <span className={`text-sm font-bold font-mono tracking-wide ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{word}</span>
                               <div className="flex items-center gap-3">
@@ -352,7 +299,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                     <div className="animate-fade-in">
                       {curriculumTopic.trim() ? (
                         <div className={`p-6 rounded-2xl border text-left flex flex-col justify-between min-h-[220px] ${
-                          isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-orange-50/40 border-orange-200/60'
+                          isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-orange-50/40 border-orange-200/60'
                         }`}>
                           <div>
                             <div className="flex items-center justify-between mb-3">
@@ -385,7 +332,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                         </div>
                       ) : (
                         <div className={`p-8 rounded-2xl border text-center flex flex-col items-center justify-center min-h-[220px] ${
-                          isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                          isThemeNight ? 'bg-brand-dark border-white/5' : 'bg-zinc-50 border-zinc-200'
                         }`}>
                           <div className="w-12 h-12 mb-3 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                             <Sparkle size={24} weight="bold" />
@@ -413,7 +360,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                     <div className="animate-fade-in">
                       {curriculumPhonics.trim() ? (
                         <div className={`p-6 rounded-2xl border text-left min-h-[220px] flex flex-col justify-between ${
-                          isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-indigo-50/40 border-indigo-200/60'
+                          isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-indigo-50/40 border-indigo-200/60'
                         }`}>
                           <div>
                             <div className="flex items-center justify-between mb-3">
@@ -446,7 +393,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                         </div>
                       ) : (
                         <div className={`p-8 rounded-2xl border text-center flex flex-col items-center justify-center min-h-[220px] ${
-                          isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                          isThemeNight ? 'bg-brand-dark border-white/5' : 'bg-zinc-50 border-zinc-200'
                         }`}>
                           <div className="w-12 h-12 mb-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
                             <Notebook size={24} weight="bold" />
@@ -474,7 +421,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                     <div className="animate-fade-in">
                       {curriculumPassage.trim() ? (
                         <div className={`p-6 rounded-2xl border text-left min-h-[220px] flex flex-col justify-between ${
-                          isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-emerald-50/40 border-emerald-200/60'
+                          isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-emerald-50/40 border-emerald-200/60'
                         }`}>
                           <div>
                             <div className="flex items-center justify-between mb-3">
@@ -497,7 +444,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                         </div>
                       ) : (
                         <div className={`p-8 rounded-2xl border text-center flex flex-col items-center justify-center min-h-[220px] ${
-                          isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                          isThemeNight ? 'bg-brand-dark border-white/5' : 'bg-zinc-50 border-zinc-200'
                         }`}>
                           <div className="w-12 h-12 mb-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
                             <BookOpen size={24} weight="bold" />
@@ -525,7 +472,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                     <div className="animate-fade-in">
                       {curriculumOther.trim() ? (
                         <div className={`p-6 rounded-2xl border text-left min-h-[220px] flex flex-col justify-between ${
-                          isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-purple-50/40 border-purple-200/60'
+                          isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-purple-50/40 border-purple-200/60'
                         }`}>
                           <div>
                             <div className="flex items-center justify-between mb-3">
@@ -555,7 +502,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                         </div>
                       ) : (
                         <div className={`p-8 rounded-2xl border text-center flex flex-col items-center justify-center min-h-[220px] ${
-                          isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                          isThemeNight ? 'bg-brand-dark border-white/5' : 'bg-zinc-50 border-zinc-200'
                         }`}>
                           <div className="w-12 h-12 mb-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
                             <FileText size={24} weight="bold" />
@@ -585,7 +532,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                 isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
               }`}>
                 <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 flex flex-col justify-between h-full text-left relative overflow-hidden transition-colors ${
-                  isThemeNight ? 'bg-[#0a0a0c]' : 'bg-white'
+                  isThemeNight ? 'bg-brand-dark' : 'bg-white'
                 }`}>
                   <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-500/10 to-transparent blur-3xl pointer-events-none" />
                   <div>
@@ -606,7 +553,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                     <div className="space-y-4 text-xs leading-relaxed text-zinc-300 font-medium">
                       {!hasVocabData ? (
                         <div className={`p-6 rounded-2xl border text-center text-xs text-zinc-500 flex flex-col items-center gap-2 ${
-                          isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-zinc-50 border-zinc-200'
+                          isThemeNight ? 'bg-brand-dark border-white/5' : 'bg-zinc-50 border-zinc-200'
                         }`}>
                           <BookOpen size={24} weight="bold" />
                           <span>{isKo ? '이번 주 등록된 어휘가 없습니다. 커리큘럼 탭에서 단어를 추가해 주세요.' : 'No vocabulary words set for this week yet — add some on the Curriculum tab to get tips here.'}</span>
@@ -628,7 +575,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                         </>
                       ) : (
                         <div className={`p-6 rounded-2xl border text-center text-xs text-emerald-500 flex flex-col items-center gap-2 ${
-                          isThemeNight ? 'bg-[#050505] border-white/5' : 'bg-emerald-50/50 border-emerald-200'
+                          isThemeNight ? 'bg-brand-dark border-white/5' : 'bg-emerald-50/50 border-emerald-200'
                         }`}>
                           <Sparkle size={24} weight="bold" />
                           <span>{isKo ? '아직 채점된 오답이 없습니다 (또는 모든 아이들이 완벽히 소화했습니다!)' : 'No mistakes scanned against this week\'s words yet — or everyone nailed it!'}</span>
@@ -660,7 +607,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
             isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
           }`}>
             <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
-              isThemeNight ? 'bg-[#0a0a0c] text-white' : 'bg-white text-zinc-900'
+              isThemeNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'
             }`}>
               <div className={`flex items-center justify-between mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
                 <div className="flex items-center gap-3">
@@ -697,7 +644,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
 
               {submittedLogs.length === 0 ? (
                 <div className={`p-12 rounded-3xl border text-center space-y-4 ${
-                  isThemeNight ? 'bg-[#050505] border-white/5 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-700'
+                  isThemeNight ? 'bg-brand-dark border-white/5 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-700'
                 }`}>
                   <div className="w-16 h-16 rounded-3xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center mx-auto text-2xl shadow-inner">
                     📑
@@ -717,7 +664,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
                 <div className="space-y-4">
                   {submittedLogs.map((log: any, idx: number) => (
                     <div key={log.id || idx} className={`p-5 rounded-2xl border transition-all ${
-                      isThemeNight ? 'bg-[#050505] border-white/10' : 'bg-zinc-50 border-zinc-200'
+                      isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
                     }`}>
                       <div className="flex items-center justify-between pb-3 border-b border-white/5">
                         <div className="flex items-center gap-2">
@@ -752,5 +699,59 @@ export const NativeFtDashboard: React.FC<Props> = ({
         </div>
       )}
     </>
+  );
+});
+
+interface FtStatCardsProps {
+  isNight: boolean;
+  isKo: boolean;
+  completionRate: number;
+  completedHomeworkCount: number;
+  activeStudentsCount: number;
+}
+
+/**
+ * Extracted so TeacherPage.tsx can render this directly instead of
+ * hand-duplicating the stat-card block (previously drifted independently,
+ * one variant not even using the double-bezel construction). One source
+ * of truth for the FT/KT overview stats going forward.
+ */
+export const FtStatCards: React.FC<FtStatCardsProps> = ({
+  isNight,
+  isKo,
+  completionRate,
+  completedHomeworkCount,
+  activeStudentsCount,
+}) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <StatTile
+        isNight={isNight}
+        label={isKo ? '숙제 완료율' : 'Completion Rate'}
+        icon={<TrendUp size={14} weight="bold" className="text-orange-500" />}
+        badge={{ text: `${completionRate}%`, tone: 'emerald' }}
+        ring={{ value: completionRate }}
+        value={
+          <>
+            {completedHomeworkCount}{' '}
+            <span className="text-sm font-normal text-zinc-500">
+              / {activeStudentsCount} {isKo ? '명 완료' : 'Students'}
+            </span>
+          </>
+        }
+      />
+      <StatTile
+        isNight={isNight}
+        label={isKo ? '등록 원생 수' : 'Enrolled Students'}
+        icon={<Users size={14} weight="bold" className="text-orange-500" />}
+        badge={{ text: isKo ? '활동 원생' : 'ACTIVE ROSTER', tone: 'neutral' }}
+        value={
+          <>
+            {activeStudentsCount} <span className="text-sm font-normal text-zinc-500">{isKo ? '명 등록' : 'Children'}</span>
+          </>
+        }
+        sublabel={isKo ? '가입 승인 완료된 활동 원생 수' : 'Approved active student profiles'}
+      />
+    </div>
   );
 };

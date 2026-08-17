@@ -214,7 +214,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
     <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${
       isNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
     }`}>
-      <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${isNight ? 'bg-[#0a0a0c]' : 'bg-white'}`}>
+      <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${isNight ? 'bg-brand-dark' : 'bg-white'}`}>
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
@@ -260,7 +260,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="David / 김다윗"
                 required
-                className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
+                className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
               />
             </div>
             <div className="flex-1 min-w-[180px]">
@@ -271,7 +271,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="parent@email.com"
                 required
-                className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${isNight ? 'bg-[#050505] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
+                className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
               />
             </div>
             <button

@@ -38,7 +38,7 @@ export const WeekCalendarModal: React.FC<Props> = ({
         isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
       }`}>
         <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar transition-colors ${
-          isThemeNight ? 'bg-[#0c0c0e] text-zinc-200' : 'bg-white text-zinc-900'
+          isThemeNight ? 'bg-brand-dark text-zinc-200' : 'bg-white text-zinc-900'
         }`}>
           <button
             type="button"
@@ -96,7 +96,7 @@ export const WeekCalendarModal: React.FC<Props> = ({
                     isActiveWeek
                       ? 'border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/10'
                       : isThemeNight
-                        ? 'bg-[#050505] border-white/10 hover:border-white/20 hover:bg-white/5'
+                        ? 'bg-brand-dark border-white/10 hover:border-white/20 hover:bg-white/5'
                         : 'bg-zinc-50 border-zinc-200 hover:border-orange-300 hover:bg-orange-50/50'
                   }`}
                 >
@@ -150,7 +150,7 @@ export const WeekCalendarModal: React.FC<Props> = ({
               type="button"
               onClick={onClose}
               className={`px-6 py-3 font-bold text-xs rounded-xl border transition-all cursor-pointer ${
-                isThemeNight ? 'bg-[#050505] text-zinc-300 border-white/10 hover:bg-white/5' : 'bg-zinc-100 text-zinc-700 border-zinc-300 hover:bg-zinc-200'
+                isThemeNight ? 'bg-brand-dark text-zinc-300 border-white/10 hover:bg-white/5' : 'bg-zinc-100 text-zinc-700 border-zinc-300 hover:bg-zinc-200'
               }`}
             >
               {isKo ? '닫기' : 'Close'}

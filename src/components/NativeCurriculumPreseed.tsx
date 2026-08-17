@@ -63,7 +63,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
   return (
     <div
       className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-8 font-sans transition-all ${
-        isNight ? 'bg-[#060608] border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+        isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
       {/* Header */}
@@ -92,7 +92,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
         {/* Left Column: Preset Textbooks & Syllabus Photo Upload (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
           {/* 1. Photo Syllabus Scanner Box */}
-          <div className={`p-5 rounded-2xl border space-y-4 ${isNight ? 'bg-[#08080c] border-orange-500/30' : 'bg-orange-50/50 border-orange-200'}`}>
+          <div className={`p-5 rounded-2xl border space-y-4 ${isNight ? 'bg-brand-dark border-orange-500/30' : 'bg-orange-50/50 border-orange-200'}`}>
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider font-mono text-orange-500 flex items-center gap-1.5">
                 <UploadSimple size={16} />
@@ -168,7 +168,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
 
         {/* Right Column: Pre-Seeded Scope & Sequence View (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
-          <div className={`p-6 sm:p-8 rounded-3xl border space-y-6 ${isNight ? 'bg-[#08080c] border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+          <div className={`p-6 sm:p-8 rounded-3xl border space-y-6 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <span className="text-[10px] font-mono font-bold text-orange-500 uppercase block mb-1">
@@ -205,7 +205,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
             </div>
 
             {/* Selected Unit Details Box */}
-            <div className={`p-5 rounded-2xl border space-y-4 ${isNight ? 'bg-[#030305] border-white/10' : 'bg-white border-zinc-200'}`}>
+            <div className={`p-5 rounded-2xl border space-y-4 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200'}`}>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-emerald-400 uppercase">
                   Unit {currentUnitObj.unitNum} Topic:

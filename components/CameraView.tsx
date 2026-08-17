@@ -310,7 +310,7 @@ export const CameraView: React.FC<Props> = ({
         ></div>
         <div
           id="magic-drop-zone-inner"
-          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-[#050505]/40 border-white/10 shadow-2xl' : 'bg-white border-zinc-200 shadow-xl'} backdrop-blur-3xl rounded-[2.5rem] border transition-all duration-200 ease-[var(--ease-premium)] flex flex-col items-center justify-center p-5 md:p-12 group
+          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-brand-dark/40 border-white/10 shadow-2xl' : 'bg-white border-zinc-200 shadow-xl'} backdrop-blur-3xl rounded-[2.5rem] border transition-all duration-200 ease-[var(--ease-premium)] flex flex-col items-center justify-center p-5 md:p-12 group
               ${dragActive && !isLocked ? 'border-orange-500 shadow-md scale-[1.02]' : 'lg:hover:border-orange-500/30'}`}
           onDragEnter={isLocked ? undefined : handleDrag}
           onDragLeave={isLocked ? undefined : handleDrag}

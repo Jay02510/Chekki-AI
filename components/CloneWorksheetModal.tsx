@@ -4,6 +4,7 @@ import { generateSimilarWorksheet } from '../services/geminiService';
 import { ChekkiMascot } from './Icons';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Spinner } from '@phosphor-icons/react';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Props {
   originalItems: WorksheetItem[];
@@ -105,13 +106,28 @@ export const CloneWorksheetModal: React.FC<Props> = ({
     setHasDrawn(false);
   };
 
+  // This modal has no internal open/close state of its own — its parent
+  // mounts/unmounts it — so "open" for focus-trap purposes is just "mounted"
+  // (audit: P1 finding, only in-scope modal not wired to useDialogA11y).
+  const dialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: true,
+    onClose,
+  });
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose}></div>
 
-      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-4xl mx-4">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={language === 'ko' ? '연습 모드' : 'Practice Mode'}
+        tabIndex={-1}
+        className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-4xl mx-4"
+      >
         <div
-          className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-[#050505]' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
+          className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
         >
           <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-10 shrink-0">
             <div className="flex items-center gap-3">
@@ -125,6 +141,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({
             </div>
             <button
               onClick={onClose}
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
               className="min-w-[48px] min-h-[48px] rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
             >
               ✕
@@ -168,7 +185,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({
                 {hasDrawn && (
                   <button
                     onClick={onClose}
-                    className="bg-green-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-lg animate-bounce min-h-[44px]"
+                    className="bg-green-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-lg animate-fade-in-up min-h-[44px]"
                   >
                     Finish & Get Stamp!
                   </button>

@@ -105,10 +105,10 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
 
   return (
     <div className={`min-h-screen flex items-center justify-center p-4 sm:p-6 font-sans transition-colors ${
-      isNight ? 'bg-[#030305] text-zinc-100' : 'bg-zinc-50 text-zinc-900'
+      isNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'
     }`}>
       <div className={`w-full max-w-2xl rounded-3xl border p-6 sm:p-10 shadow-2xl space-y-8 transition-all ${
-        isNight ? 'bg-[#08080c] border-white/10' : 'bg-white border-zinc-200'
+        isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200'
       }`}>
         
         {/* Wizard Header Progress Bar */}
@@ -180,7 +180,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                   onChange={(e) => setAcademyName(e.target.value)}
                   placeholder="E.g. Apex International Academy"
                   className={`w-full p-3.5 rounded-xl border text-sm font-bold outline-none focus:border-orange-500 transition-all ${
-                    isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                    isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                   }`}
                 />
               </div>
@@ -193,7 +193,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                   value={campusLevel}
                   onChange={(e) => setCampusLevel(e.target.value)}
                   className={`w-full p-3.5 rounded-xl border text-sm font-bold outline-none focus:border-orange-500 cursor-pointer ${
-                    isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                    isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                   }`}
                 >
                   <option value="Kindergarten & Elementary">유치부 &amp; 초등부 (Kindergarten &amp; Elementary)</option>
@@ -273,7 +273,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                     onChange={(e) => setNewClassName(e.target.value)}
                     placeholder={isKo ? '새 학급반 입력 (예: 7B Sunshine)' : 'Add class (e.g. 7B Sunshine)'}
                     className={`flex-1 p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 ${
-                      isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                     }`}
                   />
                   <button
@@ -314,7 +314,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                   onChange={(e) => setSelectedTextbook(e.target.value)}
                   placeholder="E.g. Bricks Reading 150 / Subject Link L4"
                   className={`w-full p-3.5 rounded-xl border text-sm font-bold outline-none focus:border-orange-500 ${
-                    isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                    isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                   }`}
                 />
               </div>

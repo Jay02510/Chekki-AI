@@ -395,7 +395,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   }, []);
 
   return createPortal(
-    <div className="fixed inset-0 z-[200] bg-[#050505] text-zinc-50 overflow-y-auto animate-fade-in font-sans">
+    <div className="fixed inset-0 z-[200] bg-brand-dark text-zinc-50 overflow-y-auto animate-fade-in font-sans">
       <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03] bg-noise mix-blend-overlay" />
 
       {showHandoff && (

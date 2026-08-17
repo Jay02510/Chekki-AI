@@ -230,9 +230,9 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
           className="relative w-full max-w-[800px] max-h-[90vh] bg-white/5 ring-1 ring-white/10 p-2 sm:p-3 rounded-[2.5rem] shadow-[0_0_80px_rgba(0,0,0,0.8)]"
         >
           {/* Inner Core */}
-          <div className="relative h-full max-h-[calc(90vh-1.5rem)] flex flex-col bg-[#050505] rounded-[2rem] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden">
+          <div className="relative h-full max-h-[calc(90vh-1.5rem)] flex flex-col bg-brand-dark rounded-[2rem] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden">
             {/* Header */}
-            <div className="flex-none p-6 sm:p-10 flex justify-between items-start z-10 bg-gradient-to-b from-[#050505] to-transparent">
+            <div className="flex-none p-6 sm:p-10 flex justify-between items-start z-10 bg-gradient-to-b from-brand-dark to-transparent">
               <div>
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -372,7 +372,7 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
             </div>
 
             {/* Massive Floating Print CTA */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent pointer-events-none flex justify-center z-20">
+            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 bg-gradient-to-t from-brand-dark via-brand-dark to-transparent pointer-events-none flex justify-center z-20">
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
