@@ -16,7 +16,16 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
         // We will remove the manual redirect so the landing page works.
 
         const apiPath = req.url?.split('?')[0];
-        if (apiPath && apiPath.startsWith('/api/')) {
+        // Shared helpers under api/_lib/ (e.g. pricingTiers.ts) are imported
+        // as plain ES modules by frontend code, not called as endpoints —
+        // Vite serves them by their real file path, which happens to start
+        // with /api/ too. Without this guard the block below tries to
+        // dynamic-import them as a serverless handler and appends ".ts" a
+        // second time (pricingTiers.ts -> pricingTiers.ts.ts), 500ing and
+        // breaking any page that imports from api/_lib/ (landing page,
+        // TeacherPage, SchoolsLandingPage, etc.) in dev only — production
+        // builds bundle the import directly and never hit this middleware.
+        if (apiPath && apiPath.startsWith('/api/') && !apiPath.startsWith('/api/_lib/')) {
           const endpointName = apiPath.replace('/api/', '');
 
           // Parse body if method is POST

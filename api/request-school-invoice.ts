@@ -74,6 +74,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       status: 'pending_payment',
       bankInfo,
       createdAt: new Date().toISOString(),
+      // Informational only — this is an unauthenticated public endpoint, so
+      // schoolId here is never verified to belong to the requester.
+      // confirm_invoice (api/admin.ts) correctly ignores this field and
+      // always mints its own schoolId; do not wire this value into any
+      // future authorization or upgrade decision without first verifying
+      // requester ownership of the school (audit: Low finding).
       ...(schoolId ? { schoolId: String(schoolId).trim() } : {}),
     };
 

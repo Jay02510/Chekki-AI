@@ -69,7 +69,6 @@ export const CameraView: React.FC<Props> = ({
     setGuestUsed(used);
   }, [isAuthenticated]);
 
-  // Listen for trigger-scan event from BottomNav
   useEffect(() => {
     const handleTriggerScan = () => {
       if (isAuthenticated) {

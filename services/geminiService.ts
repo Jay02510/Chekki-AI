@@ -221,7 +221,8 @@ export const refineWorksheetItem = async (
   item: WorksheetItem,
   reason: string,
   language: string = 'ko',
-  idempotencyKey?: string
+  idempotencyKey?: string,
+  signal?: AbortSignal
 ): Promise<Partial<WorksheetItem>> => {
   if (MOCK_MODE) {
     await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
@@ -246,6 +247,7 @@ export const refineWorksheetItem = async (
     const response = await fetch(`${API_BASE_URL}/api/analyze`, {
       method: 'POST',
       headers,
+      signal,
       body: JSON.stringify({
         task: 'refine',
         itemToRefine: item,
@@ -332,38 +334,4 @@ export const askChekkiQuestion = async (
     console.error('[geminiService] Ask API error:', e);
     throw e;
   }
-};
-
-// ─── generateQuiz ─────────────────────────────────────────────────────────────
-export interface QuizItem {
-  question: string;
-  correct_answer: string;
-  distractors: string[];
-  options: string[]; // shuffled: correct_answer + distractors
-  explanation_ko: string;
-}
-
-export const generateQuiz = async (
-  mistakes: Array<{ question_text?: string; correct_answer?: string }>,
-  language: string = 'ko'
-): Promise<QuizItem[]> => {
-  const idToken = await getValidIdToken();
-  if (!idToken) throw new Error('UNAUTHORIZED: Must be signed in to generate a quiz.');
-
-  const response = await fetch(`${API_BASE_URL}/api/generate-quiz`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${idToken}`,
-    },
-    body: JSON.stringify({ mistakes, language }),
-  });
-
-  if (!response.ok) {
-    const errData = await response.json().catch(() => ({}));
-    throw new Error(errData.message || errData.error || `QUIZ_FAILED_${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.quiz as QuizItem[];
 };

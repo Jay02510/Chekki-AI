@@ -386,6 +386,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const cleanEmail = email.toLowerCase().trim();
       const cleanPass = pass.trim();
+
+      // Reserved for the pre-provisioned Apple/reviewer demo accounts (see the
+      // email-based plan override in fetchAndSetUserProfile). Those accounts
+      // only ever sign in with a pre-set password, never sign up — blocking
+      // registration here closes the gap where someone could self-register
+      // the literal address in an environment that hasn't provisioned it yet
+      // and pick up the demo "pro" display override (audit: High finding #2).
+      if (cleanEmail === 'test@example.com' || cleanEmail === 'expired@example.com') {
+        throw new Error('This email address is reserved.');
+      }
+
       const res = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPass);
 
       const newProfile: UserProfile = {

@@ -595,12 +595,14 @@ https://urlgeni.us/chekki
       // it clears trialEndsAt so the create-class/create-teacher-invite
       // soft-lock stops applying.
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
+      const sanitizedUpgradeSchoolId = sanitizeSchoolId(schoolId);
+      if (!sanitizedUpgradeSchoolId) return res.status(400).json({ error: 'Invalid schoolId' });
       const targetPlanId = req.body?.planId;
       if (!targetPlanId || typeof targetPlanId !== 'string') {
         return res.status(400).json({ error: 'Missing planId' });
       }
 
-      const schoolRef = adminDb.collection('schools').doc(schoolId);
+      const schoolRef = adminDb.collection('schools').doc(sanitizedUpgradeSchoolId);
       const schoolSnap = await schoolRef.get();
       if (!schoolSnap.exists) return res.status(404).json({ error: 'School not found' });
 
@@ -614,12 +616,14 @@ https://urlgeni.us/chekki
       return res.status(200).json({
         success: true,
         message: 'School upgraded successfully',
-        schoolId,
+        schoolId: sanitizedUpgradeSchoolId,
         planId: targetPlanId,
         seatsTotal: newSeats,
       });
     } else if (action === 'assign_teacher') {
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
+      const sanitizedAssignSchoolId = sanitizeSchoolId(schoolId);
+      if (!sanitizedAssignSchoolId) return res.status(400).json({ error: 'Invalid schoolId' });
       let targetUid = uid;
 
       if (!targetUid && email) {
@@ -636,17 +640,17 @@ https://urlgeni.us/chekki
 
       if (!targetUid) return res.status(400).json({ error: 'Missing uid or email' });
 
-      const schoolDoc = await adminDb.collection('schools').doc(schoolId).get();
+      const schoolDoc = await adminDb.collection('schools').doc(sanitizedAssignSchoolId).get();
       if (!schoolDoc.exists) {
         return res.status(404).json({ error: 'School not found' });
       }
 
-      const sName = schoolDoc.data()?.name || schoolId;
+      const sName = schoolDoc.data()?.name || sanitizedAssignSchoolId;
 
       await adminDb.collection('users').doc(targetUid).set(
         {
           role: 'teacher',
-          schoolId: schoolId,
+          schoolId: sanitizedAssignSchoolId,
           schoolName: sName,
           plan: 'pro',
           maxScansPerDay: 9999,
@@ -659,7 +663,7 @@ https://urlgeni.us/chekki
       // Add user to usedByUids array on the school doc
       await adminDb
         .collection('schools')
-        .doc(schoolId)
+        .doc(sanitizedAssignSchoolId)
         .update({
           usedByUids: FieldValue.arrayUnion(targetUid),
         });

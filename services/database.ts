@@ -193,6 +193,7 @@ export const db = {
       );
     } catch (e) {
       console.error('[saveUserMistakes] failed:', e);
+      throw e;
     }
   },
 

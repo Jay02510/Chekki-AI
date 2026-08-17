@@ -39,6 +39,14 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [justCopied, setJustCopied] = useState(false);
 
+  // Bulk invite: paste several emails at once instead of filling the single
+  // form N times during initial school setup, when a director has a full
+  // roster of FT/KT seats to fill in one sitting.
+  const [isBulkMode, setIsBulkMode] = useState(false);
+  const [bulkEmailsInput, setBulkEmailsInput] = useState('');
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+  const [bulkResults, setBulkResults] = useState<Array<{ email: string; success: boolean; error?: string }>>([]);
+
   const copyInviteLink = async (link: string) => {
     try {
       if (navigator.clipboard?.writeText) {
@@ -141,6 +149,69 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
     }
   };
 
+  const handleSendBulkInvites = async () => {
+    setMessage(null);
+    setBulkResults([]);
+    const emails = Array.from(
+      new Set(
+        bulkEmailsInput
+          .split('\n')
+          .map((e) => e.trim())
+          .filter(Boolean)
+      )
+    );
+    if (emails.length === 0) {
+      setMessage({ text: isKo ? '이메일을 한 줄에 하나씩 입력하세요.' : 'Enter one email per line.', type: 'error' });
+      return;
+    }
+    if (!classId) {
+      setMessage({ text: isKo ? '배정할 학급을 선택하세요.' : 'Pick a class for this teacher to join.', type: 'error' });
+      return;
+    }
+    setIsSending(true);
+    setBulkProgress({ done: 0, total: emails.length });
+    // Sequential, not Promise.all — the backend re-reads the seat count per
+    // request rather than in a transaction, so firing these in parallel near
+    // the seat cap could let more invites through than seats actually allow.
+    const results: Array<{ email: string; success: boolean; error?: string }> = [];
+    for (const inviteEmail of emails) {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        const response = await fetch('/api/create-teacher-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+          body: JSON.stringify({ role, email: inviteEmail, classId }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          results.push({ email: inviteEmail, success: false, error: data.error || 'failed' });
+          if (data.trialExpired) setShowUpgradeConfirm(true);
+        } else {
+          results.push({ email: inviteEmail, success: true });
+        }
+      } catch (err) {
+        results.push({ email: inviteEmail, success: false, error: isKo ? '네트워크 오류' : 'network error' });
+      }
+      setBulkResults([...results]);
+      setBulkProgress({ done: results.length, total: emails.length });
+    }
+    setIsSending(false);
+    const successCount = results.filter((r) => r.success).length;
+    setMessage({
+      text: isKo
+        ? `${successCount}/${emails.length}건 초대를 보냈습니다.`
+        : `Sent ${successCount}/${emails.length} invites.`,
+      type: successCount === emails.length ? 'success' : 'error',
+    });
+    if (successCount === emails.length) {
+      setBulkEmailsInput('');
+    } else {
+      // Leave only the failed emails in the textarea so the director can
+      // fix and resubmit without retyping everything that already worked.
+      setBulkEmailsInput(results.filter((r) => !r.success).map((r) => r.email).join('\n'));
+    }
+  };
+
   const handleRevokeInvite = async (inviteId: string) => {
     setRevokingId(inviteId);
     setMessage(null);
@@ -214,26 +285,70 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         </select>
       </div>
 
-      <div className="space-y-2">
-        <input
-          type="email"
-          value={email}
-          disabled={noEmailYet}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder={isKo ? '선생님 이메일 주소' : "Teacher's email address"}
-          className={`w-full p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 disabled:opacity-40 ${
-            isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-          }`}
-        />
-        <label className="flex items-center gap-2 text-[11px] text-zinc-400 font-bold cursor-pointer">
-          <input type="checkbox" checked={noEmailYet} onChange={(e) => setNoEmailYet(e.target.checked)} />
-          {isKo ? '아직 이메일을 모릅니다 (공유 가능한 1회용 링크 생성)' : "I don't know their email yet (generate a single-use link instead)"}
-        </label>
-      </div>
+      {!isBulkMode ? (
+        <div className="space-y-2">
+          <input
+            type="email"
+            value={email}
+            disabled={noEmailYet}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={isKo ? '선생님 이메일 주소' : "Teacher's email address"}
+            className={`w-full p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 disabled:opacity-40 ${
+              isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+            }`}
+          />
+          <label className="flex items-center gap-2 text-[11px] text-zinc-400 font-bold cursor-pointer">
+            <input type="checkbox" checked={noEmailYet} onChange={(e) => setNoEmailYet(e.target.checked)} />
+            {isKo ? '아직 이메일을 모릅니다 (공유 가능한 1회용 링크 생성)' : "I don't know their email yet (generate a single-use link instead)"}
+          </label>
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          <textarea
+            value={bulkEmailsInput}
+            onChange={(e) => setBulkEmailsInput(e.target.value)}
+            rows={5}
+            placeholder={isKo ? '이메일을 한 줄에 하나씩 붙여넣으세요\nteacher1@example.com\nteacher2@example.com' : 'Paste one email per line\nteacher1@example.com\nteacher2@example.com'}
+            className={`w-full p-3 rounded-xl border text-xs font-mono outline-none focus:border-orange-500 ${
+              isNight ? 'bg-[#030305] border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+            }`}
+          />
+          {bulkProgress && (
+            <p className="text-[11px] text-zinc-500 font-mono">
+              {isKo ? `전송 중 ${bulkProgress.done}/${bulkProgress.total}` : `Sending ${bulkProgress.done}/${bulkProgress.total}`}
+            </p>
+          )}
+          {bulkResults.length > 0 && (
+            <div className="max-h-32 overflow-y-auto space-y-1 pt-1">
+              {bulkResults.map((r, idx) => (
+                <div key={`${r.email}-${idx}`} className="flex items-center justify-between text-[11px] gap-2">
+                  <span className="text-zinc-400 truncate">{r.email}</span>
+                  <span className={`font-bold shrink-0 ${r.success ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {r.success ? (isKo ? '전송됨 ✓' : 'sent ✓') : r.error || (isKo ? '실패' : 'failed')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <button
         type="button"
-        onClick={handleSendInvite}
+        onClick={() => {
+          setMessage(null);
+          setIsBulkMode((prev) => !prev);
+        }}
+        className="text-[11px] text-orange-400 hover:text-orange-300 font-bold underline cursor-pointer"
+      >
+        {isBulkMode
+          ? (isKo ? '← 한 명씩 초대하기' : '← Invite one at a time')
+          : (isKo ? '여러 명 한번에 초대하기 (붙여넣기)' : 'Invite multiple at once (paste emails)')}
+      </button>
+
+      <button
+        type="button"
+        onClick={isBulkMode ? handleSendBulkInvites : handleSendInvite}
         disabled={isSending || !classId || (role === 'ft' ? remainingFt <= 0 : remainingKt <= 0)}
         className="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all"
       >
@@ -241,6 +356,8 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
           ? (isKo ? '전송 중...' : 'Sending...')
           : (role === 'ft' ? remainingFt <= 0 : remainingKt <= 0)
           ? (isKo ? '남은 좌석 없음' : 'No seats remaining')
+          : isBulkMode
+          ? (isKo ? '모두 초대 보내기' : 'Send all invites')
           : noEmailYet
           ? (isKo ? '초대 링크 생성' : 'Generate invite link')
           : (isKo ? '초대 이메일 보내기' : 'Send invite email')}

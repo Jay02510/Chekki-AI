@@ -6,6 +6,45 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 016 — KT review queue and bulk teacher invite: reused existing data shape, didn't restructure
+
+**Date:** 2026-08-17
+**Status:** Resolved
+
+**Context:** Friction audit against actual code (not guessing) found two FT/KT/director pain points: `NativeKtDashboard.tsx` only ever rendered `ktPendingLogs[0]`, forcing a KT through pending reports strictly one at a time with no visibility into the queue behind it; and `TeacherInvitePanel.tsx` only accepted one email per submission, so a director staffing a new campus had to repeat the invite form once per hire.
+
+**Decision:** For the KT queue: `ktPendingLogs` in `TeacherPage.tsx` was already a real Firestore-backed array — the fix was entirely in what gets passed to the dashboard (a new `activeKtLogId` selection state plus a `KtReviewQueue.tsx` chip strip), not in `NativeKtDashboard.tsx` itself, whose per-report local state already resets correctly via its existing `key`-remount pattern. For bulk invite: added a "paste multiple emails" textarea mode to `TeacherInvitePanel.tsx` that loops the existing single-invite `/api/create-teacher-invite` call sequentially (not `Promise.all`), since the backend re-reads the seat count per request rather than in a transaction — parallel calls near the seat cap could race past the limit.
+
+**Consequences:** Both shipped without backend changes. On partial bulk-invite failure, the textarea is left containing only the failed emails so the director doesn't retype ones that already succeeded. The KT queue shows a transient "copied ✓" state on a chip for ~1.4s before the approved log actually drops out of the array, giving a visible confirmation trail instead of an instant vanish.
+
+---
+
+## 015 — Rejected a unified FT chatbot; two targeted integrations instead
+
+**Date:** 2026-08-17
+**Status:** Resolved
+
+**Context:** After scoping voice-fill for the daily log (Decision 014), the question came up of whether a single context-aware chat agent should become the interface for all FT tasks — daily log, syllabus/homework upload, worksheet generation, and the read-only Insights dashboard.
+
+**Decision:** No. Mapped the actual FT task surface (`TeacherPage.tsx`, `NativeFtDashboard.tsx`, `CurriculumEditorForm.tsx`): syllabus/homework upload is already a one-tap photo flow and worksheet generation is already a single button — both faster than any chat interaction could be, so wrapping them in conversation would add friction, not remove it. Voice only helps where the current UI is genuinely slower than talking, which is true for the daily log form and nowhere else on the FT side. Built two narrow, additive integrations instead: (1) the FT's already-scanned weekly curriculum (`curriculumTopic` state, already loaded by `TeacherPage.tsx`) now prefills the daily log's Lesson Topic field via the same `useEffect` prefill pattern already used for class name/textbook — voice-fill then naturally skips asking about it, no backend change needed; (2) a chat box (`InsightsChatPanel.tsx`) added to the read-only Insights tab, reusing the existing `ask_question` Gemini task and its client wrapper (`askChekkiQuestion` in `services/geminiService.ts`) rather than building new Q&A infrastructure.
+
+**Consequences:** No new backend endpoints for either integration — both reuse data/infra that already existed. FT's camera-upload and one-tap flows are untouched. The Insights tab remains primarily the existing 5-slide dashboard; the chat box is additive, not a replacement.
+
+---
+
+## 014 — Voice-fill for the FT daily log: turn-based, not speech-to-speech; nothing commits without explicit confirmation
+
+**Date:** 2026-08-16
+**Status:** Resolved
+
+**Context:** The FT daily log form (`NativeTeacherLogForm.tsx`) was identified as the single biggest friction point for Foreign Teachers — a multi-field form filled manually every class, every day. The founder has separately built a real-time speech-to-speech voice agent (Vodabi) and wanted to bring that experience here.
+
+**Decision:** Scoped down to turn-based voice fill (record → transcribe + extract → confirm → repeat), not live speech-to-speech. The backend is Vercel serverless (Hobby plan, already at its 12-function cap — `api/analyze.ts` is the single consolidated endpoint every task funnels through), which can't hold a persistent connection open the way Gemini Live/OpenAI Realtime would need; that's a genuinely different infra class, not a config change. New `task: 'voice_log_fill'` branch added to `api/analyze.ts`, reusing the multi-turn conversational pattern and `responseSchema`-constrained JSON extraction already proven by the existing `ask_question` and `generate_worksheet` tasks. Client (`VoiceFillAssistant.tsx`) records via plain `MediaRecorder` (no native plugin needed — mic permissions were already declared in `Info.plist`/`AndroidManifest.xml` for an unrelated prior feature). Critically: each turn's result (transcript + extracted fields + any student exceptions) sits unapplied until the teacher explicitly taps "Use this" — nothing writes into the real form state automatically, closing the gap where a mis-transcription could silently reach the KT undetected.
+
+**Consequences:** Real-world testing surfaced two follow-on issues, both fixed same-session: (1) the extraction prompt initially under-extracted when a teacher described multiple fields in one long utterance (only 2 of 5 stated fields captured) — fixed by rewriting the prompt to explicitly enumerate all fields to check plus a worked few-shot example, and lowering temperature from 0.4 to 0.15; (2) student-specific notes ("Min-jun struggled with pronunciation") were originally out of scope for voice and had no way to avoid being misfiled into the whole-class `generalComments` field — extended the schema with a separate `newExceptions` array and a one-time follow-up question, keeping named-student notes on the same `exceptions[]` pipeline the manual "+ Add A Student" modal already uses (KT review, phone-consultation prep), never mixed into the class-wide summary. Also added: `safetySettings` matching the harassment/hate-speech/sexual/dangerous-content thresholds already used elsewhere in the file (this call was missed when originally added), an explicit instruction to never carry profanity into extracted fields, a 25s client-side request timeout, and a dismissible "your voice is never saved" banner. Speed/friction-reduction itself is unverified — flagged for the pilot to measure time-to-submit against the manual form rather than assuming voice is faster.
+
+---
+
 ## 013 — Landing pages: fixed stale claims, aligned speed messaging, removed unverified testimonials
 
 **Date:** 2026-08-15

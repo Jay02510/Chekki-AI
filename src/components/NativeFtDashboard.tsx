@@ -11,6 +11,7 @@ import {
   Check,
 } from '@phosphor-icons/react';
 import { NativeTeacherLogForm } from './NativeTeacherLogForm';
+import { InsightsChatPanel } from './InsightsChatPanel';
 import { ClassLogPayload } from '../services/aiGenerator';
 
 interface TroubleWord {
@@ -106,6 +107,7 @@ export const NativeFtDashboard: React.FC<Props> = ({
               userProfile={user}
               selectedClassName={activeClass?.name}
               selectedTextbookName={selectedTextbookName}
+              selectedLessonTopic={curriculumTopic}
               roster={roster}
             />
           </div>
@@ -639,6 +641,16 @@ export const NativeFtDashboard: React.FC<Props> = ({
               </div>
 
           </div>
+
+          <InsightsChatPanel
+            isNight={isThemeNight}
+            isKo={isKo}
+            curriculumTopic={curriculumTopic}
+            curriculumPhonics={curriculumPhonics}
+            curriculumPassage={curriculumPassage}
+            curriculumOther={curriculumOther}
+            sortedTroubleWords={sortedTroubleWords}
+          />
         </div>
       )}
 

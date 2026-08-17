@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkle, Plus, X, Check, UserPlus, Lock, FloppyDisk } from '@phosphor-icons/react';
+import { Sparkle, Plus, X, Check, UserPlus, Lock, FloppyDisk, Microphone, PencilSimple } from '@phosphor-icons/react';
 import { ClassLogPayload, saveOfflineDraft, getOfflineDraft, clearOfflineDraft } from '../services/aiGenerator';
+import { VoiceFillException, VoiceFillFields } from '../services/voiceFill';
 import { UserProfile } from '../../types';
 import { getPermissionsForUser } from '../utils/permissions';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { VoiceFillAssistant } from './VoiceFillAssistant';
 
 interface Props {
   isNight?: boolean;
@@ -12,6 +14,10 @@ interface Props {
   userProfile?: UserProfile | null;
   selectedClassName?: string;
   selectedTextbookName?: string;
+  /** This week's saved curriculum topic, if any — prefills Lesson Topic so
+   * voice-fill/manual entry don't ask for something already scanned in via
+   * the Syllabus tab. */
+  selectedLessonTopic?: string;
   /** Real, approved students in the active class. Empty until the roster loads or has no one yet. */
   roster?: string[];
   /** Public marketing/demo showcase only. Never true for a real, authenticated teacher session. */
@@ -45,6 +51,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   userProfile,
   selectedClassName,
   selectedTextbookName,
+  selectedLessonTopic,
   roster = [],
   isDemo = false,
 }) => {
@@ -52,7 +59,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   const effectiveRoster = roster.length > 0 ? roster : (isDemo ? DEMO_ROSTER : []);
   const [className, setClassName] = useState(selectedClassName || (isDemo ? DEMO_CLASS_NAME : ''));
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [lessonTopic, setLessonTopic] = useState(isDemo ? DEMO_LESSON_TOPIC : '');
+  const [lessonTopic, setLessonTopic] = useState(isDemo ? DEMO_LESSON_TOPIC : (selectedLessonTopic || ''));
   const [textbook, setTextbook] = useState(selectedTextbookName || (isDemo ? DEMO_TEXTBOOK : ''));
   const [energyLevel, setEnergyLevel] = useState<string>(isDemo ? DEMO_ENERGY_LEVEL : '');
 
@@ -63,11 +70,44 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   useEffect(() => {
     if (selectedTextbookName) setTextbook(selectedTextbookName);
   }, [selectedTextbookName]);
+
+  useEffect(() => {
+    if (selectedLessonTopic) setLessonTopic(selectedLessonTopic);
+  }, [selectedLessonTopic]);
   const [activities, setActivities] = useState<string[]>(isDemo ? DEMO_ACTIVITIES : []);
   const [generalComments, setGeneralComments] = useState(isDemo ? DEMO_COMMENTS : '');
 
   // Offline Draft Notification State
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
+
+  // Voice Fill Assistant State
+  const [showVoiceFill, setShowVoiceFill] = useState(false);
+
+  // responseSchema on the backend constrains JSON *shape*, not string
+  // *content* — the server already strips values that look like leaked JSON
+  // (api/analyze.ts, handleVoiceLogFillTask), but this is a second, cheap
+  // backstop on the client so a value that slips past that check (or a future
+  // code path that skips it) still can't silently land in the form.
+  const looksLikeLeakedJson = (value: unknown): boolean =>
+    typeof value === 'string' && /"\s*:\s*"/.test(value);
+
+  // lessonTopic/textbook are short structured fields — a 200+ char value is
+  // itself a sign something went wrong upstream. generalComments is the one
+  // field meant to hold a long dictated note, so it only goes through the
+  // leaked-JSON shape check, not a length cap (a legitimately long voice-fill
+  // comment used to be silently dropped here with no indication to the
+  // teacher — audit: Low-Medium finding).
+  const looksLikeLeakedShortField = (value: unknown): boolean =>
+    looksLikeLeakedJson(value) || (typeof value === 'string' && value.length > 200);
+
+  const handleVoiceFieldsUpdate = (fields: VoiceFillFields | null | undefined) => {
+    if (!fields) return;
+    if (fields.lessonTopic && !looksLikeLeakedShortField(fields.lessonTopic)) setLessonTopic(fields.lessonTopic);
+    if (fields.textbook && !looksLikeLeakedShortField(fields.textbook)) setTextbook(fields.textbook);
+    if (fields.energyLevel) setEnergyLevel(fields.energyLevel);
+    if (fields.activities && fields.activities.length > 0) setActivities(fields.activities);
+    if (fields.generalComments && !looksLikeLeakedJson(fields.generalComments)) setGeneralComments(fields.generalComments);
+  };
 
   // Student Spotlight & Exception Modal State (Praise & Attention)
   const [exceptions, setExceptions] = useState<Array<{ studentName: string; details: string; type?: 'praise' | 'attention' }>>(
@@ -79,6 +119,78 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   const [isCustomStudentName, setIsCustomStudentName] = useState(effectiveRoster.length === 0);
   const [customStudentInput, setCustomStudentInput] = useState('');
   const [modalDetails, setModalDetails] = useState('');
+  // null = adding a new exception; a number = editing exceptions[idx] in place.
+  const [editingExceptionIndex, setEditingExceptionIndex] = useState<number | null>(null);
+
+  // Restore an unsaved draft on mount. saveOfflineDraft() has been writing
+  // every field change to localStorage all along, but nothing ever read it
+  // back — a crash or accidental reload silently threw away whatever the
+  // teacher had typed/spoken so far. Only class/lessonTopic/textbook can
+  // still be overridden by the selectedClassName/selectedTextbookName/
+  // selectedLessonTopic prop-prefill effects above (intentional — fresh
+  // class/curriculum data should always win over a stale draft for those).
+  useEffect(() => {
+    if (isDemo) return;
+    const draft = getOfflineDraft();
+    if (!draft) return;
+    const hasContent =
+      draft.lessonTopic || draft.textbook || draft.energyLevel ||
+      (draft.activities && draft.activities.length > 0) ||
+      draft.generalComments || (draft.exceptions && draft.exceptions.length > 0);
+    if (!hasContent) return;
+    if (draft.className) setClassName(draft.className);
+    if (draft.date) setDate(draft.date);
+    if (draft.lessonTopic) setLessonTopic(draft.lessonTopic);
+    if (draft.textbook) setTextbook(draft.textbook);
+    if (draft.energyLevel) setEnergyLevel(draft.energyLevel);
+    if (draft.activities && draft.activities.length > 0) setActivities(draft.activities);
+    if (draft.generalComments) setGeneralComments(draft.generalComments);
+    if (draft.exceptions && draft.exceptions.length > 0) setExceptions(draft.exceptions);
+    setHasDraftRestored(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const discardRestoredDraft = () => {
+    clearOfflineDraft();
+    setHasDraftRestored(false);
+    setLessonTopic(selectedLessonTopic || '');
+    setTextbook(selectedTextbookName || '');
+    setEnergyLevel('');
+    setActivities([]);
+    setGeneralComments('');
+    setExceptions([]);
+  };
+
+  const handleOpenAddModal = () => {
+    setEditingExceptionIndex(null);
+    setModalCategory('praise');
+    setModalDetails('');
+    setCustomStudentInput('');
+    setIsCustomStudentName(effectiveRoster.length === 0);
+    setModalStudentName(effectiveRoster[0] || '');
+    setShowExceptionModal(true);
+  };
+
+  const handleEditException = (idx: number) => {
+    const ex = exceptions[idx];
+    const inRoster = effectiveRoster.includes(ex.studentName);
+    setIsCustomStudentName(!inRoster);
+    if (inRoster) setModalStudentName(ex.studentName);
+    else setCustomStudentInput(ex.studentName);
+    setModalCategory(ex.type || 'praise');
+    // Strip the ⭐/⚠️ prefix "Save Highlight" auto-adds so editing and
+    // re-saving doesn't stack a second prefix onto the same note.
+    setModalDetails(ex.details.replace(/^(⭐|⚠️)\s*/, ''));
+    setEditingExceptionIndex(idx);
+    setShowExceptionModal(true);
+  };
+
+  const handleVoiceExceptionsAdd = (newExceptions: VoiceFillException[]) => {
+    setExceptions((prev) => [
+      ...prev,
+      ...newExceptions.map((ex) => ({ studentName: ex.studentName, details: ex.details, type: ex.category })),
+    ]);
+  };
 
   // Roster loads asynchronously after this form mounts (class fetch on
   // TeacherPage). Once real names arrive, switch off custom-name mode and
@@ -143,6 +255,16 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   const isRealLogIncomplete =
     !isDemo && (!className.trim() || !lessonTopic.trim() || !textbook.trim() || !energyLevel || activities.length === 0);
 
+  const missingFieldLabels = isDemo
+    ? []
+    : [
+        !className.trim() && 'Class Name',
+        !lessonTopic.trim() && 'Lesson Topic',
+        !textbook.trim() && 'Textbook',
+        !energyLevel && 'Energy Level',
+        activities.length === 0 && 'Activities',
+      ].filter((label): label is string => Boolean(label));
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isRealLogIncomplete) return;
@@ -174,10 +296,46 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             Daily Classroom & Student Assessment Log
           </h2>
         </div>
-        <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-mono font-bold">
-          ⚡ Takes about 30 seconds
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-mono font-bold">
+            ⚡ Takes about 30 seconds
+          </span>
+          {!isDemo && (
+            <button
+              type="button"
+              onClick={() => setShowVoiceFill((prev) => !prev)}
+              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all cursor-pointer active:scale-95 ${
+                showVoiceFill
+                  ? 'bg-orange-500 border-orange-500 text-white'
+                  : isNight
+                  ? 'bg-white/5 border-white/10 text-orange-400 hover:bg-white/10'
+                  : 'bg-orange-50 border-orange-200 text-orange-500 hover:bg-orange-100'
+              }`}
+              aria-label="Fill by voice"
+              title="Fill by voice"
+            >
+              <Microphone size={16} weight="fill" />
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Draft Restored Banner */}
+      {hasDraftRestored && (
+        <div className={`mb-6 p-3 rounded-2xl border flex items-center gap-2.5 text-xs font-bold ${
+          isNight ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' : 'bg-sky-50 border-sky-200 text-sky-700'
+        }`}>
+          <FloppyDisk size={16} weight="fill" className="shrink-0" />
+          <span className="flex-1">Restored your unsaved draft from last time.</span>
+          <button
+            type="button"
+            onClick={discardRestoredDraft}
+            className="shrink-0 underline hover:no-underline cursor-pointer"
+          >
+            Discard
+          </button>
+        </div>
+      )}
 
       {/* Interactive Helper Banner */}
       {isDemo && (
@@ -187,6 +345,16 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             <span>👇 Demo Preview: Click any buttons below & hit orange button to see how AI parent script generation works!</span>
           </div>
         </div>
+      )}
+
+      {!isDemo && showVoiceFill && (
+        <VoiceFillAssistant
+          isNight={isNight}
+          currentFields={{ lessonTopic, textbook, energyLevel, activities, generalComments }}
+          onFieldsUpdate={handleVoiceFieldsUpdate}
+          onExceptionsAdd={handleVoiceExceptionsAdd}
+          onClose={() => setShowVoiceFill(false)}
+        />
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -371,7 +539,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
             <button
               type="button"
-              onClick={() => setShowExceptionModal(true)}
+              onClick={handleOpenAddModal}
               className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-md active:scale-95"
             >
               <Plus size={14} weight="bold" />
@@ -395,14 +563,24 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     <span className="font-black text-amber-400 block font-mono">⚠️ {ex.studentName}</span>
                     <p className="text-xs leading-relaxed mt-0.5 opacity-90">{ex.details}</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveException(idx)}
-                    aria-label="Remove exception"
-                    className="min-w-11 min-h-11 flex items-center justify-center shrink-0 rounded bg-black/20 hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
-                  >
-                    <X size={14} />
-                  </button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleEditException(idx)}
+                      aria-label="Edit exception"
+                      className="min-w-11 min-h-11 flex items-center justify-center rounded bg-black/20 hover:bg-orange-500 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <PencilSimple size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveException(idx)}
+                      aria-label="Remove exception"
+                      className="min-w-11 min-h-11 flex items-center justify-center rounded bg-black/20 hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -427,6 +605,11 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             </>
           )}
         </button>
+        {missingFieldLabels.length > 0 && (
+          <p className="text-[11px] text-amber-400 font-mono text-center -mt-3">
+            Missing: {missingFieldLabels.join(', ')}
+          </p>
+        )}
       </form>
 
       {/* Student Exception Pop-up Modal (Exact match to Screenshot 5) */}
@@ -445,11 +628,16 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <UserPlus size={20} className="text-orange-500" weight="bold" />
-                <h3 id="exception-modal-title" className="font-black text-base">Flag Student Exception</h3>
+                <h3 id="exception-modal-title" className="font-black text-base">
+                  {editingExceptionIndex !== null ? 'Edit Student Note' : 'Flag Student Exception'}
+                </h3>
               </div>
               <button
                 type="button"
-                onClick={() => setShowExceptionModal(false)}
+                onClick={() => {
+                  setEditingExceptionIndex(null);
+                  setShowExceptionModal(false);
+                }}
                 aria-label="Close"
                 className="min-w-11 min-h-11 flex items-center justify-center rounded bg-white/10 hover:bg-white/20 transition-colors"
               >
@@ -551,7 +739,10 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowExceptionModal(false)}
+                  onClick={() => {
+                    setEditingExceptionIndex(null);
+                    setShowExceptionModal(false);
+                  }}
                   className="w-1/2 py-2.5 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 text-zinc-400"
                 >
                   Cancel
@@ -562,17 +753,20 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     const chosenName = (isCustomStudentName ? customStudentInput : modalStudentName) || 'Student';
                     const detailText = modalDetails.trim() || (modalCategory === 'praise' ? 'Great focus and enthusiastic participation!' : 'Needs extra review on target vocabulary.');
                     const prefix = modalCategory === 'praise' ? '⭐ ' : '⚠️ ';
-                    setExceptions([
-                      ...exceptions,
-                      { studentName: chosenName, details: prefix + detailText, type: modalCategory },
-                    ]);
+                    const savedException = { studentName: chosenName, details: prefix + detailText, type: modalCategory };
+                    if (editingExceptionIndex !== null) {
+                      setExceptions((prev) => prev.map((ex, i) => (i === editingExceptionIndex ? savedException : ex)));
+                    } else {
+                      setExceptions((prev) => [...prev, savedException]);
+                    }
                     setModalDetails('');
                     setCustomStudentInput('');
+                    setEditingExceptionIndex(null);
                     setShowExceptionModal(false);
                   }}
                   className="w-1/2 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
                 >
-                  Save Highlight
+                  {editingExceptionIndex !== null ? 'Save Changes' : 'Save Highlight'}
                 </button>
               </div>
             </div>

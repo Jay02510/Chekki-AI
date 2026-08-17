@@ -34,17 +34,10 @@ export const revenueCatService = {
       }
 
       if (!apiKey || apiKey.includes('placeholder')) {
-        // console.warn(`[RevenueCat] Initialization skipped for ${platform}: API key is missing or placeholder.`);
         return;
       }
 
       try {
-        // Check if system clock is wildly off (common cause for Code 2)
-        const currentYear = new Date().getFullYear();
-        if (currentYear < 2026 || currentYear > 2035) {
-          // console.error('[RevenueCat] CRITICAL: System clock is set to ' + currentYear + '. Google Play Billing will FAIL.');
-        }
-
         // Enable SDK logs to see exact bridge exceptions
         await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
 

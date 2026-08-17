@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -44,6 +44,7 @@ import {
 } from '@phosphor-icons/react';
 import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
 import { NativeKtDashboard } from '../components/NativeKtDashboard';
+import { KtReviewQueue } from '../components/KtReviewQueue';
 import { NativeFtDashboard } from '../components/NativeFtDashboard';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { FeedbackModal } from '../../components/FeedbackModal';
@@ -160,7 +161,20 @@ export default function TeacherPage({ isNight = true }: Props) {
   // what the FT submitted (previously relied on shared `ftLogOutput` state,
   // which never reached a KT on another device — Audit: FT->KT handoff).
   const [ktPendingLogs, setKtPendingLogs] = useState<any[]>([]);
-  const activeKtLog = ktPendingLogs[0] || null;
+  // Explicit selection lets the KT jump to any queued log, not just the
+  // oldest one — falls back to the first pending log when nothing's been
+  // clicked yet (e.g. right after a class switch).
+  const [activeKtLogId, setActiveKtLogId] = useState<string | null>(null);
+  const activeKtLog = ktPendingLogs.find((l) => l.id === activeKtLogId) || ktPendingLogs[0] || null;
+  // Brief "copied ✓" confirmation on the queue chip before the log actually
+  // drops out of ktPendingLogs, so approving doesn't just make it vanish
+  // with no visible trail of what was just sent.
+  const [justCopiedLogId, setJustCopiedLogId] = useState<string | null>(null);
+  // Cleared on unmount and on class switch so a pending "remove from queue"
+  // timeout from a stale approve doesn't fire against a freshly-fetched log
+  // list for a different class (audit: Medium finding — missing timeout
+  // cleanup on class switch/unmount).
+  const ktApproveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Distinguishes "no logs submitted yet" from "failed to load logs" — without
   // this a failed Firestore read looked identical to an empty queue, and
   // NativeKtDashboard's placeholder sample content made that indistinguishable
@@ -179,7 +193,17 @@ export default function TeacherPage({ isNight = true }: Props) {
         reviewedByName: (user as any)?.name || user?.email || 'Unknown teacher',
         sentAt: serverTimestamp(),
       });
-      setKtPendingLogs((prev) => prev.filter((l) => l.id !== activeKtLog.id));
+      // Show the checkmark on the queue chip first, then remove it — an
+      // instant vanish left no visible confirmation of what had just been
+      // sent (same short-lived-success pattern NativeKtDashboard already
+      // uses for its own "Copied!" button state).
+      setJustCopiedLogId(activeKtLog.id);
+      if (ktApproveTimeoutRef.current) clearTimeout(ktApproveTimeoutRef.current);
+      ktApproveTimeoutRef.current = setTimeout(() => {
+        setKtPendingLogs((prev) => prev.filter((l) => l.id !== activeKtLog.id));
+        setJustCopiedLogId((cur) => (cur === activeKtLog.id ? null : cur));
+        ktApproveTimeoutRef.current = null;
+      }, 1400);
       return true;
     } catch (err) {
       console.error('Failed to save KT-reviewed report:', err);
@@ -1030,10 +1054,12 @@ export default function TeacherPage({ isNight = true }: Props) {
     if (!selectedClass?.id || selectedClass.isDemo) {
       setSubmittedLogs([]);
       setKtPendingLogs([]);
+      setActiveKtLogId(null);
       setKtLogsLoadError(false);
       return;
     }
     setKtLogsLoadError(false);
+    setActiveKtLogId(null);
     (async () => {
       try {
         const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
@@ -1051,6 +1077,15 @@ export default function TeacherPage({ isNight = true }: Props) {
         setKtLogsLoadError(true);
       }
     })();
+  }, [selectedClass?.id]);
+
+  // Cancel any pending KT-approve "remove from queue" timeout when switching
+  // classes or unmounting, so it can't fire against a different class's
+  // freshly-loaded log list.
+  useEffect(() => {
+    return () => {
+      if (ktApproveTimeoutRef.current) clearTimeout(ktApproveTimeoutRef.current);
+    };
   }, [selectedClass?.id]);
 
   // Show teacher onboarding once when first authenticated with no classes.
@@ -3557,6 +3592,23 @@ ${questionsHtml}
                     ? '⚠️ 리포트 대기열을 불러오지 못했습니다. 아래는 실제 데이터가 아닙니다 — 새로고침 후 다시 시도해주세요.'
                     : "⚠️ Couldn't load the review queue — what's shown below is not real data. Please refresh and try again."}
                 </span>
+              </div>
+            )}
+            {activeTab === 'kt_script' && ktPendingLogs.length > 0 && (
+              <div className="mb-4 max-w-4xl mx-auto w-full">
+                <KtReviewQueue
+                  logs={ktPendingLogs.map((l) => ({
+                    id: l.id,
+                    lessonTopic: l.lessonTopic,
+                    date: l.date,
+                    flaggedCount: (l.aiStudentReports || []).length,
+                  }))}
+                  activeId={activeKtLog?.id || null}
+                  justCopiedId={justCopiedLogId}
+                  onSelect={setActiveKtLogId}
+                  isNight={isThemeNight}
+                  isKo={isKo}
+                />
               </div>
             )}
             {activeTab === 'kt_script' && (

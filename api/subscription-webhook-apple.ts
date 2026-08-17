@@ -50,9 +50,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
       await handleNotification(notificationType as string, subtype as string, transactionInfo);
     } else {
-      // Version 1 fallback
-      const { notification_type, latest_receipt_info } = payload;
-      await handleV1Notification(notification_type, latest_receipt_info);
+      // Apple deprecated v1 App Store Server Notifications; only v2
+      // (signedPayload, verified above) carries a real signature. A v1 body
+      // is unauthenticated request data — refuse it outright rather than
+      // parsing it, so this branch can never become a silent "any POST
+      // flips plan to pro" bypass the way the v2 path was before its JWS
+      // verification was added (audit: Medium finding — unverified v1
+      // webhook path).
+      console.warn('[webhook-apple] Rejected unverified v1 notification payload');
+      return res.status(200).end();
     }
 
     // Always return 200 to Apple to prevent retries
@@ -140,10 +146,6 @@ async function handleNotification(type: string, subtype: string, data: any) {
 
     await batch.commit();
   }
-}
-
-async function handleV1Notification(notificationType: string, latestReceiptInfo: any) {
-  console.log('[webhook-apple] V1 notification received:', notificationType);
 }
 
 export default withSentry(handler);

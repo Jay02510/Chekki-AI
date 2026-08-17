@@ -2,10 +2,17 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry.js';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
+import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
 
 // Apple receipt validation endpoints
 const APPLE_PRODUCTION_URL = 'https://buy.itunes.apple.com/verifyReceipt';
 const APPLE_SANDBOX_URL = 'https://sandbox.itunes.apple.com/verifyReceipt';
+
+// Every call hits Apple's paid verifyReceipt API (twice on a sandbox-receipt
+// retry) — no throttle meant a single authenticated caller could script
+// repeated calls to run up cost or trip Apple's own rate limit for the whole
+// app (audit: Medium finding — no rate limit on subscription-validate-apple).
+const checkValidateLimit = createRateLimiter('validate_apple', 10, 60);
 
 // Your Apple App-Specific Shared Secret
 const APPLE_SHARED_SECRET = process.env.APPLE_SHARED_SECRET;
@@ -46,6 +53,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { success: withinLimit } = await checkValidateLimit(clientIp(req));
+  if (!withinLimit) {
+    return res.status(429).json({ error: 'Too many attempts. Please wait a minute and try again.' });
+  }
 
   // Verify Firebase ID Token
   const authHeader = req.headers.authorization;

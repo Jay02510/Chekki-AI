@@ -2,6 +2,38 @@ What's New in Chekki AI
 
 English
 
+Fill Your Daily Log by Voice
+Foreign teachers can now speak their daily class log instead of tapping through every field. Describe the lesson, energy level, activities, and any student worth flagging in one breath — Chekki shows exactly what it heard and which fields it's about to fill before anything is applied, so you always confirm before it counts. Your voice is never saved; it's discarded right after processing.
+
+Korean Teacher Review Queue
+The Parent Script tab (`NativeKtDashboard`) is no longer one report at a time. A new queue strip shows every pending log waiting for review, lets a KT jump to any one directly instead of going in strict order, and gives a clear checkmark confirmation the moment a report is copied and sent.
+
+Invite Your Whole Teaching Staff at Once
+Directors setting up a new campus no longer have to fill out the teacher-invite form one email at a time. Paste a whole list of teacher emails at once and send every invite in one go.
+
+Ask Chekki About This Week's Class
+The Weekly Insights tab now has a chat box. Ask directly about this week's trouble words or curriculum instead of paging through the slides to find them yourself.
+
+---
+
+채키 AI 업데이트 소식
+
+한국어
+
+음성으로 일지 작성하기
+이제 원어민 선생님께서 매일의 수업 일지를 하나하나 입력하는 대신 말로 작성할 수 있습니다. 수업 주제, 분위기, 활동, 그리고 눈에 띄는 학생이 있다면 한 번에 이야기해 주세요. 채키가 들은 내용과 어떤 항목에 입력될지 먼저 보여드리므로, 확인 후에만 반영됩니다. 음성은 저장되지 않으며 처리 즉시 삭제됩니다.
+
+한국인 교사 검토 대기열
+알림톡 대본 탭(`NativeKtDashboard`)이 더 이상 한 번에 한 건씩만 처리하는 화면이 아닙니다. 검토 대기 중인 모든 일지를 한눈에 볼 수 있는 대기열이 추가되어, 순서에 상관없이 원하는 항목으로 바로 이동할 수 있고, 대본을 복사해 발송하는 즉시 체크 표시로 확인됩니다.
+
+교사진 초대를 한 번에
+새 캠퍼스를 개설하는 원장님께서 더 이상 초대 이메일을 한 건씩 입력하지 않아도 됩니다. 여러 명의 이메일을 한 번에 붙여넣어 모든 초대를 한 번에 발송할 수 있습니다.
+
+이번 주 수업에 대해 채키에게 질문하기
+주간 인사이트 탭에 채팅창이 추가되었습니다. 슬라이드를 일일이 넘기지 않고 이번 주 오답 단어나 커리큘럼에 대해 바로 질문해보세요.
+
+---
+
 Unified B2B Educator Invite-Link Authorization
 We've completely overhauled authentication for private English Kindergartens and hagwons! Directors can now set up their campus and instantly share 1-click invite links (`/teacher?invite=school-slug`). Foreign (FT) and Korean (KT) teachers join directly via sign-up without needing to type or remember authorization codes.
 
