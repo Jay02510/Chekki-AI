@@ -1,0 +1,62 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "bounce-easing",
+        "value": "animate-bounce",
+        "files": [
+          "components/LoadingScreen.tsx"
+        ],
+        "createdAt": "2026-08-17T02:17:54.671Z",
+        "reason": "three-dot loading indicator, standard typing/loading affordance meant to loop for the wait duration — not a routine action or a nagging CTA, distinct from the CloneWorksheetModal CTA bounce that was fixed"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "text-zinc-400",
+        "files": [
+          "src/pages/AdminPage.tsx"
+        ],
+        "createdAt": "2026-08-17T05:20:38.664Z",
+        "reason": "zinc-400 on zinc-800 is a neutral-on-neutral status badge fallback (billing cycle / invite age), ~5.5:1 contrast, passes WCAG AA — detector's colored-background heuristic misfires on the neutral zinc-800 badge fill, not an actual gray-on-saturated-color case"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "text-zinc-300",
+        "files": [
+          "src/pages/AdminPage.tsx"
+        ],
+        "createdAt": "2026-08-17T05:58:40.910Z",
+        "reason": "plan-tier badge fallback (bg-zinc-800/text-zinc-300, mutually exclusive ternary branch from the orange 'pro' badge) — neutral-on-neutral, higher contrast than the already-ignored zinc-400 case, detector misfires on ternary strings that also contain a colored branch"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "text-zinc-500",
+        "files": [
+          "src/pages/AdminPage.tsx"
+        ],
+        "createdAt": "2026-08-17T05:58:40.946Z",
+        "reason": "inactive nav-tab text (text-zinc-500 hover:text-white/80) sits on the bg-zinc-950 tab-strip container, not on the sibling ternary branch's orange active-state background — same ternary-conflation false positive as the badge cases"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "text-zinc-300",
+        "files": [
+          "src/components/NativeDirectorPortal.tsx"
+        ],
+        "createdAt": "2026-08-17T06:19:08.094Z",
+        "reason": "phone-script talking-points card uses bg-orange-500/5 (5% opacity tint, reads as near-black/near-white base, not a saturated colored background) with text-zinc-300 body copy — high actual contrast, detector's heuristic fires on any orange-x/N class regardless of opacity"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "text-zinc-900",
+        "files": [
+          "src/components/NativeKtDashboard.tsx"
+        ],
+        "createdAt": "2026-08-17T06:52:01.223Z",
+        "reason": "light-mode textarea: text-zinc-900 (near-black) on bg-orange-50/50 (light orange tint) is high-contrast dark-on-light, not washed-out gray-on-saturated-color — detector's heuristic treats any zinc-* text class as gray regardless of shade"
+      }
+    ]
+  }
+}

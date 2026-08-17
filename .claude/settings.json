@@ -49,7 +49,12 @@
       "Bash(node verify-director5.mjs)",
       "Bash(node cleanup-teachers.mjs)",
       "Bash(node cleanup-parents.mjs)",
-      "Bash(node cleanup-auth-direct.mjs)"
+      "Bash(node cleanup-auth-direct.mjs)",
+      "Bash(kill 61098)",
+      "Bash(rtk npm *)",
+      "Bash(/usr/bin/find /Users/jasonbenjamin/Projects/Chekki-AI-main -name \"aiGenerator.ts\" ! -path \"*/node_modules/*\")",
+      "Bash(node .claude/skills/impeccable/scripts/hook-admin.mjs ignore-value gray-on-color \"text-zinc-900\" --file src/components/NativeKtDashboard.tsx --reason \"light-mode textarea: text-zinc-900 \\(near-black\\) on bg-orange-50/50 \\(light orange tint\\) is high-contrast dark-on-light, not washed-out gray-on-saturated-color — detector's heuristic treats any zinc-* text class as gray regardless of shade\")",
+      "Bash(awk '{print $1}')"
     ]
   }
 }

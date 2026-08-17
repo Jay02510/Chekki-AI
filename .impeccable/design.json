@@ -1,14 +1,14 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-10T00:00:00Z",
+  "generatedAt": "2026-08-17T00:00:00Z",
   "title": "Design System: Chekki AI",
   "extensions": {
     "colorMeta": {
       "primary": { "role": "primary", "displayName": "Brand Orange", "canonical": "oklch(67% 0.22 38)", "tonalRamp": ["#431407", "#7c2d12", "#9a3412", "#c2410c", "#ea580c", "#f97316", "#fdba74", "#ffedd5"] },
       "brand-dark": { "role": "neutral", "displayName": "Brand Dark", "canonical": "oklch(8% 0.005 240)", "tonalRamp": ["#000000", "#050505", "#09090b", "#121214", "#1c1c1f", "#27272a", "#3f3f46", "#52525b"] },
       "brand-card": { "role": "neutral", "displayName": "Brand Card Background", "canonical": "oklch(12% 0.01 240)", "tonalRamp": ["#050505", "#0F1014", "#16171b", "#222328", "#2e3037", "#3b3d45", "#484b55", "#565a65"] },
-      "accent-purple": { "role": "secondary", "displayName": "Accent Purple", "canonical": "oklch(63% 0.25 302)", "tonalRamp": ["#3b0764", "#581c87", "#6b21a8", "#7e22ce", "#9333ea", "#a855f7", "#c084fc", "#e9d5ff"] },
-      "accent-pink": { "role": "secondary", "displayName": "Accent Pink", "canonical": "oklch(59% 0.23 350)", "tonalRamp": ["#500724", "#831843", "#9d174d", "#be185d", "#db2777", "#ec4899", "#f472b6", "#fbcfe8"] },
+      "accent-purple": { "role": "reserved", "displayName": "Accent Purple (reserved, not active)", "canonical": "oklch(63% 0.25 302)", "tonalRamp": ["#3b0764", "#581c87", "#6b21a8", "#7e22ce", "#9333ea", "#a855f7", "#c084fc", "#e9d5ff"] },
+      "accent-pink": { "role": "reserved", "displayName": "Accent Pink (reserved, not active)", "canonical": "oklch(59% 0.23 350)", "tonalRamp": ["#500724", "#831843", "#9d174d", "#be185d", "#db2777", "#ec4899", "#f472b6", "#fbcfe8"] },
       "success": { "role": "semantic", "displayName": "Success Emerald", "canonical": "oklch(70% 0.15 165)", "tonalRamp": ["#022c22", "#064e3b", "#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7"] },
       "error": { "role": "semantic", "displayName": "Error Red", "canonical": "oklch(63% 0.21 25)", "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5"] },
       "warning": { "role": "semantic", "displayName": "Warning Amber", "canonical": "oklch(76% 0.16 70)", "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d"] },
@@ -73,7 +73,7 @@
       "refersTo": "modal-bezel",
       "description": "The app's single modal construction: full-screen blurred scrim, thin outer bezel, solid inner card. Used by ConfirmDialog and every extracted modal (ScannedModal, AcademyLogoModal, DocPreviewModal, WeekCalendarModal, ReportCardModal).",
       "html": "<div class=\"ds-modal-scrim\"><div class=\"ds-modal-bezel\"><div class=\"ds-modal-inner\"><button class=\"ds-modal-close\" aria-label=\"Close\">×</button><p>Modal content</p></div></div></div>",
-      "css": ".ds-modal-scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; } .ds-modal-bezel { position: relative; padding: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; max-width: 480px; width: 100%; } .ds-modal-inner { position: relative; border-radius: 34px; background: #0c0c0e; padding: 32px; } .ds-modal-close { position: absolute; top: 24px; right: 24px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: rgba(255,255,255,0.05); color: #a1a1aa; border: none; cursor: pointer; transition: background 0.2s, color 0.2s; } .ds-modal-close:hover { background: rgba(255,255,255,0.1); color: #ffffff; }"
+      "css": ".ds-modal-scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; } .ds-modal-bezel { position: relative; padding: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; max-width: 480px; width: 100%; } .ds-modal-inner { position: relative; border-radius: 34px; background: #050505; padding: 32px; } .ds-modal-close { position: absolute; top: 24px; right: 24px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: rgba(255,255,255,0.05); color: #a1a1aa; border: none; cursor: pointer; transition: background 0.2s, color 0.2s; } .ds-modal-close:hover { background: rgba(255,255,255,0.1); color: #ffffff; }"
     },
     {
       "name": "Toast",
@@ -85,34 +85,37 @@
     }
   ],
   "narrative": {
-    "northStar": "The Playful Homework Helper",
-    "overview": "Chekki AI features a warm, tactile notebook feel set against high-contrast dark surfaces. It combines professional, precise AI scanning capabilities with hand-drawn visual cues (circles, stars, highlights) that mimic pencil-and-paper learning. The interface is split into two primary environments: a pitch-dark, highly functional web/mobile application (product register) and a rich, deep-navy marketing homepage (brand register). This system rejects corporate SaaS uniformity in favor of rounded shapes, friendly display fonts, and emotional visual feedback.",
+    "northStar": "The Warm Console",
+    "overview": "Chekki AI reads as an instrument panel, not a form: near-black surfaces (#050505) with a single warm-orange accent, the way a piece of serious hardware has exactly one indicator light. The product exists to take the stress out of a nightly ritual — a Korean parent grading English homework they can't fully read themselves — so the interface stays calm and dark rather than loud or playful, and lets the orange accent do the work of saying \"here, this matters\" without competing with it anywhere else on screen.\n\nNearly every elevated surface — modals, cards, panels — uses a distinctive double-bezel construction: an outer rounded shell in a translucent hairline border, with an inner surface inset by a consistent margin and its own slightly smaller radius. Combined with soft, large-blur ambient shadows and a 1px inset highlight along the top edge, this reads as a physical panel with real depth, not a flat rectangle with a shadow bolted on.\n\nThis session (2026-08-17) also closed out a real drift problem: an undocumented second gradient system (orange→pink→purple/indigo) had crept into the splash screen, loading screen, camera hero, and landing headline independently. That's now retired — orange is the only accent, confirmed as the intended direction going forward, not a stopgap.",
     "keyCharacteristics": [
-      "Tactile Comfort: Rounded buttons, prominent borders, and soft cards.",
-      "Skeuomorphic Overlays: Highlights and correct/incorrect marks appear to be hand-drawn directly on scanned sheets.",
-      "Cognitive Clarity: Low-stress information hierarchy built to be navigated easily by tired parents and young kids."
+      "Near-black instrument-panel base, warmed by exactly one accent color",
+      "Double-bezel construction on nearly every card and modal",
+      "Soft, large-blur ambient shadows over hard drop-shadows",
+      "Full Korean/English parity in every component, never a fallback language",
+      "font-display (Space Grotesk, weight 900) reserved for headlines; body copy stays in Plus Jakarta Sans"
     ],
     "rules": [
-      { "name": "The 10% Pop Rule", "body": "Bold, primary colors (Orange, Purple, Pink) should only cover <=10% of any screen. The dark background handles the structural weight; colors are reserved for interactive and feedback actions.", "section": "colors" },
+      { "name": "The One Accent Rule", "body": "Brand Orange is the only accent color on any given screen. No gradients combining orange with purple, pink, or indigo — that pattern was identified and removed as unintentional drift this session, not a rejected-but-valid alternative.", "section": "colors" },
       { "name": "The Semantic-Never-Decorative Rule", "body": "Emerald, red, and amber are reserved for their semantic meaning (success/error/warning) and never used as arbitrary decorative accents.", "section": "colors" },
-      { "name": "The Handwriting Offset Rule", "body": "Any text written in the handwritten font (Patrick Hand) should be slightly rotated (-1deg to 2deg) to feel authentically drawn on the paper.", "section": "typography" },
-      { "name": "The Tonal Depth Rule", "body": "Depth is established by color value shifts (Background at #050505 -> Cards/Modals at #0F1014 -> Buttons at #1F2937). Do not drop heavy black shadows onto dark cards.", "section": "elevation" },
-      { "name": "The Bezel Rule", "body": "A modal is never a single flat rounded rectangle - it is always a thin outer bezel wrapping a solid inner card.", "section": "components" }
+      { "name": "The Break-Keep Rule", "body": "Any Korean-bearing text at display or title size gets break-keep — Korean text wraps by word/syllable-block, not mid-character, and this is non-negotiable given roughly half the user base reads Korean as their primary language.", "section": "typography" },
+      { "name": "The Tinted Glow Rule", "body": "When a shadow signals emphasis (an active state, a primary CTA), it is tinted to Brand Orange, never left as a neutral black glow — a black glow reads as generic elevation, an orange one reads as \"this is the important one.\"", "section": "elevation" },
+      { "name": "The Double-Bezel Rule", "body": "The system's signature form: an outer container at one radius (commonly rounded-[2rem]) with a translucent hairline border, wrapping an inner surface inset by a small fixed margin (p-1.5) at a correspondingly smaller radius (calc(2rem - 0.375rem)). New modals/cards should default to this construction, not a plain single-radius card.", "section": "components" }
     ],
     "dos": [
-      "Do wrap bilingual copy in containers that prevent alignment breakage between Korean and English line heights.",
-      "Do use native browser zoom configurations by keeping the viewport tag free of user-scalable=no.",
-      "Do tilt hand-drawn annotations to preserve the 'Playful Homework Helper' feel.",
-      "Do give every icon-only button and modal close control a minimum 44x44px touch target (24x24px only as an accepted exception for dense inline chip-delete controls).",
-      "Do route every confirmation and status message through ConfirmDialog / useToast - never window.confirm(), confirm(), or alert().",
-      "Do show both sides of a problem/solution card at once on marketing pages - hover-only reveals never fire on touch."
+      "Do use Brand Orange as the only accent color on any given screen — it is the single indicator light on the console, and its rarity is what makes it legible.",
+      "Do build new modals/elevated cards with the double-bezel construction (outer shell + inset inner surface) rather than a plain single-radius card.",
+      "Do tint emphasis shadows to Brand Orange rather than leaving them neutral black.",
+      "Do apply break-keep to any Korean-bearing display/title text.",
+      "Do give every pressable element active:scale-[0.97] press feedback.",
+      "Do give every icon-only button and modal close control a minimum 44x44px touch target.",
+      "Do route every confirmation and status message through ConfirmDialog / useToast — never window.confirm(), confirm(), or alert()."
     ],
     "donts": [
-      "Don't use generic stark blue-to-purple CSS gradient text.",
-      "Don't hide critical audience-specific entry points behind generic tab filters; stack them with clear anchors.",
-      "Don't animate image cards on hover; use border/glow highlights on the parent container instead.",
-      "Don't use emerald/red/amber for anything other than success/error/warning.",
-      "Don't use font-serif (Playfair Display) outside the rare 'handwritten paper' register - it isn't part of the standard type hierarchy."
+      "Don't combine Brand Orange with purple/pink/indigo in a gradient — that pattern was identified and removed as unintentional drift this session, not a stylistic option.",
+      "Don't use bounce/spring easing (cubic-bezier overshoot curves) on routine, high-frequency interactions — reserve any bounce for genuinely rare, celebratory moments, and confirm there is one before reaching for it.",
+      "Don't use hard, sharp-edged drop-shadows — the system's shadow vocabulary is exclusively soft and ambient.",
+      "Don't introduce a new near-black hex value for a \"one-off\" dark surface — use Brand Dark; ~200 scattered duplicates of this exact mistake were consolidated this session.",
+      "Don't use emerald/red/amber for anything other than success/error/warning."
     ]
   }
 }
