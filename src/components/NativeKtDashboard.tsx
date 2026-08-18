@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Copy, CheckCircle, Sparkle, UserCheck, X, Lock, Bell, BellSlash } from '@phosphor-icons/react';
 import { GeneratedReportOutput } from '../services/aiGenerator';
 import { UserProfile } from '../../types';
@@ -26,6 +26,12 @@ interface Props {
   // KT copies the script to send, since that's the point they've committed
   // to this version being final.
   onApprove?: (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) => Promise<boolean> | boolean | void;
+  // Fires whenever the current draft has an unsaved edit (typed but not yet
+  // copied/sent) — lets the parent warn before switching queue items or
+  // tabs, since this component is keyed by the active group and fully
+  // remounts on switch, silently discarding any in-progress edit otherwise
+  // (Audit: unsaved KT edits lost on switch).
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 export const NativeKtDashboard: React.FC<Props> = ({
@@ -38,6 +44,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
   pendingCount = 0,
   skipInlineExceptions = false,
   onApprove,
+  onDirtyChange,
 }) => {
   const isKo = isKoProp !== undefined ? isKoProp : (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
   const permissions = getPermissionsForUser(userProfile);
@@ -90,6 +97,12 @@ export const NativeKtDashboard: React.FC<Props> = ({
     generatedOutput?.status || 'pending_review'
   );
 
+  useEffect(() => {
+    onDirtyChange?.(reportStatus === 'edited_by_kt');
+    return () => onDirtyChange?.(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportStatus]);
+
   // 3-Tone Script Switcher State
   const [scriptTone, setScriptTone] = useState<'formal' | 'friendly' | 'concise'>('formal');
   const [filterUrgentOnly, setFilterUrgentOnly] = useState(false);
@@ -99,6 +112,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
     if (scriptTone === 'concise') return `[${className} ${isKo ? '알림톡' : 'Report'}]`;
     return `[${academyName} ${isKo ? '학부모 알림톡' : 'Parent Update'}]`;
   };
+
+  const displayedStudentReports = generatedOutput?.studentReports && generatedOutput.studentReports.length > 0
+    ? generatedOutput.studentReports
+    : [];
 
   const getFormattedScript = () => {
     // Exceptions (praise/attention flags) used to render only in this KT's
@@ -128,27 +145,40 @@ export const NativeKtDashboard: React.FC<Props> = ({
     }
   };
 
-  const displayedStudentReports = generatedOutput?.studentReports && generatedOutput.studentReports.length > 0
-    ? generatedOutput.studentReports
-    : [];
+  const [copyFailed, setCopyFailed] = useState(false);
 
   const handleCopyKakaoScript = async () => {
     if (isDemoContent || isApproving) return;
     const fullText = currentFullText;
+    setCopyFailed(false);
 
+    // Actually confirm the copy succeeded before treating this as "sent" —
+    // the clipboard call used to fire without being awaited, so a rejected
+    // promise resolved asynchronously after this function had already moved
+    // on to marking the report approved/sent regardless (Audit: unconfirmed
+    // clipboard write still marked "sent"). A KT relying on "Copied! ✅" to
+    // know they can paste into KakaoTalk needs that signal to be real.
+    let copySucceeded = false;
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(fullText);
+        await navigator.clipboard.writeText(fullText);
+        copySucceeded = true;
       } else {
         const textarea = document.createElement('textarea');
         textarea.value = fullText;
         document.body.appendChild(textarea);
         textarea.select();
-        document.execCommand('copy');
+        copySucceeded = document.execCommand('copy');
         document.body.removeChild(textarea);
       }
     } catch (e) {
-      console.warn('Clipboard write fallback executed:', e);
+      console.warn('Clipboard write failed:', e);
+      copySucceeded = false;
+    }
+
+    if (!copySucceeded) {
+      setCopyFailed(true);
+      return;
     }
 
     // The approve write must resolve before we tell the KT this is sent —
@@ -337,6 +367,13 @@ export const NativeKtDashboard: React.FC<Props> = ({
             </button>
           </div>
         </div>
+        {copyFailed && (
+          <p className="w-full text-right text-[11px] font-bold text-rose-400">
+            {isKo
+              ? '⚠️ 복사에 실패했습니다 — 발송 처리되지 않았습니다. 아래 텍스트를 직접 선택해 복사해주세요.'
+              : "⚠️ Copy failed — not marked as sent. Select the text below and copy it manually."}
+          </p>
+        )}
       </div>
 
       {/* 3-Stage Report Status Badge Bar */}

@@ -5,8 +5,22 @@ import { adminDb, adminAuth as authDb } from './_lib/firebaseAdmin.js';
 import { seatsForPlan } from './_lib/pricingTiers.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
+import { createHash, timingSafeEqual } from 'crypto';
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
+
+// Plain `!==` leaks timing information proportional to how many leading
+// characters match, which a network attacker can exploit to recover the
+// passcode character-by-character (Audit: non-constant-time admin passcode
+// comparison — this endpoint gates account impersonation and deletion).
+// Hashing both sides first sidesteps timingSafeEqual's requirement that
+// both buffers be the same length (a raw length mismatch would otherwise
+// throw before any real comparison happens).
+function safeEquals(a: string, b: string): boolean {
+  const hashA = createHash('sha256').update(a).digest();
+  const hashB = createHash('sha256').update(b).digest();
+  return timingSafeEqual(hashA, hashB);
+}
 
 // schoolId becomes a Firestore doc ID via .doc(sanitizedSchoolId) below — the
 // Admin SDK treats '/' in that string as a subcollection path separator, so
@@ -47,7 +61,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  if (passcode !== ADMIN_PASSCODE) {
+  if (typeof passcode !== 'string' || !safeEquals(passcode, ADMIN_PASSCODE)) {
     return res.status(401).json({ error: 'Unauthorized: Invalid Passcode' });
   }
 

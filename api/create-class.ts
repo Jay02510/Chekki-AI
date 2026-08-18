@@ -137,6 +137,15 @@ async function requireDirectorOrKt(uid: string) {
   return { schoolId: userData.schoolId as string };
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function sendStudentInviteEmail(opts: {
   parentEmail: string;
   studentName: string;
@@ -146,6 +155,13 @@ async function sendStudentInviteEmail(opts: {
 }): Promise<boolean> {
   const resendApiKey = process.env.RESEND_API_KEY;
   if (!resendApiKey) return false;
+  // Director/KT-entered fields (student name, class/school name) go into a
+  // parent-facing email — escaped so a compromised or malicious staff
+  // account can't inject arbitrary HTML/links into it (Audit: unescaped
+  // user input in HTML email templates).
+  const safeStudentName = escapeHtml(opts.studentName);
+  const safeClassName = escapeHtml(opts.className);
+  const safeSchoolName = escapeHtml(opts.schoolName);
   try {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -159,7 +175,7 @@ async function sendStudentInviteEmail(opts: {
             <div style="text-align: center; margin-bottom: 24px;">
               <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
             </div>
-            <p style="font-size: 15px; color: #e4e4e7;"><strong>${opts.schoolName}</strong>에서 <strong>${opts.studentName}</strong> 학생을 <strong>${opts.className}</strong> 학급에 등록했습니다.</p>
+            <p style="font-size: 15px; color: #e4e4e7;"><strong>${safeSchoolName}</strong>에서 <strong>${safeStudentName}</strong> 학생을 <strong>${safeClassName}</strong> 학급에 등록했습니다.</p>
             <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 버튼을 누르면 가입 코드가 자동으로 연결됩니다 — 따로 입력하실 필요 없습니다. 계정이 없으시면 버튼을 누른 뒤 뜨는 화면에서 <strong>"Sign Up"</strong>을 눌러 새로 만들어 주시면 됩니다. 이미 계정이 있으시면 그 이메일로 로그인만 하시면 자동으로 연결됩니다.</p>
             <div style="text-align: center; margin: 24px 0;">
               <a href="https://chekkiai.com/?classCode=${opts.inviteCode}" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 가입하기</a>

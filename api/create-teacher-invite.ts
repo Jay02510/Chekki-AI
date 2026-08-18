@@ -106,9 +106,15 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
   // Resend integration already wired up for invoice emails (audit §22),
   // so the director doesn't have to manually forward a link.
   const resendApiKey = process.env.RESEND_API_KEY;
+  // Tracked so the response can tell the director whether the email
+  // actually went out — fetch doesn't throw on a non-2xx, so a rejected
+  // Resend request (bad key, unverified domain, malformed payload) used to
+  // fail completely silently and "Invite sent!" showed regardless (Audit:
+  // invite email reports success while the send failed).
+  let emailSent = false;
   if (resendApiKey && cleanEmail) {
     try {
-      await fetch('https://api.resend.com/emails', {
+      const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${resendApiKey}`,
@@ -136,12 +142,26 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
           `,
         }),
       });
+      if (emailResponse.ok) {
+        emailSent = true;
+      } else {
+        const body = await emailResponse.text().catch(() => '');
+        console.error('[create-teacher-invite] Resend API rejected the request:', emailResponse.status, body, cleanEmail);
+      }
     } catch (emailErr) {
       console.warn('[create-teacher-invite] Resend email failed (invite still created):', emailErr);
     }
   }
 
-  return res.status(200).json({ success: true, inviteId, inviteUrl, role, email: cleanEmail || null });
+  return res.status(200).json({
+    success: true,
+    inviteId,
+    inviteUrl,
+    role,
+    email: cleanEmail || null,
+    emailSent,
+    resendConfigured: !!resendApiKey,
+  });
 }
 
 async function handleAssignClassTeacher(req: VercelRequest, res: VercelResponse, schoolId: string) {

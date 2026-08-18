@@ -10,6 +10,25 @@ import { computeInvoicePricing } from './_lib/invoicePricing.js';
 // arbitrary inboxes or run up the Resend bill.
 const checkInvoiceLimit = createRateLimiter('invoice', 3, 3600);
 
+// Public, unauthenticated input goes straight into HTML emails below (both
+// the customer confirmation and the internal support notification) — must
+// be escaped so a submitted `<script>`/`<a href=...>` can't inject arbitrary
+// HTML/links into an email that looks like it came from Chekki AI (Audit:
+// unescaped user input in HTML email templates). Also bounded to reasonable
+// lengths since the only prior validation was presence, not size.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function clamp(value: string, maxLen: number): string {
+  return value.slice(0, maxLen);
+}
+
 async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res);
 
@@ -46,6 +65,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!academyName || !contactName || !email) {
       return res.status(400).json({ error: 'Missing required fields (academyName, contactName, email)' });
+    }
+    if (
+      String(academyName).length > 200 ||
+      String(contactName).length > 100 ||
+      String(email).length > 200 ||
+      String(phone || '').length > 30 ||
+      String(bizRegNumber || '').length > 50
+    ) {
+      return res.status(400).json({ error: 'One or more fields exceed the maximum allowed length.' });
     }
 
     const { unitPrice, totalAmount } = computeInvoicePricing(planId, teacherCount, billingCycle);
@@ -91,6 +119,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // (Audit: silent invoice write failure).
     await adminDb.collection('school_invoices').doc(invoiceId).set(invoicePayload);
 
+    // Escaped variants for HTML interpolation only — invoicePayload itself
+    // stays raw for Firestore storage and admin-panel display.
+    const safeAcademyName = escapeHtml(invoicePayload.academyName);
+    const safeContactName = escapeHtml(invoicePayload.contactName);
+    const safeEmail = escapeHtml(invoicePayload.email);
+    const safePhone = escapeHtml(invoicePayload.phone);
+
     // Send automated email via Resend
     const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
@@ -112,9 +147,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
                   <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #a1a1aa; margin-top: 4px;">교육기관용 수강 청구서</p>
                 </div>
                 
-                <p style="font-size: 15px; color: #e4e4e7;">안녕하세요 <strong>${invoicePayload.contactName}</strong> 님,</p>
+                <p style="font-size: 15px; color: #e4e4e7;">안녕하세요 <strong>${safeContactName}</strong> 님,</p>
                 <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">
-                  <strong>${invoicePayload.academyName}</strong>의 Chekki AI 학원 구독 신청이 성공적으로 접수되었습니다.<br/>
+                  <strong>${safeAcademyName}</strong>의 Chekki AI 학원 구독 신청이 성공적으로 접수되었습니다.<br/>
                   아래 계좌로 수강료를 입금해 주시면, 확인 후 24시간 이내에 교사 인증 코드가 활성화됩니다.
                 </p>
 
@@ -167,8 +202,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
                 <p>New school invoice request pending payment.</p>
                 <table style="border-collapse: collapse; font-size: 14px;">
                   <tr><td style="padding: 4px 12px 4px 0; color: #666;">Invoice ID</td><td><strong>${invoiceId}</strong></td></tr>
-                  <tr><td style="padding: 4px 12px 4px 0; color: #666;">Academy</td><td>${invoicePayload.academyName}</td></tr>
-                  <tr><td style="padding: 4px 12px 4px 0; color: #666;">Contact</td><td>${invoicePayload.contactName} (${invoicePayload.email}${invoicePayload.phone ? `, ${invoicePayload.phone}` : ''})</td></tr>
+                  <tr><td style="padding: 4px 12px 4px 0; color: #666;">Academy</td><td>${safeAcademyName}</td></tr>
+                  <tr><td style="padding: 4px 12px 4px 0; color: #666;">Contact</td><td>${safeContactName} (${safeEmail}${safePhone ? `, ${safePhone}` : ''})</td></tr>
                   <tr><td style="padding: 4px 12px 4px 0; color: #666;">Plan</td><td>${invoicePayload.planName} · ${invoicePayload.teacherCount} teacher(s) · ${billingCycle === 'yearly' ? 'yearly' : 'monthly'}</td></tr>
                   <tr><td style="padding: 4px 12px 4px 0; color: #666;">Total</td><td><strong>₩${totalAmount.toLocaleString()}</strong></td></tr>
                 </table>

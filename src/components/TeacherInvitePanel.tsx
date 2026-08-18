@@ -133,12 +133,21 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         }
         return;
       }
-      setMessage({
-        text: noEmailYet
-          ? (isKo ? '초대 링크가 생성되었습니다. 아래에서 복사하세요.' : 'Invite link created — copy it below.')
-          : (isKo ? `${email} 주소로 초대 이메일을 전송했습니다.` : `Invite email sent to ${email}.`),
-        type: 'success',
-      });
+      // data.emailSent reflects whether the Resend call actually succeeded —
+      // previously this always claimed success regardless (Audit: invite
+      // email reports success while the send failed).
+      if (noEmailYet) {
+        setMessage({ text: isKo ? '초대 링크가 생성되었습니다. 아래에서 복사하세요.' : 'Invite link created — copy it below.', type: 'success' });
+      } else if (data.emailSent) {
+        setMessage({ text: isKo ? `${email} 주소로 초대 이메일을 전송했습니다.` : `Invite email sent to ${email}.`, type: 'success' });
+      } else {
+        setMessage({
+          text: data.resendConfigured
+            ? (isKo ? `초대는 생성되었지만 ${email}로 이메일 전송에 실패했습니다. 아래 링크를 직접 전달해주세요.` : `Invite created, but the email to ${email} failed to send. Share the link below directly.`)
+            : (isKo ? '초대는 생성되었지만 이메일 발송이 설정되지 않았습니다. 아래 링크를 직접 전달해주세요.' : 'Invite created, but email sending isn\'t configured. Share the link below directly.'),
+          type: 'error',
+        });
+      }
       setLastLink(data.inviteUrl);
       setEmail('');
       setNoEmailYet(false);
@@ -186,6 +195,15 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         if (!response.ok) {
           results.push({ email: inviteEmail, success: false, error: data.error || 'failed' });
           if (data.trialExpired) setShowUpgradeConfirm(true);
+        } else if (!data.emailSent) {
+          // Invite record was created but the actual email didn't go out —
+          // don't report this row as a plain success (Audit: invite email
+          // reports success while the send failed).
+          results.push({
+            email: inviteEmail,
+            success: false,
+            error: isKo ? '초대는 생성됐지만 이메일 발송 실패' : 'invite created but email failed to send',
+          });
         } else {
           results.push({ email: inviteEmail, success: true });
         }

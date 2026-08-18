@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sparkle, Plus, X, Check, UserPlus, Lock, FloppyDisk, Microphone, PencilSimple } from '@phosphor-icons/react';
 import { ClassLogPayload, saveOfflineDraft, getOfflineDraft, clearOfflineDraft } from '../services/aiGenerator';
 import { VoiceFillException, VoiceFillFields } from '../services/voiceFill';
@@ -211,6 +211,25 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   const [exceptions, setExceptions] = useState<LogException[]>(
     isDemo ? DEMO_EXCEPTIONS : []
   );
+
+  // Clear class-specific form state when the FT switches which class is
+  // active mid-log — previously only className/textbook/lessonTopic
+  // re-synced, so exceptions (which carry studentUids from whichever
+  // roster was active when they were flagged) survived a class switch and
+  // could be submitted against the wrong class's log (Audit: exception
+  // carried into wrong class on switch). Skipped on the very first mount —
+  // this only fires on an actual change, not the initial value.
+  const prevClassNameRef = useRef(selectedClassName);
+  useEffect(() => {
+    if (isDemo) return;
+    if (prevClassNameRef.current === selectedClassName) return;
+    prevClassNameRef.current = selectedClassName;
+    setActivities([]);
+    setEnergyLevel('');
+    setGeneralComments('');
+    setExceptions([]);
+  }, [selectedClassName, isDemo]);
+
   const [showExceptionModal, setShowExceptionModal] = useState(false);
   const [modalStudentUid, setModalStudentUid] = useState(effectiveRoster[0]?.uid || '');
   const [modalCategory, setModalCategory] = useState<'praise' | 'attention'>('praise');
