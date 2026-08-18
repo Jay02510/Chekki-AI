@@ -89,7 +89,7 @@
   "crons": [
     {
       "path": "/api/create-teacher-invite?action=send_pending_digests",
-      "schedule": "0 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
