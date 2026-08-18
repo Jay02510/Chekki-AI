@@ -10,6 +10,7 @@ import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useResolvedRole } from '../../hooks/useResolvedRole';
 import { useKtReviewQueue } from '../../hooks/useKtReviewQueue';
+import { useTeacherTabs } from '../../hooks/useTeacherTabs';
 import { useDirectorPortalState } from '../../hooks/useDirectorPortalState';
 import { useCurriculumEditorState } from '../../hooks/useCurriculumEditorState';
 import { 
@@ -332,26 +333,12 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>(
     firestoreEducatorRole === 'kt' ? 'kt' : 'ft'
   );
-  type TabId = 'overview' | 'insights' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum' | 'director_hq' | 'kt_script' | 'kt_log';
   const isDirectorUser = isDirectorPath || user?.role === 'director';
-  // Director/KT/FT used to share one activeTab state — since they're all
-  // rendered from the same TeacherPage switchboard with role-gated JSX
-  // rather than separate pages, a shared tab id (e.g. both KT and FT using
-  // 'overview') meant switching to one role's tab silently also selected
-  // the other role's content underneath. Splitting the state per role kills
-  // that collision without needing a full separate-pages route split.
-  const [directorActiveTab, setDirectorActiveTab] = useState<TabId>('director_hq');
-  const [ktActiveTab, setKtActiveTab] = useState<TabId>('kt_script');
-  const [ftActiveTab, setFtActiveTab] = useState<TabId>('overview');
-  const activeTab: TabId = isDirectorUser ? directorActiveTab : (educatorRole === 'kt' ? ktActiveTab : ftActiveTab);
-  const setActiveTab = (tab: TabId) => {
-    if (educatorRole === 'kt' && ktActiveTab === 'kt_script' && tab !== 'kt_script' && !confirmDiscardKtDraft()) {
-      return;
-    }
-    if (isDirectorUser) setDirectorActiveTab(tab);
-    else if (educatorRole === 'kt') { setKtActiveTab(tab); setKtDraftDirty(false); }
-    else setFtActiveTab(tab);
-  };
+  // activeTab/setActiveTab are declared further below, via useTeacherTabs —
+  // it needs confirmDiscardKtDraft from useKtReviewQueue, which itself needs
+  // state declared between here and there (curriculumEditor, studentsData),
+  // so the hook call and the effects that use activeTab are grouped together
+  // right after useKtReviewQueue instead of here.
   const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
   const [submittedLogs, setSubmittedLogs] = useState<any[]>([]);
 
@@ -392,51 +379,6 @@ export default function TeacherPage({ isNight = true }: Props) {
   // was only ever needed pre-auth (see the activeTab/loginRole useState
   // defaults, which legitimately use isDirectorPath as a loading-state guess).
   const { isDirector: resolvedIsDirector, isKt: resolvedIsKt } = useResolvedRole(user, loginRole);
-
-  useEffect(() => {
-    if (user) {
-      const isDirector = resolvedIsDirector;
-      const isKtRole = resolvedIsKt;
-
-      if (isDirector) {
-        setLoginRole('director');
-        setActiveTab('director_hq');
-      } else if (isKtRole) {
-        setLoginRole('teacher');
-        setEducatorRole('kt');
-        setActiveTab('kt_script');
-      } else {
-        setLoginRole('teacher');
-        setEducatorRole('ft');
-        if (activeTab === 'director_hq' || activeTab === 'kt_script') {
-          setActiveTab('overview');
-        }
-      }
-    }
-  }, [user?.uid, user?.educatorRole, user?.role]);
-
-  // Handle Teacher Invite Link URL Params (FT vs KT Role Routing)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const inviteRole = params.get('role');
-      if (inviteRole === 'kt') {
-        setEducatorRole('kt');
-        setActiveTab('kt_script');
-      } else if (inviteRole === 'ft') {
-        setEducatorRole('ft');
-        setActiveTab('overview');
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (activeTab === 'syllabus') {
-      setUploadMode('syllabus');
-    } else if (activeTab === 'homework') {
-      setUploadMode('worksheet');
-    }
-  }, [activeTab]);
 
   // Curriculum/scan editor state — extracted into a hook (Phase 1 of the
   // TeacherPage split, see buzzing-nibbling-hearth plan).
@@ -491,6 +433,56 @@ export default function TeacherPage({ isNight = true }: Props) {
     handleKtApprove,
     formatConsolidatedDraft,
   } = useKtReviewQueue(educatorRole, classes, selectedClass, user, showToast, isKo, studentNamesByUid);
+
+  // Tab state (Phase 5 of the buzzing-nibbling-hearth TeacherPage split) —
+  // declared here rather than up with the rest of the per-role state because
+  // it needs confirmDiscardKtDraft/setKtDraftDirty from useKtReviewQueue above.
+  const { activeTab, setActiveTab } = useTeacherTabs(isDirectorUser, educatorRole, confirmDiscardKtDraft, setKtDraftDirty);
+
+  useEffect(() => {
+    if (user) {
+      const isDirector = resolvedIsDirector;
+      const isKtRole = resolvedIsKt;
+
+      if (isDirector) {
+        setLoginRole('director');
+        setActiveTab('director_hq');
+      } else if (isKtRole) {
+        setLoginRole('teacher');
+        setEducatorRole('kt');
+        setActiveTab('kt_script');
+      } else {
+        setLoginRole('teacher');
+        setEducatorRole('ft');
+        if (activeTab === 'director_hq' || activeTab === 'kt_script') {
+          setActiveTab('overview');
+        }
+      }
+    }
+  }, [user?.uid, user?.educatorRole, user?.role]);
+
+  // Handle Teacher Invite Link URL Params (FT vs KT Role Routing)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const inviteRole = params.get('role');
+      if (inviteRole === 'kt') {
+        setEducatorRole('kt');
+        setActiveTab('kt_script');
+      } else if (inviteRole === 'ft') {
+        setEducatorRole('ft');
+        setActiveTab('overview');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'syllabus') {
+      setUploadMode('syllabus');
+    } else if (activeTab === 'homework') {
+      setUploadMode('worksheet');
+    }
+  }, [activeTab]);
   const [isLoadingRoster, setIsLoadingRoster] = useState(false);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState<any | null>(null);
   const [flagReasonInput, setFlagReasonInput] = useState('');
