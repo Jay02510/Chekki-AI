@@ -1082,7 +1082,8 @@ Return ONLY valid JSON matching this schema:
       "questionNumber": string,
       "questionText": string,
       "answer": string,
-      "category": string
+      "category": string,
+      "bounding_box": { "ymin": number, "xmin": number, "ymax": number, "xmax": number } (the question's location on ITS OWN page image, coordinates 0-1000 scaled to that page's width/height — same convention as a normal graded-worksheet scan. Omit this field for a question if you can't confidently locate it, rather than guessing.)
     }
   ],
   "pages": [
@@ -1099,7 +1100,8 @@ Return ONLY valid JSON matching this schema:
           "questionNumber": string,
           "questionText": string,
           "answer": string,
-          "category": string
+          "category": string,
+          "bounding_box": { "ymin": number, "xmin": number, "ymax": number, "xmax": number } (0-1000 scale, that page's own image — omit if unsure)
         }
       ]
     }

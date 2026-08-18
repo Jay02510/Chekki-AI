@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BookOpen, Sparkle, Eye, X, Warning, Plus, Check, CheckCircle } from '@phosphor-icons/react';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { WorksheetOverlay } from '../../components/WorksheetOverlay';
+import type { WorksheetItem } from '../../types';
 
 const BAD_WORDS_PATTERN = /(fuck|shit|asshole|bitch|bastard|cunt|dick|cock|pussy|slut|whore|nigger|faggot|retard|damn|crap|idiot|stupid|씨발|개새끼|병신|지랄|존나|닥쳐|미친|좆|씹)/i;
 
@@ -49,6 +51,27 @@ export function ScannedModal({
     selectedPageIndex === 'all' || !scannedData?.pages
       ? scannedData
       : scannedData.pages.find((p: any) => (p.pageIndex || p.pageNumber) === selectedPageIndex) || scannedData;
+
+  // Same pinned-overlay component the parent app uses when a parent scans
+  // their child's worksheet at home (components/WorksheetOverlay.tsx) — a
+  // teacher reviewing a scan should see the identical positioned-pill view,
+  // not a separate hand-built mock (audit: teacher scan review didn't match
+  // what parents actually see). Blank-key styling (hasHandwriting={false}
+  // below) since this is the master answer key, not a graded submission —
+  // no is_correct verdict exists here.
+  const overlayItems: WorksheetItem[] = useMemo(
+    () =>
+      (activeDisplayObj?.detectedAnswers || []).map((item: any, idx: number) => ({
+        id: idx + 1,
+        type: item.category || 'text',
+        question_text: item.questionText || item.question || '',
+        correct_answer: item.correctAnswer || item.answer || '',
+        korean_guide: '',
+        teaching_script_ko: '',
+        bounding_box: item.bounding_box,
+      })),
+    [activeDisplayObj]
+  );
 
   const hasInappropriateContent = activeDisplayObj?.detectedAnswers?.some(
     (ans: any) =>
@@ -231,34 +254,13 @@ export function ScannedModal({
                   {/* Paper Sheet Preview Container with Real Image Preview */}
                   <div className="relative w-full rounded-2xl border border-zinc-300 dark:border-white/10 bg-black/40 text-zinc-900 shadow-xl overflow-hidden font-serif select-none min-h-[420px] flex flex-col items-center justify-center p-3">
                     {worksheetPreviewUrl || docPreviewUrl || syllabusPreviewUrl ? (
-                      <div className="relative w-full h-full min-h-[380px] rounded-xl overflow-hidden border border-white/20 bg-zinc-900 flex items-center justify-center group">
-                        {/* Actual Scanned Physical Document Image */}
-                        <img
-                          src={worksheetPreviewUrl || docPreviewUrl || syllabusPreviewUrl || undefined}
-                          alt="Scanned Physical Worksheet"
-                          className="w-full h-auto max-h-[500px] object-contain rounded-lg drop-shadow-2xl"
-                        />
-
-                        {/* Green Ink Answer Overlay Badge on top of image */}
-                        <div className="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-emerald-500/90 text-white font-mono font-bold text-xs shadow-lg backdrop-blur-md border border-emerald-300 flex items-center gap-1.5">
-                          <Sparkle size={14} weight="fill" className="animate-pulse" />
-                          <span>{isKo ? '🟢 Chekki Parent App 정답 오버레이 잉크' : '🟢 Green Ink Answer Overlay'}</span>
-                        </div>
-
-                        {/* Interactive Overlay Tags on Image */}
-                        <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 text-white text-xs space-y-1">
-                          <span className="text-[10px] font-mono text-emerald-400 font-bold block uppercase tracking-wider">
-                            {isKo ? '💡 학부모용 실시간 정답 오버레이 가이드:' : '💡 Live Parent App Screen Overlay:'}
-                          </span>
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {(activeDisplayObj?.detectedAnswers || []).slice(0, 5).map((ans: any, i: number) => (
-                              <span key={i} className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-emerald-500/30 text-emerald-300 border border-emerald-400/40">
-                                Q{i + 1}: {ans.correctAnswer || ans.answer || 'Answer'}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
+                      <WorksheetOverlay
+                        imageUrl={(worksheetPreviewUrl || docPreviewUrl || syllabusPreviewUrl) as string}
+                        items={overlayItems}
+                        isNight={isThemeNight}
+                        hasHandwriting={false}
+                        className="min-h-[380px] rounded-xl"
+                      />
                     ) : (
                       <div className="relative w-full rounded-2xl bg-white p-6 min-h-[380px] text-zinc-900">
                         <div className="border-b-2 border-zinc-900 pb-3 mb-6 flex justify-between items-end">
