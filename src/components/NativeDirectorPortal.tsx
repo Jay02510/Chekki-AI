@@ -47,6 +47,7 @@ interface Props {
   curriculumPassage?: string;
   onResolveFlag?: (studentUid: string) => void;
   onRequestSeatExpansion?: (extraSeats: number) => Promise<boolean>;
+  onRequestPlanChange?: (planId: string, planName: string) => Promise<boolean>;
 }
 
 export const NativeDirectorPortal: React.FC<Props> = ({
@@ -68,6 +69,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   curriculumPassage = '',
   onResolveFlag = () => {},
   onRequestSeatExpansion,
+  onRequestPlanChange,
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'exceptions' | 'teachers' | 'billing'>('overview');
 
@@ -702,7 +704,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* ========================================================================= */}
       {activeTab === 'billing' && (
         schoolId ? (
-          <SchoolBillingPanel isNight={isNight} isKo={isKo} schoolId={schoolId} seatsTotal={seatsTotal || { ft: 0, kt: 0 }} trialStatus={trialStatus} />
+          <SchoolBillingPanel isNight={isNight} isKo={isKo} schoolId={schoolId} seatsTotal={seatsTotal || { ft: 0, kt: 0 }} trialStatus={trialStatus} onRequestPlanChange={onRequestPlanChange} />
         ) : (
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
             School profile still loading — billing info will be available once it finishes.

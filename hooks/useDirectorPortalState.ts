@@ -99,9 +99,46 @@ export function useDirectorPortalState(
     }
   };
 
+  // Same request-only pattern as handleRequestSeatExpansion above: files a
+  // school_invoices record + email, a human applies the plan change via
+  // AdminPage once payment clears. "Change Plan / Upgrade" used to just
+  // link out to the public /schools marketing page (Audit: director sent
+  // off the dashboard with no way back to actually request the change).
+  const handleRequestPlanChange = async (planId: string, planName: string): Promise<boolean> => {
+    const schoolId = user?.schoolId;
+    if (!schoolId) return false;
+    try {
+      const response = await fetch('/api/request-school-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          schoolId,
+          academyName: user?.schoolName || schoolId,
+          contactName: user?.name || user?.schoolName || 'Director',
+          email: user?.email || '',
+          planId,
+          planName,
+          billingCycle: 'monthly',
+        }),
+      });
+      if (!response.ok) throw new Error(`Request failed with ${response.status}`);
+      return true;
+    } catch (err) {
+      console.error('Failed to submit plan change request:', err);
+      showToast({
+        type: 'error',
+        message: isKo
+          ? '⚠️ 요금제 변경 요청을 보내지 못했습니다. 다시 시도해주세요.'
+          : "⚠️ The plan change request didn't go through. Please try again.",
+      });
+      return false;
+    }
+  };
+
   return {
     schoolSeatsTotal,
     schoolPlanId,
+    handleRequestPlanChange,
     trialStatus,
     handleRequestSeatExpansion,
   };
