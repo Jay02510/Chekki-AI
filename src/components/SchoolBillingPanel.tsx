@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { doc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
-import { PLAN_LABELS } from '../../api/_lib/pricingTiers';
+import { PLAN_LABELS, PLAN_SEATS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
 
 interface Props {
   isNight?: boolean;
@@ -114,9 +114,16 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowPlanModal(false)} />
           <div className={`relative w-full max-w-md rounded-2xl border p-6 space-y-4 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200'}`}>
-            <h4 className={`font-black text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-              {isKo ? '요금제 변경 요청' : 'Request a Plan Change'}
-            </h4>
+            <div>
+              <h4 className={`font-black text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {isKo ? '요금제 변경 요청' : 'Request a Plan Change'}
+              </h4>
+              {!planRequestSent && (
+                <p className={`text-xs mt-1 ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  {isKo ? '월간 요금 기준입니다. 요청 후 담당자가 이메일로 결제 방법을 안내합니다.' : 'Prices shown are monthly. Our team will email you payment details after you request.'}
+                </p>
+              )}
+            </div>
 
             {planRequestSent ? (
               <div className="space-y-4">
@@ -137,6 +144,8 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
               <div className="space-y-2">
                 {SELECTABLE_PLAN_IDS.filter((id) => id !== planId).map((id) => {
                   const label = PLAN_LABELS[id];
+                  const seats = PLAN_SEATS[id];
+                  const billing = PRICING_BILLING[id];
                   return (
                     <button
                       key={id}
@@ -150,9 +159,21 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
                       }}
                       className={`w-full text-left px-4 py-3 rounded-xl border transition-all disabled:opacity-50 ${isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100'}`}
                     >
-                      <span className={`block text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {isKo ? label.nameKo : label.nameEn}
-                      </span>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className={`block text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                          {isKo ? label.nameKo : label.nameEn}
+                        </span>
+                        {billing && (
+                          <span className="shrink-0 text-sm font-black text-orange-500 font-mono">
+                            {billing.monthly.krw > 0 ? `₩${billing.monthly.krw.toLocaleString()}/mo` : (isKo ? '무료' : 'Free')}
+                          </span>
+                        )}
+                      </div>
+                      {seats && (
+                        <span className={`block text-[11px] mt-1 font-mono ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                          {seats.ft} FT + {seats.kt} KT {isKo ? '석' : 'seats'}
+                        </span>
+                      )}
                     </button>
                   );
                 })}

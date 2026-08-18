@@ -18,7 +18,7 @@ import {
   ShieldCheck
 } from '@phosphor-icons/react';
 import { SchoolLoopDiagram } from '../components/SchoolLoopDiagram';
-import { PLAN_SEATS, PLAN_LABELS } from '../../api/_lib/pricingTiers';
+import { PLAN_SEATS, PLAN_LABELS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -27,19 +27,10 @@ interface Props {
   setIsNight: (val: boolean) => void;
 }
 
-// Pricing/billing figures only — seat counts and plan names are NOT
-// duplicated here anymore. They're pulled from api/_lib/pricingTiers.ts
-// (PLAN_SEATS/PLAN_LABELS), the same table api/set-initial-role.ts uses
-// server-side to grant seats, so the modal can never show a split the
-// backend wouldn't actually honor.
-const PRICING_BILLING: Record<string, { monthly: { krw: number; usd: number }; yearly: { krw: number; usd: number }; minSeats: number; defaultTeachers: number }> = {
-  trial: { monthly: { krw: 0, usd: 0 }, yearly: { krw: 0, usd: 0 }, minSeats: 1, defaultTeachers: 1 },
-  solo: { monthly: { krw: 39000, usd: 29 }, yearly: { krw: 31000, usd: 23 }, minSeats: 1, defaultTeachers: 1 },
-  starter: { monthly: { krw: 69000, usd: 49 }, yearly: { krw: 55000, usd: 39 }, minSeats: 1, defaultTeachers: 3 },
-  school_pro: { monthly: { krw: 290000, usd: 220 }, yearly: { krw: 232000, usd: 175 }, minSeats: 5, defaultTeachers: 10 },
-  enterprise: { monthly: { krw: 590000, usd: 450 }, yearly: { krw: 472000, usd: 360 }, minSeats: 10, defaultTeachers: 20 },
-};
-
+// Pricing/billing figures, seat counts, and plan names all come from
+// api/_lib/pricingTiers.ts — the same tables api/set-initial-role.ts and
+// api/request-school-invoice.ts use, so this modal can never show a plan
+// the backend wouldn't actually honor.
 const PRICING_TIERS = Object.fromEntries(
   Object.entries(PRICING_BILLING).map(([id, billing]) => [
     id,

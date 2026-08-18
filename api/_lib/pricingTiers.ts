@@ -46,3 +46,18 @@ export function labelsForPlan(planId: string | undefined | null): { nameEn: stri
   if (!planId) return PLAN_LABELS.trial;
   return PLAN_LABELS[planId] || PLAN_LABELS.trial;
 }
+
+/**
+ * Pricing/billing figures for the same plan ids. Previously only existed
+ * inline in SchoolsLandingPage.tsx, so any other screen showing a plan
+ * picker (e.g. the director dashboard's "Change Plan" request modal) had
+ * no price to show at all — a director had to leave the dashboard and
+ * find the marketing page just to see what a plan costs.
+ */
+export const PRICING_BILLING: Record<string, { monthly: { krw: number; usd: number }; yearly: { krw: number; usd: number }; minSeats: number; defaultTeachers: number }> = {
+  trial: { monthly: { krw: 0, usd: 0 }, yearly: { krw: 0, usd: 0 }, minSeats: 1, defaultTeachers: 1 },
+  solo: { monthly: { krw: 39000, usd: 29 }, yearly: { krw: 31000, usd: 23 }, minSeats: 1, defaultTeachers: 1 },
+  starter: { monthly: { krw: 69000, usd: 49 }, yearly: { krw: 55000, usd: 39 }, minSeats: 1, defaultTeachers: 3 },
+  school_pro: { monthly: { krw: 290000, usd: 220 }, yearly: { krw: 232000, usd: 175 }, minSeats: 5, defaultTeachers: 10 },
+  enterprise: { monthly: { krw: 590000, usd: 450 }, yearly: { krw: 472000, usd: 360 }, minSeats: 10, defaultTeachers: 20 },
+};

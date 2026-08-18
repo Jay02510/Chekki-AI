@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkle, ChartBar, Notebook, FileText, CaretRight } from '@phosphor-icons/react';
+import { Sparkle, ChartBar, Notebook, FileText, Users, CaretRight } from '@phosphor-icons/react';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
@@ -111,6 +111,29 @@ export function KtSidebarNav({ isNight, isKo, activeTab, setActiveTab, showRepor
           <span>{isKo ? '📄 워크시트 채점기' : '📄 Worksheet Scanner'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'homework' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+      </button>
+
+      <button
+        onClick={() => setActiveTab('students')}
+        className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+          activeTab === 'students'
+            ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+            : isNight
+              ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+              : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-xl transition-colors ${
+            activeTab === 'students'
+              ? 'bg-orange-500/20 text-orange-500'
+              : isNight ? 'bg-white/5 text-purple-400 group-hover:text-white' : 'bg-purple-100 text-purple-600 group-hover:text-zinc-900'
+          }`}>
+            <Users size={18} weight="bold" />
+          </div>
+          <span>{isKo ? '👥 원생 명단 관리 (Roster)' : '👥 Student Roster'}</span>
+        </div>
+        <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
 
       {/* AI Report Studio Generator Trigger Button — parent-facing report

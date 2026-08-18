@@ -653,11 +653,15 @@ export default function TeacherPage({ isNight = true }: Props) {
       if (!welcomeDone) {
         // Pre-fill name from user profile
         setWelcomeName(user.name || user.email?.split('@')[0] || '');
-        // Detect FT/KT from a previously stored explicit selection only — never
-        // from an email substring (the last instance of that pattern, audit §20e).
+        // Detect FT/KT from a previously stored explicit selection, falling
+        // back to the resolved Firestore role — never from an email
+        // substring (the last instance of that pattern, audit §20e). The
+        // localStorage-only version left this screen stuck on the FT
+        // default for any KT account that never went through invite
+        // redemption on this device (e.g. seeded directly in Firestore).
         const storedEducatorRole = localStorage.getItem(`chekki_educator_role_${uid}`) ||
           localStorage.getItem(`chekki_educator_role_${user.email}`);
-        setWelcomeRole(storedEducatorRole === 'kt' ? 'kt' : 'ft');
+        setWelcomeRole(storedEducatorRole === 'kt' || user.educatorRole === 'kt' ? 'kt' : 'ft');
         setShowTeacherWelcome(true);
       }
     }
@@ -742,7 +746,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   }, [isAuthenticated, user?.uid]);
 
-  const fetchClasses = async () => {
+  const fetchClasses = async (isRetry = false) => {
     const uid = user?.uid || 'guest';
     setIsLoadingClasses(true);
     const fetchedFromFirestore: any[] = [];
@@ -763,7 +767,19 @@ export default function TeacherPage({ isNight = true }: Props) {
           fetchedFromFirestore.push({ id: doc.id, ...doc.data() });
         });
       }
-    } catch (err) {
+    } catch (err: any) {
+      // Same transient-permission-denied-right-after-signup pattern
+      // StudentInvitePanel already retries once for (firestore.rules
+      // re-reads the caller's own user doc on every query; that read can
+      // momentarily deny before a brand-new session settles) — this fetch
+      // had no retry at all, so a fresh signup could get stuck showing
+      // "couldn't load classes" and a stale local cache forever, with no
+      // self-heal (Audit: director class list empty, contradicting a
+      // synced-looking selected class from local cache).
+      if (err?.code === 'permission-denied' && !isRetry) {
+        setTimeout(() => fetchClasses(true), 1500);
+        return;
+      }
       console.warn('Firestore fetch warning (falling back to local storage):', err);
       setSyncWarning(
         isKo
@@ -2372,7 +2388,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               </div>
             </div>
           )}
-          {classes.length === 0 && !(loginRole === 'director' || user?.role === 'director') && (
+          {classes.length === 0 && (!selectedClass || selectedClass.isDemo) && !(loginRole === 'director' || user?.role === 'director') && (
             <div className={`p-5 rounded-3xl border mb-6 flex items-center gap-3.5 transition-all shadow-sm ${
               isThemeNight
                 ? 'bg-orange-500/10 border-orange-500/30 text-orange-200'
