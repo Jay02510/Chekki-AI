@@ -110,6 +110,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
               selectedTextbookName={selectedTextbookName}
               selectedLessonTopic={curriculumTopic}
               roster={roster}
+              isRealClassSynced={!activeClass?.isDemo}
             />
           </div>
           {/* NOTE: Duplicate worksheet scanner that previously lived here was

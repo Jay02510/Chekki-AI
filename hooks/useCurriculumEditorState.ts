@@ -440,7 +440,13 @@ export function useCurriculumEditorState(
       console.warn('LocalStorage curriculum load error:', e);
     }
 
-    // 2. Fetch latest snapshot from Firestore
+    // 2. Fetch latest snapshot from Firestore — skip for the demo/no-class
+    // placeholder, its doc is never created server-side so this would only
+    // ever produce a permission-denied console error, not real data.
+    if (targetClass.isDemo) {
+      setIsLoadingCurriculum(false);
+      return;
+    }
     try {
       const docRef = doc(dbInstance, 'curriculums', currDocId);
       const snap = await getDoc(docRef);

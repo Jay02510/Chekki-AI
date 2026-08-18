@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BookOpen, Sparkle, Eye, X, Warning, Plus, Check, CheckCircle } from '@phosphor-icons/react';
+import { BookOpen, Sparkle, Eye, X, Warning, Plus, Check, CheckCircle, Trash } from '@phosphor-icons/react';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { WorksheetOverlay } from '../../components/WorksheetOverlay';
 import type { WorksheetItem } from '../../types';
@@ -303,30 +303,6 @@ export function ScannedModal({
                     <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
                       {isKo ? '✏️ 문항 및 정답 수정 (Right Panel Editor)' : '✏️ Edit Questions & Correct Answers'}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setScannedData((prev: any) => {
-                          const currentAnswers = prev?.detectedAnswers || [];
-                          const newNum = currentAnswers.length + 1;
-                          const newAnswers = [
-                            ...currentAnswers,
-                            {
-                              questionNumber: newNum,
-                              category: 'Vocabulary',
-                              questionText: `${newNum}. Additional Question Text ${newNum}`,
-                              correctAnswer: 'answer',
-                              answer: 'answer',
-                            },
-                          ];
-                          return { ...prev, detectedAnswers: newAnswers };
-                        });
-                      }}
-                      className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1 cursor-pointer"
-                    >
-                      <Plus size={14} weight="bold" />
-                      <span>{isKo ? '문항 추가' : 'Add Question'}</span>
-                    </button>
                   </div>
 
                   {activeDisplayObj?.detectedAnswers && activeDisplayObj.detectedAnswers.length > 0 ? (
@@ -341,8 +317,8 @@ export function ScannedModal({
                               itemHasBadWord ? 'bg-red-500/10 border-red-500/40' : isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
                             }`}
                           >
-                            <div className="flex items-center justify-between">
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 shrink-0">
                                 Question #{item.questionNumber || idx + 1}
                               </span>
                               <input
@@ -358,6 +334,20 @@ export function ScannedModal({
                                 }}
                                 className="text-[10px] font-bold uppercase tracking-wider bg-transparent border-b border-zinc-600 focus:border-orange-500 text-zinc-400 outline-none text-right w-28"
                               />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setScannedData((prev: any) => {
+                                    const list = [...(prev?.detectedAnswers || [])];
+                                    list.splice(idx, 1);
+                                    return { ...prev, detectedAnswers: list };
+                                  });
+                                }}
+                                aria-label={isKo ? '문항 삭제' : 'Delete question'}
+                                className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-all cursor-pointer"
+                              >
+                                <Trash size={13} weight="bold" />
+                              </button>
                             </div>
 
                             <input

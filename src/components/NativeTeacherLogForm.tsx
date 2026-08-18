@@ -22,6 +22,12 @@ interface Props {
    * not yet redeemed (isPending) — empty until the roster loads or has no
    * one yet. */
   roster?: { uid: string; name: string; isPending?: boolean }[];
+  /** False when the active class is the client-only sample/preview
+   * placeholder (no real class assigned yet) — the locked class field then
+   * says "Preview" instead of "Synced", since nothing is actually synced
+   * to the cloud yet. Defaults true so existing real-class callers are
+   * unaffected. */
+  isRealClassSynced?: boolean;
   /** Public marketing/demo showcase only. Never true for a real, authenticated teacher session. */
   isDemo?: boolean;
   /** Landing-page demo only: shows the mic button and plays a canned,
@@ -135,6 +141,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   selectedTextbookName,
   selectedLessonTopic,
   roster = [],
+  isRealClassSynced = true,
   isDemo = false,
   demoScripted = false,
 }) => {
@@ -573,7 +580,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 <span>{selectedClassName || (isKo ? '선택된 학급 없음' : 'No class selected')}</span>
                 <span className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wide text-zinc-500 shrink-0">
                   <Lock size={12} weight="bold" />
-                  {isKo ? '동기화됨' : 'Synced'}
+                  {isRealClassSynced ? (isKo ? '동기화됨' : 'Synced') : (isKo ? '미리보기' : 'Preview')}
                 </span>
               </div>
             )}

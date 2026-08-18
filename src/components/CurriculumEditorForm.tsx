@@ -10,6 +10,7 @@ import {
   Info,
   Printer,
   CheckCircle,
+  Trash,
 } from '@phosphor-icons/react';
 import { UserProfile } from '../../types';
 interface Props {
@@ -641,21 +642,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0 z-30 flex-wrap">
-                        <label className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
-                          <span>📷</span>
-                          <span>{isKo ? '카메라 바로 촬영' : 'Camera Snap'}</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files.length > 0) {
-                                handleTextbookFileUpload(e.target.files, 'worksheet');
-                              }
-                            }}
-                            className="hidden"
-                          />
-                        </label>
+                        {/* View actions — what to do with the worksheet already here */}
                         {worksheetPreviewUrl && (
                           <button
                             type="button"
@@ -683,7 +670,33 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                             <span>{isKo ? '정답지 확인' : 'View Answers'}</span>
                           </button>
                         )}
-                        {/* Continuous Upload Button */}
+
+                        {/* Divider between "view this one" and "replace/remove it" */}
+                        <div className="w-px h-6 bg-white/10 mx-0.5" />
+
+                        {/* Rescan actions — replace the current worksheet with a new photo */}
+                        <label className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
+                          <span>📷</span>
+                          <span>{isKo ? '카메라 바로 촬영' : 'Camera Snap'}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files.length > 0) {
+                                handleTextbookFileUpload(e.target.files, 'worksheet');
+                              }
+                            }}
+                            className="hidden"
+                          />
+                        </label>
+
+                        {/* Remove — clears this worksheet so a new one can be
+                            uploaded from scratch. This used to be mislabeled
+                            "+ Upload Additional Worksheet" while actually just
+                            wiping the current one (Audit: delete action
+                            disguised as an add action, teacher had no visible
+                            way to remove a bad scan). */}
                         <button
                           type="button"
                           onClick={() => {
@@ -691,10 +704,10 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                             setWorksheetScannedData(null);
                             setWorksheetFileName('');
                           }}
-                          className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
                         >
-                          <Plus size={14} weight="bold" />
-                          <span>{isKo ? '+ 추가 워크시트 업로드' : '+ Upload Additional Worksheet'}</span>
+                          <Trash size={14} weight="bold" />
+                          <span>{isKo ? '삭제' : 'Remove'}</span>
                         </button>
                       </div>
                     </div>

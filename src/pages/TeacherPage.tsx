@@ -108,7 +108,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
 
   const [showActivationWizard, setShowActivationWizard] = useState(false);
-  const { schoolSeatsTotal, schoolPlanId, trialStatus, handleRequestSeatExpansion } = useDirectorPortalState(user, showToast, isKo);
+  const { schoolSeatsTotal, schoolPlanId, trialStatus, handleRequestSeatExpansion, handleRequestPlanChange } = useDirectorPortalState(user, showToast, isKo);
   const [showReportCardModal, setShowReportCardModal] = useState(false);
 
   // FT/KT first-login welcome modal state
@@ -1210,22 +1210,34 @@ export default function TeacherPage({ isNight = true }: Props) {
       // 1. Fetch dual-persisted class scans from LocalStorage
       const localClassKey = `class_scans_${targetClass.id}`;
       const localScans: any[] = JSON.parse(localStorage.getItem(localClassKey) || '[]');
-      
-      // 2. Fetch class scans from Firestore
+
+      // 2. Fetch class scans + roster from Firestore — skip for the demo/
+      // no-class placeholder, its docs are never created server-side so
+      // this would only ever produce a permission-denied console error.
       const firestoreScans: any[] = [];
-      try {
-        const scansQ = query(
-          collection(dbInstance, 'classes', targetClass.id, 'studentScans')
+      let rosterDocs: any[] = [];
+      if (!targetClass.isDemo) {
+        try {
+          const scansQ = query(
+            collection(dbInstance, 'classes', targetClass.id, 'studentScans')
+          );
+          const scansSnap = await getDocs(scansQ);
+          scansSnap.forEach(sDoc => firestoreScans.push({ id: sDoc.id, ...sDoc.data() }));
+        } catch (sErr) {
+          console.warn('Firestore class scans fetch warning (using local fallback):', sErr);
+          setSyncWarning(
+            isKo
+              ? '⚠️ 클라우드에서 채점 기록을 불러오지 못해 이 기기에 저장된 정보만 표시하고 있습니다.'
+              : "⚠️ Couldn't load scan history from the cloud — showing only what's saved on this device."
+          );
+        }
+
+        const q = query(
+          collection(dbInstance, 'users'),
+          where('classId', '==', targetClass.id)
         );
-        const scansSnap = await getDocs(scansQ);
-        scansSnap.forEach(sDoc => firestoreScans.push({ id: sDoc.id, ...sDoc.data() }));
-      } catch (sErr) {
-        console.warn('Firestore class scans fetch warning (using local fallback):', sErr);
-        setSyncWarning(
-          isKo
-            ? '⚠️ 클라우드에서 채점 기록을 불러오지 못해 이 기기에 저장된 정보만 표시하고 있습니다.'
-            : "⚠️ Couldn't load scan history from the cloud — showing only what's saved on this device."
-        );
+        const snap = await getDocs(q);
+        rosterDocs = snap.docs;
       }
 
       // Merge scans by ID
@@ -1234,15 +1246,10 @@ export default function TeacherPage({ isNight = true }: Props) {
       localScans.forEach(s => { if (!scansMap.has(s.id)) scansMap.set(s.id, s); });
       const allClassScans = Array.from(scansMap.values());
 
-      // 3. Fetch Roster Users
-      const q = query(
-        collection(dbInstance, 'users'),
-        where('classId', '==', targetClass.id)
-      );
-      const snap = await getDocs(q);
+      // 3. Build roster from fetched users
       const students: any[] = [];
-      
-      for (const userDoc of snap.docs) {
+
+      for (const userDoc of rosterDocs) {
         const student: any = { uid: userDoc.id, ...userDoc.data() };
         
         // Match scans for this student
@@ -2834,15 +2841,6 @@ export default function TeacherPage({ isNight = true }: Props) {
               <div className="flex items-center gap-2.5">
                 <button
                   type="button"
-                  onClick={() => { setShowTeacherOnboarding(true); setTeacherObStep(0); }}
-                  className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
-                    isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-white border-zinc-300 text-zinc-700 hover:bg-zinc-100 shadow-xs'
-                  }`}
-                >
-                  {isKo ? '가이드 보기' : 'View Guide'}
-                </button>
-                <button
-                  type="button"
                   onClick={() => setShowCreateClassModal(true)}
                   className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] shrink-0 cursor-pointer"
                 >
@@ -2886,6 +2884,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 seatsTotal={schoolSeatsTotal}
                 trialStatus={trialStatus}
                 onRequestSeatExpansion={handleRequestSeatExpansion}
+                onRequestPlanChange={handleRequestPlanChange}
                 pendingRoster={pendingRoster}
                 activeRoster={activeRoster}
                 classes={classes}
@@ -3018,6 +3017,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   selectedClassName={activeClass?.name}
                   selectedTextbookName={selectedTextbookName}
                   roster={ftDashboardRoster}
+                  isRealClassSynced={!activeClass?.isDemo}
                 />
               </div>
             )}
@@ -3508,32 +3508,38 @@ export default function TeacherPage({ isNight = true }: Props) {
                   )}
                 </div>
 
-                {/* Re-open Walkthrough Guide */}
-                <div className={`flex items-center justify-between p-4 border rounded-2xl ${
-                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
-                }`}>
-                  <div>
-                    <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {isKo ? '교사 온보딩 가이드 다시보기' : 'Onboarding Walkthrough'}
-                    </h4>
-                    <p className="text-[11px] text-zinc-400">
-                      {isKo ? '학급 개설 및 학부모 6자리 코드 연결 가이드' : 'Review 3-step teacher tutorial guide.'}
-                    </p>
+                {/* Re-open Walkthrough Guide — the tour's content is FT/KT-
+                    specific (waiting on a director's class assignment), so
+                    hide this for directors rather than show them a guide
+                    written about a role they don't have (Audit: director's
+                    settings surfaced the FT/KT-worded tour). */}
+                {loginRole !== 'director' && user?.role !== 'director' && (
+                  <div className={`flex items-center justify-between p-4 border rounded-2xl ${
+                    isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                  }`}>
+                    <div>
+                      <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                        {isKo ? '교사 온보딩 가이드 다시보기' : 'Onboarding Walkthrough'}
+                      </h4>
+                      <p className="text-[11px] text-zinc-400">
+                        {isKo ? '학급 개설 및 학부모 6자리 코드 연결 가이드' : 'Review 3-step teacher tutorial guide.'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowSettingsModal(false);
+                        setTeacherObStep(0);
+                        setShowTeacherOnboarding(true);
+                      }}
+                      className={`px-3.5 py-2 font-bold text-xs rounded-xl border transition-all whitespace-nowrap cursor-pointer ${
+                        isThemeNight ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' : 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800 border-zinc-300'
+                      }`}
+                    >
+                      {isKo ? '가이드 열기' : 'Open Tutorial'}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowSettingsModal(false);
-                      setTeacherObStep(0);
-                      setShowTeacherOnboarding(true);
-                    }}
-                    className={`px-3.5 py-2 font-bold text-xs rounded-xl border transition-all whitespace-nowrap cursor-pointer ${
-                      isThemeNight ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' : 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800 border-zinc-300'
-                    }`}
-                  >
-                    {isKo ? '가이드 열기' : 'Open Tutorial'}
-                  </button>
-                </div>
+                )}
 
                 {/* Report a Bug / Send Feedback — staff dashboard had no path to
                     reach us at all; only the parent-facing app did. */}

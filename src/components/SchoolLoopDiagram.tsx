@@ -66,15 +66,15 @@ const PARENT_LOOP: LoopDef = {
 // connected by outward-bowing curves so the whole shape reads as a loop —
 // not three chips in a row with straight arrows between them.
 const NODES = [
-  { x: 50, y: 10 },
-  { x: 88, y: 74 },
-  { x: 12, y: 74 },
+  { x: 50, y: 8 },
+  { x: 82, y: 78 },
+  { x: 18, y: 78 },
 ] as const;
 
 const EDGES = [
-  'M 50 10 Q 94 28 88 74',
-  'M 88 74 Q 50 102 12 74',
-  'M 12 74 Q 6 28 50 10',
+  'M 50 8 Q 90 24 82 78',
+  'M 82 78 Q 50 104 18 78',
+  'M 18 78 Q 10 24 50 8',
 ];
 
 function LoopCard({ loop, isNight, isKo }: { loop: LoopDef; isNight: boolean; isKo: boolean }) {
@@ -106,7 +106,7 @@ function LoopCard({ loop, isNight, isKo }: { loop: LoopDef; isNight: boolean; is
       {/* The loop itself: three step-nodes on a closed curved path, with a
           repeating cadence label at the center so it reads as "this keeps
           happening," not a one-time sequence. */}
-      <div className="relative w-full max-w-[280px] mx-auto aspect-square">
+      <div className="relative w-full max-w-[300px] mx-auto aspect-square pb-4">
         <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full overflow-visible" aria-hidden="true">
           <defs>
             <marker id={markerId} markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
@@ -139,7 +139,7 @@ function LoopCard({ loop, isNight, isKo }: { loop: LoopDef; isNight: boolean; is
           return (
             <div
               key={i}
-              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 w-24 text-center"
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 w-20 text-center"
               style={{ left: `${node.x}%`, top: `${node.y}%` }}
             >
               <span className={`w-9 h-9 rounded-full flex items-center justify-center border shrink-0 ${accentBg}`}>
