@@ -7,8 +7,11 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc, addDoc, orderBy, limit as fbLimit, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
 import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
-import { compressImage, stripDataUrlPrefix, getMimeTypeFromDataUrl } from '../../services/compressImage';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { useResolvedRole } from '../../hooks/useResolvedRole';
+import { useKtReviewQueue } from '../../hooks/useKtReviewQueue';
+import { useDirectorPortalState } from '../../hooks/useDirectorPortalState';
+import { useCurriculumEditorState } from '../../hooks/useCurriculumEditorState';
 import { 
   GraduationCap, 
   Sparkle, 
@@ -49,8 +52,6 @@ import { KtReviewQueue } from '../components/KtReviewQueue';
 import { NativeFtDashboard, FtStatCards } from '../components/NativeFtDashboard';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { FeedbackModal } from '../../components/FeedbackModal';
-import { asString, asJoinedString } from '../../utils/validate';
-import { parseApiError } from '../../utils/describeError';
 import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
 import { NativeDirectorStudentsTab } from '../components/NativeDirectorStudentsTab';
 import { StudentInvitePanel } from '../components/StudentInvitePanel';
@@ -61,14 +62,11 @@ import { ReportCardModal } from '../components/ReportCardModal';
 import { CurriculumEditorForm } from '../components/CurriculumEditorForm';
 import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { validateCurriculumOtherField } from '../utils/curriculumGuardrail';
 import {
   generateGeneralClassSummary,
   generateStudentExceptionReport,
   ClassLogPayload,
-  GeneratedReportOutput
 } from '../services/aiGenerator';
-import { consolidateStudentReports, formatConsolidatedDraft, ConsolidatedStudentDay } from '../services/consolidateStudentReports';
 
 interface Props {
   isNight?: boolean;
@@ -78,6 +76,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const { user, firebaseUser, signIn, signUp, logout, deleteAccount, isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const { language, setLanguage } = useLanguage();
+  const isKo = language === 'ko';
   const [isThemeNight, setIsThemeNight] = useState(isNight);
   const [confirmDialog, setConfirmDialog] = useState<{
     title: string;
@@ -109,11 +108,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
 
   const [showActivationWizard, setShowActivationWizard] = useState(false);
-  const [schoolSeatsTotal, setSchoolSeatsTotal] = useState<{ ft: number; kt: number }>({ ft: 0, kt: 0 });
-  // undefined = not fetched yet (avoids flashing the "complete payment"
-  // banner before we know); null = fetched and genuinely unset.
-  const [schoolPlanId, setSchoolPlanId] = useState<string | null | undefined>(undefined);
-  const [trialStatus, setTrialStatus] = useState<{ onTrial: boolean; daysRemaining: number; expired: boolean } | null>(null);
+  const { schoolSeatsTotal, schoolPlanId, trialStatus, handleRequestSeatExpansion } = useDirectorPortalState(user, showToast, isKo);
   const [showReportCardModal, setShowReportCardModal] = useState(false);
 
   // FT/KT first-login welcome modal state
@@ -133,7 +128,6 @@ export default function TeacherPage({ isNight = true }: Props) {
     if (typeof window === 'undefined') return '';
     return localStorage.getItem('chekki_invite_by') || '';
   });
-  const [welcomeClassName, setWelcomeClassName] = useState('');
 
   // Auth state - Defaults to 'signup' if coming from setup CTA or invite link
   const [authMode, setAuthMode] = useState<'login' | 'signup'>(() => {
@@ -153,125 +147,12 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [authError, setAuthError] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // FT Log & AI Script state
-  const [ftLogOutput, setFtLogOutput] = useState<GeneratedReportOutput | null>(null);
-  const [isSubmittingFtLog, setIsSubmittingFtLog] = useState(false);
+  // Log-submit in-flight flag — shared by FT and KT, both submit through the
+  // same handleLogSubmit handler (KT via the kt_log tab's NativeTeacherLogForm).
+  const [isSubmittingLog, setIsSubmittingLog] = useState(false);
 
-  // KT review queue — real, Firestore-backed logs pending review for the
-  // selected class, so a KT on a separate account/device actually sees
-  // what the FT submitted (previously relied on shared `ftLogOutput` state,
-  // which never reached a KT on another device — Audit: FT->KT handoff).
-  const [ktPendingLogs, setKtPendingLogs] = useState<any[]>([]);
-  // Explicit selection lets the KT jump to any queued log, not just the
-  // oldest one — falls back to the first pending log when nothing's been
-  // clicked yet (e.g. right after a class switch).
-  const [activeKtLogId, setActiveKtLogId] = useState<string | null>(null);
-  // Brief "copied ✓" confirmation on the queue chip before the log actually
-  // drops out of ktPendingLogs, so approving doesn't just make it vanish
-  // with no visible trail of what was just sent.
-  const [justCopiedLogId, setJustCopiedLogId] = useState<string | null>(null);
-  // Cleared on unmount and on class switch so a pending "remove from queue"
-  // timeout from a stale approve doesn't fire against a freshly-fetched log
-  // list for a different class (audit: Medium finding — missing timeout
-  // cleanup on class switch/unmount).
-  const ktApproveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Distinguishes "no logs submitted yet" from "failed to load logs" — without
-  // this a failed Firestore read looked identical to an empty queue, and
-  // NativeKtDashboard's placeholder sample content made that indistinguishable
-  // from real emptiness too (Audit: no loading/error state for KT queue).
-  const [ktLogsLoadError, setKtLogsLoadError] = useState(false);
-
-  const handleKtApprove = async (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]): Promise<boolean> => {
-    if (!activeKtGroup || activeKtGroup.entries.length === 0 || !user?.uid) return false;
-    const activeGroupKey = groupKey(activeKtGroup);
-    try {
-      // A consolidated student-day draft can be assembled from multiple
-      // source logs across different classes — approving it has to mark
-      // every one of them "sent", not just one, or the others would still
-      // show up as pending next time the queue loads.
-      await Promise.all(
-        activeKtGroup.entries.map((e) => {
-          const logRef = doc(dbInstance, 'classes', e.classId, 'logs', e.logId);
-          return updateDoc(logRef, {
-            approvedSummary,
-            approvedExceptions,
-            reviewStatus: 'sent',
-            reviewedByUid: user.uid,
-            reviewedByName: (user as any)?.name || user?.email || 'Unknown teacher',
-            sentAt: serverTimestamp(),
-          });
-        })
-      );
-      // Show the checkmark on the queue chip first, then remove it — an
-      // instant vanish left no visible confirmation of what had just been
-      // sent (same short-lived-success pattern NativeKtDashboard already
-      // uses for its own "Copied!" button state).
-      const sentLogIds = new Set(activeKtGroup.sourceLogIds);
-      setJustCopiedLogId(activeGroupKey);
-      if (ktApproveTimeoutRef.current) clearTimeout(ktApproveTimeoutRef.current);
-      ktApproveTimeoutRef.current = setTimeout(() => {
-        setKtPendingLogs((prev) => prev.filter((l) => !sentLogIds.has(l.id)));
-        setJustCopiedLogId((cur) => (cur === activeGroupKey ? null : cur));
-        ktApproveTimeoutRef.current = null;
-      }, 1400);
-      return true;
-    } catch (err) {
-      console.error('Failed to save KT-reviewed report:', err);
-      // The UI (copy/share buttons) previously reported success regardless of
-      // this write's outcome, so a failed approve silently never reached
-      // parents with no indication to the KT that it didn't go through
-      // (Audit: silent FT->KT persist failure). NativeKtDashboard now awaits
-      // this return value before showing its own "sent" state.
-      showToast({
-        type: 'error',
-        message: isKo
-          ? '⚠️ 학부모 전송 승인이 저장되지 않았습니다. 다시 시도해주세요.'
-          : "⚠️ The approval wasn't saved — parents won't see this yet. Please try again.",
-      });
-      return false;
-    }
-  };
-
-  // Files a real school_invoices record + sends the director the actual bank
-  // transfer email, same pipeline new-academy signups use. Previously this
-  // button only wrote to sessionStorage and told the director an invoice had
-  // been sent when nothing left the browser (Audit: fake seat-expansion
-  // confirmation). A human still applies the seat increase via AdminPage's
-  // upgrade_school action once payment clears — this just makes sure that
-  // request actually exists somewhere real for them to act on.
-  const handleRequestSeatExpansion = async (extraSeats: number): Promise<boolean> => {
-    const schoolId = (user as any)?.schoolId;
-    if (!schoolId) return false;
-    try {
-      const response = await fetch('/api/request-school-invoice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          schoolId,
-          academyName: user?.schoolName || schoolId,
-          contactName: user?.name || user?.schoolName || 'Director',
-          email: user?.email || '',
-          teacherCount: extraSeats,
-          planName: `+${extraSeats} Seat Expansion`,
-          billingCycle: 'monthly',
-        }),
-      });
-      if (!response.ok) throw new Error(`Request failed with ${response.status}`);
-      return true;
-    } catch (err) {
-      console.error('Failed to submit seat expansion request:', err);
-      showToast({
-        type: 'error',
-        message: isKo
-          ? '⚠️ 석 추가 요청을 보내지 못했습니다. 다시 시도해주세요.'
-          : "⚠️ The seat request didn't go through. Please try again.",
-      });
-      return false;
-    }
-  };
-
-  const handleFtLogSubmit = async (payload: ClassLogPayload) => {
-    setIsSubmittingFtLog(true);
+  const handleLogSubmit = async (payload: ClassLogPayload) => {
+    setIsSubmittingLog(true);
     try {
       const summary = await generateGeneralClassSummary({ ...payload, authorRole: educatorRole });
       const studentReports = await Promise.all(
@@ -296,11 +177,6 @@ export default function TeacherPage({ isNight = true }: Props) {
           };
         })
       );
-      const output: GeneratedReportOutput = {
-        bilingualClassSummary: summary,
-        studentReports,
-      };
-      setFtLogOutput(output);
       // Stay on the FT's own dashboard after submit — the kt_script tab
       // is the KT's review workspace, not an FT-facing "success" screen.
       // FT gets a toast confirmation below instead of being bounced there.
@@ -381,7 +257,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           : "Couldn't generate the report from your log. Please try submitting again.",
       });
     } finally {
-      setIsSubmittingFtLog(false);
+      setIsSubmittingLog(false);
     }
   };
 
@@ -436,7 +312,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     window.location.pathname.includes('director') || 
     new URLSearchParams(window.location.search).get('role') === 'director'
   );
-  const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath || (user as any)?.role === 'director' ? 'director' : 'teacher');
+  const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath || user?.role === 'director' ? 'director' : 'teacher');
 
   // Direct teacher self-signup is disabled (see the Auth Mode Toggle render
   // guard further down) — teacher accounts only exist via a director's
@@ -452,12 +328,12 @@ export default function TeacherPage({ isNight = true }: Props) {
   // Email-substring matching ('kt' in email) is intentionally removed — it was
   // silently misclassifying FT teachers whose email happened to contain 'kt'
   // (e.g. kate@, dakota@, nikto@) and hiding their homework tab. (Audit §7)
-  const firestoreEducatorRole = (user as any)?.educatorRole as 'ft' | 'kt' | undefined;
+  const firestoreEducatorRole = user?.educatorRole as 'ft' | 'kt' | undefined;
   const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>(
     firestoreEducatorRole === 'kt' ? 'kt' : 'ft'
   );
   type TabId = 'overview' | 'insights' | 'syllabus' | 'homework' | 'students' | 'history' | 'curriculum' | 'director_hq' | 'kt_script' | 'kt_log';
-  const isDirectorUser = isDirectorPath || (user as any)?.role === 'director';
+  const isDirectorUser = isDirectorPath || user?.role === 'director';
   // Director/KT/FT used to share one activeTab state — since they're all
   // rendered from the same TeacherPage switchboard with role-gated JSX
   // rather than separate pages, a shared tab id (e.g. both KT and FT using
@@ -469,8 +345,11 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [ftActiveTab, setFtActiveTab] = useState<TabId>('overview');
   const activeTab: TabId = isDirectorUser ? directorActiveTab : (educatorRole === 'kt' ? ktActiveTab : ftActiveTab);
   const setActiveTab = (tab: TabId) => {
+    if (educatorRole === 'kt' && ktActiveTab === 'kt_script' && tab !== 'kt_script' && !confirmDiscardKtDraft()) {
+      return;
+    }
     if (isDirectorUser) setDirectorActiveTab(tab);
-    else if (educatorRole === 'kt') setKtActiveTab(tab);
+    else if (educatorRole === 'kt') { setKtActiveTab(tab); setKtDraftDirty(false); }
     else setFtActiveTab(tab);
   };
   const [uploadMode, setUploadMode] = useState<'syllabus' | 'worksheet'>('syllabus');
@@ -503,31 +382,21 @@ export default function TeacherPage({ isNight = true }: Props) {
     })();
   }, [user?.uid]);
 
+  // Deliberately NOT falling back to isDirectorPath inside useResolvedRole:
+  // isDirectorPath just checks whether the URL contains "director" (e.g.
+  // /director-hq), which any authenticated teacher can end up on. Falling
+  // back to it once a real user is signed in let the URL override their
+  // actual Firestore role, showing a real KT/FT account the full Director HQ
+  // shell. A brand-new director already resolves correctly via loginRole
+  // (set at signup) or localStorage (written at signup), so that fallback
+  // was only ever needed pre-auth (see the activeTab/loginRole useState
+  // defaults, which legitimately use isDirectorPath as a loading-state guess).
+  const { isDirector: resolvedIsDirector, isKt: resolvedIsKt } = useResolvedRole(user, loginRole);
+
   useEffect(() => {
     if (user) {
-      // Same fallback chain as the post-auth routing effect below (Firestore
-      // role → localStorage role written at signup → loginRole selection) —
-      // these two effects previously disagreed because this one only checked
-      // the Firestore field, so a director whose Firestore role write failed
-      // (audit §20b) would render the regular teacher dashboard here even
-      // though the other effect correctly fell back to localStorage (§20c).
-      const uid = user.uid || '';
-      const firestoreRole = (user as any).role;
-      const localRole = uid ? localStorage.getItem(`chekki_user_role_${uid}`) : null;
-      const resolvedRole = firestoreRole || localRole || loginRole;
-      // Deliberately NOT `|| isDirectorPath` here: isDirectorPath just checks
-      // whether the URL contains "director" (e.g. /director-hq), which any
-      // authenticated teacher can end up on. Falling back to it once a real
-      // user is signed in let the URL override their actual Firestore role,
-      // showing a real KT/FT account the full Director HQ shell. A brand-new
-      // director already resolves correctly via loginRole (set at signup) or
-      // localRole (written at signup) above, so this fallback was only ever
-      // needed pre-auth (see the activeTab/loginRole useState defaults, which
-      // legitimately use isDirectorPath as a loading-state guess).
-      const isDirector = resolvedRole === 'director';
-      // Educator role: always read from Firestore field first.
-      // Do NOT use email.includes('kt') — see comment on educatorRole state above.
-      const isKtRole = (user as any).educatorRole === 'kt';
+      const isDirector = resolvedIsDirector;
+      const isKtRole = resolvedIsKt;
 
       if (isDirector) {
         setLoginRole('director');
@@ -544,49 +413,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         }
       }
     }
-  }, [user?.uid, (user as any)?.educatorRole, (user as any)?.role]);
-
-  // Load the school's seat pool for the director invite panel (wizard + dashboard).
-  useEffect(() => {
-    const schoolId = (user as any)?.schoolId;
-    if (!schoolId || (user as any)?.role !== 'director') return;
-    (async () => {
-      try {
-        const snap = await getDoc(doc(dbInstance, 'schools', schoolId));
-        const seats = snap.data()?.seatsTotal;
-        if (seats) setSchoolSeatsTotal({ ft: seats.ft || 0, kt: seats.kt || 0 });
-        setSchoolPlanId(snap.data()?.planId || null);
-      } catch (err) {
-        console.warn('Failed to load school seat totals:', err);
-      }
-    })();
-  }, [(user as any)?.schoolId, (user as any)?.role]);
-
-  // Trial countdown banner + one-time day-5/6 Resend reminder (server-side
-  // idempotency via trialReminderSentAt — see api/update-school-profile.ts).
-  useEffect(() => {
-    if ((user as any)?.role !== 'director') return;
-    (async () => {
-      try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const response = await fetch('/api/update-school-profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-          body: JSON.stringify({ checkTrialStatus: true }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setTrialStatus({
-            onTrial: !!data.onTrial,
-            daysRemaining: data.daysRemaining ?? 0,
-            expired: !!data.expired,
-          });
-        }
-      } catch (err) {
-        console.warn('Failed to check trial status:', err);
-      }
-    })();
-  }, [(user as any)?.schoolId, (user as any)?.role]);
+  }, [user?.uid, user?.educatorRole, user?.role]);
 
   // Handle Teacher Invite Link URL Params (FT vs KT Role Routing)
   useEffect(() => {
@@ -611,380 +438,32 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   }, [activeTab]);
 
-  // Curriculum state
-  const [selectedTextbookName, setSelectedTextbookName] = useState<string>('');
-  const [curriculumTopic, setCurriculumTopic] = useState('');
-  const [curriculumVocab, setCurriculumVocab] = useState('');
-  const [curriculumPhonics, setCurriculumPhonics] = useState('');
-  const [curriculumPassage, setCurriculumPassage] = useState('');
-  const [curriculumOther, setCurriculumOther] = useState('');
-  // The literal answer key extracted from a worksheet scan (question/answer
-  // pairs), scoped to this same week's curriculum doc — separate from
-  // vocab/phonics/passage above because it's only ever produced by a
-  // worksheet scan (never a syllabus scan) and was previously generated by
-  // the AI and silently discarded (never saved, never used at grading time).
-  const [curriculumAnswerKey, setCurriculumAnswerKey] = useState<Array<{ questionText: string; answer: string }>>([]);
-  const [curriculumLastEditedByName, setCurriculumLastEditedByName] = useState('');
-  const [curriculumLastEditedAt, setCurriculumLastEditedAt] = useState('');
-  const [curriculumSlideIndex, setCurriculumSlideIndex] = useState(0);
-  const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
-  const [isSavingCurriculum, setIsSavingCurriculum] = useState(false);
-  const [isGeneratingWorksheet, setIsGeneratingWorksheet] = useState(false);
-  const [isDraggingFile, setIsDraggingFile] = useState(false);
-  const [isScanningTextbook, setIsScanningTextbook] = useState(false);
-  const [textbookPreviewUrl, setTextbookPreviewUrl] = useState<string | null>(null);
-
-  // Scanned AI Worksheet Modal & Selection state
-  const [showScannedModal, setShowScannedModal] = useState(false);
-  const [scannedData, setScannedData] = useState<any>(null);
-  const [uploadedFileType, setUploadedFileType] = useState<'image' | 'pdf'>('image');
-  const [uploadedFileName, setUploadedFileName] = useState<string>('');
-  const [textbookPreviewUrls, setTextbookPreviewUrls] = useState<string[]>([]);
-  const [selectedPageIndex, setSelectedPageIndex] = useState<number | 'all'>('all');
-
-  // Staged pages picked but not yet scanned — lets teachers add/remove
-  // individual page photos before committing to a scan, instead of the
-  // previous all-or-nothing behavior where every file select immediately
-  // replaced the whole batch and re-scanned (Audit: no way to add or
-  // delete images after uploading).
-  const [pendingScanFiles, setPendingScanFiles] = useState<{ file: File; previewUrl: string }[]>([]);
-
-  const handleStageFiles = (inputFiles: FileList | File[], scanType: 'syllabus' | 'worksheet') => {
-    setUploadMode(scanType);
-    const files = inputFiles instanceof FileList ? Array.from(inputFiles) : inputFiles;
-    setPendingScanFiles((prev) => {
-      const combined = [...prev, ...files.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }))];
-      return combined.slice(0, 5);
-    });
-  };
-
-  const handleRemoveStagedFile = (index: number) => {
-    setPendingScanFiles((prev) => {
-      const target = prev[index];
-      if (target) URL.revokeObjectURL(target.previewUrl);
-      return prev.filter((_, i) => i !== index);
-    });
-  };
-
-  const clearStagedFiles = () => {
-    setPendingScanFiles((prev) => {
-      prev.forEach((p) => URL.revokeObjectURL(p.previewUrl));
-      return [];
-    });
-  };
-
-  const handleScanStagedFiles = (scanType: 'syllabus' | 'worksheet') => {
-    if (pendingScanFiles.length === 0) return;
-    void handleTextbookFileUpload(pendingScanFiles.map((p) => p.file), scanType);
-  };
-
-  // Separate Syllabus Upload State
-  const [syllabusFileName, setSyllabusFileName] = useState<string>('');
-  const [syllabusPreviewUrl, setSyllabusPreviewUrl] = useState<string | null>(null);
-  const [syllabusScannedData, setSyllabusScannedData] = useState<any>(null);
-  const [syllabusWeeks, setSyllabusWeeks] = useState<number>(4);
-  const [isScanningSyllabus, setIsScanningSyllabus] = useState(false);
-  const [syllabusWeeklySchedule, setSyllabusWeeklySchedule] = useState<Array<{ week: number; topic: string; vocab: string; phonics: string }>>([]);
-
-  // Separate Worksheet Upload State
-  const [worksheetFileName, setWorksheetFileName] = useState<string>('');
-  const [worksheetPreviewUrl, setWorksheetPreviewUrl] = useState<string | null>(null);
-  const [worksheetScannedData, setWorksheetScannedData] = useState<any>(null);
-  const [isScanningWorksheet, setIsScanningWorksheet] = useState(false);
-  const [activeScannedModalType, setActiveScannedModalType] = useState<'syllabus' | 'worksheet'>('syllabus');
-
-  const handleSyllabusWeeksChange = (weeks: number) => {
-    const safeWeeks = Math.max(1, Math.min(24, weeks));
-    setSyllabusWeeks(safeWeeks);
-    setSyllabusWeeklySchedule(prev => {
-      const next = [...prev];
-      if (next.length < safeWeeks) {
-        for (let i = next.length + 1; i <= safeWeeks; i++) {
-          next.push({
-            week: i,
-            topic: `Unit ${i}: Topic Title`,
-            vocab: `target_word_1, target_word_2, target_word_3`,
-            phonics: `phonics_rule_${i}`
-          });
-        }
-      } else {
-        return next.slice(0, safeWeeks);
-      }
-      return next;
-    });
-  };
-
-  // Pick & Choose Selection State inside Scanned AI Modal
-  const [selectedScannedTopic, setSelectedScannedTopic] = useState(true);
-  const [selectedScannedPassage, setSelectedScannedPassage] = useState(true);
-  const [selectedScannedOther, setSelectedScannedOther] = useState(true);
-  const [selectedScannedVocab, setSelectedScannedVocab] = useState<string[]>([]);
-  const [selectedScannedPhonics, setSelectedScannedPhonics] = useState<string[]>([]);
-  const [activeScannedTab, setActiveScannedTab] = useState<'parentView' | 'picker'>('picker');
-  const [scanStatusMessage, setScanStatusMessage] = useState<string | null>(null);
-  const [showDocPreviewModal, setShowDocPreviewModal] = useState(false);
-  const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
-
-  // New Chip Input state
-  const [newVocabInput, setNewVocabInput] = useState('');
-  const [newPhonicsInput, setNewPhonicsInput] = useState('');
-
-  // Vocab Chip helpers
-  const handleAddVocabWord = (wordToAdd?: string) => {
-    const word = (wordToAdd !== undefined ? wordToAdd : newVocabInput).trim();
-    if (!word) return;
-    const currentList = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-    if (!currentList.map(w => w.toLowerCase()).includes(word.toLowerCase())) {
-      const updated = [...currentList, word];
-      setCurriculumVocab(updated.join(', '));
-    }
-    if (wordToAdd === undefined) setNewVocabInput('');
-  };
-
-  const handleRemoveVocabWord = (indexToRemove: number) => {
-    const currentList = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-    const updated = currentList.filter((_, idx) => idx !== indexToRemove);
-    setCurriculumVocab(updated.join(', '));
-  };
-
-  // Phonics Chip helpers
-  const handleAddPhonicsRule = (ruleToAdd?: string) => {
-    const rule = (ruleToAdd !== undefined ? ruleToAdd : newPhonicsInput).trim();
-    if (!rule) return;
-    const currentList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-    if (!currentList.map(r => r.toLowerCase()).includes(rule.toLowerCase())) {
-      const updated = [...currentList, rule];
-      setCurriculumPhonics(updated.join(', '));
-    }
-    if (ruleToAdd === undefined) setNewPhonicsInput('');
-  };
-
-  const handleRemovePhonicsRule = (indexToRemove: number) => {
-    const currentList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-    const updated = currentList.filter((_, idx) => idx !== indexToRemove);
-    setCurriculumPhonics(updated.join(', '));
-  };
-
-  const handleRemoveAnswerKeyEntry = (indexToRemove: number) => {
-    setCurriculumAnswerKey((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-  };
-
-  const handleEditAnswerKeyEntry = (index: number, field: 'questionText' | 'answer', value: string) => {
-    setCurriculumAnswerKey((prev) => prev.map((entry, idx) => idx === index ? { ...entry, [field]: value } : entry));
-  };
-
-  const handleTextbookFileUpload = async (inputFiles: FileList | File[] | File, scanType: 'syllabus' | 'worksheet' = uploadMode) => {
-    const fileList: File[] = inputFiles instanceof FileList 
-      ? Array.from(inputFiles) 
-      : Array.isArray(inputFiles) 
-        ? inputFiles 
-        : [inputFiles];
-
-    if (!fileList || fileList.length === 0) return;
-
-    // Cap at 5 files max per scan batch
-    const selectedFiles = fileList.slice(0, 5);
-
-    // The backend (api/analyze.ts) hard-caps the request body at 10MB, and
-    // base64 encoding inflates raw file bytes by ~33% on top of that. This
-    // must block (not just warn) and check the COMBINED batch size, not each
-    // file individually — a previous 15MB-per-file, warning-only check let
-    // real PDFs (and multi-file batches) sail past it and fail server-side
-    // with a generic "couldn't read this file" message that gave no reason.
-    const totalBytes = selectedFiles.reduce((sum, f) => sum + f.size, 0);
-    const SAFE_RAW_BYTES_LIMIT = 6 * 1024 * 1024; // leaves room for base64 (+33%) + JSON envelope under the 10MB server cap
-    if (totalBytes > SAFE_RAW_BYTES_LIMIT) {
-      showToast({ type: 'error', message: isKo
-        ? `⚠️ 파일 용량이 너무 큽니다 (${(totalBytes / (1024 * 1024)).toFixed(1)}MB, 최대 6MB). 단원별로 나누거나 페이지 수를 줄여 다시 시도해 주세요.`
-        : `⚠️ File too large (${(totalBytes / (1024 * 1024)).toFixed(1)}MB combined, 6MB max). Split into smaller sections or fewer pages and try again.`
-      });
-      return;
-    }
-
-    if (scanType === 'syllabus') {
-      setIsScanningSyllabus(true);
-    } else {
-      setIsScanningWorksheet(true);
-    }
-
-    setIsScanningTextbook(true);
-    setScanStatusMessage(null);
-    setSelectedPageIndex('all');
-
-    const firstFile = selectedFiles[0];
-    const isPdf = firstFile.type === 'application/pdf' || firstFile.name.toLowerCase().endsWith('.pdf');
-    const fileName = selectedFiles.length === 1 
-      ? firstFile.name 
-      : (isKo ? `${firstFile.name} 외 ${selectedFiles.length - 1}개 파일` : `${firstFile.name} + ${selectedFiles.length - 1} more`);
-
-    if (scanType === 'syllabus') {
-      setSyllabusFileName(fileName);
-    } else {
-      setWorksheetFileName(fileName);
-    }
-
-    setUploadedFileType(isPdf ? 'pdf' : 'image');
-    setUploadedFileName(fileName);
-
-    try {
-      const cleanBase64List: string[] = [];
-      const previewList: string[] = [];
-
-      for (const file of selectedFiles) {
-        const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve, reject) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = (err) => reject(err);
-        });
-        reader.readAsDataURL(file);
-        const rawBase64Url = await base64Promise;
-
-        if (!isPdf) {
-          const compressed = await compressImage(rawBase64Url);
-          previewList.push(compressed);
-          cleanBase64List.push(stripDataUrlPrefix(compressed));
-        } else {
-          cleanBase64List.push(stripDataUrlPrefix(rawBase64Url));
-        }
-      }
-
-      setTextbookPreviewUrls(previewList);
-      const mainPreview = previewList.length > 0 ? previewList[0] : null;
-      setTextbookPreviewUrl(mainPreview);
-
-      if (scanType === 'syllabus') {
-        setSyllabusPreviewUrl(mainPreview);
-      } else {
-        setWorksheetPreviewUrl(mainPreview);
-      }
-
-      // Call AI analysis with images_base64 list
-      const idToken = await auth.currentUser?.getIdToken();
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({
-          images_base64: cleanBase64List,
-          mode: scanType === 'syllabus' ? 'syllabus_course_plan' : 'textbook_curriculum_ocr',
-          mimeType: isPdf ? 'application/pdf' : getMimeTypeFromDataUrl(mainPreview || '')
-        }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw parseApiError(res, data);
-
-      if (data.analysis) {
-        const analysisData = {
-          ...data.analysis,
-          scanType
-        };
-        setScannedData(analysisData);
-
-        if (scanType === 'syllabus') {
-          setSyllabusScannedData(analysisData);
-        } else {
-          setWorksheetScannedData(analysisData);
-        }
-
-        const words = Array.isArray(data.analysis.vocabWords)
-          ? data.analysis.vocabWords
-          : (data.analysis.vocabWords || '').split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean);
-        setSelectedScannedVocab(words);
-
-        const sounds = Array.isArray(data.analysis.phonicsRules)
-          ? data.analysis.phonicsRules
-          : (data.analysis.phonicsRules || '').split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean);
-        setSelectedScannedPhonics(sounds);
-
-        setSelectedScannedTopic(Boolean(data.analysis.topic));
-        setSelectedScannedPassage(Boolean(data.analysis.passage));
-        setSelectedScannedOther(Boolean(data.analysis.other));
-
-        // Auto-fill into curriculum state
-        if (data.analysis.topic) setCurriculumTopic(data.analysis.topic);
-        if (words.length > 0) setCurriculumVocab(words.join(', '));
-        if (sounds.length > 0) setCurriculumPhonics(sounds.join(', '));
-        if (data.analysis.passage) setCurriculumPassage(data.analysis.passage);
-
-        setActiveScannedModalType(scanType);
-        setActiveScannedTab(scanType === 'syllabus' ? 'picker' : 'parentView');
-        setShowScannedModal(true);
-        setScanStatusMessage(
-          isKo 
-            ? (scanType === 'syllabus' ? `📘 교재 목차 분석 완료! 주간 커리큘럼 단어 & 파닉스 범위가 추출되었습니다.` : `📄 일간 워크시트 스캔 완료! 학부모용 정답지 가이드가 추출되었습니다.`)
-            : (scanType === 'syllabus' ? `📘 Course Syllabus scanned! Scope & Vocabulary extracted.` : `📄 Daily Worksheet scanned! Parent answer keys extracted.`)
-        );
-        clearStagedFiles();
-      }
-    } catch (err) {
-      console.error('Curriculum scan failed:', err);
-      // Clear the optimistic file-name/preview state set before the scan started —
-      // otherwise a failed file stays listed as if it were successfully stored,
-      // with only a transient toast (which disappears) explaining why.
-      setUploadedFileName('');
-      setTextbookPreviewUrl(null);
-      setTextbookPreviewUrls([]);
-      if (scanType === 'syllabus') {
-        setSyllabusFileName('');
-        setSyllabusPreviewUrl(null);
-      } else {
-        setWorksheetFileName('');
-        setWorksheetPreviewUrl(null);
-      }
-      const detail = err instanceof Error && err.message && err.message !== 'Failed to fetch' ? ` (${err.message})` : '';
-      showToast({
-        type: 'error',
-        message: isKo
-          ? `스캔에 실패했습니다. 이미지를 확인하고 다시 시도해 주세요.${detail}`
-          : `Scan failed — couldn't read this file. Please check the image and try again.${detail}`,
-      });
-    } finally {
-      setIsScanningTextbook(false);
-      setIsScanningSyllabus(false);
-      setIsScanningWorksheet(false);
-    }
-  };
-
-  const applyScannedSelectionToCurriculum = () => {
-    if (!scannedData) return;
-    if (selectedScannedTopic && scannedData.topic) {
-      setCurriculumTopic(asString(scannedData.topic, String(scannedData.topic)));
-    }
-    // Merge into whatever's already there rather than replace — a syllabus
-    // scan (term-level word list) and a worksheet scan (this week's words)
-    // used to silently overwrite each other since both wrote the same plain
-    // text field; applying either one now only adds words, never drops the
-    // other source's.
-    if (selectedScannedVocab.length > 0) {
-      const existing = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-      setCurriculumVocab(Array.from(new Set([...existing, ...selectedScannedVocab])).join(', '));
-    }
-    if (selectedScannedPhonics.length > 0) {
-      const existing = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-      setCurriculumPhonics(Array.from(new Set([...existing, ...selectedScannedPhonics])).join(', '));
-    }
-    if (selectedScannedPassage && scannedData.passage) {
-      setCurriculumPassage(asString(scannedData.passage, String(scannedData.passage)));
-    }
-    if (selectedScannedOther && scannedData.other) {
-      setCurriculumOther(asString(scannedData.other, String(scannedData.other)));
-    }
-    // Worksheet scans (not syllabus scans) produce a real answer key —
-    // previously extracted by the AI and then thrown away entirely (never
-    // saved, never used at grading time). Merge by question text so
-    // re-scanning the same worksheet doesn't create duplicate entries.
-    if (Array.isArray(scannedData.detectedAnswers) && scannedData.detectedAnswers.length > 0) {
-      const newEntries = scannedData.detectedAnswers
-        .filter((a: any) => a?.questionText && a?.answer)
-        .map((a: any) => ({ questionText: String(a.questionText), answer: String(a.answer) }));
-      setCurriculumAnswerKey((prev) => {
-        const existingTexts = new Set(prev.map((e: { questionText: string }) => e.questionText));
-        return [...prev, ...newEntries.filter((e: { questionText: string }) => !existingTexts.has(e.questionText))];
-      });
-    }
-    setShowScannedModal(false);
-    setScanStatusMessage(isKo ? '선택한 학급 커리큘럼 항목이 성공적으로 적용되었습니다!' : 'Selected items successfully applied to your weekly curriculum!');
-  };
+  // Curriculum/scan editor state — extracted into a hook (Phase 1 of the
+  // TeacherPage split, see buzzing-nibbling-hearth plan).
+  const curriculumEditor = useCurriculumEditorState(
+    selectedClass,
+    fallbackDemoClass,
+    user,
+    showToast,
+    isKo,
+    uploadMode,
+    setUploadMode,
+    setSyncWarning,
+  );
+  const {
+    selectedTextbookName,
+    curriculumTopic, curriculumVocab, curriculumPhonics, curriculumPassage, curriculumOther,
+    curriculumAnswerKey, curriculumSlideIndex, setCurriculumSlideIndex,
+    scannedData, showScannedModal, setShowScannedModal, setScannedData,
+    activeScannedModalType,
+    selectedScannedTopic, setSelectedScannedTopic, selectedScannedVocab, setSelectedScannedVocab,
+    selectedPageIndex, setSelectedPageIndex,
+    textbookPreviewUrl, docPreviewUrl, syllabusPreviewUrl, worksheetPreviewUrl,
+    uploadedFileName,
+    showDocPreviewModal, setShowDocPreviewModal,
+    handleTextbookFileUpload, applyScannedSelectionToCurriculum,
+    loadCurriculum, handleSaveCurriculum, handleGenerateWorksheet,
+  } = curriculumEditor;
 
   // Student roster & analytics state
   const [studentsData, setStudentsData] = useState<any[]>([]);
@@ -998,34 +477,20 @@ export default function TeacherPage({ isNight = true }: Props) {
     () => Object.fromEntries((studentsData || []).filter((s: any) => s?.uid && s?.name).map((s: any) => [s.uid, s.name])),
     [studentsData]
   );
-  // Consolidated per-student-per-day view of the cross-class pending queue
-  // — a student in two classes with two different FTs used to produce two
-  // entirely separate review items; this groups everything touching them
-  // that day (keyed on studentUid, see consolidateStudentReports) into one
-  // review unit instead of leaving the KT to notice and merge by hand.
-  const ktConsolidatedGroups = useMemo(
-    () => consolidateStudentReports(ktPendingLogs, user?.schoolName || 'Chekki Master Academy', studentNamesByUid),
-    [ktPendingLogs, user, studentNamesByUid]
-  );
-  const groupKey = (g: ConsolidatedStudentDay) => g.studentUid || `custom:${g.studentName.trim().toLowerCase()}:${g.date}`;
-  const activeKtGroup = ktConsolidatedGroups.find((g) => groupKey(g) === activeKtLogId) || ktConsolidatedGroups[0] || null;
-  // KtReviewQueue is memoized, but a fresh .map() literal built inline in JSX
-  // on every render would defeat that regardless — this is the one place the
-  // derived shape actually needs to be recomputed (audit action #6).
-  const ktQueueLogs = useMemo(
-    () =>
-      ktConsolidatedGroups.map((g) => ({
-        id: groupKey(g),
-        studentName: g.studentName,
-        // A student can appear in more than one class the same day (see
-        // consolidateStudentReports) — join every distinct source class name
-        // so the queue's class filter can match on any of them.
-        className: [...new Set(g.entries.map((e) => e.className).filter(Boolean))].join(', '),
-        date: g.date,
-        flaggedCount: g.entries.filter((e) => !!e.exceptionParagraph).length,
-      })),
-    [ktConsolidatedGroups]
-  );
+  const {
+    ktPendingLogs, setKtPendingLogs,
+    activeKtLogId, setActiveKtLogId,
+    ktDraftDirty, setKtDraftDirty,
+    justCopiedLogId,
+    ktLogsLoadError, setKtLogsLoadError,
+    confirmDiscardKtDraft,
+    ktConsolidatedGroups,
+    activeKtGroup,
+    ktQueueLogs,
+    groupKey,
+    handleKtApprove,
+    formatConsolidatedDraft,
+  } = useKtReviewQueue(educatorRole, classes, selectedClass, user, showToast, isKo, studentNamesByUid);
   const [isLoadingRoster, setIsLoadingRoster] = useState(false);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState<any | null>(null);
   const [flagReasonInput, setFlagReasonInput] = useState('');
@@ -1049,7 +514,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   // (even to '') so switching accounts/schools in the same browser can't
   // leave a previous school's logo on screen.
   useEffect(() => {
-    const schoolId = (user as any)?.schoolId;
+    const schoolId = user?.schoolId;
     if (!schoolId) {
       setAcademyLogo('');
       return;
@@ -1064,7 +529,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         setAcademyLogo('');
       }
     })();
-  }, [(user as any)?.schoolId]);
+  }, [user?.schoolId]);
 
   // Worksheet Format & Question Style State
   const [worksheetType, setWorksheetType] = useState<string>('daily_homework');
@@ -1075,8 +540,6 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [resetPwStatus, setResetPwStatus] = useState<{ text: string; isError?: boolean } | null>(null);
   const [isSendingReset, setIsSendingReset] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-
-  const isKo = language === 'ko';
 
   const handleSendResetPassword = async () => {
     if (!user?.email) return;
@@ -1145,48 +608,6 @@ export default function TeacherPage({ isNight = true }: Props) {
     })();
   }, [selectedClass?.id, educatorRole]);
 
-  // KT review queue, cross-class: every pending log from every class this
-  // KT has access to (`classes`, already loaded via fetchClasses's
-  // owned+assigned query), not just whichever class is currently selected —
-  // required so a student in two classes with two different FTs shows up
-  // for consolidation under one student-day card instead of two invisible
-  // halves.
-  useEffect(() => {
-    if (educatorRole !== 'kt') return;
-    const realClasses = classes.filter((c: any) => c?.id && !c.isDemo);
-    if (realClasses.length === 0) {
-      setKtPendingLogs([]);
-      setActiveKtLogId(null);
-      return;
-    }
-    setKtLogsLoadError(false);
-    (async () => {
-      try {
-        const perClassLogs = await Promise.all(
-          realClasses.map(async (c: any) => {
-            const logsRef = collection(dbInstance, 'classes', c.id, 'logs');
-            const logsQuery = query(logsRef, where('reviewStatus', '==', 'pending_review'), orderBy('createdAt', 'desc'), fbLimit(50));
-            const snap = await getDocs(logsQuery);
-            return snap.docs.map((d) => ({ id: d.id, classId: c.id, className: c.name, ...d.data() } as any));
-          })
-        );
-        setKtPendingLogs(perClassLogs.flat().reverse()); // oldest pending first
-      } catch (err) {
-        console.error('Failed to load cross-class KT review queue:', err);
-        setKtLogsLoadError(true);
-      }
-    })();
-  }, [educatorRole, classes.map((c: any) => c?.id).join('|')]);
-
-  // Cancel any pending KT-approve "remove from queue" timeout when switching
-  // classes or unmounting, so it can't fire against a different class's
-  // freshly-loaded log list.
-  useEffect(() => {
-    return () => {
-      if (ktApproveTimeoutRef.current) clearTimeout(ktApproveTimeoutRef.current);
-    };
-  }, [selectedClass?.id]);
-
   // Show teacher onboarding once when first authenticated with no classes.
   // Directors get their own dedicated activation wizard (see the effect below) —
   // showing this generic tour to them too produced two stacked onboarding
@@ -1203,7 +624,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   // them create their own disconnected class).
   useEffect(() => {
     const uid = user?.uid || 'guest';
-    const isInvitedWaitingOnAssignment = !!(user as any)?.schoolId;
+    const isInvitedWaitingOnAssignment = !!user?.schoolId;
     if (!isLoadingClasses && isAuthenticated && user?.role === 'teacher' && !isInvitedWaitingOnAssignment) {
       if (classes.length === 0) {
         const obDone =
@@ -1223,15 +644,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   useEffect(() => {
     if (!isAuthenticated || !user) return;
     const uid = user.uid || '';
-
-    // Role resolution: Firestore role → localStorage fallback (written at signup) → loginRole selection
-    const firestoreRole = (user as any).role;
-    const localRole = uid ? localStorage.getItem(`chekki_user_role_${uid}`) : null;
-    const resolvedRole = firestoreRole || localRole || loginRole;
-
-    // See the matching comment on the other role-resolution effect above —
-    // not falling back to isDirectorPath here for the same reason.
-    const isDirector = resolvedRole === 'director';
+    const isDirector = resolvedIsDirector;
 
     if (isDirector && isActivateParam) {
       // Director with ?activate=true — show wizard only if first time.
@@ -1305,10 +718,10 @@ export default function TeacherPage({ isNight = true }: Props) {
   const teacherObSteps = [
     {
       img: '/assets/teacher_ob_create_class.png',
-      titleEn: 'Create Class & Share Code',
-      titleKo: '학급 개설 & 6자리 학부모 코드 전달',
-      descEn: 'Set up your class in 5 seconds and share the 6-digit join code with parents for instant home homework sync.',
-      descKo: '5초 만에 학급을 개설하고 6자리 코드를 학부모님께 전달하세요. 가정에서 스캔한 오답과 점수가 실시간 연동됩니다.',
+      titleEn: 'Your Class & Parent Join Code',
+      titleKo: '담당 학급 & 6자리 학부모 코드',
+      descEn: "Your director sets up your class and assigns you to it — share the 6-digit join code they give you with parents for instant home homework sync.",
+      descKo: '원장님이 학급을 개설하고 선생님을 배정합니다. 전달받은 6자리 코드를 학부모님께 공유하면 가정에서 스캔한 오답과 점수가 실시간 연동됩니다.',
     },
     {
       img: '/assets/teacher_ob_seed_curriculum.png',
@@ -1789,252 +1202,6 @@ export default function TeacherPage({ isNight = true }: Props) {
     fetchRosterAndMistakes();
   }, [selectedClass?.id, selectedClass?.activeWeekNumber]);
 
-  const loadCurriculum = async () => {
-    const targetClass = selectedClass || fallbackDemoClass;
-    setIsLoadingCurriculum(true);
-    const currDocId = `${targetClass.id}_week_${targetClass.activeWeekNumber || 1}`;
-    const localKey = `curriculum_${currDocId}`;
-
-    // 1. Pre-load from LocalStorage for instant render & offline compatibility
-    try {
-      const cached = localStorage.getItem(localKey);
-      if (cached) {
-        const data = JSON.parse(cached);
-        setCurriculumTopic(asString(data.topic));
-        setCurriculumVocab(asJoinedString(data.vocabWords));
-        setCurriculumPhonics(asJoinedString(data.phonicsRules));
-        setCurriculumPassage(asString(data.passage));
-        setCurriculumOther(asString(data.other));
-        setCurriculumAnswerKey(Array.isArray(data.answerKey) ? data.answerKey : []);
-        setCurriculumLastEditedByName(asString(data.lastEditedByName));
-        setCurriculumLastEditedAt(asString(data.lastEditedAt));
-      } else {
-        setCurriculumTopic('');
-        setCurriculumVocab('');
-        setCurriculumPhonics('');
-        setCurriculumPassage('');
-        setCurriculumOther('');
-        setCurriculumAnswerKey([]);
-        setCurriculumLastEditedByName('');
-        setCurriculumLastEditedAt('');
-      }
-    } catch (e) {
-      console.warn('LocalStorage curriculum load error:', e);
-    }
-
-    // 2. Fetch latest snapshot from Firestore
-    try {
-      const docRef = doc(dbInstance, 'curriculums', currDocId);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        setCurriculumTopic(asString(data.topic));
-        setCurriculumVocab(asJoinedString(data.vocabWords));
-        setCurriculumPhonics(asJoinedString(data.phonicsRules));
-        setCurriculumPassage(asString(data.passage));
-        setCurriculumOther(asString(data.other));
-        setCurriculumAnswerKey(Array.isArray(data.answerKey) ? data.answerKey : []);
-        setCurriculumLastEditedByName(asString(data.lastEditedByName));
-        setCurriculumLastEditedAt(asString(data.lastEditedAt));
-        try {
-          localStorage.setItem(localKey, JSON.stringify(data));
-        } catch (e) {
-          console.warn('Failed to cache curriculum to localStorage:', e);
-        }
-      }
-    } catch (err) {
-      console.warn('Failed to load curriculum from Firestore (using local fallback):', err);
-      setSyncWarning(
-        isKo
-          ? '⚠️ 클라우드에서 커리큘럼을 불러오지 못해 이 기기에 저장된 정보를 표시하고 있습니다.'
-          : "⚠️ Couldn't load curriculum from the cloud — showing what's saved on this device."
-      );
-    } finally {
-      setIsLoadingCurriculum(false);
-    }
-  };
-
-  const handleSaveCurriculum = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const targetClass = selectedClass || fallbackDemoClass;
-
-    // --- GUARDRAIL VALIDATION FOR "OTHER" FIELD ---
-    const guardrailResult = validateCurriculumOtherField(curriculumOther);
-    if (!guardrailResult.ok) {
-      showToast({ type: 'error', message: isKo
-        ? `[보안 경고] 부적절한 단어("${guardrailResult.badWord}")가 포함되어 있습니다. 학습에 적합한 언어를 사용해 주세요.`
-        : `[Security Warning] Inappropriate term detected ("${guardrailResult.badWord}"). Please use appropriate educational content.`
-      });
-      return;
-    }
-
-    setIsSavingCurriculum(true);
-    const currDocId = `${targetClass.id}_week_${targetClass.activeWeekNumber || 1}`;
-    const localKey = `curriculum_${currDocId}`;
-
-    try {
-      const vocabList = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-      const phonicsList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-
-      // Multiple FTs can share a class (assignedTeacherUids), so a save here
-      // silently overwrites whatever a co-teacher last wrote with no trace
-      // of who or when — this stamps both so a conflict is at least visible
-      // after the fact, not a lock (Audit: no lock/attribution on shared
-      // curriculum edits).
-      const editedByName = (user as any)?.name || user?.email || 'Unknown teacher';
-      const editedAt = new Date().toISOString();
-      const payload = {
-        classId: targetClass.id,
-        teacherUid: user?.uid || targetClass.teacherUid || '',
-        weekNumber: targetClass.activeWeekNumber || 1,
-        topic: curriculumTopic.trim(),
-        vocabWords: vocabList,
-        phonicsRules: phonicsList,
-        passage: curriculumPassage.trim(),
-        other: curriculumOther.trim(),
-        answerKey: curriculumAnswerKey,
-        updatedAt: editedAt,
-        lastEditedByUid: user?.uid || '',
-        lastEditedByName: editedByName,
-        lastEditedAt: editedAt,
-      };
-
-      // 1. Dual-persist to local storage immediately
-      try {
-        localStorage.setItem(localKey, JSON.stringify(payload));
-      } catch (lErr) {
-        console.warn('LocalStorage write warning:', lErr);
-      }
-
-      // 2. Persist to Firestore
-      let curriculumFirestoreFailed = false;
-      try {
-        const docRef = doc(dbInstance, 'curriculums', currDocId);
-        await setDoc(docRef, payload, { merge: true });
-      } catch (firestoreErr) {
-        console.warn('Firestore curriculum write warning (saved locally):', firestoreErr);
-        curriculumFirestoreFailed = true;
-      }
-
-      setCurriculumLastEditedByName(editedByName);
-      setCurriculumLastEditedAt(editedAt);
-
-      if (curriculumFirestoreFailed) {
-        setSyncWarning(
-          isKo
-            ? '⚠️ 커리큘럼이 이 기기에만 저장되었습니다. 클라우드에 동기화되지 않았습니다.'
-            : '⚠️ Curriculum saved on this device only — it has not synced to the cloud yet.'
-        );
-      } else {
-        showToast({ type: 'success', message: isKo ? '주간 커리큘럼이 성공적으로 저장되었습니다!' : 'Weekly curriculum saved successfully!' });
-      }
-    } catch (err) {
-      console.error('Failed to save curriculum:', err);
-      showToast({ type: 'error', message: isKo ? '저장 실패. 다시 시도해 주세요.' : 'Failed to save curriculum.' });
-    } finally {
-      setIsSavingCurriculum(false);
-    }
-  };
-
-  const escapeHtml = (s: string) =>
-    String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
-
-  const handleGenerateWorksheet = async () => {
-    const vocabList = curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-    const phonicsList = curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-
-    if (!curriculumTopic.trim() && vocabList.length === 0 && phonicsList.length === 0 && !curriculumPassage.trim()) {
-      showToast({
-        type: 'error',
-        message: isKo
-          ? '워크시트를 생성하려면 먼저 주제, 어휘, 파닉스 규칙 또는 지문 중 하나를 입력해 주세요.'
-          : 'Set a topic, vocabulary, phonics rules, or passage for this week before generating a worksheet.',
-      });
-      return;
-    }
-
-    setIsGeneratingWorksheet(true);
-    try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({
-          task: 'generate_worksheet',
-          worksheetType,
-          questionStyle,
-          language: isKo ? 'ko' : 'en',
-          curriculum: {
-            topic: curriculumTopic.trim(),
-            vocabWords: vocabList,
-            phonicsRules: phonicsList,
-            passage: curriculumPassage.trim(),
-          },
-        }),
-      });
-
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        throw new Error(errBody?.error || `HTTP_${res.status}`);
-      }
-
-      const { worksheet } = await res.json();
-      if (!worksheet?.questions?.length) throw new Error('EMPTY_WORKSHEET');
-
-      const title = isKo ? worksheet.title_ko || worksheet.title_en : worksheet.title_en || worksheet.title_ko;
-      const instructions = isKo ? worksheet.instructions_ko : worksheet.instructions_en;
-
-      const questionsHtml = worksheet.questions.map((q: any) => {
-        const prompt = isKo ? (q.prompt_ko || q.prompt_en) : (q.prompt_en || q.prompt_ko);
-        const choicesHtml = Array.isArray(q.choices) && q.choices.length > 0
-          ? `<div class="choices">${q.choices.map((c: string) => `<div>${escapeHtml(c)}</div>`).join('')}</div>`
-          : '<div class="answer-line"></div>';
-        return `<div class="question"><span class="qnum">${q.number}.</span> ${escapeHtml(prompt)}${choicesHtml}</div>`;
-      }).join('');
-
-      const answerKeyHtml = worksheet.questions.map((q: any) =>
-        `<div class="answer-row"><span class="qnum">${q.number}.</span> ${escapeHtml(q.answer)}</div>`
-      ).join('');
-
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        showToast({ type: 'error', message: isKo ? '팝업이 차단되었습니다. 팝업 차단을 해제해 주세요.' : 'Pop-up blocked — please allow pop-ups to print the worksheet.' });
-        return;
-      }
-
-      printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title || 'Worksheet')}</title>
-<style>
-body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #111; }
-h1 { font-size: 22px; margin-bottom: 4px; }
-.instructions { color: #555; font-size: 13px; margin-bottom: 24px; }
-.question { margin-bottom: 18px; font-size: 14px; line-height: 1.6; }
-.qnum { font-weight: bold; margin-right: 6px; }
-.choices { margin-top: 6px; margin-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
-.answer-line { border-bottom: 1px solid #999; height: 24px; margin-top: 6px; margin-left: 20px; max-width: 320px; }
-.answer-key { page-break-before: always; margin-top: 40px; }
-.answer-row { font-size: 13px; margin-bottom: 6px; }
-</style></head><body>
-<h1>${escapeHtml(title || 'Worksheet')}</h1>
-${instructions ? `<p class="instructions">${escapeHtml(instructions)}</p>` : ''}
-${questionsHtml}
-<div class="answer-key"><h2>${isKo ? '정답지 (교사용)' : 'Answer Key (Teacher Copy)'}</h2>${answerKeyHtml}</div>
-</body></html>`);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => printWindow.print(), 300);
-
-      showToast({ type: 'success', message: isKo ? '⚡ AI 맞춤 워크시트(PDF)가 생성되었습니다!' : '⚡ AI Worksheet Generated Successfully!' });
-    } catch (err: any) {
-      console.error('Worksheet generation failed:', err);
-      const message = err?.message === 'GENERATE_LIMIT_REACHED'
-        ? (isKo ? '오늘의 생성 한도에 도달했습니다.' : "You've reached today's generation limit.")
-        : (isKo ? '워크시트 생성에 실패했습니다. 다시 시도해 주세요.' : 'Failed to generate worksheet. Please try again.');
-      showToast({ type: 'error', message });
-    } finally {
-      setIsGeneratingWorksheet(false);
-    }
-  };
-
   const fetchRosterAndMistakes = async () => {
     const targetClass = selectedClass || fallbackDemoClass;
     if (!targetClass?.id) return;
@@ -2142,7 +1309,7 @@ ${questionsHtml}
   // genuinely no answer anywhere. Best-effort: never blocks or fails the
   // roster action itself if the log write fails.
   const logActivity = async (type: string, targetLabel: string) => {
-    const schoolId = (user as any)?.schoolId;
+    const schoolId = user?.schoolId;
     if (!schoolId || !user?.uid) return;
     try {
       await addDoc(collection(dbInstance, 'activityLog'), {
@@ -2150,7 +1317,7 @@ ${questionsHtml}
         type,
         targetLabel,
         actorUid: user.uid,
-        actorName: (user as any)?.name || user?.email || 'Unknown',
+        actorName: user?.name || user?.email || 'Unknown',
         createdAt: serverTimestamp(),
       });
     } catch (err) {
@@ -2248,7 +1415,7 @@ ${questionsHtml}
           flaggedException: {
             date: new Date().toISOString().split('T')[0],
             reason: reason.trim(),
-            teacherName: (user as any)?.displayName || (user as any)?.email?.split('@')[0] || (isKo ? '선생님' : 'Teacher'),
+            teacherName: user?.name || user?.email?.split('@')[0] || (isKo ? '선생님' : 'Teacher'),
             resolved: false,
           },
         });
@@ -2258,7 +1425,7 @@ ${questionsHtml}
       await fetchRosterAndMistakes();
       setSelectedStudentDetails((prev: any) =>
         prev && prev.uid === studentUid
-          ? { ...prev, flaggedException: reason && reason.trim() ? { date: new Date().toISOString().split('T')[0], reason: reason.trim(), teacherName: (user as any)?.displayName || (user as any)?.email?.split('@')[0] || 'Teacher', resolved: false } : null }
+          ? { ...prev, flaggedException: reason && reason.trim() ? { date: new Date().toISOString().split('T')[0], reason: reason.trim(), teacherName: user?.name || user?.email?.split('@')[0] || 'Teacher', resolved: false } : null }
           : prev
       );
     } catch (err) {
@@ -2702,7 +1869,7 @@ ${questionsHtml}
       <UnifiedAccountActivation
         isNight={isThemeNight}
         isKo={isKo}
-        schoolId={(user as any)?.schoolId || ''}
+        schoolId={user?.schoolId || ''}
         seatsTotal={schoolSeatsTotal}
         trialStatus={trialStatus}
         onComplete={async (data) => {
@@ -2764,48 +1931,12 @@ ${questionsHtml}
 
   // --- FT/KT FIRST-LOGIN WELCOME MODAL ---
   if (showTeacherWelcome) {
-    // Creates the class through the same server-authoritative path as the
-    // "+ New Class" modal (api/create-class.ts). This used to fabricate a
-    // class object entirely client-side with a fake `CHK####` join code,
-    // never touching Firestore — the code "worked" in the UI but no parent
-    // could ever join with it, and the class vanished on next login since
-    // fetchClasses() (real Firestore query) correctly found nothing.
-    const dismissWelcome = async (className?: string) => {
+    // Classes are director-created and teacher-assigned only (single flow,
+    // no FT/KT self-serve creation) — this just records the welcome as seen
+    // and drops the teacher onto their dashboard to wait for assignment.
+    const dismissWelcome = () => {
       const uid = user?.uid || '';
       if (uid) localStorage.setItem(`chekki_teacher_welcome_done_${uid}`, '1');
-
-      if (className && className.trim()) {
-        setIsCreatingClass(true);
-        try {
-          const idToken = await auth.currentUser?.getIdToken();
-          const response = await fetch('/api/create-class', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-            body: JSON.stringify({ name: className.trim(), level: 'General' }),
-          });
-          const data = await response.json();
-          if (response.ok) {
-            setClasses((prev: any[]) => [data.class, ...prev]);
-            setSelectedClass(data.class);
-          } else {
-            // Real seat-limit/trial rejection or server error — surface it
-            // rather than silently handing the teacher a class that will
-            // never actually receive parent scans.
-            showToast({
-              type: 'error',
-              message: data.error || (isKo ? '학급 개설에 실패했습니다. 대시보드에서 다시 시도해 주세요.' : "Couldn't create your class. Please try again from the dashboard."),
-            });
-          }
-        } catch (err) {
-          console.error('[dismissWelcome] create-class failed:', err);
-          showToast({
-            type: 'error',
-            message: isKo ? '학급 개설에 실패했습니다. 대시보드에서 다시 시도해 주세요.' : "Couldn't create your class. Please try again from the dashboard.",
-          });
-        } finally {
-          setIsCreatingClass(false);
-        }
-      }
       setShowTeacherWelcome(false);
       setActiveTab(welcomeRole === 'kt' ? 'kt_script' : 'overview');
     };
@@ -2864,7 +1995,7 @@ ${questionsHtml}
 
                 <div className="space-y-1.5 text-left">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">{isKo ? '선생님 역할' : 'Your Role'}</label>
-                  {(user as any)?.educatorRole ? (
+                  {user?.educatorRole ? (
                     // Role was already decided by the director's invite (audit
                     // §21d) — this is a read-only confirmation, not a choice.
                     <div className={`w-full py-3 rounded-xl text-xs font-black border text-center ${
@@ -2902,80 +2033,33 @@ ${questionsHtml}
               </div>
             )}
 
-            {/* Step 2 — invited teachers join a school, not a class: only the
-                director assigns classes (via Teacher Assignments), so
-                letting an invited FT/KT type a class name here created a
-                standalone class of their own, disconnected from the
+            {/* Step 2 — single flow: the director creates classes and
+                assigns teachers to them (Teacher Assignments); a teacher
+                never creates their own class here. This used to branch on
+                welcomeSchool and let anyone without it type a class name,
+                which created a standalone class disconnected from the
                 director's real roster (audit: teacher ends up on a
-                different class than the one the director set up). Anyone
-                who signed up WITHOUT an invite (no welcomeSchool) still
-                gets the self-serve class-creation form. */}
+                different class than the one the director set up) — one
+                path now, regardless of how the account was created. */}
             {teacherWelcomeStep === 2 && (
-              welcomeSchool ? (
-                <div className="w-full space-y-5">
-                  <div className="text-center mb-2">
-                    <h2 className="text-2xl font-black tracking-tight text-white mb-1">{isKo ? '거의 다 됐어요!' : "You're all set!"}</h2>
-                    <p className="text-zinc-400 text-xs leading-relaxed">
-                      {isKo
-                        ? '원장님이 담당 학급을 배정하면 대시보드에 표시됩니다.'
-                        : 'Your director will assign you to a class — it\'ll show up on your dashboard once they do.'}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => dismissWelcome('')}
-                    className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                  >
-                    <CheckCircle size={18} weight="bold" />
-                    <span>{isKo ? '완료 — 대시보드 입장! 🎉' : 'Done — Enter Dashboard! 🎉'}</span>
-                  </button>
-                </div>
-              ) : (
               <div className="w-full space-y-5">
                 <div className="text-center mb-2">
-                  <h2 className="text-2xl font-black tracking-tight text-white mb-1">{isKo ? '담당 학급반을 알려주세요' : 'Your Class Assignment'}</h2>
-                  <p className="text-zinc-400 text-xs leading-relaxed">{isKo ? '담당 학급반 이름을 입력하세요. 나중에 언제든 추가할 수 있습니다.' : 'Enter your class name. You can add more later.'}</p>
+                  <h2 className="text-2xl font-black tracking-tight text-white mb-1">{isKo ? '거의 다 됐어요!' : "You're all set!"}</h2>
+                  <p className="text-zinc-400 text-xs leading-relaxed">
+                    {isKo
+                      ? '원장님이 담당 학급을 배정하면 대시보드에 표시됩니다.'
+                      : 'Your director will assign you to a class — it\'ll show up on your dashboard once they do.'}
+                  </p>
                 </div>
-
-                <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">{isKo ? '학급반 이름' : 'Class Name'}</label>
-                  <input
-                    type="text"
-                    value={welcomeClassName}
-                    onChange={(e) => setWelcomeClassName(e.target.value)}
-                    placeholder={isKo ? '예: 7B Sunshine / 초등 3반' : 'E.g. 7B Sunshine / Level 3 Advanced'}
-                    className={`w-full p-4 rounded-2xl border text-sm font-bold outline-none focus:border-orange-500 transition-all ${isThemeNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
-                  />
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setTeacherWelcomeStep(1)}
-                    className={`w-1/3 py-4 rounded-2xl font-bold text-xs border transition-all cursor-pointer ${isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700'}`}
-                  >
-                    ← {isKo ? '이전' : 'Back'}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isCreatingClass}
-                    onClick={() => dismissWelcome(welcomeClassName)}
-                    className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                  >
-                    <CheckCircle size={18} weight="bold" />
-                    <span>{isCreatingClass ? (isKo ? '생성 중...' : 'Creating...') : (isKo ? '완료 — 대시보드 입장! 🎉' : 'Done — Enter Dashboard! 🎉')}</span>
-                  </button>
-                </div>
-
                 <button
                   type="button"
-                  onClick={() => dismissWelcome('')}
-                  className="w-full text-xs text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer py-1"
+                  onClick={() => dismissWelcome()}
+                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
-                  {isKo ? '나중에 설정하기' : 'Skip for now'}
+                  <CheckCircle size={18} weight="bold" />
+                  <span>{isKo ? '완료 — 대시보드 입장! 🎉' : 'Done — Enter Dashboard! 🎉'}</span>
                 </button>
               </div>
-              )
             )}
           </div>
         </div>
@@ -3041,8 +2125,10 @@ ${questionsHtml}
                 <button
                   onClick={() => {
                     if (isLast) {
+                      // Classes are director-created and teacher-assigned only —
+                      // one auth/onboarding flow, no self-serve class creation
+                      // for FT/KT (was: opened the create-class modal here).
                       dismissTeacherOnboarding();
-                      setShowCreateClassModal(true);
                     } else {
                       setTeacherObStep(teacherObStep + 1);
                     }
@@ -3051,7 +2137,7 @@ ${questionsHtml}
                 >
                   <span>
                     {isLast
-                      ? (isKo ? '첫 학급 만들기' : 'Create First Class')
+                      ? (isKo ? '시작하기' : 'Got it')
                       : (isKo ? '다음 단계' : 'Next Step')}
                   </span>
                   <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
@@ -3703,8 +2789,8 @@ ${questionsHtml}
             }`}>
               <p className="text-xs font-semibold flex-1 min-w-[240px]">
                 {isKo
-                  ? `이 초대 링크는 새 계정 생성용입니다. 현재 ${(user as any)?.email || ''} 계정으로 로그인되어 있어 초대가 적용되지 않았습니다. 초대를 수락하려면 먼저 로그아웃하세요.`
-                  : `This invite link is for creating a new account. You're signed in as ${(user as any)?.email || 'another user'} in this browser, so the invite wasn't applied. Log out first to accept it.`}
+                  ? `이 초대 링크는 새 계정 생성용입니다. 현재 ${user?.email || ''} 계정으로 로그인되어 있어 초대가 적용되지 않았습니다. 초대를 수락하려면 먼저 로그아웃하세요.`
+                  : `This invite link is for creating a new account. You're signed in as ${user?.email || 'another user'} in this browser, so the invite wasn't applied. Log out first to accept it.`}
               </p>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -3795,7 +2881,7 @@ ${questionsHtml}
                 isKo={isKo}
                 academyName={displayedAcademyName}
                 academyLogo={academyLogo}
-                schoolId={(user as any)?.schoolId}
+                schoolId={user?.schoolId || undefined}
                 planId={schoolPlanId}
                 seatsTotal={schoolSeatsTotal}
                 trialStatus={trialStatus}
@@ -3828,7 +2914,12 @@ ${questionsHtml}
                   logs={ktQueueLogs}
                   activeId={activeKtGroup ? groupKey(activeKtGroup) : null}
                   justCopiedId={justCopiedLogId}
-                  onSelect={setActiveKtLogId}
+                  onSelect={(id) => {
+                    if (id === activeKtLogId) return;
+                    if (!confirmDiscardKtDraft()) return;
+                    setKtDraftDirty(false);
+                    setActiveKtLogId(id);
+                  }}
                   isNight={isThemeNight}
                   isKo={isKo}
                 />
@@ -3863,6 +2954,7 @@ ${questionsHtml}
                 skipInlineExceptions={!!activeKtGroup}
                 pendingCount={Math.max(0, ktConsolidatedGroups.length - 1)}
                 onApprove={handleKtApprove}
+                onDirtyChange={setKtDraftDirty}
               />
             )}
 
@@ -3920,8 +3012,8 @@ ${questionsHtml}
               <div className="animate-fade-in">
                 <NativeTeacherLogForm
                   isNight={isThemeNight}
-                  onSubmitLog={handleFtLogSubmit}
-                  isSubmitting={isSubmittingFtLog}
+                  onSubmitLog={handleLogSubmit}
+                  isSubmitting={isSubmittingLog}
                   userProfile={user}
                   selectedClassName={activeClass?.name}
                   selectedTextbookName={selectedTextbookName}
@@ -3940,8 +3032,8 @@ ${questionsHtml}
               activeClass={activeClass}
               selectedTextbookName={selectedTextbookName}
               roster={ftDashboardRoster}
-              handleFtLogSubmit={handleFtLogSubmit}
-              isSubmittingFtLog={isSubmittingFtLog}
+              handleFtLogSubmit={handleLogSubmit}
+              isSubmittingFtLog={isSubmittingLog}
               completionRate={completionRate}
               completedHomeworkCount={completedHomeworkCount}
               activeStudentsCount={activeStudentsCount}
@@ -3971,69 +3063,8 @@ ${questionsHtml}
                   classes={classes}
                   selectedClass={selectedClass}
                   setSelectedClass={setSelectedClass}
-                  selectedTextbookName={selectedTextbookName}
-                  setSelectedTextbookName={setSelectedTextbookName}
-                  isLoadingCurriculum={isLoadingCurriculum}
-                  handleSaveCurriculum={handleSaveCurriculum}
-                  scanStatusMessage={scanStatusMessage}
-                  scannedData={scannedData}
-                  setShowScannedModal={setShowScannedModal}
-                  isDraggingFile={isDraggingFile}
-                  setIsDraggingFile={setIsDraggingFile}
-                  handleTextbookFileUpload={handleTextbookFileUpload}
-                  pendingScanFiles={pendingScanFiles}
-                  handleStageFiles={handleStageFiles}
-                  handleRemoveStagedFile={handleRemoveStagedFile}
-                  handleScanStagedFiles={handleScanStagedFiles}
-                  isScanningSyllabus={isScanningSyllabus}
-                  syllabusPreviewUrl={syllabusPreviewUrl}
-                  syllabusFileName={syllabusFileName}
-                  setDocPreviewUrl={setDocPreviewUrl}
-                  setShowDocPreviewModal={setShowDocPreviewModal}
-                  syllabusScannedData={syllabusScannedData}
-                  setActiveScannedModalType={setActiveScannedModalType}
-                  setScannedData={setScannedData}
-                  syllabusWeeks={syllabusWeeks}
-                  handleSyllabusWeeksChange={handleSyllabusWeeksChange}
-                  isScanningWorksheet={isScanningWorksheet}
-                  worksheetPreviewUrl={worksheetPreviewUrl}
-                  worksheetFileName={worksheetFileName}
-                  worksheetScannedData={worksheetScannedData}
-                  setWorksheetPreviewUrl={setWorksheetPreviewUrl}
-                  setWorksheetScannedData={setWorksheetScannedData}
-                  setWorksheetFileName={setWorksheetFileName}
                   handleUpdateWeek={handleUpdateWeek}
-                  curriculumTopic={curriculumTopic}
-                  setCurriculumTopic={setCurriculumTopic}
-                  curriculumVocab={curriculumVocab}
-                  setCurriculumVocab={setCurriculumVocab}
-                  handleRemoveVocabWord={handleRemoveVocabWord}
-                  newVocabInput={newVocabInput}
-                  setNewVocabInput={setNewVocabInput}
-                  handleAddVocabWord={handleAddVocabWord}
-                  curriculumPhonics={curriculumPhonics}
-                  setCurriculumPhonics={setCurriculumPhonics}
-                  handleRemovePhonicsRule={handleRemovePhonicsRule}
-                  newPhonicsInput={newPhonicsInput}
-                  setNewPhonicsInput={setNewPhonicsInput}
-                  handleAddPhonicsRule={handleAddPhonicsRule}
-                  curriculumPassage={curriculumPassage}
-                  setCurriculumPassage={setCurriculumPassage}
-                  curriculumOther={curriculumOther}
-                  setCurriculumOther={setCurriculumOther}
-                  curriculumAnswerKey={curriculumAnswerKey}
-                  handleRemoveAnswerKeyEntry={handleRemoveAnswerKeyEntry}
-                  handleEditAnswerKeyEntry={handleEditAnswerKeyEntry}
-                  curriculumLastEditedByName={curriculumLastEditedByName}
-                  curriculumLastEditedAt={curriculumLastEditedAt}
-                  worksheetType={worksheetType}
-                  setWorksheetType={setWorksheetType}
-                  questionStyle={questionStyle}
-                  setQuestionStyle={setQuestionStyle}
-                  loadCurriculum={loadCurriculum}
-                  isSavingCurriculum={isSavingCurriculum}
-                  handleGenerateWorksheet={handleGenerateWorksheet}
-                  isGeneratingWorksheet={isGeneratingWorksheet}
+                  {...curriculumEditor}
                 />
               )}
 
