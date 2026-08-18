@@ -12,26 +12,26 @@ import { useResolvedRole } from '../../hooks/useResolvedRole';
 import { useKtReviewQueue } from '../../hooks/useKtReviewQueue';
 import { useTeacherTabs } from '../../hooks/useTeacherTabs';
 import { useRosterAnalytics } from '../../hooks/useRosterAnalytics';
+import { DirectorSidebarNav } from '../components/DirectorSidebarNav';
+import { KtSidebarNav } from '../components/KtSidebarNav';
+import { FtSidebarNav } from '../components/FtSidebarNav';
+import { DirectorTabContent } from '../components/DirectorTabContent';
+import { KtTabContent } from '../components/KtTabContent';
+import { FtTabContent } from '../components/FtTabContent';
 import { useDirectorPortalState } from '../../hooks/useDirectorPortalState';
 import { useCurriculumEditorState } from '../../hooks/useCurriculumEditorState';
 import { 
-  GraduationCap, 
-  Sparkle, 
-  Users, 
-  ChartBar, 
-  FileText, 
-  ClockCounterClockwise,
-  ArrowRight, 
+  GraduationCap,
+  Sparkle,
+  ArrowRight,
   ArrowLeft,
   Eye,
-  CheckCircle, 
+  CheckCircle,
   Plus,
   Calendar,
-  BookOpen,
   Printer,
-  SignOut, 
-  ChalkboardTeacher, 
-  CaretRight, 
+  SignOut,
+  ChalkboardTeacher,
   Warning,
   Check,
   Funnel,
@@ -45,23 +45,13 @@ import {
   Sun,
   Moon,
   Trash,
-  Buildings,
-  Notebook
+  Buildings
 } from '@phosphor-icons/react';
-import { NativeDirectorPortal } from '../components/NativeDirectorPortal';
-import { NativeKtDashboard } from '../components/NativeKtDashboard';
-import { KtReviewQueue } from '../components/KtReviewQueue';
-import { NativeFtDashboard, FtStatCards } from '../components/NativeFtDashboard';
-import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { FeedbackModal } from '../../components/FeedbackModal';
-import { NativeTeacherLogForm } from '../components/NativeTeacherLogForm';
-import { NativeDirectorStudentsTab } from '../components/NativeDirectorStudentsTab';
-import { StudentInvitePanel } from '../components/StudentInvitePanel';
 import { ScannedModal } from '../components/ScannedModal';
 import { DocPreviewModal } from '../components/DocPreviewModal';
 import { WeekCalendarModal } from '../components/WeekCalendarModal';
 import { ReportCardModal } from '../components/ReportCardModal';
-import { CurriculumEditorForm } from '../components/CurriculumEditorForm';
 import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import {
@@ -2082,351 +2072,25 @@ export default function TeacherPage({ isNight = true }: Props) {
             if ((e.target as HTMLElement).closest('button')) setIsSidebarOpen(false);
           }}
         >
-          {/* Director Tabs (Director Only) — grouped: hub first, setup tasks
-              below with a labeled break, matching the tight-within/generous-
-              between rhythm used elsewhere in the app. */}
+          {/* Nav per role — DirectorSidebarNav/KtSidebarNav/FtSidebarNav
+              (Phase 6 of the buzzing-nibbling-hearth TeacherPage split). */}
           {(loginRole === 'director' || user?.role === 'director') && (
-            <>
-              <button
-                onClick={() => setActiveTab('director_hq')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'director_hq'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'director_hq'
-                      ? 'bg-orange-500/20 text-orange-500'
-                      : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
-                  }`}>
-                    <Buildings size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '🏢 원장님 HQ 총괄 대시보드' : '🏢 Director HQ Dashboard'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'director_hq' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-
-              <div className="pt-6 mt-2 border-t border-white/5 space-y-2">
-                <span className="block px-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                  {isKo ? '설정' : 'Setup'}
-                </span>
-
-                <button
-                  onClick={() => setActiveTab('students')}
-                  className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                    activeTab === 'students'
-                      ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                      : isThemeNight
-                        ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl transition-colors ${
-                      activeTab === 'students'
-                        ? 'bg-orange-500/20 text-orange-500'
-                        : isThemeNight ? 'bg-white/5 text-purple-400 group-hover:text-white' : 'bg-purple-100 text-purple-600 group-hover:text-zinc-900'
-                    }`}>
-                      <Users size={18} weight="bold" />
-                    </div>
-                    <span>{isKo ? '👥 원생 명단 관리 (Roster)' : '👥 Student Roster'}</span>
-                  </div>
-                  <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-                </button>
-              </div>
-            </>
+            <DirectorSidebarNav isNight={isThemeNight} isKo={isKo} activeTab={activeTab} setActiveTab={setActiveTab} />
           )}
 
-          {/* KT KakaoTalk Script Tab (KT Only) */}
           {loginRole !== 'director' && educatorRole === 'kt' && (
-            <>
-              <button
-                onClick={() => setActiveTab('kt_script')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'kt_script'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight 
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'kt_script' 
-                      ? 'bg-orange-500/20 text-orange-500' 
-                      : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
-                  }`}>
-                    <Sparkle size={18} weight="fill" />
-                  </div>
-                  <span>{isKo ? '⚡ 알림톡 대본 & 1클릭 복사' : '⚡ KakaoTalk Parent Script'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'kt_script' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('overview')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'overview'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight 
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'overview' 
-                      ? 'bg-orange-500/20 text-orange-500' 
-                      : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
-                  }`}>
-                    <ChartBar size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '반 출석 및 채점 현황' : 'Class Overview'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('kt_log')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'kt_log'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'kt_log'
-                      ? 'bg-orange-500/20 text-orange-500'
-                      : isThemeNight ? 'bg-white/5 text-orange-400 group-hover:text-white' : 'bg-orange-100 text-orange-600 group-hover:text-zinc-900'
-                  }`}>
-                    <Notebook size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '✏️ 오늘 수업 일지 작성' : "✏️ Submit Today's Log"}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'kt_log' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-
-              {/* DEMO: Syllabus/Curriculum Setup tab hidden — OCR scan flow
-                  not battle-tested enough for live demo. Manual entry (topic
-                  /vocab/phonics/passage) lives here too; only the OCR trigger
-                  was the risk, but this tab is cut wholesale to keep the nav
-                  simple. Re-enable by uncommenting. */}
-              {/*
-              <button
-                onClick={() => setActiveTab('syllabus')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'syllabus'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'syllabus'
-                      ? 'bg-orange-500/20 text-orange-500'
-                      : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
-                  }`}>
-                    <BookOpen size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '📘 교재 목차 등록' : '📘 Curriculum Setup'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-              */}
-
-              <button
-                onClick={() => setActiveTab('homework')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'homework'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'homework'
-                      ? 'bg-orange-500/20 text-orange-500'
-                      : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
-                  }`}>
-                    <FileText size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '📄 워크시트 채점기' : '📄 Worksheet Scanner'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'homework' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-            </>
+            <KtSidebarNav
+              isNight={isThemeNight}
+              isKo={isKo}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              showReportCardModal={showReportCardModal}
+              setShowReportCardModal={setShowReportCardModal}
+            />
           )}
 
-          {/* FT Foreign Teacher Tabs (FT Only) */}
           {loginRole !== 'director' && educatorRole === 'ft' && (
-            <>
-              <button
-                onClick={() => setActiveTab('overview')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'overview'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight 
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'overview' 
-                      ? 'bg-orange-500/20 text-orange-500' 
-                      : isThemeNight ? 'bg-white/5 text-orange-400 group-hover:text-white' : 'bg-orange-100 text-orange-600 group-hover:text-zinc-900'
-                  }`}>
-                    <ChartBar size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '클래스 스캐너 & 일지' : 'Class Scanner & Log'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('insights')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'insights'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'insights'
-                      ? 'bg-orange-500/20 text-orange-500'
-                      : isThemeNight ? 'bg-white/5 text-amber-400 group-hover:text-white' : 'bg-amber-100 text-amber-600 group-hover:text-zinc-900'
-                  }`}>
-                    <Sparkle size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '📚 주간 커리큘럼 & 오답 분석' : '📚 Weekly Insights'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'insights' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-
-              {/* DEMO: Syllabus/Curriculum Setup tab hidden — see KT nav above
-                  for rationale. Re-enable by uncommenting. */}
-              {/*
-              <button
-                onClick={() => setActiveTab('syllabus')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'syllabus'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'syllabus'
-                      ? 'bg-orange-500/20 text-orange-500'
-                      : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
-                  }`}>
-                    <BookOpen size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '📘 교재 목차 등록' : '📘 Curriculum Setup'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'syllabus' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-              */}
-
-              <button
-                onClick={() => setActiveTab('homework')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'homework'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'homework'
-                      ? 'bg-orange-500/20 text-orange-500'
-                      : isThemeNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
-                  }`}>
-                    <FileText size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '📄 워크시트 채점기' : '📄 Worksheet Scanner'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'homework' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('history')}
-                className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-                  activeTab === 'history'
-                    ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-                    : isThemeNight 
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl transition-colors ${
-                    activeTab === 'history' 
-                      ? 'bg-orange-500/20 text-orange-500' 
-                      : isThemeNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
-                  }`}>
-                    <ClockCounterClockwise size={18} weight="bold" />
-                  </div>
-                  <span>{isKo ? '📜 작성한 일지 이력' : '📜 Log History'}</span>
-                </div>
-                <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'history' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-              </button>
-            </>
-          )}
-
-          {/* AI Report Studio Generator Trigger Button — parent-facing report
-              generation is KT's job (they're the one who reviews/sends
-              parent communication), not FT's or the director's. Previously
-              shown to any non-director, including FT, who has no reason to
-              trigger a parent report from their own dashboard. */}
-          {loginRole !== 'director' && educatorRole === 'kt' && (
-          <button
-            type="button"
-            onClick={() => setShowReportCardModal(true)}
-            className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-              showReportCardModal
-                ? 'bg-orange-500/20 text-orange-400 border-orange-500/50 font-black'
-                : isThemeNight
-                  ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:border-orange-500/40'
-                  : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:border-orange-300'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl transition-colors ${
-                showReportCardModal
-                  ? 'bg-orange-500/20 text-orange-400'
-                  : isThemeNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-600 group-hover:text-zinc-900'
-              }`}>
-                <Sparkle size={18} weight="fill" />
-              </div>
-              <span>{isKo ? '📊 학부모 성적표 발급기' : '📊 Generate Weekly Report'}</span>
-            </div>
-            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
-              showReportCardModal
-                ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                : isThemeNight ? 'bg-white/5 text-zinc-500 border-white/10' : 'bg-zinc-100 text-zinc-500 border-zinc-200'
-            }`}>
-              GENERATE
-            </span>
-          </button>
+            <FtSidebarNav isNight={isThemeNight} isKo={isKo} activeTab={activeTab} setActiveTab={setActiveTab} />
           )}
         </nav>
 
@@ -2731,11 +2395,30 @@ export default function TeacherPage({ isNight = true }: Props) {
           )}
 
           <div className="animate-fade-in">
-            {/* Director HQ Tab */}
-            {activeTab === 'director_hq' && (
-              <NativeDirectorPortal
+            {/* Sync Warning Banner — shown when a Firestore write failed silently (Fix 8) */}
+            {syncWarning && (
+              <div className={`mb-4 p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${
+                isThemeNight ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300'
+              }`}>
+                <p className="text-xs font-bold text-amber-500 flex-1">{syncWarning}</p>
+                <button
+                  type="button"
+                  onClick={() => setSyncWarning(null)}
+                  className="text-amber-400 hover:text-amber-200 text-xs font-bold cursor-pointer shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Per-role tab content — DirectorTabContent/KtTabContent/
+                FtTabContent (Phase 6 of the buzzing-nibbling-hearth
+                TeacherPage split). */}
+            {isDirectorUser ? (
+              <DirectorTabContent
                 isNight={isThemeNight}
                 isKo={isKo}
+                activeTab={activeTab}
                 academyName={displayedAcademyName}
                 academyLogo={academyLogo}
                 schoolId={user?.schoolId || undefined}
@@ -2753,202 +2436,92 @@ export default function TeacherPage({ isNight = true }: Props) {
                 curriculumTopic={curriculumTopic}
                 curriculumPassage={curriculumPassage}
                 onResolveFlag={(uid: string) => handleToggleFlagStudent(uid)}
+                isLoadingRoster={isLoadingRoster}
+                handleApproveStudent={handleApproveStudent}
+                handleDeclineStudent={handleDeclineStudent}
+                handleRemoveStudent={handleRemoveStudent}
+                handleMoveStudent={handleMoveStudent}
+                fetchRosterAndMistakes={fetchRosterAndMistakes}
+                setSelectedStudentDetails={setSelectedStudentDetails}
               />
-            )}
-
-            {/* KT KakaoTalk Script Tab */}
-            {activeTab === 'kt_script' && ktLogsLoadError && (
-              <div className="mb-4 p-3.5 rounded-2xl border flex items-center gap-3 bg-red-500/10 border-red-500/30 text-red-400">
-                <span className="text-sm">
-                  {isKo
-                    ? '⚠️ 리포트 대기열을 불러오지 못했습니다. 아래는 실제 데이터가 아닙니다 — 새로고침 후 다시 시도해주세요.'
-                    : "⚠️ Couldn't load the review queue — what's shown below is not real data. Please refresh and try again."}
-                </span>
-              </div>
-            )}
-            {activeTab === 'kt_script' && ktPendingLogs.length > 0 && (
-              <div className="mb-4 max-w-4xl mx-auto w-full">
-                <KtReviewQueue
-                  logs={ktQueueLogs}
-                  activeId={activeKtGroup ? groupKey(activeKtGroup) : null}
-                  justCopiedId={justCopiedLogId}
-                  onSelect={(id) => {
-                    if (id === activeKtLogId) return;
-                    if (!confirmDiscardKtDraft()) return;
-                    setKtDraftDirty(false);
-                    setActiveKtLogId(id);
-                  }}
-                  isNight={isThemeNight}
-                  isKo={isKo}
-                />
-              </div>
-            )}
-            {activeTab === 'kt_script' && (
-              <NativeKtDashboard
-                key={activeKtGroup ? groupKey(activeKtGroup) : 'empty'}
+            ) : educatorRole === 'kt' ? (
+              <KtTabContent
                 isNight={isThemeNight}
                 isKo={isKo}
-                className={activeKtGroup ? activeKtGroup.studentName : (activeClass?.name || '7세반 (샘플)')}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                ktLogsLoadError={ktLogsLoadError}
+                ktPendingLogs={ktPendingLogs}
+                ktQueueLogs={ktQueueLogs}
+                activeKtGroup={activeKtGroup}
+                justCopiedLogId={justCopiedLogId}
+                activeKtLogId={activeKtLogId}
+                confirmDiscardKtDraft={confirmDiscardKtDraft}
+                setKtDraftDirty={setKtDraftDirty}
+                setActiveKtLogId={setActiveKtLogId}
+                groupKey={groupKey}
+                formatConsolidatedDraft={formatConsolidatedDraft}
+                activeClass={activeClass}
                 academyName={displayedAcademyName}
-                userProfile={user}
-                generatedOutput={
-                  activeKtGroup
-                    ? {
-                        bilingualClassSummary: {
-                          // Consolidated draft: shared intro + every source
-                          // paragraph (general + exception) stacked below it,
-                          // already separated by blank lines — see
-                          // formatConsolidatedDraft. Exceptions are baked in
-                          // here rather than left to the exceptions-append
-                          // step below, so skipInlineExceptions avoids
-                          // duplicating them.
-                          korean: formatConsolidatedDraft(activeKtGroup, isKo),
-                          english: '',
-                        },
-                        studentReports: [],
-                      }
-                    : null
-                }
-                skipInlineExceptions={!!activeKtGroup}
-                pendingCount={Math.max(0, ktConsolidatedGroups.length - 1)}
-                onApprove={handleKtApprove}
-                onDirtyChange={setKtDraftDirty}
+                user={user}
+                ktConsolidatedGroups={ktConsolidatedGroups}
+                handleKtApprove={handleKtApprove}
+                completionRate={completionRate}
+                completedHomeworkCount={completedHomeworkCount}
+                activeStudentsCount={activeStudentsCount}
+                handleLogSubmit={handleLogSubmit}
+                isSubmittingLog={isSubmittingLog}
+                selectedTextbookName={selectedTextbookName}
+                ftDashboardRoster={ftDashboardRoster}
+                uploadMode={uploadMode}
+                classes={classes}
+                selectedClass={selectedClass}
+                setSelectedClass={setSelectedClass}
+                handleUpdateWeek={handleUpdateWeek}
+                curriculumEditor={curriculumEditor}
+                pendingRoster={pendingRoster}
+                activeRoster={activeRoster}
+                isLoadingRoster={isLoadingRoster}
+                handleApproveStudent={handleApproveStudent}
+                handleDeclineStudent={handleDeclineStudent}
+                handleRemoveStudent={handleRemoveStudent}
+                handleMoveStudent={handleMoveStudent}
+                fetchRosterAndMistakes={fetchRosterAndMistakes}
+                setSelectedStudentDetails={setSelectedStudentDetails}
+              />
+            ) : (
+              <FtTabContent
+                isNight={isThemeNight}
+                isKo={isKo}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                user={user}
+                activeClass={activeClass}
+                selectedTextbookName={selectedTextbookName}
+                ftDashboardRoster={ftDashboardRoster}
+                handleLogSubmit={handleLogSubmit}
+                isSubmittingLog={isSubmittingLog}
+                completionRate={completionRate}
+                completedHomeworkCount={completedHomeworkCount}
+                activeStudentsCount={activeStudentsCount}
+                curriculumSlideIndex={curriculumSlideIndex}
+                setCurriculumSlideIndex={setCurriculumSlideIndex}
+                activeVocabWords={activeVocabWords}
+                isLoadingRoster={isLoadingRoster}
+                sortedTroubleWords={sortedTroubleWords}
+                curriculumTopic={curriculumTopic}
+                curriculumPhonics={curriculumPhonics}
+                curriculumPassage={curriculumPassage}
+                curriculumOther={curriculumOther}
+                submittedLogs={submittedLogs}
+                uploadMode={uploadMode}
+                classes={classes}
+                selectedClass={selectedClass}
+                setSelectedClass={setSelectedClass}
+                handleUpdateWeek={handleUpdateWeek}
+                curriculumEditor={curriculumEditor}
               />
             )}
-
-            {/* Sync Warning Banner — shown when a Firestore write failed silently (Fix 8) */}
-            {syncWarning && (
-              <div className={`mb-4 p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${
-                isThemeNight ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300'
-              }`}>
-                <p className="text-xs font-bold text-amber-500 flex-1">{syncWarning}</p>
-                <button
-                  type="button"
-                  onClick={() => setSyncWarning(null)}
-                  className="text-amber-400 hover:text-amber-200 text-xs font-bold cursor-pointer shrink-0"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-
-            {activeTab === 'overview' && educatorRole === 'kt' && (
-              // KT Overview: lightweight summary only — stat cards + navigation hints.
-              // The class log form lives on its own kt_log tab now, not here.
-              <div className="space-y-6 animate-fade-in">
-                <div className={`p-5 rounded-3xl border ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
-                  <p className={`text-sm font-bold mb-1 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {isKo ? '한국인 담임 교사 현황 요약' : 'KT Class Summary'}
-                  </p>
-                  <p className={`text-xs ${isThemeNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    {isKo ? '선택된 반:' : 'Active class:'} <span className="font-mono font-bold">{activeClass?.name || '—'}</span>
-                  </p>
-                </div>
-                <FtStatCards
-                  isNight={isThemeNight}
-                  isKo={isKo}
-                  completionRate={completionRate}
-                  completedHomeworkCount={completedHomeworkCount}
-                  activeStudentsCount={activeStudentsCount}
-                />
-                <div className={`p-5 rounded-3xl border flex items-center justify-between ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
-                  <p className={`text-sm ${isThemeNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                    {isKo ? '학부모 알림톡 작성 & 1클릭 복사' : 'Write & copy parent KakaoTalk script'}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('kt_script')}
-                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
-                  >
-                    {isKo ? '알림톡 작성하기 →' : 'Go to Script →'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'kt_log' && educatorRole === 'kt' && (
-              <div className="animate-fade-in">
-                <NativeTeacherLogForm
-                  isNight={isThemeNight}
-                  onSubmitLog={handleLogSubmit}
-                  isSubmitting={isSubmittingLog}
-                  userProfile={user}
-                  selectedClassName={activeClass?.name}
-                  selectedTextbookName={selectedTextbookName}
-                  roster={ftDashboardRoster}
-                  isRealClassSynced={!activeClass?.isDemo}
-                />
-              </div>
-            )}
-
-            {educatorRole !== 'kt' && (
-            <ErrorBoundary>
-            <NativeFtDashboard
-              isNight={isThemeNight}
-              isKo={isKo}
-              activeTab={activeTab}
-              user={user}
-              activeClass={activeClass}
-              selectedTextbookName={selectedTextbookName}
-              roster={ftDashboardRoster}
-              handleFtLogSubmit={handleLogSubmit}
-              isSubmittingFtLog={isSubmittingLog}
-              completionRate={completionRate}
-              completedHomeworkCount={completedHomeworkCount}
-              activeStudentsCount={activeStudentsCount}
-              curriculumSlideIndex={curriculumSlideIndex}
-              setCurriculumSlideIndex={setCurriculumSlideIndex}
-              activeVocabWords={activeVocabWords}
-              hasVocabData={activeVocabWords.length > 0}
-              isLoadingRoster={isLoadingRoster}
-              sortedTroubleWords={sortedTroubleWords}
-              setActiveTab={setActiveTab}
-              curriculumTopic={curriculumTopic}
-              curriculumPhonics={curriculumPhonics}
-              curriculumPassage={curriculumPassage}
-              curriculumOther={curriculumOther}
-              submittedLogs={submittedLogs}
-            />
-            </ErrorBoundary>
-            )}
-
-              {(activeTab === 'syllabus' || activeTab === 'homework') && !(loginRole === 'director' || user?.role === 'director') && (
-                <CurriculumEditorForm
-                  isNight={isThemeNight}
-                  isKo={isKo}
-                  activeTab={activeTab}
-                  uploadMode={uploadMode}
-                  user={user}
-                  classes={classes}
-                  selectedClass={selectedClass}
-                  setSelectedClass={setSelectedClass}
-                  handleUpdateWeek={handleUpdateWeek}
-                  {...curriculumEditor}
-                />
-              )}
-
-              {activeTab === 'students' && (
-                <div className="space-y-8">
-                {selectedClass && !selectedClass.isDemo && (loginRole === 'director' || user?.role === 'director' || educatorRole === 'kt') && (
-                  <StudentInvitePanel isNight={isThemeNight} isKo={isKo} classId={selectedClass.id} />
-                )}
-                <NativeDirectorStudentsTab
-                  isNight={isThemeNight}
-                  isKo={isKo}
-                  pendingRoster={pendingRoster}
-                  activeRoster={activeRoster}
-                  isLoadingRoster={isLoadingRoster}
-                  classes={classes}
-                  selectedClass={selectedClass}
-                  handleApproveStudent={handleApproveStudent}
-                  handleDeclineStudent={handleDeclineStudent}
-                  handleRemoveStudent={handleRemoveStudent}
-                  handleMoveStudent={handleMoveStudent}
-                  fetchRosterAndMistakes={fetchRosterAndMistakes}
-                  setSelectedStudentDetails={setSelectedStudentDetails}
-                />
-                </div>
-              )}
 
             </div>
         </section>
