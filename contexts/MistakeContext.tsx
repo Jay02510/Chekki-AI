@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { WorksheetItem } from '../types';
 import { useAuth } from './AuthContext';
 import { db } from '../services/database';
 import { localHistoryService, StruggleRecord } from '../services/localHistoryService';
+import { useToast } from './ToastContext';
+import { describeError } from '../utils/describeError';
 
 interface MistakeItem extends WorksheetItem {
   uniqueId: string;
@@ -24,14 +26,21 @@ const MistakeContext = createContext<MistakeContextType | undefined>(undefined);
 
 export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [mistakes, setMistakes] = useState<MistakeItem[]>([]);
   const [showMistakeModal, setShowMistakeModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  // True when the initial cloud read failed — blocks saveState's cloud write
+  // path so a transient network blip can't overwrite real cloud history with
+  // an incomplete local-only view (Audit: silent mistake-history wipe).
+  const cloudSyncBlockedRef = useRef(false);
+  const isKo = typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko';
 
   // Sync with Firestore or Local Storage
   useEffect(() => {
     const loadMistakes = async () => {
       setIsLoading(true);
+      cloudSyncBlockedRef.current = false;
       try {
         let loadedMistakes: MistakeItem[] = [];
 
@@ -55,7 +64,24 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
         if (user?.uid) {
           // 2. User is logged in -> Fetch Cloud Mistakes
-          const cloudMistakes = await db.getUserMistakes(user.uid);
+          let cloudMistakes: MistakeItem[];
+          try {
+            cloudMistakes = await db.getUserMistakes(user.uid);
+          } catch (err) {
+            // Don't touch the cloud doc at all when we can't confirm what's
+            // actually in it — show local-only for this session and block
+            // saves until a real (successful) reload happens.
+            console.warn('[MistakeContext] cloud mistake fetch failed, not syncing this session:', err);
+            cloudSyncBlockedRef.current = true;
+            showToast({
+              type: 'error',
+              message: isKo
+                ? '⚠️ 저장된 오답 기록을 불러오지 못했습니다. 이번 세션에서는 새로 추가한 항목이 동기화되지 않습니다.'
+                : "⚠️ Couldn't load your saved mistakes. New bookmarks won't sync this session — try reloading.",
+            });
+            setMistakes(mappedLocalMistakes);
+            return;
+          }
 
           if (mappedLocalMistakes.length > 0) {
             // 3. Migration: Merge Local Mistakes into Cloud and clear local
@@ -86,6 +112,11 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const saveState = async (updatedMistakes: MistakeItem[]) => {
     try {
+      if (user?.uid && cloudSyncBlockedRef.current) {
+        // Cloud state is unconfirmed this session — don't risk overwriting
+        // real cloud data with this incomplete local view.
+        return;
+      }
       if (user?.uid) {
         // Save to Cloud
         await db.saveUserMistakes(user.uid, updatedMistakes, user.classId);
@@ -101,7 +132,12 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
         localStorage.setItem('chekki_local_struggle_history', JSON.stringify(records));
       }
     } catch (error) {
+      // Bookmarking a mistake is an optimistic UI update — without this, a
+      // failed save looked identical to a successful one, then silently
+      // reverted on next reload with no explanation (Audit: bookmark save
+      // can silently fail to persist).
       console.warn('Failed to save mistakes state', error);
+      showToast({ type: 'error', message: describeError(error, isKo ? '저장하지 못했습니다. 다시 시도해주세요.' : "Couldn't save — please try again.") });
     }
   };
 

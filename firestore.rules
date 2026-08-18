@@ -27,16 +27,22 @@ service cloud.firestore {
     // FT+KT sharing a class). Checking both keeps every class doc written
     // before this field existed working exactly as before.
     function isClassTeacher(classId) {
-      let classData = get(/databases/$(database)/documents/classes/$(classId)).data;
-      // Also requires the caller to still BE an active teacher, not just
-      // once-matched a class doc's teacherUid — otherwise a director
-      // removing a teacher (api/create-teacher-invite.ts's 'remove' action clears their role/schoolId)
-      // wouldn't actually revoke access to classes that teacher originally
-      // created, since teacherUid alone never expires.
+      // A demo/sandbox classId (client-only, e.g. `demo_${uid}`, used by the
+      // zero-setup preview dashboard) or a brand-new real class's very first
+      // read never has a `classes/{classId}` doc yet — dereferencing
+      // `get(...).data` on a nonexistent doc errors the rule itself, which
+      // Firestore reports as PERMISSION_DENIED instead of a clean "not
+      // found" (audit: preview/first-write Firestore reads/writes broken).
+      // Guarding with exists() first makes a missing class doc resolve to
+      // "not the teacher" instead of crashing the whole rule evaluation.
       return request.auth != null &&
+        exists(/databases/$(database)/documents/classes/$(classId)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' && (
-          classData.teacherUid == request.auth.uid ||
-          ('assignedTeacherUids' in classData && classData.assignedTeacherUids.hasAny([request.auth.uid]))
+          get(/databases/$(database)/documents/classes/$(classId)).data.teacherUid == request.auth.uid ||
+          (
+            'assignedTeacherUids' in get(/databases/$(database)/documents/classes/$(classId)).data &&
+            get(/databases/$(database)/documents/classes/$(classId)).data.assignedTeacherUids.hasAny([request.auth.uid])
+          )
         );
     }
 
@@ -48,15 +54,36 @@ service cloud.firestore {
     // directors even after NativeDirectorPortal started using the real
     // roster component.
     function isSchoolDirectorOfClass(classId) {
+      // Same nonexistent-class-doc guard as isClassTeacher() above.
       return request.auth != null &&
+        exists(/databases/$(database)/documents/classes/$(classId)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId ==
           get(/databases/$(database)/documents/classes/$(classId)).data.schoolId;
     }
 
-    // User Profiles: Authenticated users can read profiles; updates restricted to self or admin
+    // User Profiles: read scoped to self, admin, same-school staff roster
+    // (TeacherRosterPanel.tsx), or a student's own class roster entry (FT/KT/
+    // director fetching enrolled students for a class they teach/administer,
+    // TeacherPage.tsx/NativeDirectorPortal.tsx). Previously any signed-in
+    // account could read every user's profile — full PII (email, child data,
+    // school info, usage counters) for every parent/teacher/director in the
+    // app (Audit: unscoped users read, contradicted the published security
+    // factsheet's per-school isolation claims).
     match /users/{userId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null && (
+        request.auth.uid == userId ||
+        isAdmin() ||
+        (
+          resource.data.schoolId != null &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId
+        ) ||
+        (
+          resource.data.classId != null &&
+          (isClassTeacher(resource.data.classId) || isSchoolDirectorOfClass(resource.data.classId))
+        )
+      );
 
       allow create: if request.auth != null && (
         isAdmin() || 
@@ -264,7 +291,15 @@ service cloud.firestore {
 
     // Classes rules
     match /classes/{classId} {
-      allow read: if request.auth != null;
+      // Scoped to the class's own teacher/director/enrolled member — no
+      // current client code needs broader access (Audit: unscoped classes
+      // read, lower-sensitivity data but same pattern as the fixes above).
+      allow read: if request.auth != null && (
+        isClassTeacher(classId) ||
+        isSchoolDirectorOfClass(classId) ||
+        userBelongsToClass(classId) ||
+        isAdmin()
+      );
       // Creation only happens server-side via api/create-class.ts (Admin SDK,
       // bypasses these rules), which counts existing classes against
       // schools/{schoolId}.seatsTotal before writing. A client-side
@@ -329,7 +364,16 @@ service cloud.firestore {
       }
 
       match /studentScans/{scanId} {
-        allow read: if request.auth != null;
+        // Scoped to the class's own teacher/director or the scan's own
+        // student — previously any signed-in account could read any class's
+        // scan/grading data if it obtained the classId, which is a
+        // semi-predictable string (Audit: unscoped studentScans read).
+        allow read: if request.auth != null && (
+          isClassTeacher(classId) ||
+          isSchoolDirectorOfClass(classId) ||
+          resource.data.studentUid == request.auth.uid ||
+          isAdmin()
+        );
         // A scan can only ever be written as the writer's own uid — the old
         // rule OR'd `userBelongsToClass(classId)` on its own, which let any
         // classmate create/overwrite another student's scan record, and
@@ -351,7 +395,21 @@ service cloud.firestore {
 
     // Curriculum pre-seeding rules
     match /curriculums/{curriculumId} {
-      allow read: if request.auth != null;
+      // Scoped to the class's own teacher/director — previously any
+      // signed-in account could read any school's curriculum (vocab,
+      // phonics, answer keys) if it obtained the doc ID (Audit: unscoped
+      // curriculums read).
+      allow read: if request.auth != null && (
+        // A getDoc() for a week that hasn't been saved yet targets a curriculum
+        // doc that doesn't exist — resource is null, and dereferencing
+        // resource.data below would error the rule (PERMISSION_DENIED instead
+        // of a clean empty read). Safe to allow: there's no data to protect on
+        // a document that isn't there.
+        resource == null ||
+        (resource.data.classId != null && (isClassTeacher(resource.data.classId) || isSchoolDirectorOfClass(resource.data.classId))) ||
+        (resource.data.teacherUid != null && resource.data.teacherUid == request.auth.uid) ||
+        isAdmin()
+      );
       allow create: if request.auth != null && (
         isClassTeacher(request.resource.data.classId) ||
         (request.resource.data.teacherUid != null && request.resource.data.teacherUid == request.auth.uid) ||

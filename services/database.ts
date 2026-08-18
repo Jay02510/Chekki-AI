@@ -163,18 +163,17 @@ export const db = {
     }
   },
 
+  // Throws on a real read failure instead of swallowing to `[]` — a caller
+  // that can't tell "genuinely no mistakes yet" from "the read failed"
+  // ends up treating a network blip as an empty account and can overwrite
+  // real cloud data with nothing (Audit: silent mistake-history wipe).
   async getUserMistakes(uid: string): Promise<any[]> {
-    try {
-      const docRef = doc(dbInstance, 'users', uid, 'data', 'mistakes');
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        return docSnap.data().items || [];
-      }
-      return [];
-    } catch (e) {
-      console.warn('[getUserMistakes] failed:', e);
-      return [];
+    const docRef = doc(dbInstance, 'users', uid, 'data', 'mistakes');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data().items || [];
     }
+    return [];
   },
 
   // classId is stamped onto the doc so a teacher's read access (firestore.rules
