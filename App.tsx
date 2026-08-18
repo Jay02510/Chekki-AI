@@ -37,51 +37,39 @@ import { Capacitor } from '@capacitor/core';
 import { revenueCatService } from './services/revenueCatService';
 import { useWorksheetAnalysis } from './src/hooks/useWorksheetAnalysis';
 import { APP_VERSION } from './src/version';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const SESSION_KEY = 'hw_last_session';
 
 // Root Error Boundary Component
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
-  state: { hasError: boolean; error: Error | null } = { hasError: false, error: null };
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('[ErrorBoundary caught crash]:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center z-[99999]">
-          <div className="w-24 h-24 mb-6">
-            <ChekkiMascot className="w-full h-full" mood="thinking" />
-          </div>
-          <h1 className="text-xl font-black text-white mb-2 font-display">
-            Something went wrong.
-          </h1>
-          {this.state.error && (
-            <div className="max-w-md w-full p-4 mb-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono text-left overflow-auto max-h-40">
-              <p className="font-bold">{this.state.error.name}: {this.state.error.message}</p>
-              {this.state.error.stack && (
-                <pre className="text-[10px] mt-2 text-rose-300/80 whitespace-pre-wrap">{this.state.error.stack.slice(0, 300)}</pre>
-              )}
-            </div>
-          )}
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-orange-500 text-white px-8 py-3.5 rounded-2xl font-black text-xs shadow-lg hover:bg-orange-600 transition-all active:scale-[0.97] cursor-pointer"
-          >
-            Reload App
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+// Full-page crash fallback for the app's route-level ErrorBoundary wraps
+// below — shows the actual error and a hard reload, distinct from the
+// smaller in-place "Try Again" default the shared ErrorBoundary uses at
+// section level (see components/ErrorBoundary.tsx).
+const AppCrashFallback = (error: Error | null) => (
+  <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center z-[99999]">
+    <div className="w-24 h-24 mb-6">
+      <ChekkiMascot className="w-full h-full" mood="thinking" />
+    </div>
+    <h1 className="text-xl font-black text-white mb-2 font-display">
+      Something went wrong.
+    </h1>
+    {error && (
+      <div className="max-w-md w-full p-4 mb-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono text-left overflow-auto max-h-40">
+        <p className="font-bold">{error.name}: {error.message}</p>
+        {error.stack && (
+          <pre className="text-[10px] mt-2 text-rose-300/80 whitespace-pre-wrap">{error.stack.slice(0, 300)}</pre>
+        )}
+      </div>
+    )}
+    <button
+      onClick={() => window.location.reload()}
+      className="bg-orange-500 text-white px-8 py-3.5 rounded-2xl font-black text-xs shadow-lg hover:bg-orange-600 transition-all active:scale-[0.97] cursor-pointer"
+    >
+      Reload App
+    </button>
+  </div>
+);
 
 // Suspense fallback for lazy-loaded route pages — brief by design, since the
 // chunk is small and usually cached after first visit.
@@ -154,10 +142,18 @@ function AppContent() {
     isLoading: isAuthLoading,
     redeemClassCodeDetailed,
     logout,
+    redirectAuthError,
+    clearRedirectAuthError,
   } = useAuth();
   const { t, language } = useLanguage();
   const isInApp = useInAppBrowser();
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (!redirectAuthError) return;
+    showToast({ type: 'error', message: redirectAuthError });
+    clearRedirectAuthError();
+  }, [redirectAuthError, showToast, clearRedirectAuthError]);
 
   const {
     analysisState,
@@ -576,13 +572,13 @@ function AppContent() {
 
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
   if (showSubscribePage && platform === 'web')
-    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><SubscribePage /></Suspense></ErrorBoundary>;
+    return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><SubscribePage /></Suspense></ErrorBoundary>;
   if (showAdminPage && platform === 'web')
-    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><AdminPage /></Suspense></ErrorBoundary>;
+    return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><AdminPage /></Suspense></ErrorBoundary>;
   if (showTeacherPage && platform === 'web')
-    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><TeacherPage isNight={isNight} /></Suspense></ErrorBoundary>;
+    return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><TeacherPage isNight={isNight} /></Suspense></ErrorBoundary>;
   if (showSchoolsPage && platform === 'web')
-    return <ErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} /></Suspense></ErrorBoundary>;
+    return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} /></Suspense></ErrorBoundary>;
 
   // The FT/KT/Director dashboards only exist on web (TeacherPage etc. above
   // are gated `platform === 'web'`) — on the downloaded native app they were
@@ -608,7 +604,7 @@ function AppContent() {
   }
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary fallback={AppCrashFallback}>
       <div
         className={`min-h-[100dvh] ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-200 flex flex-col`}
       >

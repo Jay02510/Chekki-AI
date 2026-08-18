@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProfile, SubscriptionRecord, SubscriptionPlatform } from '../types';
+import { describeError } from '../utils/describeError';
 import { auth, db, dbInstance } from '../services/database';
 import { doc, updateDoc, increment, arrayRemove, deleteDoc } from 'firebase/firestore';
 import {
@@ -97,6 +98,14 @@ interface AuthContextType {
   joinClassWithCode: (classCode: string) => Promise<boolean>;
   redeemClassCodeDetailed: (classCode: string) => Promise<{ success: boolean; schoolName?: string; className?: string; error?: string; wrongAccount?: boolean }>;
   leaveClassroom: () => Promise<void>;
+  // A failed Google/Apple redirect sign-in used to only log to console — the
+  // user's experience was "I signed in and nothing happened" with no way to
+  // know why (Audit: OAuth redirect failure gives no UI feedback). ToastProvider
+  // wraps AuthProvider in the tree, not the other way around, so this can't
+  // show a toast directly from here — exposed for a consumer that does have
+  // toast access (AppContent in App.tsx) to surface.
+  redirectAuthError: string | null;
+  clearRedirectAuthError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -105,6 +114,8 @@ const FREE_DAILY_LIMIT = 2;
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [userProfile, _setUserProfile] = useState<UserProfile | null>(null);
+  const [redirectAuthError, setRedirectAuthError] = useState<string | null>(null);
+  const clearRedirectAuthError = useCallback(() => setRedirectAuthError(null), []);
 
   const setUserProfile = useCallback(
     (profileOrUpdater: UserProfile | null | ((prev: UserProfile | null) => UserProfile | null)) => {
@@ -286,6 +297,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (err) {
         console.error('[AuthContext] Redirect login error:', err);
+        setRedirectAuthError(describeError(err, 'Sign-in failed. Please try again.'));
       }
     };
 
@@ -1402,6 +1414,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         joinClassWithCode,
         redeemClassCodeDetailed,
         leaveClassroom,
+        redirectAuthError,
+        clearRedirectAuthError,
       }}
     >
       {children}

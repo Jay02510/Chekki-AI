@@ -11,12 +11,13 @@ import {
   Printer,
   CheckCircle,
 } from '@phosphor-icons/react';
+import { UserProfile } from '../../types';
 interface Props {
   isNight: boolean;
   isKo: boolean;
   activeTab: string;
   uploadMode: 'syllabus' | 'worksheet';
-  user: any;
+  user: UserProfile | null;
   classes: any[];
   selectedClass: any;
   setSelectedClass: (c: any) => void;
@@ -197,7 +198,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     : (isKo ? `📄 일간 워크시트 및 오답 채점 (Week ${selectedClass?.activeWeekNumber || 1})` : `📄 Daily Homework Worksheet Scanner (Week ${selectedClass?.activeWeekNumber || 1})`)}
                 </h4>
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono">
-                  ✍️ {isKo ? `담당 교사: ${(user as any)?.displayName || (user as any)?.email?.split('@')[0] || '원어민 교사'}` : `Assigned: ${(user as any)?.displayName || (user as any)?.email?.split('@')[0] || 'FT Teacher'}`}
+                  ✍️ {isKo ? `담당 교사: ${user?.name || user?.email?.split('@')[0] || '원어민 교사'}` : `Assigned: ${user?.name || user?.email?.split('@')[0] || 'FT Teacher'}`}
                 </span>
               </div>
               <p className="text-xs text-zinc-400 mt-0.5">

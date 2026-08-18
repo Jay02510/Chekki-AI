@@ -54,6 +54,10 @@ export interface UserProfile {
   childEnglishLevel?: string;
   parentEnglishLevel?: string;
   role?: 'parent' | 'teacher' | 'admin' | 'director' | 'foreign_teacher' | 'korean_teacher';
+  // Sub-type of role: 'teacher' — see api/redeem.ts's educatorRole/invite.role.
+  // Do NOT use email.includes('kt') as a substitute (see TeacherPage.tsx's
+  // comment on the same field for why).
+  educatorRole?: 'ft' | 'kt';
   classId?: string | null;
   studentName?: string | null;
   classStatus?: 'pending' | 'active' | null;
