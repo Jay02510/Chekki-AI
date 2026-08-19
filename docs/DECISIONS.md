@@ -6,6 +6,32 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 019 — Loop diagram: 4-node honest loops + shortened headline/payoff copy
+
+**Date:** 2026-08-19
+**Status:** Resolved
+
+**Context:** The `/schools` landing page's "Two loops, always turning" diagram (`SchoolLoopDiagram.tsx`) originally drew each loop as 3 nodes in a closed triangle. Review surfaced two problems: (1) each loop was missing its actual closing step — the teacher loop skipped "teach to the gap" between mistakes surfacing and the next week's upload, and the parent loop skipped "parent reads it" after KT sends, so the diagram implied the loop closed on an action neither role actually took; (2) drawing all edges identically implied the closing connection was as causal as the others, when it's really just the cadence restarting (reading a report doesn't cause tomorrow's log entry). Separately, while iterating reference images in Gemini, the headline/payoff copy got tightened to something punchier than the original code copy.
+
+**Decision:** Both loops now render 4 nodes in a diamond layout. The first 3 connecting edges stay solid (real cause → effect); the closing edge (node 4 back to node 1) is dashed, dimmer, and carries its own "Every week"/"Every day" cadence label instead of sharing one generic center label — visually distinguishing "this caused that" from "this cycle restarts on schedule." Copy shortened: teacher headline "Upload homework. Track mistakes." (was "Upload homework. See what's stuck."), teacher payoff "Walk into the class prepared." (was the longer "...already knowing which students need help, and with what."); parent headline "Stay up to date. Stay in the loop." (was "Class happens. The update follows."), parent payoff "Stay informed about how your child's day went." (was "...— in Korean, same day.").
+
+**Consequences:** The live component is the source of truth for this copy — no separate marketing doc holds it. A static reference image was also generated in Gemini (dark background) matching this version for use outside the live page (social/blog); a light-mode variant is a separate manual Gemini generation, not something this repo can produce (no image-gen tooling here).
+
+---
+
+## 018 — Director tools added strictly within the existing core loop; enrollment/tuition explicitly out of scope
+
+**Date:** 2026-08-19
+**Status:** Resolved
+
+**Context:** Asked (acting as a school principal) what director-facing analytics/management tools were missing beyond the student roster. The first pass of candidates included enrollment funnel and tuition/payment tracking — both real director needs, but neither touches anything Chekki currently does (grading, curriculum, daily logs, KT parent reports). Redirected the scope to tools that extend data Chekki already collects.
+
+**Decision:** Built two director-only views, both read/aggregate over existing data with no new Firestore collections: (1) **Student Database** (`StudentDatabaseGrid.tsx`) — an Airtable-style sortable/searchable/filterable grid over the same `activeRoster`/`pendingRoster` `NativeDirectorStudentsTab.tsx` already fetches, added via `@tanstack/react-table` (pinned to stable `^8.21.3`, not the `^9` default `npm install` resolves to — v9 is a lower-level API that doesn't match the widely-documented v8 hooks). (2) **Log Compliance Tracker** (`LogComplianceTracker.tsx` + `hooks/useLogCompliance.ts`) — per-class, per-day rollup of whether that class's assigned teacher submitted a log, with a miss-streak badge; queries each class's existing `classes/{id}/logs` subcollection by `date`, same subcollection-query shape `useKtReviewQueue.ts` already uses. `NativeDirectorStudentsTab.tsx`'s CSV export logic was extracted to `src/utils/csvExport.ts` so both the new grid and the existing roster tab share one implementation instead of two copies.
+
+**Consequences:** Two new sidebar tabs (`student_database`, `log_compliance` added to `TabId`), director-only, gated the same way `students`/`director_hq` already are — no FT/KT surface touched. Enrollment funnel and tuition/payment status remain explicitly unbuilt; if either comes up again, treat it as a new, separate scoping conversation rather than folding it into these two views.
+
+---
+
 ## 017 — Parent email is optional when adding a student; partially reopens Decision 001
 
 **Date:** 2026-08-17

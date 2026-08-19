@@ -386,7 +386,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
       )}
       {lastLink && (
         <div className="flex items-center gap-2">
-          <input readOnly value={lastLink} className="flex-1 p-2 rounded-lg bg-black/30 border border-white/10 text-[10px] font-mono text-zinc-300" />
+          <input readOnly value={lastLink} className="flex-1 min-w-0 p-2 rounded-lg bg-black/30 border border-white/10 text-[10px] font-mono text-zinc-300 truncate" />
           <button
             type="button"
             onClick={() => copyInviteLink(lastLink)}

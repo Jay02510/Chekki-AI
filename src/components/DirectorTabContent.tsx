@@ -2,6 +2,9 @@ import React from 'react';
 import { NativeDirectorPortal } from './NativeDirectorPortal';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
 import { StudentInvitePanel } from './StudentInvitePanel';
+import { StudentDatabaseGrid } from './StudentDatabaseGrid';
+import { LogComplianceTracker } from './LogComplianceTracker';
+import { useLogCompliance } from '../../hooks/useLogCompliance';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
@@ -41,6 +44,7 @@ interface Props {
 // combined switchboard is dropped (it always resolved true here anyway).
 export function DirectorTabContent(props: Props) {
   const { isNight, isKo, activeTab } = props;
+  const { complianceRows, isLoading: isLoadingCompliance } = useLogCompliance(props.classes);
 
   return (
     <>
@@ -89,6 +93,28 @@ export function DirectorTabContent(props: Props) {
             setSelectedStudentDetails={props.setSelectedStudentDetails}
           />
         </div>
+      )}
+
+      {activeTab === 'student_database' && (
+        <StudentDatabaseGrid
+          isNight={isNight}
+          isKo={isKo}
+          activeRoster={props.activeRoster}
+          pendingRoster={props.pendingRoster}
+          classes={props.classes}
+          handleMoveStudent={props.handleMoveStudent}
+          handleRemoveStudent={props.handleRemoveStudent}
+          setSelectedStudentDetails={props.setSelectedStudentDetails}
+        />
+      )}
+
+      {activeTab === 'log_compliance' && (
+        <LogComplianceTracker
+          isNight={isNight}
+          isKo={isKo}
+          complianceRows={complianceRows}
+          isLoading={isLoadingCompliance}
+        />
       )}
     </>
   );

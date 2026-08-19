@@ -1,5 +1,5 @@
 import React from 'react';
-import { Buildings, Users, CaretRight } from '@phosphor-icons/react';
+import { Buildings, Users, Table, ClipboardText, CaretRight } from '@phosphor-icons/react';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
@@ -64,6 +64,52 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
             <span>{isKo ? '👥 원생 명단 관리 (Roster)' : '👥 Student Roster'}</span>
           </div>
           <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+        </button>
+
+        <button
+          onClick={() => setActiveTab('student_database')}
+          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+            activeTab === 'student_database'
+              ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+              : isNight
+                ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-xl transition-colors ${
+              activeTab === 'student_database'
+                ? 'bg-orange-500/20 text-orange-500'
+                : isNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
+            }`}>
+              <Table size={18} weight="bold" />
+            </div>
+            <span>{isKo ? '🗂️ 학생 데이터베이스' : '🗂️ Student Database'}</span>
+          </div>
+          <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'student_database' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+        </button>
+
+        <button
+          onClick={() => setActiveTab('log_compliance')}
+          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+            activeTab === 'log_compliance'
+              ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
+              : isNight
+                ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-xl transition-colors ${
+              activeTab === 'log_compliance'
+                ? 'bg-orange-500/20 text-orange-500'
+                : isNight ? 'bg-white/5 text-rose-400 group-hover:text-white' : 'bg-rose-100 text-rose-600 group-hover:text-zinc-900'
+            }`}>
+              <ClipboardText size={18} weight="bold" />
+            </div>
+            <span>{isKo ? '📋 일지 제출 현황' : '📋 Log Compliance'}</span>
+          </div>
+          <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'log_compliance' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
         </button>
       </div>
     </>

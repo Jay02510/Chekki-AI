@@ -440,7 +440,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
                               onChange={(e) => setAddEmailValue(e.target.value)}
                               placeholder="parent@email.com"
                               required
-                              className={`flex-1 p-2 rounded-lg border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'}`}
+                              className={`flex-1 min-w-0 p-2 rounded-lg border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'}`}
                             />
                             <button
                               type="submit"

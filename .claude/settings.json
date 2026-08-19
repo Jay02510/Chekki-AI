@@ -54,7 +54,14 @@
       "Bash(rtk npm *)",
       "Bash(/usr/bin/find /Users/jasonbenjamin/Projects/Chekki-AI-main -name \"aiGenerator.ts\" ! -path \"*/node_modules/*\")",
       "Bash(node .claude/skills/impeccable/scripts/hook-admin.mjs ignore-value gray-on-color \"text-zinc-900\" --file src/components/NativeKtDashboard.tsx --reason \"light-mode textarea: text-zinc-900 \\(near-black\\) on bg-orange-50/50 \\(light orange tint\\) is high-contrast dark-on-light, not washed-out gray-on-saturated-color — detector's heuristic treats any zinc-* text class as gray regardless of shade\")",
-      "Bash(awk '{print $1}')"
+      "Bash(awk '{print $1}')",
+      "Bash(timeout 30 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 1; done')",
+      "Bash(npx --yes playwright@latest install --with-deps chromium)",
+      "Bash(node shot.mjs http://localhost:3000/schools schools.png)",
+      "Bash(node shot.mjs http://localhost:3000/schools schools-newloop.png)",
+      "Bash(grep -n 'text-white\">$\\\\|font-black tracking-tight text-white' /Users/jasonbenjamin/Projects/Chekki-AI-main/src/Landing.tsx)",
+      "Bash(node shot.mjs http://localhost:3000/schools schools-newloop2.png)",
+      "Bash(echo \"EXIT: $?\")"
     ]
   }
 }

@@ -1,16 +1,7 @@
 import React from 'react';
 import { Warning, UserCheck, CheckCircle, MagnifyingGlass, DownloadSimple } from '@phosphor-icons/react';
 import { StatTile } from './ui/StatTile';
-
-// Escapes a CSV field per RFC 4180: wraps in quotes and doubles any embedded
-// quotes whenever the value contains a comma, quote, or newline.
-export function csvField(value: unknown): string {
-  const str = value === null || value === undefined ? '' : String(value);
-  if (/[",\n]/.test(str)) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
-}
+import { downloadCSV } from '../utils/csvExport';
 
 function exportRosterCSV(pendingRoster: any[], activeRoster: any[], className: string) {
   const header = ['Student Name', 'Parent Name', 'Parent Email', 'Status', 'Weekly Scan', 'Last Scan Date', 'Flagged', 'Flag Reason', 'Flag Date'];
@@ -29,17 +20,7 @@ function exportRosterCSV(pendingRoster: any[], activeRoster: any[], className: s
     ]),
   ];
 
-  const csv = [header, ...rows].map((row) => row.map(csvField).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  const safeClassName = (className || 'roster').replace(/[^a-z0-9-_]+/gi, '-');
-  link.href = url;
-  link.download = `${safeClassName}-roster-${new Date().toISOString().split('T')[0]}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  downloadCSV(header, rows, `${className || 'roster'}-roster`);
 }
 
 interface Props {

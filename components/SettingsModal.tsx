@@ -9,6 +9,7 @@ import { FeedbackModal } from './FeedbackModal';
 import { db, dbInstance } from '../services/database';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { InAppReview } from '@capacitor-community/in-app-review';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface Props {
   onClose: () => void;
@@ -56,6 +57,8 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
   const [isUpgradingCode, setIsUpgradingCode] = useState(false);
   const [redeemError, setRedeemError] = useState('');
   const [redeemSuccess, setRedeemSuccess] = useState('');
+  const [showCodeEntry, setShowCodeEntry] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   const [activeClassDetails, setActiveClassDetails] = useState<any>(null);
   const [isLoadingClassDetails, setIsLoadingClassDetails] = useState(false);
@@ -581,65 +584,121 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                     {language === 'ko' ? '🏫 학급 가입 및 Premium 인증' : '🏫 School Sponsorship'}
                   </h3>
 
-                  <form
-                    onSubmit={handleRedeemClassCode}
-                    className="p-5 bg-zinc-900/40 border border-zinc-900 rounded-3xl space-y-4 text-left"
-                  >
+                  {/* Default: most parents don't have a code yet — nudge them
+                      to invite their director instead of a dead-end form. */}
+                  <div className="p-5 bg-orange-500/5 border border-orange-500/15 rounded-3xl space-y-4 text-left">
                     <p className="text-xs text-zinc-400 font-medium leading-relaxed break-keep">
                       {language === 'ko'
-                        ? '다니고 계신 어학원(Poly, GATE, ECC 등) 담당 선생님께 초대받으셨나요? 초대 코드를 입력해 Premium 혜택과 맞춤형 숙제 관리를 시작하세요.'
-                        : "Were you invited by your child's teacher (Poly, GATE, ECC, etc.)? Enter your invite code to activate premium grading and sync homework."}
+                        ? '다니고 계신 어학원 원장님이 체키 스쿨 프로를 도입하시면, 원장님 초대로 Premium 혜택을 100% 무료로 이용하실 수 있어요.'
+                        : "If your child's academy director adopts Chekki School Pro, you get Premium access 100% free via their personal invite."}
                     </p>
 
-                    {user?.plan === 'pro' && (
-                      <div className="p-3 bg-orange-500/5 border border-orange-500/15 text-orange-400 text-[10px] sm:text-xs font-semibold rounded-xl leading-normal font-korean">
-                        ⚠️{' '}
+                    <div className="bg-zinc-950/40 border border-white/10 rounded-2xl p-3.5 space-y-1.5">
+                      <p className="text-[10px] font-mono font-bold uppercase text-orange-400 tracking-wider">
+                        {language === 'ko' ? '📋 추천 메시지 미리보기' : '📋 PREVIEW MESSAGE'}
+                      </p>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
                         {language === 'ko'
-                          ? '주의: 현재 유료 정기 결제 플랜을 사용 중이십니다. 초대 코드를 등록해도 자동 정기 결제는 연동되지 않으므로, 이중 청구를 방지하기 위해 App Store 또는 Google Play에서 구독을 수동으로 취소해 주세요.'
-                          : 'Note: You have an active Premium plan. Joining via an invite code transitions your account sponsorship. Please cancel your App Store or Play Store subscription manually to avoid duplicate billing.'}
-                      </div>
-                    )}
-
-                    <div className="space-y-1.5">
-                      <label
-                        className={`block text-xs font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}
-                      >
-                        {language === 'ko'
-                          ? '초대 코드 입력'
-                          : 'Enter Invite Code'}
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={classJoinCode}
-                          onChange={(e) => setClassJoinCode(e.target.value)}
-                          placeholder="E.g. MERC82"
-                          maxLength={6}
-                          className={`flex-1 ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-2xl px-5 py-3 focus:border-orange-500 outline-none text-sm uppercase font-mono tracking-widest`}
-                        />
-                        <button
-                          type="submit"
-                          disabled={isUpgradingCode}
-                          className="px-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0"
-                        >
-                          {isUpgradingCode ? (
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          ) : (
-                            <span>{language === 'ko' ? '등록' : 'Redeem'}</span>
-                          )}
-                        </button>
-                      </div>
+                          ? '안녕하세요 원장님! Chekki AI로 아이 숙제를 스캔해서 채점 결과를 바로 받아보고 있어요. Chekki School Pro를 도입하시면 선생님들 채점 시간이 크게 줄고, 저희 같은 학부모들은 전원 무료로 이용할 수 있대요. 한번 살펴봐 주시겠어요? https://www.chekkiai.com/schools'
+                          : "Hello Director! We've been using Chekki AI to scan and grade my child's homework — it's been great. Chekki School Pro brings this to your whole academy: teachers save hours on grading, and every parent gets it free. Worth a look: https://www.chekkiai.com/schools"}
+                      </p>
                     </div>
 
-                    {redeemError && (
-                      <p className="text-red-400 text-xs font-semibold pl-1">⚠️ {redeemError}</p>
-                    )}
-                    {redeemSuccess && (
-                      <p className="text-emerald-400 text-xs font-semibold pl-1">
-                        ✓ {redeemSuccess}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const inviteMsg = language === 'ko'
+                          ? '안녕하세요 원장님! Chekki AI로 아이 숙제를 스캔해서 채점 결과를 바로 받아보고 있어요. Chekki School Pro를 도입하시면 선생님들 채점 시간이 크게 줄고, 저희 같은 학부모들은 전원 무료로 이용할 수 있대요. 한번 살펴봐 주시겠어요? https://www.chekkiai.com/schools'
+                          : "Hello Director! We've been using Chekki AI to scan and grade my child's homework — it's been great. Chekki School Pro brings this to your whole academy: teachers save hours on grading, and every parent gets it free. Worth a look: https://www.chekkiai.com/schools";
+                        const copied = await copyToClipboard(inviteMsg);
+                        if (copied) {
+                          setInviteCopied(true);
+                          setTimeout(() => setInviteCopied(false), 2500);
+                        } else {
+                          showToast({
+                            type: 'error',
+                            message: language === 'ko' ? '복사에 실패했습니다. 다시 시도해 주세요.' : 'Copy failed — please try again.',
+                          });
+                        }
+                      }}
+                      className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl shadow-md transition-all cursor-pointer"
+                    >
+                      {inviteCopied
+                        ? (language === 'ko' ? '✓ 복사 완료!' : '✓ Copied!')
+                        : (language === 'ko' ? '메시지 복사하기' : 'Copy Invite Message')}
+                    </button>
+                  </div>
+
+                  {/* Fallback for the minority who already have a personal code. */}
+                  {!showCodeEntry ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowCodeEntry(true)}
+                      className="text-zinc-500 hover:text-orange-500 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      {language === 'ko' ? '이미 초대 코드가 있으신가요?' : 'Already have an invite code?'}
+                    </button>
+                  ) : (
+                    <form
+                      onSubmit={handleRedeemClassCode}
+                      className="p-5 bg-zinc-900/40 border border-zinc-900 rounded-3xl space-y-4 text-left"
+                    >
+                      <p className="text-xs text-zinc-400 font-medium leading-relaxed break-keep">
+                        {language === 'ko'
+                          ? '다니고 계신 어학원(Poly, GATE, ECC 등) 담당 선생님께 초대받으셨나요? 초대 코드를 입력해 Premium 혜택과 맞춤형 숙제 관리를 시작하세요.'
+                          : "Were you invited by your child's teacher (Poly, GATE, ECC, etc.)? Enter your invite code to activate premium grading and sync homework."}
                       </p>
-                    )}
-                  </form>
+
+                      {user?.plan === 'pro' && (
+                        <div className="p-3 bg-orange-500/5 border border-orange-500/15 text-orange-400 text-[10px] sm:text-xs font-semibold rounded-xl leading-normal font-korean">
+                          ⚠️{' '}
+                          {language === 'ko'
+                            ? '주의: 현재 유료 정기 결제 플랜을 사용 중이십니다. 초대 코드를 등록해도 자동 정기 결제는 연동되지 않으므로, 이중 청구를 방지하기 위해 App Store 또는 Google Play에서 구독을 수동으로 취소해 주세요.'
+                            : 'Note: You have an active Premium plan. Joining via an invite code transitions your account sponsorship. Please cancel your App Store or Play Store subscription manually to avoid duplicate billing.'}
+                        </div>
+                      )}
+
+                      <div className="space-y-1.5">
+                        <label
+                          className={`block text-xs font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}
+                        >
+                          {language === 'ko'
+                            ? '초대 코드 입력'
+                            : 'Enter Invite Code'}
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={classJoinCode}
+                            onChange={(e) => setClassJoinCode(e.target.value)}
+                            placeholder="E.g. MERC82"
+                            maxLength={6}
+                            className={`flex-1 min-w-0 ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-2xl px-5 py-3 focus:border-orange-500 outline-none text-sm uppercase font-mono tracking-widest`}
+                          />
+                          <button
+                            type="submit"
+                            disabled={isUpgradingCode}
+                            className="px-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0"
+                          >
+                            {isUpgradingCode ? (
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                              <span>{language === 'ko' ? '등록' : 'Redeem'}</span>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {redeemError && (
+                        <p className="text-red-400 text-xs font-semibold pl-1">⚠️ {redeemError}</p>
+                      )}
+                      {redeemSuccess && (
+                        <p className="text-emerald-400 text-xs font-semibold pl-1">
+                          ✓ {redeemSuccess}
+                        </p>
+                      )}
+                    </form>
+                  )}
                 </div>
               ) : (
                 /* --- SCHOOL & CLASSROOM SETTINGS (Case B: Already B2B, configure child/class) --- */

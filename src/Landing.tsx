@@ -4,6 +4,7 @@ import ParentReliefStrip from './components/ParentReliefStrip';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from 'framer-motion';
+import { copyToClipboard } from '../utils/clipboard';
 import {
   PlayCircle,
   GraduationCap,
@@ -895,9 +896,9 @@ export default function Home() {
                 {isKo ? '📋 추천 카카오톡 / 문자 메시지' : '📋 PREVIEW INVITATION MESSAGE'}
               </p>
               <p className="text-xs text-zinc-300 leading-relaxed font-sans">
-                {isKo 
-                  ? '안녕하세요 원장님! 우리 학원 교재 목차 자동 등록 및 AI 정밀 숙제 채점 시스템 "체키 스쿨 프로" 도입을 추천드려요. 학원도 편해지고 학부모님들도 초대만 하면 무료로 이용하실 수 있어요! https://chekki.app/schools'
-                  : 'Hello Director! I recommend implementing "Chekki School Pro" for textbook syllabus auto-seeding and AI autograding. Check out https://chekki.app/schools'}
+                {isKo
+                  ? '안녕하세요 원장님! Chekki AI로 아이 숙제를 스캔해서 채점 결과를 바로 받아보고 있어요. Chekki School Pro를 도입하시면 선생님들 채점 시간이 크게 줄고, 저희 같은 학부모들은 전원 무료로 이용할 수 있대요. 한번 살펴봐 주시겠어요? https://www.chekkiai.com/schools'
+                  : "Hello Director! We've been using Chekki AI to scan and grade my child's homework — it's been great. Chekki School Pro brings this to your whole academy: teachers save hours on grading, and every parent gets it free. Worth a look: https://www.chekkiai.com/schools"}
               </p>
             </div>
 
@@ -905,13 +906,15 @@ export default function Home() {
             <div className="space-y-3">
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   const inviteMsg = isKo
-                    ? '안녕하세요 원장님! 우리 학원 교재 목차 자동 등록 및 AI 정밀 숙제 채점 시스템 "체키 스쿨 프로" 도입을 추천드려요. 학원도 편해지고 학부모님들도 초대만 하면 무료로 이용하실 수 있어요! https://chekki.app/schools'
-                    : 'Hello Director! Check out Chekki School Pro for textbook syllabus auto-seeding and AI autograding: https://chekki.app/schools';
-                  navigator.clipboard.writeText(inviteMsg);
-                  setCopiedInvite(true);
-                  setTimeout(() => setCopiedInvite(false), 2500);
+                    ? '안녕하세요 원장님! Chekki AI로 아이 숙제를 스캔해서 채점 결과를 바로 받아보고 있어요. Chekki School Pro를 도입하시면 선생님들 채점 시간이 크게 줄고, 저희 같은 학부모들은 전원 무료로 이용할 수 있대요. 한번 살펴봐 주시겠어요? https://www.chekkiai.com/schools'
+                    : "Hello Director! We've been using Chekki AI to scan and grade my child's homework — it's been great. Chekki School Pro brings this to your whole academy: teachers save hours on grading, and every parent gets it free. Worth a look: https://www.chekkiai.com/schools";
+                  const copied = await copyToClipboard(inviteMsg);
+                  if (copied) {
+                    setCopiedInvite(true);
+                    setTimeout(() => setCopiedInvite(false), 2500);
+                  }
                 }}
                 className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs rounded-2xl shadow-lg shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95"
               >

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProfile, SubscriptionRecord, SubscriptionPlatform } from '../types';
-import { describeError } from '../utils/describeError';
 import { auth, db, dbInstance } from '../services/database';
 import { doc, updateDoc, increment, arrayRemove, deleteDoc } from 'firebase/firestore';
 import {
@@ -296,8 +295,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setShowLoginModal(false);
         }
       } catch (err) {
-        console.error('[AuthContext] Redirect login error:', err);
-        setRedirectAuthError(describeError(err, 'Sign-in failed. Please try again.'));
+        // No screen in this app currently calls signInWithRedirect() — this
+        // check runs unconditionally on every cold launch purely to catch a
+        // redirect flow that never happens, so any transient error it
+        // throws (storage read glitch, a persistence hiccup during the
+        // auth-init retry in services/database.ts) was surfacing as a
+        // false-alarm "Sign-in failed" toast before the user had done
+        // anything. Log only — there is no real redirect result being lost.
+        console.error('[AuthContext] Redirect login error (non-fatal, no redirect flow in use):', err);
       }
     };
 
@@ -339,7 +344,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // If the profile is null and we are not in the middle of a signup,
           // the user is authenticated in Firebase but has no Firestore profile.
           // This happens if the page reloads during sign in (e.g. signInWithRedirect or Safari unloading).
-          if (!isSigningUpRef.current) {
+          // Anonymous guest sessions (see the GUEST AUTH branch below) skip
+          // this entirely — they aren't a real account, so there's nothing
+          // to persist a profile doc for (was writing a throwaway 'free'
+          // plan doc to Firestore on every guest session for no benefit,
+          // since guest quota is tracked in localStorage, not this doc).
+          if (!isSigningUpRef.current && !user.isAnonymous) {
             console.log('[AuthContext] Creating missing profile for authenticated user');
             const newProfile: UserProfile = {
               name: user.displayName || 'User',
@@ -940,7 +950,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserProfile({ ...userProfile, name });
       return;
     }
-    if (!firebaseUser || !userProfile) return;
+    if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) return;
     setUserProfile({ ...userProfile, name });
     await db.updateUser(firebaseUser.uid, { name });
   };
@@ -954,7 +964,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserProfile({ ...userProfile, childAge, childEnglishLevel, parentEnglishLevel });
       return;
     }
-    if (!firebaseUser || !userProfile) return;
+    if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) {
+      throw new Error('Not signed in.');
+    }
     const updates = { childAge, childEnglishLevel, parentEnglishLevel };
     setUserProfile({ ...userProfile, ...updates });
     await db.updateUser(firebaseUser.uid, updates);
@@ -970,7 +982,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       return;
     }
-    if (!firebaseUser || !userProfile) return;
+    if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) return;
 
     // Only set pending if a non-empty class ID is selected and it differs from current classId
     const isNewEnrollment = classId && classId !== userProfile.classId;
@@ -1133,14 +1145,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserProfile({ ...userProfile, isCanceled: true });
       return;
     }
-    if (!firebaseUser || !userProfile) return;
+    if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) return;
     const updates: Partial<UserProfile> = { isCanceled: true };
     setUserProfile({ ...userProfile, ...updates });
     await db.updateUser(firebaseUser.uid, updates);
   };
 
   const requestLimitReset = async (reason: string): Promise<boolean> => {
-    if (!firebaseUser) return false;
+    if (!firebaseUser || firebaseUser.isAnonymous) return false;
     try {
       await db.sendFeedback(firebaseUser.uid, {
         comment: `[RESET_REQUEST] ${reason}`,
@@ -1154,7 +1166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const joinSchool = async (schoolCode: string): Promise<boolean> => {
-    if (!firebaseUser || !userProfile) return false;
+    if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) return false;
 
     try {
       const idToken = await firebaseUser.getIdToken();
@@ -1190,7 +1202,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const joinClassWithCode = async (classCode: string): Promise<boolean> => {
-    if (!firebaseUser || !userProfile) return false;
+    if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) return false;
 
     try {
       const idToken = await firebaseUser.getIdToken();
@@ -1235,7 +1247,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const redeemClassCodeDetailed = useCallback(async (
     classCode: string
   ): Promise<{ success: boolean; schoolName?: string; className?: string; error?: string; wrongAccount?: boolean }> => {
-    if (!firebaseUser || !userProfile) return { success: false, error: 'Not signed in.' };
+    if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) {
+      return { success: false, error: 'Not signed in.' };
+    }
 
     try {
       const idToken = await firebaseUser.getIdToken();
@@ -1274,7 +1288,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [firebaseUser, userProfile, setUserProfile]);
 
   const leaveClassroom = async () => {
-    if (!firebaseUser || !userProfile) return;
+    if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) return;
     const isPaidUser = subscriptionRecord && subscriptionRecord.subscription_status === 'active';
     const updates = {
       classId: null,
@@ -1290,7 +1304,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const upgradeToPro = async (code?: string): Promise<boolean> => {
-    if (!firebaseUser || !userProfile) return false;
+    if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) return false;
 
     if (code) {
       const sanitizedCode = code.toUpperCase().trim();
@@ -1324,7 +1338,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     product: any = AppleProducts.MONTHLY
   ): Promise<{ success: boolean; message?: string; userCancelled?: boolean }> => {
     const isDemo = ['test@example.com', 'expired@example.com'].includes(userProfile?.email || '');
-    if (!isDemo && (!firebaseUser || !userProfile)) {
+    if (!isDemo && (!firebaseUser || !userProfile || firebaseUser.isAnonymous)) {
       return { success: false, message: 'Please log in to subscribe.' };
     }
 
@@ -1354,7 +1368,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const restorePurchases = async (): Promise<{ success: boolean; message?: string }> => {
-    if (!firebaseUser) return { success: false, message: 'Not logged in.' };
+    if (!firebaseUser || firebaseUser.isAnonymous) {
+      return { success: false, message: 'Not logged in.' };
+    }
 
     const res = await subscriptionService.restorePurchases(firebaseUser.uid);
     if (res.success && userProfile?.plan !== 'pro') {
@@ -1401,7 +1417,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         joinSchool,
         cancelSubscription,
         requestLimitReset,
-        isAuthenticated: !!userProfile,
+        // A native guest session (signInAnonymously, see the
+        // onAuthStateChanged null-user branch above) gets its own Firestore
+        // profile so scan/question counters have somewhere to live, but it
+        // is not a real account — treating it as authenticated let guests
+        // silently land in the same "free plan" UI as a signed-in parent,
+        // with the login modal never prompted (Bug: guest auto "logged in").
+        isAuthenticated: !!userProfile && !firebaseUser?.isAnonymous,
         isLoading,
         showPaywall,
         setShowPaywall,

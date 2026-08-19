@@ -31,3 +31,5 @@ The current release includes the remaining audit remediation work for core produ
 - Added director roster/class CSV export (client-side, no new serverless function).
 - Stood up CI (GitHub Actions: typecheck, test, lint (report-only), build on every push/PR to `main`) and a first unit test suite (Vitest) covering seat-limit math and CSV field escaping.
 - Added Sentry error monitoring for both the frontend (`@sentry/react`, via `VITE_SENTRY_DSN`) and the Vercel API functions (`@sentry/node`, via `SENTRY_DSN`); no-ops until those env vars are set.
+- Split `src/pages/TeacherPage.tsx` (was 4,678 lines, one component for all three staff roles) into role-scoped hooks and shell components — director/FT/KT each render from their own tab-content/sidebar-nav components off shared state hooks, cutting regression risk when one role's code changes.
+- Added two director-only dashboard tools: a sortable/searchable/filterable Student Database grid (`@tanstack/react-table`) and a Log Compliance Tracker (per-class daily log submission rollup with miss-streak badges) — both read/aggregate over existing data, no new backend.

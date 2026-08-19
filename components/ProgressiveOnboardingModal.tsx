@@ -40,6 +40,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [parentLevel, setParentLevel] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profileSubmitError, setProfileSubmitError] = useState('');
 
   // School code step state
   const [classCode, setClassCode] = useState('');
@@ -52,12 +53,20 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
   const handleProfileSubmit = async () => {
     if (!selectedAge || !selectedLevel || !parentLevel) return;
     setIsSubmitting(true);
+    setProfileSubmitError('');
     try {
       await updateChildProfile(selectedAge, selectedLevel, parentLevel);
       setStep(7); // advance to school code step
     } catch (e) {
       console.error(e);
-      onSkip();
+      // Don't silently treat a save failure (e.g. not signed in yet) as a
+      // permanent skip — that stranded users on a "done" screen whose
+      // childAge/schoolId were never actually persisted. Let them retry.
+      setProfileSubmitError(
+        language === 'ko'
+          ? '저장하지 못했습니다. 다시 시도해 주세요.'
+          : "Couldn't save. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -259,6 +268,9 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       </div>
 
       <div className="space-y-4 pt-4 border-t border-white/5">
+        {profileSubmitError && (
+          <p className="text-center text-xs font-bold text-red-400">{profileSubmitError}</p>
+        )}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}

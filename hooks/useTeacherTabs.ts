@@ -6,6 +6,8 @@ export type TabId =
   | 'syllabus'
   | 'homework'
   | 'students'
+  | 'student_database'
+  | 'log_compliance'
   | 'history'
   | 'curriculum'
   | 'director_hq'

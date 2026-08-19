@@ -2,6 +2,9 @@ What's New in Chekki AI
 
 English
 
+Student Database & Log Compliance Tracker for Directors
+Directors now have two new dashboard tabs. "Student Database" is a searchable, sortable spreadsheet-style view of the whole roster — filter by class, sort any column, and export to CSV. "Log Compliance" shows every class's daily-log submission history at a glance for the last two weeks, with a streak badge flagging classes that have gone multiple days without a log.
+
 Fill Your Daily Log by Voice
 Foreign teachers can now speak their daily class log instead of tapping through every field. Describe the lesson, energy level, activities, and any student worth flagging in one breath — Chekki shows exactly what it heard and which fields it's about to fill before anything is applied, so you always confirm before it counts. Your voice is never saved; it's discarded right after processing.
 
@@ -19,6 +22,9 @@ The Weekly Insights tab now has a chat box. Ask directly about this week's troub
 채키 AI 업데이트 소식
 
 한국어
+
+원장님을 위한 학생 데이터베이스 & 일지 제출 현황
+원장님 대시보드에 새로운 탭 두 개가 추가되었습니다. "학생 데이터베이스"는 전체 원생 명단을 검색하고 정렬할 수 있는 스프레드시트 형태의 화면으로, 반별 필터링과 CSV 내보내기가 가능합니다. "일지 제출 현황"은 최근 2주간 반별 일지 제출 여부를 한눈에 보여주며, 여러 날 연속 미제출된 반은 스트릭 배지로 표시됩니다.
 
 음성으로 일지 작성하기
 이제 원어민 선생님께서 매일의 수업 일지를 하나하나 입력하는 대신 말로 작성할 수 있습니다. 수업 주제, 분위기, 활동, 그리고 눈에 띄는 학생이 있다면 한 번에 이야기해 주세요. 채키가 들은 내용과 어떤 항목에 입력될지 먼저 보여드리므로, 확인 후에만 반영됩니다. 음성은 저장되지 않으며 처리 즉시 삭제됩니다.

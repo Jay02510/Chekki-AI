@@ -50,7 +50,21 @@ export const auth = (() => {
       if (e.code === 'auth/already-initialized') {
         return getAuth(app);
       }
-      console.error('Firebase auth initialization error:', e);
+      console.error('Firebase auth initialization error, retrying with indexedDB persistence:', e);
+      try {
+        return initializeAuth(app, {
+          persistence: indexedDBLocalPersistence,
+        });
+      } catch (e2: any) {
+        if (e2.code === 'auth/already-initialized') {
+          return getAuth(app);
+        }
+        // Both persistence strategies failed — sessions will not survive an
+        // app restart on this device. Surface loudly rather than silently
+        // falling back to an unconfigured getAuth(app), which was masking
+        // this as "auth randomly logs users out on cold start."
+        console.error('Firebase auth: both browserLocal and indexedDB persistence failed, falling back to default (session will NOT persist):', e2);
+      }
     }
   }
   return getAuth(app);

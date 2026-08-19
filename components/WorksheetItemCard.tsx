@@ -319,7 +319,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                           <div
                             className={`teaching-script-text text-base md:text-xl ${isNight ? 'text-zinc-100' : 'text-zinc-800'} font-korean leading-relaxed font-bold italic`}
                             dangerouslySetInnerHTML={{
-                              __html: renderMarkdown(`&quot;${displayScript || ''}&quot;`),
+                              __html: renderMarkdown(`"${displayScript || ''}"`),
                             }}
                           />
                         </div>

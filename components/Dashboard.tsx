@@ -29,6 +29,7 @@ import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 import { Capacitor } from '@capacitor/core';
 import { cleanAnswerText } from '../utils/speechUtils';
 import { playSuccessSound, hapticSuccess, hapticError } from '../utils/feedbackUtils';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface DashboardProps {
   onClose: () => void;
@@ -474,12 +475,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             </div>
             <div>
               <h3 className="text-sm font-bold text-white tracking-tight">
-                {language === 'ko' ? '우리 아이 어학원에 Chekki 무료 도입 추천하기' : 'Invite Child\'s Academy for ₩0 Free Access'}
+                {language === 'ko' ? '원장님께 추천하고, 우리 아이는 무료로' : "Get Your Academy On Board — Your Child Goes Free"}
               </h3>
               <p className="text-xs text-zinc-400 leading-normal">
                 {language === 'ko'
-                  ? '원장님이 Chekki School Pro를 승인하면 학부모님은 ₩0원에 프리미엄 서비스를 이용하실 수 있습니다.'
-                  : 'When your director activates Chekki School Pro, parents get ₩0 free unlimited access.'}
+                  ? '원장님이 Chekki School Pro를 도입하시면, 채점 시간은 줄고 학부모님은 ₩0원으로 프리미엄을 이용하실 수 있어요.'
+                  : "Chekki School Pro autogrades homework so teachers save hours — and every parent at the academy gets Premium free."}
               </p>
             </div>
           </div>
@@ -487,8 +488,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             type="button"
             onClick={async () => {
               const inviteText = language === 'ko'
-                ? '안녕하세요 원장님! 저희 아이 영자신문 및 숙제 검토에 Chekki AI 앱을 활용 중입니다. 어학원 연동 및 전원 ₩0원 무료 혜택(Chekki School Pro)을 확인해보세요: https://chekki.ai/schools'
-                : 'Hello Director! Our family is using Chekki AI for daily homework scans. Check out Chekki School Pro for ₩0 free student access: https://chekki.ai/schools';
+                ? '안녕하세요 원장님! Chekki AI로 아이 숙제를 스캔해서 채점 결과를 바로 받아보고 있어요. Chekki School Pro를 도입하시면 선생님들 채점 시간이 크게 줄고, 저희 같은 학부모들은 전원 무료로 이용할 수 있대요. 한번 살펴봐 주시겠어요? https://www.chekkiai.com/schools'
+                : "Hello Director! We've been using Chekki AI to scan and grade my child's homework — it's been great. Chekki School Pro brings this to your whole academy: teachers save hours on grading, and every parent gets it free. Worth a look: https://www.chekkiai.com/schools";
 
               // 1. If mobile Web Share API is available, trigger native 1-click KakaoTalk / SMS share sheet
               if (navigator.share) {
@@ -496,7 +497,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   await navigator.share({
                     title: language === 'ko' ? 'Chekki 어학원 원장님 초대' : 'Chekki Academy Director Invite',
                     text: inviteText,
-                    url: 'https://chekki.ai/schools'
+                    url: 'https://www.chekkiai.com/schools'
                   });
                   showToast({
                     message: language === 'ko' ? '원장님 추천 초대장 전달 완료!' : 'Invitation shared successfully!',
@@ -508,14 +509,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 }
               }
 
-              // 2. Fallback: Copy to Clipboard
-              if (navigator.clipboard) {
-                navigator.clipboard.writeText(inviteText);
-                showToast({
-                  message: language === 'ko' ? '원장님 추천 초대 문구가 복사되었습니다! 카카오톡이나 이메일에 붙여넣어 주세요.' : 'Academy invitation link copied to clipboard! Paste into KakaoTalk or Email.',
-                  type: 'success'
-                });
-              }
+              // 2. Fallback: copy to clipboard (falls back further to
+              // execCommand if the Clipboard API is denied — see utils/clipboard.ts)
+              const copied = await copyToClipboard(inviteText);
+              showToast({
+                message: copied
+                  ? (language === 'ko' ? '원장님 추천 초대 문구가 복사되었습니다! 카카오톡이나 이메일에 붙여넣어 주세요.' : 'Academy invitation link copied to clipboard! Paste into KakaoTalk or Email.')
+                  : (language === 'ko' ? '복사에 실패했습니다. 다시 시도해 주세요.' : 'Copy failed — please try again.'),
+                type: copied ? 'success' : 'error',
+              });
             }}
             className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95"
           >

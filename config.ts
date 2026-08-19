@@ -27,9 +27,14 @@ const getApiBaseUrl = () => {
     return `http://${DEVELOPER_LOCAL_IP}:3000`;
   }
 
-  // Default production URL for native platforms
-  return 'https://chekkiai.com';
+  // Default production URL for native platforms.
+  // Must be the `www` host, not the bare apex domain: Vercel now 308-
+  // redirects chekkiai.com -> www.chekkiai.com, and a redirected response
+  // is not a valid CORS preflight (OPTIONS) response — every native fetch
+  // to the apex domain fails at the network layer before reaching the API
+  // (surfaced as NETWORK_ERROR / "Failed to fetch" in the app).
+  return 'https://www.chekkiai.com';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
-export const PUBLIC_APP_URL = 'https://chekkiai.com';
+export const PUBLIC_APP_URL = 'https://www.chekkiai.com';
