@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface Props {
   isNight: boolean;
@@ -22,7 +22,23 @@ const LOOP_IMAGE: Record<'dark' | 'light', Record<'en' | 'ko', { src: string; bg
   },
 };
 
+// Toggling theme/language swaps the <img src> between four separate static
+// files; without a warm cache the new file can take long enough to fetch
+// that the old (wrong-theme) image stays visibly on screen mid-swap. Prefetch
+// all four on mount so any later toggle resolves from cache instantly.
+function usePrefetchLoopImages() {
+  useEffect(() => {
+    Object.values(LOOP_IMAGE).forEach((byLang) => {
+      Object.values(byLang).forEach(({ src }) => {
+        const img = new Image();
+        img.src = src;
+      });
+    });
+  }, []);
+}
+
 export function SchoolLoopDiagram({ isNight, isKo }: Props) {
+  usePrefetchLoopImages();
   const variant = LOOP_IMAGE[isNight ? 'dark' : 'light'][isKo ? 'ko' : 'en'];
   const alt = isKo
     ? '두 개의 순환 루프. 선생님용: 숙제 업로드, 학부모가 스캔, 오답이 드러남, 격차 지도 (매주 반복). 학부모용: 교사가 일지 기록, AI가 초안 작성, KT 검토 후 발송, 학부모가 확인 (매일 반복).'

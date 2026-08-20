@@ -71,18 +71,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const isKo = language === 'ko';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Theme Persistence
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('chekki_theme');
-      if (savedTheme === 'light') {
-        setIsNight(false);
-      } else if (savedTheme === 'dark') {
-        setIsNight(true);
-      }
-    }
-  }, [setIsNight]);
-
   const toggleTheme = () => {
     const next = !isNight;
     setIsNight(next);
