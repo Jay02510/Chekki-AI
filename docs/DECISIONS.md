@@ -6,6 +6,23 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 020 — Pre-pilot security audit: fix login enumeration + runbook now, defer key rotation and admin MFA
+
+**Date:** 2026-08-21
+**Status:** Accepted (partially deferred)
+
+**Context:** Ran a 10-category security audit ahead of starting school-director outreach. Two items came back MISSING with real launch-relevance: (1) `LoginModal.tsx` returned distinct error strings for "no account with this email" vs "wrong password," letting an untargeted login attempt enumerate registered emails one guess at a time; (2) `git log -p --all` contains at least 4 real API keys committed in the past (Gemini key confirmed live-looking, three more flagged), and `api/admin.ts` gates impersonation/deletion/school creation behind one shared static passcode with no MFA or per-admin identity.
+
+**Decision:** Fixed the login-enumeration issue immediately — `auth/user-not-found` and `auth/wrong-password` now both surface the same generic "Invalid email or password" message for untargeted login attempts (the invite-flow case, where the app already knows this is the user's own invited email, keeps its specific messaging since that's not an enumeration vector). Added `docs/SECURITY_RUNBOOK.md` with concrete rotation steps for API keys, the admin passcode, and Firebase Auth compromise.
+
+Explicitly deferred both remaining items, on the operator's call:
+- **API key rotation**: a prior rotation attempt broke the live App Store build. Deferring until that failure mode is understood and a rotation can be done without repeating it — tracked as the runbook's "known open issue."
+- **Admin passcode → per-admin MFA**: only one admin (the operator) currently exists, so the "leaked shared secret = any of several people" blast radius the checklist item is designed against doesn't apply yet. Revisit when a second admin/ops person is added.
+
+**Consequences:** The enumeration fix and runbook ship now, closing the two items that were pure upside with no real cost. The two deferred items remain real open risk (a leaked historical key is still live until rotated) — `docs/SECURITY_RUNBOOK.md` documents them explicitly so they aren't silently forgotten once school outreach starts and the pressure to revisit them drops.
+
+---
+
 ## 019 — Loop diagram: 4-node honest loops + shortened headline/payoff copy
 
 **Date:** 2026-08-19

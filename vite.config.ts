@@ -86,9 +86,24 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
   };
 };
 
+// Vercel preview deployments serve the same build as production with no
+// distinguishing robots directive, so a stray preview URL is as indexable as
+// the live site. VERCEL_ENV is set by Vercel at build time ('production' |
+// 'preview' | 'development'); local builds run outside Vercel and leave it
+// unset, which also skips this (correct — nothing to protect there).
+const noindexOnPreview = () => ({
+  name: 'noindex-on-preview',
+  transformIndexHtml(html: string) {
+    if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
+      return html.replace('<head>', '<head>\n  <meta name="robots" content="noindex, nofollow">');
+    }
+    return html;
+  },
+});
+
 export default defineConfig(({ mode }) => ({
   base: './',
-  plugins: [react(), ...(mode === 'development' ? [apiMiddleware({ mode })] : [])],
+  plugins: [react(), noindexOnPreview(), ...(mode === 'development' ? [apiMiddleware({ mode })] : [])],
   server: {
     port: 3000,
     host: true,

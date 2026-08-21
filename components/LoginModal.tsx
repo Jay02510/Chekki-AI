@@ -83,13 +83,18 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         if (viewMode === 'login' && pendingClassCode) {
           // Invited parents usually don't have an account yet — send them
           // straight to Sign Up instead of leaving them stuck on Sign In.
+          // Safe to reveal here: this is the user's own invited email, not
+          // an attacker probing an arbitrary address.
           setViewMode('signup');
           msg = "No account found with this email yet — let's create one to join your class.";
         } else {
-          msg = 'No account found with this email.';
+          // Deliberately identical to auth/wrong-password below — telling an
+          // untargeted login attempt "no account" vs "wrong password" lets an
+          // attacker enumerate registered emails one guess at a time.
+          msg = 'Invalid email or password. Please try again.';
         }
       }
-      if (err.code === 'auth/wrong-password') msg = 'Incorrect password.';
+      if (err.code === 'auth/wrong-password') msg = 'Invalid email or password. Please try again.';
       if (err.code === 'auth/invalid-credential')
         msg = 'Invalid email or password. Please try again.';
       if (err.code === 'auth/email-already-in-use') {
