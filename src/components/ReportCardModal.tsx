@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Printer, Sparkle, PhoneCall } from '@phosphor-icons/react';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { dbInstance } from '../../services/database';
@@ -40,7 +40,17 @@ export const ReportCardModal: React.FC<Props> = ({
   const [isGeneratingTalkingPoints, setIsGeneratingTalkingPoints] = useState(false);
   const [talkingPointsError, setTalkingPointsError] = useState(false);
 
+  // Nothing cancelled the in-flight Firestore query + AI call below if the
+  // staff member switched the selected student while it was still running —
+  // the effect below only cleared the currently-displayed talkingPoints, it
+  // didn't stop the older request from later overwriting state with the
+  // PREVIOUS student's consultation notes once it resolved, silently
+  // displaying one student's private notes under a different student's name
+  // (audit: stale-response race in the parent-consultation panel).
+  const requestIdRef = useRef(0);
+
   useEffect(() => {
+    requestIdRef.current += 1;
     setTalkingPoints(null);
     setTalkingPointsError(false);
   }, [selectedStudentDetails?.uid]);
@@ -50,6 +60,7 @@ export const ReportCardModal: React.FC<Props> = ({
     const classId = selectedClass?.id;
     const studentName = selectedStudentDetails?.studentName || selectedStudentDetails?.name || 'Student';
     if (!studentUid || !classId) return;
+    const thisRequestId = ++requestIdRef.current;
     setIsGeneratingTalkingPoints(true);
     setTalkingPointsError(false);
     try {
@@ -76,16 +87,16 @@ export const ReportCardModal: React.FC<Props> = ({
         .join('\n');
 
       if (!historicalLogs) {
-        setTalkingPoints([]);
+        if (requestIdRef.current === thisRequestId) setTalkingPoints([]);
         return;
       }
       const points = await generatePhoneConsultationPrep(studentName, historicalLogs);
-      setTalkingPoints(points);
+      if (requestIdRef.current === thisRequestId) setTalkingPoints(points);
     } catch (err) {
       console.error('Failed to generate weekly talking points:', err);
-      setTalkingPointsError(true);
+      if (requestIdRef.current === thisRequestId) setTalkingPointsError(true);
     } finally {
-      setIsGeneratingTalkingPoints(false);
+      if (requestIdRef.current === thisRequestId) setIsGeneratingTalkingPoints(false);
     }
   };
 

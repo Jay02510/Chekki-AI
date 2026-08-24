@@ -66,6 +66,11 @@ export const InsightsChatPanel: React.FC<Props> = ({
           : "Couldn't get an answer just now — please try again."
       );
       setMessages(messages);
+      // The input was cleared optimistically above before this request even
+      // ran — on failure the transcript reverts, but without restoring the
+      // text here the question itself was gone with nothing left to retry
+      // except retyping from memory (audit: lost input on failed send).
+      setQuestion(trimmed);
     } finally {
       setIsLoading(false);
     }
