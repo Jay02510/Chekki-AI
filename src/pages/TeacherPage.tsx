@@ -5,7 +5,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../../contexts/ToastContext';
 import { dbInstance, auth } from '../../services/database';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, deleteDoc, addDoc, orderBy, limit as fbLimit, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, addDoc, orderBy, limit as fbLimit, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
 import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
@@ -1118,9 +1118,25 @@ export default function TeacherPage({ isNight = true }: Props) {
     try {
       if (user?.uid) {
         try {
-          await deleteDoc(doc(dbInstance, 'classes', targetId));
+          // Direct client deleteDoc() used to be gated by firestore.rules'
+          // `teacherUid == request.auth.uid` — any class this director
+          // didn't personally create (an earlier test class, one created
+          // under a now-removed account) permission-denied silently here,
+          // vanished from local state only, and kept counting against the
+          // school's seat-based class limit server-side forever. Server-
+          // side action authorizes by school membership instead.
+          const idToken = await auth.currentUser?.getIdToken();
+          const response = await fetch('/api/create-class', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+            body: JSON.stringify({ action: 'delete_class', classId: targetId }),
+          });
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || 'Failed to delete class');
+          }
         } catch (fsErr) {
-          console.warn('Firestore delete class warning:', fsErr);
+          console.warn('Class delete warning:', fsErr);
           setSyncWarning(
             isKo
               ? '⚠️ 학급이 이 기기에서만 삭제되었습니다. 클라우드에서 삭제되지 않아 다른 기기나 학부모 화면에는 계속 표시될 수 있습니다.'

@@ -207,6 +207,40 @@ async function sendStudentInviteEmail(opts: {
   }
 }
 
+// Class deletion previously went straight from the client (deleteDoc)
+// against a firestore.rules gate of `teacherUid == request.auth.uid ||
+// isAdmin()` — but `teacherUid` is set to whoever happened to call
+// api/create-class.ts at creation time, which isn't necessarily today's
+// director (an earlier test iteration, an account that's since been
+// removed, or simply a different teacher entirely). Any class the current
+// director didn't personally create couldn't be deleted by them at all —
+// the client caught the permission-denied silently, removed it from local
+// state only, and it stayed alive server-side, still counting against the
+// school's seat-based class limit (audit: "class limit reached" with zero
+// classes visibly showing). Directors should be able to delete any class
+// in their own school, not just ones they happen to own by uid.
+async function handleDeleteClass(req: VercelRequest, res: VercelResponse, uid: string) {
+  const { classId } = req.body || {};
+  if (typeof classId !== 'string' || !classId) {
+    return res.status(400).json({ error: 'classId is required' });
+  }
+
+  const userSnap = await adminDb.collection('users').doc(uid).get();
+  const userData = userSnap.data();
+  if (!userSnap.exists || userData?.role !== 'director' || !userData?.schoolId) {
+    return res.status(403).json({ error: 'Only a director can delete a class' });
+  }
+
+  const classRef = adminDb.collection('classes').doc(classId);
+  const classSnap = await classRef.get();
+  if (!classSnap.exists || classSnap.data()?.schoolId !== userData.schoolId) {
+    return res.status(404).json({ error: 'That class does not belong to your school' });
+  }
+
+  await classRef.delete();
+  return res.status(200).json({ success: true });
+}
+
 async function handleAddStudents(req: VercelRequest, res: VercelResponse, uid: string) {
   const { success } = await checkAddStudentsLimit(uid);
   if (!success) {
@@ -382,6 +416,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
+    if (action === 'delete_class') return await handleDeleteClass(req, res, uid);
     if (action === 'add_students') return await handleAddStudents(req, res, uid);
     if (action === 'resend_student_invite') return await handleResendStudentInvite(req, res, uid);
     if (action === 'remove_pending_student') return await handleRemovePendingStudent(req, res, uid);
