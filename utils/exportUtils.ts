@@ -203,7 +203,14 @@ export const saveImageToDevice = async (
           });
           return true;
         }
-      } catch (e) {
+      } catch (e: any) {
+        // The user cancelling the native share sheet rejects with
+        // AbortError, same as this catch's real-failure case — without
+        // distinguishing them, dismissing the share dialog fell through to
+        // an unwanted forced download instead of just doing nothing.
+        if (e?.name === 'AbortError') {
+          return false;
+        }
         console.warn('Navigator share with files failed', e);
       }
 

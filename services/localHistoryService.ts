@@ -1,4 +1,5 @@
 import { WorksheetItem } from '../types';
+import { generateUUID } from '../utils/uuid';
 
 const HISTORY_STORAGE_KEY = 'chekki_local_struggle_history';
 
@@ -27,7 +28,11 @@ export const localHistoryService = {
       if (incorrectItems.length === 0) return;
 
       const newRecords: StruggleRecord[] = incorrectItems.map((item) => ({
-        id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+        // Date.now().toString() collided across multiple wrong answers
+        // logged in the same millisecond by this .map() on a WebView
+        // without crypto.randomUUID — generateUUID() already has a
+        // collision-safe fallback elsewhere in the codebase, reused here.
+        id: generateUUID(),
         date: new Date().toISOString(),
         question_text: item.question_text,
         student_response: item.student_response,

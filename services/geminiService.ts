@@ -86,9 +86,23 @@ export const analyzeWorksheet = async (
       );
     }
 
+    // The 5-minute safety timeout used to be entirely dead code: every real
+    // caller (useWorksheetAnalysis) passes its own AbortController signal,
+    // and `signal || timeoutController.signal` always picked the caller's
+    // signal — timeoutController.signal was built and cleaned up but never
+    // actually attached to the fetch below. A stalled connection (flaky
+    // school WiFi, a backgrounded device) had no client-side escape hatch
+    // at all; the caller's signal only aborts on unmount or a fresh scan,
+    // not on a network stall. Now the timeout controller is always what's
+    // passed to fetch, and the caller's signal (if any) is wired to abort
+    // it too — both can cancel the request instead of only one winning.
     const timeoutController = new AbortController();
     const timeoutId = setTimeout(() => timeoutController.abort(), 300000);
-    const activeSignal = signal || timeoutController.signal;
+    if (signal) {
+      if (signal.aborted) timeoutController.abort();
+      else signal.addEventListener('abort', () => timeoutController.abort(), { once: true });
+    }
+    const activeSignal = timeoutController.signal;
 
     // --- CLIENT-SIDE IMAGE COMPRESSION ---
     // Downscale to max 1600px JPEG before sending to prevent the 4MB
