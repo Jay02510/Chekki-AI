@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -304,7 +305,21 @@ export default function TeacherPage({ isNight = true }: Props) {
     window.location.pathname.includes('director') || 
     new URLSearchParams(window.location.search).get('role') === 'director'
   );
-  const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(isDirectorPath || user?.role === 'director' ? 'director' : 'teacher');
+  // Signup always ends in window.location.reload() (see handleAuthSubmit),
+  // so on the very first render after a director signs up, `user?.role`
+  // hasn't come back from Firestore yet — this initializer used to default
+  // to 'teacher' in that window, flashing the FT dashboard before the
+  // isDirector effect below corrected it moments later. useResolvedRole's
+  // fallback chain already covers this via the `chekki_user_role_${uid}`
+  // localStorage value signup writes right before reloading (see
+  // handleAuthSubmit) — checking it here too closes the same gap for the
+  // very first render, before that effect has had a chance to run.
+  const [loginRole, setLoginRole] = useState<'teacher' | 'director'>(() => {
+    if (isDirectorPath || user?.role === 'director') return 'director';
+    const cachedUid = user?.uid || auth.currentUser?.uid;
+    if (cachedUid && localStorage.getItem(`chekki_user_role_${cachedUid}`) === 'director') return 'director';
+    return 'teacher';
+  });
 
   // Direct teacher self-signup is disabled (see the Auth Mode Toggle render
   // guard further down) — teacher accounts only exist via a director's
@@ -781,6 +796,15 @@ export default function TeacherPage({ isNight = true }: Props) {
         return;
       }
       console.warn('Firestore fetch warning (falling back to local storage):', err);
+      // This catch previously only console.warn'd — a caught error never
+      // reaches Sentry automatically, so a real class-fetch failure here
+      // (as opposed to the already-handled transient permission-denied
+      // right after signup) left zero record of what actually went wrong,
+      // no error code, nothing to diagnose from later.
+      Sentry.captureException(err, {
+        tags: { area: 'fetchClasses' },
+        extra: { uid, role: user?.role, educatorRole, schoolId: user?.schoolId, isRetry },
+      });
       setSyncWarning(
         isKo
           ? '⚠️ 클라우드에서 학급 목록을 불러오지 못해 이 기기에 저장된 정보를 표시하고 있습니다. 최신 정보가 아닐 수 있습니다.'
@@ -1470,7 +1494,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
         <div className="relative w-full max-w-md p-1.5 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col">
           <div className="bg-brand-dark rounded-[calc(2.5rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center">
-            <div className="w-full flex justify-start mb-2">
+            <div className="w-full flex justify-between items-center mb-2">
               <button
                 type="button"
                 onClick={() => { window.location.href = '/'; }}
@@ -1478,6 +1502,21 @@ export default function TeacherPage({ isNight = true }: Props) {
               >
                 <ArrowLeft size={14} weight="bold" />
                 <span>{isKo ? '메인 서비스로 돌아가기' : 'Return to Main Service'}</span>
+              </button>
+              {/* The only language switcher lived in the post-auth header
+                  (below), leaving every pre-auth screen — login, signup,
+                  and specifically an invited FT/KT arriving straight at an
+                  invite link with no prior page to set language on — stuck
+                  in whatever language the app happened to load in, with no
+                  way to change it before creating their account. */}
+              <button
+                type="button"
+                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+                className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                title="Switch Language / 언어 변경"
+              >
+                <span>🌐</span>
+                <span>{language === 'ko' ? '한국어' : 'EN'}</span>
               </button>
             </div>
 
