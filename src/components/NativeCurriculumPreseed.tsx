@@ -21,7 +21,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
   const [isScanningOcr, setIsScanningOcr] = useState<boolean>(false);
   const [scannedSuccess, setScannedSuccess] = useState<boolean>(false);
 
-  const textbooks = [
+  const [textbooks, setTextbooks] = useState(() => [
     {
       id: 'bricks-150',
       title: 'Bricks Reading 150 (Book 1)',
@@ -46,7 +46,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
         { unitNum: 4, title: 'Renewable Energy', vocab: ['Solar Panel', 'Turbine', 'Geothermal', 'Biomass'] }
       ]
     }
-  ];
+  ]);
 
   const currentTextbook = textbooks.find((b) => b.id === selectedBook) || textbooks[0];
   const currentUnitObj = currentTextbook.units.find((u) => u.unitNum === selectedUnit) || currentTextbook.units[3];
@@ -155,7 +155,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
                 >
                   <div className="space-y-1">
                     <h4 className="font-black text-sm">{b.title}</h4>
-                    <p className="text-[11px] text-zinc-500 font-mono">{b.publisher} • {b.targetLevel}</p>
+                    <p className={`text-[11px] font-mono ${isNight ? 'text-zinc-500' : 'text-zinc-600'}`}>{b.publisher} • {b.targetLevel}</p>
                   </div>
                   {selectedBook === b.id && (
                     <div className="w-2.5 h-2.5 rounded-full bg-orange-500 shrink-0 animate-pulse" />
@@ -231,9 +231,18 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
                         type="button"
                         title="Remove word"
                         onClick={() => {
-                          const updated = currentUnitObj.vocab.filter((_, i) => i !== idx);
-                          currentUnitObj.vocab = updated;
-                          setSelectedUnit(selectedUnit); // force trigger re-render
+                          setTextbooks((prev) =>
+                            prev.map((b) =>
+                              b.id !== selectedBook
+                                ? b
+                                : {
+                                    ...b,
+                                    units: b.units.map((u) =>
+                                      u.unitNum !== selectedUnit ? u : { ...u, vocab: u.vocab.filter((_, i) => i !== idx) }
+                                    ),
+                                  }
+                            )
+                          );
                         }}
                         className="text-orange-500/60 hover:text-orange-400 font-bold ml-1 cursor-pointer"
                       >
@@ -246,8 +255,18 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
                     onClick={() => {
                       const newWord = prompt('Enter custom vocabulary word to add:', 'Photosynthesis');
                       if (newWord && newWord.trim()) {
-                        currentUnitObj.vocab.push(newWord.trim());
-                        setSelectedUnit(selectedUnit);
+                        setTextbooks((prev) =>
+                          prev.map((b) =>
+                            b.id !== selectedBook
+                              ? b
+                              : {
+                                  ...b,
+                                  units: b.units.map((u) =>
+                                    u.unitNum !== selectedUnit ? u : { ...u, vocab: [...u.vocab, newWord.trim()] }
+                                  ),
+                                }
+                          )
+                        );
                       }
                     }}
                     className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 border border-dashed border-white/20 text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-1"

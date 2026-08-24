@@ -53,47 +53,62 @@ export function useRosterAnalytics(
 
   const activeVocabWords = getWeeklyVocabWords();
 
-  const vocabMistakeCounts: Record<string, number> = {};
-  activeVocabWords.forEach((word) => {
-    vocabMistakeCounts[word] = 0;
-  });
+  // Feeds NativeFtDashboard, which is React.memo'd. vocabMistakeCounts (and
+  // everything derived from it) was previously rebuilt as a fresh object/
+  // array on every render regardless of whether studentsData/curriculum
+  // actually changed — the sortedTroubleWords useMemo below had a dep that
+  // was itself always a new reference, so it never actually memoized
+  // anything, defeating NativeFtDashboard's memo every render (audit #6).
+  const {
+    vocabMistakeCounts,
+    completedHomeworkCount,
+    rosterWithCompletion,
+  } = useMemo(() => {
+    const counts: Record<string, number> = {};
+    activeVocabWords.forEach((word) => {
+      counts[word] = 0;
+    });
 
-  let completedHomeworkCount = 0;
+    let completed = 0;
 
-  const rosterWithCompletion = (studentsData || []).filter(Boolean).map((student) => {
-    if (!student) return null;
-    const weeklyMistakes = (student.mistakes || []).filter((m: any) => m && isMistakeInWeeklyCurriculum(m));
-    const hasScannedThisWeek = weeklyMistakes.length > 0 || (
-      student.lastScanDate &&
-      (new Date().getTime() - new Date(student.lastScanDate).getTime()) < 7 * 24 * 60 * 60 * 1000
-    );
+    const roster = (studentsData || []).filter(Boolean).map((student) => {
+      if (!student) return null;
+      const weeklyMistakes = (student.mistakes || []).filter((m: any) => m && isMistakeInWeeklyCurriculum(m));
+      const hasScannedThisWeek = weeklyMistakes.length > 0 || (
+        student.lastScanDate &&
+        (new Date().getTime() - new Date(student.lastScanDate).getTime()) < 7 * 24 * 60 * 60 * 1000
+      );
 
-    if (hasScannedThisWeek && student.classStatus === 'active') {
-      completedHomeworkCount++;
-    }
+      if (hasScannedThisWeek && student.classStatus === 'active') {
+        completed++;
+      }
 
-    if (student.classStatus === 'active') {
-      weeklyMistakes.forEach((m: any) => {
-        if (!m) return;
-        const qText = (m.question_text || '').toLowerCase();
-        const aText = (m.correct_answer || '').toLowerCase();
-        const rText = (m.student_response || '').toLowerCase();
+      if (student.classStatus === 'active') {
+        weeklyMistakes.forEach((m: any) => {
+          if (!m) return;
+          const qText = (m.question_text || '').toLowerCase();
+          const aText = (m.correct_answer || '').toLowerCase();
+          const rText = (m.student_response || '').toLowerCase();
 
-        activeVocabWords.forEach((word) => {
-          if (qText.includes(word) || aText.includes(word) || rText.includes(word)) {
-            vocabMistakeCounts[word]++;
-          }
+          activeVocabWords.forEach((word) => {
+            if (qText.includes(word) || aText.includes(word) || rText.includes(word)) {
+              counts[word]++;
+            }
+          });
         });
-      });
-    }
+      }
 
-    return {
-      ...student,
-      hasScannedThisWeek,
-      weeklyMistakesCount: weeklyMistakes.length,
-      weeklyMistakes,
-    };
-  }).filter(Boolean);
+      return {
+        ...student,
+        hasScannedThisWeek,
+        weeklyMistakesCount: weeklyMistakes.length,
+        weeklyMistakes,
+      };
+    }).filter(Boolean);
+
+    return { vocabMistakeCounts: counts, completedHomeworkCount: completed, rosterWithCompletion: roster };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [studentsData, curriculumVocab, curriculumPhonics]);
 
   const activeRoster = rosterWithCompletion.filter((student) => student.classStatus === 'active');
   const pendingRoster = rosterWithCompletion.filter((student) => student.classStatus === 'pending');
@@ -104,9 +119,6 @@ export function useRosterAnalytics(
     ? Math.round((completedHomeworkCount / activeStudentsCount) * 100)
     : 0;
 
-  // Feeds NativeFtDashboard, which is React.memo'd — an inline .map() here
-  // would rebuild a new array reference every render regardless of whether
-  // vocabMistakeCounts actually changed, defeating that memo (audit #6).
   const sortedTroubleWords = useMemo(
     () =>
       Object.keys(vocabMistakeCounts)
