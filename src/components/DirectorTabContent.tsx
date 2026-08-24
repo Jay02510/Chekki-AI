@@ -45,7 +45,15 @@ interface Props {
 // combined switchboard is dropped (it always resolved true here anyway).
 export function DirectorTabContent(props: Props) {
   const { isNight, isKo, activeTab } = props;
-  const { complianceRows, isLoading: isLoadingCompliance } = useLogCompliance(props.classes);
+  // Only query when the director is actually viewing this tab — this hook
+  // fires one logs-subcollection query per class, and was previously called
+  // unconditionally on every DirectorTabContent render (director_hq,
+  // students, student_database — any tab), reading Firestore for a view the
+  // director might never open (audit: unnecessary reads on every portal
+  // visit).
+  const { complianceRows, isLoading: isLoadingCompliance } = useLogCompliance(
+    activeTab === 'log_compliance' ? props.classes : []
+  );
 
   return (
     <>
