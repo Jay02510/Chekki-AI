@@ -830,6 +830,62 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   };
 
+  // Redeems the current inviteSlug (a director-generated single-use invite
+  // link) against whichever account just authenticated — shared by both the
+  // signup and login paths below. Previously only the signup branch called
+  // this; a teacher whose Firebase Auth account already existed (e.g.
+  // removed from a school, then re-invited to a different one) hit
+  // "auth/email-already-in-use" on signup, was told to log in instead, but
+  // the login branch never redeemed the invite at all — they'd sign in
+  // successfully and land right back on their old, now-stale profile with
+  // no class, no matter how many times they clicked the new invite link
+  // (audit: re-invited teacher can't accept a new invite email).
+  const redeemInviteIfPresent = async () => {
+    if (!inviteSlug) return;
+    const uid = auth.currentUser?.uid || '';
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch('/api/redeem-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ inviteId: inviteSlug }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to redeem invite');
+      }
+      if (uid) {
+        localStorage.setItem(`chekki_user_role_${uid}`, 'teacher');
+        localStorage.setItem(`chekki_educator_role_${uid}`, data.educatorRole);
+        if (data.schoolName) localStorage.setItem(`chekki_invite_school_name_${uid}`, data.schoolName);
+        if (data.invitedByName) localStorage.setItem(`chekki_invite_by_${uid}`, data.invitedByName);
+        localStorage.setItem(`chekki_invite_school_${uid}`, inviteSlug);
+      }
+      // Un-uid-keyed mirrors — read by the welcome-screen initializer, which
+      // runs on the reload below before Firebase auth has necessarily
+      // restored the uid synchronously.
+      if (data.schoolName) localStorage.setItem('chekki_invite_school_name', data.schoolName);
+      if (data.invitedByName) localStorage.setItem('chekki_invite_by', data.invitedByName);
+      localStorage.setItem('chekki_invite_school', inviteSlug);
+    } catch (inviteErr: any) {
+      throw new Error(
+        isKo
+          ? `초대 링크를 사용할 수 없습니다: ${inviteErr.message}`
+          : `This invite link couldn't be used: ${inviteErr.message}`
+      );
+    }
+
+    // The `?invite=` param never got cleared after a successful redemption,
+    // so it stuck around through the reload and every reload after that —
+    // the "you're signed in as a different account, invite wasn't applied"
+    // banner is gated on nothing but that param being present (see
+    // showInviteSessionNotice), so it kept flashing on the account that had
+    // JUST correctly redeemed the invite.
+    const url = new URL(window.location.href);
+    url.searchParams.delete('invite');
+    window.history.replaceState({}, '', url.toString());
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
@@ -855,35 +911,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           // educatorRole are decided by the invite document, not the signup
           // form's Teacher/Director toggle. Redeeming is server-side via the
           // Admin SDK, same reasoning as set-initial-role below.
-          try {
-            const idToken = await auth.currentUser?.getIdToken();
-            const response = await fetch('/api/redeem-invite', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-              body: JSON.stringify({ inviteId: inviteSlug }),
-            });
-            const data = await response.json();
-            if (!response.ok) {
-              throw new Error(data.error || 'Failed to redeem invite');
-            }
-            if (newUid) {
-              localStorage.setItem(`chekki_user_role_${newUid}`, 'teacher');
-              localStorage.setItem(`chekki_educator_role_${newUid}`, data.educatorRole);
-              if (data.schoolName) localStorage.setItem(`chekki_invite_school_name_${newUid}`, data.schoolName);
-              if (data.invitedByName) localStorage.setItem(`chekki_invite_by_${newUid}`, data.invitedByName);
-            }
-            // Un-uid-keyed mirrors — read by the welcome-screen initializer,
-            // which runs on the reload right below before Firebase auth has
-            // necessarily restored `newUid` synchronously.
-            if (data.schoolName) localStorage.setItem('chekki_invite_school_name', data.schoolName);
-            if (data.invitedByName) localStorage.setItem('chekki_invite_by', data.invitedByName);
-          } catch (inviteErr: any) {
-            throw new Error(
-              isKo
-                ? `초대 링크를 사용할 수 없습니다: ${inviteErr.message}`
-                : `This invite link couldn't be used: ${inviteErr.message}`
-            );
-          }
+          await redeemInviteIfPresent();
         } else {
           // Assign the role server-side — firestore.rules blocks clients from
           // writing their own `role` field, so a direct client updateDoc() call
@@ -923,29 +951,20 @@ export default function TeacherPage({ isNight = true }: Props) {
           }
         }
 
-        // Persist invite school if teacher arrived via invite link
-        if (inviteSlug) {
-          const uid = auth.currentUser?.uid || '';
-          if (uid) localStorage.setItem(`chekki_invite_school_${uid}`, inviteSlug);
-          localStorage.setItem('chekki_invite_school', inviteSlug);
-
-          // The `?invite=` param never got cleared after a successful
-          // redemption, so it stuck around through the reload below and
-          // every reload after that — the "you're signed in as a different
-          // account, invite wasn't applied" banner is gated on nothing but
-          // that param being present (see showInviteSessionNotice), so it
-          // kept flashing on the account that had JUST correctly redeemed
-          // the invite (audit: session-mismatch banner shows for the right
-          // account too, not just a genuine mismatch).
-          const url = new URL(window.location.href);
-          url.searchParams.delete('invite');
-          window.history.replaceState({}, '', url.toString());
-        }
-
         window.location.reload();
 
       } else {
         await signIn(email, password);
+        // A teacher whose account already existed (removed from a school,
+        // then re-invited) never got their new invite redeemed before this
+        // fix — the signup branch above was the only one that called
+        // redeemInviteIfPresent, and "email already in use" pointed them
+        // here without ever completing the redemption. Same reload as
+        // signup: the redeemed role/schoolId need a clean re-fetch.
+        if (inviteSlug) {
+          await redeemInviteIfPresent();
+          window.location.reload();
+        }
       }
     } catch (err: any) {
       let msg = err.message;

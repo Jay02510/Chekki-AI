@@ -31,6 +31,23 @@ export function sanitizeSchoolId(raw: string): string {
   return raw.toUpperCase().trim().replace(/[^A-Z0-9_-]/g, '');
 }
 
+// delete_school/upgrade_school/assign_teacher all reference an EXISTING
+// school doc, not a new one — they used to run the incoming schoolId
+// through sanitizeSchoolId() same as create_school, which uppercases it.
+// Self-serve director signups (api/set-initial-role.ts) create schools as
+// `school_${uid}` — lowercase, with a mixed-case Firebase uid — never
+// through sanitizeSchoolId at all. Re-sanitizing that id on delete/upgrade/
+// assign silently retargeted a completely different, nonexistent doc path:
+// Firestore's .delete() on a doc that doesn't exist succeeds without error,
+// so "School deleted successfully" showed while the real school (and its
+// data) was untouched and reappeared on the next refresh (audit: admin
+// can't delete a self-serve-created school). This only guards against the
+// actual injection risk (a '/' turning .doc(id) into a nested subcollection
+// path) without reshaping a real, already-established id.
+export function isValidExistingDocId(raw: string): boolean {
+  return typeof raw === 'string' && raw.trim().length > 0 && !raw.includes('/');
+}
+
 // This endpoint gates account impersonation, deletion, and upgrades behind a
 // single shared passcode — rate limit failed attempts hard so it can't be
 // brute-forced (audit §15a).
@@ -353,8 +370,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ success: true });
     } else if (action === 'delete_school') {
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
-      const sanitizedSchoolId = sanitizeSchoolId(schoolId);
-      if (!sanitizedSchoolId) return res.status(400).json({ error: 'Invalid schoolId' });
+      if (!isValidExistingDocId(schoolId)) return res.status(400).json({ error: 'Invalid schoolId' });
+      const sanitizedSchoolId = schoolId;
 
       const usersRef = adminDb.collection('users');
       const teachersSnapshot = await usersRef.where('schoolId', '==', sanitizedSchoolId).get();
@@ -609,8 +626,8 @@ https://urlgeni.us/chekki
       // it clears trialEndsAt so the create-class/create-teacher-invite
       // soft-lock stops applying.
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
-      const sanitizedUpgradeSchoolId = sanitizeSchoolId(schoolId);
-      if (!sanitizedUpgradeSchoolId) return res.status(400).json({ error: 'Invalid schoolId' });
+      if (!isValidExistingDocId(schoolId)) return res.status(400).json({ error: 'Invalid schoolId' });
+      const sanitizedUpgradeSchoolId = schoolId;
       const targetPlanId = req.body?.planId;
       if (!targetPlanId || typeof targetPlanId !== 'string') {
         return res.status(400).json({ error: 'Missing planId' });
@@ -636,8 +653,8 @@ https://urlgeni.us/chekki
       });
     } else if (action === 'assign_teacher') {
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId' });
-      const sanitizedAssignSchoolId = sanitizeSchoolId(schoolId);
-      if (!sanitizedAssignSchoolId) return res.status(400).json({ error: 'Invalid schoolId' });
+      if (!isValidExistingDocId(schoolId)) return res.status(400).json({ error: 'Invalid schoolId' });
+      const sanitizedAssignSchoolId = schoolId;
       let targetUid = uid;
 
       if (!targetUid && email) {

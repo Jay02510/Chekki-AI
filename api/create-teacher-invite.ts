@@ -49,6 +49,7 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
   if (!classSnap.exists || classSnap.data()?.schoolId !== schoolId) {
     return res.status(404).json({ error: 'That class does not belong to your school' });
   }
+  const className = classSnap.data()?.name || classId;
   const cleanEmail = typeof email === 'string' && email.trim() ? email.trim().toLowerCase() : undefined;
 
   const schoolRef = adminDb.collection('schools').doc(schoolId);
@@ -130,6 +131,7 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
                 <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
               </div>
               <p style="font-size: 15px; color: #e4e4e7;">${schoolData.name || 'An academy'}에서 회원님을 <strong>${role === 'ft' ? '원어민 선생님(FT)' : '한국인 선생님(KT)'}</strong>으로 초대했습니다.</p>
+              <p style="font-size: 14px; color: #e4e4e7;">배정된 학급: <strong style="color: #f97316;">${className}</strong></p>
               <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 링크로 접속해 비밀번호만 설정하면 바로 시작할 수 있습니다.</p>
               <div style="text-align: center; margin: 24px 0;">
                 <a href="${inviteUrl}" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">초대 수락하기</a>

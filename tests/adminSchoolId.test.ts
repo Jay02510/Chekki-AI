@@ -1,5 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { sanitizeSchoolId } from '../api/admin';
+import { sanitizeSchoolId, isValidExistingDocId } from '../api/admin';
+
+describe('isValidExistingDocId', () => {
+  it('accepts a real self-serve schoolId as-is, case preserved', () => {
+    // Self-serve director signups create schools as `school_${uid}` with a
+    // mixed-case Firebase uid, never through sanitizeSchoolId — this must
+    // stay exact or delete/upgrade/assign_teacher silently target the
+    // wrong (nonexistent) doc.
+    expect(isValidExistingDocId('school_AbC123xyz')).toBe(true);
+  });
+
+  it('accepts an admin-created uppercase schoolId as-is', () => {
+    expect(isValidExistingDocId('MY-SCHOOL_01')).toBe(true);
+  });
+
+  it('rejects a path-traversal attempt via a slash', () => {
+    expect(isValidExistingDocId('abc/../../evil')).toBe(false);
+  });
+
+  it('rejects empty or whitespace-only input', () => {
+    expect(isValidExistingDocId('')).toBe(false);
+    expect(isValidExistingDocId('   ')).toBe(false);
+  });
+});
 
 describe('sanitizeSchoolId', () => {
   it('uppercases and trims', () => {
