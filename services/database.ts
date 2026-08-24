@@ -13,7 +13,6 @@ import {
   deleteDoc,
   addDoc,
   runTransaction,
-  enableIndexedDbPersistence,
 } from 'firebase/firestore';
 import {
   getAuth,

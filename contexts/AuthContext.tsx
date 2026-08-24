@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import * as Sentry from '@sentry/react';
 import { UserProfile, SubscriptionRecord, SubscriptionPlatform } from '../types';
 import { auth, db, dbInstance } from '../services/database';
 import { doc, updateDoc, increment, arrayRemove, deleteDoc } from 'firebase/firestore';
@@ -330,12 +331,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           profile = await db.getUser(user.uid);
         } catch (e) {
-          console.error('[AuthContext] Failed to load user profile from network:', e);
-          // If we had no cache, we must stop loading now
-          if (!cachedProfile) {
-            setIsLoading(false);
+          console.warn('[AuthContext] Background profile refresh failed, retrying once:', e);
+          // A cached-profile user used to freeze on that stale snapshot for
+          // the rest of the session on any network hiccup here (db.getUser's
+          // own 5s race-timeout, more likely on a flaky mobile connection) —
+          // no retry, no signal, nothing else in the app re-triggers this
+          // fetch. That stale `role`/`schoolId` then silently fed every
+          // permission-gated query for the whole session (audit: KT class
+          // read intermittently permission-denied with no clear cause).
+          // One retry after a short delay, with Sentry visibility if it
+          // still fails, rather than giving up permanently and silently.
+          try {
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+            profile = await db.getUser(user.uid);
+          } catch (retryErr) {
+            console.error('[AuthContext] Profile refresh retry also failed:', retryErr);
+            Sentry.captureException(retryErr, {
+              tags: { area: 'authContextProfileRefresh' },
+              extra: { uid: user.uid, hadCachedProfile: !!cachedProfile },
+            });
+            // If we had no cache, we must stop loading now
+            if (!cachedProfile) {
+              setIsLoading(false);
+            }
+            return;
           }
-          return;
         }
 
         if (profile) {

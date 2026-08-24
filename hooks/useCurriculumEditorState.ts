@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { dbInstance, auth } from '../services/database';
 import { compressImage, stripDataUrlPrefix, getMimeTypeFromDataUrl } from '../services/compressImage';
@@ -46,6 +46,13 @@ export function useCurriculumEditorState(
   const [curriculumLastEditedAt, setCurriculumLastEditedAt] = useState('');
   const [curriculumSlideIndex, setCurriculumSlideIndex] = useState(0);
   const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
+  // loadCurriculum captures `targetClass` by closure at call time with no
+  // cancellation — switching selectedClass while a fetch is still in flight
+  // used to let the older, now-stale response's setters land after the
+  // newer class's own load, silently overwriting the just-selected class's
+  // curriculum fields with the previous class's data. This ref tracks which
+  // request is the most recent one so a superseded response can be dropped.
+  const latestCurriculumRequestId = useRef<string | null>(null);
   const [isSavingCurriculum, setIsSavingCurriculum] = useState(false);
   const [isGeneratingWorksheet, setIsGeneratingWorksheet] = useState(false);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -412,6 +419,7 @@ export function useCurriculumEditorState(
     setIsLoadingCurriculum(true);
     const currDocId = `${targetClass.id}_week_${targetClass.activeWeekNumber || 1}`;
     const localKey = `curriculum_${currDocId}`;
+    latestCurriculumRequestId.current = currDocId;
 
     // 1. Pre-load from LocalStorage for instant render & offline compatibility
     try {
@@ -450,6 +458,10 @@ export function useCurriculumEditorState(
     try {
       const docRef = doc(dbInstance, 'curriculums', currDocId);
       const snap = await getDoc(docRef);
+      // A newer loadCurriculum() call (selectedClass switched again while
+      // this one was in flight) has already claimed the ref — this response
+      // is stale, drop it instead of overwriting the newer class's fields.
+      if (latestCurriculumRequestId.current !== currDocId) return;
       if (snap.exists()) {
         const data = snap.data();
         setCurriculumTopic(asString(data.topic));

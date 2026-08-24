@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import * as Sentry from '@sentry/react';
 import { collection, doc, getDocs, orderBy, limit as fbLimit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 import { dbInstance } from '../services/database';
 import { consolidateStudentReports, formatConsolidatedDraft, ConsolidatedStudentDay } from '../src/services/consolidateStudentReports';
@@ -76,6 +77,15 @@ export function useKtReviewQueue(
         setKtPendingLogs(perClassLogs.flat().reverse()); // oldest pending first
       } catch (err) {
         console.error('Failed to load cross-class KT review queue:', err);
+        // No telemetry on this catch before now — a permission-denied here
+        // shares the same class-membership dependency as TeacherPage's
+        // fetchClasses (which does capture to Sentry), but this query could
+        // fail silently with zero record if it hit the same underlying
+        // issue instead.
+        Sentry.captureException(err, {
+          tags: { area: 'ktReviewQueue' },
+          extra: { educatorRole, classIds: realClasses.map((c: any) => c.id) },
+        });
         setKtLogsLoadError(true);
       }
     })();
