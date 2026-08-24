@@ -104,9 +104,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (action === 'list') {
+      // orderBy() on subscriptionStartedAt silently drops every doc that
+      // doesn't have that field set — Firestore excludes, not nulls-first,
+      // for a range/order clause. Every free/trial account writes
+      // subscriptionStartedAt: null explicitly (AuthContext.tsx), which
+      // Firestore treats the same as absent, so the entire free/trial
+      // population (directors mid-trial, every FT/KT) never appeared in
+      // this list regardless of the 100-doc cap or search query — only
+      // accounts that had actually completed a paid upgrade showed up
+      // (audit: invited teacher accounts invisible in admin "View Members").
+      // createdAt is set on every account-creation path instead.
       const usersSnapshot = await adminDb
         .collection('users')
-        .orderBy('subscriptionStartedAt', 'desc')
+        .orderBy('createdAt', 'desc')
         .limit(100)
         .get();
 
@@ -760,6 +770,84 @@ https://urlgeni.us/chekki
       }
 
       return res.status(200).json({ success: true, dryRun: false, deletedUsers, deletedCurriculums });
+    } else if (action === 'sweep_orphaned_class_assignments') {
+      // Cleanup for a class of stale data left by the pre-fix client-side
+      // class-delete path (silently permission-denied, so the class doc
+      // survived) and the schoolId-sanitization bug (delete_school/
+      // upgrade_school retargeting the wrong doc): a class's teacherUid or
+      // assignedTeacherUids can still list a uid whose own user doc's
+      // schoolId no longer matches the class's schoolId (moved/removed from
+      // that school) or whose user doc is gone entirely. isSchoolDirectorOfClass()/
+      // isClassTeacher() in firestore.rules both do a schoolId/role
+      // cross-check against the class doc, so a single such stale entry
+      // permission-denies the *entire* array-contains query for that uid —
+      // this is why a director's fetchClasses() could throw
+      // "Missing or insufficient permissions" for a brand-new account with
+      // zero real classes.
+      const dryRun = req.body?.dryRun !== false;
+
+      const classesSnap = await adminDb.collection('classes').get();
+      const userCache = new Map<string, any | null>();
+      const getUser = async (targetUid: string) => {
+        if (userCache.has(targetUid)) return userCache.get(targetUid);
+        const snap = await adminDb.collection('users').doc(targetUid).get();
+        const val = snap.exists ? snap.data() : null;
+        userCache.set(targetUid, val);
+        return val;
+      };
+
+      const findings: Array<{
+        classId: string;
+        className: string;
+        classSchoolId: string | null;
+        field: 'teacherUid' | 'assignedTeacherUids';
+        uid: string;
+        reason: string;
+      }> = [];
+
+      for (const classDoc of classesSnap.docs) {
+        const data = classDoc.data();
+        const classSchoolId = data.schoolId || null;
+        const uidsToCheck: Array<{ field: 'teacherUid' | 'assignedTeacherUids'; uid: string }> = [];
+        if (data.teacherUid) uidsToCheck.push({ field: 'teacherUid', uid: data.teacherUid });
+        if (Array.isArray(data.assignedTeacherUids)) {
+          for (const u of data.assignedTeacherUids) uidsToCheck.push({ field: 'assignedTeacherUids', uid: u });
+        }
+
+        for (const { field, uid: checkUid } of uidsToCheck) {
+          const userData = await getUser(checkUid);
+          if (!userData) {
+            findings.push({ classId: classDoc.id, className: data.name || classDoc.id, classSchoolId, field, uid: checkUid, reason: 'user_missing' });
+          } else if (userData.schoolId !== classSchoolId) {
+            findings.push({ classId: classDoc.id, className: data.name || classDoc.id, classSchoolId, field, uid: checkUid, reason: 'schoolId_mismatch' });
+          }
+        }
+      }
+
+      if (dryRun) {
+        return res.status(200).json({ success: true, dryRun: true, findingsCount: findings.length, findings });
+      }
+
+      let fixedClasses = 0;
+      const byClass = new Map<string, typeof findings>();
+      for (const f of findings) {
+        if (!byClass.has(f.classId)) byClass.set(f.classId, []);
+        byClass.get(f.classId)!.push(f);
+      }
+      for (const [classId, classFindings] of byClass.entries()) {
+        const update: Record<string, any> = {};
+        if (classFindings.some((f) => f.field === 'teacherUid')) {
+          update.teacherUid = FieldValue.delete();
+        }
+        const staleAssigned = classFindings.filter((f) => f.field === 'assignedTeacherUids').map((f) => f.uid);
+        if (staleAssigned.length > 0) {
+          update.assignedTeacherUids = FieldValue.arrayRemove(...staleAssigned);
+        }
+        await adminDb.collection('classes').doc(classId).update(update);
+        fixedClasses++;
+      }
+
+      return res.status(200).json({ success: true, dryRun: false, fixedClasses, findingsCount: findings.length, findings });
     } else {
       return res.status(400).json({ error: 'Invalid action' });
     }
