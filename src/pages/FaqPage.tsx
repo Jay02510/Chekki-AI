@@ -403,7 +403,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <a
-              href="mailto:chekkihelp@gmail.com?subject=[Chekki%20Support]%20Customer%20Inquiry"
+              href="mailto:support@chekkiai.com?subject=[Chekki%20Support]%20Customer%20Inquiry"
               className="px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.97] cursor-pointer flex items-center gap-2"
             >
               <span>💬</span>

@@ -21,6 +21,7 @@ import { SchoolLoopDiagram } from '../components/SchoolLoopDiagram';
 import { PLAN_SEATS, PLAN_LABELS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useToast } from '../../contexts/ToastContext';
+import { copyToClipboard } from '../../utils/clipboard';
 
 interface Props {
   isNight: boolean;
@@ -128,7 +129,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [contactName, setContactName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState(() => typeof window !== 'undefined' ? localStorage.getItem('chekki_director_email') || '' : '');
-  const [teacherCount, setTeacherCount] = useState(3);
   const [studentCount, setStudentCount] = useState('');
   const [bizRegNumber, setBizRegNumber] = useState('');
   const [copiedBank, setCopiedBank] = useState(false);
@@ -145,18 +145,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     return currency === 'KRW' ? `₩${price.toLocaleString()}` : `$${price}`;
   };
 
-  const handleTeacherCountChange = (count: number) => {
-    const safeCount = Math.max(1, count);
-    setTeacherCount(safeCount);
-    
-    if (safeCount <= 3) {
-      setSelectedPlanId('starter');
-    } else if (safeCount <= 10) {
-      setSelectedPlanId('school_pro');
-    } else {
-      setSelectedPlanId('enterprise');
-    }
-  };
 
 
 
@@ -1503,10 +1491,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         <strong className="text-base text-emerald-400">110-623-147138</strong>
                         <button
                           type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText('110-623-147138');
-                            setCopiedBank(true);
-                            setTimeout(() => setCopiedBank(false), 2000);
+                          onClick={async () => {
+                            const ok = await copyToClipboard('110-623-147138');
+                            if (ok) {
+                              setCopiedBank(true);
+                              setTimeout(() => setCopiedBank(false), 2000);
+                            } else {
+                              showToast({
+                                type: 'error',
+                                message: isKo ? '복사에 실패했습니다. 계좌번호를 직접 입력해주세요.' : 'Copy failed — please enter the account number manually.',
+                              });
+                            }
                           }}
                           className="px-2.5 py-1 bg-emerald-500 text-white font-bold text-[10px] rounded-lg cursor-pointer"
                         >
@@ -1552,7 +1547,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                           phone,
                           planId: selectedPlanId,
                           planName: isKo ? activePlan.nameKo : activePlan.nameEn,
-                          teacherCount,
+                          teacherCount: activePlan.defaultTeachers,
                           billingCycle,
                           type: 'bank-transfer',
                         }),
