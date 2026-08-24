@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Warning, UserCheck, CheckCircle, MagnifyingGlass, DownloadSimple } from '@phosphor-icons/react';
 import { StatTile } from './ui/StatTile';
 import { downloadCSV } from '../utils/csvExport';
@@ -71,6 +71,24 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
   setSelectedStudentDetails,
 }) => {
   const isThemeNight = isNight;
+  // None of handleApproveStudent/handleDeclineStudent/handleRemoveStudent/
+  // handleMoveStudent are guarded against a double-click firing the async
+  // Firestore write twice — the writes themselves are idempotent, but
+  // logActivity() isn't, so a double-click leaves two duplicate entries in
+  // the audit trail the director uses to see "who approved this student."
+  // One shared busy flag (not per-row) is enough since Firestore roundtrips
+  // here are seconds, not something a director needs to parallelize across
+  // rows.
+  const [isRosterActionBusy, setIsRosterActionBusy] = useState(false);
+  const runRosterAction = async (action: () => void) => {
+    if (isRosterActionBusy) return;
+    setIsRosterActionBusy(true);
+    try {
+      await action();
+    } finally {
+      setIsRosterActionBusy(false);
+    }
+  };
   return (
     <div className="space-y-8 animate-fade-in">
 
@@ -119,16 +137,18 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                       </td>
                       <td className="py-4 text-right pr-2 space-x-3">
                         <button
-                          onClick={() => handleDeclineStudent(student.uid)}
-                          className={`px-4 py-2 border font-bold rounded-xl transition-all text-xs active:scale-[0.97] cursor-pointer ${
+                          onClick={() => runRosterAction(() => handleDeclineStudent(student.uid))}
+                          disabled={isRosterActionBusy}
+                          className={`px-4 py-2 border font-bold rounded-xl transition-all text-xs active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                             isThemeNight ? 'border-white/10 hover:border-white/20 bg-brand-dark text-zinc-400 hover:text-zinc-200' : 'border-zinc-300 hover:border-zinc-400 bg-zinc-100 text-zinc-700'
                           }`}
                         >
                           ✕ {isKo ? '거절' : 'Decline'}
                         </button>
                         <button
-                          onClick={() => handleApproveStudent(student.uid)}
-                          className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all text-xs active:scale-[0.97] cursor-pointer"
+                          onClick={() => runRosterAction(() => handleApproveStudent(student.uid))}
+                          disabled={isRosterActionBusy}
+                          className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all text-xs active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           ✓ {isKo ? '승인' : 'Approve'}
                         </button>
@@ -273,9 +293,10 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                       </td>
                       <td className="py-4 text-right pr-2 flex items-center justify-end gap-2">
                         <select
-                          onChange={(e) => handleMoveStudent(student.uid, e.target.value)}
+                          onChange={(e) => runRosterAction(() => handleMoveStudent(student.uid, e.target.value))}
                           value=""
-                          className={`text-[10px] font-bold px-3 py-2 rounded-xl cursor-pointer outline-none focus:border-orange-500 appearance-none transition-colors ${
+                          disabled={isRosterActionBusy}
+                          className={`text-[10px] font-bold px-3 py-2 rounded-xl cursor-pointer outline-none focus:border-orange-500 appearance-none transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                             isThemeNight ? 'bg-brand-dark border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
                           }`}
                         >
@@ -289,8 +310,9 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                             ))}
                         </select>
                         <button
-                          onClick={() => handleRemoveStudent(student.uid)}
-                          className="px-3.5 py-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] cursor-pointer"
+                          onClick={() => runRosterAction(() => handleRemoveStudent(student.uid))}
+                          disabled={isRosterActionBusy}
+                          className="px-3.5 py-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           {isKo ? '삭제' : 'Remove'}
                         </button>

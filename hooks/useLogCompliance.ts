@@ -22,7 +22,7 @@ export interface ComplianceRow {
   classId: string;
   className: string;
   teacherName: string;
-  days: { date: string; submitted: boolean }[];
+  days: { date: string; submitted: boolean; isToday: boolean }[];
   missStreak: number;
 }
 
@@ -46,6 +46,7 @@ export function useLogCompliance(classes: any[]) {
       return;
     }
     setIsLoading(true);
+    const todayIso = isoDate(new Date());
     (async () => {
       try {
         const rows = await Promise.all(
@@ -55,11 +56,21 @@ export function useLogCompliance(classes: any[]) {
             const snap = await getDocs(logsQuery);
             const submittedDates = new Set(snap.docs.map((d) => d.data().date));
 
-            const dayResults = days.map((date) => ({ date, submitted: submittedDates.has(date) }));
+            const dayResults = days.map((date) => ({
+              date,
+              submitted: submittedDates.has(date),
+              isToday: date === todayIso,
+            }));
 
+            // Today isn't missed until the day is actually over — without
+            // this, every class shows a false "missed" streak the moment a
+            // director opens this tab each morning, before any teacher has
+            // had a chance to log yet.
             let missStreak = 0;
             for (let i = dayResults.length - 1; i >= 0; i--) {
-              if (dayResults[i].submitted) break;
+              const day = dayResults[i];
+              if (day.isToday && !day.submitted) continue;
+              if (day.submitted) break;
               missStreak++;
             }
 

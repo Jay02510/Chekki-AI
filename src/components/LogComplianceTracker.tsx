@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, XCircle, Fire } from '@phosphor-icons/react';
+import { CheckCircle, XCircle, Circle, Fire } from '@phosphor-icons/react';
 import type { ComplianceRow } from '../../hooks/useLogCompliance';
 
 interface Props {
@@ -71,6 +71,8 @@ export function LogComplianceTracker({ isNight, isKo, complianceRows, isLoading 
                       <td key={d.date} className="py-3 px-1 text-center">
                         {d.submitted ? (
                           <CheckCircle size={14} weight="fill" className="inline text-emerald-500" />
+                        ) : d.isToday ? (
+                          <Circle size={14} weight="bold" className="inline text-zinc-500/40" />
                         ) : (
                           <XCircle size={14} weight="fill" className="inline text-red-500/40" />
                         )}

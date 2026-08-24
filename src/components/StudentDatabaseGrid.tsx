@@ -60,6 +60,20 @@ export function StudentDatabaseGrid({
   const [globalFilter, setGlobalFilter] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [sorting, setSorting] = useState<SortingState>([]);
+  // Neither handler is guarded against a rapid double-action (e.g. two Move
+  // requests for the same student fired before the first roster refresh
+  // lands) — one shared busy flag blocks a second mutation until the first
+  // one's Firestore round-trip finishes.
+  const [isActionBusy, setIsActionBusy] = useState(false);
+  const runAction = async (action: () => void) => {
+    if (isActionBusy) return;
+    setIsActionBusy(true);
+    try {
+      await action();
+    } finally {
+      setIsActionBusy(false);
+    }
+  };
 
   const classNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -148,9 +162,10 @@ export function StudentDatabaseGrid({
           return (
             <div className="flex items-center justify-end gap-2">
               <select
-                onChange={(e) => e.target.value && handleMoveStudent(row.uid, e.target.value)}
+                onChange={(e) => e.target.value && runAction(() => handleMoveStudent(row.uid, e.target.value))}
                 value=""
-                className={`text-[10px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer outline-none appearance-none ${
+                disabled={isActionBusy}
+                className={`text-[10px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer outline-none appearance-none disabled:opacity-40 disabled:cursor-not-allowed ${
                   isNight ? 'bg-brand-dark border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
                 }`}
               >
@@ -160,8 +175,9 @@ export function StudentDatabaseGrid({
                 ))}
               </select>
               <button
-                onClick={() => handleRemoveStudent(row.uid)}
-                className="px-3 py-1.5 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-lg text-[10px] active:scale-[0.95] cursor-pointer"
+                onClick={() => runAction(() => handleRemoveStudent(row.uid))}
+                disabled={isActionBusy}
+                className="px-3 py-1.5 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-lg text-[10px] active:scale-[0.95] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isKo ? '삭제' : 'Remove'}
               </button>
@@ -178,7 +194,7 @@ export function StudentDatabaseGrid({
         },
       }),
     ],
-    [isKo, isNight, classes, handleMoveStudent, handleRemoveStudent, setSelectedStudentDetails]
+    [isKo, isNight, classes, handleMoveStudent, handleRemoveStudent, setSelectedStudentDetails, isActionBusy]
   );
 
   const table = useReactTable({
