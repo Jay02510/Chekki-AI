@@ -60,6 +60,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import {
   generateGeneralClassSummary,
   generateStudentExceptionReport,
+  clearOfflineDraft,
   ClassLogPayload,
 } from '../services/aiGenerator';
 
@@ -199,6 +200,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           });
           const newLog = { id: docRef.id, ...payload };
           setSubmittedLogs((prev) => [newLog, ...prev]);
+          clearOfflineDraft();
           setKtPendingLogs((prev) => [...prev, {
             id: docRef.id,
             classId: selectedClass.id,

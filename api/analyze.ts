@@ -1130,6 +1130,24 @@ Return ONLY valid JSON matching this schema:
       const rawText = response.text || '{}';
       try {
         const parsed = parseAiJson(rawText);
+
+        // This branch returns before the shared scansUsedToday increment
+        // further down in the handler ever runs, so every curriculum/
+        // syllabus OCR scan — the busiest AI feature in the teacher
+        // dashboard — was completely free for non-pro accounts regardless
+        // of the quota gate checked above (audit: unlimited free scans on
+        // this mode). Same increment used on the cache-hit path above.
+        if (userSnap && userSnap.exists && realUserPlan !== 'pro') {
+          try {
+            await userRef.update({
+              scansUsedToday: isNewDay ? 1 : FieldValue.increment(1),
+              lastScanDate: today,
+            });
+          } catch (dbLimitErr) {
+            console.warn('[analyze] Failed to update user scans limit on curriculum OCR success:', dbLimitErr);
+          }
+        }
+
         return res.status(200).json({ analysis: parsed });
       } catch (err) {
         // Previously this fell back to hardcoded fake "Weather & Nature"

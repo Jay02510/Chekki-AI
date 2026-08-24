@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Copy, CheckCircle, Sparkle, UserCheck, X, Lock, Bell, BellSlash } from '@phosphor-icons/react';
 import { GeneratedReportOutput } from '../services/aiGenerator';
 import { UserProfile } from '../../types';
@@ -91,6 +91,30 @@ export const NativeKtDashboard: React.FC<Props> = ({
     generatedOutput?.bilingualClassSummary.english ||
       'Today in 7A, students actively practiced Unit 4 Photosynthesis vocabulary. Everyone participated attentively during the reading drill.'
   );
+
+  // This component stays mounted (same key) while the KT works through a
+  // student's review card — if the underlying consolidated draft changes
+  // while it's open (e.g. another teacher adds a note for the same
+  // student/day, updating ktConsolidatedGroups reactively upstream), the
+  // useState initializers above never re-run, so the KT's screen silently
+  // keeps showing the old content. Only auto-resync when the KT hasn't
+  // started editing away from what was last synced — an active edit is
+  // never clobbered (audit: KT sends a script missing content that arrived
+  // after they opened the card).
+  const lastSyncedKoreanRef = useRef(generatedOutput?.bilingualClassSummary.korean);
+  const lastSyncedEnglishRef = useRef(generatedOutput?.bilingualClassSummary.english);
+  useEffect(() => {
+    const newKorean = generatedOutput?.bilingualClassSummary.korean;
+    const newEnglish = generatedOutput?.bilingualClassSummary.english;
+    if (newKorean !== undefined && newKorean !== lastSyncedKoreanRef.current) {
+      setEditedKoreanSummary((prev) => (prev === lastSyncedKoreanRef.current ? newKorean : prev));
+      lastSyncedKoreanRef.current = newKorean;
+    }
+    if (newEnglish !== undefined && newEnglish !== lastSyncedEnglishRef.current) {
+      setEnglishSummary((prev) => (prev === lastSyncedEnglishRef.current ? newEnglish : prev));
+      lastSyncedEnglishRef.current = newEnglish;
+    }
+  }, [generatedOutput?.bilingualClassSummary.korean, generatedOutput?.bilingualClassSummary.english]);
 
   // 3-Stage Report Status State
   const [reportStatus, setReportStatus] = useState<'pending_review' | 'edited_by_kt' | 'copied_sent'>(

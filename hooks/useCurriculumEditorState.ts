@@ -4,6 +4,18 @@ import { dbInstance, auth } from '../services/database';
 import { compressImage, stripDataUrlPrefix, getMimeTypeFromDataUrl } from '../services/compressImage';
 import { asString, asJoinedString } from '../utils/validate';
 import { parseApiError } from '../utils/describeError';
+
+// A random-per-call key defeats the point of the server's idempotency lock —
+// two concurrent calls from a double-tap would each mint their own key and
+// both run the full (billed) Gemini request. Deriving the key from the
+// request content itself instead means two truly-duplicate concurrent
+// requests collide on the same key, so the server's processing-lock/cache
+// actually catches the second one.
+async function contentIdempotencyKey(payload: unknown): Promise<string> {
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 import { validateCurriculumOtherField } from '../src/utils/curriculumGuardrail';
 import type { UserProfile } from '../types';
 import type { useToast } from '../contexts/ToastContext';
@@ -285,14 +297,24 @@ export function useCurriculumEditorState(
 
       // Call AI analysis with images_base64 list
       const idToken = await auth.currentUser?.getIdToken();
+      const analyzeBody = {
+        images_base64: cleanBase64List,
+        mode: scanType === 'syllabus' ? 'syllabus_course_plan' : 'textbook_curriculum_ocr',
+        mimeType: isPdf ? 'application/pdf' : getMimeTypeFromDataUrl(mainPreview || ''),
+      };
+      // Without this, a double-tap or a retry-after-apparent-timeout on
+      // slow WiFi fires two full, quota-charged Gemini calls for the same
+      // pages — analyze.ts's idempotency dedup (keyed purely off this
+      // header) already exists for exactly this, but nothing on this scan
+      // path was sending it (unlike the parent-facing worksheet-scan flow).
       const res = await fetch('/api/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({
-          images_base64: cleanBase64List,
-          mode: scanType === 'syllabus' ? 'syllabus_course_plan' : 'textbook_curriculum_ocr',
-          mimeType: isPdf ? 'application/pdf' : getMimeTypeFromDataUrl(mainPreview || '')
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+          'X-Idempotency-Key': await contentIdempotencyKey(analyzeBody),
+        },
+        body: JSON.stringify(analyzeBody),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -599,21 +621,26 @@ export function useCurriculumEditorState(
     setIsGeneratingWorksheet(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
+      const generateBody = {
+        task: 'generate_worksheet',
+        worksheetType,
+        questionStyle,
+        language: isKo ? 'ko' : 'en',
+        curriculum: {
+          topic: curriculumTopic.trim(),
+          vocabWords: vocabList,
+          phonicsRules: phonicsList,
+          passage: curriculumPassage.trim(),
+        },
+      };
       const res = await fetch('/api/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({
-          task: 'generate_worksheet',
-          worksheetType,
-          questionStyle,
-          language: isKo ? 'ko' : 'en',
-          curriculum: {
-            topic: curriculumTopic.trim(),
-            vocabWords: vocabList,
-            phonicsRules: phonicsList,
-            passage: curriculumPassage.trim(),
-          },
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+          'X-Idempotency-Key': await contentIdempotencyKey(generateBody),
+        },
+        body: JSON.stringify(generateBody),
       });
 
       if (!res.ok) {

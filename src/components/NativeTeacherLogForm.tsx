@@ -262,6 +262,18 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
       (draft.activities && draft.activities.length > 0) ||
       draft.generalComments || (draft.exceptions && draft.exceptions.length > 0);
     if (!hasContent) return;
+    // The autosaved draft is a single global localStorage key, not scoped
+    // per class — this form remounts every time its parent tab unmounts it
+    // (e.g. switching to Insights and back), and a stale draft from a
+    // DIFFERENT class than the one now active would otherwise silently
+    // overwrite className/exceptions here, with the UI still showing the
+    // (correct) selectedClassName prop elsewhere — the submitted log's
+    // exceptions end up tied to the wrong class's roster (audit: log
+    // submitted under wrong class after a mid-session class switch). Only
+    // restore when the draft actually belongs to the class currently active.
+    if (selectedClassName && draft.className && draft.className !== selectedClassName) {
+      return;
+    }
     if (draft.className) setClassName(draft.className);
     if (draft.date) setDate(draft.date);
     if (draft.lessonTopic) setLessonTopic(draft.lessonTopic);
@@ -432,7 +444,13 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isRealLogIncomplete) return;
-    clearOfflineDraft();
+    // Clearing here ran synchronously before onSubmitLog's async work (AI
+    // report generation, then the Firestore write) had even started — if
+    // either step failed (network drop mid-submit) or the tab was
+    // reloaded/killed while still in flight, the offline-draft recovery
+    // copy was already gone with nothing to fall back on. onSubmitLog's
+    // caller (TeacherPage.tsx's handleLogSubmit) now clears it itself, only
+    // once the log has actually persisted.
     onSubmitLog({
       className,
       date,
