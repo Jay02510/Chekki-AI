@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Buildings, CheckCircle, FolderUser, UserGear, UploadSimple } from '@phosphor-icons/react';
 import { auth } from '../../services/database';
 import { useToast } from '../../contexts/ToastContext';
@@ -70,8 +70,16 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
   // Persists the real school name server-side (api/set-initial-role.ts only
   // had a placeholder "New Academy" to work with) — fire-and-forget since
   // it's not on the critical path for the wizard to keep moving.
+  // Fires again every time Step 1's Next is clicked (Back then re-edit then
+  // Next again) with no ordering guard — an earlier, slower in-flight call
+  // could resolve AFTER a later one with a newer name, silently reverting
+  // the server's academyName back to the stale value while the wizard has
+  // already moved on with the newer one (audit: academy-name persist race).
+  const persistAcademyNameRequestIdRef = useRef(0);
+
   const persistAcademyName = async () => {
     if (!academyName.trim()) return;
+    const thisRequestId = ++persistAcademyNameRequestIdRef.current;
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch('/api/update-school-profile', {
@@ -79,8 +87,10 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
         body: JSON.stringify({ academyName: academyName.trim(), logoUrl: logoPreview || undefined }),
       });
+      if (thisRequestId !== persistAcademyNameRequestIdRef.current) return;
       if (!response.ok) throw new Error(await response.text());
     } catch (err) {
+      if (thisRequestId !== persistAcademyNameRequestIdRef.current) return;
       console.warn('Failed to persist academy name:', err);
       // Not on the critical path for the wizard (still lets the director
       // continue), but a silent failure here used to mean they'd finish
@@ -95,7 +105,11 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
     }
   };
 
+  const [hasFinished, setHasFinished] = useState(false);
+
   const handleFinish = () => {
+    if (hasFinished) return;
+    setHasFinished(true);
     onComplete({
       academyName,
       logoUrl: logoPreview || undefined,
@@ -380,7 +394,8 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={handleFinish}
-                className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                disabled={hasFinished}
+                className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
                 <CheckCircle size={18} weight="bold" />
                 <span>{isKo ? '설정 완료 & 대시보드 입장! 🎉' : 'Complete & Launch Workspace! 🎉'}</span>

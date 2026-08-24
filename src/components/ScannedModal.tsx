@@ -52,6 +52,27 @@ export function ScannedModal({
       ? scannedData
       : scannedData.pages.find((p: any) => (p.pageIndex || p.pageNumber) === selectedPageIndex) || scannedData;
 
+  // Every edit below operates on activeDisplayObj.detectedAnswers (the list
+  // actually rendered), but a specific page's list lives at
+  // scannedData.pages[i].detectedAnswers — writing straight to
+  // scannedData.detectedAnswers (the separate top-level aggregate) silently
+  // edited/deleted the WRONG array whenever a specific page was selected,
+  // with the visible list never updating and "Apply to Curriculum" pulling
+  // stale/unrelated data (audit: page edits invisible and lost on apply).
+  const updateActiveDetectedAnswers = (updater: (list: any[]) => any[]) => {
+    setScannedData((prev: any) => {
+      if (selectedPageIndex === 'all' || !prev?.pages) {
+        return { ...prev, detectedAnswers: updater(prev?.detectedAnswers || []) };
+      }
+      const pages = prev.pages.map((p: any) =>
+        (p.pageIndex || p.pageNumber) === selectedPageIndex
+          ? { ...p, detectedAnswers: updater(p.detectedAnswers || []) }
+          : p
+      );
+      return { ...prev, pages };
+    });
+  };
+
   // Same pinned-overlay component the parent app uses when a parent scans
   // their child's worksheet at home (components/WorksheetOverlay.tsx) — a
   // teacher reviewing a scan should see the identical positioned-pill view,
@@ -326,10 +347,10 @@ export function ScannedModal({
                                 value={item.category || 'Vocabulary'}
                                 onChange={(e) => {
                                   const val = e.target.value;
-                                  setScannedData((prev: any) => {
-                                    const list = [...(prev?.detectedAnswers || [])];
-                                    list[idx] = { ...list[idx], category: val };
-                                    return { ...prev, detectedAnswers: list };
+                                  updateActiveDetectedAnswers((list) => {
+                                    const next = [...list];
+                                    next[idx] = { ...next[idx], category: val };
+                                    return next;
                                   });
                                 }}
                                 className="text-[10px] font-bold uppercase tracking-wider bg-transparent border-b border-zinc-600 focus:border-orange-500 text-zinc-400 outline-none text-right w-28"
@@ -337,10 +358,10 @@ export function ScannedModal({
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setScannedData((prev: any) => {
-                                    const list = [...(prev?.detectedAnswers || [])];
-                                    list.splice(idx, 1);
-                                    return { ...prev, detectedAnswers: list };
+                                  updateActiveDetectedAnswers((list) => {
+                                    const next = [...list];
+                                    next.splice(idx, 1);
+                                    return next;
                                   });
                                 }}
                                 aria-label={isKo ? '문항 삭제' : 'Delete question'}
@@ -355,10 +376,10 @@ export function ScannedModal({
                               value={item.questionText || item.question || ''}
                               onChange={(e) => {
                                 const val = e.target.value;
-                                setScannedData((prev: any) => {
-                                  const list = [...(prev?.detectedAnswers || [])];
-                                  list[idx] = { ...list[idx], questionText: val, question: val };
-                                  return { ...prev, detectedAnswers: list };
+                                updateActiveDetectedAnswers((list) => {
+                                  const next = [...list];
+                                  next[idx] = { ...next[idx], questionText: val, question: val };
+                                  return next;
                                 });
                               }}
                               className={`w-full text-xs font-semibold p-2.5 rounded-xl border outline-none transition-all ${
@@ -381,10 +402,10 @@ export function ScannedModal({
                                 value={item.correctAnswer || item.answer || ''}
                                 onChange={(e) => {
                                   const val = e.target.value;
-                                  setScannedData((prev: any) => {
-                                    const list = [...(prev?.detectedAnswers || [])];
-                                    list[idx] = { ...list[idx], correctAnswer: val, answer: val };
-                                    return { ...prev, detectedAnswers: list };
+                                  updateActiveDetectedAnswers((list) => {
+                                    const next = [...list];
+                                    next[idx] = { ...next[idx], correctAnswer: val, answer: val };
+                                    return next;
                                   });
                                 }}
                                 className={`bg-brand-dark border outline-none px-3 py-1.5 rounded-lg font-mono font-black text-xs w-full max-w-[220px] ${
@@ -405,13 +426,10 @@ export function ScannedModal({
                       <button
                         type="button"
                         onClick={() => {
-                          setScannedData((prev: any) => ({
-                            ...prev,
-                            detectedAnswers: [
-                              { questionNumber: 1, category: 'Vocabulary', questionText: '1. Organisms that make food', correctAnswer: 'producers', answer: 'producers' },
-                              { questionNumber: 2, category: 'Vocabulary', questionText: '2. Organisms that eat living things', correctAnswer: 'consumer', answer: 'consumer' },
-                            ],
-                          }));
+                          updateActiveDetectedAnswers(() => [
+                            { questionNumber: 1, category: 'Vocabulary', questionText: '1. Organisms that make food', correctAnswer: 'producers', answer: 'producers' },
+                            { questionNumber: 2, category: 'Vocabulary', questionText: '2. Organisms that eat living things', correctAnswer: 'consumer', answer: 'consumer' },
+                          ]);
                         }}
                         className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
                       >

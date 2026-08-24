@@ -36,7 +36,29 @@ export function useLogCompliance(classes: any[]) {
   const [complianceRows, setComplianceRows] = useState<ComplianceRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const days = useMemo(() => lastNDays(WINDOW_DAYS), []);
+  // Recomputed only once (empty deps) before this fix, so a director who
+  // left this tab open across midnight (or just for a few hours) kept
+  // seeing the 14-day window and isToday flags pinned to whenever the
+  // component first mounted — today's real submissions fell outside the
+  // fetched range or a stale day stayed flagged "today" (audit: compliance
+  // window/isToday freezes at mount, producing wrong miss streaks on
+  // long-lived sessions). Polling is cheap (a date-string comparison) and
+  // only triggers a refetch on an actual day rollover.
+  const [todayKey, setTodayKey] = useState(() => isoDate(new Date()));
+  useEffect(() => {
+    const checkDayRollover = () => {
+      const current = isoDate(new Date());
+      setTodayKey((prev) => (prev === current ? prev : current));
+    };
+    const intervalId = setInterval(checkDayRollover, 5 * 60 * 1000);
+    document.addEventListener('visibilitychange', checkDayRollover);
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', checkDayRollover);
+    };
+  }, []);
+
+  const days = useMemo(() => lastNDays(WINDOW_DAYS), [todayKey]);
   const realClasses = useMemo(() => classes.filter((c: any) => c?.id && !c.isDemo), [classes]);
   const classesKey = realClasses.map((c: any) => c.id).join('|');
 

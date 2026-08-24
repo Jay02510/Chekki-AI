@@ -423,10 +423,26 @@ export function useCurriculumEditorState(
     // previously extracted by the AI and then thrown away entirely (never
     // saved, never used at grading time). Merge by question text so
     // re-scanning the same worksheet doesn't create duplicate entries.
-    if (Array.isArray(scannedData.detectedAnswers) && scannedData.detectedAnswers.length > 0) {
-      const newEntries = scannedData.detectedAnswers
-        .filter((a: any) => a?.questionText && a?.answer)
-        .map((a: any) => ({ questionText: String(a.questionText), answer: String(a.answer) }));
+    // A multi-page scan's editable answers live per-page in scannedData.pages
+    // (ScannedModal.tsx edits the specific page currently selected there) —
+    // this used to only ever read the top-level detectedAnswers field, which
+    // is just the AI's original aggregate and never reflects any correction
+    // made while reviewing an individual page (audit: page edits silently
+    // dropped from Apply). Merge both, preferring a page-scoped entry over
+    // the stale top-level one for the same question.
+    const pageAnswers = Array.isArray(scannedData.pages)
+      ? scannedData.pages.flatMap((p: any) => (Array.isArray(p?.detectedAnswers) ? p.detectedAnswers : []))
+      : [];
+    const topLevelAnswers = Array.isArray(scannedData.detectedAnswers) ? scannedData.detectedAnswers : [];
+    const mergedAnswersByText = new Map<string, any>();
+    for (const a of topLevelAnswers) if (a?.questionText) mergedAnswersByText.set(String(a.questionText), a);
+    for (const a of pageAnswers) if (a?.questionText) mergedAnswersByText.set(String(a.questionText), a);
+    const allDetectedAnswers = Array.from(mergedAnswersByText.values());
+
+    if (allDetectedAnswers.length > 0) {
+      const newEntries = allDetectedAnswers
+        .filter((a: any) => a?.questionText && (a?.answer || a?.correctAnswer))
+        .map((a: any) => ({ questionText: String(a.questionText), answer: String(a.answer || a.correctAnswer) }));
       setCurriculumAnswerKey((prev) => {
         const existingTexts = new Set(prev.map((e: { questionText: string }) => e.questionText));
         return [...prev, ...newEntries.filter((e: { questionText: string }) => !existingTexts.has(e.questionText))];

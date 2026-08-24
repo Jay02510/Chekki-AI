@@ -98,6 +98,21 @@ export function consolidateStudentReports(
           })
         : (log.aiStudentReports || []).map((e) => ({ uid: e.studentUid ?? null, name: e.studentName }));
 
+    // enrolledStudentUids only covers the roster-approved class — an
+    // exception typed for a walk-in/trial student (free-typed name, no
+    // roster match, studentUid: null) previously had no target at all once
+    // a class had a normal non-empty roster, silently dropping that note
+    // from the KT's consolidated queue with no error (audit: non-roster
+    // exceptions dropped from consolidation).
+    if (log.enrolledStudentUids && log.enrolledStudentUids.length > 0) {
+      const coveredUids = new Set(targets.map((t) => t.uid).filter(Boolean));
+      for (const ex of log.aiStudentReports || []) {
+        if (ex.studentUid && coveredUids.has(ex.studentUid)) continue;
+        targets.push({ uid: ex.studentUid ?? null, name: ex.studentName });
+        if (ex.studentUid) coveredUids.add(ex.studentUid);
+      }
+    }
+
     if (targets.length === 0) continue;
 
     for (const target of targets) {
