@@ -66,7 +66,6 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
           const rows = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as PendingStudent[];
           rows.sort((a, b) => (b.addedAt?.toMillis() || 0) - (a.addedAt?.toMillis() || 0));
           setPending(rows);
-          setMessage(null);
           setHasLoaded(true);
         },
         (err) => {

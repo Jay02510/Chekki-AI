@@ -88,7 +88,6 @@ export default function AdminPage() {
 
   const handleFetchInvoices = async () => {
     setLoading(true);
-    setMessage({ text: '', type: '' });
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
@@ -115,7 +114,6 @@ export default function AdminPage() {
 
   const handleFetchInvites = async () => {
     setLoading(true);
-    setMessage({ text: '', type: '' });
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
@@ -238,7 +236,6 @@ export default function AdminPage() {
 
   const handleFetchUsers = async () => {
     setLoading(true);
-    setMessage({ text: '', type: '' });
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
@@ -260,7 +257,6 @@ export default function AdminPage() {
 
   const handleFetchSchools = async () => {
     setLoading(true);
-    setMessage({ text: '', type: '' });
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
@@ -375,8 +371,14 @@ export default function AdminPage() {
         throw new Error(data.error || 'Failed to delete school');
       }
 
+      // Update local state directly instead of re-fetching the whole list:
+      // /api/admin is rate-limited to 5 req/60s per IP (api/admin.ts:37), and
+      // a refetch here doubles the request cost of every delete. Deleting a
+      // handful of schools in a row could hit the limit, silently fail the
+      // refetch, and leave the stale pre-delete list on screen — looking
+      // exactly like the delete itself hadn't worked.
+      setSchools((prev) => prev.filter((s) => s.schoolId !== schoolId));
       setMessage({ text: `✅ School ${schoolName} deleted successfully!`, type: 'success' });
-      handleFetchSchools();
     } catch (err: any) {
       console.error(err);
       setMessage({ text: err.message || 'Error deleting school', type: 'error' });
