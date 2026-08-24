@@ -86,6 +86,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           // signups for the same invoiced email could both pass the
           // `pendingSnap.empty` check and both claim the same school (Audit:
           // non-transactional school claim).
+          //
+          // The user-doc write (role/schoolId) used to happen separately,
+          // after this transaction committed. If that second write failed
+          // (transient error, function timeout), the school stayed
+          // permanently claimed (ownerUid set) but the user doc never got
+          // schoolId — a retry could no longer find the school via the
+          // `ownerUid == null` query above, so it fell through to minting a
+          // brand-new, disconnected trial school for the same director,
+          // recreating the exact "two schools for one business" bug this
+          // endpoint exists to prevent. Both writes now happen in the same
+          // transaction so they succeed or fail together.
           claimedSchool = await adminDb.runTransaction(async (t) => {
             const pendingSnap = await t.get(
               adminDb.collection('schools')
@@ -95,15 +106,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
             );
             if (pendingSnap.empty) return null;
             const pendingDoc = pendingSnap.docs[0];
+            const claimedName = pendingDoc.data()?.name;
             t.update(pendingDoc.ref, { ownerUid: uid });
-            return { id: pendingDoc.id, name: pendingDoc.data()?.name };
+            t.set(
+              userRef,
+              { role, schoolId: pendingDoc.id, schoolName: claimedName || schoolNameForUser },
+              { merge: true }
+            );
+            return { id: pendingDoc.id, name: claimedName };
           });
         }
 
         if (claimedSchool) {
-          resolvedSchoolId = claimedSchool.id;
-          if (claimedSchool.name) schoolNameForUser = claimedSchool.name;
-        } else {
+          // Role/schoolId already written atomically with the claim above —
+          // skip the shared write below for this path.
+          return res.status(200).json({ success: true, role, schoolId: claimedSchool.id });
+        }
+
+        {
           resolvedSchoolId = `school_${uid}`;
           const resolvedPlanId = typeof planId === 'string' ? planId : 'trial';
           const seats = seatsForPlan(resolvedPlanId);

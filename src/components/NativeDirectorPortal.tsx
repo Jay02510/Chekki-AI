@@ -36,6 +36,7 @@ interface Props {
   activeRoster?: any[];
   trialStatus?: { onTrial: boolean; daysRemaining: number; expired: boolean } | null;
   classes?: any[];
+  onClassesChanged?: () => void;
   selectedClass?: any;
   // Current active-week target vocab for selectedClass, same computation
   // TeacherPage's own curriculum tab and per-student mistake tracking use
@@ -62,6 +63,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   activeRoster = [],
   trialStatus = null,
   classes = [],
+  onClassesChanged,
   selectedClass,
   weeklyVocabWords = [],
   weeklyPhonicsRules = [],
@@ -690,7 +692,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           )}
 
           {schoolId ? (
-            <TeacherRosterPanel isNight={isNight} schoolId={schoolId} classes={classes} />
+            <TeacherRosterPanel isNight={isNight} schoolId={schoolId} classes={classes} onAssignmentChanged={onClassesChanged} />
           ) : (
             <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
               School profile still loading — teacher assignment will be available once it finishes.

@@ -2485,6 +2485,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 pendingRoster={pendingRoster}
                 activeRoster={activeRoster}
                 classes={classes}
+                onClassesChanged={() => fetchClasses()}
                 selectedClass={selectedClass}
                 weeklyVocabWords={getWeeklyVocabWords()}
                 weeklyPhonicsRules={getWeeklyPhonicsRules()}

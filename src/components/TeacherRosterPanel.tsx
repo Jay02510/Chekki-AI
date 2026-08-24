@@ -14,6 +14,14 @@ interface Props {
   isNight?: boolean;
   schoolId: string;
   classes: any[];
+  // Real refetch of the parent's `classes` state (TeacherPage's
+  // fetchClasses). Without this, a successful assign/remove only updated
+  // the local mirror below — the next time the parent's `classes` prop
+  // changed for any unrelated reason, the sync effect overwrote that mirror
+  // back to the stale pre-assignment data, silently reverting an assignment
+  // that had actually succeeded server-side (audit: director sees the
+  // assignment tick go green then disappear).
+  onAssignmentChanged?: () => void;
 }
 
 /**
@@ -25,7 +33,7 @@ interface Props {
  * role/schoolId directly, so this panel is a thin UI over that endpoint, not
  * a second place those checks are implemented.
  */
-export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, classes }) => {
+export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, classes, onAssignmentChanged }) => {
   const [teachers, setTeachers] = useState<SchoolTeacher[]>([]);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
@@ -78,6 +86,9 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
           return { ...c, assignedTeacherUids: Array.from(current) };
         })
       );
+      // Refresh the parent's real classes state so the next `classes` prop
+      // sync reflects this assignment instead of overwriting it back out.
+      onAssignmentChanged?.();
     } catch (err: any) {
       setMessage({ text: err.message || 'Failed to update assignment.', type: 'error' });
     } finally {

@@ -22,6 +22,7 @@ interface Props {
   pendingRoster: any[];
   activeRoster: any[];
   classes: any[];
+  onClassesChanged?: () => void;
   selectedClass: any;
   weeklyVocabWords: string[];
   weeklyPhonicsRules: string[];
@@ -63,6 +64,7 @@ export function DirectorTabContent(props: Props) {
           pendingRoster={props.pendingRoster}
           activeRoster={props.activeRoster}
           classes={props.classes}
+          onClassesChanged={props.onClassesChanged}
           selectedClass={props.selectedClass}
           weeklyVocabWords={props.weeklyVocabWords}
           weeklyPhonicsRules={props.weeklyPhonicsRules}
