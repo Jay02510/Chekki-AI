@@ -135,7 +135,19 @@ service cloud.firestore {
       );
       allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
-    
+
+    // Notifications: server-written only (Admin SDK bypasses rules), owner
+    // can read their own and mark them read/unread — never create/delete
+    // from the client, and never touch anyone else's.
+    match /users/{userId}/notifications/{notifId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow update: if request.auth != null && request.auth.uid == userId &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(
+          ['type', 'title', 'body', 'createdAt', 'meta']
+        );
+      allow create, delete: if false;
+    }
+
     // Helper to prevent storage exhaustion and ensure type safety
     function isValidMistake() {
       let data = request.resource.data;

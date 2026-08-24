@@ -4,6 +4,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter } from './_lib/rateLimit.js';
+import { notifyDirectors } from './_lib/notifications.js';
 
 // Codes (classCode/schoolCode/teacherCode) are short, guessable strings with
 // real value behind them (free pro access, class enrollment) — this endpoint
@@ -194,6 +195,13 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
     }
     throw error;
   }
+
+  await notifyDirectors(schoolId, {
+    type: 'student_joined',
+    title: 'New student join request',
+    body: `${invitedStudentName || email || 'A student'} requested to join ${classData.name || 'a class'} — approve them in Student Roster.`,
+    meta: { classId, uid },
+  });
 
   return res.status(200).json({
     success: true,
@@ -441,6 +449,13 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
     }
     throw error;
   }
+
+  await notifyDirectors(schoolId, {
+    type: 'teacher_invite_accepted',
+    title: 'Teacher invite accepted',
+    body: `${callerEmail || 'A teacher'} accepted the invite as ${educatorRole === 'kt' ? 'KT' : 'FT'}${className ? ` for ${className}` : ''}.`,
+    meta: { uid, educatorRole },
+  });
 
   return res.status(200).json({
     success: true,

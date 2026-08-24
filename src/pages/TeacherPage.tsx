@@ -13,10 +13,12 @@ import { useResolvedRole } from '../../hooks/useResolvedRole';
 import { useKtReviewQueue } from '../../hooks/useKtReviewQueue';
 import { useTeacherTabs } from '../../hooks/useTeacherTabs';
 import { useRosterAnalytics } from '../../hooks/useRosterAnalytics';
+import { useNotifications } from '../../hooks/useNotifications';
 import { DirectorSidebarNav } from '../components/DirectorSidebarNav';
 import { KtSidebarNav } from '../components/KtSidebarNav';
 import { FtSidebarNav } from '../components/FtSidebarNav';
 import { DirectorTabContent } from '../components/DirectorTabContent';
+import { NotificationBell } from '../components/NotificationBell';
 import { KtTabContent } from '../components/KtTabContent';
 import { FtTabContent } from '../components/FtTabContent';
 import { useDirectorPortalState } from '../../hooks/useDirectorPortalState';
@@ -340,6 +342,9 @@ export default function TeacherPage({ isNight = true }: Props) {
     firestoreEducatorRole === 'kt' ? 'kt' : 'ft'
   );
   const isDirectorUser = isDirectorPath || user?.role === 'director';
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifications(
+    isDirectorUser ? user?.uid : null
+  );
   // activeTab/setActiveTab are declared further below, via useTeacherTabs —
   // it needs confirmDiscardKtDraft from useKtReviewQueue, which itself needs
   // state declared between here and there (curriculumEditor, studentsData),
@@ -2359,6 +2364,19 @@ export default function TeacherPage({ isNight = true }: Props) {
             )}
 
 
+
+            {/* Notification Bell (director only — teacher invite accepted,
+                student join requests, plan/payment upgrades) */}
+            {isDirectorUser && (
+              <NotificationBell
+                isNight={isThemeNight}
+                isKo={isKo}
+                notifications={notifications}
+                unreadCount={unreadCount}
+                onMarkRead={markRead}
+                onMarkAllRead={markAllRead}
+              />
+            )}
 
             {/* Language Switcher */}
             <button

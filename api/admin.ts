@@ -5,6 +5,7 @@ import { adminDb, adminAuth as authDb } from './_lib/firebaseAdmin.js';
 import { seatsForPlan } from './_lib/pricingTiers.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
+import { notifyDirectors } from './_lib/notifications.js';
 import { createHash, timingSafeEqual } from 'crypto';
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
@@ -652,6 +653,13 @@ https://urlgeni.us/chekki
         planId: targetPlanId,
         seatsTotal: newSeats,
         trialEndsAt: FieldValue.delete(),
+      });
+
+      await notifyDirectors(sanitizedUpgradeSchoolId, {
+        type: 'plan_upgraded',
+        title: 'Payment confirmed',
+        body: `Your school's plan was upgraded to ${targetPlanId} (${newSeats} seats).`,
+        meta: { planId: targetPlanId, seatsTotal: newSeats },
       });
 
       return res.status(200).json({
