@@ -122,6 +122,28 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (syncedFromRC) {
       const subRef = adminDb.collection('subscriptions').doc(userId);
+
+      // RevenueCat's own propagation of an Apple event this app's webhook
+      // already applied (e.g. a renewal) can lag by seconds — a poll landing
+      // in that gap would otherwise read RC's still-stale 'expired' view and
+      // clobber the correct 'active' state the webhook just wrote. Don't let
+      // this poll downgrade an account whose stored expiry is still in the
+      // future; only a source that's at least as fresh should ever demote it.
+      if (status !== 'active') {
+        const existingSubSnap = await subRef.get();
+        const existingSub = existingSubSnap.exists ? existingSubSnap.data()! : null;
+        const existingExpiry = existingSub?.subscription_expiry_date
+          ? new Date(existingSub.subscription_expiry_date)
+          : null;
+        if (existingExpiry && existingExpiry > new Date()) {
+          return res.status(200).json({
+            subscription_status: existingSub!.subscription_status,
+            subscription_platform: existingSub!.subscription_platform,
+            subscription_expiry_date: existingSub!.subscription_expiry_date,
+          });
+        }
+      }
+
       await subRef.set(
         {
           user_id: userId,

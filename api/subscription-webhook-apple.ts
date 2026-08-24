@@ -1,8 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry.js';
 import crypto from 'crypto';
+import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from './_lib/firebaseAdmin.js';
 import { verifyAppleNotification, verifyAppleTransaction } from './_lib/appleWebhookVerifier.js';
+import { captureException } from './_lib/sentry.js';
 
 /**
  * Apple Server-to-Server Notification Handler
@@ -36,7 +38,26 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // old behavior here) lets anyone POST a crafted payload and flip a
       // user to plan:'pro'.
       const decoded = await verifyAppleNotification(payload.signedPayload);
-      const { notificationType, subtype, data } = decoded;
+      const { notificationType, subtype, data, notificationUUID, signedDate } = decoded as any;
+
+      // Apple redelivers notifications on retry (and doesn't guarantee
+      // in-order delivery) — without recording which notificationUUIDs
+      // were already applied, a redelivered SUBSCRIBED could reprocess
+      // after a later REFUND already downgraded the account, resurrecting
+      // an already-refunded subscription.
+      if (notificationUUID) {
+        const dedupeRef = adminDb.collection('processedAppleNotifications').doc(notificationUUID);
+        const alreadyProcessed = await adminDb.runTransaction(async (t) => {
+          const snap = await t.get(dedupeRef);
+          if (snap.exists) return true;
+          t.set(dedupeRef, { notificationType, subtype: subtype || null, processedAt: new Date().toISOString() });
+          return false;
+        });
+        if (alreadyProcessed) {
+          console.log(`[webhook-apple] Skipping already-processed notification ${notificationUUID}`);
+          return res.status(200).end();
+        }
+      }
 
       // signedTransactionInfo is itself a separately-signed JWS and needs
       // its own verification, not just a base64 decode.
@@ -48,7 +69,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      await handleNotification(notificationType as string, subtype as string, transactionInfo);
+      await handleNotification(notificationType as string, subtype as string, transactionInfo, signedDate as number | undefined);
     } else {
       // Apple deprecated v1 App Store Server Notifications; only v2
       // (signedPayload, verified above) carries a real signature. A v1 body
@@ -69,7 +90,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-async function handleNotification(type: string, subtype: string, data: any) {
+async function handleNotification(type: string, subtype: string, data: any, signedDate?: number) {
   if (!data) return;
 
   const now = new Date().toISOString();
@@ -121,12 +142,27 @@ async function handleNotification(type: string, subtype: string, data: any) {
 
   if (userRef) {
     const finalUserId = userRef.id;
+
+    // Apple doesn't guarantee delivery order — a redelivered/delayed older
+    // event (e.g. a retried SUBSCRIBED) could otherwise land after a newer
+    // one (a REFUND) already applied and stomp it with stale state. Only
+    // apply this event if it's not older than the last one we accepted.
+    if (signedDate) {
+      const existingSnap = await userRef.get();
+      const existingSignedDate = existingSnap.exists ? existingSnap.data()?.apple_last_signed_date : null;
+      if (existingSignedDate && signedDate <= existingSignedDate) {
+        console.log(`[webhook-apple] Dropping out-of-order notification for ${finalUserId} (event ${signedDate} <= last-applied ${existingSignedDate})`);
+        return;
+      }
+    }
+
     const batch = adminDb.batch();
     const userProfileRef = adminDb.collection('users').doc(finalUserId);
 
     batch.update(userRef, {
       subscription_status: status,
       subscription_expiry_date: expiresDate ? expiresDate.toISOString() : null,
+      apple_last_signed_date: signedDate || FieldValue.delete(),
       updated_at: now,
     });
 
@@ -145,6 +181,26 @@ async function handleNotification(type: string, subtype: string, data: any) {
     }
 
     await batch.commit();
+  } else if (originalTransactionId) {
+    // No subscriptions/{uid} doc exists yet — most likely this webhook beat
+    // the client's own subscription-validate-apple.ts call (app backgrounded
+    // right after purchase). Apple gets a 200 either way and will never
+    // retry, so without persisting this somewhere the event is lost forever
+    // and the purchase may never activate. Stash it so a reconciliation
+    // pass (or a future validate-apple call matching this
+    // originalTransactionId) can still apply it, and surface it — this
+    // should be rare, not silent.
+    await adminDb.collection('pendingAppleNotifications').doc(originalTransactionId).set({
+      notificationType: type,
+      subtype: subtype || null,
+      status,
+      expiresDate: expiresDate ? expiresDate.toISOString() : null,
+      originalTransactionId,
+      receivedAt: now,
+    });
+    captureException(
+      new Error(`[webhook-apple] No matching subscriptions doc for originalTransactionId ${originalTransactionId} (type=${type}) — stashed as pending`)
+    );
   }
 }
 

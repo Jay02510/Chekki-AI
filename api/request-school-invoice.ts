@@ -93,8 +93,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       email: String(email).trim().toLowerCase(),
       phone: String(phone || '').trim(),
       bizRegNumber: String(bizRegNumber || '').trim(),
-      planId: planId || 'small',
-      planName: planName || 'Small Academy Plan',
+      // 'small' isn't a real plan id in pricingTiers.ts's catalog
+      // (trial/solo/starter/school_pro/enterprise) — computeInvoicePricing
+      // above already silently falls back to 'starter' pricing for an
+      // unrecognized id, but this stored planId fed confirm_invoice's
+      // seatsForPlan() untouched, which has its OWN separate fallback to
+      // the trial tier (1 FT/1 KT). A ₩-charged starter-tier invoice with
+      // no planId sent (e.g. SchoolsLandingPage's consultation form) was
+      // silently activated at trial seat counts. Match computeInvoicePricing's
+      // own fallback so the stored id and the applied price never diverge.
+      planId: planId || 'starter',
+      planName: planName || 'Starter Plan',
       teacherCount: Math.max(1, Number(teacherCount)),
       studentCount: String(studentCount || '').trim(),
       unitPrice,
