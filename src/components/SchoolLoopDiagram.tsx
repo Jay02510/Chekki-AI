@@ -46,15 +46,9 @@ export function SchoolLoopDiagram({ isNight, isKo }: Props) {
 
   return (
     <section className="py-8 md:py-10 px-4 md:px-8 max-w-6xl mx-auto w-full space-y-5">
-      <div className="text-center max-w-xl mx-auto space-y-1.5">
-        <span className="px-3 py-1 bg-orange-500/10 border border-orange-500/30 text-orange-500 text-[10px] font-mono font-black uppercase tracking-widest rounded-full inline-block">
-          {isKo ? '채키 작동 방식' : 'HOW CHEKKI WORKS'}
-        </span>
-        <h3 className={`font-display text-2xl sm:text-3xl font-black break-keep ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-          {isKo ? '두 개의 루프, 계속 돌아갑니다' : 'Two loops, always turning'}
-        </h3>
-      </div>
-
+      {/* Each source image already has its own baked-in "HOW CHEKKI WORKS"
+          badge + headline (captured deliberately during cropping) — a live
+          React header here would duplicate it, not add to it. */}
       <div className="rounded-[2rem] overflow-hidden" style={{ backgroundColor: variant.bg }}>
         <img src={variant.src} alt={alt} className="w-full h-auto block" loading="lazy" />
       </div>
