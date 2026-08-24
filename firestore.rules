@@ -312,10 +312,21 @@ service cloud.firestore {
       // authorized and school-membership-checked there. This rule only
       // covers day-to-day field updates (e.g. activeWeekNumber) by whoever
       // is already an owner or assigned teacher, not who can become one.
+      //
+      // Missing isSchoolDirectorOfClass here (present on the read rule
+      // above) meant a director could see a class they didn't personally
+      // create/get assigned to by uid, but any client-side update to it —
+      // e.g. TeacherPage.tsx's week-nav control (handleUpdateWeek/
+      // handleSelectWeek), carries no role gate of its own and is reachable
+      // by any signed-in director browsing that class — silently
+      // permission-denied. The catch swallowed it into a "saved on this
+      // device only" toast with no clear signal why (audit: director's
+      // active-week changes don't persist for classes they didn't create).
       allow update: if request.auth != null && (
         (
           (resource.data.teacherUid == request.auth.uid ||
-            ('assignedTeacherUids' in resource.data && resource.data.assignedTeacherUids.hasAny([request.auth.uid]))) &&
+            ('assignedTeacherUids' in resource.data && resource.data.assignedTeacherUids.hasAny([request.auth.uid])) ||
+            isSchoolDirectorOfClass(classId)) &&
           request.resource.data.teacherUid == resource.data.teacherUid &&
           request.resource.data.assignedTeacherUids == resource.data.assignedTeacherUids
         ) ||
