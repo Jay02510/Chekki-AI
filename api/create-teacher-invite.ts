@@ -9,6 +9,12 @@ import { isValidAssignPayload, isValidRemoveTeacherPayload, canRemoveTeacher } f
 
 const checkTeacherInviteLimit = createRateLimiter('teacher_invite', 20, 60);
 
+class SeatLimitError extends Error {
+  constructor(public count: number, public max: number) {
+    super('Seat limit reached');
+  }
+}
+
 /**
  * Director-only school-membership actions: create invite (default), assign
  * a teacher to a class, or remove a teacher entirely. Folded into one file
@@ -72,17 +78,10 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
   const maxForRole = maxInvitesForRole(seatsTotal, role);
 
   const invitesRef = adminDb.collection('invites');
-  const existingForRole = await invitesRef
+  const existingForRoleQuery = invitesRef
     .where('schoolId', '==', schoolId)
     .where('role', '==', role)
-    .where('status', 'in', ['pending', 'claimed'])
-    .get();
-
-  if (existingForRole.size >= maxForRole) {
-    return res.status(400).json({
-      error: `No ${role.toUpperCase()} seats remaining (${existingForRole.size}/${maxForRole} used).`,
-    });
-  }
+    .where('status', 'in', ['pending', 'claimed']);
 
   const inviteId = generateInviteId();
   const invitePayload = {
@@ -95,7 +94,29 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
     createdAt: new Date().toISOString(),
     createdByUid: uid,
   };
-  await invitesRef.doc(inviteId).set(invitePayload);
+
+  // Count-then-write outside a transaction let two concurrent invite
+  // requests for the same role both read the same count, both pass the
+  // < maxForRole check, and both persist — exceeding the seat limit this
+  // check exists to enforce, the same race already present in
+  // api/create-class.ts's class-count check (audit: TOCTOU on invite seat
+  // limit).
+  try {
+    await adminDb.runTransaction(async (tx) => {
+      const existingForRole = await tx.get(existingForRoleQuery);
+      if (existingForRole.size >= maxForRole) {
+        throw new SeatLimitError(existingForRole.size, maxForRole);
+      }
+      tx.set(invitesRef.doc(inviteId), invitePayload);
+    });
+  } catch (err: any) {
+    if (err instanceof SeatLimitError) {
+      return res.status(400).json({
+        error: `No ${role.toUpperCase()} seats remaining (${err.count}/${err.max} used).`,
+      });
+    }
+    throw err;
+  }
 
   // Always build the invite link against a real https origin — corsOrigin
   // can resolve to 'capacitor://localhost' when the request comes from

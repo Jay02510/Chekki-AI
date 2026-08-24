@@ -11,6 +11,12 @@ import { FieldValue } from 'firebase-admin/firestore';
 const checkCreateClassLimit = createRateLimiter('create_class', 20, 60);
 const checkAddStudentsLimit = createRateLimiter('add_students', 20, 60);
 
+class ClassLimitError extends Error {
+  constructor(public count: number, public max: number) {
+    super('Class limit reached');
+  }
+}
+
 /**
  * Server-side seat-limit enforcement on class creation (audit §2/§10/§18).
  *
@@ -75,16 +81,19 @@ async function handleCreateClassAction(req: VercelRequest, res: VercelResponse, 
   const existingQuery = schoolId
     ? adminDb.collection('classes').where('schoolId', '==', schoolId)
     : adminDb.collection('classes').where('teacherUid', '==', uid);
-  const existingSnap = await existingQuery.get();
 
-  if (existingSnap.size >= maxClasses) {
-    return res.status(400).json({
-      error: `Class limit reached (${existingSnap.size}/${maxClasses}). Contact support@chekkiai.com to add more seats.`,
-    });
-  }
-
-  const sanitizedName = name.trim().replace(/\s+/g, '-');
-  const classId = `${schoolId || uid}_${sanitizedName}_${Date.now()}`;
+  // Count-then-write was previously done outside a transaction, so two
+  // concurrent create-class requests (double-click, or two teachers
+  // submitting near-simultaneously) could both read the same count, both
+  // pass the < maxClasses check, and both write — silently exceeding the
+  // school's purchased seat limit this endpoint's own count check exists to
+  // enforce (audit: TOCTOU race on class-count seat limit). The old
+  // deterministic classId (`${schoolId}_${name}_${Date.now()}`, millisecond
+  // resolution) also meant two near-simultaneous same-name requests could
+  // collide on the same doc ID and silently overwrite each other via .set()
+  // — now using an auto-generated doc ID instead.
+  const newClassRef = adminDb.collection('classes').doc();
+  const classId = newClassRef.id;
   const newClass = {
     id: classId,
     schoolId: schoolId || `school_${uid.slice(0, 8)}`,
@@ -100,7 +109,22 @@ async function handleCreateClassAction(req: VercelRequest, res: VercelResponse, 
     createdAt: new Date().toISOString(),
   };
 
-  await adminDb.collection('classes').doc(classId).set(newClass);
+  try {
+    await adminDb.runTransaction(async (tx) => {
+      const existingSnap = await tx.get(existingQuery);
+      if (existingSnap.size >= maxClasses) {
+        throw new ClassLimitError(existingSnap.size, maxClasses);
+      }
+      tx.set(newClassRef, newClass);
+    });
+  } catch (err: any) {
+    if (err instanceof ClassLimitError) {
+      return res.status(400).json({
+        error: `Class limit reached (${err.count}/${err.max}). Contact support@chekkiai.com to add more seats.`,
+      });
+    }
+    throw err;
+  }
 
   return res.status(200).json({ success: true, class: newClass });
 }

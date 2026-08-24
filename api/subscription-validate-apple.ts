@@ -101,6 +101,28 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const status = isActive ? 'active' : 'expired';
 
     const latestTx = latestReceiptInfo[0] || {};
+    const originalTransactionId = latestTx.original_transaction_id || null;
+
+    // A valid Apple receipt only proves a real purchase happened somewhere —
+    // Apple's verifyReceipt returns success for whoever submits it, it
+    // doesn't bind the receipt to the caller. Without this check, any
+    // authenticated user who obtains someone else's receipt blob (screenshot,
+    // log leak, shared support ticket) could POST it under their own uid and
+    // get upgraded to pro for free, and the same purchase could be
+    // "redeemed" by unlimited accounts (audit: receipt not bound to
+    // purchasing account). Reject if this transaction is already recorded
+    // against a different user.
+    if (originalTransactionId) {
+      const existingSub = await adminDb
+        .collection('subscriptions')
+        .where('apple_original_transaction_id', '==', originalTransactionId)
+        .limit(1)
+        .get();
+      if (!existingSub.empty && existingSub.docs[0].id !== user_id) {
+        return res.status(409).json({ error: 'This purchase is already linked to a different account' });
+      }
+    }
+
     const now = new Date().toISOString();
     const subData = {
       user_id,
@@ -130,6 +152,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         plan: 'pro',
         maxScansPerDay: 9999,
         maxQuestionsPerDay: 9999,
+      });
+    } else {
+      // Mirrors subscription-webhook-apple.ts's downgrade — without this, a
+      // user granted 'pro' here (or by the webhook) stayed stuck at
+      // unlimited quota forever if this endpoint was ever called again
+      // after their subscription lapsed and the webhook was missed/delayed.
+      batch.update(userRef, {
+        plan: 'free',
+        maxScansPerDay: 3,
+        maxQuestionsPerDay: 5,
       });
     }
 

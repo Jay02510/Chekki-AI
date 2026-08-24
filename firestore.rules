@@ -100,13 +100,19 @@ service cloud.firestore {
         (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'schoolId', 'schoolName', 'educatorRole', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate'])) ||
         // Teacher or director updating classroom fields (roster
         // approve/decline/remove/move, flaggedException) on a student in
-        // their own class/school.
+        // their own class/school. Allowlisted (hasOnly) rather than
+        // blocklisted — the blocklist only excluded a few PII/plan fields,
+        // so a valid teacher/director auth token could otherwise write
+        // ANY other field on a supervised student's doc via the raw
+        // Firestore SDK, including quota fields (maxScansPerDay etc.) the
+        // app's own client code never touches through this path (audit:
+        // roster-update rule allowed unbounded field writes).
         (
           (
             (request.resource.data.classId != null && (isClassTeacher(request.resource.data.classId) || isSchoolDirectorOfClass(request.resource.data.classId))) ||
             (resource.data.classId != null && (isClassTeacher(resource.data.classId) || isSchoolDirectorOfClass(resource.data.classId)) && request.resource.data.classId == null)
           ) &&
-          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'email', 'name', 'schoolId', 'schoolName', 'childAge', 'childEnglishLevel', 'parentEnglishLevel'])
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['classId', 'classStatus', 'flaggedException'])
         )
       );
     }
@@ -148,14 +154,6 @@ service cloud.firestore {
       allow create, delete: if false;
     }
 
-    // Helper to prevent storage exhaustion and ensure type safety
-    function isValidMistake() {
-      let data = request.resource.data;
-      let qValid = !data.keys().hasAny(['question_text']) || (data.question_text is string && data.question_text.size() < 1000);
-      let aValid = !data.keys().hasAny(['correct_answer']) || (data.correct_answer is string && data.correct_answer.size() < 1000);
-      return qValid && aValid;
-    }
-
     // Helper to validate curriculum pre-seeding documents including the 'other' field
     function isValidCurriculum() {
       let data = request.resource.data;
@@ -165,34 +163,15 @@ service cloud.firestore {
       return topicValid && passageValid && otherValid;
     }
 
-    // Mistakes: Strict ownership check & authorized teacher analytics access.
-    match /mistakes/{mistakeId} {
-      allow get, list: if request.auth != null && (
-        (resource.data.userId == request.auth.uid) || 
-        isAdmin() ||
-        (
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' &&
-          isClassTeacher(get(/databases/$(database)/documents/users/$(resource.data.userId)).data.classId)
-        )
-      );
-      
-      allow create: if request.auth != null 
-        && request.resource.data.userId == request.auth.uid
-        && isValidMistake();
-        
-      allow update: if request.auth != null && (
-        isAdmin() ||
-        (resource.data.userId == request.auth.uid 
-         && request.resource.data.userId == request.auth.uid 
-         && isValidMistake())
-      );
-      
-      allow delete: if request.auth != null && (
-        (resource.data.userId == request.auth.uid) || isAdmin()
-      );
-    }
+    // Note: mistakes are stored at users/{uid}/data/mistakes (see the rule
+    // above and services/database.ts's saveUserMistakes), not as individual
+    // docs in a top-level `mistakes` collection — no code writes there. A
+    // legacy rule block for that collection was removed (audit: dead rule
+    // left an unused, permissive attack surface reachable directly via the
+    // Firestore SDK with a valid auth token, even though nothing in the app
+    // ever populated it).
 
-    
+
     function isValidFeedback() {
       let data = request.resource.data;
       let cValid = !data.keys().hasAny(['comment']) || (data.comment is string && data.comment.size() < 2000);
