@@ -23,6 +23,20 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- App Links: opens invite links (chekkiai.com/teacher?invite=...)
+                 straight into the app instead of the mobile browser. Verified
+                 against /.well-known/assetlinks.json (audit: invite links never
+                 opened the native app — no App/Universal Links wiring existed
+                 on either platform). autoVerify requires Android 6.0+ and a
+                 matching assetlinks.json; falls back to an app-picker prompt
+                 on older devices or if verification hasn't completed yet. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="chekkiai.com" android:pathPrefix="/teacher" />
+            </intent-filter>
         </activity>
 
         <provider

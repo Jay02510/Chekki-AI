@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "3G65TYA3KS.com.chekkiai.app",
+        "paths": ["/teacher", "/teacher/*"]
+      }
+    ]
+  }
+}
