@@ -18,6 +18,7 @@ interface Props {
   isNight?: boolean;
   isKo?: boolean;
   classId: string;
+  classes?: { id: string; name: string }[];
 }
 
 /**
@@ -30,12 +31,26 @@ interface Props {
  * matches the redeeming parent's email against it — so staff can see who
  * still hasn't redeemed instead of guessing.
  */
-export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = false, classId }) => {
+export const StudentInvitePanel: React.FC<Props> = ({
+  isNight = true,
+  isKo = false,
+  classId,
+  classes = [],
+}) => {
   const [pending, setPending] = useState<PendingStudent[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [targetClassId, setTargetClassId] = useState(classId);
+
+  // Keep the picker following the class the director is currently viewing
+  // rather than sticking to whatever was selected the first time the form
+  // opened — a stale target here would silently add students to the wrong
+  // class.
+  useEffect(() => {
+    setTargetClassId(classId);
+  }, [classId]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -54,7 +69,8 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
     // students invited yet" even right after a successful add. Sorted
     // client-side below instead.
     let cancelled = false;
-    let retried = false;
+    let retryCount = 0;
+    const maxRetries = 3;
     let unsub: (() => void) | undefined;
 
     const attach = () => {
@@ -67,20 +83,31 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
           rows.sort((a, b) => (b.addedAt?.toMillis() || 0) - (a.addedAt?.toMillis() || 0));
           setPending(rows);
           setHasLoaded(true);
+          // A retry that eventually succeeds should clear whatever error
+          // banner an earlier failed attempt left up — otherwise a student
+          // that *did* load successfully sits under a stale "Failed to
+          // load" message (audit: newly-added student invisible, error
+          // banner and empty-state both shown together).
+          setMessage((m) => (m?.text === 'Failed to load the invite list. Please refresh.' ? null : m));
         },
         (err) => {
           console.warn('Failed to load pending student invites:', err?.code, err);
           // firestore.rules re-reads the caller's own user doc on every
           // attach to check schoolId; right after creating a brand-new
           // class that read can transiently permission-deny before the
-          // director's session settles. One silent retry avoids scaring
-          // staff with an error on a class that's a second old.
-          if (err?.code === 'permission-denied' && !retried) {
-            retried = true;
+          // director's session settles. A single fixed 1.5s retry wasn't
+          // always enough — a slower session settle left the listener
+          // permanently in the error state with no way to recover even
+          // after a student was successfully added via the API (audit:
+          // added student never appeared, error banner stuck). Retry with
+          // backoff instead of once.
+          if (err?.code === 'permission-denied' && retryCount < maxRetries) {
+            const delay = 1000 * 2 ** retryCount;
+            retryCount += 1;
             unsub?.();
             setTimeout(() => {
               if (!cancelled) attach();
-            }, 1500);
+            }, delay);
             return;
           }
           if (cancelled) return;
@@ -113,7 +140,7 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
     setIsSubmitting(true);
     setMessage(null);
     try {
-      const data = await callEndpoint({ action: 'add_students', classId, students });
+      const data = await callEndpoint({ action: 'add_students', classId: targetClassId, students });
       const withEmail = data.added - (data.addedWithoutEmail || 0);
       if (data.addedWithoutEmail > 0 && withEmail === 0) {
         setMessage({
@@ -282,6 +309,24 @@ export const StudentInvitePanel: React.FC<Props> = ({ isNight = true, isKo = fal
 
         {showAddForm && (
           <form onSubmit={handleAddSingle} className="flex flex-wrap items-end gap-2 mb-6 p-4 rounded-2xl bg-white/5 border border-white/10">
+            {classes.length > 1 && (
+              <div className="flex-1 min-w-[140px]">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase block mb-1">
+                  {isKo ? '학급' : 'Class'}
+                </label>
+                <select
+                  value={targetClassId}
+                  onChange={(e) => setTargetClassId(e.target.value)}
+                  className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
+                >
+                  {classes.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="flex-1 min-w-[140px]">
               <label className="text-[10px] font-bold text-zinc-400 uppercase block mb-1">{isKo ? '학생 이름' : 'Student Name'}</label>
               <input

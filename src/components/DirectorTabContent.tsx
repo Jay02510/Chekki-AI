@@ -3,6 +3,8 @@ import { NativeDirectorPortal } from './NativeDirectorPortal';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
 import { StudentInvitePanel } from './StudentInvitePanel';
 import { StudentDatabaseGrid } from './StudentDatabaseGrid';
+import { TeacherInvitePanel } from './TeacherInvitePanel';
+import { TeacherRosterPanel } from './TeacherRosterPanel';
 import { LogComplianceTracker } from './LogComplianceTracker';
 import { useLogCompliance } from '../../hooks/useLogCompliance';
 import type { TabId } from '../../hooks/useTeacherTabs';
@@ -48,9 +50,8 @@ export function DirectorTabContent(props: Props) {
   // Only query when the director is actually viewing this tab — this hook
   // fires one logs-subcollection query per class, and was previously called
   // unconditionally on every DirectorTabContent render (director_hq,
-  // students, student_database — any tab), reading Firestore for a view the
-  // director might never open (audit: unnecessary reads on every portal
-  // visit).
+  // students — any tab), reading Firestore for a view the director might
+  // never open (audit: unnecessary reads on every portal visit).
   const { complianceRows, isLoading: isLoadingCompliance } = useLogCompliance(
     activeTab === 'log_compliance' ? props.classes : []
   );
@@ -85,7 +86,14 @@ export function DirectorTabContent(props: Props) {
       {activeTab === 'students' && (
         <div className="space-y-8">
           {props.selectedClass && !props.selectedClass.isDemo && (
-            <StudentInvitePanel isNight={isNight} isKo={isKo} classId={props.selectedClass.id} />
+            <StudentInvitePanel
+              isNight={isNight}
+              isKo={isKo}
+              classId={props.selectedClass.id}
+              classes={props.classes
+                .filter((c: any) => !c.isDemo)
+                .map((c: any) => ({ id: c.id, name: c.name }))}
+            />
           )}
           <NativeDirectorStudentsTab
             isNight={isNight}
@@ -102,20 +110,54 @@ export function DirectorTabContent(props: Props) {
             fetchRosterAndMistakes={props.fetchRosterAndMistakes}
             setSelectedStudentDetails={props.setSelectedStudentDetails}
           />
+          <StudentDatabaseGrid
+            isNight={isNight}
+            isKo={isKo}
+            activeRoster={props.activeRoster}
+            pendingRoster={props.pendingRoster}
+            classes={props.classes}
+            handleMoveStudent={props.handleMoveStudent}
+            handleRemoveStudent={props.handleRemoveStudent}
+            setSelectedStudentDetails={props.setSelectedStudentDetails}
+          />
         </div>
       )}
 
-      {activeTab === 'student_database' && (
-        <StudentDatabaseGrid
-          isNight={isNight}
-          isKo={isKo}
-          activeRoster={props.activeRoster}
-          pendingRoster={props.pendingRoster}
-          classes={props.classes}
-          handleMoveStudent={props.handleMoveStudent}
-          handleRemoveStudent={props.handleRemoveStudent}
-          setSelectedStudentDetails={props.setSelectedStudentDetails}
-        />
+      {activeTab === 'teacher_assignment' && (
+        <div className="space-y-6">
+          {props.schoolId && props.classes.length === 0 ? (
+            <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400 font-bold">
+              Create at least one class before inviting teachers — invites need a class to assign the teacher to.
+            </div>
+          ) : props.schoolId ? (
+            <TeacherInvitePanel
+              isNight={isNight}
+              isKo={false}
+              schoolId={props.schoolId}
+              seatsTotal={props.seatsTotal || { ft: 0, kt: 0 }}
+              classes={props.classes
+                .filter((c: any) => !c.isDemo)
+                .map((c: any) => ({ id: c.id, name: c.name }))}
+            />
+          ) : (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
+              School profile still loading — invites will be available once it finishes.
+            </div>
+          )}
+
+          {props.schoolId ? (
+            <TeacherRosterPanel
+              isNight={isNight}
+              schoolId={props.schoolId}
+              classes={props.classes}
+              onAssignmentChanged={props.onClassesChanged}
+            />
+          ) : (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
+              School profile still loading — teacher assignment will be available once it finishes.
+            </div>
+          )}
+        </div>
       )}
 
       {activeTab === 'log_compliance' && (

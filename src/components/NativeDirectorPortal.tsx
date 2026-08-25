@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Buildings,
   WarningCircle,
-  UserGear,
   PlusCircle,
   FolderUser,
   SquaresFour,
@@ -11,8 +10,6 @@ import {
 import { collection, query, where, getCountFromServer, getDocs } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
-import { TeacherInvitePanel } from './TeacherInvitePanel';
-import { TeacherRosterPanel } from './TeacherRosterPanel';
 import { SchoolBillingPanel } from './SchoolBillingPanel';
 import { ActivityFeed } from './ActivityFeed';
 
@@ -73,7 +70,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   onRequestSeatExpansion,
   onRequestPlanChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'exceptions' | 'teachers' | 'billing'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'exceptions' | 'billing'>('overview');
 
   // Campus-wide roster + flag counts — previously TOTAL ROSTER and FLAGGED
   // EXCEPTIONS only reflected whichever single class was selected
@@ -336,21 +333,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             {flaggedStudents.length > 0 && (
               <span className="w-2 h-2 rounded-full bg-rose-500 absolute -top-1 -right-1 animate-ping" />
             )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('teachers')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
-              activeTab === 'teachers'
-                ? 'bg-orange-500 border-orange-500 text-white shadow-md'
-                : isNight
-                ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-            }`}
-          >
-            <UserGear size={16} weight="bold" />
-            <span>Teacher Assignments</span>
           </button>
 
           <button
@@ -669,40 +651,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: TEACHER ASSIGNMENTS & CLASS ALLOCATION */}
-      {/* ========================================================================= */}
-      {activeTab === 'teachers' && (
-        <div className="space-y-6">
-          {schoolId && classes.length === 0 ? (
-            <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400 font-bold">
-              Create at least one class before inviting teachers — invites need a class to assign the teacher to.
-            </div>
-          ) : schoolId ? (
-            <TeacherInvitePanel
-              isNight={isNight}
-              isKo={false}
-              schoolId={schoolId}
-              seatsTotal={seatsTotal || { ft: 0, kt: 0 }}
-              classes={classes.filter((c: any) => !c.isDemo).map((c: any) => ({ id: c.id, name: c.name }))}
-            />
-          ) : (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
-              School profile still loading — invites will be available once it finishes.
-            </div>
-          )}
-
-          {schoolId ? (
-            <TeacherRosterPanel isNight={isNight} schoolId={schoolId} classes={classes} onAssignmentChanged={onClassesChanged} />
-          ) : (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
-              School profile still loading — teacher assignment will be available once it finishes.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* TAB 4: BILLING — plan, seats, trial/renewal, always checkable */}
+      {/* TAB 3: BILLING — plan, seats, trial/renewal, always checkable */}
       {/* ========================================================================= */}
       {activeTab === 'billing' && (
         schoolId ? (
