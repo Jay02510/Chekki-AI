@@ -339,12 +339,14 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                             </div>
 
                             {item.korean_guide && (
-                              <p className="text-zinc-500 text-sm mt-6 leading-relaxed font-korean">
-                                <span className="text-white/40 block mb-1 text-xs">
+                              <div className="mt-6 p-4 rounded-2xl bg-orange-500/5 border border-orange-500/10">
+                                <span className="text-orange-400 block mb-1 text-xs font-bold uppercase tracking-widest">
                                   {t('lbl_mom_tip')}
                                 </span>
-                                {item.korean_guide}
-                              </p>
+                                <p className="text-zinc-300 text-sm leading-relaxed font-korean">
+                                  {item.korean_guide}
+                                </p>
+                              </div>
                             )}
                           </div>
 

@@ -441,6 +441,11 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                             {index === 0 && !isListening && (
                               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-zinc-50 animate-ping" />
                             )}
+                            {userPlan !== 'pro' && index !== 0 && (
+                              <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full border-2 border-zinc-50 flex items-center justify-center text-[8px] leading-none">
+                                🔒
+                              </span>
+                            )}
                           </button>
                           <div className="flex-1">
                             <h5 className="text-[10px] md:text-xs font-black uppercase tracking-widest text-indigo-500 mb-0.5">
@@ -461,7 +466,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                           className={`relative px-0 py-1 transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${!isAuthenticated && index !== 0 ? 'blur-[4px] opacity-40 pointer-events-none select-none' : ''} ${speechResult?.id === item.id ? (speechResult.success ? 'scale-110 z-10' : 'translate-x-1') : ''}`}
                         >
                           {item.is_correct === false && hasHandwriting !== false && (
-                            <div className="mb-2">
+                            <div className="mb-3 p-3 rounded-2xl bg-red-500/5 border border-red-500/10">
                               <span className="text-xs text-red-500/80 font-bold uppercase tracking-wider block mb-1">
                                 {language === 'ko' ? '아이의 답안' : "Child's Answer"}
                               </span>
@@ -473,27 +478,35 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                               </span>
                             </div>
                           )}
-                          {item.is_correct === false && hasHandwriting !== false && (
-                            <span className="text-xs text-emerald-500/80 font-bold uppercase tracking-wider block mt-3 mb-1">
-                              {language === 'ko' ? '정답' : 'Correct Answer'}
-                            </span>
-                          )}
-                          {hasHandwriting === false && (
-                            <span className="text-[10px] text-blue-500/80 font-black uppercase tracking-widest block mb-2 bg-blue-500/10 w-fit px-2 py-0.5 rounded-full border border-blue-500/20 shadow-sm">
-                              {language === 'ko' ? '정답 모드' : 'Answer Key'}
-                            </span>
-                          )}
-                          <span
-                            className={`font-hand ${isAnswerLong ? 'text-xl md:text-3xl' : 'text-3xl md:text-5xl'} font-bold transition-colors duration-200 block break-words whitespace-normal break-words min-w-0 rotate-[1.5deg] inline-block ${speechResult?.id === item.id ? (speechResult.success ? (isNight ? 'text-green-300 drop-shadow-[0_2px_8px_rgba(34,197,94,0.5)]' : 'text-green-600 drop-shadow-[0_2px_8px_rgba(22,163,74,0.3)]') : isNight ? 'text-red-300 drop-shadow-[0_2px_8px_rgba(239,68,68,0.5)]' : 'text-red-600 drop-shadow-[0_2px_8px_rgba(220,38,38,0.3)]') : isNight ? 'text-emerald-400' : 'text-emerald-600'}`}
+                          <div
+                            className={
+                              item.is_correct === false && hasHandwriting !== false
+                                ? 'p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/10'
+                                : ''
+                            }
                           >
-                            {item.is_correct === true && <span className="mr-2">✅</span>}
-                            {answerText}
-                            {speechResult?.id === item.id && speechResult.success && (
-                              <span className="ml-3 inline-block animate-[bounce_1s_ease-[cubic-bezier(0.23,1,0.32,1)]_infinite] drop-shadow-lg z-20 text-3xl">
-                                🌟
+                            {item.is_correct === false && hasHandwriting !== false && (
+                              <span className="text-xs text-emerald-500/80 font-bold uppercase tracking-wider block mb-1">
+                                {language === 'ko' ? '정답' : 'Correct Answer'}
                               </span>
                             )}
-                          </span>
+                            {hasHandwriting === false && (
+                              <span className="text-[10px] text-blue-500/80 font-black uppercase tracking-widest block mb-2 bg-blue-500/10 w-fit px-2 py-0.5 rounded-full border border-blue-500/20 shadow-sm">
+                                {language === 'ko' ? '정답 모드' : 'Answer Key'}
+                              </span>
+                            )}
+                            <span
+                              className={`font-hand ${isAnswerLong ? 'text-xl md:text-3xl' : 'text-3xl md:text-5xl'} font-bold transition-colors duration-200 block break-words whitespace-normal break-words min-w-0 rotate-[1.5deg] inline-block ${speechResult?.id === item.id ? (speechResult.success ? (isNight ? 'text-green-300 drop-shadow-[0_2px_8px_rgba(34,197,94,0.5)]' : 'text-green-600 drop-shadow-[0_2px_8px_rgba(22,163,74,0.3)]') : isNight ? 'text-red-300 drop-shadow-[0_2px_8px_rgba(239,68,68,0.5)]' : 'text-red-600 drop-shadow-[0_2px_8px_rgba(220,38,38,0.3)]') : isNight ? 'text-emerald-400' : 'text-emerald-600'}`}
+                            >
+                              {item.is_correct === true && <span className="mr-2">✅</span>}
+                              {answerText}
+                              {speechResult?.id === item.id && speechResult.success && (
+                                <span className="ml-3 inline-block animate-[bounce_1s_ease-[cubic-bezier(0.23,1,0.32,1)]_infinite] drop-shadow-lg z-20 text-3xl">
+                                  🌟
+                                </span>
+                              )}
+                            </span>
+                          </div>
                         </div>
 
                         {/* Tool Actions */}
@@ -508,7 +521,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                   onPlayAudio(cleanAnswerText(item.correct_answer || ''));
                                 }
                               }}
-                              className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-[1.02] active:scale-[0.97] hover:-translate-y-0.5 shadow-sm transition-transform ${isNight ? 'bg-emerald-500/10 text-emerald-400 hover:text-emerald-300' : 'bg-emerald-600/10 text-emerald-600 hover:text-emerald-500'}`}
+                              className={`relative w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-[1.02] active:scale-[0.97] hover:-translate-y-0.5 shadow-sm transition-transform ${isNight ? 'bg-emerald-500/10 text-emerald-400 hover:text-emerald-300' : 'bg-emerald-600/10 text-emerald-600 hover:text-emerald-500'}`}
                               title={
                                 userPlan !== 'pro' && index !== 0
                                   ? language === 'ko'
@@ -524,6 +537,11 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                               >
                                 <path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L5.5 8H1v8h4.5l6.5 4.77V3.23z" />
                               </svg>
+                              {userPlan !== 'pro' && index !== 0 && (
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full border-2 border-zinc-50 flex items-center justify-center text-[8px] leading-none">
+                                  🔒
+                                </span>
+                              )}
                             </button>
                             <span
                               className={`text-[7px] md:text-[9px] font-black uppercase tracking-widest opacity-80 leading-none h-4 flex items-center text-center ${isNight ? 'text-emerald-500/60' : 'text-emerald-600/60'}`}
@@ -540,7 +558,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                   else onToggleMistake(item);
                                 })
                               }
-                              className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-[1.02] active:scale-[0.97] hover:-translate-y-0.5 shadow-sm transition-transform ${flagged ? 'bg-red-500/10 text-red-500' : isNight ? 'bg-white/5 text-emerald-500/60 hover:text-emerald-400' : 'bg-emerald-500/5 text-emerald-600/50 hover:text-emerald-600'}`}
+                              className={`relative w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-[1.02] active:scale-[0.97] hover:-translate-y-0.5 shadow-sm transition-transform ${flagged ? 'bg-red-500/10 text-red-500' : isNight ? 'bg-white/5 text-emerald-500/60 hover:text-emerald-400' : 'bg-emerald-500/5 text-emerald-600/50 hover:text-emerald-600'}`}
                               title={
                                 userPlan !== 'pro' && index !== 0
                                   ? language === 'ko'
@@ -562,6 +580,11 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                   d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
                                 />
                               </svg>
+                              {userPlan !== 'pro' && index !== 0 && (
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full border-2 border-zinc-50 flex items-center justify-center text-[8px] leading-none">
+                                  🔒
+                                </span>
+                              )}
                             </button>
                             <span
                               className={`text-[7px] md:text-[9px] font-black uppercase tracking-widest opacity-80 leading-none h-4 flex items-center text-center ${flagged ? 'text-red-400' : isNight ? 'text-emerald-500/60' : 'text-emerald-600/60'}`}
