@@ -142,11 +142,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         .limit(500)
         .get();
 
+      // No further slice here — the admin panel's search box filters
+      // whatever this endpoint returns client-side (AdminPage.tsx), so
+      // capping this below the 500-doc Firestore limit silently made
+      // whole accounts unsearchable. Undated docs (pre-createdAt-fix
+      // signups, including several director accounts) sort last and were
+      // the first ones cut, which is exactly what the search box's job
+      // is to find (audit: director accounts didn't show up in "View
+      // Members" search).
       const sortedDocs = [...usersSnapshot.docs].sort((a, b) => {
         const aTime = a.data().createdAt ? new Date(a.data().createdAt).getTime() : 0;
         const bTime = b.data().createdAt ? new Date(b.data().createdAt).getTime() : 0;
         return bTime - aTime;
-      }).slice(0, 100);
+      });
 
       const users = sortedDocs.map((doc) => {
         const data = doc.data();

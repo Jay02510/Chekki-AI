@@ -66,6 +66,7 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUids, setSelectedUids] = useState<Set<string>>(new Set());
   const [isPurgingDemoData, setIsPurgingDemoData] = useState(false);
+  const [isSweepingOrphans, setIsSweepingOrphans] = useState(false);
 
   // Invoices State
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -781,6 +782,70 @@ export default function AdminPage() {
     }
   };
 
+  const handleSweepOrphanedAssignments = async () => {
+    setIsSweepingOrphans(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'sweep_orphaned_class_assignments', dryRun: true }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to scan for orphaned assignments');
+
+      const findingsCount = data.findingsCount || 0;
+      if (findingsCount === 0) {
+        setMessage({ text: 'No orphaned class assignments found.', type: 'success' });
+        setIsSweepingOrphans(false);
+        return;
+      }
+
+      const classPreview = (data.findings || [])
+        .slice(0, 8)
+        .map((f: any) => `${f.className} (${f.field}: ${f.reason})`)
+        .join(', ');
+      const moreCount = findingsCount > 8 ? ` +${findingsCount - 8} more` : '';
+
+      setConfirmDialog({
+        title: `Remove ${findingsCount} stale teacher assignment${findingsCount !== 1 ? 's' : ''} (${classPreview}${moreCount})? Each one is currently permission-denying the ENTIRE class list for the affected teacher/director whenever it's queried — this only removes the dangling uid reference, not the class itself.`,
+        confirmText: `Clean Up ${findingsCount} Assignment${findingsCount !== 1 ? 's' : ''}`,
+        variant: 'destructive',
+        onConfirm: () => {
+          setConfirmDialog(null);
+          void performSweepOrphanedAssignments();
+        },
+      });
+    } catch (err: any) {
+      setMessage({ text: err.message || 'Error scanning for orphaned assignments', type: 'error' });
+    } finally {
+      setIsSweepingOrphans(false);
+    }
+  };
+
+  const performSweepOrphanedAssignments = async () => {
+    setIsSweepingOrphans(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'sweep_orphaned_class_assignments', dryRun: false }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to clean up orphaned assignments');
+
+      setMessage({
+        text: `✅ Cleaned up ${data.fixedClasses} class${data.fixedClasses !== 1 ? 'es' : ''} (${data.findingsCount} stale reference${data.findingsCount !== 1 ? 's' : ''} removed).`,
+        type: 'success',
+      });
+    } catch (err: any) {
+      setMessage({ text: err.message || 'Error cleaning up orphaned assignments', type: 'error' });
+    } finally {
+      setIsSweepingOrphans(false);
+    }
+  };
+
   const handleResetPassword = async (email: string) => {
     try {
       await sendPasswordResetEmail(auth, email);
@@ -1045,15 +1110,26 @@ export default function AdminPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium"
                 />
-                <button
-                  type="button"
-                  onClick={handlePurgeDemoData}
-                  disabled={isPurgingDemoData}
-                  className="self-start px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-xs font-bold border border-purple-500/30 disabled:opacity-40 transition-colors"
-                  title="Find and delete every user whose email contains 'demo' or 'test', plus leftover demo curriculum docs"
-                >
-                  {isPurgingDemoData ? 'Scanning…' : '🧹 Purge Demo/Test Data'}
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handlePurgeDemoData}
+                    disabled={isPurgingDemoData}
+                    className="self-start px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-xs font-bold border border-purple-500/30 disabled:opacity-40 transition-colors"
+                    title="Find and delete every user whose email contains 'demo' or 'test', plus leftover demo curriculum docs"
+                  >
+                    {isPurgingDemoData ? 'Scanning…' : '🧹 Purge Demo/Test Data'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSweepOrphanedAssignments}
+                    disabled={isSweepingOrphans}
+                    className="self-start px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-bold border border-amber-500/30 disabled:opacity-40 transition-colors"
+                    title="Find and remove stale teacherUid/assignedTeacherUids entries on class docs — a single one permission-denies that teacher's ENTIRE class list, not just that one class"
+                  >
+                    {isSweepingOrphans ? 'Scanning…' : '🧹 Sweep Orphaned Class Assignments'}
+                  </button>
+                </div>
                 {selectedUids.size > 0 && (
                   <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20">
                     <span className="text-xs font-bold text-red-400">
