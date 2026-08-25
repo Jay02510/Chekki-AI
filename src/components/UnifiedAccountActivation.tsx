@@ -256,7 +256,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                 persistAcademyName();
                 setStep(2);
               }}
-              className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+              className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
             >
               <span>{isKo ? '다음: 학급반 및 커리큘럼 설정 →' : 'Next: Setup Classes & Curriculum →'}</span>
             </button>
@@ -293,7 +293,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={handleAddClass}
-                    className="px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
+                    className="px-4 py-3 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
                   >
                     + {isKo ? '추가' : 'Add'}
                   </button>
@@ -347,7 +347,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setStep(3)}
-                className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
                 <span>{isKo ? '다음: 선생님 초대 설정 →' : 'Next: Invite Staff Teachers →'}</span>
               </button>
@@ -395,7 +395,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                 type="button"
                 onClick={handleFinish}
                 disabled={hasFinished}
-                className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
                 <CheckCircle size={18} weight="bold" />
                 <span>{isKo ? '설정 완료 & 대시보드 입장! 🎉' : 'Complete & Launch Workspace! 🎉'}</span>

@@ -157,13 +157,13 @@ export const CloneWorksheetModal: React.FC<Props> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsDigitalMode(false)}
-                className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${!isDigitalMode ? 'bg-zinc-800 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}
+                className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] ${!isDigitalMode ? 'bg-zinc-800 text-white shadow-md' : 'text-zinc-400 hover:text-zinc-800'}`}
               >
                 Read / Print
               </button>
               <button
                 onClick={() => setIsDigitalMode(true)}
-                className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] flex items-center gap-2 ${isDigitalMode ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-800'}`}
+                className={`px-4 py-2 text-xs font-black rounded-lg transition-all min-h-[44px] flex items-center gap-2 ${isDigitalMode ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-zinc-800'}`}
               >
                 <svg
                   className="w-3 h-3"

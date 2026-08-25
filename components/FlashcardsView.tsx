@@ -60,7 +60,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
               {language === 'ko' ? '디지털 플래시카드' : 'Digital Flashcards'}
             </h2>
             {!isDone && (
-              <span className="text-zinc-500 text-sm font-bold tracking-widest uppercase">
+              <span className="text-zinc-400 text-sm font-bold tracking-widest uppercase">
                 {currentIndex + 1} / {mistakes.length}
               </span>
             )}
@@ -124,13 +124,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
                   className="absolute inset-0 bg-black/40 border border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:bg-white/5 transition-colors"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
-                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 mb-6 absolute top-8">
+                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 mb-6 absolute top-8">
                     {language === 'ko' ? '문제' : 'Question'}
                   </span>
                   <p className="text-2xl md:text-3xl lg:text-4xl font-medium text-white leading-relaxed">
                     {currentMistake?.question_text}
                   </p>
-                  <p className="text-zinc-500 text-sm mt-8 absolute bottom-8 font-korean">
+                  <p className="text-zinc-400 text-sm mt-8 absolute bottom-8 font-korean">
                     {language === 'ko' ? '카드를 탭해서 정답 확인하기' : 'Tap card to flip'}
                   </p>
                 </div>

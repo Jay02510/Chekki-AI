@@ -353,7 +353,7 @@ export const VoiceFillAssistant: React.FC<Props> = ({
           )}
 
           <div role="status" aria-live="polite">
-            <p className="text-[11px] text-center font-mono text-zinc-500">
+            <p className="text-[11px] text-center font-mono text-zinc-400">
               {state === 'recording'
                 ? language === 'ko'
                   ? '녹음 중... 다시 눌러 종료'

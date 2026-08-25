@@ -95,7 +95,7 @@ export const InsightsChatPanel: React.FC<Props> = ({
             <h4 className={`text-lg font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
               {isKo ? '이번 주 데이터에 대해 질문하기' : 'Ask about this week'}
             </h4>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-zinc-400">
               {isKo
                 ? '커리큘럼과 오답 통계를 바탕으로 답변합니다'
                 : "Answers using this week's curriculum and mistake data"}
@@ -142,7 +142,7 @@ export const InsightsChatPanel: React.FC<Props> = ({
             type="button"
             onClick={() => void handleSend()}
             disabled={isLoading || !question.trim()}
-            className="w-11 h-11 shrink-0 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
+            className="w-11 h-11 shrink-0 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black flex items-center justify-center transition-all cursor-pointer active:scale-95"
             aria-label={isKo ? '전송' : 'Send'}
           >
             {isLoading ? (

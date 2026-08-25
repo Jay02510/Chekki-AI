@@ -52,7 +52,7 @@ export function NotificationBell({ isNight, isKo, notifications, unreadCount, on
       >
         <Bell size={16} weight="bold" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-orange-500 text-white text-[10px] font-black">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-orange-500 text-black text-[10px] font-black">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}

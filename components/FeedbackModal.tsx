@@ -88,7 +88,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                 >
                   {t('fb_success')}
                 </h3>
-                <p className="text-zinc-500 text-sm">Thanks for letting us know!</p>
+                <p className="text-zinc-400 text-sm">Thanks for letting us know!</p>
               </div>
             ) : (
               <>
@@ -107,7 +107,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
 
                 {!context && (
                   <div className="flex flex-col items-center gap-3">
-                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
                       {t('fb_rating')}
                     </p>
                     <div className="flex gap-2">
@@ -118,7 +118,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                           className={`transition-all duration-200 active:scale-90 ${star <= rating ? 'scale-110' : 'opacity-30 grayscale'}`}
                         >
                           <svg
-                            className={`w-8 h-8 ${star <= rating ? (star <= 2 ? 'text-red-400' : star === 3 ? 'text-yellow-400' : 'text-orange-400') : 'text-zinc-500'}`}
+                            className={`w-8 h-8 ${star <= rating ? (star <= 2 ? 'text-red-400' : star === 3 ? 'text-yellow-400' : 'text-orange-400') : 'text-zinc-400'}`}
                             fill="currentColor"
                             viewBox="0 0 24 24"
                           >
@@ -135,7 +135,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                 )}
 
                 <div className="text-left space-y-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
                     {t('fb_comment')}
                   </label>
                   <textarea
@@ -150,7 +150,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                   <button
                     onClick={handleSubmit}
                     disabled={isSubmitting || (!comment && context)}
-                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2"
+                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -165,7 +165,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                   </button>
 
                   <div className="pt-2">
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-2">
+                    <p className="text-[10px] text-zinc-400 uppercase tracking-[0.2em] mb-2">
                       Or email us directly
                     </p>
                     <a

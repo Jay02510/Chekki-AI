@@ -188,7 +188,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
               <button 
                 type="button" 
                 onClick={() => window.location.href = '#pricing'}
-                className="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+                className="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-black font-black text-xs shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
               >
                 <Camera weight="fill" size={14} />
                 {activeTab === 'korean' ? '무료 체험' : 'Try Free'}
@@ -228,7 +228,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                   onClick={() => setActiveTab('korean')}
                   className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     activeTab === 'korean' 
-                      ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' 
+                      ? 'bg-orange-500 text-black shadow-md shadow-orange-500/30' 
                       : isNight ? 'bg-white/5 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-600 hover:text-zinc-900'
                   }`}
                 >
@@ -239,7 +239,7 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                   onClick={() => setActiveTab('english')}
                   className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     activeTab === 'english' 
-                      ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' 
+                      ? 'bg-orange-500 text-black shadow-md shadow-orange-500/30' 
                       : isNight ? 'bg-white/5 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-600 hover:text-zinc-900'
                   }`}
                 >

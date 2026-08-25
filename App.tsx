@@ -65,7 +65,7 @@ const AppCrashFallback = (error: Error | null) => (
     )}
     <button
       onClick={() => window.location.reload()}
-      className="bg-orange-500 text-white px-8 py-3.5 rounded-2xl font-black text-xs shadow-lg hover:bg-orange-600 transition-all active:scale-[0.97] cursor-pointer"
+      className="bg-orange-500 text-black px-8 py-3.5 rounded-2xl font-black text-xs shadow-lg hover:bg-orange-600 transition-all active:scale-[0.97] cursor-pointer"
     >
       Reload App
     </button>
@@ -866,7 +866,7 @@ function AppContent() {
                         <div
                           className={`mt-3 p-4 rounded-2xl border text-left text-[10px] font-mono break-all max-w-sm mx-auto overflow-y-auto max-h-32 transition-all duration-200 ${
                             isNight
-                              ? 'bg-zinc-950/80 border-white/5 text-zinc-500'
+                              ? 'bg-zinc-950/80 border-white/5 text-zinc-400'
                               : 'bg-zinc-100 border-zinc-200 text-zinc-600'
                           }`}
                         >
@@ -879,7 +879,7 @@ function AppContent() {
                 <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
                   <button
                     onClick={hookHandleScanAgain}
-                    className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]"
+                    className="bg-orange-500 text-black px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]"
                   >
                     {t('btn_scan_again_simple')}
                   </button>
@@ -915,7 +915,7 @@ function AppContent() {
                     onClick={() =>
                       setAnalysisState((prev) => ({ ...prev, showHandwritingWarning: false }))
                     }
-                    className="bg-orange-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg min-h-[48px] w-full sm:w-auto"
+                    className="bg-orange-500 text-black px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg min-h-[48px] w-full sm:w-auto"
                   >
                     {language === 'ko' ? '그래도 진행하기' : 'Proceed Anyway'}
                   </button>

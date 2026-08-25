@@ -49,7 +49,7 @@ export const InlineFeedback: React.FC = () => {
         <h4 className="text-white font-black text-lg md:text-xl font-display mb-1">
           {language === 'ko' ? '채키가 도움이 되었나요? 🎓' : 'Is Chekki helping tonight?'}
         </h4>
-        <p className="text-zinc-500 text-xs font-korean">
+        <p className="text-zinc-400 text-xs font-korean">
           {language === 'ko'
             ? '더 나은 서비스를 위해 의견을 남겨주세요.'
             : 'Help us make homework time even better.'}

@@ -82,7 +82,7 @@ export const MobileAppBanner: React.FC<Props> = ({ onVisibilityChange }) => {
             ? 'ChekkiAI를 앱으로 이용하세요'
             : 'Get the full experience on ChekkiAI app'}
         </p>
-        <p className="text-zinc-500 text-[10px] truncate">
+        <p className="text-zinc-400 text-[10px] truncate">
           {language === 'ko'
             ? '앱에서만 구독이 가능합니다'
             : 'Subscription is only available in the app'}
@@ -94,7 +94,7 @@ export const MobileAppBanner: React.FC<Props> = ({ onVisibilityChange }) => {
         href={storeUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black px-3 py-2 rounded-xl transition-colors whitespace-nowrap"
+        className="shrink-0 bg-orange-500 hover:bg-orange-600 text-black text-[10px] font-black px-3 py-2 rounded-xl transition-colors whitespace-nowrap"
       >
         {mobilePlatform === 'ios' ? <AppleLogo className="w-4 h-4" /> : '🤖'}{' '}
         {language === 'ko' ? '다운로드' : 'Download'}

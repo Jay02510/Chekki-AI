@@ -230,7 +230,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => setShowScannedModal(true)}
-                    className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
+                    className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
                   >
                     🎯 {isKo ? '스캔 결과 & 답안 확인' : 'View Scanned Answers'}
                   </button>
@@ -339,7 +339,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       <p className="text-xs font-bold text-orange-500">
                         {isKo ? 'Chekki AI가 교재 시라버스 목차를 분석하고 있습니다...' : 'Scanning Course Syllabus with Chekki AI...'}
                       </p>
-                      <p className="text-[10px] text-zinc-500 mt-1">
+                      <p className="text-[10px] text-zinc-400 mt-1">
                         {isKo ? '전체 주차별 어휘 및 파닉스 범위를 추출합니다 (정답지 불필요)' : 'Extracting multi-week course scope & vocabulary (No answer key needed)'}
                       </p>
                     </div>
@@ -431,7 +431,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                         type="button"
                         onClick={() => handleScanStagedFiles('syllabus')}
                         disabled={isScanningSyllabus}
-                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
                       >
                         {isKo ? `${pendingScanFiles.length}페이지 스캔 →` : `Scan ${pendingScanFiles.length} Page${pendingScanFiles.length > 1 ? 's' : ''} →`}
                       </button>
@@ -479,7 +479,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                           onClick={() => handleSyllabusWeeksChange(numWeeks)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                             syllabusWeeks === numWeeks
-                              ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                              ? 'bg-orange-500 text-black border-orange-500 shadow-md'
                               : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-300 text-zinc-700'
                           }`}
                         >
@@ -599,7 +599,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       <p className="text-xs font-bold text-orange-500">
                         {isKo ? 'Chekki AI가 워크시트 문제와 학부모 정답지를 분석하고 있습니다...' : 'Scanning Daily Worksheet & Answer Key with Chekki AI...'}
                       </p>
-                      <p className="text-[10px] text-zinc-500 mt-1">
+                      <p className="text-[10px] text-zinc-400 mt-1">
                         {isKo ? '문제별 학부모 잉크 정답 오버레이 가이드를 추출합니다' : 'Extracting question-by-question parent answer keys'}
                       </p>
                     </div>
@@ -675,7 +675,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                         <div className="w-px h-6 bg-white/10 mx-0.5" />
 
                         {/* Rescan actions — replace the current worksheet with a new photo */}
-                        <label className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
+                        <label className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
                           <span>📷</span>
                           <span>{isKo ? '카메라 바로 촬영' : 'Camera Snap'}</span>
                           <input
@@ -725,7 +725,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                         type="button"
                         onClick={() => handleScanStagedFiles('worksheet')}
                         disabled={isScanningWorksheet}
-                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
                       >
                         {isKo ? `${pendingScanFiles.length}페이지 스캔 →` : `Scan ${pendingScanFiles.length} Page${pendingScanFiles.length > 1 ? 's' : ''} →`}
                       </button>
@@ -791,7 +791,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-300'
                 }`}>
                   {curriculumVocab.split(/[,\n]/).filter(s => s.trim()).length === 0 ? (
-                    <p className="text-xs text-zinc-500 italic p-1">
+                    <p className="text-xs text-zinc-400 italic p-1">
                       {isKo ? '등록된 단어가 없습니다. 아래에서 단어를 추가하거나 워크시트를 스캔하세요.' : 'No vocabulary words yet. Type below or scan a worksheet.'}
                     </p>
                   ) : (
@@ -834,7 +834,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => handleAddVocabWord()}
-                    className="px-4 py-3.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                    className="px-4 py-3.5 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
                   >
                     + {isKo ? '추가' : 'Add'}
                   </button>
@@ -864,7 +864,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-300'
                 }`}>
                   {curriculumPhonics.split(/[,\n]/).filter(s => s.trim()).length === 0 ? (
-                    <p className="text-xs text-zinc-500 italic p-1">
+                    <p className="text-xs text-zinc-400 italic p-1">
                       {isKo ? '등록된 파닉스 규칙이 없습니다. 아래에서 음가를 추가하거나 스캔하세요.' : 'No phonics rules yet. Type below or scan a worksheet.'}
                     </p>
                   ) : (
@@ -1132,7 +1132,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
             <div className={`flex items-center gap-4 justify-between pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
               {curriculumLastEditedByName ? (
-                <p className="text-[11px] text-zinc-500">
+                <p className="text-[11px] text-zinc-400">
                   {isKo ? '마지막 수정: ' : 'Last edited by '}
                   <span className="font-bold text-zinc-400">{curriculumLastEditedByName}</span>
                   {curriculumLastEditedAt && (
@@ -1155,7 +1155,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               <button
                 type="submit"
                 disabled={isSavingCurriculum}
-                className="group px-7 py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
+                className="group px-7 py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
               >
                 {isSavingCurriculum ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

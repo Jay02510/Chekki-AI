@@ -298,7 +298,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 sessionStorage.setItem('chekki_teacher_seats', '10');
                 window.location.href = '/teacher?activate=true&role=director&plan=school_pro';
               }}
-              className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-3xl shadow-lg shadow-orange-500/25 transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
+              className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-3xl shadow-lg shadow-orange-500/25 transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
             >
               <span>{isKo ? '⚡ 60초 무료 캠퍼스 구축 시작하기 →' : 'Start Free 60-Second Campus Setup →'}</span>
               <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
@@ -522,7 +522,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               onClick={() => setBillingCycle('monthly')}
               className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 billingCycle === 'monthly'
-                  ? 'bg-orange-500 text-white shadow-md'
+                  ? 'bg-orange-500 text-black shadow-md'
                   : isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
@@ -533,7 +533,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               onClick={() => setBillingCycle('yearly')}
               className={`px-5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 billingCycle === 'yearly'
-                  ? 'bg-orange-500 text-white shadow-md'
+                  ? 'bg-orange-500 text-black shadow-md'
                   : isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
@@ -569,7 +569,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <button
               type="button"
               onClick={() => openPlanModal('trial', 1, 1)}
-              className="w-full sm:w-auto px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-xl transition-all shadow-md active:scale-[0.97] whitespace-nowrap cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-xl transition-all shadow-md active:scale-[0.97] whitespace-nowrap cursor-pointer"
             >
               {isKo ? '지금 무료 시작하기' : 'Start Free Trial'}
             </button>
@@ -740,7 +740,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 : 'bg-gradient-to-b from-orange-500/[0.08] to-white border-2 border-orange-500 text-zinc-900 shadow-xl hover:border-orange-600'
             }`}
           >
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-orange-500 text-white text-[9px] font-black tracking-widest uppercase rounded-full shadow-lg">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-orange-500 text-black text-[9px] font-black tracking-widest uppercase rounded-full shadow-lg">
               {isKo ? 'MOST POPULAR' : 'MOST POPULAR'}
             </div>
             <div>
@@ -801,7 +801,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 e.stopPropagation();
                 openPlanModal('school_pro', 10, 1);
               }}
-              className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
             >
               {isKo ? '마스터 스쿨 프로 시작' : 'Choose Master School Pro'}
             </button>
@@ -909,7 +909,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               setConsultationSubmitted(false);
               setShowConsultationModal(true);
             }}
-            className="w-full sm:w-auto px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-10 py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>{isKo ? '1:1 학원 맞춤 상담 신청하기' : 'Schedule 1:1 Consultation'}</span>
             <ArrowRight size={16} weight="bold" />
@@ -958,7 +958,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
-                      : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                      : 'text-zinc-400 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
                   }`}
                 >
                   <X size={18} weight="bold" />
@@ -981,7 +981,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <button
                     type="button"
                     onClick={() => setShowConsultationModal(false)}
-                    className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all shadow-md cursor-pointer"
+                    className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl transition-all shadow-md cursor-pointer"
                   >
                     {isKo ? '확인' : 'Close'}
                   </button>
@@ -1122,7 +1122,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <button
                       type="submit"
                       disabled={isSubmittingConsultation}
-                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer active:scale-98 flex items-center justify-center gap-2"
+                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer active:scale-98 flex items-center justify-center gap-2"
                     >
                       {isSubmittingConsultation ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -1130,7 +1130,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         <span>{isKo ? '1:1 상담 신청하기' : 'Submit Consultation Request'}</span>
                       )}
                     </button>
-                    <p className="text-[10px] text-zinc-500 text-center mt-2 font-mono">
+                    <p className="text-[10px] text-zinc-400 text-center mt-2 font-mono">
                       ✉️ support@chekkiai.com
                     </p>
                   </div>
@@ -1184,7 +1184,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all active:scale-[0.95] cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
-                      : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                      : 'text-zinc-400 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
                   }`}
                 >
                   <X size={18} weight="bold" />
@@ -1290,7 +1290,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   sessionStorage.setItem('chekki_teacher_seats', activePlan.defaultTeachers?.toString() || '10');
                   window.location.href = `/teacher?activate=true&role=director&plan=${encodeURIComponent(selectedPlanId)}`;
                 }}
-                className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
                 <span>{isKo ? `⚡ 60초 무료 캠퍼스 구축 시작하기 (${activePlan.nameKo} 전용) →` : `⚡ Start Free 60-Second Setup (${activePlan.nameEn}) →`}</span>
               </button>
@@ -1339,7 +1339,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all active:scale-[0.95] cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
-                      : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                      : 'text-zinc-400 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
                   }`}
                 >
                   <X size={18} weight="bold" />
@@ -1377,14 +1377,14 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <button
                     type="button"
                     disabled
-                    className="p-2.5 rounded-xl border text-[11px] font-bold opacity-50 bg-white/5 border-white/10 text-zinc-500 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                    className="p-2.5 rounded-xl border text-[11px] font-bold opacity-50 bg-white/5 border-white/10 text-zinc-400 flex items-center justify-center gap-1.5 cursor-not-allowed"
                   >
                     💳 {isKo ? '신용카드 (출시 예정)' : 'Credit Card (Coming Soon)'}
                   </button>
                   <button
                     type="button"
                     disabled
-                    className="p-2.5 rounded-xl border text-[11px] font-bold opacity-50 bg-white/5 border-white/10 text-zinc-500 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                    className="p-2.5 rounded-xl border text-[11px] font-bold opacity-50 bg-white/5 border-white/10 text-zinc-400 flex items-center justify-center gap-1.5 cursor-not-allowed"
                   >
                     💛 {isKo ? '카카오페이 (출시 예정)' : 'KakaoPay (Coming Soon)'}
                   </button>
@@ -1716,7 +1716,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </a>
           </div>
 
-          <p className="text-xs text-zinc-500 font-medium pt-2">
+          <p className="text-xs text-zinc-400 font-medium pt-2">
             © {new Date().getFullYear()} ChekkiAI. All rights reserved.
           </p>
         </div>

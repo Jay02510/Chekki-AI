@@ -191,7 +191,7 @@ export function ScannedModal({
                   </p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 bg-orange-500 text-white font-mono font-bold text-[10px] rounded-lg uppercase shrink-0">
+              <span className="px-2.5 py-1 bg-orange-500 text-black font-mono font-bold text-[10px] rounded-lg uppercase shrink-0">
                 Chekki App Sync
               </span>
             </div>
@@ -200,7 +200,7 @@ export function ScannedModal({
           {/* Page Selector Pill Bar for Multi-Page Extractions */}
           {scannedData?.pages && scannedData.pages.length > 0 && (
             <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 custom-scrollbar">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mr-1 shrink-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mr-1 shrink-0">
                 {isKo ? '페이지 선택:' : 'Select Page:'}
               </span>
               <button
@@ -208,7 +208,7 @@ export function ScannedModal({
                 onClick={() => setSelectedPageIndex('all')}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 cursor-pointer flex items-center gap-1.5 ${
                   selectedPageIndex === 'all'
-                    ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                    ? 'bg-orange-500 text-black border-orange-500 shadow-md'
                     : isThemeNight
                     ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
                     : 'bg-zinc-100 border-zinc-300 text-zinc-700'
@@ -227,7 +227,7 @@ export function ScannedModal({
                     onClick={() => setSelectedPageIndex(pageNum)}
                     className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 cursor-pointer flex items-center gap-1.5 ${
                       isActive
-                        ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                        ? 'bg-orange-500 text-black border-orange-500 shadow-md'
                         : isThemeNight
                         ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
                         : 'bg-zinc-100 border-zinc-300 text-zinc-700'
@@ -286,7 +286,7 @@ export function ScannedModal({
                       <div className="relative w-full rounded-2xl bg-white p-6 min-h-[380px] text-zinc-900">
                         <div className="border-b-2 border-zinc-900 pb-3 mb-6 flex justify-between items-end">
                           <div>
-                            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold">PHYSICAL WORKSHEET SCAN</span>
+                            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold">PHYSICAL WORKSHEET SCAN</span>
                             <h4 className="text-base font-black tracking-tight text-zinc-900 font-sans">
                               {activeDisplayObj?.topic || (isKo ? '스캔된 자료' : 'Scanned Document')}
                             </h4>
@@ -306,7 +306,7 @@ export function ScannedModal({
                               </div>
                             ))
                           ) : (
-                            <p className="text-zinc-500 text-xs p-3">
+                            <p className="text-zinc-400 text-xs p-3">
                               {isKo
                                 ? '이 페이지에서 문항/정답을 찾지 못했습니다. 문항이 있는 페이지인지 확인해 주세요.'
                                 : "No questions or answers detected on this page — check it's the right page, or add answers manually below."}
@@ -421,7 +421,7 @@ export function ScannedModal({
                       })}
                     </div>
                   ) : (
-                    <div className="p-8 text-center border rounded-2xl border-dashed border-white/10 text-xs text-zinc-500 space-y-3">
+                    <div className="p-8 text-center border rounded-2xl border-dashed border-white/10 text-xs text-zinc-400 space-y-3">
                       <p>{isKo ? '추출된 개별 정답 문항이 없거나 아직 스캔되지 않았습니다.' : 'No worksheet question answers extracted yet.'}</p>
                       <button
                         type="button"
@@ -431,7 +431,7 @@ export function ScannedModal({
                             { questionNumber: 2, category: 'Vocabulary', questionText: '2. Organisms that eat living things', correctAnswer: 'consumer', answer: 'consumer' },
                           ]);
                         }}
-                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
+                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
                       >
                         <Plus size={14} weight="bold" />
                         <span>{isKo ? '수동 정답 문항 작성하기' : 'Create Answer Key Manually'}</span>
@@ -507,7 +507,7 @@ export function ScannedModal({
                             }}
                             className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-2 ${
                               isSelected
-                                ? 'bg-orange-500 border-orange-500 text-white shadow-md scale-[1.02]'
+                                ? 'bg-orange-500 border-orange-500 text-black shadow-md scale-[1.02]'
                                 : isThemeNight
                                 ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
                                 : 'bg-zinc-100 border-zinc-300 text-zinc-700'
@@ -540,7 +540,7 @@ export function ScannedModal({
             <button
               type="button"
               onClick={onApplyToCurriculum}
-              className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
             >
               <CheckCircle size={16} weight="bold" />
               <span>{isKo ? '선택 항목을 주간 커리큘럼에 적용' : 'Apply Selected to Curriculum'}</span>

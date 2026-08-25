@@ -657,7 +657,7 @@ export default function Home() {
           <div className={`p-8 border-2 rounded-3xl flex flex-col justify-between transition-all relative scale-[1.02] ${
             isNight ? 'bg-[#0f0904] border-orange-500 shadow-2xl shadow-orange-500/20' : 'bg-orange-50 border-orange-500'
           }`}>
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-orange-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-md font-mono">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-orange-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full shadow-md font-mono">
               {isKo ? '최고의 가치 • 17% 할인' : 'BEST VALUE • SAVE 17%'}
             </div>
             <div>
@@ -704,7 +704,7 @@ export default function Home() {
               onClick={() => {
                 window.location.href = '/subscribe';
               }}
-              className="w-full mt-6 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl shadow-xl shadow-orange-500/30 transition-all cursor-pointer flex items-center justify-between group active:scale-95"
+              className="w-full mt-6 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-2xl shadow-xl shadow-orange-500/30 transition-all cursor-pointer flex items-center justify-between group active:scale-95"
             >
               <span>{isKo ? '연간 패스 선택하기 (₩99,000)' : 'Subscribe Yearly (₩99,000)'}</span>
               <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">

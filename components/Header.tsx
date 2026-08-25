@@ -142,7 +142,7 @@ export const Header: React.FC<Props> = ({
                           ? 'text-black'
                           : 'text-white'
                         : isNight
-                          ? 'text-zinc-500 hover:text-zinc-300'
+                          ? 'text-zinc-400 hover:text-zinc-300'
                           : 'text-zinc-400 hover:text-zinc-600'
                     } uppercase tracking-widest`}
                   >
@@ -156,7 +156,7 @@ export const Header: React.FC<Props> = ({
                           ? 'text-black'
                           : 'text-white'
                         : isNight
-                          ? 'text-zinc-500 hover:text-zinc-300'
+                          ? 'text-zinc-400 hover:text-zinc-300'
                           : 'text-zinc-400 hover:text-zinc-600'
                     } uppercase tracking-widest`}
                   >
@@ -277,7 +277,7 @@ export const Header: React.FC<Props> = ({
                           >
                             {user.name}
                           </p>
-                          <p className="text-[10px] text-zinc-500 truncate mb-2 leading-tight">
+                          <p className="text-[10px] text-zinc-400 truncate mb-2 leading-tight">
                             {user.email}
                           </p>
                           <div className="flex items-center gap-2">
@@ -368,7 +368,7 @@ export const Header: React.FC<Props> = ({
                             className={`w-full text-left px-3 py-2 text-xs ${isNight ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'} rounded-lg transition-colors flex items-center gap-3 leading-tight`}
                           >
                             <svg
-                              className="w-3.5 h-3.5 text-zinc-500"
+                              className="w-3.5 h-3.5 text-zinc-400"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2"
@@ -391,7 +391,7 @@ export const Header: React.FC<Props> = ({
                           >
                             <div className="flex items-center gap-3">
                               <svg
-                                className="w-3.5 h-3.5 text-zinc-500"
+                                className="w-3.5 h-3.5 text-zinc-400"
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
@@ -415,7 +415,7 @@ export const Header: React.FC<Props> = ({
                             className={`w-full text-left px-3 py-2 text-xs ${isNight ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'} rounded-lg transition-colors flex items-center gap-3 leading-tight`}
                           >
                             <svg
-                              className="w-3.5 h-3.5 text-zinc-500"
+                              className="w-3.5 h-3.5 text-zinc-400"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2"
@@ -442,7 +442,7 @@ export const Header: React.FC<Props> = ({
                           >
                             <div className="flex items-center gap-3">
                               <svg
-                                className="w-3.5 h-3.5 text-zinc-500"
+                                className="w-3.5 h-3.5 text-zinc-400"
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
@@ -470,7 +470,7 @@ export const Header: React.FC<Props> = ({
                             className={`w-full text-left px-3 py-2 text-xs ${isNight ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'} rounded-lg transition-colors flex items-center gap-3 leading-tight`}
                           >
                             <svg
-                              className="w-3.5 h-3.5 text-zinc-500"
+                              className="w-3.5 h-3.5 text-zinc-400"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2"
@@ -501,7 +501,7 @@ export const Header: React.FC<Props> = ({
                           >
                             {isNight ? (
                               <svg
-                                className="w-3.5 h-3.5 text-zinc-500"
+                                className="w-3.5 h-3.5 text-zinc-400"
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
@@ -515,7 +515,7 @@ export const Header: React.FC<Props> = ({
                               </svg>
                             ) : (
                               <svg
-                                className="w-3.5 h-3.5 text-zinc-500"
+                                className="w-3.5 h-3.5 text-zinc-400"
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"

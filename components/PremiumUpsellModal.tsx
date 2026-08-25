@@ -111,7 +111,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
             <div
               className={`${isNight ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50 border-orange-200'} rounded-2xl p-4 flex items-center gap-4`}
             >
-              <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white text-lg shrink-0 shadow-lg">
+              <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-black text-lg shrink-0 shadow-lg">
                 ⭐
               </div>
               <div className="flex-1">
@@ -143,7 +143,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
                   300
                 );
               }}
-              className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base shadow-xl active:scale-[0.97] transition-all ring-2 ring-white/10 min-h-[52px] flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-black font-black text-base shadow-xl active:scale-[0.97] transition-all ring-2 ring-white/10 min-h-[52px] flex items-center justify-center gap-2"
             >
               <span>💳</span>
               {language === 'ko' ? '구독 옵션 보기' : 'View Subscription Options'}

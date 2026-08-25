@@ -190,7 +190,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
         <div className="w-10 h-10 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-        <p className="text-zinc-500 text-sm font-bold">{t('sub_loading')}</p>
+        <p className="text-zinc-400 text-sm font-bold">{t('sub_loading')}</p>
       </div>
     );
   }
@@ -283,7 +283,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
             </span>
           </div>
 
-          <p className="text-[10px] md:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em]">
+          <p className="text-[10px] md:text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em]">
             {t('sub_yearly')}
           </p>
 
@@ -298,7 +298,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
                   (language === 'ko' ? '₩99,000' : '$69.99')}
             </p>
             {!SCREENSHOT_MODE && (
-              <p className="text-sm font-bold text-zinc-500">{t('sub_perYear')}</p>
+              <p className="text-sm font-bold text-zinc-400">{t('sub_perYear')}</p>
             )}
           </div>
 
@@ -328,7 +328,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
               {t('sub_trial_badge')}
             </span>
           </div>
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
             {t('sub_monthly')}
           </p>
           <div className="flex items-baseline gap-1">
@@ -342,7 +342,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
                   (language === 'ko' ? '₩9,900' : '$6.99')}
             </p>
             {!SCREENSHOT_MODE && (
-              <p className="text-xs font-bold text-zinc-500">{t('sub_perMonth')}</p>
+              <p className="text-xs font-bold text-zinc-400">{t('sub_perMonth')}</p>
             )}
           </div>
 
@@ -358,7 +358,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         <button
           onClick={handleSubscribe}
           disabled={isProcessing}
-          className="w-full py-5 rounded-3xl bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-200 disabled:text-zinc-500 text-white font-black text-lg shadow-2xl shadow-orange-500/40 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+          className="w-full py-5 rounded-3xl bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-200 disabled:text-zinc-500 text-black font-black text-lg shadow-2xl shadow-orange-500/40 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
         >
           {isProcessing ? (
             <div className="w-5 h-5 border-[3px] border-white/20 border-t-white rounded-full animate-spin" />
@@ -393,7 +393,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
           ].map((item) => (
             <span
               key={item.key}
-              className="text-[9px] md:text-[10px] text-zinc-500 font-bold flex items-center gap-1"
+              className="text-[9px] md:text-[10px] text-zinc-400 font-bold flex items-center gap-1"
             >
               <span>{item.icon}</span>
               {getDisclosureText(t(item.key as any))}
@@ -406,7 +406,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         <button
           onClick={handleRestore}
           disabled={isProcessing}
-          className="text-zinc-500 hover:text-orange-500 font-black text-[10px] uppercase tracking-widest transition-colors"
+          className="text-zinc-400 hover:text-orange-500 font-black text-[10px] uppercase tracking-widest transition-colors"
         >
           {t('sub_restore')}
         </button>
@@ -414,7 +414,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         <div
           className={`${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-100 border-zinc-200 shadow-inner'} rounded-3xl p-5 border space-y-4 w-full`}
         >
-          <p className="text-[10px] text-zinc-500 leading-relaxed text-center font-medium break-keep">
+          <p className="text-[10px] text-zinc-400 leading-relaxed text-center font-medium break-keep">
             {getDisclosureText(t('sub_disclosure_trial'))}
           </p>
 
@@ -478,7 +478,7 @@ const WebSubscriptionView: React.FC<{ isNight?: boolean }> = ({ isNight = true }
         >
           {copy.headline}
         </h3>
-        <p className="text-[11px] md:text-xs text-zinc-500 max-w-[280px] mx-auto leading-relaxed">
+        <p className="text-[11px] md:text-xs text-zinc-400 max-w-[280px] mx-auto leading-relaxed">
           {copy.subtext}
         </p>
       </div>
@@ -486,7 +486,7 @@ const WebSubscriptionView: React.FC<{ isNight?: boolean }> = ({ isNight = true }
       <div className="w-full max-w-xs space-y-3 px-4">
         <a
           href="/subscribe"
-          className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base shadow-xl shadow-orange-500/20 active:scale-[0.97] transition-all text-center block"
+          className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-black font-black text-base shadow-xl shadow-orange-500/20 active:scale-[0.97] transition-all text-center block"
         >
           {t('sub_webCta')}
         </a>
@@ -494,11 +494,11 @@ const WebSubscriptionView: React.FC<{ isNight?: boolean }> = ({ isNight = true }
         <div
           className={`flex items-center justify-center gap-3 py-2 border-t ${isNight ? 'border-white/5' : 'border-zinc-100'} mt-4 opacity-50`}
         >
-          <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+          <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1">
             <AppleLogo className="w-2 h-2" /> iOS
           </span>
           <span className="text-zinc-700">|</span>
-          <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+          <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1">
             🤖 Android ({language === 'ko' ? '준비 중' : 'Soon'})
           </span>
         </div>
@@ -527,7 +527,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ onClose, isNight = true })
         >
           {t('sub_title')}
         </h2>
-        <p className="text-zinc-500 text-sm font-medium break-keep">{t('sub_subtitle')}</p>
+        <p className="text-zinc-400 text-sm font-medium break-keep">{t('sub_subtitle')}</p>
 
         <div className="mt-3 flex justify-center">
           <span

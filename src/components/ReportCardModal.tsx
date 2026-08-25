@@ -221,7 +221,7 @@ export const ReportCardModal: React.FC<Props> = ({
                 type="button"
                 onClick={handleGenerateTalkingPoints}
                 disabled={!selectedStudentDetails?.uid || isGeneratingTalkingPoints}
-                className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5 no-print"
+                className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5 no-print"
               >
                 <Sparkle size={13} weight="bold" className={isGeneratingTalkingPoints ? 'animate-spin' : ''} />
                 <span>
@@ -232,17 +232,17 @@ export const ReportCardModal: React.FC<Props> = ({
               </button>
             </div>
             {!selectedStudentDetails?.uid ? (
-              <p className="text-xs text-zinc-500">{isKo ? '먼저 원생을 선택하세요.' : 'Select a student first.'}</p>
+              <p className="text-xs text-zinc-400">{isKo ? '먼저 원생을 선택하세요.' : 'Select a student first.'}</p>
             ) : talkingPointsError ? (
               <p className="text-xs text-rose-600">{isKo ? '생성에 실패했습니다. 다시 시도해주세요.' : 'Generation failed — please try again.'}</p>
             ) : talkingPoints === null ? (
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-zinc-400">
                 {isKo
                   ? '선택한 기간의 일일 기록(수업 코멘트 + 특이사항)을 바탕으로 실제 AI가 상담 포인트를 생성합니다.'
                   : "Pulls this student's real daily logs (class comments + exceptions) from the selected range and generates real AI talking points."}
               </p>
             ) : talkingPoints.length === 0 ? (
-              <p className="text-xs text-zinc-500">{isKo ? '선택한 기간에 기록된 일지가 없습니다.' : 'No logs recorded for this student in the selected range.'}</p>
+              <p className="text-xs text-zinc-400">{isKo ? '선택한 기간에 기록된 일지가 없습니다.' : 'No logs recorded for this student in the selected range.'}</p>
             ) : (
               <ul className="space-y-1.5">
                 {talkingPoints.map((point, i) => (
@@ -257,7 +257,7 @@ export const ReportCardModal: React.FC<Props> = ({
 
           {/* Print Action Bar */}
           <div className="mt-6 pt-4 border-t border-zinc-200 flex justify-between items-center">
-            <p className="text-[10px] text-zinc-500 font-mono">
+            <p className="text-[10px] text-zinc-400 font-mono">
               {isKo ? 'Chekki AI B2B Academy Platform' : 'Chekki AI B2B Academy Platform'}
             </p>
             <div className="flex gap-3">
@@ -272,7 +272,7 @@ export const ReportCardModal: React.FC<Props> = ({
                 type="button"
                 onClick={() => window.print()}
                 disabled={talkingPoints === null || talkingPoints.length === 0}
-                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
+                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
               >
                 <Printer size={16} weight="bold" />
                 <span>{isKo ? '인쇄 / PDF 발급' : 'Print / Export PDF'}</span>

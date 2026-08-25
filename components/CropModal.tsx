@@ -370,7 +370,7 @@ export const CropModal: React.FC<Props> = ({
             <button
               onClick={handleCropSubmit}
               disabled={isProcessing}
-              className="w-full sm:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-1.5"
+              className="w-full sm:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-1.5"
             >
               {isProcessing ? (
                 <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

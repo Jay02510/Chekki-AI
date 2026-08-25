@@ -109,7 +109,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
               type="button"
               onClick={handleSimulateOcrScan}
               disabled={isScanningOcr}
-              className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-black font-bold rounded-xl text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isScanningOcr ? (
                 <>
@@ -192,7 +192,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
                     onClick={() => setSelectedUnit(u.unitNum)}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${
                       selectedUnit === u.unitNum
-                        ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                        ? 'bg-orange-500 border-orange-500 text-black shadow-md'
                         : isNight
                         ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
                         : 'bg-white border-zinc-200 text-zinc-700'
@@ -210,7 +210,7 @@ export const NativeCurriculumPreseed: React.FC<Props> = ({ isNight = true }) => 
                 <span className="text-xs font-mono font-bold text-emerald-400 uppercase">
                   Unit {currentUnitObj.unitNum} Topic:
                 </span>
-                <span className="text-xs font-mono text-zinc-500">Auto-Linked to Roster</span>
+                <span className="text-xs font-mono text-zinc-400">Auto-Linked to Roster</span>
               </div>
 
               <h4 className="text-base font-black text-white">{currentUnitObj.title}</h4>

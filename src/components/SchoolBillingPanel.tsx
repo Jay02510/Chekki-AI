@@ -80,7 +80,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
           <button
             type="button"
             onClick={() => { setPlanRequestSent(false); setShowPlanModal(true); }}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 inline-block text-center"
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 inline-block text-center"
           >
             {isKo ? '요금제 변경 / 업그레이드' : 'Change Plan / Upgrade'}
           </button>

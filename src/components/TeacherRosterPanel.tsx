@@ -149,7 +149,7 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
             </div>
 
             {localClasses.length === 0 ? (
-              <p className="text-[11px] text-zinc-500">No classes to assign yet.</p>
+              <p className="text-[11px] text-zinc-400">No classes to assign yet.</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {localClasses.map((c: any) => {

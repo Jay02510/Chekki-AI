@@ -937,9 +937,9 @@ export default function AdminPage() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-white font-sans">
+    <div className="min-h-dvh bg-zinc-950 flex flex-col items-center justify-center p-6 text-white font-sans">
       <div
-        className={`w-full bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-200 ${isAuthorized ? 'max-w-4xl' : 'max-w-md'}`}
+        className={`w-full bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition duration-200 ${isAuthorized ? 'max-w-4xl' : 'max-w-md'}`}
       >
         {/* Glow effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -951,7 +951,7 @@ export default function AdminPage() {
           <h1 className="text-2xl font-black font-display tracking-tight text-center">
             Admin Portal
           </h1>
-          <p className="text-zinc-500 text-sm mt-1">Provision Pro Accounts</p>
+          <p className="text-zinc-400 text-sm mt-1">Provision Pro Accounts</p>
         </div>
 
         {message.text && (
@@ -974,14 +974,14 @@ export default function AdminPage() {
                   required
                   value={passcode}
                   onChange={(e) => setPasscode(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium text-center pr-12"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition placeholder:text-zinc-700 font-medium text-center pr-12"
                   placeholder="••••••••••••"
                   autoFocus
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasscode(!showPasscode)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                 >
                   {showPasscode ? (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1014,7 +1014,7 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={authorizing}
-              className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-orange-600 hover:to-pink-600 text-white font-black py-4 rounded-xl mt-4 shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-orange-600 hover:to-pink-600 text-white font-black py-4 rounded-xl mt-4 shadow-lg transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {authorizing ? 'Verifying...' : 'Verify'}
             </button>
@@ -1028,7 +1028,7 @@ export default function AdminPage() {
                   setMode('create');
                   setMessage({ text: '', type: '' });
                 }}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'create' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition ${mode === 'create' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-white/80'}`}
               >
                 Create New
               </button>
@@ -1038,7 +1038,7 @@ export default function AdminPage() {
                   setMode('upgrade');
                   setMessage({ text: '', type: '' });
                 }}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'upgrade' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition ${mode === 'upgrade' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-white/80'}`}
               >
                 Upgrade Existing
               </button>
@@ -1048,7 +1048,7 @@ export default function AdminPage() {
                   setMode('delete');
                   setMessage({ text: '', type: '' });
                 }}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'delete' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition ${mode === 'delete' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-white/80'}`}
               >
                 Delete Existing
               </button>
@@ -1059,7 +1059,7 @@ export default function AdminPage() {
                   setMessage({ text: '', type: '' });
                   handleFetchUsers();
                 }}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'view_members' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition ${mode === 'view_members' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-white/80'}`}
               >
                 View Members
               </button>
@@ -1070,7 +1070,7 @@ export default function AdminPage() {
                   setMessage({ text: '', type: '' });
                   handleFetchSchools();
                 }}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'schools' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition ${mode === 'schools' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-white/80'}`}
               >
                 Schools
               </button>
@@ -1081,7 +1081,7 @@ export default function AdminPage() {
                   setMessage({ text: '', type: '' });
                   handleFetchInvoices();
                 }}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'invoices' ? 'bg-orange-500 text-white shadow font-black' : 'text-zinc-500 hover:text-white/80'}`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition ${mode === 'invoices' ? 'bg-orange-500 text-black shadow font-black' : 'text-zinc-400 hover:text-white/80'}`}
               >
                 Bank Invoices 🧾
               </button>
@@ -1092,7 +1092,7 @@ export default function AdminPage() {
                   setMessage({ text: '', type: '' });
                   handleFetchInvites();
                 }}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${mode === 'invites' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-white/80'}`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition ${mode === 'invites' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-white/80'}`}
               >
                 Pending Invites
               </button>
@@ -1108,7 +1108,7 @@ export default function AdminPage() {
                   placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition placeholder:text-zinc-700 font-medium"
                 />
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -1191,7 +1191,7 @@ export default function AdminPage() {
                           </tr>
                         ) : filteredUsers.length === 0 ? (
                           <tr>
-                            <td colSpan={8} className="py-8 text-center text-zinc-500">
+                            <td colSpan={8} className="py-8 text-center text-zinc-400">
                               No members found.
                             </td>
                           </tr>
@@ -1217,7 +1217,7 @@ export default function AdminPage() {
                                     {user.role || 'parent'}
                                   </span>
                                   {user.schoolName && (
-                                    <span className="text-[10px] text-zinc-500 mt-1 font-bold">
+                                    <span className="text-[10px] text-zinc-400 mt-1 font-bold">
                                       {user.schoolName}
                                     </span>
                                   )}
@@ -1230,7 +1230,7 @@ export default function AdminPage() {
                                   {user.plan || 'FREE'}
                                 </span>
                               </td>
-                              <td className="py-3 px-4 text-zinc-500 hidden md:table-cell">
+                              <td className="py-3 px-4 text-zinc-400 hidden md:table-cell">
                                 <div className="flex flex-col">
                                   <span className="text-xs">
                                     Scans: {user.scansUsedToday} / {user.maxScansPerDay}
@@ -1240,7 +1240,7 @@ export default function AdminPage() {
                                   </span>
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-zinc-500 hidden md:table-cell">
+                              <td className="py-3 px-4 text-zinc-400 hidden md:table-cell">
                                 {user.nextBillingDate
                                   ? new Date(user.nextBillingDate).toLocaleDateString()
                                   : '-'}
@@ -1298,7 +1298,7 @@ export default function AdminPage() {
                     placeholder="Search by school name or code..."
                     value={schoolSearchQuery}
                     onChange={(e) => setSchoolSearchQuery(e.target.value)}
-                    className="w-full sm:w-72 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 text-sm font-medium"
+                    className="w-full sm:w-72 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition placeholder:text-zinc-700 text-sm font-medium"
                   />
                   <div className="flex gap-2 w-full sm:w-auto">
                     <button
@@ -1307,7 +1307,7 @@ export default function AdminPage() {
                         setMessage({ text: '', type: '' });
                         setShowCreateSchoolModal(true);
                       }}
-                      className="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-lg flex items-center justify-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white text-xs font-black uppercase tracking-wider rounded-xl transition shadow-lg flex items-center justify-center gap-1.5"
                     >
                       <span>+ Create School</span>
                     </button>
@@ -1319,7 +1319,7 @@ export default function AdminPage() {
                         setAssignEmailInput('');
                         setShowAssignModal(true);
                       }}
-                      className="flex-1 sm:flex-none px-4 py-2.5 bg-zinc-800 text-zinc-200 hover:bg-zinc-700 hover:text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all border border-zinc-700 flex items-center justify-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-zinc-800 text-zinc-200 hover:bg-zinc-700 hover:text-white text-xs font-black uppercase tracking-wider rounded-xl transition border border-zinc-700 flex items-center justify-center gap-1.5"
                     >
                       <span>Assign Teacher</span>
                     </button>
@@ -1348,7 +1348,7 @@ export default function AdminPage() {
                           <SkeletonRows columns={8} />
                         ) : filteredSchools.length === 0 ? (
                           <tr>
-                            <td colSpan={8} className="py-8 text-center text-zinc-500">
+                            <td colSpan={8} className="py-8 text-center text-zinc-400">
                               No schools found.
                             </td>
                           </tr>
@@ -1410,7 +1410,7 @@ export default function AdminPage() {
                                   </span>
                                 )}
                               </td>
-                              <td className="py-3 px-4 text-zinc-500 hidden md:table-cell">
+                              <td className="py-3 px-4 text-zinc-400 hidden md:table-cell">
                                 {school.createdAt
                                   ? new Date(school.createdAt).toLocaleDateString()
                                   : '-'}
@@ -1470,7 +1470,7 @@ export default function AdminPage() {
                             placeholder="e.g. APEX10"
                             value={schoolIdInput}
                             onChange={(e) => setSchoolIdInput(e.target.value)}
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-bold uppercase tracking-wider"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-bold uppercase tracking-wider"
                           />
                         </div>
                         <div>
@@ -1484,7 +1484,7 @@ export default function AdminPage() {
                             placeholder="e.g. Apex Seocho"
                             value={schoolNameInput}
                             onChange={(e) => setSchoolNameInput(e.target.value)}
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-medium"
                           />
                         </div>
                         <div>
@@ -1498,7 +1498,7 @@ export default function AdminPage() {
                             placeholder="e.g. APEX10-TEACHER"
                             value={schoolTeacherCodeInput}
                             onChange={(e) => setSchoolTeacherCodeInput(e.target.value)}
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-bold uppercase tracking-wider"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-bold uppercase tracking-wider"
                           />
                         </div>
                         <div>
@@ -1513,21 +1513,21 @@ export default function AdminPage() {
                             onChange={(e) =>
                               setSchoolMaxUsesInput(parseInt(e.target.value, 10) || 0)
                             }
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-medium"
                           />
                         </div>
                         <div className="flex gap-3 pt-2">
                           <button
                             type="button"
                             onClick={() => setShowCreateSchoolModal(false)}
-                            className="flex-1 py-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold uppercase tracking-wider rounded-xl transition-all text-xs"
+                            className="flex-1 py-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold uppercase tracking-wider rounded-xl transition text-xs"
                           >
                             Cancel
                           </button>
                           <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 py-3.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white font-black uppercase tracking-wider rounded-xl transition-all shadow-lg text-xs"
+                            className="flex-1 py-3.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white font-black uppercase tracking-wider rounded-xl transition shadow-lg text-xs"
                           >
                             Create School
                           </button>
@@ -1562,7 +1562,7 @@ export default function AdminPage() {
                             placeholder="teacher@school.com"
                             value={assignEmailInput}
                             onChange={(e) => setAssignEmailInput(e.target.value)}
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-medium"
                           />
                         </div>
                         <div>
@@ -1575,7 +1575,7 @@ export default function AdminPage() {
                               required
                               value={assignSchoolIdInput}
                               onChange={(e) => setAssignSchoolIdInput(e.target.value)}
-                              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium appearance-none"
+                              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-medium appearance-none"
                             >
                               <option value="">-- Choose School --</option>
                               {schools.map((s) => (
@@ -1584,7 +1584,7 @@ export default function AdminPage() {
                                 </option>
                               ))}
                             </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-500">
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-400">
                               <svg
                                 className="w-4 h-4"
                                 fill="none"
@@ -1605,14 +1605,14 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => setShowAssignModal(false)}
-                            className="flex-1 py-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold uppercase tracking-wider rounded-xl transition-all text-xs"
+                            className="flex-1 py-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold uppercase tracking-wider rounded-xl transition text-xs"
                           >
                             Cancel
                           </button>
                           <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 py-3.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white font-black uppercase tracking-wider rounded-xl transition-all shadow-lg text-xs"
+                            className="flex-1 py-3.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white font-black uppercase tracking-wider rounded-xl transition shadow-lg text-xs"
                           >
                             Assign Teacher
                           </button>
@@ -1630,7 +1630,7 @@ export default function AdminPage() {
                   </h3>
                   <button
                     onClick={handleFetchInvoices}
-                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-bold transition-all"
+                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-bold transition"
                   >
                     Refresh List
                   </button>
@@ -1638,7 +1638,7 @@ export default function AdminPage() {
 
                 <div className="w-full overflow-x-auto">
                   {!loading && invoices.length === 0 ? (
-                    <div className="p-8 text-center text-zinc-500 text-sm">
+                    <div className="p-8 text-center text-zinc-400 text-sm">
                       No corporate bank invoice requests found.
                     </div>
                   ) : (
@@ -1665,7 +1665,7 @@ export default function AdminPage() {
                             </td>
                             <td className="py-3.5 px-4">
                               <div className="font-bold text-white">{inv.academyName}</div>
-                              <div className="text-zinc-500 text-[11px]">{inv.contactName} ({inv.email})</div>
+                              <div className="text-zinc-400 text-[11px]">{inv.contactName} ({inv.email})</div>
                             </td>
                             <td className="py-3.5 px-4">
                               <div className="text-zinc-300 font-medium flex items-center gap-1.5">
@@ -1680,7 +1680,7 @@ export default function AdminPage() {
                                   </span>
                                 )}
                               </div>
-                              <div className="text-zinc-500 text-[11px]">{inv.teacherCount} Teacher Seats</div>
+                              <div className="text-zinc-400 text-[11px]">{inv.teacherCount} Teacher Seats</div>
                             </td>
                             <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
                               ₩{(inv.totalAmount || 0).toLocaleString()}
@@ -1702,13 +1702,13 @@ export default function AdminPage() {
                                 {inv.status !== 'paid' && (
                                   <button
                                     onClick={() => handleConfirmInvoice(inv.invoiceId)}
-                                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs shadow transition-all active:scale-[0.95]"
+                                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs shadow transition active:scale-[0.95]"
                                   >
                                     Confirm Bank Payment & Activate
                                   </button>
                                 )}
                                 {inv.status === 'paid' && (
-                                  <span className="text-[11px] font-mono text-zinc-500">
+                                  <span className="text-[11px] font-mono text-zinc-400">
                                     Code: {inv.generatedTeacherCode}
                                   </span>
                                 )}
@@ -1736,18 +1736,18 @@ export default function AdminPage() {
                   </h3>
                   <button
                     onClick={handleFetchInvites}
-                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-bold transition-all"
+                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-bold transition"
                   >
                     Refresh List
                   </button>
                 </div>
-                <p className="text-[11px] text-zinc-500 -mt-2">
+                <p className="text-[11px] text-zinc-400 -mt-2">
                   Invite links a director sent that nobody has claimed yet, oldest first.
                 </p>
 
                 <div className="w-full overflow-x-auto">
                   {!loading && invites.length === 0 ? (
-                    <div className="p-8 text-center text-zinc-500 text-sm">
+                    <div className="p-8 text-center text-zinc-400 text-sm">
                       No pending invites.
                     </div>
                   ) : (
@@ -1824,7 +1824,7 @@ export default function AdminPage() {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium"
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition placeholder:text-zinc-700 font-medium"
                       placeholder="e.g. Test Teacher"
                     />
                   </div>
@@ -1839,7 +1839,7 @@ export default function AdminPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition placeholder:text-zinc-700 font-medium"
                     placeholder="name@school.com"
                   />
                 </div>
@@ -1855,13 +1855,13 @@ export default function AdminPage() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-zinc-700 font-medium pr-12"
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition placeholder:text-zinc-700 font-medium pr-12"
                         placeholder="••••••••"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                       >
                         {showPassword ? (
                           <svg
@@ -1912,13 +1912,13 @@ export default function AdminPage() {
                       <select
                         value={duration}
                         onChange={(e) => setDuration(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium appearance-none"
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-medium appearance-none"
                       >
                         <option value="1_month">1 Month</option>
                         <option value="1_year">1 Year</option>
                         <option value="lifetime">Lifetime</option>
                       </select>
-                      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-500">
+                      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-400">
                         <svg
                           className="w-4 h-4"
                           fill="none"
@@ -1940,7 +1940,7 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${
+                  className={`w-full text-white font-black py-4 rounded-xl shadow-lg transition active:scale-[0.98] flex items-center justify-center gap-2 ${
                     loading
                       ? 'bg-zinc-800 cursor-not-allowed'
                       : mode === 'delete'
@@ -1966,7 +1966,7 @@ export default function AdminPage() {
 
       <a
         href="/app.html"
-        className="mt-8 text-zinc-500 text-sm font-bold hover:text-white transition-colors"
+        className="mt-8 text-zinc-400 text-sm font-bold hover:text-white transition-colors"
       >
         ← Back to App
       </a>

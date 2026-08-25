@@ -253,7 +253,7 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                 >
                   Learning
                   <br />
-                  <span className="text-zinc-500">Dashboard</span>
+                  <span className="text-zinc-400">Dashboard</span>
                 </motion.h2>
               </div>
 
@@ -296,7 +296,7 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                   <h3 className="text-2xl font-display font-bold text-white mb-3">
                     {t('review_empty_title')}
                   </h3>
-                  <p className="text-zinc-500 max-w-sm leading-relaxed text-sm">
+                  <p className="text-zinc-400 max-w-sm leading-relaxed text-sm">
                     {t('review_empty_desc')}
                   </p>
                 </motion.div>
@@ -330,7 +330,7 @@ export const OdapNoteModal: React.FC<Props> = ({ isNight = true }) => {
                             </h4>
 
                             <div className="p-4 rounded-2xl bg-black/50 ring-1 ring-white/5">
-                              <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+                              <span className="text-[10px] text-zinc-400 uppercase tracking-widest block mb-1">
                                 {t('lbl_correct_answer')}
                               </span>
                               <p className="text-emerald-400 font-hand text-2xl font-bold tracking-wide">

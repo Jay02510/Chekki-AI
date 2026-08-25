@@ -205,7 +205,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
               <button
                 onClick={close}
                 aria-label="Close"
-                className="text-zinc-500 hover:text-orange-500 transition-colors text-xl"
+                className="text-zinc-400 hover:text-orange-500 transition-colors text-xl"
               >
                 ✕
               </button>
@@ -219,7 +219,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                     <h3 className="text-balance text-sm font-black text-purple-400 uppercase tracking-tight leading-tight mb-1">
                       Admin Access
                     </h3>
-                    <p className="text-xs sm:text-sm text-zinc-500 font-bold">
+                    <p className="text-xs sm:text-sm text-zinc-400 font-bold">
                       System management enabled
                     </p>
                   </div>
@@ -321,7 +321,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                       key={i}
                       className={`${isNight ? 'bg-black/40 border-white/5' : 'bg-white border-zinc-200 shadow-sm'} p-2 sm:p-3 rounded-2xl border`}
                     >
-                      <p className="text-[10px] sm:text-xs font-black text-zinc-500 uppercase mb-1">
+                      <p className="text-[10px] sm:text-xs font-black text-zinc-400 uppercase mb-1">
                         {d.label}
                       </p>
                       <p className={`text-xs font-black truncate ${d.color}`}>{d.val}</p>
@@ -335,7 +335,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                 className={`${isNight ? 'bg-zinc-800/30 border-white/5' : 'bg-zinc-100/50 border-zinc-200 shadow-sm'} rounded-3xl p-4 sm:p-6 border`}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-balance text-xs sm:text-sm font-black text-zinc-500 uppercase tracking-tight">
+                  <h3 className="text-balance text-xs sm:text-sm font-black text-zinc-400 uppercase tracking-tight">
                     {language === 'ko' ? '구독 정보' : 'SUBSCRIPTION'}
                   </h3>
                   {/* Status Badge */}
@@ -434,7 +434,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                                   : 'Basic Plan'}
                             </p>
                           )}
-                          <p className="text-[10px] text-zinc-500 font-bold">
+                          <p className="text-[10px] text-zinc-400 font-bold">
                             {subscriptionRecord.subscription_platform === 'apple'
                               ? t('sub_platformApple')
                               : subscriptionRecord.subscription_platform === 'google'
@@ -501,7 +501,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                             {t('sub_expired')}
                           </p>
                           {subscriptionRecord.subscription_expiry_date && (
-                            <p className="text-xs sm:text-sm text-zinc-500 font-bold">
+                            <p className="text-xs sm:text-sm text-zinc-400 font-bold">
                               {new Date(
                                 subscriptionRecord.subscription_expiry_date
                               ).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', {
@@ -519,7 +519,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                           close();
                           setShowPaywall(true);
                         }}
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-black py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
                       >
                         {t('sub_renew_now')}
                       </button>
@@ -533,7 +533,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                       </p>
                       {Capacitor.getPlatform() === 'web' ? (
                         <div className="space-y-4">
-                          <p className="text-xs sm:text-sm text-zinc-500 font-bold text-center italic break-keep">
+                          <p className="text-xs sm:text-sm text-zinc-400 font-bold text-center italic break-keep">
                             {language === 'ko'
                               ? '모바일 앱을 통해 구독하세요'
                               : 'Subscribe via our mobile app'}
@@ -547,7 +547,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                             >
                               App Store
                             </a>
-                            <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 opacity-50 text-[10px] sm:text-xs font-black text-zinc-500 uppercase tracking-widest">
+                            <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 opacity-50 text-[10px] sm:text-xs font-black text-zinc-400 uppercase tracking-widest">
                               Google Play
                             </div>
                           </div>
@@ -558,7 +558,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                             close();
                             setShowPaywall(true);
                           }}
-                          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
+                          className="w-full bg-orange-500 hover:bg-orange-600 text-black py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
                         >
                           {t('sub_subscribe_now')}
                         </button>
@@ -570,7 +570,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
 
               {/* --- PROFILE --- */}
               <div>
-                <h3 className="text-balance text-xs font-black text-zinc-500 uppercase tracking-tight mb-4">
+                <h3 className="text-balance text-xs font-black text-zinc-400 uppercase tracking-tight mb-4">
                   {t('settings_profile')}
                 </h3>
                 <div className="space-y-4">
@@ -591,7 +591,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
               {/* --- SCHOOL & CLASSROOM SETTINGS (Case A: B2C Parents, allow late B2B redemption) --- */}
               {!user?.schoolId ? (
                 <div className="space-y-6 pt-4 border-t border-zinc-900/10">
-                  <h3 className="text-balance text-xs font-black text-zinc-500 uppercase tracking-tight">
+                  <h3 className="text-balance text-xs font-black text-zinc-400 uppercase tracking-tight">
                     {language === 'ko' ? '🏫 학급 가입 및 Premium 인증' : '🏫 School Sponsorship'}
                   </h3>
 
@@ -632,7 +632,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                           });
                         }
                       }}
-                      className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl shadow-md transition-all cursor-pointer"
+                      className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-2xl shadow-md transition-all cursor-pointer"
                     >
                       {inviteCopied
                         ? (language === 'ko' ? '✓ 복사 완료!' : '✓ Copied!')
@@ -645,7 +645,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                     <button
                       type="button"
                       onClick={() => setShowCodeEntry(true)}
-                      className="text-zinc-500 hover:text-orange-500 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                      className="text-zinc-400 hover:text-orange-500 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
                     >
                       {language === 'ko' ? '이미 초대 코드가 있으신가요?' : 'Already have an invite code?'}
                     </button>
@@ -689,7 +689,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                           <button
                             type="submit"
                             disabled={isUpgradingCode}
-                            className="px-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0"
+                            className="px-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0"
                           >
                             {isUpgradingCode ? (
                               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -715,7 +715,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                 /* --- SCHOOL & CLASSROOM SETTINGS (Case B: Already B2B, configure child/class) --- */
                 <div className="space-y-6 pt-4 border-t border-zinc-900/10">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-balance text-xs font-black text-zinc-500 uppercase tracking-tight">
+                    <h3 className="text-balance text-xs font-black text-zinc-400 uppercase tracking-tight">
                       {language === 'ko' ? '🏫 학교 / 학급 정보' : '🏫 School & Classroom Info'}
                     </h3>
                     <button
@@ -898,31 +898,31 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
               <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 px-4 py-2 border-t border-white/5 pt-6">
                 <button
                   onClick={() => setShowLegal('privacy')}
-                  className="text-xs sm:text-sm text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
+                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
                 >
                   {t('nav_privacy')}
                 </button>
                 <button
                   onClick={() => setShowLegal('terms')}
-                  className="text-xs sm:text-sm text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
+                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
                 >
                   {t('nav_terms')}
                 </button>
                 <button
                   onClick={() => setShowLegal('refund')}
-                  className="text-xs sm:text-sm text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
+                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
                 >
                   {t('nav_refund')}
                 </button>
                 <button
                   onClick={() => setShowLegal('youth')}
-                  className="text-xs sm:text-sm text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
+                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
                 >
                   {t('nav_youth')}
                 </button>
                 <button
                   onClick={() => setShowLegal('support')}
-                  className="text-xs sm:text-sm text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
+                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
                 >
                   {language === 'ko' ? '고객 지원' : 'Help & Support'}
                 </button>

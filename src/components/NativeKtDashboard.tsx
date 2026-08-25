@@ -290,7 +290,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 className={`w-11 h-11 rounded-2xl flex items-center justify-center border transition-all cursor-pointer shrink-0 ${
                   notifyEnabled
                     ? 'bg-white/10 hover:bg-white/15 border-white/15 text-white'
-                    : 'bg-white/5 border-white/10 text-zinc-500'
+                    : 'bg-white/5 border-white/10 text-zinc-400'
                 }`}
                 title={isKo ? '알림 설정' : 'Notification settings'}
                 aria-label={isKo ? '알림 설정' : 'Notification settings'}
@@ -340,7 +340,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                     </div>
                   )}
                   {isSavingNotifyPrefs && (
-                    <p className="text-[10px] text-zinc-500">{isKo ? '저장 중...' : 'Saving...'}</p>
+                    <p className="text-[10px] text-zinc-400">{isKo ? '저장 중...' : 'Saving...'}</p>
                   )}
                 </div>
               )}
@@ -371,7 +371,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
                   : copied
                   ? 'bg-emerald-500 text-white shadow-emerald-500/20 cursor-pointer active:scale-95'
-                  : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20 cursor-pointer active:scale-95'
+                  : 'bg-orange-500 hover:bg-orange-600 text-black shadow-orange-500/20 cursor-pointer active:scale-95'
               }`}
             >
               {isApproving ? (
@@ -410,7 +410,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
               reportStatus === 'pending_review'
                 ? 'bg-red-500/20 border-red-500 text-red-400 shadow-sm'
-                : 'bg-white/5 border-white/10 text-zinc-500'
+                : 'bg-white/5 border-white/10 text-zinc-400'
             }`}
           >
             🔴 {isKo ? '검수 대기' : 'PENDING REVIEW'}
@@ -422,7 +422,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
               reportStatus === 'edited_by_kt'
                 ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm'
-                : 'bg-white/5 border-white/10 text-zinc-500'
+                : 'bg-white/5 border-white/10 text-zinc-400'
             }`}
           >
             🟡 {isKo ? '교사 수정완료' : 'EDITED BY KT'}
@@ -434,7 +434,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
               reportStatus === 'copied_sent'
                 ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm'
-                : 'bg-white/5 border-white/10 text-zinc-500'
+                : 'bg-white/5 border-white/10 text-zinc-400'
             }`}
           >
             🟢 {isKo ? '발송 완료' : 'COPIED & SENT'}
@@ -535,7 +535,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               : 'bg-orange-50/50 border-orange-200 text-zinc-900 focus:border-orange-500'
           }`}
         />
-        <div className="flex justify-between items-center text-[11px] text-zinc-500 font-mono italic">
+        <div className="flex justify-between items-center text-[11px] text-zinc-400 font-mono italic">
           <span>ℹ️ {isKo ? '위 대본 문장을 직접 수정할 수 있습니다. 복사 버튼 클릭 시 수정된 내용이 복사됩니다.' : 'KT can edit any sentence above directly. Clicking copy will copy your edited version.'}</span>
           {!permissions.canEditReports && (
             <span className="text-amber-400 font-bold flex items-center gap-1">

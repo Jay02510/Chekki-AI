@@ -489,7 +489,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               onClick={() => setShowVoiceFill((prev) => !prev)}
               className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all cursor-pointer active:scale-95 ${
                 showVoiceFill
-                  ? 'bg-orange-500 border-orange-500 text-white'
+                  ? 'bg-orange-500 border-orange-500 text-black'
                   : isNight
                   ? 'bg-white/5 border-white/10 text-orange-400 hover:bg-white/10'
                   : 'bg-orange-50 border-orange-200 text-orange-500 hover:bg-orange-100'
@@ -507,7 +507,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               disabled={isPlayingScriptedVoiceFill}
               className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all cursor-pointer active:scale-95 disabled:cursor-default ${
                 isPlayingScriptedVoiceFill
-                  ? 'bg-orange-500 border-orange-500 text-white animate-pulse'
+                  ? 'bg-orange-500 border-orange-500 text-black animate-pulse'
                   : isNight
                   ? 'bg-white/5 border-white/10 text-orange-400 hover:bg-white/10'
                   : 'bg-orange-50 border-orange-200 text-orange-500 hover:bg-orange-100'
@@ -596,7 +596,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 }`}
               >
                 <span>{selectedClassName || (isKo ? '선택된 학급 없음' : 'No class selected')}</span>
-                <span className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wide text-zinc-500 shrink-0">
+                <span className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wide text-zinc-400 shrink-0">
                   <Lock size={12} weight="bold" />
                   {isRealClassSynced ? (isKo ? '동기화됨' : 'Synced') : (isKo ? '미리보기' : 'Preview')}
                 </span>
@@ -688,7 +688,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                   onClick={() => toggleActivity(act)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5 ${
                     active
-                      ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                      ? 'bg-orange-500 border-orange-500 text-black shadow-md'
                       : isNight
                       ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
                       : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
@@ -750,13 +750,13 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               <label className="text-xs font-bold text-orange-400 uppercase font-mono block">
                 {isKo ? '학생 개별 노트' : 'Student Notes'}
               </label>
-              <span className="text-[11px] text-zinc-500 font-mono">{isKo ? '맞춤 학부모 업데이트가 필요한 학생을 표시하세요' : 'Flag specific students needing tailored parent updates'}</span>
+              <span className="text-[11px] text-zinc-400 font-mono">{isKo ? '맞춤 학부모 업데이트가 필요한 학생을 표시하세요' : 'Flag specific students needing tailored parent updates'}</span>
             </div>
 
             <button
               type="button"
               onClick={handleOpenAddModal}
-              className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-md active:scale-95"
+              className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-black rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-md active:scale-95"
             >
               <Plus size={14} weight="bold" />
               <span>{isKo ? '+ 학생 추가' : '+ Add A Student'}</span>
@@ -765,7 +765,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
           {/* List of Flagged Exceptions */}
           {exceptions.length === 0 ? (
-            <p className="text-xs text-zinc-500 italic py-2 font-mono">{isKo ? '이번 수업에 추가된 학생 노트가 없습니다.' : 'No student exceptions added for this class session.'}</p>
+            <p className="text-xs text-zinc-400 italic py-2 font-mono">{isKo ? '이번 수업에 추가된 학생 노트가 없습니다.' : 'No student exceptions added for this class session.'}</p>
           ) : (
             <div className="space-y-2">
               {exceptions.map((ex, idx) => (
@@ -812,7 +812,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                         <button
                           type="button"
                           onClick={() => handleConfirmSuggestedMatch(idx)}
-                          className="px-2 py-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
+                          className="px-2 py-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-black cursor-pointer"
                         >
                           {isKo ? '확인' : 'Confirm'}
                         </button>
@@ -836,7 +836,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         <button
           type="submit"
           disabled={isSubmitting || isRealLogIncomplete}
-          className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+          className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <>
@@ -1022,7 +1022,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     setEditingExceptionIndex(null);
                     setShowExceptionModal(false);
                   }}
-                  className="w-1/2 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+                  className="w-1/2 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
                 >
                   {editingExceptionIndex !== null
                     ? (isKo ? '변경사항 저장' : 'Save Changes')

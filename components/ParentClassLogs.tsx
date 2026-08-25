@@ -84,11 +84,11 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentName, languag
               <div key={log.id} className="p-4 rounded-2xl border border-white/10 bg-brand-dark">
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/5">
                   <span className="font-bold text-sm text-blue-400">{log.className}</span>
-                  <span className="text-xs text-zinc-500 font-mono">{log.date}</span>
+                  <span className="text-xs text-zinc-400 font-mono">{log.date}</span>
                 </div>
                 {log.lessonTopic && (
                   <p className="text-xs text-zinc-300">
-                    <span className="text-zinc-500">{isKo ? '수업 주제: ' : 'Topic: '}</span>
+                    <span className="text-zinc-400">{isKo ? '수업 주제: ' : 'Topic: '}</span>
                     {log.lessonTopic}
                   </p>
                 )}

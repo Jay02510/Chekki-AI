@@ -64,7 +64,7 @@ export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({
         <button
           type="submit"
           disabled={!query.trim() || isAsking}
-          className={`shrink-0 mr-3 md:mr-4 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100  active:scale-[0.97] ${query.trim() ? 'text-orange-500' : 'text-zinc-500'}`}
+          className={`shrink-0 mr-3 md:mr-4 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100  active:scale-[0.97] ${query.trim() ? 'text-orange-500' : 'text-zinc-400'}`}
           title="Search"
         >
           {isAsking ? (
@@ -283,7 +283,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                 <button
                   onClick={() => setShowConfirmClose(false)}
                   disabled={isSaving}
-                  className="w-full text-zinc-500 py-2 font-bold text-xs uppercase tracking-wide hover:text-white transition-colors disabled:opacity-50"
+                  className="w-full text-zinc-400 py-2 font-bold text-xs uppercase tracking-wide hover:text-white transition-colors disabled:opacity-50"
                 >
                   {language === 'ko' ? '취소' : 'Cancel'}
                 </button>
@@ -391,7 +391,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
               <button
                 type="submit"
                 disabled={!followUpText.trim() || isAsking}
-                className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97] ${followUpText.trim() ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-500'}`}
+                className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97] ${followUpText.trim() ? 'bg-orange-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}
               >
                 <svg
                   className="w-4 h-4"
@@ -446,7 +446,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                 <p className="text-[10px] text-orange-400 font-black uppercase tracking-wide mb-0.5">
                   {language === 'ko' ? '도움이 되셨나요?' : 'Was this helpful?'}
                 </p>
-                <p className="text-[10px] text-zinc-500 font-korean truncate">
+                <p className="text-[10px] text-zinc-400 font-korean truncate">
                   {language === 'ko'
                     ? '무료 로그인하고 대화를 이어가세요!'
                     : 'Login to ask follow-ups & get deeper answers!'}
@@ -457,7 +457,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                   onClose();
                   openLoginModal();
                 }}
-                className="text-[10px] bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-black uppercase tracking-wider whitespace-nowrap shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
+                className="text-[10px] bg-orange-500 hover:bg-orange-600 text-black px-5 py-2.5 rounded-xl font-black uppercase tracking-wider whitespace-nowrap shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
               >
                 {language === 'ko' ? '회원가입' : 'Sign Up'}
               </button>

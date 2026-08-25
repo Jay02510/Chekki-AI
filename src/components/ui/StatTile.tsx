@@ -101,7 +101,7 @@ export const StatTile: React.FC<StatTileProps> = ({
               <h4 className={`text-2xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}>
                 {value}
               </h4>
-              {sublabel && <p className="text-xs text-zinc-500 mt-1">{sublabel}</p>}
+              {sublabel && <p className="text-xs text-zinc-400 mt-1">{sublabel}</p>}
             </div>
           </div>
         ) : (
@@ -109,7 +109,7 @@ export const StatTile: React.FC<StatTileProps> = ({
             <h4 className={`text-2xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}>
               {value}
             </h4>
-            {sublabel && <p className="text-xs text-zinc-500 mt-1">{sublabel}</p>}
+            {sublabel && <p className="text-xs text-zinc-400 mt-1">{sublabel}</p>}
             {sparkline && sparkline.length > 1 && <Sparkline points={sparkline} isNight={isNight} />}
           </div>
         )}

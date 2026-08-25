@@ -101,7 +101,7 @@ export const WeekCalendarModal: React.FC<Props> = ({
                   }`}
                 >
                   {isActiveWeek && (
-                    <span className="absolute top-3 right-3 px-2 py-0.5 bg-orange-500 text-white text-[9px] font-black uppercase rounded-md shadow-xs">
+                    <span className="absolute top-3 right-3 px-2 py-0.5 bg-orange-500 text-black text-[9px] font-black uppercase rounded-md shadow-xs">
                       {isKo ? '현재 주차' : 'Active'}
                     </span>
                   )}
@@ -124,7 +124,7 @@ export const WeekCalendarModal: React.FC<Props> = ({
                           <span>✅ {isKo ? '업로드 완료' : 'Uploaded'}</span>
                           <span className="font-mono">{wordCount} words</span>
                         </div>
-                        <div className="flex items-center justify-between text-zinc-500 font-mono text-[9px]">
+                        <div className="flex items-center justify-between text-zinc-400 font-mono text-[9px]">
                           <span>📅 {uploadDate}</span>
                           <span className="text-orange-500 font-bold group-hover:underline">
                             {isKo ? '이동 ➔' : 'Jump ➔'}
@@ -132,7 +132,7 @@ export const WeekCalendarModal: React.FC<Props> = ({
                         </div>
                       </>
                     ) : (
-                      <div className="flex items-center justify-between text-zinc-500 font-medium">
+                      <div className="flex items-center justify-between text-zinc-400 font-medium">
                         <span>⏳ {isKo ? '미등록 (빈 학습지)' : 'Empty Curriculum'}</span>
                         <span className="text-orange-500 font-bold group-hover:underline">
                           {isKo ? '이동 ➔' : 'Jump ➔'}

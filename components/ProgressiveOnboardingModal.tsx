@@ -151,7 +151,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       <div className="space-y-8 mb-10 flex-1 overflow-y-auto custom-scrollbar px-2 -mx-2">
         {/* Age Select */}
         <div>
-          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4">
+          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
             {language === 'ko' ? '아이의 연령' : "Child's Age"}
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -163,7 +163,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 onClick={() => setSelectedAge(opt.id)}
                 className={`relative overflow-hidden py-4 px-3 rounded-2xl text-sm font-bold transition-all duration-200 \${
                   selectedAge === opt.id
-                    ? 'text-white ring-2 ring-orange-500 bg-orange-500/10'
+                    ? 'text-black ring-2 ring-orange-500 bg-orange-500/10'
                     : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
                 }`}
               >
@@ -181,7 +181,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
         {/* Level Select */}
         <div>
-          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4">
+          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
             {language === 'ko' ? '영어 학습 경험' : 'English Experience'}
           </label>
           <div className="flex flex-col gap-3">
@@ -193,7 +193,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 onClick={() => setSelectedLevel(opt.id)}
                 className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-200 text-left flex justify-between items-center \${
                   selectedLevel === opt.id
-                    ? 'text-white ring-2 ring-orange-500 bg-orange-500/10'
+                    ? 'text-black ring-2 ring-orange-500 bg-orange-500/10'
                     : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
                 }`}
               >
@@ -210,7 +210,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs relative z-10"
+                      className="w-5 h-5 rounded-full bg-orange-500 text-black flex items-center justify-center text-xs relative z-10"
                     >
                       ✓
                     </motion.div>
@@ -223,7 +223,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
         {/* Parent Level Select */}
         <div>
-          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4">
+          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
             {language === 'ko' ? '엄마/아빠의 영어 수준' : "Parent's English Level"}
           </label>
           <div className="flex flex-col gap-3">
@@ -238,7 +238,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 onClick={() => setParentLevel(opt.id)}
                 className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-200 text-left flex justify-between items-center \${
                   parentLevel === opt.id
-                    ? 'text-white ring-2 ring-orange-500 bg-orange-500/10'
+                    ? 'text-black ring-2 ring-orange-500 bg-orange-500/10'
                     : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
                 }`}
               >
@@ -255,7 +255,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs relative z-10"
+                      className="w-5 h-5 rounded-full bg-orange-500 text-black flex items-center justify-center text-xs relative z-10"
                     >
                       ✓
                     </motion.div>
@@ -293,7 +293,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <div className="flex justify-center">
           <button
             onClick={onSkip}
-            className="text-zinc-500 py-2 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
+            className="text-zinc-400 py-2 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
           >
             {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
           </button>
@@ -362,7 +362,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <div className="flex justify-center mt-3">
           <button
             onClick={onSkip}
-            className="text-zinc-500 py-1 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
+            className="text-zinc-400 py-1 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
           >
             {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
           </button>
@@ -433,7 +433,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 false,
                 <div className="flex flex-col gap-4 mt-2 w-full max-w-[280px] mx-auto mb-8">
                   <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-left">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] text-left">
                       {language === 'ko' ? '언어 (Language)' : 'Language'}
                     </label>
                     <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
@@ -444,13 +444,13 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       />
                       <button
                         onClick={() => setLanguage('en')}
-                        className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'en' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'en' ? 'text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
                       >
                         English
                       </button>
                       <button
                         onClick={() => setLanguage('ko')}
-                        className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'ko' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'ko' ? 'text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
                       >
                         한국어
                       </button>
@@ -459,7 +459,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
                   {setIsNight && (
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-left">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] text-left">
                         {language === 'ko' ? '테마 (View)' : 'View'}
                       </label>
                       <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
@@ -621,7 +621,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                     <button
                       onClick={handleJoinClass}
                       disabled={classCode.trim().length < 4 || isJoiningClass}
-                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                     >
                       {isJoiningClass ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -644,7 +644,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                   </div>
                   <button
                     onClick={onComplete}
-                    className="text-zinc-500 py-2 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
+                    className="text-zinc-400 py-2 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
                   >
                     {language === 'ko' ? '나중에 입력할게요' : 'Skip for now'}
                   </button>

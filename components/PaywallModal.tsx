@@ -73,7 +73,7 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
           <button
             onClick={close}
             aria-label="Close"
-            className="absolute top-4 right-5 text-zinc-500 hover:text-white transition-colors text-xl z-30 p-1"
+            className="absolute top-4 right-5 text-zinc-400 hover:text-white transition-colors text-xl z-30 p-1"
           >
             ✕
           </button>

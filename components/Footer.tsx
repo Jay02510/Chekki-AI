@@ -25,7 +25,7 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
               Chekki<span className="text-orange-500">AI</span>
             </h2>
           </div>
-          <p className="text-zinc-500 text-xs font-medium leading-relaxed max-w-sm">
+          <p className="text-zinc-400 text-xs font-medium leading-relaxed max-w-sm">
             {language === 'ko'
               ? '채키 AI는 부모님과 아이들의 즐거운 학습 경험을 위해 최선을 다합니다. 혁신적인 AI 기술로 숙제와 공부가 더 즐거워지는 세상을 만듭니다.'
               : 'Chekki AI is dedicated to creating joyful learning experiences for parents and children through innovative AI technology.'}
@@ -39,7 +39,7 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
             >
               {language === 'ko' ? '사업자 정보' : 'Business Info'}
             </h4>
-            <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-500 font-medium">
+            <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-400 font-medium">
               <p>
                 <span className="text-zinc-600 font-bold">
                   {language === 'ko' ? '상호:' : 'Biz:'}
@@ -66,7 +66,7 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
             >
               {language === 'ko' ? '고객 센터' : 'Contact Us'}
             </h4>
-            <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-500 font-medium font-korean">
+            <div className="space-y-1.5 text-[10px] md:text-xs text-zinc-400 font-medium font-korean">
               <p>
                 <span className="text-zinc-600 font-bold">
                   {language === 'ko' ? '이메일:' : 'Email:'}

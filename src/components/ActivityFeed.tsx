@@ -75,7 +75,7 @@ export const ActivityFeed: React.FC<Props> = ({ isNight = true, isKo = false, sc
               <span className="font-mono">{entry.targetLabel}</span>
             </span>
             {entry.createdAt && (
-              <span className="text-[10px] text-zinc-500 shrink-0">
+              <span className="text-[10px] text-zinc-400 shrink-0">
                 {entry.createdAt.toDate().toLocaleString(isKo ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
               </span>
             )}

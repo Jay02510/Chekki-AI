@@ -452,7 +452,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 className={`absolute inset-0 flex flex-col items-center justify-center ${isNight ? 'bg-zinc-900/40' : 'bg-white/40'} backdrop-blur-2xl min-h-[400px] z-20`}
               >
                 <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin mb-6"></div>
-                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-wide leading-normal animate-pulse break-keep">
+                <p className="text-zinc-400 text-[10px] font-black uppercase tracking-wide leading-normal animate-pulse break-keep">
                   {language === 'ko' ? '종이 분석 중...' : 'Scanning Paper...'}
                 </p>
               </div>
@@ -613,7 +613,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
               <button
                 onClick={() => setIsFullscreen(false)}
-                className="w-14 h-14 rounded-full bg-orange-600/90 hover:bg-orange-500 backdrop-blur-xl flex items-center justify-center text-white opacity-40 hover:opacity-100 transition-all active:scale-90 border-2 border-white/30 pointer-events-auto shadow-2xl group shrink-0"
+                className="w-14 h-14 rounded-full bg-orange-600/90 hover:bg-orange-500 backdrop-blur-xl flex items-center justify-center text-black opacity-40 hover:opacity-100 transition-all active:scale-90 border-2 border-white/30 pointer-events-auto shadow-2xl group shrink-0"
               >
                 <svg
                   className="w-10 h-10 group-hover:rotate-90 transition-transform duration-200"

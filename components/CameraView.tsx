@@ -319,7 +319,7 @@ export const CameraView: React.FC<Props> = ({
         >
           {!isAuthenticated && !guestUsed && (
             <div className="absolute top-4 md:top-10 z-40  pointer-events-none">
-              <div className="bg-orange-500 text-white text-[8px] md:text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-2 border border-white/20 whitespace-nowrap">
+              <div className="bg-orange-500 text-black text-[8px] md:text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-2 border border-white/20 whitespace-nowrap">
                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
                 {t('guest_scan_badge')}
               </div>
@@ -801,8 +801,8 @@ export const CameraView: React.FC<Props> = ({
               onClick={() => window.dispatchEvent(new CustomEvent('open-settings-class-code'))}
               className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
                 isNight
-                  ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20'
-                  : 'bg-orange-500 hover:bg-orange-600 text-white'
+                  ? 'bg-orange-500 hover:bg-orange-600 text-black shadow-md shadow-orange-500/20'
+                  : 'bg-orange-500 hover:bg-orange-600 text-black'
               }`}
             >
               {language === 'ko' ? '코드 입력' : 'Enter Code'}
@@ -848,7 +848,7 @@ export const CameraView: React.FC<Props> = ({
               <h3 className="text-2xl md:text-5xl font-black text-white uppercase tracking-tighter">
                 Chekki Toolkit
               </h3>
-              <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] md:text-sm">
+              <p className="text-zinc-400 font-bold uppercase tracking-widest text-[10px] md:text-sm">
                 Advanced assistance for curious parents
               </p>
             </div>

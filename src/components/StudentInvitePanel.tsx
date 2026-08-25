@@ -377,7 +377,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
                   {r.parentEmail ? (
                     <span className="font-mono">{r.parentEmail}</span>
                   ) : (
-                    <span className="italic text-zinc-500">{isKo ? '이메일 없음 — 명단에만 추가' : 'no email — roster only'}</span>
+                    <span className="italic text-zinc-400">{isKo ? '이메일 없음 — 명단에만 추가' : 'no email — roster only'}</span>
                   )}
                 </div>
               ))}
@@ -394,11 +394,11 @@ export const StudentInvitePanel: React.FC<Props> = ({
         )}
 
         {!hasLoaded ? (
-          <p className="text-xs text-zinc-500 text-center py-6">
+          <p className="text-xs text-zinc-400 text-center py-6">
             {isKo ? '초대 목록 불러오는 중...' : 'Loading invite list...'}
           </p>
         ) : pending.length === 0 ? (
-          <p className="text-xs text-zinc-500 text-center py-6">
+          <p className="text-xs text-zinc-400 text-center py-6">
             {isKo ? '아직 초대한 학생이 없습니다.' : 'No students invited yet.'}
           </p>
         ) : (

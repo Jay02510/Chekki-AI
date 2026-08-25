@@ -1653,7 +1653,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   onClick={() => { setLoginRole('teacher'); setAuthError(''); if (!inviteSlug) setAuthMode('login'); }}
                   className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     loginRole === 'teacher'
-                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                      ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20'
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -1719,7 +1719,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   onClick={() => { setAuthMode('login'); setAuthError(''); }}
                   className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                     authMode === 'login'
-                      ? (loginRole === 'director' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-white shadow-lg shadow-orange-500/20')
+                      ? (loginRole === 'director' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-black shadow-lg shadow-orange-500/20')
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -1730,7 +1730,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   onClick={() => { setAuthMode('signup'); setAuthError(''); }}
                   className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                     authMode === 'signup'
-                      ? (loginRole === 'director' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-white shadow-lg shadow-orange-500/20')
+                      ? (loginRole === 'director' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-black shadow-lg shadow-orange-500/20')
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -1764,7 +1764,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
             </p>
             {!isPlanSignup && loginRole === 'teacher' && !inviteSlug && (
-              <p className="text-[10px] text-zinc-500 text-center max-w-xs -mt-4 mb-6 leading-relaxed">
+              <p className="text-[10px] text-zinc-400 text-center max-w-xs -mt-4 mb-6 leading-relaxed">
                 {isKo
                   ? '교사 계정은 원장님의 초대 링크로만 생성됩니다. 초대 링크가 없다면 원장님께 요청해 주세요.'
                   : "Teacher accounts are only created via your director's invite link. Ask them to send you one."}
@@ -1774,7 +1774,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer mb-6 underline underline-offset-2"
+                className="text-[11px] text-zinc-400 hover:text-zinc-300 transition-colors cursor-pointer mb-6 underline underline-offset-2"
               >
                 {isKo ? '이미 계정이 있으신가요? 로그인' : 'Already have an account? Log in'}
               </button>
@@ -1868,7 +1868,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="submit"
                 disabled={isSigningIn}
-                className="group w-full py-4 mt-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
+                className="group w-full py-4 mt-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
               >
                 {isSigningIn ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -2061,7 +2061,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                           onClick={() => setWelcomeRole(r)}
                           className={`flex-1 py-3 rounded-xl text-xs font-black border transition-all cursor-pointer ${
                             welcomeRole === r
-                              ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
+                              ? 'bg-orange-500 border-orange-500 text-black shadow-lg shadow-orange-500/20'
                               : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-600'
                           }`}
                         >
@@ -2075,7 +2075,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => setTeacherWelcomeStep(2)}
-                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
                   <span>{isKo ? '다음: 학급 확인 →' : 'Next: Class Setup →'}</span>
                 </button>
@@ -2103,7 +2103,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => dismissWelcome()}
-                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
                   <CheckCircle size={18} weight="bold" />
                   <span>{isKo ? '완료 — 대시보드 입장! 🎉' : 'Done — Enter Dashboard! 🎉'}</span>
@@ -2182,7 +2182,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                       setTeacherObStep(teacherObStep + 1);
                     }
                   }}
-                  className="group w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
+                  className="group w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
                 >
                   <span>
                     {isLast
@@ -2240,7 +2240,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               <h1 className={`text-sm font-black tracking-tight truncate ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                 {user?.schoolName || 'B2B Academy'}
               </h1>
-              <p className="text-[10px] text-zinc-500 font-medium truncate mt-0.5">
+              <p className="text-[10px] text-zinc-400 font-medium truncate mt-0.5">
                 {user?.email}
               </p>
             </div>
@@ -2297,7 +2297,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
             <div className="min-w-0">
               <p className={`text-xs font-bold truncate ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{user?.name}</p>
-              <p className="text-[10px] text-zinc-500 truncate">{user?.email}</p>
+              <p className="text-[10px] text-zinc-400 truncate">{user?.email}</p>
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
@@ -2376,7 +2376,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   ))}
                 </select>
               ) : (
-                <div className="text-zinc-500 text-sm font-semibold p-2">
+                <div className="text-zinc-400 text-sm font-semibold p-2">
                   {isKo ? '학급을 먼저 등록해 주세요.' : 'Create a class to get started.'}
                 </div>
               )}
@@ -2553,7 +2553,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 : 'bg-orange-50/90 border-orange-200 text-orange-950 shadow-orange-500/5'
             }`}>
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-orange-500/30">
+                <div className="w-10 h-10 rounded-2xl bg-orange-500 text-black flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-orange-500/30">
                   ✨
                 </div>
                 <div>
@@ -2571,7 +2571,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => setShowCreateClassModal(true)}
-                  className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] shrink-0 cursor-pointer"
+                  className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] shrink-0 cursor-pointer"
                 >
                   + {isKo ? '새 학급반 만들기' : 'Create Class Now'}
                 </button>
@@ -2584,7 +2584,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 ? 'bg-orange-500/10 border-orange-500/30 text-orange-200'
                 : 'bg-orange-50/90 border-orange-200 text-orange-950 shadow-orange-500/5'
             }`}>
-              <div className="w-10 h-10 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-orange-500/30">
+              <div className="w-10 h-10 rounded-2xl bg-orange-500 text-black flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-orange-500/30">
                 ⏳
               </div>
               <div>
@@ -2760,7 +2760,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <span>👦 {selectedStudentDetails.studentName || 'Unnamed'}</span>
                   <span className="text-xs font-normal text-zinc-400">{isKo ? '원생 학습 성장 기록' : "'s Growth & Practice Log"}</span>
                 </h3>
-                <p className="text-xs text-zinc-500 font-mono mt-1">
+                <p className="text-xs text-zinc-400 font-mono mt-1">
                   {selectedStudentDetails.email}
                 </p>
               </div>
@@ -2797,7 +2797,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     </button>
                   </div>
                   <p className="text-xs text-zinc-300">{selectedStudentDetails.flaggedException.reason}</p>
-                  <p className="text-[10px] text-zinc-500 font-mono">
+                  <p className="text-[10px] text-zinc-400 font-mono">
                     {selectedStudentDetails.flaggedException.teacherName} · {selectedStudentDetails.flaggedException.date}
                   </p>
                 </div>
@@ -2848,7 +2848,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             {/* Drawer Content */}
             <div className="flex-1 overflow-y-auto py-6 space-y-6 custom-scrollbar pr-1">
               <div>
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 block">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 block">
                   {isKo ? '이번 주 도전 복습 포인트' : "This week's focus practice items"}
                 </span>
 
@@ -2878,14 +2878,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                               </span>
                             )}
                           </div>
-                          <span className="text-[9px] text-zinc-500 font-mono">
+                          <span className="text-[9px] text-zinc-400 font-mono">
                             {m.dateAdded ? m.dateAdded.split('T')[0] : ''}
                           </span>
                         </div>
 
                         <div className="space-y-3 text-xs">
                           <div>
-                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">
+                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">
                               Question / Word
                             </span>
                             <p className={`font-bold font-mono ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{m.question_text}</p>
@@ -2893,13 +2893,13 @@ export default function TeacherPage({ isNight = true }: Props) {
 
                           <div className="grid grid-cols-2 gap-4 pt-1">
                             <div>
-                              <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">
+                              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">
                                 Target Answer
                               </span>
                               <p className="font-bold text-emerald-500 font-mono">{m.correct_answer}</p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">
+                              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">
                                 Student Answer
                               </span>
                               <p className="font-bold text-red-500 font-mono">{m.student_response || '(Blank)'}</p>
@@ -2918,7 +2918,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => setShowReportCardModal(true)}
-                className="w-1/2 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl transition-all shadow-lg shadow-orange-500/20 active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-1/2 py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-2xl transition-all shadow-lg shadow-orange-500/20 active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Printer size={16} weight="bold" />
                 <span>{isKo ? '맞춤 로고 성적표 인쇄' : 'Print Branded Report'}</span>
@@ -3022,7 +3022,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="submit"
                     disabled={isCreatingClass}
-                    className="flex-1 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="flex-1 py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {isCreatingClass ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

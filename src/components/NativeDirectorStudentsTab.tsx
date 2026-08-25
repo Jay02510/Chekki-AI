@@ -133,7 +133,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                       </td>
                       <td className="py-4">
                         <p className={`font-bold ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>{student.name}</p>
-                        <p className="text-[10px] text-zinc-500 font-mono">{student.email}</p>
+                        <p className="text-[10px] text-zinc-400 font-mono">{student.email}</p>
                       </td>
                       <td className="py-4 text-right pr-2 space-x-3">
                         <button
@@ -148,7 +148,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                         <button
                           onClick={() => runRosterAction(() => handleApproveStudent(student.uid))}
                           disabled={isRosterActionBusy}
-                          className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all text-xs active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all text-xs active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           ✓ {isKo ? '승인' : 'Approve'}
                         </button>
@@ -227,7 +227,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                 value={
                   <>
                     {activeRoster.filter((s) => s.hasScannedThisWeek).length}
-                    <span className="text-sm font-normal text-zinc-500"> / {activeRoster.length}</span>
+                    <span className="text-sm font-normal text-zinc-400"> / {activeRoster.length}</span>
                   </>
                 }
               />
@@ -239,7 +239,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
               <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
             </div>
           ) : activeRoster.length === 0 ? (
-            <div className="py-16 text-center text-zinc-500 text-xs leading-relaxed font-korean">
+            <div className="py-16 text-center text-zinc-400 text-xs leading-relaxed font-korean">
               {isKo
                 ? '이 학급반에 등록된 학생이 없습니다. 가입 코드를 학부모에게 공유하거나 승인을 기다려 주세요.'
                 : 'No active students enrolled in this class yet.'}
@@ -271,7 +271,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                       </td>
                       <td className="py-4">
                         <p className={`font-bold ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>{student.name}</p>
-                        <p className="text-[10px] text-zinc-500 font-mono">{student.email}</p>
+                        <p className="text-[10px] text-zinc-400 font-mono">{student.email}</p>
                       </td>
                       <td className="py-4">
                         {student.hasScannedThisWeek ? (
@@ -288,7 +288,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                           </span>
                         )}
                       </td>
-                      <td className="py-4 font-mono text-zinc-500 text-[10px]">
+                      <td className="py-4 font-mono text-zinc-400 text-[10px]">
                         {student.lastScanDate ? student.lastScanDate : '-'}
                       </td>
                       <td className="py-4 text-right pr-2 flex items-center justify-end gap-2">

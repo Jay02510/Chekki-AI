@@ -177,7 +177,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
             <button
               onClick={close}
               aria-label={language === 'ko' ? '닫기' : 'Close'}
-              className="text-zinc-500 hover:text-orange-500 transition-colors"
+              className="text-zinc-400 hover:text-orange-500 transition-colors"
             >
               ✕
             </button>
@@ -268,7 +268,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
                     onClose();
                     setShowPaywall(true);
                   }}
-                  className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-[0.97] transition-all"
+                  className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-black py-4 rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-[0.97] transition-all"
                 >
                   {t('sub_subscribe_now')}
                 </button>

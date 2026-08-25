@@ -83,7 +83,7 @@ const SubscribePage: React.FC = () => {
         <h1 className="text-4xl md:text-5xl font-black tracking-tight">
           Chekki<span className="text-orange-500">AI</span>
         </h1>
-        <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.3em] mt-1.5">
+        <p className="text-zinc-400 text-xs font-black uppercase tracking-[0.3em] mt-1.5">
           Homework Helper
         </p>
       </div>
@@ -118,7 +118,7 @@ const SubscribePage: React.FC = () => {
           >
             <AppleLogo size={28} weight="fill" className="text-black shrink-0" />
             <div className="text-left">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
                 {isKo ? '다운로드' : 'Download on the'}
               </p>
               <p className="text-sm font-black leading-none mt-0.5">App Store</p>
@@ -144,11 +144,11 @@ const SubscribePage: React.FC = () => {
 
         {/* QR code for desktop */}
         <div className="hidden md:flex flex-col items-center gap-3 pt-6 border-t border-white/5">
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
             {isKo ? 'iPhone / Android QR 코드로 스캔' : 'Scan to download on mobile'}
           </p>
           <QRCodeWithFallback url={APP_STORE_URL} />
-          <p className="text-[9px] text-zinc-500">iOS &amp; Android App Store</p>
+          <p className="text-[9px] text-zinc-400">iOS &amp; Android App Store</p>
         </div>
 
         {/* Language toggle */}
@@ -156,13 +156,13 @@ const SubscribePage: React.FC = () => {
           <div className="flex bg-zinc-950 rounded-xl p-1 border border-zinc-800">
             <button
               onClick={() => setLanguage('en')}
-              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase ${language === 'en' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500'}`}
+              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase ${language === 'en' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-400'}`}
             >
               EN
             </button>
             <button
               onClick={() => setLanguage('ko')}
-              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase ${language === 'ko' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500'}`}
+              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase ${language === 'ko' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-400'}`}
             >
               KO
             </button>
@@ -171,7 +171,7 @@ const SubscribePage: React.FC = () => {
       </div>
 
       {/* Footer & Business Info */}
-      <footer className="mt-12 text-center text-xs text-zinc-500 space-y-4 max-w-lg w-full border-t border-white/10 pt-8">
+      <footer className="mt-12 text-center text-xs text-zinc-400 space-y-4 max-w-lg w-full border-t border-white/10 pt-8">
         <div className="space-y-1 text-[11px] text-zinc-400">
           <p>
             <span><strong>{isKo ? '상호:' : 'Company:'}</strong> 채키 AI (Chekki AI)</span> | {' '}

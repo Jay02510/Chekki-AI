@@ -415,13 +415,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             </p>
             <button
               onClick={confirmStartPractice}
-              className="w-full py-5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-full text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.97] transition-all"
+              className="w-full py-5 bg-orange-500 hover:bg-orange-600 text-black font-black rounded-full text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.97] transition-all"
             >
               {language === 'ko' ? '준비 완료!' : "I'm Ready!"}
             </button>
             <button
               onClick={() => setShowHandoff(false)}
-              className="mt-4 text-zinc-500 hover:text-white font-korean text-sm"
+              className="mt-4 text-zinc-400 hover:text-white font-korean text-sm"
             >
               {language === 'ko' ? '취소' : 'Cancel'}
             </button>
@@ -519,7 +519,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 type: copied ? 'success' : 'error',
               });
             }}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95"
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-md transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95"
           >
             <span>✨</span>
             <span>{language === 'ko' ? '원장님 초대장 전송 / 복사' : 'Share / Copy Director Invite'}</span>
@@ -588,7 +588,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       </button>
                       <button
                         onClick={confirmStartPractice}
-                        className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all"
+                        className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-black rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all"
                       >
                         I&apos;m Ready!
                       </button>
@@ -596,7 +596,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   </div>
                 ) : (
                   <>
-                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-2">
                       Past Mistakes
                     </h3>
                     {mistakes.length === 0 ? (
@@ -615,7 +615,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                           className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default gap-3"
                         >
                           <div className="flex flex-col gap-1 min-w-0">
-                            <span className="text-sm font-medium line-through text-zinc-500 decoration-red-500/50 break-words whitespace-normal">
+                            <span className="text-sm font-medium line-through text-zinc-400 decoration-red-500/50 break-words whitespace-normal">
                               {mistake.question_text}
                             </span>
                             <span className="text-sm font-bold text-emerald-400 break-words whitespace-normal">
@@ -745,14 +745,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       <span className="text-xs font-bold text-emerald-400">{score} ✓</span>
                     </div>
 
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
                       {language === 'ko'
                         ? '다음 문장을 소리 내어 읽어보세요'
                         : 'Read the sentence out loud'}
                     </p>
 
                     <div className="bg-black/40 rounded-2xl p-6 border border-white/5 w-full">
-                      <p className="text-sm text-zinc-500 line-through mb-2">
+                      <p className="text-sm text-zinc-400 line-through mb-2">
                         {current.question_text}
                       </p>
                       <p

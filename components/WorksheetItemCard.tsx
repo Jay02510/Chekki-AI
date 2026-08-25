@@ -148,13 +148,13 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
             <div
               className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 ease-in-out ${
                 isActive
-                  ? 'bg-orange-500 text-white shadow-lg rotate-3'
+                  ? 'bg-orange-500 text-black shadow-lg rotate-3'
                   : item.is_correct === false && hasHandwriting !== false
                     ? 'bg-red-500 text-white shadow-md shadow-red-500/20'
                     : item.is_correct === true
                       ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
                       : isNight
-                        ? 'bg-zinc-800 text-zinc-500'
+                        ? 'bg-zinc-800 text-zinc-400'
                         : 'bg-zinc-100 text-zinc-400'
               }`}
             >
@@ -296,7 +296,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                 e.stopPropagation();
                                 onSetScriptLanguage(item.id, 'ko');
                               }}
-                              className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${currentScriptLang === 'ko' ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                              className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${currentScriptLang === 'ko' ? 'bg-orange-500 text-black shadow-lg' : 'text-zinc-400 hover:text-zinc-300'}`}
                             >
                               KO
                             </button>
@@ -305,7 +305,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                 e.stopPropagation();
                                 onSetScriptLanguage(item.id, 'en');
                               }}
-                              className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${currentScriptLang === 'en' ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                              className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${currentScriptLang === 'en' ? 'bg-orange-500 text-black shadow-lg' : 'text-zinc-400 hover:text-zinc-300'}`}
                             >
                               EN
                             </button>

@@ -96,7 +96,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
             {features.map((feat, index) => (
               <p
                 key={index}
-                className={`absolute inset-0 w-full text-center text-zinc-500 font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all duration-200 transform ${index === featureIndex ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+                className={`absolute inset-0 w-full text-center text-zinc-400 font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all duration-200 transform ${index === featureIndex ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
               >
                 {feat}
               </p>

@@ -26,7 +26,7 @@ export function LogComplianceTracker({ isNight, isKo, complianceRows, isLoading 
 
   if (complianceRows.length === 0) {
     return (
-      <div className="py-16 text-center text-zinc-500 text-xs">
+      <div className="py-16 text-center text-zinc-400 text-xs">
         {isKo ? '표시할 반이 없습니다.' : 'No classes to show yet.'}
       </div>
     );
@@ -42,7 +42,7 @@ export function LogComplianceTracker({ isNight, isKo, complianceRows, isLoading 
             <h4 className={`text-lg font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
               {isKo ? '수업 일지 제출 현황' : 'Log Submission Compliance'}
             </h4>
-            <p className="text-xs text-zinc-500 mt-0.5">
+            <p className="text-xs text-zinc-400 mt-0.5">
               {isKo ? '지난 14일간 반별 일지 제출 여부입니다.' : 'Daily log submission over the last 14 days, per class.'}
             </p>
           </div>
@@ -65,14 +65,14 @@ export function LogComplianceTracker({ isNight, isKo, complianceRows, isLoading 
                   <tr key={row.classId} className={`transition-colors ${isNight ? 'hover:bg-white/[0.02]' : 'hover:bg-zinc-50'}`}>
                     <td className="py-3 pl-2 font-black sticky left-0">
                       <p className={isNight ? 'text-white' : 'text-zinc-900'}>{row.className}</p>
-                      <p className="text-[10px] text-zinc-500 font-mono font-normal">{row.teacherName}</p>
+                      <p className="text-[10px] text-zinc-400 font-mono font-normal">{row.teacherName}</p>
                     </td>
                     {row.days.map((d) => (
                       <td key={d.date} className="py-3 px-1 text-center">
                         {d.submitted ? (
                           <CheckCircle size={14} weight="fill" className="inline text-emerald-500" />
                         ) : d.isToday ? (
-                          <Circle size={14} weight="bold" className="inline text-zinc-500/40" />
+                          <Circle size={14} weight="bold" className="inline text-zinc-400/40" />
                         ) : (
                           <XCircle size={14} weight="fill" className="inline text-red-500/40" />
                         )}
@@ -85,7 +85,7 @@ export function LogComplianceTracker({ isNight, isKo, complianceRows, isLoading 
                           {row.missStreak}
                         </span>
                       ) : (
-                        <span className="text-zinc-500 text-[10px] font-mono">{row.missStreak}</span>
+                        <span className="text-zinc-400 text-[10px] font-mono">{row.missStreak}</span>
                       )}
                     </td>
                   </tr>

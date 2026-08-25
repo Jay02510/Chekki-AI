@@ -39,7 +39,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
       </button>
 
       <div className="pt-6 mt-2 border-t border-white/5 space-y-2">
-        <span className="block px-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+        <span className="block px-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">
           {isKo ? '설정' : 'Setup'}
         </span>
 

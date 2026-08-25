@@ -179,7 +179,7 @@ export const RefineModal: React.FC<Props> = ({
             <div
               className={`${isNight ? 'bg-zinc-900/40 border-white/5 shadow-inner' : 'bg-zinc-50 border-zinc-200'} rounded-3xl p-6 border mb-8 group transition-all hover:border-white/10`}
             >
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em] mb-2">
+              <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em] mb-2">
                 {language === 'ko' ? '질문' : 'Question'}
               </p>
               <p
@@ -238,7 +238,7 @@ export const RefineModal: React.FC<Props> = ({
                 disabled={isSubmitting || (!selectedReason && !customReason.trim())}
                 className={`w-full py-5 md:py-6 rounded-full font-black text-sm md:text-base uppercase tracking-[0.3em] transition-all transform active:scale-[0.95] flex items-center justify-center gap-4 relative overflow-hidden shadow-2xl ${
                   isSubmitting || (!selectedReason && !customReason.trim())
-                    ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'
+                    ? 'bg-zinc-800 text-zinc-400 cursor-not-allowed opacity-50'
                     : `${isNight ? 'bg-white hover:bg-zinc-100 text-black' : 'bg-zinc-900 hover:bg-black text-white'}`
                 }`}
               >

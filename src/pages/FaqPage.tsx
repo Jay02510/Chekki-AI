@@ -211,7 +211,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
               <span>{isKo ? '메인으로' : 'Home'}</span>
             </button>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigateTo('/')}>
-              <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-500/30">
+              <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center text-black font-bold text-lg shadow-md shadow-orange-500/30">
                 체
               </div>
               <span className="font-extrabold text-lg tracking-tight">Chekki AI <span className="text-orange-500 font-mono text-xs">FAQ</span></span>
@@ -293,7 +293,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
               onClick={() => setActiveCategory('all')}
               className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                 activeCategory === 'all' 
-                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                  ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20' 
                   : isNight ? 'bg-white/5 border border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border border-zinc-200 text-zinc-700 hover:bg-zinc-200'
               }`}
             >
@@ -304,7 +304,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
               onClick={() => setActiveCategory('parent')}
               className={`px-5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
                 activeCategory === 'parent' 
-                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                  ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20' 
                   : isNight ? 'bg-white/5 border border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border border-zinc-200 text-zinc-700 hover:bg-zinc-200'
               }`}
             >
@@ -316,7 +316,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
               onClick={() => setActiveCategory('teacher')}
               className={`px-5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
                 activeCategory === 'teacher' 
-                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                  ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20' 
                   : isNight ? 'bg-white/5 border border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border border-zinc-200 text-zinc-700 hover:bg-zinc-200'
               }`}
             >
@@ -369,7 +369,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
                     </div>
 
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                      isOpen ? 'rotate-180 bg-orange-500 text-white' : isNight ? 'bg-white/5 text-zinc-400' : 'bg-zinc-100 text-zinc-600'
+                      isOpen ? 'rotate-180 bg-orange-500 text-black' : isNight ? 'bg-white/5 text-zinc-400' : 'bg-zinc-100 text-zinc-600'
                     }`}>
                       <CaretDown size={16} weight="bold" />
                     </div>
@@ -404,7 +404,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
           <div className="flex flex-wrap justify-center gap-3">
             <a
               href="mailto:support@chekkiai.com?subject=[Chekki%20Support]%20Customer%20Inquiry"
-              className="px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.97] cursor-pointer flex items-center gap-2"
+              className="px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.97] cursor-pointer flex items-center gap-2"
             >
               <span>💬</span>
               <span>{isKo ? '고객 지원 1:1 이메일 문의' : 'Contact Customer Support'}</span>
@@ -460,7 +460,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
             </button>
           </div>
 
-          <p className="text-xs text-zinc-500 font-medium pt-2">
+          <p className="text-xs text-zinc-400 font-medium pt-2">
             © {new Date().getFullYear()} ChekkiAI. All rights reserved.
           </p>
         </div>

@@ -269,7 +269,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
           type="button"
           onClick={() => setRole('ft')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
-            role === 'ft' ? 'bg-orange-500 border-orange-500 text-white' : isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-600'
+            role === 'ft' ? 'bg-orange-500 border-orange-500 text-black' : isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-600'
           }`}
         >
           {isKo ? '원어민 선생님 (FT)' : 'Foreign Teacher (FT)'}
@@ -286,7 +286,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">
+        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
           {isKo ? '배정할 학급' : 'Assign to class'}
         </label>
         <select
@@ -332,7 +332,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
             }`}
           />
           {bulkProgress && (
-            <p className="text-[11px] text-zinc-500 font-mono">
+            <p className="text-[11px] text-zinc-400 font-mono">
               {isKo ? `전송 중 ${bulkProgress.done}/${bulkProgress.total}` : `Sending ${bulkProgress.done}/${bulkProgress.total}`}
             </p>
           )}
@@ -368,7 +368,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         type="button"
         onClick={isBulkMode ? handleSendBulkInvites : handleSendInvite}
         disabled={isSending || !classId || (role === 'ft' ? remainingFt <= 0 : remainingKt <= 0)}
-        className="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all"
+        className="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-xs rounded-xl transition-all"
       >
         {isSending
           ? (isKo ? '전송 중...' : 'Sending...')
@@ -405,7 +405,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
               <span className={`font-mono font-bold px-1.5 py-0.5 rounded shrink-0 ${inv.role === 'ft' ? 'text-orange-400' : 'text-blue-400'}`}>
                 {inv.role.toUpperCase()}
               </span>
-              <span className={`font-bold shrink-0 ${inv.status === 'claimed' ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              <span className={`font-bold shrink-0 ${inv.status === 'claimed' ? 'text-emerald-400' : 'text-zinc-400'}`}>
                 {inv.status === 'claimed' ? (isKo ? '수락됨' : 'claimed') : (isKo ? '대기중' : 'pending')}
               </span>
               {inv.status === 'pending' && (

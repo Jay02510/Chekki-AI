@@ -124,7 +124,7 @@ export function StudentDatabaseGrid({
         cell: (info) => (
           <div>
             <p className="font-bold">{info.getValue()}</p>
-            <p className="text-[10px] text-zinc-500 font-mono">{info.row.original.parentEmail}</p>
+            <p className="text-[10px] text-zinc-400 font-mono">{info.row.original.parentEmail}</p>
           </div>
         ),
       }),
@@ -147,7 +147,7 @@ export function StudentDatabaseGrid({
       }),
       columnHelper.accessor('lastScanDate', {
         header: isKo ? '마지막 스캔일' : 'Last Active',
-        cell: (info) => <span className="font-mono text-[10px] text-zinc-500">{info.getValue() || '-'}</span>,
+        cell: (info) => <span className="font-mono text-[10px] text-zinc-400">{info.getValue() || '-'}</span>,
       }),
       columnHelper.accessor('weeklyMistakesCount', {
         header: isKo ? '주간 오답' : 'Weekly Mistakes',
@@ -228,7 +228,7 @@ export function StudentDatabaseGrid({
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
         <div className="flex flex-col sm:flex-row gap-3 flex-1">
           <div className={`relative flex-1 max-w-xs`}>
-            <MagnifyingGlass size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <MagnifyingGlass size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
               value={globalFilter}
@@ -267,7 +267,7 @@ export function StudentDatabaseGrid({
       <div className={`p-1 rounded-[2.5rem] ${isNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'}`}>
         <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 ${isNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'}`}>
           {filteredByClass.length === 0 ? (
-            <div className="py-16 text-center text-zinc-500 text-xs">
+            <div className="py-16 text-center text-zinc-400 text-xs">
               {isKo ? '표시할 학생이 없습니다.' : 'No students match this view.'}
             </div>
           ) : (

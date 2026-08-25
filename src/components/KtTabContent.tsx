@@ -157,7 +157,7 @@ export function KtTabContent(props: Props) {
             <button
               type="button"
               onClick={() => props.setActiveTab('kt_script')}
-              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               {isKo ? '알림톡 작성하기 →' : 'Go to Script →'}
             </button>

@@ -749,7 +749,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 <button
                   aria-label="Open Dashboard"
                   onClick={() => onOpenDashboard && onOpenDashboard()}
-                  className={`h-12 px-5 rounded-full bg-orange-500 text-white hover:bg-orange-600 flex items-center justify-center font-black text-xs uppercase tracking-widest transition-all duration-200 active:scale-[0.98] group shadow-sm shrink-0`}
+                  className={`h-12 px-5 rounded-full bg-orange-500 text-black hover:bg-orange-600 flex items-center justify-center font-black text-xs uppercase tracking-widest transition-all duration-200 active:scale-[0.98] group shadow-sm shrink-0`}
                   title={language === 'ko' ? '대시보드 열기' : 'Open Dashboard'}
                 >
                   <span className="group-hover:scale-[1.02] transition-transform">DASH</span>
@@ -833,7 +833,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
               <div className="flex flex-col gap-4 pt-2 w-full">
                 <div className="flex flex-col items-center justify-center space-y-3 pb-4">
                   <div className="w-6 h-6 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin"></div>
-                  <p className="text-[10px] md:text-xs font-bold text-zinc-500 font-korean uppercase tracking-wide leading-normal break-keep">
+                  <p className="text-[10px] md:text-xs font-bold text-zinc-400 font-korean uppercase tracking-wide leading-normal break-keep">
                     {t('ws_scanning_detail')}
                   </p>
                 </div>

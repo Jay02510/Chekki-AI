@@ -234,7 +234,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
             <div className="relative flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-2 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-brand-orange flex items-center justify-center shadow-lg shadow-orange-500/25">
-                  <span className="text-white text-xs font-black">C</span>
+                  <span className="text-black text-xs font-black">C</span>
                 </div>
                 <span
                   className={`${isNight ? 'text-white/80' : 'text-zinc-900/80'} text-sm font-black tracking-tight`}
@@ -259,7 +259,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 >
                   {getTitle()}
                 </h2>
-                <p className="text-zinc-500 text-[11px] md:text-xs font-semibold leading-relaxed max-w-[240px] mx-auto break-keep">
+                <p className="text-zinc-400 text-[11px] md:text-xs font-semibold leading-relaxed max-w-[240px] mx-auto break-keep">
                   {getSubtitle()}
                 </p>
               </div>
@@ -311,7 +311,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 {viewMode === 'signup' && (
                   <div className="relative group">
                     <svg
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-500 group-focus-within:text-brand-orange transition-colors duration-250"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400 group-focus-within:text-brand-orange transition-colors duration-250"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2.5"
@@ -339,7 +339,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
 
                 <div className="relative group">
                   <svg
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-500 group-focus-within:text-brand-orange transition-colors duration-250"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400 group-focus-within:text-brand-orange transition-colors duration-250"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -368,7 +368,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                   <div className="space-y-2.5">
                     <div className="relative group">
                       <svg
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-500 group-focus-within:text-brand-orange transition-colors duration-250"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400 group-focus-within:text-brand-orange transition-colors duration-250"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2.5"
@@ -394,7 +394,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-brand-orange transition-colors duration-250"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-brand-orange transition-colors duration-250"
                       >
                         {showPassword ? (
                           <svg
@@ -437,7 +437,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                         <button
                           type="button"
                           onClick={() => setViewMode('forgot')}
-                          className="text-[10px] text-zinc-500 hover:text-brand-orange font-bold transition-colors duration-250"
+                          className="text-[10px] text-zinc-400 hover:text-brand-orange font-bold transition-colors duration-250"
                         >
                           Forgot Password?
                         </button>
@@ -449,7 +449,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-brand-orange hover:bg-orange-600 text-white font-black py-3.5 rounded-2xl shadow-xl shadow-orange-500/30 transform active:scale-[0.98] disabled:opacity-50 transition-all duration-250 text-sm font-display tracking-wide mt-2"
+                  className="w-full bg-brand-orange hover:bg-orange-600 text-black font-black py-3.5 rounded-2xl shadow-xl shadow-orange-500/30 transform active:scale-[0.98] disabled:opacity-50 transition-all duration-250 text-sm font-display tracking-wide mt-2"
                 >
                   {isLoading
                     ? viewMode === 'login'
@@ -467,7 +467,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
 
               <div className="relative flex py-4 items-center">
                 <div className="flex-grow border-t border-zinc-200 dark:border-white/5"></div>
-                <span className="flex-shrink mx-4 text-[9px] text-zinc-500 font-black uppercase tracking-[0.2em]">
+                <span className="flex-shrink mx-4 text-[9px] text-zinc-400 font-black uppercase tracking-[0.2em]">
                   or continue with
                 </span>
                 <div className="flex-grow border-t border-zinc-200 dark:border-white/5"></div>
@@ -534,7 +534,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                     if (viewMode === 'forgot') setViewMode('login');
                     else setViewMode(viewMode === 'login' ? 'signup' : 'login');
                   }}
-                  className={`text-zinc-500 text-[11px] hover:text-brand-orange font-bold transition-colors duration-250`}
+                  className={`text-zinc-400 text-[11px] hover:text-brand-orange font-bold transition-colors duration-250`}
                 >
                   {viewMode === 'login' ? (
                     <>
@@ -555,7 +555,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
 
                 <button
                   onClick={close}
-                  className="text-zinc-500 text-[10px] hover:text-brand-orange font-black uppercase tracking-widest transition-all duration-250 underline underline-offset-2"
+                  className="text-zinc-400 text-[10px] hover:text-brand-orange font-black uppercase tracking-widest transition-all duration-250 underline underline-offset-2"
                 >
                   {t('login_guest_link')}
                 </button>
@@ -564,31 +564,31 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                   <span>By continuing, you agree to our</span>
                   <button
                     onClick={() => setShowLegal('terms')}
-                    className="underline text-zinc-500 hover:text-zinc-400"
+                    className="underline text-zinc-400 hover:text-zinc-400"
                   >
                     Terms
                   </button>
                   <button
                     onClick={() => setShowLegal('privacy')}
-                    className="underline text-zinc-500 hover:text-zinc-400"
+                    className="underline text-zinc-400 hover:text-zinc-400"
                   >
                     Privacy
                   </button>
                   <button
                     onClick={() => setShowLegal('support')}
-                    className="underline text-zinc-500 hover:text-zinc-400"
+                    className="underline text-zinc-400 hover:text-zinc-400"
                   >
                     Support
                   </button>
                   <button
                     onClick={() => setShowLegal('refund')}
-                    className="underline text-zinc-500 hover:text-zinc-400"
+                    className="underline text-zinc-400 hover:text-zinc-400"
                   >
                     Refund
                   </button>
                   <button
                     onClick={() => setShowLegal('youth')}
-                    className="underline text-zinc-500 hover:text-zinc-400"
+                    className="underline text-zinc-400 hover:text-zinc-400"
                   >
                     Youth
                   </button>
