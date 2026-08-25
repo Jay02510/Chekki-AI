@@ -5,6 +5,7 @@ import { useToast } from '../contexts/ToastContext';
 import { ChekkiMascot } from './Icons';
 import { db } from '../services/database';
 import { useModalExit } from '../hooks/useModalExit';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Props {
   onClose: () => void;
@@ -22,6 +23,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { isClosing, close } = useModalExit(onClose);
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: close });
 
   const handleSubmit = async () => {
     if (!firebaseUser) return;
@@ -53,6 +55,11 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
       ></div>
 
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('fb_title')}
+        tabIndex={-1}
         className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[95vh] w-full max-w-md mx-2 sm:mx-4`}
       >
         <div
@@ -66,6 +73,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
             </div>
             <button
               onClick={close}
+              aria-label="Close"
               className={`absolute top-4 right-4 ${isNight ? 'text-zinc-500 hover:text-white' : 'text-zinc-400 hover:text-zinc-900'} transition-colors`}
             >
               ✕

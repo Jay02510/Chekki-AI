@@ -407,6 +407,13 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                   : 'Pro: AI Pronunciation Eval'
                                 : t('tt_pronunciation')
                             }
+                            aria-label={
+                              userPlan !== 'pro' && index !== 0
+                                ? language === 'ko'
+                                  ? 'Pro: AI 발음 평가'
+                                  : 'Pro: AI Pronunciation Eval'
+                                : t('tt_pronunciation')
+                            }
                           >
                             {isListening ? (
                               <div className="flex gap-1 items-center justify-center h-full">
@@ -529,6 +536,13 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                     : 'Pro: Native AI Pronunciation Audio'
                                   : t('tt_audio')
                               }
+                              aria-label={
+                                userPlan !== 'pro' && index !== 0
+                                  ? language === 'ko'
+                                    ? 'Pro: 원어민 AI 발음 듣기'
+                                    : 'Pro: Native AI Pronunciation Audio'
+                                  : t('tt_audio')
+                              }
                             >
                               <svg
                                 className="w-5 h-5 md:w-6 md:h-6"
@@ -560,6 +574,13 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                               }
                               className={`relative w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-[1.02] active:scale-[0.97] hover:-translate-y-0.5 shadow-sm transition-transform ${flagged ? 'bg-red-500/10 text-red-500' : isNight ? 'bg-white/5 text-emerald-500/60 hover:text-emerald-400' : 'bg-emerald-500/5 text-emerald-600/50 hover:text-emerald-600'}`}
                               title={
+                                userPlan !== 'pro' && index !== 0
+                                  ? language === 'ko'
+                                    ? 'Pro: 대시보드 저장'
+                                    : 'Pro: Save to Dashboard'
+                                  : t('tt_bookmark')
+                              }
+                              aria-label={
                                 userPlan !== 'pro' && index !== 0
                                   ? language === 'ko'
                                     ? 'Pro: 대시보드 저장'
@@ -603,6 +624,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                               }
                               className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full btn-press hover:scale-[1.02] active:scale-[0.97] hover:-translate-y-0.5 shadow-sm transition-transform ${isNight ? 'bg-emerald-500/10 text-emerald-400 hover:text-emerald-300' : 'bg-emerald-600/10 text-emerald-600 hover:text-emerald-500'}`}
                               title={t('tt_refine')}
+                              aria-label={t('tt_refine')}
                             >
                               <svg
                                 className="w-5 h-5 md:w-6 md:h-6"

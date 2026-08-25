@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useModalExit } from '../hooks/useModalExit';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Props {
   imageSrc: string;
@@ -80,6 +81,7 @@ export const CropModal: React.FC<Props> = ({
   const [currentImage, setCurrentImage] = useState(imageSrc);
   const [isProcessing, setIsProcessing] = useState(false);
   const { isClosing, close } = useModalExit(onClose);
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: close });
   const [box, setBox] = useState<Box>({ x: 10, y: 10, w: 80, h: 80 });
   const [lowResWarning, setLowResWarning] = useState(false);
 
@@ -197,6 +199,11 @@ export const CropModal: React.FC<Props> = ({
 
       {/* Modal Container */}
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="crop-modal-title"
+        tabIndex={-1}
         className={`relative p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.6)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[92vh] w-full max-w-xl sm:mx-4`}
       >
         <div
@@ -207,7 +214,7 @@ export const CropModal: React.FC<Props> = ({
             className={`p-5 pb-3 border-b ${isNight ? 'border-zinc-900 bg-zinc-950/50' : 'border-zinc-100 bg-zinc-50/50'} flex items-start justify-between shrink-0`}
           >
             <div>
-              <h3 className="text-lg md:text-xl font-black tracking-tight">
+              <h3 id="crop-modal-title" className="text-lg md:text-xl font-black tracking-tight">
                 {isKo ? '📸 이미지 편집' : '📸 Edit Image'}
               </h3>
               <p
@@ -223,6 +230,7 @@ export const CropModal: React.FC<Props> = ({
               disabled={isProcessing}
               className={`p-2 rounded-full transition-colors ${isNight ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100'}`}
               title="Close"
+              aria-label="Close"
             >
               ✕
             </button>

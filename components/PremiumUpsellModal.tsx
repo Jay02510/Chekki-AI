@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useModalExit } from '../hooks/useModalExit';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Props {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
   const { setShowPaywall } = useAuth();
   const { language } = useLanguage();
   const { isClosing, close } = useModalExit(onClose);
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen, onClose: close });
 
   if (!isOpen) return null;
 
@@ -58,6 +60,11 @@ export const PremiumUpsellModal: React.FC<Props> = ({
       />
 
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="premium-upsell-title"
+        tabIndex={-1}
         className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[95vh] w-full max-w-md mx-2 sm:mx-4`}
       >
         <div
@@ -87,6 +94,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
               {info.icon}
             </div>
             <h2
+              id="premium-upsell-title"
               className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-display break-keep`}
             >
               {language === 'ko' ? info.title_ko : info.title_en}

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { AppleLogo } from './AppleLogo';
 import { useModalExit } from '../hooks/useModalExit';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Props {
   onClose: () => void;
@@ -17,6 +18,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const platform = Capacitor.getPlatform();
   const { isClosing, close } = useModalExit(onClose);
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: close });
 
   const formatDate = (isoStr?: string | null) => {
     if (!isoStr) return 'N/A';
@@ -138,6 +140,11 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
       />
 
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="billing-modal-title"
+        tabIndex={-1}
         className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[95vh] w-full max-w-2xl mx-2 sm:mx-4`}
       >
         <div
@@ -161,6 +168,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
                 />
               </svg>
               <h2
+                id="billing-modal-title"
                 className={`text-balance text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight`}
               >
                 {t('billing_title')}
@@ -168,6 +176,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
             </div>
             <button
               onClick={close}
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
               className="text-zinc-500 hover:text-orange-500 transition-colors"
             >
               ✕

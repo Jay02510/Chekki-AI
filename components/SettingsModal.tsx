@@ -11,6 +11,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { InAppReview } from '@capacitor-community/in-app-review';
 import { copyToClipboard } from '../utils/clipboard';
 import { useModalExit } from '../hooks/useModalExit';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface Props {
   onClose: () => void;
@@ -20,6 +21,7 @@ interface Props {
 
 export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight }) => {
   const { isClosing, close } = useModalExit(onClose);
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: close });
   const {
     user,
     updateProfile,
@@ -181,6 +183,11 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
         ></div>
 
         <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="settings-modal-title"
+          tabIndex={-1}
           className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] w-full max-w-lg md:max-w-xl lg:max-w-2xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[90vh] mx-2 sm:mx-4`}
         >
           <div
@@ -190,12 +197,14 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
               className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-5 py-5 sm:px-8 sm:py-6 border-b flex justify-between items-center shrink-0`}
             >
               <h2
+                id="settings-modal-title"
                 className={`text-balance text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase tracking-tight`}
               >
                 {t('settings_title')}
               </h2>
               <button
                 onClick={close}
+                aria-label="Close"
                 className="text-zinc-500 hover:text-orange-500 transition-colors text-xl"
               >
                 ✕
