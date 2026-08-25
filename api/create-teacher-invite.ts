@@ -120,8 +120,17 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
 
   // Always build the invite link against a real https origin — corsOrigin
   // can resolve to 'capacitor://localhost' when the request comes from
-  // the native app's WebView, which would produce a broken link.
-  const linkOrigin = corsOrigin.startsWith('http') ? corsOrigin : 'https://chekkiai.com';
+  // the native app's WebView, which would produce a broken link. This is
+  // also the fallback for the exact case Universal/App Links exist to
+  // fix — a director inviting a teacher FROM the app — so it must land on
+  // whichever host actually verifies. chekkiai.com (no www) permanently
+  // redirects to www.chekkiai.com, and neither Apple's nor Google's
+  // link-verification crawlers follow redirects when fetching
+  // apple-app-site-association/assetlinks.json, so a link built on the
+  // apex would never open the app no matter how the native config is set
+  // up (audit: native-app invite links used the domain that fails
+  // verification).
+  const linkOrigin = corsOrigin.startsWith('http') ? corsOrigin : 'https://www.chekkiai.com';
   const inviteUrl = `${linkOrigin}/teacher?invite=${inviteId}`;
 
   // Email the invite directly if we have an address — reuses the same

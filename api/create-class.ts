@@ -202,7 +202,7 @@ async function sendStudentInviteEmail(opts: {
             <p style="font-size: 15px; color: #e4e4e7;"><strong>${safeSchoolName}</strong>에서 <strong>${safeStudentName}</strong> 학생을 <strong>${safeClassName}</strong> 학급에 등록했습니다.</p>
             <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 버튼을 누르면 가입 코드가 자동으로 연결됩니다 — 따로 입력하실 필요 없습니다. 계정이 없으시면 버튼을 누른 뒤 뜨는 화면에서 <strong>"Sign Up"</strong>을 눌러 새로 만들어 주시면 됩니다. 이미 계정이 있으시면 그 이메일로 로그인만 하시면 자동으로 연결됩니다.</p>
             <div style="text-align: center; margin: 24px 0;">
-              <a href="https://chekkiai.com/?classCode=${opts.inviteCode}" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 가입하기</a>
+              <a href="https://www.chekkiai.com/?classCode=${opts.inviteCode}" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 가입하기</a>
             </div>
             <p style="font-size: 12px; color: #71717a; text-align: center; margin: 0 0 8px 0;">버튼이 안 열리면 이 코드를 앱/사이트에 직접 입력해 주세요 (1회용):</p>
             <div style="background-color: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 12px; padding: 16px; margin: 0 0 24px 0; text-align: center;">
