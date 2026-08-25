@@ -1,7 +1,9 @@
 {
   "detector": {
     "ignoreRules": [],
-    "ignoreFiles": [],
+    "ignoreFiles": [
+      "components/OdapNoteModal.tsx"
+    ],
     "ignoreValues": [
       {
         "rule": "bounce-easing",
@@ -71,6 +73,134 @@
         "rule": "design-system-font",
         "value": "bricolage grotesque",
         "createdAt": "2026-08-17T14:52:28.565Z"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "apple sd gothic neo",
+        "files": [
+          "api/create-teacher-invite.ts"
+        ],
+        "createdAt": "2026-08-24T08:34:19.406Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#f4f4f5",
+        "files": [
+          "api/create-teacher-invite.ts"
+        ],
+        "createdAt": "2026-08-24T08:34:19.443Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#e4e4e7",
+        "files": [
+          "api/create-teacher-invite.ts"
+        ],
+        "createdAt": "2026-08-24T08:34:19.477Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#a1a1aa",
+        "files": [
+          "api/create-teacher-invite.ts"
+        ],
+        "createdAt": "2026-08-24T08:34:19.511Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#71717a",
+        "files": [
+          "api/create-teacher-invite.ts"
+        ],
+        "createdAt": "2026-08-24T08:34:19.545Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#030305",
+        "files": [
+          "api/create-teacher-invite.ts"
+        ],
+        "createdAt": "2026-08-24T08:34:30.920Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#ffffff",
+        "files": [
+          "api/create-teacher-invite.ts"
+        ],
+        "createdAt": "2026-08-24T08:34:30.958Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#f97316",
+        "files": [
+          "api/create-teacher-invite.ts"
+        ],
+        "createdAt": "2026-08-24T08:34:30.992Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#030305",
+        "files": [
+          "api/create-class.ts"
+        ],
+        "createdAt": "2026-08-24T08:35:31.731Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#f4f4f5",
+        "files": [
+          "api/create-class.ts"
+        ],
+        "createdAt": "2026-08-24T08:35:35.716Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#ffffff",
+        "files": [
+          "api/create-class.ts"
+        ],
+        "createdAt": "2026-08-24T08:35:39.889Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#f97316",
+        "files": [
+          "api/create-class.ts"
+        ],
+        "createdAt": "2026-08-24T08:35:43.805Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#e4e4e7",
+        "files": [
+          "api/create-class.ts"
+        ],
+        "createdAt": "2026-08-24T08:35:47.504Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#a1a1aa",
+        "files": [
+          "api/create-class.ts"
+        ],
+        "createdAt": "2026-08-24T08:35:51.377Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#71717a",
+        "files": [
+          "api/create-class.ts"
+        ],
+        "createdAt": "2026-08-24T08:35:55.264Z"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "apple sd gothic neo",
+        "files": [
+          "api/create-class.ts"
+        ],
+        "createdAt": "2026-08-24T08:35:59.443Z"
       }
     ]
   }
