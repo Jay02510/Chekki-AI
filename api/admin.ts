@@ -916,6 +916,25 @@ https://urlgeni.us/chekki
       const uid = userDoc.id;
       const realSchoolId = userData.schoolId || null;
 
+      // firestore.rules' isSchoolDirectorOfClass() does
+      // get(users/$(request.auth.uid)).data.role — with no exists() guard
+      // (unlike isClassTeacher() right above it, which explicitly guards
+      // for this same reason). If the signed-in Firebase Auth UID has no
+      // matching users/{uid} doc, that .data access crashes the rule
+      // evaluation and Firestore fails closed as permission-denied for
+      // every read gated by that function — which is nearly everything a
+      // director does. This checks whether that's actually happening here.
+      let authUid: string | null = null;
+      let authUidMatchesFirestoreDoc: boolean | null = null;
+      try {
+        const authUser = await authDb.getUserByEmail(cleanEmail);
+        authUid = authUser.uid;
+        authUidMatchesFirestoreDoc = authUser.uid === uid;
+      } catch (e: any) {
+        authUid = null;
+        authUidMatchesFirestoreDoc = null;
+      }
+
       const [byTeacherUid, byAssigned, bySchoolId] = await Promise.all([
         adminDb.collection('classes').where('teacherUid', '==', uid).get(),
         adminDb.collection('classes').where('assignedTeacherUids', 'array-contains', uid).get(),
@@ -942,6 +961,8 @@ https://urlgeni.us/chekki
           role: userData.role || null,
           schoolId: realSchoolId,
           educatorRole: userData.educatorRole || null,
+          authUid,
+          authUidMatchesFirestoreDoc,
         },
         classesByTeacherUid: summarize(byTeacherUid),
         classesByAssignedTeacherUids: summarize(byAssigned),
