@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
 }) => {
   const { setShowPaywall } = useAuth();
   const { language } = useLanguage();
+  const { isClosing, close } = useModalExit(onClose);
 
   if (!isOpen) return null;
 
@@ -51,18 +53,20 @@ export const PremiumUpsellModal: React.FC<Props> = ({
   return createPortal(
     <div className="fixed inset-0 z-[10005] flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/85 backdrop-blur-xl animate-fade-in"
-        onClick={onClose}
+        className={`absolute inset-0 bg-black/85 backdrop-blur-xl ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
+        onClick={close}
       />
 
-      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-md mx-2 sm:mx-4">
+      <div
+        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[95vh] w-full max-w-md mx-2 sm:mx-4`}
+      >
         <div
           className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
         >
           {/* Back Button */}
           <div className="p-4 flex items-center">
             <button
-              onClick={onClose}
+              onClick={close}
               className={`flex items-center gap-2 ${isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} transition-colors text-sm font-bold active:scale-[0.97]`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +128,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
             {/* Primary CTA — opens PaywallModal which handles platform detection */}
             <button
               onClick={() => {
-                onClose();
+                close();
                 setTimeout(
                   () =>
                     setShowPaywall(true, featureName === 'guide' ? 'moms_scripts' : featureName),

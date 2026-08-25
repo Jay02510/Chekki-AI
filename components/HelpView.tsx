@@ -5,6 +5,7 @@ import { ASSETS } from '../constants';
 import { FeedbackModal } from './FeedbackModal';
 import { LegalType } from '../types';
 import { ScreenshotCarousel } from './ScreenshotCarousel';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface HelpViewProps {
   isNight: boolean;
@@ -18,6 +19,9 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
   // Modals
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const { isClosing: isVideoClosing, close: closeVideo } = useModalExit(() =>
+    setShowVideoModal(false)
+  );
 
   return (
     <div className="animate-fade-in pb-32">
@@ -27,13 +31,15 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
       {showVideoModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
-            onClick={() => setShowVideoModal(false)}
+            className={`absolute inset-0 bg-black/95 backdrop-blur-2xl ${isVideoClosing ? 'modal-backdrop-exit' : ''}`}
+            onClick={closeVideo}
           ></div>
-          <div className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+          <div
+            className={`relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 ${isVideoClosing ? 'modal-exit' : 'modal-enter'}`}
+          >
             <video src={ASSETS.VIDEO_WALKTHROUGH} controls autoPlay className="w-full h-full" />
             <button
-              onClick={() => setShowVideoModal(false)}
+              onClick={closeVideo}
               className="absolute top-6 right-6 bg-black/50 hover:bg-black text-white p-3 rounded-full transition-colors z-10 border border-white/10 backdrop-blur-md"
             >
               ✕

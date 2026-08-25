@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDialogA11y } from '../hooks/useDialogA11y';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface SuccessDialogProps {
   message: string;
@@ -8,17 +9,21 @@ interface SuccessDialogProps {
 }
 
 export const SuccessDialog: React.FC<SuccessDialogProps> = ({ message, isNight, onClose }) => {
-  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
+  const { isClosing, close } = useModalExit(onClose);
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: close });
   return (
     <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 md:p-6">
-      <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={onClose}></div>
+      <div
+        className={`absolute inset-0 bg-black/95 backdrop-blur-xl ${isClosing ? 'modal-backdrop-exit' : ''}`}
+        onClick={close}
+      ></div>
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={message}
         tabIndex={-1}
-        className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter max-w-md w-full mx-4"
+        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} max-w-md w-full mx-4`}
       >
         <div
           className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden text-center p-8 md:p-10`}
@@ -46,7 +51,7 @@ export const SuccessDialog: React.FC<SuccessDialogProps> = ({ message, isNight, 
             {message}
           </p>
           <button
-            onClick={onClose}
+            onClick={close}
             className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-xl shadow-emerald-500/20 active:scale-[0.97] transition-all"
           >
             Close

@@ -5,6 +5,7 @@ import { ChekkiMascot } from './Icons';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Spinner } from '@phosphor-icons/react';
 import { useDialogA11y } from '../hooks/useDialogA11y';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   originalItems: WorksheetItem[];
@@ -109,14 +110,18 @@ export const CloneWorksheetModal: React.FC<Props> = ({
   // This modal has no internal open/close state of its own — its parent
   // mounts/unmounts it — so "open" for focus-trap purposes is just "mounted"
   // (audit: P1 finding, only in-scope modal not wired to useDialogA11y).
+  const { isClosing, close } = useModalExit(onClose);
   const dialogRef = useDialogA11y<HTMLDivElement>({
     isOpen: true,
-    onClose,
+    onClose: close,
   });
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose}></div>
+      <div
+        className={`absolute inset-0 bg-black/90 backdrop-blur-sm ${isClosing ? 'modal-backdrop-exit' : ''}`}
+        onClick={close}
+      ></div>
 
       <div
         ref={dialogRef}
@@ -124,7 +129,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({
         aria-modal="true"
         aria-label={language === 'ko' ? '연습 모드' : 'Practice Mode'}
         tabIndex={-1}
-        className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-4xl mx-4"
+        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[95vh] w-full max-w-4xl mx-4`}
       >
         <div
           className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
@@ -140,7 +145,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={close}
               aria-label={language === 'ko' ? '닫기' : 'Close'}
               className="min-w-[48px] min-h-[48px] rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
             >
@@ -184,7 +189,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({
                 </button>
                 {hasDrawn && (
                   <button
-                    onClick={onClose}
+                    onClick={close}
                     className="bg-green-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-lg animate-fade-in-up min-h-[44px]"
                   >
                     Finish & Get Stamp!
@@ -275,7 +280,7 @@ export const CloneWorksheetModal: React.FC<Props> = ({
 
           <div className="bg-white p-6 border-t border-gray-200 flex justify-end gap-3 shrink-0 z-10">
             <button
-              onClick={onClose}
+              onClick={close}
               className="px-8 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 min-h-[48px]"
             >
               Cancel

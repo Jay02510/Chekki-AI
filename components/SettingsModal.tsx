@@ -10,6 +10,7 @@ import { db, dbInstance } from '../services/database';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { InAppReview } from '@capacitor-community/in-app-review';
 import { copyToClipboard } from '../utils/clipboard';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   onClose: () => void;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight }) => {
+  const { isClosing, close } = useModalExit(onClose);
   const {
     user,
     updateProfile,
@@ -174,12 +176,12 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
 
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div
-          className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in"
-          onClick={onClose}
+          className={`absolute inset-0 bg-black/90 backdrop-blur-xl ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
+          onClick={close}
         ></div>
 
         <div
-          className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] w-full max-w-lg md:max-w-xl lg:max-w-2xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[90vh] mx-2 sm:mx-4`}
+          className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] w-full max-w-lg md:max-w-xl lg:max-w-2xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[90vh] mx-2 sm:mx-4`}
         >
           <div
             className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-zinc-950/90' : 'bg-white/90'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
@@ -193,7 +195,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                 {t('settings_title')}
               </h2>
               <button
-                onClick={onClose}
+                onClick={close}
                 className="text-zinc-500 hover:text-orange-500 transition-colors text-xl"
               >
                 ✕
@@ -505,7 +507,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                       </div>
                       <button
                         onClick={() => {
-                          onClose();
+                          close();
                           setShowPaywall(true);
                         }}
                         className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
@@ -544,7 +546,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                       ) : (
                         <button
                           onClick={() => {
-                            onClose();
+                            close();
                             setShowPaywall(true);
                           }}
                           className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"

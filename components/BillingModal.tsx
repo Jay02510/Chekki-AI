@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { AppleLogo } from './AppleLogo';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   onClose: () => void;
@@ -15,6 +16,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
   const isPro = user?.plan === 'pro';
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const platform = Capacitor.getPlatform();
+  const { isClosing, close } = useModalExit(onClose);
 
   const formatDate = (isoStr?: string | null) => {
     if (!isoStr) return 'N/A';
@@ -130,9 +132,14 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className={`absolute inset-0 bg-black/80 backdrop-blur-sm ${isClosing ? 'modal-backdrop-exit' : ''}`}
+        onClick={close}
+      />
 
-      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-2xl mx-2 sm:mx-4">
+      <div
+        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[95vh] w-full max-w-2xl mx-2 sm:mx-4`}
+      >
         <div
           className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
         >
@@ -160,7 +167,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
               </h2>
             </div>
             <button
-              onClick={onClose}
+              onClick={close}
               className="text-zinc-500 hover:text-orange-500 transition-colors"
             >
               ✕
@@ -261,7 +268,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
 
             <div className={`h-px w-12 ${isNight ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
             <button
-              onClick={onClose}
+              onClick={close}
               className={`${isNight ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500 shadow-sm'} px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all`}
             >
               {t('billing_back')}

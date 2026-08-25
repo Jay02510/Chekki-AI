@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ConfirmDialog } from './ConfirmDialog';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   item: WorksheetItem;
@@ -26,13 +27,14 @@ export const RefineModal: React.FC<Props> = ({
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [customReason, setCustomReason] = useState('');
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const { isClosing, close } = useModalExit(onClose);
 
   const handleClose = () => {
     if (customReason.trim()) {
       setShowDiscardConfirm(true);
       return;
     }
-    onClose();
+    close();
   };
 
   useEffect(() => {
@@ -116,7 +118,7 @@ export const RefineModal: React.FC<Props> = ({
       onClick={handleClose}
     >
       <div
-        className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter w-full sm:max-w-md md:max-w-lg flex flex-col max-h-[92vh] sm:max-h-[85vh] mx-2 sm:mx-4"
+        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} w-full sm:max-w-md md:max-w-lg flex flex-col max-h-[92vh] sm:max-h-[85vh] mx-2 sm:mx-4`}
         onClick={(e) => e.stopPropagation()}
       >
         <div
@@ -268,7 +270,7 @@ export const RefineModal: React.FC<Props> = ({
           isNight={isNight}
           onConfirm={() => {
             setShowDiscardConfirm(false);
-            onClose();
+            close();
           }}
           onCancel={() => setShowDiscardConfirm(false)}
         />

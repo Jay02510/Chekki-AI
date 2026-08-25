@@ -4,6 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useToast } from '../contexts/ToastContext';
 import { ChekkiMascot } from './Icons';
 import { db } from '../services/database';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   onClose: () => void;
@@ -20,6 +21,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const { isClosing, close } = useModalExit(onClose);
 
   const handleSubmit = async () => {
     if (!firebaseUser) return;
@@ -35,7 +37,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
         userRole: user?.role, // Now submitted from parent AND staff (director/teacher) dashboards — role lets admins triage which surface a report came from
       });
       setIsSuccess(true);
-      setTimeout(onClose, 2500);
+      setTimeout(close, 2500);
     } catch (e) {
       showToast({ type: 'error', message: 'Oops! Something went wrong. Please try again.' });
     } finally {
@@ -45,9 +47,14 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
+      <div
+        className={`absolute inset-0 bg-black/80 backdrop-blur-sm ${isClosing ? 'modal-backdrop-exit' : ''}`}
+        onClick={close}
+      ></div>
 
-      <div className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-md mx-2 sm:mx-4">
+      <div
+        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[95vh] w-full max-w-md mx-2 sm:mx-4`}
+      >
         <div
           className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
         >
@@ -58,7 +65,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
               <ChekkiMascot className="w-full h-full" mood={isSuccess ? 'happy' : 'thinking'} />
             </div>
             <button
-              onClick={onClose}
+              onClick={close}
               className={`absolute top-4 right-4 ${isNight ? 'text-zinc-500 hover:text-white' : 'text-zinc-400 hover:text-zinc-900'} transition-colors`}
             >
               ✕

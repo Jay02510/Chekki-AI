@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { LegalType } from '../types';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   type: LegalType;
@@ -33,6 +34,7 @@ export const LegalModal: React.FC<Props> = ({
 
   const { title, icon } = getHeader();
   const date = '최종 수정일: 2025년 10월 24일';
+  const { isClosing, close } = useModalExit(onClose);
 
   // This is a client-rendered SPA, so a URL fragment like /privacy#deletion
   // points at an element that doesn't exist yet when the browser tries its
@@ -52,12 +54,12 @@ export const LegalModal: React.FC<Props> = ({
       className={`fixed inset-0 z-[110] flex items-center justify-center ${isStandalone ? '' : 'p-4'}`}
     >
       <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-        onClick={isStandalone ? undefined : onClose}
+        className={`absolute inset-0 bg-black/80 backdrop-blur-sm ${isClosing ? 'modal-backdrop-exit' : ''}`}
+        onClick={isStandalone ? undefined : close}
       ></div>
 
       <div
-        className={`relative ${isNight ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200 shadow-2xl'} ${isStandalone ? 'w-full h-full rounded-none' : 'rounded-2xl w-full max-w-2xl h-[85vh]'} flex flex-col shadow-2xl border animate-fade-in-up`}
+        className={`relative ${isNight ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200 shadow-2xl'} ${isStandalone ? 'w-full h-full rounded-none' : 'rounded-2xl w-full max-w-2xl h-[85vh]'} flex flex-col shadow-2xl border ${isClosing ? 'modal-exit' : 'animate-fade-in-up'}`}
       >
         <div
           className={`${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-50 border-zinc-200'} px-6 py-4 border-b flex justify-between items-center shrink-0`}
@@ -79,7 +81,7 @@ export const LegalModal: React.FC<Props> = ({
           </div>
           {!isStandalone && (
             <button
-              onClick={onClose}
+              onClick={close}
               aria-label="Close"
               className={`${isNight ? 'text-zinc-500 hover:text-white bg-zinc-900 border-zinc-800' : 'text-zinc-400 hover:text-zinc-900 bg-zinc-100 border-zinc-200'} w-8 h-8 rounded-full flex items-center justify-center border`}
             >
@@ -497,7 +499,7 @@ export const LegalModal: React.FC<Props> = ({
               if (typeof window !== 'undefined' && window.history.length > 1) {
                 window.history.back();
               }
-              onClose();
+              close();
             }}
             className={`${isNight ? 'bg-white text-black hover:bg-zinc-200' : 'bg-zinc-900 text-white hover:bg-black shadow-lg shadow-zinc-900/20'} px-10 py-3 rounded-xl font-black transition-colors text-xs active:scale-[0.97] uppercase tracking-widest cursor-pointer`}
           >

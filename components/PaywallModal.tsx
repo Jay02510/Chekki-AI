@@ -5,6 +5,7 @@ import { SubscriptionScreen } from './SubscriptionScreen';
 import { LegalModal } from './LegalModal';
 import { LegalType } from '../types';
 import { useDialogA11y } from '../hooks/useDialogA11y';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   isNight?: boolean;
@@ -34,9 +35,10 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
     }
   }, [showPaywall]);
 
+  const { isClosing, close } = useModalExit(() => setShowPaywall(false));
   const dialogRef = useDialogA11y<HTMLDivElement>({
     isOpen: showPaywall && !standaloneLegal,
-    onClose: () => setShowPaywall(false),
+    onClose: close,
   });
 
   if (!showPaywall) return null;
@@ -44,8 +46,8 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
   return (
     <div className="fixed inset-0 z-[10010] flex items-center justify-center p-3 md:p-4">
       <div
-        className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in"
-        onClick={() => setShowPaywall(false)}
+        className={`absolute inset-0 bg-black/90 backdrop-blur-xl ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
+        onClick={close}
       />
 
       <div
@@ -54,7 +56,7 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
         aria-modal="true"
         aria-label="Premium subscription"
         tabIndex={-1}
-        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter transition-opacity w-full max-w-lg md:max-w-2xl mx-2 sm:mx-4 ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} transition-opacity w-full max-w-lg md:max-w-2xl mx-2 sm:mx-4 ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
       >
         <div
           className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
@@ -69,7 +71,7 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
 
           {/* Close */}
           <button
-            onClick={() => setShowPaywall(false)}
+            onClick={close}
             aria-label="Close"
             className="absolute top-4 right-5 text-zinc-500 hover:text-white transition-colors text-xl z-30 p-1"
           >

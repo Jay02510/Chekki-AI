@@ -182,11 +182,24 @@
     opacity: 1;
     transform: scale(1);
     transition: opacity 300ms var(--ease-premium), transform 300ms var(--ease-premium);
-    
+
     @starting-style {
       opacity: 0;
       transform: scale(0.95);
     }
+  }
+
+  /* Pairs with useModalExit: applied instead of .modal-enter while a modal
+     is closing, so the panel and its backdrop fade/scale out instead of
+     teleporting when the parent unmounts them. */
+  .modal-exit {
+    opacity: 0;
+    transform: scale(0.97);
+    transition: opacity 180ms var(--ease-in-out-strong), transform 180ms var(--ease-in-out-strong);
+  }
+  .modal-backdrop-exit {
+    opacity: 0;
+    transition: opacity 180ms var(--ease-in-out-strong);
   }
 
   .toast-enter {

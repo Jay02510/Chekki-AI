@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDialogA11y } from '../hooks/useDialogA11y';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface ConfirmDialogProps {
   title: string;
@@ -22,13 +23,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: onCancel });
+  const { isClosing, close } = useModalExit(onCancel);
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: close });
   const isDestructive = variant === 'destructive';
   return (
     <div className="fixed inset-0 z-[10010] flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/90 backdrop-blur-md"
-        onClick={onCancel}
+        className={`absolute inset-0 bg-black/90 backdrop-blur-md ${isClosing ? 'modal-backdrop-exit' : ''}`}
+        onClick={close}
         aria-hidden="true"
       />
       <div
@@ -37,7 +39,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         aria-modal="true"
         aria-labelledby="confirm-title"
         tabIndex={-1}
-        className="relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] modal-enter flex flex-col max-h-[95vh] w-full max-w-sm mx-2 sm:mx-4">
+        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[95vh] w-full max-w-sm mx-2 sm:mx-4`}>
         <div
           className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden p-6 sm:p-8`}
         >
@@ -89,7 +91,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               {confirmText || 'Confirm'}
             </button>
             <button
-              onClick={onCancel}
+              onClick={close}
               disabled={isSaving}
               className={`w-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'} py-4 rounded-2xl font-black uppercase text-xs transition-all active:scale-[0.97] disabled:opacity-50`}
             >

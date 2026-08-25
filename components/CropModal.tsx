@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   imageSrc: string;
@@ -78,6 +79,7 @@ export const CropModal: React.FC<Props> = ({
   const { language } = useLanguage();
   const [currentImage, setCurrentImage] = useState(imageSrc);
   const [isProcessing, setIsProcessing] = useState(false);
+  const { isClosing, close } = useModalExit(onClose);
   const [box, setBox] = useState<Box>({ x: 10, y: 10, w: 80, h: 80 });
   const [lowResWarning, setLowResWarning] = useState(false);
 
@@ -184,15 +186,19 @@ export const CropModal: React.FC<Props> = ({
   const isKo = language === 'ko';
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 animate-fade-in">
+    <div
+      className={`fixed inset-0 z-[120] flex items-center justify-center p-4 ${isClosing ? '' : 'animate-fade-in'}`}
+    >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/85 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
+        className={`absolute inset-0 bg-black/85 backdrop-blur-sm transition-opacity ${isClosing ? 'modal-backdrop-exit' : ''}`}
+        onClick={close}
       />
 
       {/* Modal Container */}
-      <div className="relative p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.6)] flex flex-col max-h-[92vh] w-full max-w-xl sm:mx-4">
+      <div
+        className={`relative p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.6)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[92vh] w-full max-w-xl sm:mx-4`}
+      >
         <div
           className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] ${isNight ? 'bg-[#0a0a0a] text-zinc-200' : 'bg-white text-zinc-900'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] flex flex-col overflow-hidden`}
         >
@@ -213,7 +219,7 @@ export const CropModal: React.FC<Props> = ({
               </p>
             </div>
             <button
-              onClick={onClose}
+              onClick={close}
               disabled={isProcessing}
               className={`p-2 rounded-full transition-colors ${isNight ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100'}`}
               title="Close"
@@ -330,7 +336,7 @@ export const CropModal: React.FC<Props> = ({
             className={`p-4 border-t flex flex-col sm:flex-row justify-end gap-2.5 shrink-0 ${isNight ? 'border-zinc-900 bg-zinc-950/60' : 'border-zinc-100 bg-zinc-50/60'}`}
           >
             <button
-              onClick={onClose}
+              onClick={close}
               disabled={isProcessing}
               className={`w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-bold transition-all ${
                 isNight

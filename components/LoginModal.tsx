@@ -6,6 +6,7 @@ import { LegalType } from '../types';
 import { LegalModal } from './LegalModal';
 import { Capacitor } from '@capacitor/core';
 import { useDialogA11y } from '../hooks/useDialogA11y';
+import { useModalExit } from '../hooks/useModalExit';
 
 interface Props {
   isNight?: boolean;
@@ -44,7 +45,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showLegal, setShowLegal] = useState<LegalType | null>(null);
 
-  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: showLoginModal, onClose: closeLoginModal });
+  const { isClosing, close } = useModalExit(closeLoginModal);
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: showLoginModal, onClose: close });
 
   if (!showLoginModal) return null;
 
@@ -211,9 +213,9 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
       <div className="fixed inset-0 z-[10010] flex items-start justify-center p-4 pt-20 md:pt-28 overflow-y-auto">
         <div
-          className="absolute inset-0 bg-black/60 backdrop-blur-md"
+          className={`absolute inset-0 bg-black/60 backdrop-blur-md ${isClosing ? 'modal-backdrop-exit' : ''}`}
           onClick={() => {
-            if (!email && !password && !name) closeLoginModal();
+            if (!email && !password && !name) close();
           }}
         ></div>
 
@@ -223,7 +225,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
           aria-modal="true"
           aria-labelledby="login-modal-title"
           tabIndex={-1}
-          className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl modal-enter w-full max-w-sm flex flex-col mx-2 sm:mx-4`}
+          className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl ${isClosing ? 'modal-exit' : 'modal-enter'} w-full max-w-sm flex flex-col mx-2 sm:mx-4`}
         >
           <div
             className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-zinc-950/90' : 'bg-white/90'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
@@ -241,7 +243,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 </span>
               </div>
               <button
-                onClick={closeLoginModal}
+                onClick={close}
                 aria-label="Close sign-in dialog"
                 className={`text-zinc-500 hover:text-brand-orange transition-colors ${isNight ? 'bg-black/30 border-white/5' : 'bg-zinc-100 border-zinc-200'} w-8 h-8 rounded-full flex items-center justify-center border text-[10px] shadow-sm`}
               >
@@ -552,7 +554,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 <div className={`w-full h-px ${isNight ? 'bg-white/5' : 'bg-zinc-100'} my-1`}></div>
 
                 <button
-                  onClick={closeLoginModal}
+                  onClick={close}
                   className="text-zinc-500 text-[10px] hover:text-brand-orange font-black uppercase tracking-widest transition-all duration-250 underline underline-offset-2"
                 >
                   {t('login_guest_link')}
