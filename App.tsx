@@ -220,6 +220,24 @@ function AppContent() {
   const [showHelp, setShowHelp] = useState(false);
   const platform = Capacitor.getPlatform();
 
+  // Stashes a `?classCode=` param (the parent/student join-code deep link)
+  // for the auth-gated redemption effect further down to pick up. Shared by
+  // the mount effect (cold start / normal page load) and the appUrlOpen
+  // listener (warm-start deep link) below — previously only the mount
+  // effect ever called this, so a classCode link tapped while the app was
+  // already running never got redeemed (audit: warm-start classCode links
+  // don't stash/redeem).
+  const stashPendingClassCodeFromSearch = (search: string) => {
+    const classCodeParam = new URLSearchParams(search).get('classCode');
+    if (!classCodeParam) return;
+    try {
+      sessionStorage.setItem('chekki_pending_class_code', classCodeParam.toUpperCase().trim());
+      setClassCodeStashVersion((v) => v + 1);
+    } catch (e) {
+      console.warn('Failed to stash pending class code:', e);
+    }
+  };
+
   // Trigger onboarding for authenticated users without a complete profile
   useEffect(() => {
     if (
@@ -275,6 +293,7 @@ function AppContent() {
           const url = new URL(event.url);
           window.history.pushState({}, '', url.pathname + url.search);
           handleLocationChange();
+          stashPendingClassCodeFromSearch(url.search);
         } catch (e) {
           console.warn('Failed to handle appUrlOpen deep link:', e);
         }
@@ -299,6 +318,11 @@ function AppContent() {
     isSaving?: boolean;
   } | null>(null);
   const [successDialog, setSuccessDialog] = useState<string | null>(null);
+  // Bumped whenever a classCode is (re-)stashed after mount — e.g. a
+  // warm-start deep link — so the redemption effect below (gated on
+  // isAuthLoading/isAuthenticated) re-checks sessionStorage even when auth
+  // state itself didn't change.
+  const [classCodeStashVersion, setClassCodeStashVersion] = useState(0);
 
   useEffect(() => {
     // Handle standalone legal pages and splash suppression for known routes
@@ -342,14 +366,9 @@ function AppContent() {
     // (this effect's deps don't include isAuthLoading/isAuthenticated, so it
     // would never re-run once auth resolved — openLoginModal() here was
     // effectively dead code).
-    const classCodeParam = params.get('classCode');
-    if (classCodeParam) {
+    if (params.get('classCode')) {
+      stashPendingClassCodeFromSearch(window.location.search);
       window.history.replaceState({}, '', window.location.pathname);
-      try {
-        sessionStorage.setItem('chekki_pending_class_code', classCodeParam.toUpperCase().trim());
-      } catch (e) {
-        console.warn('Failed to stash pending class code:', e);
-      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language, openLoginModal]);
@@ -410,8 +429,10 @@ function AppContent() {
         });
       }
     })();
+  // classCodeStashVersion: re-check sessionStorage when a warm-start deep
+  // link stashes a new code, even if auth state itself hasn't changed.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthLoading, isAuthenticated, language, redeemClassCodeDetailed, showToast, user, openLoginModal]);
+  }, [isAuthLoading, isAuthenticated, language, redeemClassCodeDetailed, showToast, user, openLoginModal, classCodeStashVersion]);
 
   useEffect(() => {
     // Initialize RevenueCat
