@@ -781,7 +781,21 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   }, [isAuthenticated, user?.uid]);
 
-  const fetchClasses = async (retryCount = 0) => {
+  // fetchClasses runs from a `[isAuthenticated, user, loginRole]` effect
+  // that re-fires on every `user` reference change — during the onboarding
+  // wizard (UnifiedAccountActivation), `user` changes several times in
+  // quick succession (academy name persist, logo, role settle), each
+  // kicking off its own fetchClasses call. The wizard's own onComplete
+  // handler optimistically setClasses()'s the classes it just created via
+  // the real API — but an earlier, slower fetchClasses call (e.g. one still
+  // working through its permission-denied retry backoff) could resolve
+  // *after* that optimistic update and unconditionally overwrite it,
+  // including with an empty list (audit: classes created in onboarding
+  // wizard don't show up — a stale fetchClasses response, not a data-write
+  // bug, silently reverted the just-created classes back to nothing).
+  const fetchClassesRequestIdRef = useRef(0);
+
+  const fetchClasses = async (retryCount = 0, requestId = ++fetchClassesRequestIdRef.current) => {
     const uid = user?.uid || 'guest';
     const maxRetries = 3;
     setIsLoadingClasses(true);
@@ -831,9 +845,13 @@ export default function TeacherPage({ isNight = true }: Props) {
       // class never reflects for the teacher, no self-heal). Retry with
       // backoff instead of once.
       if (err?.code === 'permission-denied' && retryCount < maxRetries) {
-        setTimeout(() => fetchClasses(retryCount + 1), 1000 * 2 ** retryCount);
+        setTimeout(() => fetchClasses(retryCount + 1, requestId), 1000 * 2 ** retryCount);
         return;
       }
+      // A newer fetchClasses call (or the onboarding wizard's own optimistic
+      // update) has already started/committed since this one began — don't
+      // let a stale, slower attempt's failure stomp over it.
+      if (requestId !== fetchClassesRequestIdRef.current) return;
       console.warn('Firestore fetch warning (falling back to local storage):', err?.code, err);
       // This catch previously only console.warn'd — a caught error never
       // reaches Sentry automatically, so a real class-fetch failure here
@@ -851,6 +869,14 @@ export default function TeacherPage({ isNight = true }: Props) {
           ? '⚠️ 클라우드에서 학급 목록을 불러오지 못해 이 기기에 저장된 정보를 표시하고 있습니다. 최신 정보가 아닐 수 있습니다.'
           : "⚠️ Couldn't load classes from the cloud — showing what's saved on this device, which may be out of date."
       );
+    }
+
+    // Same staleness guard as the hardFailure branch above, for the success
+    // path — a slower-but-successful fetch could otherwise still overwrite
+    // a newer call's (or the onboarding wizard's) more current result.
+    if (requestId !== fetchClassesRequestIdRef.current) {
+      setIsLoadingClasses(false);
+      return;
     }
 
     const localKey = `teacher_classes_${uid}`;
@@ -1899,6 +1925,23 @@ export default function TeacherPage({ isNight = true }: Props) {
             if (createdClasses.length > 0) {
               setClasses((prev: any[]) => [...createdClasses, ...prev]);
               setSelectedClass(createdClasses[0]);
+              // Also seed the localStorage cache fetchClasses merges from —
+              // belt-and-suspenders alongside the requestId staleness guard
+              // there, so even a legitimately *newer* fetchClasses call that
+              // hits a transient failure still finds these classes instead
+              // of showing an empty dashboard right after they were created.
+              try {
+                if (uid) {
+                  const localKey = `teacher_classes_${uid}`;
+                  const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+                  const map = new Map(existing.map((c: any) => [c.id, c]));
+                  createdClasses.forEach((c) => map.set(c.id, c));
+                  localStorage.setItem(localKey, JSON.stringify(Array.from(map.values())));
+                }
+              } catch {
+                // localStorage can throw in private/incognito modes — not
+                // worth failing the whole onboarding flow over a cache write.
+              }
             }
             if (failedNames.length > 0) {
               showToast({
