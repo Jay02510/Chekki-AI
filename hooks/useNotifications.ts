@@ -24,22 +24,48 @@ export function useNotifications(uid: string | null | undefined) {
       setNotifications([]);
       return;
     }
-    const q = query(
-      collection(dbInstance, 'users', uid, 'notifications'),
-      orderBy('createdAt', 'desc'),
-      fbLimit(20)
-    );
-    const unsubscribe = onSnapshot(
-      q,
-      (snap) => {
-        setNotifications(snap.docs.map((d) => ({ id: d.id, ...d.data() } as AppNotification)));
-      },
-      (err) => {
-        console.warn('[useNotifications] listener failed', err);
-        Sentry.captureException(err, { tags: { area: 'useNotifications' }, extra: { uid } });
-      }
-    );
-    return () => unsubscribe();
+    let cancelled = false;
+    let retried = false;
+    let unsubscribe: (() => void) | undefined;
+
+    const attach = () => {
+      const q = query(
+        collection(dbInstance, 'users', uid, 'notifications'),
+        orderBy('createdAt', 'desc'),
+        fbLimit(20)
+      );
+      unsubscribe = onSnapshot(
+        q,
+        (snap) => {
+          if (cancelled) return;
+          setNotifications(snap.docs.map((d) => ({ id: d.id, ...d.data() } as AppNotification)));
+        },
+        (err) => {
+          // Same transient-permission-denied-right-after-signup race
+          // StudentInvitePanel and TeacherPage.fetchClasses already retry
+          // once for (firestore.rules re-reads the caller's own user doc on
+          // every attach; that read can momentarily deny before a brand-new
+          // session settles) — this listener had no retry, so every fresh
+          // login reported a spurious permission error to Sentry.
+          if (err?.code === 'permission-denied' && !retried) {
+            retried = true;
+            unsubscribe?.();
+            setTimeout(() => {
+              if (!cancelled) attach();
+            }, 1500);
+            return;
+          }
+          console.warn('[useNotifications] listener failed', err);
+          Sentry.captureException(err, { tags: { area: 'useNotifications' }, extra: { uid } });
+        }
+      );
+    };
+    attach();
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   }, [uid]);
 
   const unreadCount = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
