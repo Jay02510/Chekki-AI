@@ -989,6 +989,8 @@ https://urlgeni.us/chekki
       }
       const targetUid = userQuery.docs[0].id;
       const targetSchoolId = userQuery.docs[0].data().schoolId || null;
+      const sampleClassSnap = await adminDb.collection('classes').where('teacherUid', '==', targetUid).limit(1).get();
+      const sampleClassId = sampleClassSnap.empty ? null : sampleClassSnap.docs[0].id;
 
       const customToken = await authDb.createCustomToken(targetUid);
 
@@ -1036,11 +1038,25 @@ https://urlgeni.us/chekki
         } catch (e: any) {
           results['own_users_doc_read'] = { ok: false, code: e?.code || null, message: e?.message || String(e) };
         }
+
+        // Distinguishes a plain single-doc get() (rule runs once, directly)
+        // from a list/query (Firestore must prove the rule holds for every
+        // possible result up front) — a get() succeeding where the
+        // equivalent list fails would confirm this is specifically a
+        // list-query limitation on get()-based rules, not a broken rule.
+        if (sampleClassId) {
+          try {
+            const d = await getDoc(doc(db, 'classes', sampleClassId));
+            results['single_class_doc_get'] = { ok: true, exists: d.exists(), classId: sampleClassId };
+          } catch (e: any) {
+            results['single_class_doc_get'] = { ok: false, code: e?.code || null, message: e?.message || String(e), classId: sampleClassId };
+          }
+        }
       } finally {
         await deleteApp(clientApp).catch(() => {});
       }
 
-      return res.status(200).json({ success: true, targetUid, targetSchoolId, results });
+      return res.status(200).json({ success: true, targetUid, targetSchoolId, sampleClassId, results });
     } else {
       return res.status(400).json({ error: 'Invalid action' });
     }
