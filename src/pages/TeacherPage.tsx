@@ -808,6 +808,27 @@ export default function TeacherPage({ isNight = true }: Props) {
       // created before assignedTeacherUids existed only match the first
       // query — merging keeps them showing up exactly as before.
       //
+      // A director additionally gets a third, schoolId-scoped query.
+      // Without it, a director only ever saw classes tied to their OWN uid
+      // (created by them, or where they're personally listed in
+      // assignedTeacherUids) — but a director administers the whole
+      // school, and firestore.rules already grants them read access to
+      // every class in it via isSchoolDirectorOfClass(). A class created
+      // under a different account (an earlier test/dogfood session, a
+      // prior onboarding attempt, a teacher who's since been removed)
+      // still counts against the school's seat limit
+      // (api/create-class.ts's schoolId-scoped count) but was completely
+      // invisible — and undeletable — from the director's own dashboard
+      // (audit: "2 classes added" per the seat-limit error, 0 shown,
+      // nothing to delete).
+      const queries = [
+        getDocs(query(collection(dbInstance, 'classes'), where('teacherUid', '==', user.uid))),
+        getDocs(query(collection(dbInstance, 'classes'), where('assignedTeacherUids', 'array-contains', user.uid))),
+      ];
+      if (isDirectorUser && user.schoolId) {
+        queries.push(getDocs(query(collection(dbInstance, 'classes'), where('schoolId', '==', user.schoolId))));
+      }
+
       // Run with allSettled, not Promise.all — Promise.all's fail-fast
       // behavior meant a permission error on EITHER query discarded a
       // successful result from the OTHER one too, so a teacher who owns
@@ -815,9 +836,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       // the separate assignedTeacherUids query happened to fail (audit:
       // co-taught classes intermittently wiped out a teacher's own classes
       // from the list, not just failing to add the co-taught ones).
-      const ownedQuery = query(collection(dbInstance, 'classes'), where('teacherUid', '==', user.uid));
-      const assignedQuery = query(collection(dbInstance, 'classes'), where('assignedTeacherUids', 'array-contains', user.uid));
-      const [ownedResult, assignedResult] = await Promise.allSettled([getDocs(ownedQuery), getDocs(assignedQuery)]);
+      const results = await Promise.allSettled(queries);
 
       const seen = new Set<string>();
       const mergeSnap = (snap: any) => {
@@ -827,10 +846,10 @@ export default function TeacherPage({ isNight = true }: Props) {
           fetchedFromFirestore.push({ id: doc.id, ...doc.data() });
         });
       };
-      if (ownedResult.status === 'fulfilled') mergeSnap(ownedResult.value);
-      else hardFailure = ownedResult.reason;
-      if (assignedResult.status === 'fulfilled') mergeSnap(assignedResult.value);
-      else hardFailure = hardFailure || assignedResult.reason;
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') mergeSnap(result.value);
+        else hardFailure = hardFailure || result.reason;
+      });
     }
 
     if (hardFailure) {
