@@ -2650,6 +2650,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                 handleMoveStudent={handleMoveStudent}
                 fetchRosterAndMistakes={fetchRosterAndMistakes}
                 setSelectedStudentDetails={setSelectedStudentDetails}
+                onNewClassClick={() => setShowCreateClassModal(true)}
+                onDeleteClass={(classId: string) => handleDeleteClass(classId)}
               />
             ) : educatorRole === 'kt' ? (
               <KtTabContent

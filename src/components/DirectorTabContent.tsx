@@ -38,6 +38,8 @@ interface Props {
   handleMoveStudent: (uid: string, targetClassId: string) => void;
   fetchRosterAndMistakes: () => void;
   setSelectedStudentDetails: (student: any) => void;
+  onNewClassClick: () => void;
+  onDeleteClass: (classId: string) => void;
 }
 
 // Director's tab content (Phase 6 of the buzzing-nibbling-hearth TeacherPage
@@ -120,6 +122,61 @@ export function DirectorTabContent(props: Props) {
             handleRemoveStudent={props.handleRemoveStudent}
             setSelectedStudentDetails={props.setSelectedStudentDetails}
           />
+        </div>
+      )}
+
+      {activeTab === 'classes' && (
+        <div className={`p-1 rounded-[2.5rem] ${isNight ? 'bg-white/5 border border-white/10' : 'bg-white border border-zinc-200 shadow-md'}`}>
+          <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 ${isNight ? 'bg-brand-dark' : 'bg-white'}`}>
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <div>
+                <h4 className={`text-lg font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                  {isKo ? '전체 학급' : 'All Classes'}
+                </h4>
+                <p className="text-xs text-zinc-400">
+                  {isKo ? '이 학원의 모든 학급입니다.' : 'Every class in this school.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={props.onNewClassClick}
+                className="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold cursor-pointer transition-colors"
+              >
+                {isKo ? '+ 새 학급' : '+ New Class'}
+              </button>
+            </div>
+
+            {props.classes.filter((c: any) => !c.isDemo).length === 0 ? (
+              <p className="text-xs text-zinc-500 text-center py-6">
+                {isKo ? '아직 학급이 없습니다.' : 'No classes yet.'}
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {props.classes
+                  .filter((c: any) => !c.isDemo)
+                  .map((c: any) => (
+                    <div
+                      key={c.id}
+                      className={`flex items-center justify-between p-4 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}
+                    >
+                      <div>
+                        <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{c.name}</p>
+                        <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                          {c.level || 'General'} · {(c.assignedTeacherUids || []).length} {isKo ? '명 배정' : 'teacher(s) assigned'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => props.onDeleteClass(c.id)}
+                        className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 cursor-pointer transition-colors"
+                      >
+                        {isKo ? '삭제' : 'Delete'}
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

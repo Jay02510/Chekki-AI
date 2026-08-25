@@ -891,6 +891,62 @@ https://urlgeni.us/chekki
       }
 
       return res.status(200).json({ success: true, dryRun: false, fixedClasses, findingsCount: findings.length, findings });
+    } else if (action === 'debug_director_classes') {
+      // Read-only diagnostic — dumps the RAW server-side truth for one
+      // account instead of reasoning about the client's possibly-stale
+      // AuthContext cache. TeacherPage.tsx's fetchClasses trusts
+      // client-side `user.schoolId` (stale-while-revalidate from
+      // localStorage, see contexts/AuthContext.tsx's cached-profile
+      // comment) to build its schoolId-scoped query; if that value is out
+      // of sync with what's actually in Firestore, the query silently
+      // filters on the wrong id. This surfaces the mismatch directly
+      // (audit: "couldn't load classes" persisted after two rounds of
+      // logically-sound fixes — needed real data, not more reasoning).
+      const { email } = req.body || {};
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({ error: 'email is required' });
+      }
+      const cleanEmail = email.toLowerCase().trim();
+      const userQuery = await adminDb.collection('users').where('email', '==', cleanEmail).limit(1).get();
+      if (userQuery.empty) {
+        return res.status(404).json({ error: 'No user found with that email' });
+      }
+      const userDoc = userQuery.docs[0];
+      const userData = userDoc.data();
+      const uid = userDoc.id;
+      const realSchoolId = userData.schoolId || null;
+
+      const [byTeacherUid, byAssigned, bySchoolId] = await Promise.all([
+        adminDb.collection('classes').where('teacherUid', '==', uid).get(),
+        adminDb.collection('classes').where('assignedTeacherUids', 'array-contains', uid).get(),
+        realSchoolId
+          ? adminDb.collection('classes').where('schoolId', '==', realSchoolId).get()
+          : Promise.resolve({ docs: [] } as any),
+      ]);
+
+      const summarize = (snap: any) =>
+        snap.docs.map((d: any) => ({
+          id: d.id,
+          name: d.data().name,
+          schoolId: d.data().schoolId,
+          teacherUid: d.data().teacherUid,
+          assignedTeacherUids: d.data().assignedTeacherUids || [],
+          createdAt: d.data().createdAt || null,
+        }));
+
+      return res.status(200).json({
+        success: true,
+        user: {
+          uid,
+          email: userData.email,
+          role: userData.role || null,
+          schoolId: realSchoolId,
+          educatorRole: userData.educatorRole || null,
+        },
+        classesByTeacherUid: summarize(byTeacherUid),
+        classesByAssignedTeacherUids: summarize(byAssigned),
+        classesBySchoolId: summarize(bySchoolId),
+      });
     } else {
       return res.status(400).json({ error: 'Invalid action' });
     }
