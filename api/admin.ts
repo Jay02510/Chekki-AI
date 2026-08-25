@@ -52,7 +52,18 @@ export function isValidExistingDocId(raw: string): boolean {
 // This endpoint gates account impersonation, deletion, and upgrades behind a
 // single shared passcode — rate limit failed attempts hard so it can't be
 // brute-forced (audit §15a).
-const checkAdminLimit = createRateLimiter('admin', 5, 60);
+// Generous volumetric guard applied to every admin request regardless of
+// outcome — protects against a runaway client loop, not brute force.
+const checkAdminLimit = createRateLimiter('admin', 60, 60);
+// Strict guard counted only on a wrong passcode (see below) — this is the
+// actual brute-force protection. Splitting these apart fixes a real bug: the
+// single 5-per-60s limiter previously counted EVERY admin action (list,
+// list_schools, list_invoices, list_invites all fire on page load alone),
+// so a legitimate, already-authenticated director loading the dashboard or
+// clicking between tabs routinely got locked out with "Too many attempts,"
+// which read as if their user list had been wiped (audit: rate limit
+// indistinguishable from data loss in the UI, and too strict for normal use).
+const checkAdminAuthFailureLimit = createRateLimiter('admin_auth_fail', 5, 60);
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res);
@@ -80,6 +91,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (typeof passcode !== 'string' || !safeEquals(passcode, ADMIN_PASSCODE)) {
+    const ipString = clientIp(req);
+    const { success } = await checkAdminAuthFailureLimit(ipString);
+    if (!success) {
+      console.warn(`[admin.ts] Repeated invalid passcode attempts from IP: ${ipString}`);
+      return res.status(429).json({ error: 'Too many attempts. Try again later.' });
+    }
     return res.status(401).json({ error: 'Unauthorized: Invalid Passcode' });
   }
 

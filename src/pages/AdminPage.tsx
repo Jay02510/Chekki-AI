@@ -56,6 +56,13 @@ export default function AdminPage() {
     onConfirm: () => void;
   } | null>(null);
   const [users, setUsers] = useState<any[]>([]);
+  // Distinguishes "fetched, genuinely zero members" from "fetch failed
+  // (e.g. rate-limited), users is still just its unset initial []" — without
+  // this the table's empty state ("No members found") and the "Total
+  // Users: 0" stat render identically for both, which reads as data loss
+  // even though nothing was touched (audit: rate-limit error indistinguishable
+  // from an empty/purged member list).
+  const [usersLoadFailed, setUsersLoadFailed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUids, setSelectedUids] = useState<Set<string>>(new Set());
   const [isPurgingDemoData, setIsPurgingDemoData] = useState(false);
@@ -247,9 +254,11 @@ export default function AdminPage() {
         throw new Error(data.error || 'Failed to fetch users');
       }
       setUsers(data.users || []);
+      setUsersLoadFailed(false);
     } catch (err: any) {
       console.error(err);
       setMessage({ text: err.message || 'Error fetching users', type: 'error' });
+      setUsersLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -1027,7 +1036,7 @@ export default function AdminPage() {
             {mode === 'view_members' ? (
               <div className="w-full flex flex-col gap-4 mt-4">
                 <div className="max-w-xs">
-                  <StatTile label="Total Users" value={users.length} />
+                  <StatTile label="Total Users" value={usersLoadFailed ? '—' : users.length} />
                 </div>
                 <input
                   type="text"
@@ -1098,6 +1107,12 @@ export default function AdminPage() {
                       <tbody className="divide-y divide-zinc-800/50">
                         {loading ? (
                           <SkeletonRows columns={8} />
+                        ) : usersLoadFailed ? (
+                          <tr>
+                            <td colSpan={8} className="py-8 text-center text-red-400">
+                              ⚠️ Couldn't load members — see the error above. Not a sign the list is actually empty.
+                            </td>
+                          </tr>
                         ) : filteredUsers.length === 0 ? (
                           <tr>
                             <td colSpan={8} className="py-8 text-center text-zinc-500">
