@@ -34,6 +34,7 @@ import { ToastProvider, useToast } from './contexts/ToastContext';
 import { ChekkiMascot } from './components/Icons';
 import { db } from './services/database';
 import { Capacitor } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
 import { revenueCatService } from './services/revenueCatService';
 import { useWorksheetAnalysis } from './src/hooks/useWorksheetAnalysis';
 import { APP_VERSION } from './src/version';
@@ -243,7 +244,8 @@ function AppContent() {
 
   // Listen for history popstate navigation changes (Dynamic Web Routing)
   // Note: initial state is set synchronously above — this only handles
-  // back/forward navigation after the first paint.
+  // back/forward navigation after the first paint. Also reused by the
+  // appUrlOpen listener below (Universal/App Links warm-start handling).
   useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
@@ -257,7 +259,35 @@ function AppContent() {
     };
 
     window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
+
+    // Universal Links (iOS) / App Links (Android): a link tapped while the
+    // app is already running (warm start) hands the OS-level URL to this
+    // listener instead of reloading the WebView — a cold start (app not
+    // running) already worked without this, since that's just the WebView's
+    // normal initial page load of the invite URL. Without a listener here,
+    // tapping an invite link with the app already open just foregrounded it
+    // on whatever screen it was already showing (audit: warm-start deep
+    // links didn't navigate). Only fires natively; no-op on web.
+    let removeAppUrlListener: (() => void) | undefined;
+    if (Capacitor.isNativePlatform()) {
+      const listenerPromise = CapacitorApp.addListener('appUrlOpen', (event) => {
+        try {
+          const url = new URL(event.url);
+          window.history.pushState({}, '', url.pathname + url.search);
+          handleLocationChange();
+        } catch (e) {
+          console.warn('Failed to handle appUrlOpen deep link:', e);
+        }
+      });
+      removeAppUrlListener = () => {
+        void listenerPromise.then((listener) => listener.remove());
+      };
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      removeAppUrlListener?.();
+    };
   }, []);
 
   // Global Confirmation State
