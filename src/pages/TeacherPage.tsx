@@ -48,7 +48,8 @@ import {
   Sun,
   Moon,
   Trash,
-  Buildings
+  Buildings,
+  CaretDown
 } from '@phosphor-icons/react';
 import { FeedbackModal } from '../../components/FeedbackModal';
 import { ScannedModal } from '../components/ScannedModal';
@@ -2359,22 +2360,35 @@ export default function TeacherPage({ isNight = true }: Props) {
 
             <div className="relative">
               {classes.length > 0 ? (
-                <select
-                  value={selectedClass?.id || ''}
-                  onChange={(e) => {
-                    const found = classes.find(c => c.id === e.target.value);
-                    if (found) setSelectedClass(found);
-                  }}
-                  className={`font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
-                    isThemeNight ? 'bg-brand-dark border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
-                  }`}
-                >
-                  {classes.map((cls) => (
-                    <option key={cls.id} value={cls.id}>
-                      {cls.name} ({cls.level})
-                    </option>
-                  ))}
-                </select>
+                <>
+                  {/* appearance-none strips the native dropdown arrow with
+                      nothing added in its place — a director/teacher
+                      assigned multiple classes had no visual sign this was
+                      a selector at all, not just a label showing the
+                      current class (audit: "no option to switch classes",
+                      when the switcher already existed and worked). */}
+                  <select
+                    value={selectedClass?.id || ''}
+                    onChange={(e) => {
+                      const found = classes.find(c => c.id === e.target.value);
+                      if (found) setSelectedClass(found);
+                    }}
+                    className={`font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
+                      isThemeNight ? 'bg-brand-dark border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
+                    }`}
+                  >
+                    {classes.map((cls) => (
+                      <option key={cls.id} value={cls.id}>
+                        {cls.name} ({cls.level})
+                      </option>
+                    ))}
+                  </select>
+                  <CaretDown
+                    size={14}
+                    weight="bold"
+                    className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-500'}`}
+                  />
+                </>
               ) : (
                 <div className="text-zinc-400 text-sm font-semibold p-2">
                   {isKo ? '학급을 먼저 등록해 주세요.' : 'Create a class to get started.'}

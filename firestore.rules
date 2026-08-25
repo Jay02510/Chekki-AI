@@ -71,13 +71,28 @@ service cloud.firestore {
     // app (Audit: unscoped users read, contradicted the published security
     // factsheet's per-school isolation claims).
     match /users/{userId} {
+      // Same cross-document get() list-query failure as classes/{classId}'s
+      // read rule (see that rule's comment) — the director branch used to
+      // do get(users/$(request.auth.uid)) to check role/schoolId, which
+      // denies the ENTIRE list query when a director's roster view runs
+      // where('classId', '==', ...) or where('schoolId', '==', ...) against
+      // this collection (TeacherPage.tsx's fetchRosterAndMistakes), even
+      // though the student write that should populate that roster
+      // succeeded. schoolId is already stamped directly on the student's
+      // own doc at signup (api/redeem.ts), so the director check needs zero
+      // get() calls once it reads from the caller's own token claims
+      // instead. The teacher branch (isClassTeacher(resource.data.classId))
+      // still does a cross-doc get() on the class doc — untouched here
+      // since it's unconfirmed whether it hits the same limitation, but
+      // worth revisiting if a teacher ever reports an empty roster the same
+      // way a director just did.
       allow read: if request.auth != null && (
         request.auth.uid == userId ||
         isAdmin() ||
         (
           resource.data.schoolId != null &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId
+          request.auth.token.role == 'director' &&
+          request.auth.token.schoolId == resource.data.schoolId
         ) ||
         (
           resource.data.classId != null &&
