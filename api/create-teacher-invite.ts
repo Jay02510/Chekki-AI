@@ -421,7 +421,7 @@ async function handleSendPendingDigests(_req: VercelRequest, res: VercelResponse
                 <p style="font-size: 15px; color: #e4e4e7;">오늘 원어민 선생님들이 제출한 수업 일지 ${totalCount}건이 검토를 기다리고 있습니다.</p>
                 <ul style="font-size: 14px; color: #a1a1aa; line-height: 1.6; padding-left: 20px;">${listHtml}</ul>
                 <div style="text-align: center; margin: 24px 0;">
-                  <a href="https://chekkiai.com/teacher" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 검토하기</a>
+                  <a href="https://www.chekkiai.com/teacher" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 검토하기</a>
                 </div>
                 <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
                   문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.
