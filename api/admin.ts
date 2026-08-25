@@ -983,15 +983,26 @@ https://urlgeni.us/chekki
       let updated = 0;
       let failed = 0;
       const failedUids: string[] = [];
-      for (const userDoc of usersSnap.docs) {
-        const data = userDoc.data();
-        try {
-          await authDb.setCustomUserClaims(userDoc.id, { role: data.role || null, schoolId: data.schoolId || null });
-          updated++;
-        } catch (e) {
-          failed++;
-          failedUids.push(userDoc.id);
-        }
+      // 174 accounts one-at-a-time blew past Vercel's function timeout (the
+      // Auth Admin API call is a network round trip each, ~100-300ms — fine
+      // sequentially for a handful of accounts, not for the whole user
+      // base). Batches of 20 in parallel finish well inside the limit.
+      const BATCH_SIZE = 20;
+      for (let i = 0; i < usersSnap.docs.length; i += BATCH_SIZE) {
+        const batch = usersSnap.docs.slice(i, i + BATCH_SIZE);
+        const results = await Promise.allSettled(
+          batch.map((userDoc) => {
+            const data = userDoc.data();
+            return authDb.setCustomUserClaims(userDoc.id, { role: data.role || null, schoolId: data.schoolId || null });
+          })
+        );
+        results.forEach((r, idx) => {
+          if (r.status === 'fulfilled') updated++;
+          else {
+            failed++;
+            failedUids.push(batch[idx].id);
+          }
+        });
       }
       return res.status(200).json({ success: true, totalUsers: usersSnap.size, updated, failed, failedUids });
     } else if (action === 'simulate_client_read') {
