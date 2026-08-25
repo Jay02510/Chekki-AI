@@ -6,6 +6,19 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 021 — Auth custom claims replace get(users/uid) in firestore.rules for role/schoolId checks
+
+**Date:** 2026-08-25
+**Status:** Resolved
+
+**Context:** Directors and teachers could not see their own classes, students, or roster — a live, days-long "core loop is broken" incident, not a cosmetic bug. Two earlier attempted fixes (client-side staleness guards, a missing schoolId-scoped query) were shipped and didn't resolve it. A read-only diagnostic (`api/admin.ts`'s `debug_director_classes`, then `simulate_client_read`) proved the account's data, schoolId, and Firebase Auth UID were all correct — the client's exact `fetchClasses()` queries failed `permission-denied` under the real client SDK with rules enforced, while a plain single-doc `get()` on one known class doc succeeded under the identical rule. Root cause: Firestore denies a LIST query outright when its security rule depends on `get()`/`exists()` to a document unrelated to the query's own filter — `isClassTeacher()`/`isSchoolDirectorOfClass()` both did `get(users/$(request.auth.uid))`, reading the caller's own profile to check role/schoolId. A single-doc `get()` with the same rule doesn't hit this limitation, which is why it was invisible in ad-hoc testing and survived two prior "logically sound" fixes.
+
+**Decision:** Move `role`/`schoolId` onto Firebase Auth custom claims (`api/_lib/firebaseAdmin.ts`'s `syncAuthClaims`, called on every server-side role/schoolId write: `set-initial-role.ts`, `redeem.ts`'s four paths, `admin.ts`'s `assign_teacher`). `firestore.rules` reads `request.auth.token.role`/`.schoolId` directly instead of `get()`-ing the caller's own user doc — zero cross-document reads, so list queries evaluate cleanly. Fixed at the source inside `isClassTeacher()`/`isSchoolDirectorOfClass()` so the propagates to every one of their 11 call sites (`classes/{classId}/logs`, `classes/{classId}/studentScans`, `curriculums`, `users/{userId}` update, `users/{userId}/data`) in one edit, plus `classes`, `users`, `invites`, `pendingStudents`, and `activityLog`'s read rules directly, all audited for the same pattern by grepping every client-side `query()`/`getDocs()` call against the rules file. `AuthContext.tsx` forces an ID token refresh (`getIdToken(true)`) on every auth-state transition so an already-open session picks up new claims within one reload instead of waiting up to an hour. A one-time `backfill_auth_claims` admin action (batched, not sequential — the first version blew Vercel's function timeout across 174 accounts) set claims for every pre-existing account, since none had them before this change.
+
+**Consequences:** `get(classes/$(classId))` calls (keyed by a resource/path-derived field, not the caller's identity) were deliberately left as-is in both helper functions — Firestore's own docs describe that "join via a foreign key on the resource" shape as supported; only the caller-identity lookup is the confirmed-broken pattern. `userBelongsToClass()` still does the same caller-identity `get()` and gates parent/student-side class and scan reads — no client list-query caller was found using it, so it's untouched pending an actual repro rather than a preemptive guess. Any future write to `role`/`schoolId` outside the four call sites above needs its own `syncAuthClaims(uid)` call or the token will silently drift from Firestore. Separately (found during this incident, unrelated to the root cause): nothing in this repo — no CI step, no deploy script — ever runs `firebase deploy --only firestore:rules`; every rules change up to this point had to be deployed manually and several previously-committed fixes may never have gone live. Worth a follow-up CI step.
+
+---
+
 ## 020 — Pre-pilot security audit: fix login enumeration + runbook now, defer key rotation and admin MFA
 
 **Date:** 2026-08-21

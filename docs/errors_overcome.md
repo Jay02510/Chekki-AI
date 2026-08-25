@@ -40,3 +40,16 @@ Use this if you want to showcase backend infrastructure, environment variable fo
   Debugging the cloud logs revealed two distinct failures: Vercel environment variable parsing stripped double quotes and escaped newlines (`\n`) from the Firebase Service Account key, corrupting credential initialization. Simultaneously, transient API rate limits on Gemini models triggered a fallback to a deprecated model ID (`gemini-1.5-pro`), causing cascade errors.
 - **Column 3: PRODUCTION RESOLUTION**
   Rewrote key loading to sanitize PEM keys, replacing stringified `\n` characters with raw byte newlines dynamically. Updated the LLM fallback router to use the stable GA model (`gemini-2.0-flash-001`) and implemented a timeout race to prevent serverless execution hangs.
+
+---
+
+## Option 4: Firestore Security Rules Silently Denying List Queries (Cross-Document Reads)
+
+Use this if you want to showcase root-cause diagnosis under pressure, Firestore internals, and building your own verification tooling instead of guessing.
+
+- **Column 1: SILENT INCIDENT**
+  Directors and teachers could not see their own classes, students, or roster — a core-loop-breaking production incident. Two prior fixes (a client-side staleness guard, a missing scoped query) were shipped based on sound reasoning about the client code, and neither resolved it. The Firestore security rules looked correct on inspection; nothing in the rule text explained the failure.
+- **Column 2: DEEP DIAGNOSTIC PATH**
+  Rather than re-reading rule text a third time, built a disposable server-side diagnostic: minted a real Firebase Auth custom token for the affected account and replayed the exact client-SDK queries with security rules actually enforced. The result isolated the failure precisely — a single-document `get()` on a known record succeeded under a rule, while a `list` query using the identical rule failed `permission-denied`. Root cause: Firestore denies an entire list query outright when its security rule depends on a `get()`/`exists()` call to a document unrelated to the query's own filter (here, a rule that read the *caller's own* profile document to check their role) — even though the same rule evaluates fine for a single-document read. This is an easy-to-miss Firestore limitation because it only manifests under `list`, not `get`.
+- **Column 3: PRODUCTION RESOLUTION**
+  Moved the role/schoolId checks from a Firestore `get()` lookup onto Firebase Auth custom claims, read directly off the caller's ID token — eliminating the cross-document read entirely. Fixed the two shared helper functions at their source so the fix propagated to eleven other rule blocks in one change, then audited every remaining client-side list query against the rules file by hand to catch the same pattern elsewhere (found and fixed three more affected collections). Added a forced ID-token refresh on session load so already-signed-in users pick up new claims without re-logging in, and a batched (not sequential, to avoid a serverless timeout) backfill for every pre-existing account.

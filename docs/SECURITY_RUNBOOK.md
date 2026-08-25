@@ -19,6 +19,8 @@ If an API key, admin passcode, or other credential leaks (committed to git, past
 
 **Known open issue (2026-08-21):** `git log -p --all` contains at least 4 real API keys committed in the past (Gemini key `AIzaSyC6aAD6Mng6uC7dzi5t3GiqN6CpDsjycqg` confirmed, three more flagged by audit). Rotation is intentionally deferred — see `docs/DECISIONS.md` #020 for why and what to watch before doing it.
 
+**Known open issue (2026-08-25):** The Firebase Admin service-account private key (`FIREBASE_SERVICE_ACCOUNT`) was printed in full to a local terminal session while diagnosing a production Firestore rules bug (`source .env` re-exported it as a shell variable, and the debug command echoed it). Not committed to git or posted anywhere external, but it did land in local shell/terminal scrollback — rotate per step 2 above (Firebase Console → Project Settings → Service Accounts → generate new private key) if that has not already been done, and confirm the old one is disabled, not just unused.
+
 ## 2. Admin passcode (`api/admin.ts` / `ADMIN_PASSCODE`)
 
 1. Rotate the value in Vercel env vars, redeploy.
