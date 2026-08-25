@@ -968,6 +968,79 @@ https://urlgeni.us/chekki
         classesByAssignedTeacherUids: summarize(byAssigned),
         classesBySchoolId: summarize(bySchoolId),
       });
+    } else if (action === 'simulate_client_read') {
+      // debug_director_classes proved the data and the Auth UID are both
+      // correct — but it reads via the Admin SDK, which bypasses
+      // firestore.rules entirely, so it can't explain a client-side
+      // permission-denied. This mints a real custom token for the target
+      // uid and runs the SAME three queries TeacherPage.tsx's fetchClasses
+      // runs, through the actual client SDK (firestore.rules enforced,
+      // exactly like the browser), to see which specific query fails and
+      // why — real rule evaluation instead of reading rule text and
+      // guessing a third time.
+      const { email } = req.body || {};
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({ error: 'email is required' });
+      }
+      const cleanEmail = email.toLowerCase().trim();
+      const userQuery = await adminDb.collection('users').where('email', '==', cleanEmail).limit(1).get();
+      if (userQuery.empty) {
+        return res.status(404).json({ error: 'No user found with that email' });
+      }
+      const targetUid = userQuery.docs[0].id;
+      const targetSchoolId = userQuery.docs[0].data().schoolId || null;
+
+      const customToken = await authDb.createCustomToken(targetUid);
+
+      const { initializeApp: initClientApp, getApps: getClientApps, getApp: getClientApp, deleteApp } = await import('firebase/app');
+      const { getAuth: getClientAuth, signInWithCustomToken } = await import('firebase/auth');
+      const { getFirestore: getClientFirestore, collection, query: fbQuery, where, getDocs, doc, getDoc } = await import('firebase/firestore');
+
+      const firebaseConfig = {
+        apiKey: 'AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k',
+        authDomain: 'homework-assistant-c00b9.firebaseapp.com',
+        projectId: 'homework-assistant-c00b9',
+        storageBucket: 'homework-assistant-c00b9.firebasestorage.app',
+        messagingSenderId: '123535525914',
+        appId: '1:123535525914:web:decc3f5b3e3ffee4a0a9a3',
+      };
+      const appName = `simulate-${Date.now()}`;
+      const clientApp = getClientApps().some((a) => a.name === appName)
+        ? getClientApp(appName)
+        : initClientApp(firebaseConfig, appName);
+      const clientAuth = getClientAuth(clientApp);
+      const db = getClientFirestore(clientApp);
+
+      const results: Record<string, any> = {};
+      try {
+        await signInWithCustomToken(clientAuth, customToken);
+
+        const tryQuery = async (label: string, q: any) => {
+          try {
+            const snap = await getDocs(q);
+            results[label] = { ok: true, docCount: snap.docs.length };
+          } catch (e: any) {
+            results[label] = { ok: false, code: e?.code || null, message: e?.message || String(e) };
+          }
+        };
+
+        await tryQuery('teacherUid_eq_uid', fbQuery(collection(db, 'classes'), where('teacherUid', '==', targetUid)));
+        await tryQuery('assignedTeacherUids_array_contains_uid', fbQuery(collection(db, 'classes'), where('assignedTeacherUids', 'array-contains', targetUid)));
+        if (targetSchoolId) {
+          await tryQuery('schoolId_eq_schoolId', fbQuery(collection(db, 'classes'), where('schoolId', '==', targetSchoolId)));
+        }
+
+        try {
+          const d = await getDoc(doc(db, 'users', targetUid));
+          results['own_users_doc_read'] = { ok: true, exists: d.exists(), role: d.data()?.role, schoolId: d.data()?.schoolId };
+        } catch (e: any) {
+          results['own_users_doc_read'] = { ok: false, code: e?.code || null, message: e?.message || String(e) };
+        }
+      } finally {
+        await deleteApp(clientApp).catch(() => {});
+      }
+
+      return res.status(200).json({ success: true, targetUid, targetSchoolId, results });
     } else {
       return res.status(400).json({ error: 'Invalid action' });
     }

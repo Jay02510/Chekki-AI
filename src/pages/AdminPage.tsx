@@ -806,6 +806,27 @@ export default function AdminPage() {
     }
   };
 
+  const handleSimulateClientRead = async () => {
+    if (!debugEmail.trim()) return;
+    setIsDebuggingClasses(true);
+    setDebugResult(null);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'simulate_client_read', email: debugEmail.trim() }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Simulation failed');
+      setDebugResult(data);
+    } catch (err: any) {
+      setMessage({ text: err.message || 'Error simulating client read', type: 'error' });
+    } finally {
+      setIsDebuggingClasses(false);
+    }
+  };
+
   const handleSweepOrphanedAssignments = async () => {
     setIsSweepingOrphans(true);
     setMessage({ text: '', type: '' });
@@ -1174,6 +1195,15 @@ export default function AdminPage() {
                       className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-bold border border-blue-500/30 disabled:opacity-40 transition-colors"
                     >
                       {isDebuggingClasses ? 'Looking up…' : '🔍 Debug Classes'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSimulateClientRead}
+                      disabled={isDebuggingClasses || !debugEmail.trim()}
+                      className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 disabled:opacity-40 transition-colors"
+                      title="Signs in AS this account (real custom token) and runs the exact same client-SDK queries fetchClasses() runs, with firestore.rules actually enforced — shows which query fails and why"
+                    >
+                      {isDebuggingClasses ? 'Simulating…' : '🧪 Simulate Client Read'}
                     </button>
                   </div>
                   {debugResult && (
