@@ -35,9 +35,28 @@ service cloud.firestore {
       // found" (audit: preview/first-write Firestore reads/writes broken).
       // Guarding with exists() first makes a missing class doc resolve to
       // "not the teacher" instead of crashing the whole rule evaluation.
+      //
+      // request.auth.token.role (Auth custom claim, synced by
+      // api/_lib/firebaseAdmin.ts's syncAuthClaims) replaces what used to be
+      // get(users/$(request.auth.uid)).data.role — that get() is keyed by
+      // the CALLER's identity, unrelated to classId or any query filter, and
+      // is the exact pattern confirmed (empirically — see classes/{classId}'s
+      // read rule) to make Firestore deny an entire LIST query outright, even
+      // though the same rule succeeds on a plain single-doc get(). This
+      // function is called from classes/{classId}/logs,
+      // classes/{classId}/studentScans, curriculums, and users/{userId}'s
+      // update rule — several of which ARE queried as lists client-side
+      // (useKtReviewQueue.ts, useLogCompliance.ts, NativeDirectorPortal.tsx,
+      // ParentClassLogs.tsx, ReportCardModal.tsx), so this was silently
+      // returning empty results rather than throwing, in each of those
+      // downstream views. get(classes/$(classId)) below is left as-is — its
+      // key comes from the resource/path itself (a same-document "join" via
+      // a foreign key), a documented-supported Firestore rules pattern
+      // distinct from the caller-identity lookup that's actually the
+      // problem.
       return request.auth != null &&
         exists(/databases/$(database)/documents/classes/$(classId)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' && (
+        request.auth.token.role == 'teacher' && (
           get(/databases/$(database)/documents/classes/$(classId)).data.teacherUid == request.auth.uid ||
           (
             'assignedTeacherUids' in get(/databases/$(database)/documents/classes/$(classId)).data &&
@@ -54,12 +73,12 @@ service cloud.firestore {
     // directors even after NativeDirectorPortal started using the real
     // roster component.
     function isSchoolDirectorOfClass(classId) {
-      // Same nonexistent-class-doc guard as isClassTeacher() above.
+      // Same nonexistent-class-doc guard, and same caller-identity get() ->
+      // token-claim swap, as isClassTeacher() above.
       return request.auth != null &&
         exists(/databases/$(database)/documents/classes/$(classId)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId ==
-          get(/databases/$(database)/documents/classes/$(classId)).data.schoolId;
+        request.auth.token.role == 'director' &&
+        request.auth.token.schoolId == get(/databases/$(database)/documents/classes/$(classId)).data.schoolId;
     }
 
     // User Profiles: read scoped to self, admin, same-school staff roster
@@ -255,9 +274,16 @@ service cloud.firestore {
     // Admin SDK in api/create-teacher-invite.ts and api/redeem.ts (redeemInvite) —
     // role and seat-limit enforcement live there, not in these rules.
     match /invites/{inviteId} {
+      // Same cross-document get()-in-a-list-query failure as
+      // classes/{classId} and users/{userId} above (see classes' read rule
+      // for the full explanation) — TeacherInvitePanel.tsx and
+      // SchoolBillingPanel.tsx both run where('schoolId', '==', ...)
+      // against this collection, a list query, which get(users/uid) denies
+      // outright. request.auth.token.schoolId preserves the exact same
+      // same-school check with zero get() calls.
       allow read: if request.auth != null && (
         isAdmin() ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId
+        request.auth.token.schoolId == resource.data.schoolId
       );
       allow write: if false;
     }
@@ -269,9 +295,15 @@ service cloud.firestore {
     // resend, redeemed-status flip) only ever happens server-side via Admin
     // SDK in api/create-class.ts and api/redeem.ts.
     match /pendingStudents/{pendingStudentId} {
+      // Same list-query-vs-get() failure as invites above — this is almost
+      // certainly the exact cause of "1 student added" succeeding server-
+      // side while the roster/invite panels (useRosterAnalytics.ts,
+      // StudentInvitePanel.tsx, both where('classId', '==', ...) against
+      // this collection) showed nothing: the write succeeded, the read that
+      // should show it was permission-denied. Same fix as invites/classes.
       allow read: if request.auth != null && (
         isAdmin() ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId
+        request.auth.token.schoolId == resource.data.schoolId
       );
       allow write: if false;
     }
@@ -285,9 +317,12 @@ service cloud.firestore {
     // only log an action as themselves, for their own school — never spoof
     // another actor or write into a school they don't belong to.
     match /activityLog/{logId} {
+      // Same list-query-vs-get() failure as invites/pendingStudents above —
+      // ActivityFeed.tsx runs where('schoolId', '==', ...) against this
+      // collection.
       allow read: if request.auth != null && (
         isAdmin() ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId
+        request.auth.token.schoolId == resource.data.schoolId
       );
       allow create: if request.auth != null &&
         request.resource.data.actorUid == request.auth.uid &&
