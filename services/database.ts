@@ -124,7 +124,18 @@ export const db = {
   },
 
   async createUser(uid: string, profile: UserProfile): Promise<void> {
-    await setDoc(doc(dbInstance, 'users', uid), { ...profile, uid });
+    // Every client-side signup path (email/password, Google popup/redirect,
+    // Apple, Kakao) creates the user doc through this single function — but
+    // none of them ever set createdAt themselves, and neither does any
+    // server-side path (api/set-initial-role.ts and api/create-teacher-
+    // invite.ts's createdAt writes are on schools/invites docs, not the
+    // user doc). api/admin.ts's "View Members" list orders by createdAt,
+    // so it silently found zero matching docs for EVERY user, not just
+    // free/trial ones as an earlier fix assumed (audit: admin user list
+    // showed 0 users despite real accounts existing). Setting it here,
+    // once, at the actual point of creation, means no future signup path
+    // can add a user doc without it.
+    await setDoc(doc(dbInstance, 'users', uid), { ...profile, uid, createdAt: new Date().toISOString() });
   },
 
   async updateUser(uid: string, updates: Partial<UserProfile>): Promise<void> {

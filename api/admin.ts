@@ -122,23 +122,33 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (action === 'list') {
-      // orderBy() on subscriptionStartedAt silently drops every doc that
-      // doesn't have that field set — Firestore excludes, not nulls-first,
-      // for a range/order clause. Every free/trial account writes
-      // subscriptionStartedAt: null explicitly (AuthContext.tsx), which
-      // Firestore treats the same as absent, so the entire free/trial
-      // population (directors mid-trial, every FT/KT) never appeared in
-      // this list regardless of the 100-doc cap or search query — only
-      // accounts that had actually completed a paid upgrade showed up
-      // (audit: invited teacher accounts invisible in admin "View Members").
-      // createdAt is set on every account-creation path instead.
+      // orderBy() silently drops every doc that doesn't have the ordered
+      // field set at all — Firestore excludes, not nulls-first, for a
+      // range/order clause. This list previously ordered by
+      // subscriptionStartedAt (excluded every free/trial account, which
+      // writes that field as null) and was "fixed" to order by createdAt
+      // instead — but createdAt wasn't actually set on the user doc by
+      // ANY signup path (services/database.ts's createUser now sets it,
+      // but every account created before that fix still lacks it), so the
+      // orderBy() just traded one silent-exclusion bug for a worse one:
+      // it found zero users, not just zero free/trial ones (audit: admin
+      // "View Members" showed 0 users despite real accounts existing).
+      // Fetching without orderBy and sorting after the fact can't silently
+      // drop anything regardless of which fields any given doc happens to
+      // have — undated docs (pre-fix accounts) just sort last instead of
+      // being excluded.
       const usersSnapshot = await adminDb
         .collection('users')
-        .orderBy('createdAt', 'desc')
-        .limit(100)
+        .limit(500)
         .get();
 
-      const users = usersSnapshot.docs.map((doc) => {
+      const sortedDocs = [...usersSnapshot.docs].sort((a, b) => {
+        const aTime = a.data().createdAt ? new Date(a.data().createdAt).getTime() : 0;
+        const bTime = b.data().createdAt ? new Date(b.data().createdAt).getTime() : 0;
+        return bTime - aTime;
+      }).slice(0, 100);
+
+      const users = sortedDocs.map((doc) => {
         const data = doc.data();
         return {
           uid: doc.id,
