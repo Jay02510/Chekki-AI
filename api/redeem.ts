@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry.js';
 import { FieldValue } from 'firebase-admin/firestore';
-import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
+import { adminDb, adminAuth, syncAuthClaims } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter } from './_lib/rateLimit.js';
 import { notifyDirectors } from './_lib/notifications.js';
@@ -196,6 +196,8 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
     throw error;
   }
 
+  await syncAuthClaims(uid);
+
   await notifyDirectors(schoolId, {
     type: 'student_joined',
     title: 'New student join request',
@@ -261,6 +263,8 @@ async function redeemSchoolCode(res: VercelResponse, uid: string, schoolCode: st
     }
     throw error;
   }
+
+  await syncAuthClaims(uid);
 
   return res.status(200).json({
     success: true,
@@ -337,6 +341,8 @@ async function redeemTeacherCode(res: VercelResponse, uid: string, callerEmailRa
     }
     throw error;
   }
+
+  await syncAuthClaims(uid);
 
   return res.status(200).json({
     success: true,
@@ -449,6 +455,8 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
     }
     throw error;
   }
+
+  await syncAuthClaims(uid);
 
   await notifyDirectors(schoolId, {
     type: 'teacher_invite_accepted',

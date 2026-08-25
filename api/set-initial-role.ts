@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry.js';
-import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
+import { adminDb, adminAuth, syncAuthClaims } from './_lib/firebaseAdmin.js';
 import { seatsForPlan } from './_lib/pricingTiers.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter } from './_lib/rateLimit.js';
@@ -120,6 +120,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         if (claimedSchool) {
           // Role/schoolId already written atomically with the claim above —
           // skip the shared write below for this path.
+          await syncAuthClaims(uid);
           return res.status(200).json({ success: true, role, schoolId: claimedSchool.id });
         }
 
@@ -153,6 +154,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       await userRef.update({ role });
     }
 
+    await syncAuthClaims(uid);
     return res.status(200).json({ success: true, role, schoolId });
   } catch (error: any) {
     console.error('[set-initial-role] error:', error);

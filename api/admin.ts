@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry.js';
 import { FieldValue } from 'firebase-admin/firestore';
-import { adminDb, adminAuth as authDb } from './_lib/firebaseAdmin.js';
+import { adminDb, adminAuth as authDb, syncAuthClaims } from './_lib/firebaseAdmin.js';
 import { seatsForPlan } from './_lib/pricingTiers.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
@@ -752,6 +752,8 @@ https://urlgeni.us/chekki
           usedByUids: FieldValue.arrayUnion(targetUid),
         });
 
+      await syncAuthClaims(targetUid);
+
       return res
         .status(200)
         .json({ success: true, message: 'User assigned as teacher successfully' });
@@ -968,6 +970,30 @@ https://urlgeni.us/chekki
         classesByAssignedTeacherUids: summarize(byAssigned),
         classesBySchoolId: summarize(bySchoolId),
       });
+    } else if (action === 'backfill_auth_claims') {
+      // One-time sweep: every existing account was assigned role/schoolId
+      // before Auth custom claims existed, so none of them carry the claims
+      // firestore.rules now needs to read director/teacher classes without
+      // the get()-in-a-list-query permission-denied bug. Sets every user's
+      // claims to match their current Firestore doc. Already-signed-in
+      // sessions still need a token refresh (forced client-side after
+      // sign-in, or a natural ~1hr refresh) before the new claims take
+      // effect — this only updates the Auth-side record.
+      const usersSnap = await adminDb.collection('users').select('role', 'schoolId').get();
+      let updated = 0;
+      let failed = 0;
+      const failedUids: string[] = [];
+      for (const userDoc of usersSnap.docs) {
+        const data = userDoc.data();
+        try {
+          await authDb.setCustomUserClaims(userDoc.id, { role: data.role || null, schoolId: data.schoolId || null });
+          updated++;
+        } catch (e) {
+          failed++;
+          failedUids.push(userDoc.id);
+        }
+      }
+      return res.status(200).json({ success: true, totalUsers: usersSnap.size, updated, failed, failedUids });
     } else if (action === 'simulate_client_read') {
       // debug_director_classes proved the data and the Auth UID are both
       // correct — but it reads via the Admin SDK, which bypasses

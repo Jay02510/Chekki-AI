@@ -67,6 +67,7 @@ export default function AdminPage() {
   const [selectedUids, setSelectedUids] = useState<Set<string>>(new Set());
   const [isPurgingDemoData, setIsPurgingDemoData] = useState(false);
   const [isSweepingOrphans, setIsSweepingOrphans] = useState(false);
+  const [isBackfillingClaims, setIsBackfillingClaims] = useState(false);
   const [debugEmail, setDebugEmail] = useState('');
   const [isDebuggingClasses, setIsDebuggingClasses] = useState(false);
   const [debugResult, setDebugResult] = useState<any>(null);
@@ -827,6 +828,28 @@ export default function AdminPage() {
     }
   };
 
+  const handleBackfillAuthClaims = async () => {
+    setIsBackfillingClaims(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode, action: 'backfill_auth_claims' }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Backfill failed');
+      setMessage({
+        text: `✅ Set auth claims for ${data.updated}/${data.totalUsers} accounts${data.failed ? ` (${data.failed} failed)` : ''}. Affected users need to log out/in (or wait ~1hr) for the new claims to take effect.`,
+        type: 'success',
+      });
+    } catch (err: any) {
+      setMessage({ text: err.message || 'Error backfilling auth claims', type: 'error' });
+    } finally {
+      setIsBackfillingClaims(false);
+    }
+  };
+
   const handleSweepOrphanedAssignments = async () => {
     setIsSweepingOrphans(true);
     setMessage({ text: '', type: '' });
@@ -1173,6 +1196,15 @@ export default function AdminPage() {
                     title="Find and remove stale teacherUid/assignedTeacherUids entries on class docs — a single one permission-denies that teacher's ENTIRE class list, not just that one class"
                   >
                     {isSweepingOrphans ? 'Scanning…' : '🧹 Sweep Orphaned Class Assignments'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBackfillAuthClaims}
+                    disabled={isBackfillingClaims}
+                    className="self-start px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 disabled:opacity-40 transition-colors"
+                    title="One-time: set role/schoolId as Auth custom claims for every existing account, so firestore.rules' classes read rule no longer needs a cross-document get() that breaks list queries. Run once after deploying the claims-based rules."
+                  >
+                    {isBackfillingClaims ? 'Backfilling…' : '🔑 Backfill Auth Claims'}
                   </button>
                 </div>
 

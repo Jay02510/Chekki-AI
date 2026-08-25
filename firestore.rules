@@ -285,9 +285,25 @@ service cloud.firestore {
       // Scoped to the class's own teacher/director/enrolled member — no
       // current client code needs broader access (Audit: unscoped classes
       // read, lower-sensitivity data but same pattern as the fixes above).
+      //
+      // Deliberately NOT using isClassTeacher()/isSchoolDirectorOfClass()
+      // here — both do get(users/$(request.auth.uid)), a cross-document
+      // read. Firestore denies an entire LIST query outright when its rule
+      // depends on a get()/exists() call to a document unrelated to the
+      // query's own filter, even though the identical rule succeeds on a
+      // plain single-doc get() (confirmed empirically: a director's
+      // TeacherPage.tsx classes queries all failed permission-denied while
+      // get()-ing one known class doc, and their own user doc, both
+      // succeeded). request.auth.token.role/.schoolId come from the
+      // caller's own ID token (set via Admin SDK custom claims,
+      // api/_lib/firebaseAdmin.ts's syncAuthClaims — kept in sync with the
+      // Firestore user doc on every role/schoolId write), so this branch
+      // needs zero get()/exists() calls and list queries evaluate cleanly.
       allow read: if request.auth != null && (
-        isClassTeacher(classId) ||
-        isSchoolDirectorOfClass(classId) ||
+        (request.auth.token.role == 'teacher' &&
+          (resource.data.teacherUid == request.auth.uid ||
+            ('assignedTeacherUids' in resource.data && resource.data.assignedTeacherUids.hasAny([request.auth.uid])))) ||
+        (request.auth.token.role == 'director' && request.auth.token.schoolId == resource.data.schoolId) ||
         userBelongsToClass(classId) ||
         isAdmin()
       );
@@ -323,8 +339,14 @@ service cloud.firestore {
         ) ||
         isAdmin()
       );
+      // A director could see any class in their school (isSchoolDirectorOfClass,
+      // via the read rule) but not delete one they didn't personally create —
+      // teacherUid == request.auth.uid was the only path. A single-doc
+      // operation, so isSchoolDirectorOfClass()'s get() calls are fine here
+      // (not the list-query limitation the read rule above works around).
       allow delete: if request.auth != null && (
         resource.data.teacherUid == request.auth.uid ||
+        isSchoolDirectorOfClass(classId) ||
         isAdmin()
       );
 

@@ -312,6 +312,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
+        // Firebase only auto-refreshes the ID token on natural expiry
+        // (~1hr) or explicit sign-in — a role/schoolId custom-claims change
+        // made server-side (api/_lib/firebaseAdmin.ts's syncAuthClaims,
+        // e.g. right after signup/invite-accept, or the one-time backfill
+        // for pre-existing accounts) otherwise sits invisible to an already
+        // -open or resumed session for up to an hour. firestore.rules'
+        // classes read rule depends on those claims being current
+        // (audit: director's classes list permission-denied despite
+        // correct Firestore data — stale token claims, not a rules bug).
+        // Forcing a refresh on every auth-state transition is the
+        // guaranteed-correct fix; the network cost is one token exchange,
+        // not a Firestore read.
+        try {
+          await user.getIdToken(true);
+        } catch (e) {
+          console.warn('[AuthContext] Forced ID token refresh failed (continuing with cached token):', e);
+        }
+
         // 1. Try to read from local cache first for instant load
         let cachedProfile: UserProfile | null = null;
         const cacheKey = `chekki_user_profile_${user.uid}`;
