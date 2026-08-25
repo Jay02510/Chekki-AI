@@ -626,8 +626,19 @@ function AppContent() {
     return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><SubscribePage /></Suspense></ErrorBoundary>;
   if (showAdminPage && platform === 'web')
     return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><AdminPage /></Suspense></ErrorBoundary>;
-  if (showTeacherPage && platform === 'web')
+  if (showTeacherPage && platform === 'web') {
+    // TeacherPage's own role-state initializers (loginRole/educatorRole)
+    // read `user` synchronously on first render — mounting it while auth is
+    // still resolving meant those initializers ran against an undefined
+    // `user`, always defaulting to the FT dashboard, which then got
+    // replaced by the correct KT/director dashboard a render later once
+    // `user` arrived. That replace-after-mount is the visible "wrong
+    // dashboard flashes first" bug — holding the mount until auth settles
+    // means TeacherPage's first render already has the real role to
+    // initialize from (audit: dashboard flash on login).
+    if (isAuthLoading) return <RouteLoadingFallback />;
     return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><TeacherPage isNight={isNight} /></Suspense></ErrorBoundary>;
+  }
   if (showSchoolsPage && platform === 'web')
     return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} /></Suspense></ErrorBoundary>;
 

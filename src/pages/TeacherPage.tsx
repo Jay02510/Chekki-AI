@@ -340,9 +340,22 @@ export default function TeacherPage({ isNight = true }: Props) {
   // silently misclassifying FT teachers whose email happened to contain 'kt'
   // (e.g. kate@, dakota@, nikto@) and hiding their homework tab. (Audit §7)
   const firestoreEducatorRole = user?.educatorRole as 'ft' | 'kt' | undefined;
-  const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>(
-    firestoreEducatorRole === 'kt' ? 'kt' : 'ft'
-  );
+  // Same flash this file already fixed for loginRole above (see the comment
+  // at line ~312): on the very first render `user?.educatorRole` may not
+  // have arrived from Firestore yet, and this initializer unconditionally
+  // defaulted to 'ft' in that window — flashing the FT dashboard for KT
+  // accounts before the correction effect below replaced it a render later.
+  // Falls back to the same `chekki_educator_role_${uid}` cache the sync-repair
+  // effect further down already writes, closing the gap for first paint too.
+  const [educatorRole, setEducatorRole] = useState<'ft' | 'kt'>(() => {
+    if (firestoreEducatorRole === 'kt') return 'kt';
+    if (firestoreEducatorRole === 'ft') return 'ft';
+    const cachedUid = user?.uid || auth.currentUser?.uid;
+    const cached =
+      (cachedUid && localStorage.getItem(`chekki_educator_role_${cachedUid}`)) ||
+      (user?.email && localStorage.getItem(`chekki_educator_role_${user.email}`));
+    return cached === 'kt' ? 'kt' : 'ft';
+  });
   const isDirectorUser = isDirectorPath || user?.role === 'director';
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(
     isDirectorUser ? user?.uid : null
@@ -768,73 +781,94 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   }, [isAuthenticated, user?.uid]);
 
-  const fetchClasses = async (isRetry = false) => {
+  const fetchClasses = async (retryCount = 0) => {
     const uid = user?.uid || 'guest';
+    const maxRetries = 3;
     setIsLoadingClasses(true);
     const fetchedFromFirestore: any[] = [];
-    try {
-      if (user?.uid) {
-        // Two queries merged by id: `teacherUid` (original single-owner
-        // field, still set on every class) and `assignedTeacherUids`
-        // (director-assigned co-teachers). Classes created before
-        // assignedTeacherUids existed only match the first query — merging
-        // keeps them showing up exactly as before.
-        const ownedQuery = query(collection(dbInstance, 'classes'), where('teacherUid', '==', user.uid));
-        const assignedQuery = query(collection(dbInstance, 'classes'), where('assignedTeacherUids', 'array-contains', user.uid));
-        const [ownedSnap, assignedSnap] = await Promise.all([getDocs(ownedQuery), getDocs(assignedQuery)]);
-        const seen = new Set<string>();
-        [...ownedSnap.docs, ...assignedSnap.docs].forEach((doc) => {
+    let hardFailure: any = null;
+    if (user?.uid) {
+      // Two independent queries merged by id: `teacherUid` (original
+      // single-owner field, still set on every class) and
+      // `assignedTeacherUids` (director-assigned co-teachers). Classes
+      // created before assignedTeacherUids existed only match the first
+      // query — merging keeps them showing up exactly as before.
+      //
+      // Run with allSettled, not Promise.all — Promise.all's fail-fast
+      // behavior meant a permission error on EITHER query discarded a
+      // successful result from the OTHER one too, so a teacher who owns
+      // classes directly (teacherUid) could see none of them just because
+      // the separate assignedTeacherUids query happened to fail (audit:
+      // co-taught classes intermittently wiped out a teacher's own classes
+      // from the list, not just failing to add the co-taught ones).
+      const ownedQuery = query(collection(dbInstance, 'classes'), where('teacherUid', '==', user.uid));
+      const assignedQuery = query(collection(dbInstance, 'classes'), where('assignedTeacherUids', 'array-contains', user.uid));
+      const [ownedResult, assignedResult] = await Promise.allSettled([getDocs(ownedQuery), getDocs(assignedQuery)]);
+
+      const seen = new Set<string>();
+      const mergeSnap = (snap: any) => {
+        snap.docs.forEach((doc: any) => {
           if (seen.has(doc.id)) return;
           seen.add(doc.id);
           fetchedFromFirestore.push({ id: doc.id, ...doc.data() });
         });
-      }
-    } catch (err: any) {
+      };
+      if (ownedResult.status === 'fulfilled') mergeSnap(ownedResult.value);
+      else hardFailure = ownedResult.reason;
+      if (assignedResult.status === 'fulfilled') mergeSnap(assignedResult.value);
+      else hardFailure = hardFailure || assignedResult.reason;
+    }
+
+    if (hardFailure) {
+      const err = hardFailure;
       // Same transient-permission-denied-right-after-signup pattern
-      // StudentInvitePanel already retries once for (firestore.rules
+      // StudentInvitePanel/useNotifications already retry for (firestore.rules
       // re-reads the caller's own user doc on every query; that read can
-      // momentarily deny before a brand-new session settles) — this fetch
-      // had no retry at all, so a fresh signup could get stuck showing
-      // "couldn't load classes" and a stale local cache forever, with no
-      // self-heal (Audit: director class list empty, contradicting a
-      // synced-looking selected class from local cache).
-      if (err?.code === 'permission-denied' && !isRetry) {
-        setTimeout(() => fetchClasses(true), 1500);
+      // momentarily deny before a brand-new session settles). A single fixed
+      // 1.5s retry wasn't always enough for a slower session settle, which
+      // left teachers permanently stuck on "couldn't load classes" even
+      // after a director had genuinely assigned them one (audit: assigned
+      // class never reflects for the teacher, no self-heal). Retry with
+      // backoff instead of once.
+      if (err?.code === 'permission-denied' && retryCount < maxRetries) {
+        setTimeout(() => fetchClasses(retryCount + 1), 1000 * 2 ** retryCount);
         return;
       }
-      console.warn('Firestore fetch warning (falling back to local storage):', err);
+      console.warn('Firestore fetch warning (falling back to local storage):', err?.code, err);
       // This catch previously only console.warn'd — a caught error never
       // reaches Sentry automatically, so a real class-fetch failure here
       // (as opposed to the already-handled transient permission-denied
       // right after signup) left zero record of what actually went wrong,
-      // no error code, nothing to diagnose from later.
+      // no error code, nothing to diagnose from later. errorCode is its own
+      // tag (not just buried in extra) so Sentry issues can be grouped/
+      // filtered by it directly.
       Sentry.captureException(err, {
-        tags: { area: 'fetchClasses' },
-        extra: { uid, role: user?.role, educatorRole, schoolId: user?.schoolId, isRetry },
+        tags: { area: 'fetchClasses', errorCode: err?.code || 'unknown' },
+        extra: { uid, role: user?.role, educatorRole, schoolId: user?.schoolId, retryCount },
       });
       setSyncWarning(
         isKo
           ? '⚠️ 클라우드에서 학급 목록을 불러오지 못해 이 기기에 저장된 정보를 표시하고 있습니다. 최신 정보가 아닐 수 있습니다.'
           : "⚠️ Couldn't load classes from the cloud — showing what's saved on this device, which may be out of date."
       );
-    } finally {
-      const localKey = `teacher_classes_${uid}`;
-      const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
-
-      const map = new Map();
-      fetchedFromFirestore.forEach(c => map.set(c.id, c));
-      localSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
-
-      const combined = Array.from(map.values());
-      setClasses(combined);
-      if (combined.length > 0) {
-        setSelectedClass((prev: any) => (prev && combined.some((c: any) => c.id === prev.id)) ? prev : combined[0]);
-      } else {
-        // Never set to null — always keep fallbackDemoClass so JSX never crashes reading .joinCode etc.
-        setSelectedClass((prev: any) => prev ?? fallbackDemoClass);
-      }
-      setIsLoadingClasses(false);
     }
+
+    const localKey = `teacher_classes_${uid}`;
+    const localSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
+
+    const map = new Map();
+    fetchedFromFirestore.forEach(c => map.set(c.id, c));
+    localSaved.forEach((c: any) => { if (!map.has(c.id)) map.set(c.id, c); });
+
+    const combined = Array.from(map.values());
+    setClasses(combined);
+    if (combined.length > 0) {
+      setSelectedClass((prev: any) => (prev && combined.some((c: any) => c.id === prev.id)) ? prev : combined[0]);
+    } else {
+      // Never set to null — always keep fallbackDemoClass so JSX never crashes reading .joinCode etc.
+      setSelectedClass((prev: any) => prev ?? fallbackDemoClass);
+    }
+    setIsLoadingClasses(false);
   };
 
   // Redeems the current inviteSlug (a director-generated single-use invite
