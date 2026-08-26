@@ -328,7 +328,7 @@ export const CropModal: React.FC<Props> = ({
             <button
               onClick={handleRotate}
               disabled={isProcessing}
-              className={`px-4 py-1.5 rounded-full border text-[11px] md:text-xs font-bold tracking-wider flex items-center gap-1.5 transition-all duration-200 ${
+              className={`px-4 py-1.5 rounded-full border text-[11px] md:text-xs font-bold tracking-wider flex items-center gap-1.5 transition-[background-color,color] duration-200 ${
                 isNight
                   ? 'bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800'
                   : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
@@ -346,7 +346,7 @@ export const CropModal: React.FC<Props> = ({
             <button
               onClick={close}
               disabled={isProcessing}
-              className={`w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-bold transition-all ${
+              className={`w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-bold transition-[background-color,color] ${
                 isNight
                   ? 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800/40'
                   : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 border border-zinc-200/40'
@@ -358,7 +358,7 @@ export const CropModal: React.FC<Props> = ({
             <button
               onClick={onGradeOriginal}
               disabled={isProcessing}
-              className={`w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-bold border transition-all ${
+              className={`w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-bold border transition-[background-color,color] ${
                 isNight
                   ? 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:text-white'
                   : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950'
@@ -370,7 +370,7 @@ export const CropModal: React.FC<Props> = ({
             <button
               onClick={handleCropSubmit}
               disabled={isProcessing}
-              className="w-full sm:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-1.5"
+              className="w-full sm:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-[background-color,transform] active:scale-[0.98] flex items-center justify-center gap-1.5"
             >
               {isProcessing ? (
                 <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

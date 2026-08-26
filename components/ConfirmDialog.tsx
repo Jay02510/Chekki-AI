@@ -86,14 +86,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <button
               onClick={onConfirm}
               disabled={isSaving}
-              className={`w-full ${isDestructive ? 'bg-red-600 hover:bg-red-700 text-white' : isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black uppercase text-xs transition-all active:scale-[0.97] disabled:opacity-50`}
+              className={`w-full ${isDestructive ? 'bg-red-600 hover:bg-red-700 text-white' : isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black uppercase text-xs transition-[background-color,transform] active:scale-[0.97] disabled:opacity-50`}
             >
               {confirmText || 'Confirm'}
             </button>
             <button
               onClick={close}
               disabled={isSaving}
-              className={`w-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'} py-4 rounded-2xl font-black uppercase text-xs transition-all active:scale-[0.97] disabled:opacity-50`}
+              className={`w-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'} py-4 rounded-2xl font-black uppercase text-xs transition-[background-color,transform] active:scale-[0.97] disabled:opacity-50`}
             >
               {cancelText || 'Cancel'}
             </button>

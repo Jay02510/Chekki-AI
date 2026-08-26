@@ -632,7 +632,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                           });
                         }
                       }}
-                      className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-2xl shadow-md transition-all cursor-pointer"
+                      className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-2xl shadow-md transition-colors cursor-pointer"
                     >
                       {inviteCopied
                         ? (language === 'ko' ? '✓ 복사 완료!' : '✓ Copied!')
@@ -689,7 +689,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                           <button
                             type="submit"
                             disabled={isUpgradingCode}
-                            className="px-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0"
+                            className="px-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-2xl shadow-md transition-[background-color,opacity] flex items-center justify-center gap-1.5 shrink-0"
                           >
                             {isUpgradingCode ? (
                               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

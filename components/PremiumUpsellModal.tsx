@@ -90,7 +90,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
 
           {/* Feature Preview */}
           <div className="px-6 pb-6 text-center">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-4xl mx-auto mb-4 shadow-2xl shadow-orange-500/30">
+            <div className="w-20 h-20 rounded-3xl bg-brand-orange flex items-center justify-center text-4xl mx-auto mb-4 shadow-2xl shadow-orange-500/30">
               {info.icon}
             </div>
             <h2
@@ -143,7 +143,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
                   300
                 );
               }}
-              className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-black font-black text-base shadow-xl active:scale-[0.97] transition-all ring-2 ring-white/10 min-h-[52px] flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-black font-black text-base shadow-xl active:scale-[0.97] transition-[background-color,transform] ring-2 ring-white/10 min-h-[52px] flex items-center justify-center gap-2"
             >
               <span>💳</span>
               {language === 'ko' ? '구독 옵션 보기' : 'View Subscription Options'}

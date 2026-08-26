@@ -331,7 +331,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Parent's Name"
                       aria-label="Your name"
-                      className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-all text-xs font-semibold placeholder:text-zinc-500`}
+                      className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-[background-color,border-color,box-shadow] text-xs font-semibold placeholder:text-zinc-500`}
                       required
                     />
                   </div>
@@ -359,7 +359,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email Address"
                     aria-label="Email address"
-                    className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-all text-xs font-semibold placeholder:text-zinc-500`}
+                    className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-[background-color,border-color,box-shadow] text-xs font-semibold placeholder:text-zinc-500`}
                     required
                   />
                 </div>
@@ -388,7 +388,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
                         aria-label="Password"
-                        className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-12 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-all text-xs font-semibold placeholder:text-zinc-500`}
+                        className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-12 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-[background-color,border-color,box-shadow] text-xs font-semibold placeholder:text-zinc-500`}
                         required
                       />
                       <button
@@ -449,7 +449,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-brand-orange hover:bg-orange-600 text-black font-black py-3.5 rounded-2xl shadow-xl shadow-orange-500/30 transform active:scale-[0.98] disabled:opacity-50 transition-all duration-250 text-sm font-display tracking-wide mt-2"
+                  className="w-full bg-brand-orange hover:bg-orange-600 text-black font-black py-3.5 rounded-2xl shadow-xl shadow-orange-500/30 transform active:scale-[0.98] disabled:opacity-50 transition-[background-color,opacity,transform] duration-250 text-sm font-display tracking-wide mt-2"
                 >
                   {isLoading
                     ? viewMode === 'login'
@@ -479,7 +479,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                     type="button"
                     onClick={handleAppleSignIn}
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-3 bg-black text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-black/25 hover:bg-zinc-900 transition-all duration-200 transform active:scale-[0.98] disabled:opacity-50 text-xs border border-white/5"
+                    className="w-full flex items-center justify-center gap-3 bg-black text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-black/25 hover:bg-zinc-900 transition-[background-color,opacity,transform] duration-200 transform active:scale-[0.98] disabled:opacity-50 text-xs border border-white/5"
                   >
                     <svg className="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17.062 10.97c.03-2.52 2.06-3.73 2.15-3.79-1.17-1.71-2.99-1.94-3.64-1.97-1.54-.16-3.01.91-3.79.91-.78 0-1.99-.89-3.29-.86-1.71.03-3.29.99-4.17 2.54-1.79 3.11-.46 7.71 1.28 10.22.85 1.23 1.86 2.61 3.19 2.56 1.28-.05 1.76-.83 3.31-.83 1.54 0 1.99.83 3.34.8 1.36-.03 2.23-1.25 3.07-2.48 1.05-1.51 1.39-2.98 1.42-3.05-.03-.01-2.73-1.04-2.76-4.15zm-2.82-7.14c.7-1.02 1.15-2.07.91-3.61-1.14.05-2.52.76-3.34 1.71-.73.85-1.37 1.94-1.17 3.04 1.26.1 2.52-.77 3.6-1.14z" />
@@ -492,7 +492,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                   type="button"
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  className={`w-full flex items-center justify-center gap-3 ${isNight ? 'bg-zinc-950 text-white hover:bg-zinc-900 border-zinc-800/80 shadow-[0_10px_25px_rgba(0,0,0,0.4)]' : 'bg-white border border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-md shadow-zinc-900/5'} font-bold py-3.5 rounded-2xl transition-all duration-200 transform active:scale-[0.98] disabled:opacity-50 text-xs`}
+                  className={`w-full flex items-center justify-center gap-3 ${isNight ? 'bg-zinc-950 text-white hover:bg-zinc-900 border-zinc-800/80 shadow-[0_10px_25px_rgba(0,0,0,0.4)]' : 'bg-white border border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-md shadow-zinc-900/5'} font-bold py-3.5 rounded-2xl transition-[background-color,opacity,transform] duration-200 transform active:scale-[0.98] disabled:opacity-50 text-xs`}
                 >
                   <svg className="w-4.5 h-4.5" viewBox="0 0 24 24">
                     <path
@@ -519,7 +519,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                   type="button"
                   onClick={handleKakaoSignIn}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#191919] font-bold py-3.5 rounded-2xl shadow-lg shadow-yellow-500/10 hover:bg-[#FADA0A] transition-all duration-200 transform active:scale-[0.98] disabled:opacity-50 text-xs"
+                  className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#191919] font-bold py-3.5 rounded-2xl shadow-lg shadow-yellow-500/10 hover:bg-[#FADA0A] transition-[background-color,opacity,transform] duration-200 transform active:scale-[0.98] disabled:opacity-50 text-xs"
                 >
                   <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 3c-4.97 0-9 3.185-9 7.11 0 2.507 1.642 4.718 4.11 5.922l-.83 3.037c-.075.28.188.528.454.356l3.585-2.378c.552.077 1.114.118 1.681.118 4.97 0 9-3.185 9-7.11S16.97 3 12 3z" />
@@ -555,7 +555,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
 
                 <button
                   onClick={close}
-                  className="text-zinc-400 text-[10px] hover:text-brand-orange font-black uppercase tracking-widest transition-all duration-250 underline underline-offset-2"
+                  className="text-zinc-400 text-[10px] hover:text-brand-orange font-black uppercase tracking-widest transition-colors duration-250 underline underline-offset-2"
                 >
                   {t('login_guest_link')}
                 </button>

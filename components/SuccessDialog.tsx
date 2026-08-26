@@ -52,7 +52,7 @@ export const SuccessDialog: React.FC<SuccessDialogProps> = ({ message, isNight, 
           </p>
           <button
             onClick={close}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-xl shadow-emerald-500/20 active:scale-[0.97] transition-all"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-xl shadow-emerald-500/20 active:scale-[0.97] transition-[background-color,transform]"
           >
             Close
           </button>

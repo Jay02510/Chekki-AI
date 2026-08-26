@@ -126,7 +126,7 @@ export const RefineModal: React.FC<Props> = ({
         >
           {/* Animated Glow Background */}
           <div className="absolute -top-24 -left-24 w-48 h-48 bg-orange-500/10 blur-[100px] rounded-full animate-pulse"></div>
-          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 blur-[100px] rounded-full animate-pulse delay-700"></div>
+          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-orange-500/10 blur-[100px] rounded-full animate-pulse delay-700"></div>
 
           {/* Fade-out overlay at the top to prevent content from cutting off when scrolled */}
           <div
@@ -139,7 +139,7 @@ export const RefineModal: React.FC<Props> = ({
           >
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-5">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-3xl shadow-[0_10px_30px_rgba(249,115,22,0.3)]">
+                <div className="w-14 h-14 rounded-2xl bg-brand-orange flex items-center justify-center text-3xl shadow-[0_10px_30px_rgba(249,115,22,0.3)]">
                   🪄
                 </div>
                 <div>
@@ -160,7 +160,7 @@ export const RefineModal: React.FC<Props> = ({
               {!isSubmitting && (
                 <button
                   onClick={handleClose}
-                  className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all active:scale-90 border border-white/5 relative z-30"
+                  className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-[color,background-color,transform] active:scale-90 border border-white/5 relative z-30"
                   aria-label="Close"
                 >
                   <svg
@@ -177,7 +177,7 @@ export const RefineModal: React.FC<Props> = ({
             </div>
 
             <div
-              className={`${isNight ? 'bg-zinc-900/40 border-white/5 shadow-inner' : 'bg-zinc-50 border-zinc-200'} rounded-3xl p-6 border mb-8 group transition-all hover:border-white/10`}
+              className={`${isNight ? 'bg-zinc-900/40 border-white/5 shadow-inner' : 'bg-zinc-50 border-zinc-200'} rounded-3xl p-6 border mb-8 group transition-[border-color] hover:border-white/10`}
             >
               <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em] mb-2">
                 {language === 'ko' ? '질문' : 'Question'}
@@ -202,9 +202,9 @@ export const RefineModal: React.FC<Props> = ({
                       key={chip.id}
                       type="button"
                       onClick={() => handleChipSelect(chip.id, chip.text)}
-                      className={`text-left px-6 py-4 rounded-2xl border text-sm md:text-base font-black transition-all transform active:scale-[0.98] break-keep ${
+                      className={`text-left px-6 py-4 rounded-2xl border text-sm md:text-base font-black transition-[background-color,border-color,color,transform] transform active:scale-[0.98] break-keep ${
                         selectedReason === chip.id
-                          ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white border-transparent shadow-[0_15px_40px_rgba(249,115,22,0.4)]'
+                          ? 'bg-brand-orange text-white border-transparent shadow-[0_15px_40px_rgba(249,115,22,0.4)]'
                           : `${isNight ? 'bg-zinc-900/60 border-white/5 text-zinc-300' : 'bg-zinc-100 border-zinc-200 text-zinc-500'} hover:bg-zinc-800 hover:border-white/10`
                       }`}
                     >
@@ -236,7 +236,7 @@ export const RefineModal: React.FC<Props> = ({
               <button
                 type="submit"
                 disabled={isSubmitting || (!selectedReason && !customReason.trim())}
-                className={`w-full py-5 md:py-6 rounded-full font-black text-sm md:text-base uppercase tracking-[0.3em] transition-all transform active:scale-[0.95] flex items-center justify-center gap-4 relative overflow-hidden shadow-2xl ${
+                className={`w-full py-5 md:py-6 rounded-full font-black text-sm md:text-base uppercase tracking-[0.3em] transition-[background-color,color,transform] transform active:scale-[0.95] flex items-center justify-center gap-4 relative overflow-hidden shadow-2xl ${
                   isSubmitting || (!selectedReason && !customReason.trim())
                     ? 'bg-zinc-800 text-zinc-400 cursor-not-allowed opacity-50'
                     : `${isNight ? 'bg-white hover:bg-zinc-100 text-black' : 'bg-zinc-900 hover:bg-black text-white'}`

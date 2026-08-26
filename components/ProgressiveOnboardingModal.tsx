@@ -161,7 +161,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 whileTap={{ scale: 0.97 }}
                 key={opt.id}
                 onClick={() => setSelectedAge(opt.id)}
-                className={`relative overflow-hidden py-4 px-3 rounded-2xl text-sm font-bold transition-all duration-200 \${
+                className={`relative overflow-hidden py-4 px-3 rounded-2xl text-sm font-bold transition-[background-color,box-shadow,color] duration-200 ${
                   selectedAge === opt.id
                     ? 'text-black ring-2 ring-orange-500 bg-orange-500/10'
                     : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
@@ -191,7 +191,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 whileTap={{ scale: 0.97 }}
                 key={opt.id}
                 onClick={() => setSelectedLevel(opt.id)}
-                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-200 text-left flex justify-between items-center \${
+                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-[background-color,box-shadow,color] duration-200 text-left flex justify-between items-center ${
                   selectedLevel === opt.id
                     ? 'text-black ring-2 ring-orange-500 bg-orange-500/10'
                     : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
@@ -236,7 +236,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 whileTap={{ scale: 0.97 }}
                 key={opt.id}
                 onClick={() => setParentLevel(opt.id)}
-                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-all duration-200 text-left flex justify-between items-center \${
+                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-[background-color,box-shadow,color] duration-200 text-left flex justify-between items-center ${
                   parentLevel === opt.id
                     ? 'text-black ring-2 ring-orange-500 bg-orange-500/10'
                     : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
@@ -414,7 +414,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
             >
               <button
                 onClick={onSkip}
-                className="bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-[10px] font-bold px-4 py-1.5 rounded-full backdrop-blur-md transition-all tracking-widest uppercase border border-white/5 hover:border-white/20 shadow-lg"
+                className="bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-[10px] font-bold px-4 py-1.5 rounded-full backdrop-blur-md transition-[background-color,color,border-color] tracking-widest uppercase border border-white/5 hover:border-white/20 shadow-lg"
               >
                 {language === 'ko' ? '건너뛰기' : 'Skip'}
               </button>
@@ -621,7 +621,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                     <button
                       onClick={handleJoinClass}
                       disabled={classCode.trim().length < 4 || isJoiningClass}
-                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-[background-color,opacity,transform] active:scale-[0.98] flex items-center justify-center gap-2"
                     >
                       {isJoiningClass ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -115,7 +115,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                         <button
                           key={star}
                           onClick={() => setRating(star)}
-                          className={`transition-all duration-200 active:scale-90 ${star <= rating ? 'scale-110' : 'opacity-30 grayscale'}`}
+                          className={`transition-[transform,opacity,filter] duration-200 active:scale-90 ${star <= rating ? 'scale-110' : 'opacity-30 grayscale'}`}
                         >
                           <svg
                             className={`w-8 h-8 ${star <= rating ? (star <= 2 ? 'text-red-400' : star === 3 ? 'text-yellow-400' : 'text-orange-400') : 'text-zinc-400'}`}
@@ -150,7 +150,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                   <button
                     onClick={handleSubmit}
                     disabled={isSubmitting || (!comment && context)}
-                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2"
+                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 transition-[background-color,opacity,transform] active:scale-[0.97] flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
