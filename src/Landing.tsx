@@ -117,6 +117,61 @@ export default function Home() {
           }
         );
       }
+
+      // AI Bento Grid (external component, targeted by its stable #ai-bento id)
+      gsap.from('#ai-bento', {
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#ai-bento',
+          start: 'top 80%',
+          toggleActions: 'play none none none',
+        },
+      });
+
+      // Educator Hub cards
+      gsap.from('.edu-card', {
+        y: 40,
+        opacity: 0,
+        duration: 0.7,
+        stagger: 0.08,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#educators',
+          start: 'top 75%',
+          toggleActions: 'play none none none',
+        },
+      });
+
+      // Pricing cards
+      gsap.from('.pricing-card', {
+        y: 40,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.06,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#pricing',
+          start: 'top 75%',
+          toggleActions: 'play none none none',
+        },
+      });
+
+      // Footer CTA
+      gsap.from('.footer-cta', {
+        y: 30,
+        opacity: 0,
+        duration: 0.7,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: 'footer',
+          start: 'top 80%',
+          toggleActions: 'play none none none',
+        },
+      });
     });
 
     return () => ctx.revert();
@@ -132,7 +187,7 @@ export default function Home() {
   }, [mobileMenuOpen]);
 
   return (
-    <main className={`overflow-x-hidden w-full max-w-full min-h-screen transition-colors duration-500 selection:bg-brand selection:text-white ${
+    <main className={`overflow-x-hidden w-full max-w-full min-h-dvh transition-colors duration-500 selection:bg-brand selection:text-white ${
       isNight ? 'bg-brand-dark text-slate-50' : 'bg-slate-50 text-slate-900'
     }`}>
       {/* Accessibility: Skip to Content */}
@@ -356,7 +411,7 @@ export default function Home() {
         </div>
 
         {/* Hero Transparent Mascot Image */}
-        <div className="hero-mascot flex-1 w-full relative h-[400px] md:h-[650px] flex justify-center md:justify-end items-center">
+        <div className="hero-mascot group flex-1 w-full relative h-[400px] md:h-[650px] flex justify-center md:justify-end items-center">
           <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[480px] aspect-square rounded-full blur-[120px] ${isNight ? 'bg-brand/20' : 'bg-brand/35'}`} />
           <img
             src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png"
@@ -452,13 +507,13 @@ export default function Home() {
             href="https://www.youtube.com/@ChekkiAI"
             target="_blank"
             rel="noopener noreferrer"
-            className={`rounded-[2.5rem] p-2 shadow-2xl group block outline-none border transition-all ${
+            className={`edu-card rounded-[2.5rem] p-2 shadow-2xl group block outline-none border transition-[border-color] ${
               isNight ? 'bg-white/[0.02] border-white/5 hover:border-brand/40' : 'bg-white border-slate-300 hover:border-brand/60 shadow-slate-200'
             }`}
           >
             <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-brand-dark relative h-[320px] flex flex-col justify-end p-8 text-white">
               <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/youtube_bg.png')] bg-cover bg-center mix-blend-screen" />
+              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-[transform,opacity] duration-[1200ms] bg-[url('/assets/youtube_bg.png')] bg-cover bg-center mix-blend-screen" />
               <div className="relative z-20">
                 <PlayCircle weight="fill" className="text-5xl text-brand mb-4 drop-shadow-xl" />
                 <h3 className="text-2xl font-bold text-white mb-2">YouTube Channel</h3>
@@ -478,13 +533,13 @@ export default function Home() {
             href="https://www.teacherspayteachers.com/store/chekki-ai"
             target="_blank"
             rel="noopener noreferrer"
-            className={`rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
+            className={`edu-card rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-[border-color] ${
               isNight ? 'bg-white/[0.02] border-white/5 hover:border-brand/40' : 'bg-white border-slate-300 hover:border-brand/60 shadow-slate-200'
             }`}
           >
             <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-brand-dark relative h-[320px] flex flex-col justify-end p-8 text-white">
               <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('https://res.cloudinary.com/dginphpy4/image/upload/v1771381888/Chekki_Splash_1_nrpzaj.png')] bg-cover bg-center mix-blend-screen" />
+              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-[transform,opacity] duration-[1200ms] bg-[url('https://res.cloudinary.com/dginphpy4/image/upload/v1771381888/Chekki_Splash_1_nrpzaj.png')] bg-cover bg-center mix-blend-screen" />
               <div className="relative z-20">
                 <GraduationCap weight="fill" className="text-5xl text-blue-400 mb-4 drop-shadow-xl" />
                 <h3 className="text-2xl font-bold text-white mb-2">TPT Store</h3>
@@ -504,13 +559,13 @@ export default function Home() {
             href="https://chekkiai.netlify.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className={`rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-all ${
+            className={`edu-card rounded-[2.5rem] p-2 shadow-xl group block outline-none border transition-[border-color] ${
               isNight ? 'bg-white/[0.02] border-white/5 hover:border-red-500/40' : 'bg-white border-slate-300 hover:border-red-500/50 shadow-slate-200'
             }`}
           >
             <div className="overflow-hidden rounded-[calc(2.5rem-0.5rem)] bg-brand-dark relative h-[320px] flex flex-col justify-end p-8 text-white">
               <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-all duration-[1200ms] bg-[url('/assets/grammar_bg.png')] bg-cover bg-center mix-blend-screen" />
+              <div className="absolute inset-0 opacity-60 group-hover:scale-110 group-hover:opacity-85 transition-[transform,opacity] duration-[1200ms] bg-[url('/assets/grammar_bg.png')] bg-cover bg-center mix-blend-screen" />
               <div className="relative z-20">
                 <FilePdf weight="fill" className="text-5xl text-red-500 mb-4 drop-shadow-xl" />
                 <h3 className="text-2xl font-bold text-white mb-2">Top Grammar PPT</h3>
@@ -545,7 +600,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
           {/* Tier 1: School Director Invite (FREE) */}
-          <div className={`p-8 border rounded-3xl flex flex-col justify-between transition-all relative ${
+          <div className={`pricing-card p-8 border rounded-3xl flex flex-col justify-between transition-[border-color] relative ${
             isNight ? 'bg-white/5 border-emerald-500/30' : 'bg-white border-zinc-200'
           }`}>
             <div>
@@ -590,14 +645,14 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setShowInviteModal(true)}
-              className="w-full mt-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs rounded-2xl transition-all cursor-pointer shadow-lg shadow-emerald-500/20 active:scale-95"
+              className="w-full mt-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs rounded-2xl transition-[background-color,transform] cursor-pointer shadow-lg shadow-emerald-500/20 active:scale-95"
             >
               {isKo ? '💌 원장님께 체키 추천/초대하기' : '💌 Invite School Director'}
             </button>
           </div>
 
           {/* Tier 2: Monthly Parent Subscription */}
-          <div className={`p-8 border rounded-3xl flex flex-col justify-between transition-all relative ${
+          <div className={`pricing-card p-8 border rounded-3xl flex flex-col justify-between transition-[border-color] relative ${
             isNight ? 'bg-white/5 border-white/10 hover:border-orange-500/50' : 'bg-white border-zinc-200'
           }`}>
             <div>
@@ -644,7 +699,7 @@ export default function Home() {
               onClick={() => {
                 window.location.href = '/subscribe';
               }}
-              className="w-full mt-6 py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-black text-xs rounded-2xl border border-white/20 transition-all cursor-pointer flex items-center justify-between group active:scale-95"
+              className="w-full mt-6 py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-black text-xs rounded-2xl border border-white/20 transition-[background-color,transform] cursor-pointer flex items-center justify-between group active:scale-95"
             >
               <span>{isKo ? '월간 구독 시작하기' : 'Subscribe Monthly (₩9,900)'}</span>
               <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
@@ -654,7 +709,7 @@ export default function Home() {
           </div>
 
           {/* Tier 3: Yearly Parent Subscription (Best Value) */}
-          <div className={`p-8 border-2 rounded-3xl flex flex-col justify-between transition-all relative scale-[1.02] ${
+          <div className={`pricing-card p-8 border-2 rounded-3xl flex flex-col justify-between transition-colors relative scale-[1.02] ${
             isNight ? 'bg-[#0f0904] border-orange-500 shadow-2xl shadow-orange-500/20' : 'bg-orange-50 border-orange-500'
           }`}>
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-orange-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full shadow-md font-mono">
@@ -704,7 +759,7 @@ export default function Home() {
               onClick={() => {
                 window.location.href = '/subscribe';
               }}
-              className="w-full mt-6 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-2xl shadow-xl shadow-orange-500/30 transition-all cursor-pointer flex items-center justify-between group active:scale-95"
+              className="w-full mt-6 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-2xl shadow-xl shadow-orange-500/30 transition-[background-color,transform] cursor-pointer flex items-center justify-between group active:scale-95"
             >
               <span>{isKo ? '연간 패스 선택하기 (₩99,000)' : 'Subscribe Yearly (₩99,000)'}</span>
               <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
@@ -722,7 +777,7 @@ export default function Home() {
         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.05] bg-noise mix-blend-overlay" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] aspect-square bg-brand/10 rounded-full blur-[150px] pointer-events-none" />
 
-        <h2 className="relative z-10 text-[clamp(3rem,6vw,6rem)] font-bold tracking-tight text-white max-w-4xl leading-[1.05] mb-16">
+        <h2 className="footer-cta relative z-10 text-[clamp(3rem,6vw,6rem)] font-bold tracking-tight text-white max-w-4xl leading-[1.05] mb-16">
           {isKo ? (
             <>스마트한 숙제 관리, <br />지금 시작하세요.</>
           ) : (
@@ -730,7 +785,7 @@ export default function Home() {
           )}
         </h2>
 
-        <div className="relative z-10 flex flex-col sm:flex-row gap-6">
+        <div className="footer-cta relative z-10 flex flex-col sm:flex-row gap-6">
           <a
             href="/app"
             onClick={(e) => {
@@ -845,7 +900,7 @@ export default function Home() {
               href="https://www.instagram.com/chekki__ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-12 h-12 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500"
+              className="w-12 h-12 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-[background-color,transform] duration-500"
             >
               <InstagramLogo size={24} weight="fill" />
             </a>
@@ -853,7 +908,7 @@ export default function Home() {
               href="https://www.tiktok.com/@chekkiai"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-12 h-12 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-all duration-500"
+              className="w-12 h-12 rounded-full bg-black/20 border border-white/5 flex items-center justify-center text-white hover:bg-black/40 hover:scale-110 transition-[background-color,transform] duration-500"
             >
               <TiktokLogo size={24} weight="fill" />
             </a>
@@ -916,7 +971,7 @@ export default function Home() {
                     setTimeout(() => setCopiedInvite(false), 2500);
                   }
                 }}
-                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs rounded-2xl shadow-lg shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs rounded-2xl shadow-lg shadow-emerald-500/20 transition-[background-color,transform] cursor-pointer flex items-center justify-center gap-2 active:scale-95"
               >
                 {copiedInvite ? (
                   <>
@@ -935,7 +990,7 @@ export default function Home() {
                 onClick={() => {
                   window.location.href = '/schools';
                 }}
-                className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs rounded-2xl transition-all cursor-pointer text-center"
+                className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs rounded-2xl transition-[background-color] cursor-pointer text-center"
               >
                 {isKo ? '🏫 학원용 안내 페이지 직접 둘러보기 (/schools)' : '🏫 View School Features (/schools)'}
               </button>

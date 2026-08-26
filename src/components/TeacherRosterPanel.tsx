@@ -161,7 +161,7 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
                       type="button"
                       onClick={() => handleToggleAssignment(c.id, t.uid, isAssigned)}
                       disabled={busyKey === key}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer disabled:opacity-40 ${
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-[background-color,border-color,opacity] cursor-pointer disabled:opacity-40 ${
                         isAssigned
                           ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
                           : isNight

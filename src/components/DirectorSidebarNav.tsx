@@ -17,7 +17,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
     <>
       <button
         onClick={() => setActiveTab('director_hq')}
-        className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+        className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
           activeTab === 'director_hq'
             ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
             : isNight
@@ -45,7 +45,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
 
         <button
           onClick={() => setActiveTab('students')}
-          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
             activeTab === 'students'
               ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
               : isNight
@@ -68,7 +68,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
 
         <button
           onClick={() => setActiveTab('classes')}
-          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
             activeTab === 'classes'
               ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
               : isNight
@@ -91,7 +91,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
 
         <button
           onClick={() => setActiveTab('teacher_assignment')}
-          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
             activeTab === 'teacher_assignment'
               ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
               : isNight
@@ -114,7 +114,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
 
         <button
           onClick={() => setActiveTab('log_compliance')}
-          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
+          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
             activeTab === 'log_compliance'
               ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
               : isNight

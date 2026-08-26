@@ -466,7 +466,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
   return (
     <div
-      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl transition-all max-w-3xl mx-auto w-full ${
+      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl transition-colors max-w-3xl mx-auto w-full ${
         isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
@@ -487,7 +487,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setShowVoiceFill((prev) => !prev)}
-              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all cursor-pointer active:scale-95 ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-[background-color,transform] cursor-pointer active:scale-95 ${
                 showVoiceFill
                   ? 'bg-orange-500 border-orange-500 text-black'
                   : isNight
@@ -505,7 +505,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               type="button"
               onClick={playScriptedVoiceFill}
               disabled={isPlayingScriptedVoiceFill}
-              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all cursor-pointer active:scale-95 disabled:cursor-default ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-[background-color,transform] cursor-pointer active:scale-95 disabled:cursor-default ${
                 isPlayingScriptedVoiceFill
                   ? 'bg-orange-500 border-orange-500 text-black animate-pulse'
                   : isNight
@@ -660,7 +660,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 key={opt}
                 type="button"
                 onClick={() => setEnergyLevel(opt)}
-                className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center justify-between cursor-pointer ${
+                className={`p-3 rounded-xl border text-xs font-bold transition-colors text-left flex items-center justify-between cursor-pointer ${
                   energyLevel === opt
                     ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-md'
                     : isNight
@@ -686,7 +686,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                   key={act}
                   type="button"
                   onClick={() => toggleActivity(act)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5 ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer border flex items-center gap-1.5 ${
                     active
                       ? 'bg-orange-500 border-orange-500 text-black shadow-md'
                       : isNight
@@ -735,7 +735,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 key={idx}
                 type="button"
                 onClick={() => setGeneralComments(preset)}
-                className="px-2.5 py-1 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[11px] font-medium border border-orange-500/20 transition-all cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[11px] font-medium border border-orange-500/20 transition-colors cursor-pointer"
               >
                 {isKo ? '+ 프리셋: ' : '+ Preset: '}{preset.slice(0, 32)}...
               </button>
@@ -756,7 +756,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             <button
               type="button"
               onClick={handleOpenAddModal}
-              className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-black rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-md active:scale-95"
+              className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-black rounded-xl text-xs font-bold transition-[background-color,transform] cursor-pointer flex items-center gap-1 shadow-md active:scale-95"
             >
               <Plus size={14} weight="bold" />
               <span>{isKo ? '+ 학생 추가' : '+ Add A Student'}</span>
@@ -836,7 +836,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         <button
           type="submit"
           disabled={isSubmitting || isRealLogIncomplete}
-          className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+          className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-[background-color,transform,opacity] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <>
@@ -900,7 +900,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => setModalCategory('praise')}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                       modalCategory === 'praise'
                         ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 font-black'
                         : 'bg-white/5 border-white/10 text-zinc-400'
@@ -912,7 +912,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => setModalCategory('attention')}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                       modalCategory === 'attention'
                         ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-black'
                         : 'bg-white/5 border-white/10 text-zinc-400'
@@ -1022,7 +1022,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     setEditingExceptionIndex(null);
                     setShowExceptionModal(false);
                   }}
-                  className="w-1/2 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+                  className="w-1/2 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold rounded-xl text-xs shadow-md transition-colors cursor-pointer"
                 >
                   {editingExceptionIndex !== null
                     ? (isKo ? '변경사항 저장' : 'Save Changes')

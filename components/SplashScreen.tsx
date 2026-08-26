@@ -88,7 +88,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
         <div className="text-center space-y-2 h-24">
           <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter font-display leading-none">
             Chekki
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">
+            <span className="text-brand-orange">
               AI
             </span>
           </h1>
@@ -96,7 +96,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish }) => {
             {features.map((feat, index) => (
               <p
                 key={index}
-                className={`absolute inset-0 w-full text-center text-zinc-400 font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all duration-200 transform ${index === featureIndex ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+                className={`absolute inset-0 w-full text-center text-zinc-400 font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] transition-[opacity,transform] duration-200 transform ${index === featureIndex ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
               >
                 {feat}
               </p>

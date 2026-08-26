@@ -101,7 +101,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     return (
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`group relative rounded-[2.5rem] border overflow-hidden transition-all duration-300 ease-in-out p-1.5 ${
+        className={`group relative rounded-[2.5rem] border overflow-hidden transition-[background-color,border-color,box-shadow,transform] duration-300 ease-out p-1.5 ${
           isActive
             ? isNight
               ? 'bg-zinc-900 border-orange-500/50 shadow-[0_20px_50px_rgba(249,115,22,0.15)] scale-[1.02]'
@@ -121,7 +121,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
         style={style}
       >
         <div
-          className={`w-full h-full rounded-[calc(2.5rem-0.375rem)] ${isNight ? 'bg-[#0A0A0A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)]'} transition-all duration-300 ease-in-out`}
+          className={`w-full h-full rounded-[calc(2.5rem-0.375rem)] ${isNight ? 'bg-[#0A0A0A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)]'} transition-[background-color,box-shadow] duration-300 ease-out`}
         >
           <div
             role="button"
@@ -146,7 +146,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
             className="p-4 md:p-8 flex items-start gap-4 md:gap-8 cursor-pointer"
           >
             <div
-              className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 ease-in-out ${
+              className={`w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-[background-color,color,box-shadow,transform] duration-300 ease-out ${
                 isActive
                   ? 'bg-orange-500 text-black shadow-lg rotate-3'
                   : item.is_correct === false && hasHandwriting !== false
@@ -242,7 +242,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                 <>
                   {/* ACCORDION 2: CHECK UNDERSTANDING / TUTOR GUIDE */}
                   <div
-                    className={`${isNight ? 'bg-orange-500/5 border-orange-500/10 shadow-inner' : 'bg-orange-50/50 border-orange-100 shadow-sm'} border rounded-3xl overflow-hidden transition-all duration-200`}
+                    className={`${isNight ? 'bg-orange-500/5 border-orange-500/10 shadow-inner' : 'bg-orange-50/50 border-orange-100 shadow-sm'} border rounded-3xl overflow-hidden transition-[background-color,border-color] duration-200`}
                   >
                     <div
                       onClick={() => {
@@ -271,7 +271,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                     </div>
 
                     <div
-                      className={`transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden ${isScriptExpanded ? 'max-h-[3000px] border-t border-orange-500/10 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 origin-top'}`}
+                      className={`transition-[max-height,opacity,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden ${isScriptExpanded ? 'max-h-[3000px] border-t border-orange-500/10 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 origin-top'}`}
                     >
                       <div className="p-5 flex flex-col gap-5">
                         <div className="flex items-center justify-between gap-3">
@@ -296,7 +296,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                 e.stopPropagation();
                                 onSetScriptLanguage(item.id, 'ko');
                               }}
-                              className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${currentScriptLang === 'ko' ? 'bg-orange-500 text-black shadow-lg' : 'text-zinc-400 hover:text-zinc-300'}`}
+                              className={`px-3 py-1 rounded-md text-[10px] font-black transition-colors ${currentScriptLang === 'ko' ? 'bg-orange-500 text-black shadow-lg' : 'text-zinc-400 hover:text-zinc-300'}`}
                             >
                               KO
                             </button>
@@ -305,7 +305,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                 e.stopPropagation();
                                 onSetScriptLanguage(item.id, 'en');
                               }}
-                              className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${currentScriptLang === 'en' ? 'bg-orange-500 text-black shadow-lg' : 'text-zinc-400 hover:text-zinc-300'}`}
+                              className={`px-3 py-1 rounded-md text-[10px] font-black transition-colors ${currentScriptLang === 'en' ? 'bg-orange-500 text-black shadow-lg' : 'text-zinc-400 hover:text-zinc-300'}`}
                             >
                               EN
                             </button>
@@ -335,7 +335,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                                   onPlayAudio(displayScript || '');
                                 }
                               }}
-                              className={`group flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-black tracking-wide transition-all border w-full sm:w-auto ${userPlan === 'pro' ? 'bg-blue-500 text-white border-blue-400 hover:scale-[1.02] active:scale-[0.97] shadow-md shadow-blue-500/20' : isNight ? 'bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20 active:scale-[0.97]' : 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 active:scale-[0.97]'}`}
+                              className={`group flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-black tracking-wide transition-[background-color,transform] border w-full sm:w-auto ${userPlan === 'pro' ? 'bg-blue-500 text-white border-blue-400 hover:scale-[1.02] active:scale-[0.97] shadow-md shadow-blue-500/20' : isNight ? 'bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20 active:scale-[0.97]' : 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 active:scale-[0.97]'}`}
                             >
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z" />
@@ -358,7 +358,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
 
                   {/* ACCORDION 1: SHOW ANSWER & OPTIONS */}
                   <div
-                    className={`${isNight ? 'bg-emerald-500/5 border-emerald-500/10 shadow-inner' : 'bg-emerald-50/50 border-emerald-100 shadow-sm'} border rounded-3xl overflow-hidden transition-all duration-200`}
+                    className={`${isNight ? 'bg-emerald-500/5 border-emerald-500/10 shadow-inner' : 'bg-emerald-50/50 border-emerald-100 shadow-sm'} border rounded-3xl overflow-hidden transition-[background-color,border-color] duration-200`}
                   >
                     <div
                       onClick={() => {
@@ -385,7 +385,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                     </div>
 
                     <div
-                      className={`transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden ${isAnswerExpanded ? 'max-h-[3000px] border-t border-emerald-500/10 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 origin-top'}`}
+                      className={`transition-[max-height,opacity,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden ${isAnswerExpanded ? 'max-h-[3000px] border-t border-emerald-500/10 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 origin-top'}`}
                     >
                       <div className="p-5 flex flex-col gap-6">
                         {/* Voice Coach Inside Answer */}
@@ -470,7 +470,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
 
                         {/* Answer Display */}
                         <div
-                          className={`relative px-0 py-1 transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${!isAuthenticated && index !== 0 ? 'blur-[4px] opacity-40 pointer-events-none select-none' : ''} ${speechResult?.id === item.id ? (speechResult.success ? 'scale-110 z-10' : 'translate-x-1') : ''}`}
+                          className={`relative px-0 py-1 transition-[opacity,filter,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${!isAuthenticated && index !== 0 ? 'blur-[4px] opacity-40 pointer-events-none select-none' : ''} ${speechResult?.id === item.id ? (speechResult.success ? 'scale-110 z-10' : 'translate-x-1') : ''}`}
                         >
                           {item.is_correct === false && hasHandwriting !== false && (
                             <div className="mb-3 p-3 rounded-2xl bg-red-500/5 border border-red-500/10">

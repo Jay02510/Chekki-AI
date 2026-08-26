@@ -9,11 +9,11 @@ colors:
   brand-card: "#0f1014"
 typography:
   display:
-    fontFamily: "'Space Grotesk', sans-serif"
+    fontFamily: "'Bricolage Grotesque', sans-serif"
     fontWeight: 900
     letterSpacing: "-0.02em"
   body:
-    fontFamily: "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "'Onest', ui-sans-serif, system-ui, sans-serif"
     fontWeight: 500
   korean:
     fontFamily: "'Noto Sans KR', sans-serif"
@@ -51,7 +51,7 @@ This session (2026-08-17) also closed out a real drift problem: an undocumented 
 - Double-bezel construction on nearly every card and modal
 - Soft, large-blur ambient shadows over hard drop-shadows
 - Full Korean/English parity in every component, never a fallback language
-- `font-display` (Space Grotesk, weight 900) reserved for headlines; body copy stays in Plus Jakarta Sans
+- `font-display` (Bricolage Grotesque, weight 900) reserved for headlines; body copy stays in Onest
 
 ## Colors
 
@@ -74,12 +74,12 @@ One accent, used deliberately and sparingly, against a near-black base.
 
 ## Typography
 
-**Display Font:** Space Grotesk (weight 900, `font-display`)
-**Body Font:** Plus Jakarta Sans (`font-sans`, the default)
+**Display Font:** Bricolage Grotesque (weight 900, `font-display`)
+**Body Font:** Onest (`font-sans`, the default)
 **Korean Font:** Noto Sans KR (`font-korean`) — used wherever Korean text renders, never left to fall back to the Latin body font
 **Hand Font:** Patrick Hand (`font-hand`) — reserved for handwriting-style content (e.g. displaying a student's answer as if handwritten)
 
-**Character:** Space Grotesk at maximum weight gives headlines a blunt, confident, almost stamped quality — deliberately not delicate or editorial. Plus Jakarta Sans keeps body copy warm and legible at the smaller sizes a phone screen demands.
+**Character:** Bricolage Grotesque at maximum weight gives headlines a blunt, confident, almost stamped quality — deliberately not delicate or editorial. Onest keeps body copy warm and legible at the smaller sizes a phone screen demands.
 
 ### Hierarchy
 - **Display** (900, `text-4xl` to `text-8xl` depending on context, `tracking-tight`, `leading-tight` or tighter): Hero headlines and the camera/scan screen's primary state text. Always paired with `break-keep` so Korean line-wrapping never splits a word mid-character.

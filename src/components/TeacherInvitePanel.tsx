@@ -268,7 +268,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         <button
           type="button"
           onClick={() => setRole('ft')}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
             role === 'ft' ? 'bg-orange-500 border-orange-500 text-black' : isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-600'
           }`}
         >
@@ -277,7 +277,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         <button
           type="button"
           onClick={() => setRole('kt')}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
             role === 'kt' ? 'bg-blue-500 border-blue-500 text-white' : isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-600'
           }`}
         >
@@ -368,7 +368,7 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         type="button"
         onClick={isBulkMode ? handleSendBulkInvites : handleSendInvite}
         disabled={isSending || !classId || (role === 'ft' ? remainingFt <= 0 : remainingKt <= 0)}
-        className="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-xs rounded-xl transition-all"
+        className="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-xs rounded-xl transition-[background-color,opacity]"
       >
         {isSending
           ? (isKo ? '전송 중...' : 'Sending...')

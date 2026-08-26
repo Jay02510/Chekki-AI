@@ -209,7 +209,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
       <div
         id={inFullscreen ? 'worksheet-overlay-fullscreen' : 'worksheet-overlay-capture'}
         onContextMenu={(e) => e.preventDefault()}
-        className={`group relative transform-gpu transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] flex items-center justify-center select-none ${
+        className={`group relative transform-gpu transition-[width,height] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] flex items-center justify-center select-none ${
           inFullscreen
             ? viewMode === 'fit'
               ? 'h-full w-full'
@@ -232,7 +232,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
           <img
             src={imageUrl}
             alt="Worksheet"
-            className={`block transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform-gpu pointer-events-none ${
+            className={`block transition-[opacity,transform,filter] duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform-gpu pointer-events-none ${
               imageLoaded || inFullscreen ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'
             }`}
             style={{
@@ -307,7 +307,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 >
                   <div
                     className={`
-                        rounded-2xl shadow-md border-2 flex items-center gap-2 transform transition-all active:scale-[0.97] group cursor-grab w-fit max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
+                        rounded-2xl shadow-md border-2 flex items-center gap-2 transform transition-transform active:scale-[0.97] group cursor-grab w-fit max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
                         ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-lg ring-4 z-[1000]' : ''}
                         ${
                           isFocused
@@ -358,14 +358,14 @@ export const WorksheetOverlay: React.FC<Props> = ({
   return (
     <>
       <div
-        className={`w-full flex flex-col ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200 shadow-xl'} lg:overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-700 ${className || 'h-full rounded-3xl'}`}
+        className={`w-full flex flex-col ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200 shadow-xl'} lg:overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-[background-color,border-color] duration-700 ${className || 'h-full rounded-3xl'}`}
       >
         <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50 flex flex-col items-end pointer-events-none gap-2">
           <div className="flex flex-col gap-3 items-start pointer-events-auto relative shrink-0">
             <button
               aria-label={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
               onClick={() => setShowSettings(!showSettings)}
-              className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/10 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-70 md:opacity-40 md:hover:opacity-100'} hover:scale-110 active:scale-90 hover:border-orange-500/50 hover:text-orange-500 transition-all duration-200 flex items-center justify-center text-xl shadow-2xl group shrink-0`}
+              className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/10 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-70 md:opacity-40 md:hover:opacity-100'} hover:scale-110 active:scale-90 hover:border-orange-500/50 hover:text-orange-500 transition-[border-color,color,opacity,transform] duration-200 flex items-center justify-center text-xl shadow-2xl group shrink-0`}
               title={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
             >
               <svg
@@ -410,7 +410,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                   <div className="w-full h-px bg-white/10"></div>
                   <button
                     onClick={resetPositions}
-                    className={`w-full py-3 rounded-2xl ${isNight ? 'bg-white/5 text-white border-white/10 hover:bg-white/10' : 'bg-zinc-100 text-zinc-900 border-zinc-200 hover:bg-zinc-200'} transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border`}
+                    className={`w-full py-3 rounded-2xl ${isNight ? 'bg-white/5 text-white border-white/10 hover:bg-white/10' : 'bg-zinc-100 text-zinc-900 border-zinc-200 hover:bg-zinc-200'} transition-[background-color,transform] flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border`}
                   >
                     <span className="text-base">🔄</span>{' '}
                     {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
@@ -423,7 +423,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
           <div className="flex items-center gap-3 pointer-events-auto shrink-0">
             <button
               onClick={() => setIsFullscreen(true)}
-              className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/30 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center hover:bg-orange-500 hover:border-orange-400 hover:text-white opacity-70 md:opacity-40 md:hover:opacity-100 hover:scale-110 active:scale-90 transition-all duration-200 shadow-2xl group shrink-0`}
+              className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/30 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center hover:bg-orange-500 hover:border-orange-400 hover:text-white opacity-70 md:opacity-40 md:hover:opacity-100 hover:scale-110 active:scale-90 transition-[background-color,border-color,color,opacity,transform] duration-200 shadow-2xl group shrink-0`}
               title="Full Screen Focus"
             >
               <svg
@@ -466,7 +466,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
           <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none z-[60]">
             <button
               onClick={handleToggleAnswers}
-              className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
+              className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-[background-color,border-color,color,transform] active:scale-[0.97] border-2 ${
                 showAnswers
                   ? 'bg-blue-500 text-white border-blue-400 shadow-sm'
                   : isNight
@@ -497,7 +497,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
               <div className="flex gap-4 pointer-events-auto shrink-0">
                 <button
                   onClick={() => setShowFullscreenSettings(!showFullscreenSettings)}
-                  className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showFullscreenSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-40 hover:opacity-100'} transition-all flex items-center justify-center text-2xl shadow-2xl active:scale-90 group relative`}
+                  className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showFullscreenSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-40 hover:opacity-100'} transition-[border-color,color,opacity] flex items-center justify-center text-2xl shadow-2xl active:scale-90 group relative`}
                   title={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
                 >
                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -535,7 +535,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                       <div className="w-full h-px bg-white/10"></div>
                       <button
                         onClick={resetPositions}
-                        className="w-full py-4 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border border-white/10"
+                        className="w-full py-4 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-[background-color,transform] flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border border-white/10"
                       >
                         <span className="text-lg">🔄</span>{' '}
                         {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
@@ -549,7 +549,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                   <div className="flex justify-center pointer-events-none absolute left-1/2 -translate-x-1/2">
                     <button
                       onClick={handleToggleAnswers}
-                      className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-[0.97] border-2 ${
+                      className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-[background-color,border-color,color,transform] active:scale-[0.97] border-2 ${
                         showAnswers
                           ? 'bg-blue-500 text-white border-blue-400 shadow-sm'
                           : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-blue-500/50 hover:text-blue-400'
@@ -568,7 +568,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
                 <button
                   onClick={() => setViewMode(viewMode === 'fit' ? 'fill' : 'fit')}
-                  className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center opacity-40 hover:opacity-100 transition-all shadow-2xl active:scale-90`}
+                  className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity shadow-2xl active:scale-90`}
                   title={
                     viewMode === 'fit'
                       ? language === 'ko'
@@ -613,7 +613,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
               <button
                 onClick={() => setIsFullscreen(false)}
-                className="w-14 h-14 rounded-full bg-orange-600/90 hover:bg-orange-500 backdrop-blur-xl flex items-center justify-center text-black opacity-40 hover:opacity-100 transition-all active:scale-90 border-2 border-white/30 pointer-events-auto shadow-2xl group shrink-0"
+                className="w-14 h-14 rounded-full bg-orange-600/90 hover:bg-orange-500 backdrop-blur-xl flex items-center justify-center text-black opacity-40 hover:opacity-100 transition-[background-color,opacity,transform] active:scale-90 border-2 border-white/30 pointer-events-auto shadow-2xl group shrink-0"
               >
                 <svg
                   className="w-10 h-10 group-hover:rotate-90 transition-transform duration-200"

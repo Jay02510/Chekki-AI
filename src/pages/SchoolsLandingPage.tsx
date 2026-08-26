@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  GraduationCap, 
-  Sparkle, 
-  Users, 
-  ChartBar, 
-  FileText, 
-  ArrowRight, 
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReducedMotion } from 'framer-motion';
+import {
+  GraduationCap,
+  Sparkle,
+  Users,
+  ChartBar,
+  FileText,
+  ArrowRight,
   CheckCircle,
   Sun,
   Moon,
@@ -145,11 +148,69 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
     return currency === 'KRW' ? `₩${price.toLocaleString()}` : `$${price}`;
   };
 
+  // Scroll-driven entrance motion — mirrors the pattern in src/Landing.tsx
+  // (gsap.context + ScrollTrigger, power3.out, no bounce/overshoot per
+  // DESIGN.md's motion rules) so this page doesn't invent a second motion
+  // vocabulary. One-shot reveals only (toggleActions play-none-none-none),
+  // fully skipped under prefers-reduced-motion.
+  const reduceMotion = useReducedMotion();
 
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    if (reduceMotion) return;
 
+    const ctx = gsap.context(() => {
+      gsap.from('.hero-text', {
+        y: 40,
+        opacity: 0,
+        duration: 1,
+        stagger: 0.12,
+        ease: 'power3.out',
+      });
+      gsap.from('.hero-mascot', {
+        scale: 0.94,
+        opacity: 0,
+        duration: 1.1,
+        delay: 0.15,
+        ease: 'power3.out',
+      });
+
+      gsap.utils.toArray<HTMLElement>('.bento-card').forEach((el, i) => {
+        gsap.from(el, {
+          y: 32,
+          opacity: 0,
+          duration: 0.7,
+          delay: (i % 3) * 0.08,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' },
+        });
+      });
+
+      gsap.utils.toArray<HTMLElement>('.pricing-card').forEach((el, i) => {
+        gsap.from(el, {
+          y: 28,
+          opacity: 0,
+          duration: 0.6,
+          delay: (i % 4) * 0.06,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' },
+        });
+      });
+
+      gsap.from('.cta-reveal', {
+        y: 24,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: '.cta-reveal', start: 'top 85%', toggleActions: 'play none none none' },
+      });
+    });
+
+    return () => ctx.revert();
+  }, [reduceMotion]);
 
   return (
-    <div className={`min-h-screen ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-slate-50 text-zinc-900'} font-sans transition-colors duration-200 relative overflow-hidden flex flex-col`}>
+    <div className={`min-h-dvh ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-slate-50 text-zinc-900'} font-sans transition-colors duration-200 relative overflow-hidden flex flex-col`}>
       {/* Background radial glows */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[100px] pointer-events-none" />
@@ -182,7 +243,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <button
               type="button"
               onClick={handleLangToggle}
-              className={`px-3 py-1 min-h-11 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1 min-h-11 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
                 isNight 
                   ? 'bg-white/5 border-white/15 text-white/90 hover:bg-white/15' 
                   : 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200'
@@ -269,12 +330,12 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         {/* Left: Text Side */}
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full z-10">
           {/* Eyebrow */}
-          <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-4 block">
+          <span className="hero-text text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-4 block">
             {isKo ? '전국 어학원·영유 전용 스마트 자동 채점 & 학부모 리포트 플랫폼' : 'AUTOMATED ACADEMY GRADING & PARENT CARE'}
           </span>
 
           {/* Headline */}
-          <h1 className={`font-display text-3xl sm:text-5xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] mb-6 text-balance ${isNight ? 'text-white' : 'text-zinc-900'} break-keep`}>
+          <h1 className={`hero-text font-display text-3xl sm:text-5xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] mb-6 text-balance ${isNight ? 'text-white' : 'text-zinc-900'} break-keep`}>
             {isKo ? (
               <>숙제 채점, 학부모 안내. <span className="text-orange-500">모두 자동으로.</span></>
             ) : (
@@ -283,14 +344,14 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </h1>
 
           {/* Subtext */}
-          <p className={`text-base sm:text-lg max-w-xl leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'} break-keep`}>
-            {isKo 
+          <p className={`hero-text text-base sm:text-lg max-w-xl leading-relaxed mb-8 ${isNight ? 'text-zinc-400' : 'text-zinc-600'} break-keep`}>
+            {isKo
               ? '정답지는 한 번만 등록하세요. 가정 숙제 스캔은 그 정답지 기준으로 자동 채점되고, 보강할 내용은 다음 수업 전에 미리 파악되며, 학부모 리포트까지 한 번에 정리됩니다.'
               : "Upload the week's answer key once, autograde every home scan against it, and know exactly what to reteach — before the parent report even goes out."}
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center md:justify-start items-center">
+          <div className="hero-text flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center md:justify-start items-center">
             <button
               type="button"
               onClick={() => {
@@ -298,7 +359,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 sessionStorage.setItem('chekki_teacher_seats', '10');
                 window.location.href = '/teacher?activate=true&role=director&plan=school_pro';
               }}
-              className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-3xl shadow-lg shadow-orange-500/25 transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
+              className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-3xl shadow-lg shadow-orange-500/25 transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
             >
               <span>{isKo ? '⚡ 60초 무료 캠퍼스 구축 시작하기 →' : 'Start Free 60-Second Campus Setup →'}</span>
               <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
@@ -307,7 +368,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
 
         {/* Right: Teacher Mascot Image Side (Holding Laptop) */}
-        <div className="flex-1 w-full flex justify-center items-center relative z-10 md:-translate-x-4">
+        <div className="hero-mascot flex-1 w-full flex justify-center items-center relative z-10 md:-translate-x-4">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[380px] md:max-w-[460px] aspect-square bg-orange-500/15 rounded-full blur-[90px] pointer-events-none" />
           <img
             src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1784647907/Chekki_Holding_Laptop_2_vhwcgy.jpg"
@@ -342,7 +403,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Bento Cell 1: Curriculum Pre-seeding (Spans 2 columns) */}
-          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ${
+          <div className={`bento-card md:col-span-2 p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-[color,background-color,border-color,box-shadow,transform] duration-500 ${
             isNight 
               ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-brand-dark-elevated' 
               : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
@@ -388,7 +449,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </div>
 
           {/* Bento Cell 2: Roster approvals (1 column) */}
-          <div className={`p-6 md:p-8 border rounded-3xl transition-all duration-500 ${
+          <div className={`bento-card p-6 md:p-8 border rounded-3xl transition-[color,background-color,border-color,box-shadow,transform] duration-500 ${
             isNight
               ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-brand-dark-elevated'
               : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
@@ -422,7 +483,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </div>
 
           {/* Bento Cell 3: Analytics (1 column) */}
-          <div className={`p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-all duration-500 ${
+          <div className={`bento-card p-6 md:p-8 border rounded-3xl flex flex-col justify-between transition-[color,background-color,border-color,box-shadow,transform] duration-500 ${
             isNight 
               ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-brand-dark-elevated' 
               : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
@@ -458,7 +519,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           </div>
 
           {/* Bento Cell 4: Parent Sync (Spans 2 columns) */}
-          <div className={`md:col-span-2 p-6 md:p-8 border rounded-3xl transition-all duration-500 ${
+          <div className={`bento-card md:col-span-2 p-6 md:p-8 border rounded-3xl transition-[color,background-color,border-color,box-shadow,transform] duration-500 ${
             isNight 
               ? 'bg-brand-dark border-white/10 hover:border-pink-500/50 hover:bg-brand-dark-elevated' 
               : 'bg-white border-zinc-200/90 hover:border-orange-500/50 hover:bg-orange-50/40 shadow-sm'
@@ -520,7 +581,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <button
               type="button"
               onClick={() => setBillingCycle('monthly')}
-              className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              className={`px-5 py-2 rounded-full text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
                 billingCycle === 'monthly'
                   ? 'bg-orange-500 text-black shadow-md'
                   : isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
@@ -531,7 +592,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <button
               type="button"
               onClick={() => setBillingCycle('yearly')}
-              className={`px-5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-5 py-2 rounded-full text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] flex items-center gap-1.5 cursor-pointer ${
                 billingCycle === 'yearly'
                   ? 'bg-orange-500 text-black shadow-md'
                   : isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
@@ -569,7 +630,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             <button
               type="button"
               onClick={() => openPlanModal('trial', 1, 1)}
-              className="w-full sm:w-auto px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-xl transition-all shadow-md active:scale-[0.97] whitespace-nowrap cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-xl transition-[color,background-color,border-color,box-shadow,transform] shadow-md active:scale-[0.97] whitespace-nowrap cursor-pointer"
             >
               {isKo ? '지금 무료 시작하기' : 'Start Free Trial'}
             </button>
@@ -580,7 +641,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Card 1: Solo Tutor & Study Room (1 Seat) */}
           <div 
             onClick={() => openPlanModal('solo', 1, 1)}
-            className={`p-5 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
+            className={`pricing-card p-5 border rounded-3xl flex flex-col justify-between transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer group ${
               isNight 
                 ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
                 : 'bg-white border-zinc-200 hover:border-orange-500/50 hover:shadow-xl shadow-sm'
@@ -644,7 +705,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 e.stopPropagation();
                 openPlanModal('solo', 1, 1);
               }}
-              className={`w-full py-2.5 font-bold text-xs rounded-xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
+              className={`w-full py-2.5 font-bold text-xs rounded-xl border text-center transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] cursor-pointer ${
                 isNight 
                   ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' 
                   : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
@@ -657,7 +718,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Card 2: Starter Academy Pack (3 Seats) */}
           <div 
             onClick={() => openPlanModal('starter', 3, 1)}
-            className={`p-5 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
+            className={`pricing-card p-5 border rounded-3xl flex flex-col justify-between transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer group ${
               isNight 
                 ? 'bg-brand-dark border-white/10 hover:border-orange-500/50 hover:bg-zinc-900/30' 
                 : 'bg-white border-zinc-200 hover:border-orange-500/50 hover:shadow-xl shadow-sm'
@@ -721,7 +782,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 e.stopPropagation();
                 openPlanModal('starter', 3, 1);
               }}
-              className={`w-full py-2.5 font-bold text-xs rounded-xl border text-center transition-all active:scale-[0.98] cursor-pointer ${
+              className={`w-full py-2.5 font-bold text-xs rounded-xl border text-center transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] cursor-pointer ${
                 isNight 
                   ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' 
                   : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
@@ -734,7 +795,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Card 3: Chekki School Pro (All-in-One Master Bundle) [MOST POPULAR] */}
           <div 
             onClick={() => openPlanModal('school_pro', 10, 1)}
-            className={`p-5 border rounded-3xl flex flex-col justify-between transition-all relative scale-[1.02] cursor-pointer group ${
+            className={`pricing-card p-5 border rounded-3xl flex flex-col justify-between transition-[color,background-color,border-color,box-shadow,transform] relative scale-[1.02] cursor-pointer group ${
               isNight 
                 ? 'bg-[#0a0705] border-orange-500/80 text-white shadow-2xl shadow-orange-500/10 hover:border-orange-500' 
                 : 'bg-gradient-to-b from-orange-500/[0.08] to-white border-2 border-orange-500 text-zinc-900 shadow-xl hover:border-orange-600'
@@ -801,7 +862,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 e.stopPropagation();
                 openPlanModal('school_pro', 10, 1);
               }}
-              className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl text-center shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl text-center shadow-lg shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] cursor-pointer"
             >
               {isKo ? '마스터 스쿨 프로 시작' : 'Choose Master School Pro'}
             </button>
@@ -810,7 +871,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           {/* Card 4: Large Academy & Franchise (Enterprise) */}
           <div 
             onClick={() => openPlanModal('enterprise', 20, 10)}
-            className={`p-5 border rounded-3xl flex flex-col justify-between transition-all cursor-pointer group ${
+            className={`pricing-card p-5 border rounded-3xl flex flex-col justify-between transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer group ${
               isNight 
                 ? 'bg-brand-dark border-white/10 hover:border-purple-500/50 hover:bg-zinc-900/30' 
                 : 'bg-white border-zinc-200 hover:border-purple-500/50 hover:shadow-xl shadow-sm'
@@ -878,7 +939,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 e.stopPropagation();
                 openPlanModal('enterprise', 20, 10);
               }}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-2xl text-center transition-all active:scale-[0.98] shadow-md cursor-pointer"
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-2xl text-center transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] shadow-md cursor-pointer"
             >
               {isKo ? '맞춤 요금 도입 문의' : 'Contact Enterprise Team'}
             </button>
@@ -887,7 +948,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       </section>
 
       {/* --- GET IN TOUCH & CONSULTATION SECTION --- */}
-      <section id="talk-to-us" className={`py-20 px-6 max-w-4xl mx-auto w-full text-center rounded-3xl my-12 border transition-colors ${
+      <section id="talk-to-us" className={`cta-reveal py-20 px-6 max-w-4xl mx-auto w-full text-center rounded-3xl my-12 border transition-colors ${
         isNight ? 'bg-gradient-to-b from-zinc-950 to-brand-dark border-white/10' : 'bg-gradient-to-b from-orange-50/70 to-white border-zinc-200 shadow-md'
       }`}>
         <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">
@@ -909,7 +970,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               setConsultationSubmitted(false);
               setShowConsultationModal(true);
             }}
-            className="w-full sm:w-auto px-10 py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-10 py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>{isKo ? '1:1 학원 맞춤 상담 신청하기' : 'Schedule 1:1 Consultation'}</span>
             <ArrowRight size={16} weight="bold" />
@@ -955,7 +1016,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   type="button"
                   onClick={() => setShowConsultationModal(false)}
                   aria-label={isKo ? '상담 신청 닫기' : 'Close consultation form'}
-                  className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
+                  className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
                       : 'text-zinc-400 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
@@ -981,7 +1042,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <button
                     type="button"
                     onClick={() => setShowConsultationModal(false)}
-                    className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl transition-all shadow-md cursor-pointer"
+                    className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl transition-[color,background-color,border-color,box-shadow,transform] shadow-md cursor-pointer"
                   >
                     {isKo ? '확인' : 'Close'}
                   </button>
@@ -1043,7 +1104,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
                       placeholder={isKo ? '예: 김원장' : 'E.g. Director Kim'}
-                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
+                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-[color,background-color,border-color,box-shadow,transform] ${
                         isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                       }`}
                     />
@@ -1060,7 +1121,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       value={academyName}
                       onChange={(e) => setAcademyName(e.target.value)}
                       placeholder={isKo ? '예: 서초 에이펙스 어학원' : 'E.g. Apex Academy Seocho'}
-                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
+                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-[color,background-color,border-color,box-shadow,transform] ${
                         isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                       }`}
                     />
@@ -1078,7 +1139,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="010-0000-0000"
-                        className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
+                        className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-[color,background-color,border-color,box-shadow,transform] ${
                           isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                         }`}
                       />
@@ -1095,7 +1156,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="director@academy.com"
-                        className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all ${
+                        className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-[color,background-color,border-color,box-shadow,transform] ${
                           isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                         }`}
                       />
@@ -1112,7 +1173,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       value={consultationMessage}
                       onChange={(e) => setConsultationMessage(e.target.value)}
                       placeholder={isKo ? '예: 강사 5명, 원생 150명 규모 세팅 및 계좌이체 청구서 발행 문의' : 'E.g. 5 teachers, 150 students, bank invoice setup'}
-                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-all font-sans ${
+                      className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 transition-[color,background-color,border-color,box-shadow,transform] font-sans ${
                         isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                       }`}
                     />
@@ -1122,7 +1183,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <button
                       type="submit"
                       disabled={isSubmittingConsultation}
-                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer active:scale-98 flex items-center justify-center gap-2"
+                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-98 flex items-center justify-center gap-2"
                     >
                       {isSubmittingConsultation ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -1181,7 +1242,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   type="button"
                   onClick={() => setShowPricingModal(false)}
                   aria-label={isKo ? '요금제 상세 닫기' : 'Close plan details'}
-                  className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all active:scale-[0.95] cursor-pointer ${
+                  className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
                       : 'text-zinc-400 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
@@ -1290,7 +1351,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   sessionStorage.setItem('chekki_teacher_seats', activePlan.defaultTeachers?.toString() || '10');
                   window.location.href = `/teacher?activate=true&role=director&plan=${encodeURIComponent(selectedPlanId)}`;
                 }}
-                className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
                 <span>{isKo ? `⚡ 60초 무료 캠퍼스 구축 시작하기 (${activePlan.nameKo} 전용) →` : `⚡ Start Free 60-Second Setup (${activePlan.nameEn}) →`}</span>
               </button>
@@ -1336,7 +1397,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   type="button"
                   onClick={() => setShowPaymentModal(false)}
                   aria-label={isKo ? '결제 창 닫기' : 'Close checkout'}
-                  className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all active:scale-[0.95] cursor-pointer ${
+                  className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'
                       : 'text-zinc-400 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
@@ -1370,7 +1431,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('bank')}
-                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-md col-span-2`}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-md col-span-2`}
                   >
                     🏦 {isKo ? '계좌이체 / 전자세금계산서 청구 (공식)' : 'Corporate Bank Transfer & Tax Invoice'}
                   </button>
@@ -1445,7 +1506,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('bank')}
-                      className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                      className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer"
                     >
                       {isKo ? '→ 계좌이체로 전환하기' : '→ Switch to Bank Transfer'}
                     </button>
@@ -1472,7 +1533,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('bank')}
-                      className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                      className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer"
                     >
                       {isKo ? '→ 계좌이체로 전환하기' : '→ Switch to Bank Transfer'}
                     </button>
@@ -1570,7 +1631,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       setIsProcessingPayment(false);
                     }
                   }}
-                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/25 transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
                   {isProcessingPayment ? (
                     <div className="flex items-center gap-2">

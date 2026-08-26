@@ -149,7 +149,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
         {/* Progress Bar */}
         <div className="w-64 bg-zinc-200/20 dark:bg-zinc-800/40 h-2 rounded-full overflow-hidden mb-6 relative z-20 border border-white/5 shadow-inner">
           <div
-            className={`h-full ${isNight ? 'bg-brand-purple shadow-[0_0_10px_#7F77DD]' : 'bg-orange-500 shadow-[0_0_10px_#f97316]'} transition-all duration-1000 ease-out`}
+            className={`h-full ${isNight ? 'bg-brand-purple shadow-[0_0_10px_#7F77DD]' : 'bg-orange-500 shadow-[0_0_10px_#f97316]'} transition-[width] duration-1000 ease-out`}
             style={{ width: `${Math.min(100, ((textIndex + 1) / loadingTexts.length) * 100)}%` }}
           />
         </div>
@@ -167,7 +167,7 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, isNight = false }) =>
         {showCancel && onCancel && (
           <button
             onClick={onCancel}
-            className={`px-8 py-3 rounded-2xl border transition-all animate-fade-in shadow-xl backdrop-blur-md min-h-[48px] text-[10px] font-black uppercase tracking-wide ${isNight ? 'border-white/10 bg-white/5 text-zinc-500 hover:text-white hover:border-white/30 hover:bg-white/10' : 'border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'}`}
+            className={`px-8 py-3 rounded-2xl border transition-colors animate-fade-in shadow-xl backdrop-blur-md min-h-[48px] text-[10px] font-black uppercase tracking-wide ${isNight ? 'border-white/10 bg-white/5 text-zinc-500 hover:text-white hover:border-white/30 hover:bg-white/10' : 'border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'}`}
           >
             {t('btn_cancel_retry')}
           </button>

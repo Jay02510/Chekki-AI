@@ -415,7 +415,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             </p>
             <button
               onClick={confirmStartPractice}
-              className="w-full py-5 bg-orange-500 hover:bg-orange-600 text-black font-black rounded-full text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.97] transition-all"
+              className="w-full py-5 bg-orange-500 hover:bg-orange-600 text-black font-black rounded-full text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.97] transition-[background-color,transform]"
             >
               {language === 'ko' ? '준비 완료!' : "I'm Ready!"}
             </button>
@@ -519,7 +519,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 type: copied ? 'success' : 'error',
               });
             }}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-md transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95"
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] shrink-0 cursor-pointer flex items-center gap-2 active:scale-95"
           >
             <span>✨</span>
             <span>{language === 'ko' ? '원장님 초대장 전송 / 복사' : 'Share / Copy Director Invite'}</span>
@@ -582,13 +582,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     <div className="flex items-center gap-3 w-full">
                       <button
                         onClick={() => setShowHandoff(false)}
-                        className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-bold transition-all"
+                        className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-bold transition-colors"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={confirmStartPractice}
-                        className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-black rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all"
+                        className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-black rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-colors"
                       >
                         I&apos;m Ready!
                       </button>
@@ -633,7 +633,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 <button
                   onClick={handleStartFlashcards}
                   disabled={mistakes.length === 0}
-                  className={`group relative overflow-hidden px-6 py-3 bg-white/5 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.97] hover:bg-white/10 border border-white/10 font-korean disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`group relative overflow-hidden px-6 py-3 bg-white/5 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-[background-color,transform,opacity] duration-200 active:scale-[0.97] hover:bg-white/10 border border-white/10 font-korean disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <Cards size={18} weight="bold" />
                   <span className="relative z-10">
@@ -643,7 +643,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 <button
                   onClick={handleStartPractice}
                   disabled={mistakes.length === 0}
-                  className={`group relative overflow-hidden px-8 py-3 bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.97] shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-600 font-korean disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-emerald-500/50`}
+                  className={`group relative overflow-hidden px-8 py-3 bg-emerald-500 text-white font-bold rounded-full text-sm flex items-center justify-center gap-3 transition-[background-color,transform,opacity,box-shadow] duration-200 active:scale-[0.97] shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-600 font-korean disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-emerald-500/50`}
                 >
                   <MicrophoneStage size={18} weight="bold" />
                   <span className="relative z-10">
@@ -722,7 +722,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 </p>
                 <button
                   onClick={handleStartPractice}
-                  className="mt-4 px-8 py-3 bg-emerald-500 text-white font-bold rounded-full hover:bg-emerald-600 transition-all duration-200 active:scale-[0.97] font-korean"
+                  className="mt-4 px-8 py-3 bg-emerald-500 text-white font-bold rounded-full hover:bg-emerald-600 transition-[background-color,transform] duration-200 active:scale-[0.97] font-korean"
                 >
                   {language === 'ko' ? '다시 연습하기' : 'Practice Again'}
                 </button>
@@ -738,7 +738,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       </span>
                       <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-orange-500 transition-all duration-200"
+                          className="h-full bg-orange-500 transition-[width] duration-200"
                           style={{ width: `${((practiceIndex + 1) / mistakes.length) * 100}%` }}
                         />
                       </div>
@@ -790,7 +790,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       <div className="flex flex-col items-center gap-4">
                         <button
                           onClick={handleMicPress}
-                          className={`group relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none ${
+                          className={`group relative w-24 h-24 rounded-full flex items-center justify-center transition-[box-shadow,transform] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none ${
                             isListening
                               ? 'active:scale-[0.97] shadow-[0_0_40px_rgba(239,68,68,0.4)]'
                               : 'hover:scale-[1.02] active:scale-[0.97] shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]'
@@ -866,7 +866,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                             setPracticeStatus('idle');
                             setSpokenText('');
                           }}
-                          className="group relative overflow-hidden pl-8 pr-2 py-2 w-full sm:w-auto bg-white/10 text-white font-bold rounded-full border border-white/20 hover:bg-white/20 text-lg flex items-center justify-between gap-8 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] outline-none"
+                          className="group relative overflow-hidden pl-8 pr-2 py-2 w-full sm:w-auto bg-white/10 text-white font-bold rounded-full border border-white/20 hover:bg-white/20 text-lg flex items-center justify-between gap-8 transition-[background-color,transform] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] outline-none"
                         >
                           <span className="relative z-10 font-korean">
                             {language === 'ko' ? '다시 말하기' : 'Try Again'}

@@ -727,7 +727,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
           onClick={() => setActiveItemId(null)}
         >
           <div
-            className={`px-4 py-3 border-b ${isNight ? 'border-white/5 bg-zinc-900/40' : 'border-zinc-100 bg-white/80'} flex flex-col shrink-0 transition-all`}
+            className={`px-4 py-3 border-b ${isNight ? 'border-white/5 bg-zinc-900/40' : 'border-zinc-100 bg-white/80'} flex flex-col shrink-0 transition-[background-color,border-color]`}
           >
             <div className="flex justify-between items-center w-full gap-4">
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -749,7 +749,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 <button
                   aria-label="Open Dashboard"
                   onClick={() => onOpenDashboard && onOpenDashboard()}
-                  className={`h-12 px-5 rounded-full bg-orange-500 text-black hover:bg-orange-600 flex items-center justify-center font-black text-xs uppercase tracking-widest transition-all duration-200 active:scale-[0.98] group shadow-sm shrink-0`}
+                  className={`h-12 px-5 rounded-full bg-orange-500 text-black hover:bg-orange-600 flex items-center justify-center font-black text-xs uppercase tracking-widest transition-[background-color,transform] duration-200 active:scale-[0.98] group shadow-sm shrink-0`}
                   title={language === 'ko' ? '대시보드 열기' : 'Open Dashboard'}
                 >
                   <span className="group-hover:scale-[1.02] transition-transform">DASH</span>
@@ -919,7 +919,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                       </span>
 
                       {/* Tooltip Overlay */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-4 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all z-[100] transform translate-y-2 group-hover:translate-y-0">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-4 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-[opacity,transform] z-[100] transform translate-y-2 group-hover:translate-y-0">
                         <p className="text-[10px] text-zinc-300 font-bold leading-relaxed normal-case tracking-normal text-left">
                           {t('zero_memory_desc')}
                         </p>

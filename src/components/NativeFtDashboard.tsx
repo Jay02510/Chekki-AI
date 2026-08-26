@@ -184,7 +184,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                             type="button"
                             onClick={() => setCurriculumSlideIndex((prev) => (prev === 0 ? 4 : prev - 1))}
                             aria-label="Previous slide"
-                            className={`w-11 h-11 rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+                            className={`w-11 h-11 rounded-xl border flex items-center justify-center text-xs font-bold transition-[background-color,transform] cursor-pointer active:scale-95 ${
                               isThemeNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
                             }`}
                             title="Previous Slide"
@@ -195,7 +195,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                             type="button"
                             onClick={() => setCurriculumSlideIndex((prev) => (prev === 4 ? 0 : prev + 1))}
                             aria-label="Next slide"
-                            className={`w-11 h-11 rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+                            className={`w-11 h-11 rounded-xl border flex items-center justify-center text-xs font-bold transition-[background-color,transform] cursor-pointer active:scale-95 ${
                               isThemeNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
                             }`}
                             title="Next Slide"
@@ -219,7 +219,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                           key={slide.id}
                           type="button"
                           onClick={() => setCurriculumSlideIndex(slide.id)}
-                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 cursor-pointer flex items-center gap-1.5 ${
                             curriculumSlideIndex === slide.id
                               ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20'
                               : isThemeNight
@@ -252,7 +252,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                           </p>
                           <button
                             onClick={() => setActiveTab('curriculum')}
-                            className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.97] cursor-pointer"
+                            className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-[background-color,transform] active:scale-[0.97] cursor-pointer"
                           >
                             + {isKo ? '단어 등록하러 가기' : 'Add Weekly Words'}
                           </button>
@@ -271,7 +271,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                       ) : (
                         <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
                           {sortedTroubleWords.map(({ word, count }) => (
-                            <div key={word} className={`flex items-center justify-between p-4 border rounded-2xl transition-all ${
+                            <div key={word} className={`flex items-center justify-between p-4 border rounded-2xl transition-colors ${
                               isThemeNight ? 'bg-brand-dark border-white/5 hover:border-white/10' : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300'
                             }`}>
                               <span className={`text-sm font-bold font-mono tracking-wide ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{word}</span>
@@ -347,7 +347,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                           <button
                             type="button"
                             onClick={() => setActiveTab('curriculum')}
-                            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] active:scale-[0.97] cursor-pointer"
                           >
                             + {isKo ? '주제 등록하기' : 'Add Topic'}
                           </button>
@@ -408,7 +408,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                           <button
                             type="button"
                             onClick={() => setActiveTab('syllabus')}
-                            className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                            className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] active:scale-[0.97] cursor-pointer"
                           >
                             + {isKo ? '파닉스 규칙 추가' : 'Add Phonics Rules'}
                           </button>
@@ -459,7 +459,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                           <button
                             type="button"
                             onClick={() => setActiveTab('curriculum')}
-                            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] active:scale-[0.97] cursor-pointer"
                           >
                             + {isKo ? '지문 등록하기' : 'Add Reading Passage'}
                           </button>
@@ -517,7 +517,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                           <button
                             type="button"
                             onClick={() => setActiveTab('curriculum')}
-                            className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                            className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] active:scale-[0.97] cursor-pointer"
                           >
                             + {isKo ? '참고 사항 추가' : 'Add Notes'}
                           </button>
@@ -636,7 +636,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }, 200);
                   }}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] active:scale-[0.97] cursor-pointer flex items-center gap-1.5"
                 >
                   <Sparkle size={14} weight="bold" />
                   <span>{isKo ? '⚡ 폼 작성 체험하기' : 'Test FT Log Form'}</span>
@@ -664,7 +664,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
               ) : (
                 <div className="space-y-4">
                   {submittedLogs.map((log: any, idx: number) => (
-                    <div key={log.id || idx} className={`p-5 rounded-2xl border transition-all ${
+                    <div key={log.id || idx} className={`p-5 rounded-2xl border transition-colors ${
                       isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
                     }`}>
                       <div className="flex items-center justify-between pb-3 border-b border-white/5">

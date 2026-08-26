@@ -231,7 +231,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
   if (isDemoContent && pendingCount === 0) {
     return (
       <div
-        className={`p-8 sm:p-12 rounded-3xl border shadow-2xl max-w-4xl mx-auto w-full text-center space-y-4 transition-all ${
+        className={`p-8 sm:p-12 rounded-3xl border shadow-2xl max-w-4xl mx-auto w-full text-center space-y-4 transition-colors ${
           isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
         }`}
       >
@@ -252,7 +252,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
 
   return (
     <div
-      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 max-w-4xl mx-auto w-full transition-all ${
+      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 max-w-4xl mx-auto w-full transition-colors ${
         isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
@@ -287,7 +287,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setShowNotifySettings((prev) => !prev)}
-                className={`w-11 h-11 rounded-2xl flex items-center justify-center border transition-all cursor-pointer shrink-0 ${
+                className={`w-11 h-11 rounded-2xl flex items-center justify-center border transition-colors cursor-pointer shrink-0 ${
                   notifyEnabled
                     ? 'bg-white/10 hover:bg-white/15 border-white/15 text-white'
                     : 'bg-white/5 border-white/10 text-zinc-400'
@@ -313,7 +313,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                       className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${notifyEnabled ? 'bg-orange-500' : 'bg-zinc-500/40'}`}
                       aria-label={isKo ? '알림 켜기/끄기' : 'Toggle notifications'}
                     >
-                      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${notifyEnabled ? 'left-[18px]' : 'left-0.5'}`} />
+                      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-[left] ${notifyEnabled ? 'left-[18px]' : 'left-0.5'}`} />
                     </button>
                   </div>
                   {notifyEnabled && (
@@ -349,7 +349,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => window.print()}
-            className={`px-4 py-2.5 min-h-11 rounded-2xl font-bold text-xs border flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            className={`px-4 py-2.5 min-h-11 rounded-2xl font-bold text-xs border flex items-center justify-center gap-2 transition-colors cursor-pointer ${
               isNight
                 ? 'bg-white/10 hover:bg-white/15 border-white/15 text-white'
                 : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-300 text-zinc-900'
@@ -366,7 +366,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               disabled={isDemoContent || isApproving}
               title={isDemoContent ? (isKo ? '실제 리포트가 없어 복사할 수 없습니다' : 'No real report to copy yet') : undefined}
               onClick={handleCopyKakaoScript}
-              className={`px-4 py-2.5 min-h-11 rounded-xl text-xs font-black shadow-lg transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-4 py-2.5 min-h-11 rounded-xl text-xs font-black shadow-lg transition-colors flex items-center gap-2 shrink-0 ${
                 isDemoContent || isApproving
                   ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
                   : copied
@@ -407,7 +407,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setReportStatus('pending_review')}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-colors cursor-pointer ${
               reportStatus === 'pending_review'
                 ? 'bg-red-500/20 border-red-500 text-red-400 shadow-sm'
                 : 'bg-white/5 border-white/10 text-zinc-400'
@@ -419,7 +419,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setReportStatus('edited_by_kt')}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-colors cursor-pointer ${
               reportStatus === 'edited_by_kt'
                 ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm'
                 : 'bg-white/5 border-white/10 text-zinc-400'
@@ -431,7 +431,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setReportStatus('copied_sent')}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-colors cursor-pointer ${
               reportStatus === 'copied_sent'
                 ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm'
                 : 'bg-white/5 border-white/10 text-zinc-400'
@@ -453,7 +453,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setScriptTone('formal')}
-              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
                 scriptTone === 'formal'
                   ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
@@ -464,7 +464,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setScriptTone('friendly')}
-              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
                 scriptTone === 'friendly'
                   ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
@@ -475,7 +475,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setScriptTone('concise')}
-              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
                 scriptTone === 'concise'
                   ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
                   : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
@@ -503,7 +503,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setFilterUrgentOnly(!filterUrgentOnly)}
-            className={`px-3 py-1 min-h-11 rounded-xl font-bold border transition-all cursor-pointer ${
+            className={`px-3 py-1 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
               filterUrgentOnly
                 ? 'bg-red-500 border-red-500 text-white shadow-md'
                 : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
@@ -527,7 +527,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           onChange={(e) => permissions.canEditReports && setEditedKoreanSummary(e.target.value)}
           disabled={!permissions.canEditReports}
           rows={4}
-          className={`w-full p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed focus:outline-none transition-all font-sans ${
+          className={`w-full p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed focus:outline-none transition-colors font-sans ${
             !permissions.canEditReports ? 'opacity-60 cursor-not-allowed' : ''
           } ${
             isNight

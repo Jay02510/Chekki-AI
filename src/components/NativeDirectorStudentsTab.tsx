@@ -89,7 +89,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                     <button
                       onClick={() => runRosterAction(() => handleDeclineStudent(student.uid))}
                       disabled={isRosterActionBusy}
-                      className={`px-4 py-2 border font-bold rounded-xl transition-all text-xs active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                      className={`px-4 py-2 border font-bold rounded-xl transition-[border-color,transform] text-xs active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                         isThemeNight ? 'border-white/10 hover:border-white/20 bg-brand-dark text-zinc-400 hover:text-zinc-200' : 'border-zinc-300 hover:border-zinc-400 bg-zinc-100 text-zinc-700'
                       }`}
                     >
@@ -98,7 +98,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                     <button
                       onClick={() => runRosterAction(() => handleApproveStudent(student.uid))}
                       disabled={isRosterActionBusy}
-                      className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all text-xs active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-[background-color,transform] text-xs active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       ✓ {isKo ? '승인' : 'Approve'}
                     </button>

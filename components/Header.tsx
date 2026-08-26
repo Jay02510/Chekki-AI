@@ -79,12 +79,12 @@ export const Header: React.FC<Props> = ({
       )}
       {showSupport && <LegalModal type="support" onClose={() => setShowSupport(false)} />}
 
-      <header className={`fixed ${pushedDownByBanner ? 'top-[76px] md:top-6' : 'top-4 md:top-6'} left-0 right-0 z-50 transition-all duration-200 ease-[var(--ease-premium)] px-4 flex justify-center pt-[env(safe-area-inset-top)] pointer-events-none`}>
+      <header className={`fixed ${pushedDownByBanner ? 'top-[76px] md:top-6' : 'top-4 md:top-6'} left-0 right-0 z-50 transition-[top] duration-200 ease-[var(--ease-premium)] px-4 flex justify-center pt-[env(safe-area-inset-top)] pointer-events-none`}>
         <div
-          className={`p-1.5 md:p-2 rounded-full pointer-events-auto backdrop-blur-3xl shadow-2xl transition-all duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-black/20 ring-1 ring-white/10 shadow-black/80' : 'bg-black/5 ring-1 ring-black/5 shadow-zinc-300/50'}`}
+          className={`p-1.5 md:p-2 rounded-full pointer-events-auto backdrop-blur-3xl shadow-2xl transition-[background-color,box-shadow] duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-black/20 ring-1 ring-white/10 shadow-black/80' : 'bg-black/5 ring-1 ring-black/5 shadow-zinc-300/50'}`}
         >
           <div
-            className={`relative w-full max-w-3xl h-12 md:h-14 flex items-center justify-between gap-2 px-3 md:px-5 rounded-full border transition-all duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-brand-dark/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]' : 'bg-white/90 border-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]'}`}
+            className={`relative w-full max-w-3xl h-12 md:h-14 flex items-center justify-between gap-2 px-3 md:px-5 rounded-full border transition-[background-color,border-color,box-shadow] duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-brand-dark/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]' : 'bg-white/90 border-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]'}`}
           >
             <div
               role="button"
@@ -103,7 +103,7 @@ export const Header: React.FC<Props> = ({
                 <span className="font-extrabold text-orange-500 leading-none">ai</span>
               </div>
 
-              <span className="absolute top-[110%] left-0 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 bg-zinc-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-md whitespace-nowrap shadow-xl pointer-events-none origin-top-left z-50">
+              <span className="absolute top-[110%] left-0 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-[transform,opacity] duration-200 bg-zinc-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-md whitespace-nowrap shadow-xl pointer-events-none origin-top-left z-50">
                 {t('tt_home')}
               </span>
             </div>
@@ -112,7 +112,7 @@ export const Header: React.FC<Props> = ({
               {/* Back to Landing Page Button */}
               <a
                 href="/"
-                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-11 rounded-full text-xs font-bold transition-all duration-200 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-11 rounded-full text-xs font-bold transition-colors duration-200 ${
                   isNight
                     ? 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
                     : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200'
@@ -129,7 +129,7 @@ export const Header: React.FC<Props> = ({
                 >
                   {/* Sliding indicator */}
                   <div
-                    className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-200 ease-out shadow-sm ${
+                    className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-transform duration-200 ease-out shadow-sm ${
                       language === 'ko' ? 'translate-x-[calc(100%)]' : 'translate-x-0'
                     } ${isNight ? 'bg-white' : 'bg-zinc-900'}`}
                   ></div>
@@ -177,7 +177,7 @@ export const Header: React.FC<Props> = ({
 
                     <button
                       onClick={() => setIsSpeedMode(false)}
-                      className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 min-h-11 rounded-full text-[10px] md:text-xs font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                      className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 min-h-11 rounded-full text-[10px] md:text-xs font-black transition-[color,transform] duration-150 ease-out active:scale-[0.97] ${
                         !isSpeedMode
                           ? 'text-white drop-shadow-md'
                           : isNight
@@ -190,7 +190,7 @@ export const Header: React.FC<Props> = ({
                     </button>
                     <button
                       onClick={() => setIsSpeedMode(true)}
-                      className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 min-h-11 rounded-full text-[10px] md:text-xs font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                      className={`relative z-10 px-3 md:px-4 py-1.5 md:py-2.5 min-h-11 rounded-full text-[10px] md:text-xs font-black transition-[color,transform] duration-150 ease-out active:scale-[0.97] ${
                         isSpeedMode
                           ? 'text-white drop-shadow-md'
                           : isNight
@@ -255,7 +255,7 @@ export const Header: React.FC<Props> = ({
                       user.name.charAt(0)
                     )}
 
-                    <span className="absolute top-[115%] right-0 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 bg-zinc-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-md whitespace-nowrap shadow-xl pointer-events-none origin-top-right z-50">
+                    <span className="absolute top-[115%] right-0 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-[transform,opacity] duration-200 bg-zinc-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-md whitespace-nowrap shadow-xl pointer-events-none origin-top-right z-50">
                       {user.name}
                     </span>
                   </button>
@@ -328,7 +328,7 @@ export const Header: React.FC<Props> = ({
                                   e.stopPropagation();
                                   setIsSpeedMode(false);
                                 }}
-                                className={`relative z-10 flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                                className={`relative z-10 flex-1 py-1.5 rounded-lg text-[10px] font-black transition-[color,transform] duration-150 ease-out active:scale-[0.97] ${
                                   !isSpeedMode
                                     ? 'text-white drop-shadow-md'
                                     : isNight
@@ -344,7 +344,7 @@ export const Header: React.FC<Props> = ({
                                   e.stopPropagation();
                                   setIsSpeedMode(true);
                                 }}
-                                className={`relative z-10 flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all duration-150 ease-out active:scale-[0.97] ${
+                                className={`relative z-10 flex-1 py-1.5 rounded-lg text-[10px] font-black transition-[color,transform] duration-150 ease-out active:scale-[0.97] ${
                                   isSpeedMode
                                     ? 'text-white drop-shadow-md'
                                     : isNight

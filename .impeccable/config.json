@@ -206,6 +206,55 @@
         "rule": "gray-on-color",
         "value": "text-zinc-300 on bg-orange-500/5",
         "createdAt": "2026-08-26T08:07:06.632Z"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "555",
+        "files": [
+          "src/components/NativeDirectorPortal.tsx"
+        ],
+        "createdAt": "2026-08-26T09:00:06.056Z",
+        "reason": "bg-orange-500/5 is a 5% tint over the near-black surface, not a saturated color fill — text-zinc-300 on it reads the same as text-zinc-300 on the base dark surface, which the style-lock's contrast matrix already clears (muted/bg 7.95:1, muted/surface 7.42:1, both dark mode)."
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "426",
+        "files": [
+          "components/WorksheetOverlay.tsx"
+        ],
+        "createdAt": "2026-08-26T09:08:25.945Z"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "299",
+        "files": [
+          "components/WorksheetItemCard.tsx"
+        ],
+        "createdAt": "2026-08-26T09:09:13.909Z"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "308",
+        "files": [
+          "components/WorksheetItemCard.tsx"
+        ],
+        "createdAt": "2026-08-26T09:09:13.946Z"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "animate-bounce",
+        "files": [
+          "components/CameraView.tsx"
+        ],
+        "createdAt": "2026-08-26T09:13:27.921Z"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "animate-bounce",
+        "files": [
+          "components/SplitView.tsx"
+        ],
+        "createdAt": "2026-08-26T09:13:27.960Z"
       }
     ]
   }

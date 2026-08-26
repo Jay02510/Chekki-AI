@@ -185,7 +185,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 
   return (
     <div
-      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-8 font-sans transition-all ${
+      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-8 font-sans transition-[background-color,border-color,color] ${
         isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
@@ -220,7 +220,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 window.location.href = '/schools';
               }
             }}
-            className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer active:scale-95"
+            className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-500/25 transition-[background-color,transform] flex items-center justify-center gap-2 shrink-0 cursor-pointer active:scale-95"
           >
             <span>⚡ 결제 완료하고 최종 활성화하기 →</span>
           </button>
@@ -253,7 +253,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTab('billing')}
-            className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all shrink-0 cursor-pointer whitespace-nowrap"
+            className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-colors shrink-0 cursor-pointer whitespace-nowrap"
           >
             {isKo ? '플랜 업그레이드 →' : 'Upgrade Plan →'}
           </button>
@@ -288,7 +288,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
               activeTab === 'overview'
                 ? 'bg-orange-500 border-orange-500 text-black shadow-md'
                 : isNight
@@ -303,7 +303,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTab('exceptions')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border relative ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border relative ${
               activeTab === 'exceptions'
                 ? 'bg-orange-500 border-orange-500 text-black shadow-md'
                 : isNight
@@ -321,7 +321,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTab('billing')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
               activeTab === 'billing'
                 ? 'bg-orange-500 border-orange-500 text-black shadow-md'
                 : isNight
@@ -421,7 +421,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => setActiveTab('exceptions')}
-                    className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold cursor-pointer hover:bg-amber-500/20 transition-all"
+                    className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold cursor-pointer hover:bg-amber-500/20 transition-colors"
                   >
                     ⚠️ {flaggedStudents.length} Flagged — Review
                   </button>
@@ -614,7 +614,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             aria-modal="true"
             aria-labelledby="seat-expansion-title"
             tabIndex={-1}
-            className={`relative w-full max-w-md p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 text-left transition-all ${
+            className={`relative w-full max-w-md p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 text-left transition-colors ${
             isNight ? 'bg-[#0a0a0d] border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
           }`}>
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -648,7 +648,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => { setShowSeatExpansionModal(false); setSeatRequestSent(false); }}
-                  className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                  className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
                 >
                   확인 완료
                 </button>
@@ -667,7 +667,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                         key={count}
                         type="button"
                         onClick={() => setRequestedExtraSeats(count)}
-                        className={`p-3 rounded-xl border text-xs font-black transition-all cursor-pointer ${
+                        className={`p-3 rounded-xl border text-xs font-black transition-colors cursor-pointer ${
                           requestedExtraSeats === count
                             ? 'bg-orange-500 border-orange-500 text-black shadow-md'
                             : isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700'
@@ -699,7 +699,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                       setIsRequestingSeats(false);
                     }
                   }}
-                  className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-black text-xs rounded-xl shadow-lg transition-all cursor-pointer"
+                  className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-black text-xs rounded-xl shadow-lg transition-[background-color,opacity] cursor-pointer"
                 >
                   {isRequestingSeats ? '요청 중...' : `⚡ +${requestedExtraSeats}석 추가 세금계산서 청구하기 →`}
                 </button>
