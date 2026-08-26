@@ -283,7 +283,7 @@ service cloud.firestore {
       // same-school check with zero get() calls.
       allow read: if request.auth != null && (
         isAdmin() ||
-        request.auth.token.schoolId == resource.data.schoolId
+        (resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId)
       );
       allow write: if false;
     }
@@ -301,9 +301,18 @@ service cloud.firestore {
       // StudentInvitePanel.tsx, both where('classId', '==', ...) against
       // this collection) showed nothing: the write succeeded, the read that
       // should show it was permission-denied. Same fix as invites/classes.
+      //
+      // resource.data.schoolId != null guard added after a live diagnostic
+      // (simulate_client_read) showed a classId-filtered query denied
+      // outright while the identical rule's schoolId-filtered query on the
+      // same collection succeeded — a list query denies entirely if rule
+      // evaluation throws on ANY candidate doc, and accessing a missing map
+      // key in Firestore Rules throws. A malformed/older pendingStudents doc
+      // missing schoolId (matched by the classId filter but invisible to a
+      // schoolId-filtered query) was enough to sink the whole query.
       allow read: if request.auth != null && (
         isAdmin() ||
-        request.auth.token.schoolId == resource.data.schoolId
+        (resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId)
       );
       allow write: if false;
     }
@@ -322,7 +331,7 @@ service cloud.firestore {
       // collection.
       allow read: if request.auth != null && (
         isAdmin() ||
-        request.auth.token.schoolId == resource.data.schoolId
+        (resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId)
       );
       allow create: if request.auth != null &&
         request.resource.data.actorUid == request.auth.uid &&
@@ -353,7 +362,7 @@ service cloud.firestore {
         (request.auth.token.role == 'teacher' &&
           (resource.data.teacherUid == request.auth.uid ||
             ('assignedTeacherUids' in resource.data && resource.data.assignedTeacherUids.hasAny([request.auth.uid])))) ||
-        (request.auth.token.role == 'director' && request.auth.token.schoolId == resource.data.schoolId) ||
+        (request.auth.token.role == 'director' && resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId) ||
         userBelongsToClass(classId) ||
         isAdmin()
       );
