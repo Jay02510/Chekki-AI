@@ -13,12 +13,12 @@ interface Props {
 // mismatch (page tokens vs. the image's own near-identical flat color).
 const LOOP_IMAGE: Record<'dark' | 'light', Record<'en' | 'ko', { src: string; bg: string }>> = {
   dark: {
-    en: { src: '/images/loop-diagram-dark-en.webp', bg: '#121212' },
-    ko: { src: '/images/loop-diagram-dark-ko.webp', bg: '#0e0e0e' },
+    en: { src: '/images/loop-diagram-dark-en.webp', bg: '#060606' },
+    ko: { src: '/images/loop-diagram-dark-ko.webp', bg: '#060606' },
   },
   light: {
-    en: { src: '/images/loop-diagram-light-en.webp', bg: '#ffffff' },
-    ko: { src: '/images/loop-diagram-light-ko.webp', bg: '#f8f9fb' },
+    en: { src: '/images/loop-diagram-light-en.webp', bg: '#f8f8fa' },
+    ko: { src: '/images/loop-diagram-light-ko.webp', bg: '#fbfcfe' },
   },
 };
 

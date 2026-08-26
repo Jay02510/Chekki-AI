@@ -106,7 +106,16 @@ export const StudentInvitePanel: React.FC<Props> = ({
             retryCount += 1;
             unsub?.();
             setTimeout(() => {
-              if (!cancelled) attach();
+              if (cancelled) return;
+              // Force a fresh ID token before retrying — this rule now reads
+              // request.auth.token.schoolId (a custom claim), and the SDK's
+              // cached token can still be missing/stale claims from before a
+              // director's schoolId was backfilled or re-synced, even though
+              // the underlying Firestore doc is already correct (audit:
+              // added student never appears, retries exhaust on a stale token).
+              auth.currentUser?.getIdToken(true).finally(() => {
+                if (!cancelled) attach();
+              });
             }, delay);
             return;
           }

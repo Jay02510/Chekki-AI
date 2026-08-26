@@ -40,6 +40,7 @@ interface Props {
   setSelectedStudentDetails: (student: any) => void;
   onNewClassClick: () => void;
   onDeleteClass: (classId: string) => void;
+  onSelectClass: (classId: string) => void;
 }
 
 // Director's tab content (Phase 6 of the buzzing-nibbling-hearth TeacherPage
@@ -154,26 +155,39 @@ export function DirectorTabContent(props: Props) {
               <div className="space-y-2">
                 {props.classes
                   .filter((c: any) => !c.isDemo)
-                  .map((c: any) => (
-                    <div
-                      key={c.id}
-                      className={`flex items-center justify-between p-4 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}
-                    >
-                      <div>
-                        <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{c.name}</p>
-                        <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
-                          {c.level || 'General'} · {(c.assignedTeacherUids || []).length} {isKo ? '명 배정' : 'teacher(s) assigned'}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => props.onDeleteClass(c.id)}
-                        className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 cursor-pointer transition-colors"
+                  .map((c: any) => {
+                    const isSelected = props.selectedClass?.id === c.id;
+                    return (
+                      <div
+                        key={c.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => props.onSelectClass(c.id)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); props.onSelectClass(c.id); } }}
+                        className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-colors ${
+                          isSelected
+                            ? (isNight ? 'bg-orange-500/10 border-orange-500/40' : 'bg-orange-50 border-orange-300')
+                            : (isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100')
+                        }`}
                       >
-                        {isKo ? '삭제' : 'Delete'}
-                      </button>
-                    </div>
-                  ))}
+                        <div>
+                          <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                            {c.name}{isSelected ? ` · ${isKo ? '선택됨' : 'Selected'}` : ''}
+                          </p>
+                          <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                            {c.level || 'General'} · {(c.assignedTeacherUids || []).length} {isKo ? '명 배정' : 'teacher(s) assigned'}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); props.onDeleteClass(c.id); }}
+                          className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 cursor-pointer transition-colors shrink-0"
+                        >
+                          {isKo ? '삭제' : 'Delete'}
+                        </button>
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </div>

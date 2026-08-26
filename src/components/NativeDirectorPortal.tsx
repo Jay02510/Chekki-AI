@@ -369,7 +369,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">CAMPUS CLASSES</span>
               <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {classes.length}{' '}
+                {classes.filter((c: any) => !c.isDemo).length}{' '}
                 <span className="text-xs font-normal text-zinc-400">Active</span>
               </h4>
             </div>

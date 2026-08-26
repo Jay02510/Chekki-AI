@@ -294,6 +294,10 @@ export default function TeacherPage({ isNight = true }: Props) {
     });
   };
 
+  // Real, non-placeholder classes only — the class-switcher and any count
+  // shown to the user should never include fallbackDemoClass.
+  const realClasses = classes.filter((c: any) => !c.isDemo);
+
   const [selectedClass, setSelectedClass] = useState<any>(() => classes[0] || fallbackDemoClass);
   const [showCreateClassModal, setShowCreateClassModal] = useState(false);
   const [newClassName, setNewClassName] = useState('');
@@ -865,7 +869,14 @@ export default function TeacherPage({ isNight = true }: Props) {
       // class never reflects for the teacher, no self-heal). Retry with
       // backoff instead of once.
       if (err?.code === 'permission-denied' && retryCount < maxRetries) {
-        setTimeout(() => fetchClasses(retryCount + 1, requestId), 1000 * 2 ** retryCount);
+        setTimeout(() => {
+          // Force a fresh ID token before retrying — firestore.rules now
+          // reads request.auth.token.role/schoolId (custom claims), and the
+          // SDK's cached token can still be missing/stale claims for a
+          // director/teacher whose account was backfilled or had its role
+          // synced after this session's token was minted.
+          auth.currentUser?.getIdToken(true).finally(() => fetchClasses(retryCount + 1, requestId));
+        }, 1000 * 2 ** retryCount);
         return;
       }
       // A newer fetchClasses call (or the onboarding wizard's own optimistic
@@ -1347,7 +1358,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     fetchRosterAndMistakes();
   }, [selectedClass?.id, selectedClass?.activeWeekNumber]);
 
-  const fetchRosterAndMistakes = async () => {
+  const fetchRosterAndMistakes = async (retryCount = 0) => {
     const targetClass = selectedClass || fallbackDemoClass;
     if (!targetClass?.id) return;
     setIsLoadingRoster(true);
@@ -1449,7 +1460,20 @@ export default function TeacherPage({ isNight = true }: Props) {
       } else {
         setStudentsData(students);
       }
-    } catch (err) {
+    } catch (err: any) {
+      // users/{userId}'s read rule now depends on request.auth.token.role/
+      // schoolId (custom claims) — the SDK's cached ID token can still be
+      // missing/stale claims right after a director/teacher's account was
+      // backfilled or role-synced, even though the underlying Firestore
+      // data is already correct (audit: a just-added student never appears
+      // in the roster, no error surfaced, no retry attempted here at all).
+      if (err?.code === 'permission-denied' && retryCount < 3) {
+        const delay = 1000 * 2 ** retryCount;
+        setTimeout(() => {
+          auth.currentUser?.getIdToken(true).finally(() => fetchRosterAndMistakes(retryCount + 1));
+        }, delay);
+        return;
+      }
       console.error('Failed to fetch roster:', err);
     } finally {
       setIsLoadingRoster(false);
@@ -2331,7 +2355,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent pointer-events-none" />
         
         {/* Top Header Control Bar */}
-        <header className={`p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-4 relative z-10 shrink-0 transition-colors ${
+        <header className={`p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-4 relative z-20 shrink-0 transition-colors ${
           isThemeNight ? 'bg-brand-dark/90 border-white/5 text-white' : 'bg-white/90 border-zinc-200 text-zinc-900 shadow-xs'
         }`}>
           <div className="flex flex-wrap items-center gap-3">
@@ -2359,7 +2383,13 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
 
             <div className="relative">
-              {classes.length > 0 ? (
+              {/* isDemo is a client-only placeholder so the rest of the page
+                  can safely read selectedClass.joinCode etc before real
+                  classes load — it should never appear as a switchable
+                  option (audit: "Sample Class" sits in the dropdown next to
+                  real classes, or is the only option shown while the real
+                  fetch is still in flight, looking like classes are missing). */}
+              {realClasses.length > 0 ? (
                 <>
                   {/* appearance-none strips the native dropdown arrow with
                       nothing added in its place — a director/teacher
@@ -2370,14 +2400,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <select
                     value={selectedClass?.id || ''}
                     onChange={(e) => {
-                      const found = classes.find(c => c.id === e.target.value);
+                      const found = realClasses.find(c => c.id === e.target.value);
                       if (found) setSelectedClass(found);
                     }}
                     className={`font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
                       isThemeNight ? 'bg-brand-dark border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
                     }`}
                   >
-                    {classes.map((cls) => (
+                    {realClasses.map((cls) => (
                       <option key={cls.id} value={cls.id}>
                         {cls.name} ({cls.level})
                       </option>
@@ -2389,6 +2419,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                     className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-500'}`}
                   />
                 </>
+              ) : isLoadingClasses ? (
+                <div className="text-zinc-400 text-sm font-semibold p-2 animate-pulse">
+                  {isKo ? '학급 불러오는 중…' : 'Loading classes…'}
+                </div>
               ) : (
                 <div className="text-zinc-400 text-sm font-semibold p-2">
                   {isKo ? '학급을 먼저 등록해 주세요.' : 'Create a class to get started.'}
@@ -2666,6 +2700,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                 setSelectedStudentDetails={setSelectedStudentDetails}
                 onNewClassClick={() => setShowCreateClassModal(true)}
                 onDeleteClass={(classId: string) => handleDeleteClass(classId)}
+                onSelectClass={(classId: string) => {
+                  const found = realClasses.find((c: any) => c.id === classId);
+                  if (found) setSelectedClass(found);
+                }}
               />
             ) : educatorRole === 'kt' ? (
               <KtTabContent
