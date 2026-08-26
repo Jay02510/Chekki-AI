@@ -1088,6 +1088,28 @@ https://urlgeni.us/chekki
           } catch (e: any) {
             results['single_class_doc_get'] = { ok: false, code: e?.code || null, message: e?.message || String(e), classId: sampleClassId };
           }
+
+          // Reproduces the "student added but never appears" report exactly
+          // — same collections, same query shape, as StudentInvitePanel and
+          // fetchRosterAndMistakes, but with firestore.rules actually
+          // enforced (unlike the Admin SDK reads elsewhere in this action).
+          await tryQuery('pendingStudents_classId_eq', fbQuery(collection(db, 'pendingStudents'), where('classId', '==', sampleClassId)));
+          await tryQuery('users_classId_eq', fbQuery(collection(db, 'users'), where('classId', '==', sampleClassId)));
+        }
+        if (targetSchoolId) {
+          await tryQuery('pendingStudents_schoolId_eq', fbQuery(collection(db, 'pendingStudents'), where('schoolId', '==', targetSchoolId)));
+        }
+
+        // The ID token minted for this session should carry whatever custom
+        // claims are currently set on the account — if role/schoolId here
+        // don't match the Firestore user doc's own fields, every rule that
+        // reads request.auth.token.* is silently checking stale/wrong values
+        // no amount of query retrying can fix.
+        try {
+          const tokenResult = await clientAuth.currentUser?.getIdTokenResult();
+          results['id_token_claims'] = { role: tokenResult?.claims?.role ?? null, schoolId: tokenResult?.claims?.schoolId ?? null };
+        } catch (e: any) {
+          results['id_token_claims'] = { error: e?.message || String(e) };
         }
       } finally {
         await deleteApp(clientApp).catch(() => {});
