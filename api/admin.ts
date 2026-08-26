@@ -1029,6 +1029,14 @@ https://urlgeni.us/chekki
       const sampleClassSnap = await adminDb.collection('classes').where('teacherUid', '==', targetUid).limit(1).get();
       const sampleClassId = sampleClassSnap.empty ? null : sampleClassSnap.docs[0].id;
 
+      // Admin SDK bypasses rules entirely — ground truth on exactly what's
+      // in the doc(s) the client-side classId-filtered query keeps denying
+      // on, instead of reasoning about rule text further.
+      const sampleClassDoc = sampleClassId ? sampleClassSnap.docs[0].data() : null;
+      const rawPendingByClassId = sampleClassId
+        ? (await adminDb.collection('pendingStudents').where('classId', '==', sampleClassId).get()).docs.map((d) => ({ id: d.id, ...d.data() }))
+        : [];
+
       const customToken = await authDb.createCustomToken(targetUid);
 
       const { initializeApp: initClientApp, getApps: getClientApps, getApp: getClientApp, deleteApp } = await import('firebase/app');
@@ -1115,7 +1123,7 @@ https://urlgeni.us/chekki
         await deleteApp(clientApp).catch(() => {});
       }
 
-      return res.status(200).json({ success: true, targetUid, targetSchoolId, sampleClassId, results });
+      return res.status(200).json({ success: true, targetUid, targetSchoolId, sampleClassId, sampleClassDoc, rawPendingByClassId, results });
     } else {
       return res.status(400).json({ error: 'Invalid action' });
     }
