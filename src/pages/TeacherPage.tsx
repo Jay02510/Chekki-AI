@@ -1624,6 +1624,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     completedHomeworkCount,
     sortedTroubleWords,
     ftDashboardRoster,
+    invitedOnlyRosterRows,
   } = useRosterAnalytics(studentsData, curriculumVocab, curriculumPhonics, selectedClass);
 
   // --- RENDER AUTH (LOGIN / SIGN UP) VIEW ---
@@ -2683,6 +2684,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 onRequestPlanChange={handleRequestPlanChange}
                 pendingRoster={pendingRoster}
                 activeRoster={activeRoster}
+                invitedOnlyRosterRows={invitedOnlyRosterRows}
                 classes={classes}
                 onClassesChanged={() => fetchClasses()}
                 selectedClass={selectedClass}

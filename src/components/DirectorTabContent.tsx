@@ -23,6 +23,7 @@ interface Props {
   onRequestPlanChange: (planId: string, planName: string) => Promise<boolean>;
   pendingRoster: any[];
   activeRoster: any[];
+  invitedOnlyRosterRows?: any[];
   classes: any[];
   onClassesChanged?: () => void;
   selectedClass: any;
@@ -103,6 +104,7 @@ export function DirectorTabContent(props: Props) {
             isKo={isKo}
             pendingRoster={props.pendingRoster}
             activeRoster={props.activeRoster}
+            invitedOnlyRosterRows={props.invitedOnlyRosterRows}
             isLoadingRoster={props.isLoadingRoster}
             classes={props.classes}
             selectedClass={props.selectedClass}

@@ -11,8 +11,8 @@ function exportRosterCSV(pendingRoster: any[], activeRoster: any[], className: s
       s.studentName || 'Unnamed',
       s.name || '',
       s.email || '',
-      'Active',
-      s.hasScannedThisWeek ? 'Scanned' : 'Not Scanned',
+      s.isInvitedOnly ? 'Invited (no account yet)' : 'Active',
+      s.isInvitedOnly ? '' : (s.hasScannedThisWeek ? 'Scanned' : 'Not Scanned'),
       s.lastScanDate || '',
       s.flaggedException ? 'Yes' : 'No',
       s.flaggedException?.reason || '',
@@ -28,6 +28,7 @@ interface Props {
   isKo: boolean;
   pendingRoster: any[];
   activeRoster: any[];
+  invitedOnlyRosterRows?: any[];
   isLoadingRoster: boolean;
   classes: any[];
   selectedClass: any;
@@ -60,6 +61,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
   isKo,
   pendingRoster,
   activeRoster,
+  invitedOnlyRosterRows = [],
   isLoadingRoster,
   classes,
   selectedClass,
@@ -71,6 +73,15 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
   setSelectedStudentDetails,
 }) => {
   const isThemeNight = isNight;
+  // Invited-by-director students with no parent redemption yet (no email on
+  // file, or email on file but not yet redeemed) have no real users/{uid}
+  // doc — Move/Remove/View Details all write to that doc and would error on
+  // these rows, so they're merged in for visibility only, not action parity.
+  // See useRosterAnalytics.ts's invitedOnlyRosterRows for why they belong in
+  // this list at all: the FT/KT log form already treats them as real,
+  // loggable class members, so hiding them from the director's own roster
+  // view here was the actual gap, not a deliberate exclusion.
+  const combinedRoster = [...activeRoster, ...invitedOnlyRosterRows];
   // None of handleApproveStudent/handleDeclineStudent/handleRemoveStudent/
   // handleMoveStudent are guarded against a double-click firing the async
   // Firestore write twice — the writes themselves are idempotent, but
@@ -189,8 +200,8 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => exportRosterCSV(pendingRoster, activeRoster, selectedClass?.name)}
-                disabled={pendingRoster.length === 0 && activeRoster.length === 0}
+                onClick={() => exportRosterCSV(pendingRoster, combinedRoster, selectedClass?.name)}
+                disabled={pendingRoster.length === 0 && combinedRoster.length === 0}
                 className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed ${
                   isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
                 }`}
@@ -238,7 +249,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
             <div className="flex items-center justify-center min-h-[30vh]">
               <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
             </div>
-          ) : activeRoster.length === 0 ? (
+          ) : combinedRoster.length === 0 ? (
             <div className="py-16 text-center text-zinc-400 text-xs leading-relaxed font-korean">
               {isKo
                 ? '이 학급반에 등록된 학생이 없습니다. 가입 코드를 학부모에게 공유하거나 승인을 기다려 주세요.'
@@ -257,7 +268,7 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isThemeNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
-                  {activeRoster.map((student) => (
+                  {combinedRoster.map((student) => (
                     <tr key={student.uid} className={`transition-colors ${isThemeNight ? 'hover:bg-white/[0.02]' : 'hover:bg-zinc-50'}`}>
                       <td className={`py-4 pl-2 font-black text-sm ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                         <span className="flex items-center gap-1.5">
@@ -270,11 +281,21 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                         </span>
                       </td>
                       <td className="py-4">
-                        <p className={`font-bold ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>{student.name}</p>
-                        <p className="text-[10px] text-zinc-400 font-mono">{student.email}</p>
+                        {student.isInvitedOnly ? (
+                          <span className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-sky-500/10 border border-sky-500/20 text-sky-400 w-fit inline-block">
+                            {isKo ? '미가입 (초대됨)' : 'Not yet joined'}
+                          </span>
+                        ) : (
+                          <>
+                            <p className={`font-bold ${isThemeNight ? 'text-zinc-200' : 'text-zinc-800'}`}>{student.name}</p>
+                            <p className="text-[10px] text-zinc-400 font-mono">{student.email}</p>
+                          </>
+                        )}
                       </td>
                       <td className="py-4">
-                        {student.hasScannedThisWeek ? (
+                        {student.isInvitedOnly ? (
+                          <span className="text-zinc-500 text-[10px]">—</span>
+                        ) : student.hasScannedThisWeek ? (
                           <span className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center gap-1.5 w-fit">
                             <CheckCircle size={14} weight="bold" />
                             <span>{isKo ? '스캔 완료' : 'Scanned'}</span>
@@ -291,40 +312,48 @@ export const NativeDirectorStudentsTab: React.FC<Props> = ({
                       <td className="py-4 font-mono text-zinc-400 text-[10px]">
                         {student.lastScanDate ? student.lastScanDate : '-'}
                       </td>
-                      <td className="py-4 text-right pr-2 flex items-center justify-end gap-2">
-                        <select
-                          onChange={(e) => runRosterAction(() => handleMoveStudent(student.uid, e.target.value))}
-                          value=""
-                          disabled={isRosterActionBusy}
-                          className={`text-[10px] font-bold px-3 py-2 rounded-xl cursor-pointer outline-none focus:border-orange-500 appearance-none transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-                            isThemeNight ? 'bg-brand-dark border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
-                          }`}
-                        >
-                          <option value="">{isKo ? '반 이동' : 'Move Class'}</option>
-                          {classes
-                            .filter((c) => c.id !== selectedClass?.id)
-                            .map((c) => (
-                              <option key={c.id} value={c.id}>
-                                {c.name}
-                              </option>
-                            ))}
-                        </select>
-                        <button
-                          onClick={() => runRosterAction(() => handleRemoveStudent(student.uid))}
-                          disabled={isRosterActionBusy}
-                          className="px-3.5 py-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                          {isKo ? '삭제' : 'Remove'}
-                        </button>
-                        <button
-                          onClick={() => setSelectedStudentDetails(student)}
-                          className={`px-4 py-2 border font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] flex items-center gap-1.5 cursor-pointer ${
-                            isThemeNight ? 'border-white/10 bg-brand-dark hover:bg-white/5 text-orange-400 hover:text-orange-300' : 'border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-orange-600'
-                          }`}
-                        >
-                          <MagnifyingGlass size={12} weight="bold" />
-                          <span>{isKo ? '오답 상세' : 'View Details'}</span>
-                        </button>
+                      <td className="py-4 text-right pr-2">
+                        {student.isInvitedOnly ? (
+                          <span className="text-[10px] text-zinc-500 italic">
+                            {isKo ? '위 초대 목록에서 관리' : 'Manage in Invite Students above'}
+                          </span>
+                        ) : (
+                          <div className="flex items-center justify-end gap-2">
+                            <select
+                              onChange={(e) => runRosterAction(() => handleMoveStudent(student.uid, e.target.value))}
+                              value=""
+                              disabled={isRosterActionBusy}
+                              className={`text-[10px] font-bold px-3 py-2 rounded-xl cursor-pointer outline-none focus:border-orange-500 appearance-none transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                                isThemeNight ? 'bg-brand-dark border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
+                              }`}
+                            >
+                              <option value="">{isKo ? '반 이동' : 'Move Class'}</option>
+                              {classes
+                                .filter((c) => c.id !== selectedClass?.id)
+                                .map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    {c.name}
+                                  </option>
+                                ))}
+                            </select>
+                            <button
+                              onClick={() => runRosterAction(() => handleRemoveStudent(student.uid))}
+                              disabled={isRosterActionBusy}
+                              className="px-3.5 py-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              {isKo ? '삭제' : 'Remove'}
+                            </button>
+                            <button
+                              onClick={() => setSelectedStudentDetails(student)}
+                              className={`px-4 py-2 border font-bold rounded-xl transition-all text-[10px] active:scale-[0.95] flex items-center gap-1.5 cursor-pointer ${
+                                isThemeNight ? 'border-white/10 bg-brand-dark hover:bg-white/5 text-orange-400 hover:text-orange-300' : 'border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-orange-600'
+                              }`}
+                            >
+                              <MagnifyingGlass size={12} weight="bold" />
+                              <span>{isKo ? '오답 상세' : 'View Details'}</span>
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}

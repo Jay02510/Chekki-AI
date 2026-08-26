@@ -175,6 +175,30 @@ export function useRosterAnalytics(
     [studentsData, pendingStudentsForRoster]
   );
 
+  // Director's "Approved Student Roster" (NativeDirectorStudentsTab) used to
+  // only ever see studentsData (real users/{uid} docs, i.e. a parent has
+  // redeemed) — a student added by a director/KT with no parent email on
+  // file (StudentInvitePanel's "Add Student", no redemption possible without
+  // an email) was invisible there even though the FT/KT log form above
+  // already treats them as a real, loggable class member. Same
+  // pendingStudentsForRoster data, reshaped to the fields that table reads
+  // (studentName/name/email/hasScannedThisWeek/lastScanDate/flaggedException
+  // all intentionally absent/false — there's no parent account yet to carry
+  // any of that). isInvitedOnly flags rows the table must not offer
+  // Move/Remove/View Details on, since those write to a real users/{uid}
+  // doc this entry doesn't have.
+  const invitedOnlyRosterRows = pendingStudentsForRoster.map((s) => ({
+    uid: s.uid,
+    studentName: s.name,
+    name: '',
+    email: '',
+    classStatus: 'active',
+    hasScannedThisWeek: false,
+    lastScanDate: null,
+    flaggedException: null,
+    isInvitedOnly: true,
+  }));
+
   return {
     getWeeklyVocabWords,
     getWeeklyPhonicsRules,
@@ -187,5 +211,6 @@ export function useRosterAnalytics(
     completedHomeworkCount,
     sortedTroubleWords,
     ftDashboardRoster,
+    invitedOnlyRosterRows,
   };
 }
