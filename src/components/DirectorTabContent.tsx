@@ -103,24 +103,19 @@ export function DirectorTabContent(props: Props) {
             isNight={isNight}
             isKo={isKo}
             pendingRoster={props.pendingRoster}
-            activeRoster={props.activeRoster}
-            invitedOnlyRosterRows={props.invitedOnlyRosterRows}
-            isLoadingRoster={props.isLoadingRoster}
-            classes={props.classes}
-            selectedClass={props.selectedClass}
             handleApproveStudent={props.handleApproveStudent}
             handleDeclineStudent={props.handleDeclineStudent}
-            handleRemoveStudent={props.handleRemoveStudent}
-            handleMoveStudent={props.handleMoveStudent}
-            fetchRosterAndMistakes={props.fetchRosterAndMistakes}
-            setSelectedStudentDetails={props.setSelectedStudentDetails}
           />
           <StudentDatabaseGrid
             isNight={isNight}
             isKo={isKo}
             activeRoster={props.activeRoster}
             pendingRoster={props.pendingRoster}
+            invitedOnlyRosterRows={props.invitedOnlyRosterRows}
+            isLoadingRoster={props.isLoadingRoster}
+            fetchRosterAndMistakes={props.fetchRosterAndMistakes}
             classes={props.classes}
+            selectedClass={props.selectedClass}
             handleMoveStudent={props.handleMoveStudent}
             handleRemoveStudent={props.handleRemoveStudent}
             setSelectedStudentDetails={props.setSelectedStudentDetails}

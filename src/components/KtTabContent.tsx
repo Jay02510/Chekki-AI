@@ -5,6 +5,7 @@ import { FtStatCards } from './NativeFtDashboard';
 import { NativeTeacherLogForm } from './NativeTeacherLogForm';
 import { CurriculumEditorForm } from './CurriculumEditorForm';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
+import { StudentDatabaseGrid } from './StudentDatabaseGrid';
 import { StudentInvitePanel } from './StudentInvitePanel';
 import type { TabId } from '../../hooks/useTeacherTabs';
 import type { ConsolidatedStudentDay } from '../services/consolidateStudentReports';
@@ -55,6 +56,7 @@ interface Props {
   // students
   pendingRoster: any[];
   activeRoster: any[];
+  invitedOnlyRosterRows?: any[];
   isLoadingRoster: boolean;
   handleApproveStudent: (uid: string) => void;
   handleDeclineStudent: (uid: string) => void;
@@ -204,15 +206,21 @@ export function KtTabContent(props: Props) {
             isNight={isNight}
             isKo={isKo}
             pendingRoster={props.pendingRoster}
-            activeRoster={props.activeRoster}
-            isLoadingRoster={props.isLoadingRoster}
-            classes={props.classes}
-            selectedClass={props.selectedClass}
             handleApproveStudent={props.handleApproveStudent}
             handleDeclineStudent={props.handleDeclineStudent}
-            handleRemoveStudent={props.handleRemoveStudent}
-            handleMoveStudent={props.handleMoveStudent}
+          />
+          <StudentDatabaseGrid
+            isNight={isNight}
+            isKo={isKo}
+            activeRoster={props.activeRoster}
+            pendingRoster={props.pendingRoster}
+            invitedOnlyRosterRows={props.invitedOnlyRosterRows}
+            isLoadingRoster={props.isLoadingRoster}
             fetchRosterAndMistakes={props.fetchRosterAndMistakes}
+            classes={props.classes}
+            selectedClass={props.selectedClass}
+            handleMoveStudent={props.handleMoveStudent}
+            handleRemoveStudent={props.handleRemoveStudent}
             setSelectedStudentDetails={props.setSelectedStudentDetails}
           />
         </div>

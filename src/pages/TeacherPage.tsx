@@ -441,14 +441,38 @@ export default function TeacherPage({ isNight = true }: Props) {
   // Student roster & analytics state
   const [studentsData, setStudentsData] = useState<any[]>([]);
 
+  // Roster & weekly-completion analytics — extracted into a hook (Phase 3
+  // of the buzzing-nibbling-hearth TeacherPage split, see the hook's own
+  // comment for why it's not scoped "FT-only" despite the plan's name).
+  // Called here (not near its other consumers further down) so
+  // invitedOnlyRosterRows is available for studentNamesByUid below.
+  const {
+    getWeeklyVocabWords,
+    getWeeklyPhonicsRules,
+    activeVocabWords,
+    activeRoster,
+    pendingRoster,
+    activeStudentsCount,
+    completionRate,
+    completedHomeworkCount,
+    sortedTroubleWords,
+    ftDashboardRoster,
+    invitedOnlyRosterRows,
+  } = useRosterAnalytics(studentsData, curriculumVocab, curriculumPhonics, selectedClass);
+
   // Roster uid -> display name, for consolidation: a log doc only carries a
   // name for students it flagged that day (aiStudentReports); an enrolled-
   // but-not-flagged student has no name anywhere in the log itself, only
   // their uid in enrolledStudentUids, so this resolves it from the roster
-  // instead of falling back to the raw uid string.
+  // instead of falling back to the raw uid string. Merges in invitedOnlyRosterRows
+  // (pending:${id} students with no users/{uid} doc) so KT reports show their
+  // real name instead of the raw pending:xxx key.
   const studentNamesByUid = useMemo(
-    () => Object.fromEntries((studentsData || []).filter((s: any) => s?.uid && s?.name).map((s: any) => [s.uid, s.name])),
-    [studentsData]
+    () => Object.fromEntries([
+      ...(studentsData || []).filter((s: any) => s?.uid && s?.name).map((s: any) => [s.uid, s.name]),
+      ...invitedOnlyRosterRows.filter((s: any) => s?.uid && s?.studentName).map((s: any) => [s.uid, s.studentName]),
+    ]),
+    [studentsData, invitedOnlyRosterRows]
   );
   const {
     ktPendingLogs, setKtPendingLogs,
@@ -1610,23 +1634,6 @@ export default function TeacherPage({ isNight = true }: Props) {
     }
   };
 
-  // Roster & weekly-completion analytics — extracted into a hook (Phase 3
-  // of the buzzing-nibbling-hearth TeacherPage split, see the hook's own
-  // comment for why it's not scoped "FT-only" despite the plan's name).
-  const {
-    getWeeklyVocabWords,
-    getWeeklyPhonicsRules,
-    activeVocabWords,
-    activeRoster,
-    pendingRoster,
-    activeStudentsCount,
-    completionRate,
-    completedHomeworkCount,
-    sortedTroubleWords,
-    ftDashboardRoster,
-    invitedOnlyRosterRows,
-  } = useRosterAnalytics(studentsData, curriculumVocab, curriculumPhonics, selectedClass);
-
   // --- RENDER AUTH (LOGIN / SIGN UP) VIEW ---
   if (!isAuthenticated) {
     // A director arriving fresh off picking a plan on /schools (?plan=... in
@@ -2744,6 +2751,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 curriculumEditor={curriculumEditor}
                 pendingRoster={pendingRoster}
                 activeRoster={activeRoster}
+                invitedOnlyRosterRows={invitedOnlyRosterRows}
                 isLoadingRoster={isLoadingRoster}
                 handleApproveStudent={handleApproveStudent}
                 handleDeclineStudent={handleDeclineStudent}

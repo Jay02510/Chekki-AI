@@ -8,15 +8,20 @@ import {
   flexRender,
   type SortingState,
 } from '@tanstack/react-table';
-import { Warning, MagnifyingGlass, DownloadSimple, CaretUp, CaretDown, CaretUpDown } from '@phosphor-icons/react';
+import { Warning, MagnifyingGlass, DownloadSimple, CaretUp, CaretDown, CaretUpDown, CheckCircle } from '@phosphor-icons/react';
 import { downloadCSV } from '../utils/csvExport';
+import { StatTile } from './ui/StatTile';
 
 interface Props {
   isNight: boolean;
   isKo: boolean;
   activeRoster: any[];
   pendingRoster: any[];
+  invitedOnlyRosterRows?: any[];
+  isLoadingRoster: boolean;
+  fetchRosterAndMistakes: () => void;
   classes: any[];
+  selectedClass: any;
   handleMoveStudent: (uid: string, targetClassId: string) => void;
   handleRemoveStudent: (uid: string) => void;
   setSelectedStudentDetails: (student: any) => void;
@@ -33,6 +38,7 @@ type Row = {
   lastScanDate: string;
   weeklyMistakesCount: number;
   flagged: boolean;
+  isInvitedOnly: boolean;
   raw: any;
 };
 
@@ -52,7 +58,11 @@ export function StudentDatabaseGrid({
   isKo,
   activeRoster,
   pendingRoster,
+  invitedOnlyRosterRows = [],
+  isLoadingRoster,
+  fetchRosterAndMistakes,
   classes,
+  selectedClass,
   handleMoveStudent,
   handleRemoveStudent,
   setSelectedStudentDetails,
@@ -85,6 +95,11 @@ export function StudentDatabaseGrid({
     const combined = [
       ...pendingRoster.map((s) => ({ ...s, __status: 'pending' })),
       ...activeRoster.map((s) => ({ ...s, __status: 'active' })),
+      // Invited-by-director students with no parent redemption yet have no
+      // classId of their own (see useRosterAnalytics.ts's invitedOnlyRosterRows)
+      // — this roster is already scoped to a single selectedClass, so it's safe
+      // to attribute them to it directly.
+      ...invitedOnlyRosterRows.map((s) => ({ ...s, __status: 'active', classId: selectedClass?.id })),
     ];
     return combined.map((s) => ({
       uid: s.uid,
@@ -97,9 +112,10 @@ export function StudentDatabaseGrid({
       lastScanDate: s.lastScanDate || '',
       weeklyMistakesCount: s.weeklyMistakesCount || 0,
       flagged: !!s.flaggedException,
+      isInvitedOnly: !!s.isInvitedOnly,
       raw: s,
     }));
-  }, [activeRoster, pendingRoster, classNameById]);
+  }, [activeRoster, pendingRoster, invitedOnlyRosterRows, classNameById, selectedClass?.id]);
 
   const filteredByClass = useMemo(
     () => (classFilter ? data.filter((r) => r.classId === classFilter) : data),
@@ -121,7 +137,11 @@ export function StudentDatabaseGrid({
       }),
       columnHelper.accessor('parentName', {
         header: isKo ? '학부모' : 'Parent',
-        cell: (info) => (
+        cell: (info) => info.row.original.isInvitedOnly ? (
+          <span className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-sky-500/10 border border-sky-500/20 text-sky-400 w-fit inline-block">
+            {isKo ? '미가입 (초대됨)' : 'Not yet joined'}
+          </span>
+        ) : (
           <div>
             <p className="font-bold">{info.getValue()}</p>
             <p className="text-[10px] text-zinc-400 font-mono">{info.row.original.parentEmail}</p>
@@ -159,6 +179,13 @@ export function StudentDatabaseGrid({
         cell: (info) => {
           const row = info.row.original;
           if (row.status !== 'active') return null;
+          if (row.isInvitedOnly) {
+            return (
+              <span className="text-[10px] text-zinc-500 italic">
+                {isKo ? '위 초대 목록에서 관리' : 'Manage in Invite Students above'}
+              </span>
+            );
+          }
           return (
             <div className="flex items-center justify-end gap-2">
               <select
@@ -252,21 +279,59 @@ export function StudentDatabaseGrid({
             ))}
           </select>
         </div>
-        <button
-          type="button"
-          onClick={exportCSV}
-          className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] ${
-            isNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
-          }`}
-        >
-          <DownloadSimple size={14} weight="bold" />
-          <span>{isKo ? 'CSV 내보내기' : 'Export CSV'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={fetchRosterAndMistakes}
+            className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] ${
+              isNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
+            }`}
+            title="Refresh parent scans & roster"
+          >
+            <span>🔄</span>
+            <span>{isKo ? '동기화 새로고침' : 'Refresh Live Sync'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={exportCSV}
+            className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] ${
+              isNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
+            }`}
+          >
+            <DownloadSimple size={14} weight="bold" />
+            <span>{isKo ? 'CSV 내보내기' : 'Export CSV'}</span>
+          </button>
+        </div>
       </div>
+
+      {!isLoadingRoster && activeRoster.length > 0 && (
+        <div className="max-w-xs">
+          <StatTile
+            isNight={isNight}
+            label={isKo ? '이번 주 스캔 완료' : 'Scanned This Week'}
+            icon={<CheckCircle size={14} weight="bold" className="text-orange-500" />}
+            ring={{
+              value: Math.round(
+                (activeRoster.filter((s) => s.hasScannedThisWeek).length / activeRoster.length) * 100
+              ),
+            }}
+            value={
+              <>
+                {activeRoster.filter((s) => s.hasScannedThisWeek).length}
+                <span className="text-sm font-normal text-zinc-400"> / {activeRoster.length}</span>
+              </>
+            }
+          />
+        </div>
+      )}
 
       <div className={`p-1 rounded-[2.5rem] ${isNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'}`}>
         <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 ${isNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'}`}>
-          {filteredByClass.length === 0 ? (
+          {isLoadingRoster ? (
+            <div className="flex items-center justify-center min-h-[30vh]">
+              <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+            </div>
+          ) : filteredByClass.length === 0 ? (
             <div className="py-16 text-center text-zinc-400 text-xs">
               {isKo ? '표시할 학생이 없습니다.' : 'No students match this view.'}
             </div>

@@ -201,6 +201,11 @@
           "api/create-class.ts"
         ],
         "createdAt": "2026-08-24T08:35:59.443Z"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "text-zinc-300 on bg-orange-500/5",
+        "createdAt": "2026-08-26T08:07:06.632Z"
       }
     ]
   }

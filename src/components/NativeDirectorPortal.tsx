@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Buildings,
   WarningCircle,
-  PlusCircle,
-  FolderUser,
   SquaresFour,
   CheckCircle
 } from '@phosphor-icons/react';
@@ -70,7 +68,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   onRequestSeatExpansion,
   onRequestPlanChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'exceptions' | 'billing'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'exceptions' | 'billing'>('overview');
 
   // Campus-wide roster + flag counts — previously TOTAL ROSTER and FLAGGED
   // EXCEPTIONS only reflected whichever single class was selected
@@ -304,21 +302,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 
           <button
             type="button"
-            onClick={() => setActiveTab('curriculum')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
-              activeTab === 'curriculum'
-                ? 'bg-orange-500 border-orange-500 text-black shadow-md'
-                : isNight
-                ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-            }`}
-          >
-            <FolderUser size={16} weight="bold" className="text-orange-400" />
-            <span>Submission Status</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => setActiveTab('exceptions')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border relative ${
               activeTab === 'exceptions'
@@ -501,47 +484,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           )}
 
           {schoolId && <ActivityFeed isNight={isNight} isKo={isKo} schoolId={schoolId} />}
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* TAB 0: SUBMISSION STATUS — read-only oversight of what teachers have
-          uploaded (not the editing tool itself; that's the outer sidebar's
-          Curriculum Preseed tab). Named "Submission Status" specifically to
-          not collide with that tab's name. */}
-      {/* ========================================================================= */}
-      {activeTab === 'curriculum' && (
-        <div className="space-y-6 animate-fade-in text-left">
-
-          <div className="grid grid-cols-1 gap-6">
-            {/* CARD 1 (Course Syllabus Scope Stream) hidden for demo build —
-                its source, the Curriculum Setup / Syllabus tab, is disabled
-                in TeacherPage.tsx (KT/FT nav) since the OCR scan flow isn't
-                battle-tested enough for a live demo. Re-enable both together. */}
-
-            {/* CARD 2: Daily Homework Worksheets Stream */}
-            <div className={`p-6 rounded-2xl border space-y-4 ${
-              isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
-            }`}>
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-xs">📄 WORKSHEETS</span>
-                  <div>
-                    <h5 className={`font-bold text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>Daily Homework Stream</h5>
-                    <p className="text-[10px] text-zinc-400">Chekki Parent App Green Ink Overlays</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                  <PlusCircle size={24} weight="bold" />
-                </div>
-                <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No worksheets submitted yet</p>
-                <p className="text-xs text-zinc-400 max-w-[200px]">Teachers upload daily homework from the Manage Homework tab. Submissions appear here automatically.</p>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
