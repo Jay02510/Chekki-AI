@@ -361,10 +361,21 @@ service cloud.firestore {
       // api/_lib/firebaseAdmin.ts's syncAuthClaims — kept in sync with the
       // Firestore user doc on every role/schoolId write), so this branch
       // needs zero get()/exists() calls and list queries evaluate cleanly.
+      // teacherUid/assignedTeacherUids checks used to be gated behind
+      // request.auth.token.role == 'teacher' — a director who is also the
+      // teacherUid on their own class (fetchClasses' teacherUid_eq_uid /
+      // assignedTeacherUids_array_contains_uid queries) got denied there by
+      // role alone, even though resource.data.teacherUid == request.auth.uid
+      // already proves the exact same ownership a teacher account would use.
+      // fetchClasses treats ANY of its 3 queries failing as a hard failure
+      // (shows "couldn't load classes from the cloud") even when the other
+      // queries return real data, so this wasn't just noise — it was a
+      // permanent, un-retriable false-positive error banner for any
+      // director who owns a class directly. Scoping to the caller's own uid
+      // on the resource is sufficient authorization regardless of role.
       allow read: if request.auth != null && (
-        (request.auth.token.role == 'teacher' &&
-          (resource.data.teacherUid == request.auth.uid ||
-            ('assignedTeacherUids' in resource.data && resource.data.assignedTeacherUids.hasAny([request.auth.uid])))) ||
+        resource.data.teacherUid == request.auth.uid ||
+        ('assignedTeacherUids' in resource.data && resource.data.assignedTeacherUids.hasAny([request.auth.uid])) ||
         (request.auth.token.role == 'director' && resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId) ||
         userBelongsToClass(classId) ||
         isAdmin()
