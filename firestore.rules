@@ -295,24 +295,27 @@ service cloud.firestore {
     // resend, redeemed-status flip) only ever happens server-side via Admin
     // SDK in api/create-class.ts and api/redeem.ts.
     match /pendingStudents/{pendingStudentId} {
-      // Same list-query-vs-get() failure as invites above — this is almost
-      // certainly the exact cause of "1 student added" succeeding server-
-      // side while the roster/invite panels (useRosterAnalytics.ts,
-      // StudentInvitePanel.tsx, both where('classId', '==', ...) against
-      // this collection) showed nothing: the write succeeded, the read that
-      // should show it was permission-denied. Same fix as invites/classes.
-      //
-      // resource.data.schoolId != null guard added after a live diagnostic
-      // (simulate_client_read) showed a classId-filtered query denied
-      // outright while the identical rule's schoolId-filtered query on the
-      // same collection succeeded — a list query denies entirely if rule
-      // evaluation throws on ANY candidate doc, and accessing a missing map
-      // key in Firestore Rules throws. A malformed/older pendingStudents doc
-      // missing schoolId (matched by the classId filter but invisible to a
-      // schoolId-filtered query) was enough to sink the whole query.
+      // A live diagnostic (simulate_client_read) proved the real mechanism
+      // here, after the schoolId != null guard below turned out NOT to be
+      // it (ground-truth doc dump showed schoolId present and correct on
+      // every candidate doc — deny persisted regardless): for a LIST query,
+      // Firestore requires the rule to contain a disjunct that's provable
+      // directly from the query's OWN filter field — it will NOT run the
+      // full rule against actual returned documents to decide. This rule
+      // only had a schoolId-based disjunct, so where('classId', '==', ...)
+      // (StudentInvitePanel.tsx, useRosterAnalytics.ts) had nothing in the
+      // rule Firestore could verify against that filter and denied outright,
+      // while where('schoolId', '==', ...) worked fine on the identical
+      // data. users/{userId} already handled this correctly — its rule has
+      // a get()-on-resource.data.classId disjunct (isSchoolDirectorOfClass),
+      // which Firestore CAN statically ground against a classId filter
+      // (unlike a get() keyed by request.auth.uid, which is never
+      // groundable and is the original bug this whole rules file was
+      // rewritten for). Same disjunct added here.
       allow read: if request.auth != null && (
         isAdmin() ||
-        (resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId)
+        (resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId) ||
+        (resource.data.classId != null && (isClassTeacher(resource.data.classId) || isSchoolDirectorOfClass(resource.data.classId)))
       );
       allow write: if false;
     }
