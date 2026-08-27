@@ -497,7 +497,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
               <div className="flex gap-4 pointer-events-auto shrink-0">
                 <button
                   onClick={() => setShowFullscreenSettings(!showFullscreenSettings)}
-                  className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showFullscreenSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-40 hover:opacity-100'} transition-[border-color,color,opacity] flex items-center justify-center text-2xl shadow-2xl active:scale-90 group relative`}
+                  className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showFullscreenSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-40 hover:opacity-100'} transition-[border-color,color,opacity,transform] flex items-center justify-center text-2xl shadow-2xl active:scale-90 group relative`}
                   title={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
                 >
                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -593,13 +593,7 @@ export const CameraView: React.FC<Props> = ({
               className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display break-keep leading-tight tracking-tight`}
             >
               {t('dash_welcome')}{' '}
-              <span
-                className={
-                  isNight
-                    ? 'text-brand-orange'
-                    : 'text-brand-orange'
-                }
-              >
+              <span className="text-brand-orange">
                 {user.name}!
               </span>
             </h1>
