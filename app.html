@@ -78,13 +78,7 @@
     </script>
   </head>
   <body class="bg-[#050505] text-zinc-100 antialiased selection:bg-brand-orange selection:text-white overscroll-none">
-    <script src="https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js" defer></script>
-    <script defer>
-      // Initialize Kakao SDK with the app key
-      if (window.Kakao && !window.Kakao.isInitialized()) {
-        window.Kakao.init('f06bc75426bf2b41940620d3ee942f06');
-      }
-    </script>
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js" defer onload="window.Kakao.isInitialized() || window.Kakao.init('f06bc75426bf2b41940620d3ee942f06')"></script>
     <script>
       window.onerror = function(message, source, lineno, colno, error) {
         var errDiv = document.createElement('div');

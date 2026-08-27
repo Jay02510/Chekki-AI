@@ -863,6 +863,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           throw new Error('Kakao SDK not loaded. Please disable adblockers and try again.');
         }
 
+        if (!(window as any).Kakao.isInitialized()) {
+          (window as any).Kakao.init('f06bc75426bf2b41940620d3ee942f06');
+        }
+
         const Kakao = (window as any).Kakao;
 
         accessToken = await new Promise<string>((resolve, reject) => {

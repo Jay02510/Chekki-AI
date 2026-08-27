@@ -130,13 +130,7 @@
       <p><a href="/faq">Frequently asked questions</a> &middot; <a href="/schools">Chekki AI for academies</a> &middot; <a href="/teacher">Teacher &amp; Director portal</a></p>
     </main>
   </div>
-  <script src="https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js" defer></script>
-  <script defer>
-    // Initialize Kakao SDK with the app key
-    if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init('f06bc75426bf2b41940620d3ee942f06');
-    }
-  </script>
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js" defer onload="window.Kakao.isInitialized() || window.Kakao.init('f06bc75426bf2b41940620d3ee942f06')"></script>
   <script type="module" src="/src/landing-entry.tsx"></script>
 </body>
 </html>
