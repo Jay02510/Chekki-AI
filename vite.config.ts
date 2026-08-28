@@ -26,7 +26,20 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
         // TeacherPage, SchoolsLandingPage, etc.) in dev only — production
         // builds bundle the import directly and never hit this middleware.
         if (apiPath && apiPath.startsWith('/api/') && !apiPath.startsWith('/api/_lib/')) {
-          const endpointName = apiPath.replace('/api/', '');
+          // vercel.json rewrites these to /api/redeem in production; this
+          // dev middleware doesn't read vercel.json, so without this map
+          // every one of them 500s locally with "Module not found" even
+          // though the route is fine in production (audit: parent invite-
+          // code redemption unusable in local dev, api/redeem-class-code.ts
+          // etc. never existed as real files).
+          const VERCEL_API_REWRITES: Record<string, string> = {
+            'redeem-class-code': 'redeem',
+            'redeem-school-code': 'redeem',
+            'redeem-teacher-code': 'redeem',
+            'redeem-invite': 'redeem',
+          };
+          const rawEndpointName = apiPath.replace('/api/', '');
+          const endpointName = VERCEL_API_REWRITES[rawEndpointName] ?? rawEndpointName;
 
           // Parse body if method is POST
           if (req.method === 'POST') {

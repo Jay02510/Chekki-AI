@@ -425,15 +425,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         subscriptionService.clearCache();
 
         // --- GUEST AUTH: Ensure every session has a token ---
-        if (Capacitor.isNativePlatform()) {
-          try {
-            await withTimeout(signInAnonymously(auth), 5000, 'signInAnonymously timeout');
-            // onAuthStateChanged will fire again with the new anon user — return here
-            // so we don't call setIsLoading(false) twice.
-            return;
-          } catch (err) {
-            console.error('[AuthContext] Anonymous sign-in failed or timed out:', err);
-          }
+        try {
+          await withTimeout(signInAnonymously(auth), 5000, 'signInAnonymously timeout');
+          // onAuthStateChanged will fire again with the new anon user — return here
+          // so we don't call setIsLoading(false) twice.
+          return;
+        } catch (err) {
+          console.error('[AuthContext] Anonymous sign-in failed or timed out:', err);
         }
       }
       setIsLoading(false);
