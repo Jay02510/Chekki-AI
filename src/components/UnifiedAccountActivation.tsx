@@ -34,7 +34,6 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
   // Step 2: Curriculum & Classes
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [newClassName, setNewClassName] = useState('');
-  const [selectedTextbook, setSelectedTextbook] = useState('Bricks Reading 150');
 
   const handleAddClass = () => {
     if (!newClassName.trim()) return;
@@ -258,7 +257,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
               }}
               className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
             >
-              <span>{isKo ? '다음: 학급반 및 커리큘럼 설정 →' : 'Next: Setup Classes & Curriculum →'}</span>
+              <span>{isKo ? '다음: 학급반 설정 →' : 'Next: Setup Classes →'}</span>
             </button>
           </div>
         )}
@@ -269,8 +268,8 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
             <div className="flex items-center gap-3 border-b border-white/10 pb-4">
               <FolderUser size={24} className="text-orange-500 shrink-0" />
               <div>
-                <h3 className="font-black text-base">{isKo ? '2단계: 학급반 구성 & 주교재 등록' : 'Step 2: Class Roster & Primary Textbook'}</h3>
-                <p className="text-xs text-zinc-400">{isKo ? '운영 중인 학급반 이름과 메인 사용 교재를 등록하세요.' : 'Register active class names and primary textbook series.'}</p>
+                <h3 className="font-black text-base">{isKo ? '2단계: 학급반 구성' : 'Step 2: Class Roster'}</h3>
+                <p className="text-xs text-zinc-400">{isKo ? '운영 중인 학급반 이름을 등록하세요. 교재는 각 학급의 커리큘럼 설정에서 등록합니다.' : "Register active class names. You'll set each class's textbook from its curriculum setup."}</p>
               </div>
             </div>
 
@@ -318,20 +317,6 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                 </div>
               </div>
 
-              <div className="space-y-1.5 pt-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
-                  {isKo ? '메인 영어 교재 시리즈 (Primary Textbook)' : 'Primary Textbook Series'}
-                </label>
-                <input
-                  type="text"
-                  value={selectedTextbook}
-                  onChange={(e) => setSelectedTextbook(e.target.value)}
-                  placeholder="E.g. Bricks Reading 150 / Subject Link L4"
-                  className={`w-full p-3.5 rounded-xl border text-sm font-bold outline-none focus:border-orange-500 ${
-                    isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                  }`}
-                />
-              </div>
             </div>
 
             <div className="flex gap-3">
