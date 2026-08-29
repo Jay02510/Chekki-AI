@@ -28,6 +28,8 @@ interface Props {
   setActiveKtLogId: (id: string | null) => void;
   groupKey: (g: ConsolidatedStudentDay) => string;
   formatConsolidatedDraft: (g: ConsolidatedStudentDay, isKo: boolean) => string;
+  getConsolidatedDraft: (g: ConsolidatedStudentDay) => string;
+  isMergingDraft: boolean;
   activeClass: any;
   academyName: string;
   user: any;
@@ -119,7 +121,7 @@ export function KtTabContent(props: Props) {
                     // formatConsolidatedDraft. Exceptions are baked in here
                     // rather than left to the exceptions-append step below,
                     // so skipInlineExceptions avoids duplicating them.
-                    korean: props.formatConsolidatedDraft(props.activeKtGroup, isKo),
+                    korean: props.getConsolidatedDraft(props.activeKtGroup),
                     english: '',
                   },
                   studentReports: [],
@@ -127,6 +129,7 @@ export function KtTabContent(props: Props) {
               : null
           }
           skipInlineExceptions={!!props.activeKtGroup}
+          isMergingDraft={props.isMergingDraft}
           pendingCount={Math.max(0, props.ktConsolidatedGroups.length - 1)}
           onApprove={props.handleKtApprove}
           onDirtyChange={props.setKtDraftDirty}

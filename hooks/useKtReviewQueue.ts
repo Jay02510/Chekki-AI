@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { collection, doc, getDocs, orderBy, limit as fbLimit, query, runTransaction, serverTimestamp, where } from 'firebase/firestore';
 import { dbInstance } from '../services/database';
-import { consolidateStudentReports, formatConsolidatedDraft, ConsolidatedStudentDay } from '../src/services/consolidateStudentReports';
+import { consolidateStudentReports, consolidatedDraftIntro, formatConsolidatedDraft, ConsolidatedStudentDay } from '../src/services/consolidateStudentReports';
+import { mergeConsolidatedReport } from '../src/services/aiGenerator';
 import type { UserProfile } from '../types';
 
 type ToastFn = (opts: { type: 'error' | 'success'; message: string }) => void;
@@ -129,6 +130,54 @@ export function useKtReviewQueue(
     [ktConsolidatedGroups]
   );
 
+  // A consolidated group backed by more than one source entry (a student in
+  // two classes, or two teachers submitting for the same class the same
+  // day) reads as several people's notes stacked back to back — see
+  // formatConsolidatedDraft. Rewriting it into one flowing paragraph so it
+  // reads like the KT wrote it themselves. A single-entry group already
+  // reads naturally (each source paragraph is prompted to stand on its own),
+  // so it's left as the plain stacked/formatted text — no AI call needed.
+  const [mergedDraft, setMergedDraft] = useState<{ key: string; korean: string } | null>(null);
+  const [isMergingDraft, setIsMergingDraft] = useState(false);
+  useEffect(() => {
+    if (!activeKtGroup || activeKtGroup.entries.length <= 1) {
+      setMergedDraft(null);
+      setIsMergingDraft(false);
+      return;
+    }
+    const key = groupKey(activeKtGroup);
+    const paragraphs = activeKtGroup.entries.flatMap((e) => [e.generalParagraph, e.exceptionParagraph].filter(Boolean) as string[]);
+    let cancelled = false;
+    setIsMergingDraft(true);
+    mergeConsolidatedReport(activeKtGroup.studentName, paragraphs, isKo)
+      .then((korean) => {
+        if (cancelled || !korean) return;
+        setMergedDraft({ key, korean: `${consolidatedDraftIntro(activeKtGroup, isKo)}\n\n${korean}` });
+      })
+      .finally(() => {
+        if (!cancelled) setIsMergingDraft(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // studentName is a real dependency, not just groupKey: studentNamesByUid
+    // (roster names) can resolve asynchronously after this effect first
+    // fires, and a student's group.studentName falls back to their raw
+    // Firestore uid until it does (confirmed live — a merge fired before the
+    // roster loaded produced "Daily Report for QJEYGCek93PLL..." instead of
+    // the student's real name). Keying only on groupKey meant that once the
+    // uid-based merge ran, the real name resolving later never re-triggered
+    // it. Re-running when the name changes is a cheap, bounded one-time
+    // correction, not a churn risk — a resolved name doesn't change again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeKtGroup ? groupKey(activeKtGroup) : null, activeKtGroup?.studentName]);
+
+  // What NativeKtDashboard should actually show: the AI-merged single
+  // paragraph once ready, else the stacked fallback while it's loading (or
+  // if the merge call failed) — never a blank state.
+  const getConsolidatedDraft = (g: ConsolidatedStudentDay) =>
+    mergedDraft && mergedDraft.key === groupKey(g) ? mergedDraft.korean : formatConsolidatedDraft(g, isKo);
+
   const handleKtApprove = async (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]): Promise<boolean> => {
     if (!activeKtGroup || activeKtGroup.entries.length === 0 || !user?.uid) return false;
     const activeGroupKey = groupKey(activeKtGroup);
@@ -227,5 +276,7 @@ export function useKtReviewQueue(
     groupKey,
     handleKtApprove,
     formatConsolidatedDraft,
+    getConsolidatedDraft,
+    isMergingDraft,
   };
 }

@@ -132,6 +132,25 @@ export async function generateStudentExceptionReport(
 }
 
 /**
+ * 2b. Merge several same-day source paragraphs for one student (multiple
+ * classes, or multiple teacher submissions for the same class) into a
+ * single flowing paragraph in one voice, instead of stacking them.
+ */
+export async function mergeConsolidatedReport(
+  studentName: string,
+  paragraphs: string[],
+  isKo: boolean
+): Promise<string | null> {
+  try {
+    const { korean } = await callGenerateReport('merge', { studentName, paragraphs, isKo });
+    return korean || null;
+  } catch (err) {
+    console.warn('mergeConsolidatedReport failed, falling back to stacked paragraphs:', err);
+    return null;
+  }
+}
+
+/**
  * 3. Parent Consultation Phone Prep Report Generator
  */
 export async function generatePhoneConsultationPrep(studentName: string, historicalLogs: string): Promise<string[]> {

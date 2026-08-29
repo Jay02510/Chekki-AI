@@ -21,6 +21,10 @@ interface Props {
   // any exception paragraphs baked in — skips getFormattedScript()'s own
   // exceptions-append step so they aren't duplicated.
   skipInlineExceptions?: boolean;
+  // True while a multi-source draft (student in >1 class, or >1 same-day
+  // submission) is being rewritten into one flowing paragraph server-side —
+  // the stacked fallback is shown in the meantime, never a blank state.
+  isMergingDraft?: boolean;
   // Persists the KT-reviewed version to Firestore (classes/{id}/logs/{id})
   // so it's the record parents see — never the raw FT note. Fired when the
   // KT copies the script to send, since that's the point they've committed
@@ -43,6 +47,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
   userProfile,
   pendingCount = 0,
   skipInlineExceptions = false,
+  isMergingDraft = false,
   onApprove,
   onDirtyChange,
 }) => {
@@ -520,6 +525,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <span className="text-orange-400 uppercase tracking-wider">
             ✏️ {isKo ? '실시간 편집 가능 학부모 알림톡 대본 (복사 전 자유 수정)' : 'Live Editable Korean Script (Review & Tweak Before Copying)'}
           </span>
+          {isMergingDraft && (
+            <span className="text-zinc-400 normal-case font-normal">
+              {isKo ? '⏳ 여러 수업 내용을 하나의 글로 다듬는 중...' : '⏳ Blending multiple class notes into one paragraph…'}
+            </span>
+          )}
         </div>
 
         <textarea

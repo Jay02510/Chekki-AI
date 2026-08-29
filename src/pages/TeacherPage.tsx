@@ -487,6 +487,8 @@ export default function TeacherPage({ isNight = true }: Props) {
     groupKey,
     handleKtApprove,
     formatConsolidatedDraft,
+    getConsolidatedDraft,
+    isMergingDraft,
   } = useKtReviewQueue(educatorRole, classes, selectedClass, user, showToast, isKo, studentNamesByUid);
 
   // Tab state (Phase 5 of the buzzing-nibbling-hearth TeacherPage split) —
@@ -2731,6 +2733,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                 setActiveKtLogId={setActiveKtLogId}
                 groupKey={groupKey}
                 formatConsolidatedDraft={formatConsolidatedDraft}
+                getConsolidatedDraft={getConsolidatedDraft}
+                isMergingDraft={isMergingDraft}
                 activeClass={activeClass}
                 academyName={displayedAcademyName}
                 user={user}

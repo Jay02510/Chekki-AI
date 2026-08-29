@@ -146,13 +146,22 @@ export function consolidateStudentReports(
   return [...groups.values()];
 }
 
-/** Assembles one consolidated group into the KT-editable draft text: one
- * shared intro line, then each entry's paragraph(s) stacked below it,
- * separated by blank lines so it's easy to read and edit. */
-export function formatConsolidatedDraft(group: ConsolidatedStudentDay, isKo: boolean): string {
-  const intro = isKo
+/** Shared header line for a consolidated group's draft — used both by the
+ * stacked fallback below and by the AI-merged version, so the two never
+ * drift in format. */
+export function consolidatedDraftIntro(group: ConsolidatedStudentDay, isKo: boolean): string {
+  return isKo
     ? `${group.academyName} — ${group.date} — ${group.studentName} 학생 일일 리포트`
     : `${group.academyName} — ${group.date} — Daily Report for ${group.studentName}`;
+}
+
+/** Assembles one consolidated group into the KT-editable draft text: one
+ * shared intro line, then each entry's paragraph(s) stacked below it,
+ * separated by blank lines so it's easy to read and edit. Fallback shape —
+ * prefer the AI-merged single-paragraph draft (see mergeConsolidatedReport)
+ * when a group has more than one source entry. */
+export function formatConsolidatedDraft(group: ConsolidatedStudentDay, isKo: boolean): string {
+  const intro = consolidatedDraftIntro(group, isKo);
   const paragraphs = group.entries.flatMap((e) => {
     const parts = [e.generalParagraph].filter(Boolean);
     if (e.exceptionParagraph) parts.push(e.exceptionParagraph);
