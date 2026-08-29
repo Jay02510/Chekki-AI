@@ -453,7 +453,7 @@ service cloud.firestore {
           (
             isClassTeacher(classId) &&
             request.resource.data.diff(resource.data).affectedKeys().hasOnly(
-              ['approvedSummary', 'approvedExceptions', 'reviewStatus', 'reviewedByUid', 'reviewedByName', 'sentAt']
+              ['approvedSummary', 'approvedExceptions', 'reviewStatus', 'reviewedByUid', 'reviewedByName', 'sentAt', 'reviewedStudentUids']
             )
           )
         );

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as Sentry from '@sentry/react';
-import { collection, doc, getDocs, orderBy, limit as fbLimit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
+import { collection, doc, getDocs, orderBy, limit as fbLimit, query, runTransaction, serverTimestamp, where } from 'firebase/firestore';
 import { dbInstance } from '../services/database';
 import { consolidateStudentReports, formatConsolidatedDraft, ConsolidatedStudentDay } from '../src/services/consolidateStudentReports';
 import type { UserProfile } from '../types';
@@ -132,33 +132,67 @@ export function useKtReviewQueue(
   const handleKtApprove = async (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]): Promise<boolean> => {
     if (!activeKtGroup || activeKtGroup.entries.length === 0 || !user?.uid) return false;
     const activeGroupKey = groupKey(activeKtGroup);
+    const studentUid = activeKtGroup.studentUid;
     try {
-      // A consolidated student-day draft can be assembled from multiple
-      // source logs across different classes — approving it has to mark
-      // every one of them "sent", not just one, or the others would still
-      // show up as pending next time the queue loads.
+      // A log doc covers the WHOLE class-day, not one student — a naive
+      // overwrite here used to flip reviewStatus to 'sent' for every other
+      // student sharing the same doc, silently dropping them from the queue
+      // before a KT ever reviewed them (confirmed live: approving one
+      // student removed a second, unrelated student's pending report).
+      // Each source log is updated in its own transaction so "has every
+      // enrolled student on this doc been reviewed yet" is read fresh
+      // rather than assumed.
       await Promise.all(
-        activeKtGroup.entries.map((e) => {
+        activeKtGroup.entries.map(async (e) => {
           const logRef = doc(dbInstance, 'classes', e.classId, 'logs', e.logId);
-          return updateDoc(logRef, {
-            approvedSummary,
-            approvedExceptions,
-            reviewStatus: 'sent',
-            reviewedByUid: user.uid,
-            reviewedByName: user?.name || user?.email || 'Unknown teacher',
-            sentAt: serverTimestamp(),
+          await runTransaction(dbInstance, async (tx) => {
+            const snap = await tx.get(logRef);
+            if (!snap.exists()) return;
+            const data = snap.data() as any;
+            const existingReviewed: string[] = data.reviewedStudentUids || [];
+            const reviewedStudentUids = studentUid && !existingReviewed.includes(studentUid)
+              ? [...existingReviewed, studentUid]
+              : existingReviewed;
+            const enrolledUids: string[] = data.enrolledStudentUids || [];
+            const isComplete = !studentUid || enrolledUids.length === 0 || enrolledUids.every((u) => reviewedStudentUids.includes(u));
+
+            // Merge this student's exception into whatever's already been
+            // approved on the doc by another student's review, instead of
+            // clobbering it.
+            const existingExceptions: { studentName: string; approvedText: string }[] = data.approvedExceptions || [];
+            const mergedExceptions = [
+              ...existingExceptions.filter((ex) => !approvedExceptions.some((n) => n.studentName === ex.studentName)),
+              ...approvedExceptions,
+            ];
+
+            tx.update(logRef, {
+              approvedSummary,
+              approvedExceptions: mergedExceptions,
+              reviewedStudentUids,
+              reviewStatus: isComplete ? 'sent' : 'pending_review',
+              reviewedByUid: user.uid,
+              reviewedByName: user?.name || user?.email || 'Unknown teacher',
+              ...(isComplete ? { sentAt: serverTimestamp() } : {}),
+            });
           });
         })
       );
-      // Show the checkmark on the queue chip first, then remove it — an
-      // instant vanish left no visible confirmation of what had just been
-      // sent (same short-lived-success pattern NativeKtDashboard already
-      // uses for its own "Copied!" button state).
-      const sentLogIds = new Set(activeKtGroup.sourceLogIds);
+      // Mirror the same reviewedStudentUids update into local state — the
+      // consolidated-groups memo re-derives from this, so this student's
+      // card drops out while any other student still sharing the same log
+      // doc stays visible (instead of the whole doc vanishing by id).
+      const touchedLogIds = new Set(activeKtGroup.sourceLogIds);
       setJustCopiedLogId(activeGroupKey);
       if (ktApproveTimeoutRef.current) clearTimeout(ktApproveTimeoutRef.current);
       ktApproveTimeoutRef.current = setTimeout(() => {
-        setKtPendingLogs((prev) => prev.filter((l) => !sentLogIds.has(l.id)));
+        setKtPendingLogs((prev) =>
+          prev.map((l) => {
+            if (!touchedLogIds.has(l.id)) return l;
+            const existing: string[] = l.reviewedStudentUids || [];
+            if (!studentUid || existing.includes(studentUid)) return l;
+            return { ...l, reviewedStudentUids: [...existing, studentUid] };
+          })
+        );
         setJustCopiedLogId((cur) => (cur === activeGroupKey ? null : cur));
         ktApproveTimeoutRef.current = null;
       }, 1400);

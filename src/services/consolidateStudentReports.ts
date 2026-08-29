@@ -24,6 +24,14 @@ export interface PendingLog {
     category?: 'praise' | 'attention';
   }>;
   enrolledStudentUids?: string[];
+  // Students already individually approved on this log doc — a log covers
+  // the WHOLE class-day, not one student, so approving David must not also
+  // remove John from the queue before a KT ever reviewed him (confirmed
+  // live: approving one student silently flipped the shared doc to 'sent'
+  // and dropped every other student sharing it). Filtering already-reviewed
+  // uids out of this log's targets keeps the doc's other students visible
+  // until each has actually been approved.
+  reviewedStudentUids?: string[];
 }
 
 export interface StudentDayEntry {
@@ -115,7 +123,9 @@ export function consolidateStudentReports(
 
     if (targets.length === 0) continue;
 
+    const reviewedUids = log.reviewedStudentUids || [];
     for (const target of targets) {
+      if (target.uid && reviewedUids.includes(target.uid)) continue;
       const group = getGroup(target.uid, target.name, date);
       const exception = target.uid
         ? exceptionsByStudent.get(target.uid)
