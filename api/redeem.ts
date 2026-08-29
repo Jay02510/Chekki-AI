@@ -50,6 +50,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { classCode, schoolCode, teacherCode, inviteId } = req.body || {};
 
+  // Real codes here are 6 chars; inviteId is ~25. A wildly oversized value
+  // (5000+ chars) used to sail past this into a Firestore
+  // where('inviteCode','==', hugeString) query, which throws on Firestore's
+  // indexed-field value size limit -- an error thrown well after
+  // verifyIdToken already succeeded, but caught by the same catch-all below
+  // that always reports it as "Authentication failed" (401), misleading the
+  // user into thinking their login broke instead of the code being invalid
+  // (audit: oversized code produces a wrong error message). Rejecting early
+  // with a clear message avoids that query entirely.
+  if ([classCode, schoolCode, teacherCode, inviteId].some((v) => typeof v === 'string' && v.length > 100)) {
+    return res.status(400).json({ error: 'Invalid code format.' });
+  }
+
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
