@@ -6,6 +6,7 @@ import { applyCors } from './_lib/cors.js';
 import { FieldValue } from 'firebase-admin/firestore';
 import { createRateLimiter } from './_lib/rateLimit.js';
 import { isValidAssignPayload, isValidRemoveTeacherPayload, canRemoveTeacher } from './_lib/rosterValidation.js';
+import { randomBytes } from 'crypto';
 
 const checkTeacherInviteLimit = createRateLimiter('teacher_invite', 20, 60);
 
@@ -35,8 +36,17 @@ class SeatLimitError extends Error {
  */
 const ALLOWED_ROLES = new Set(['ft', 'kt']);
 
+// redeemInvite (api/redeem.ts) treats this ID alone as sufficient proof of
+// authorization whenever the invite was created with no email on file
+// (director's "I don't know their email yet" option) — it grants
+// role:teacher/kt + that school's schoolId claim to whoever presents it.
+// Math.random() is not a CSPRNG: V8's xorshift128+ state can be recovered
+// from a handful of observed outputs (from ANY code path using
+// Math.random on the same warm serverless instance), making every past
+// and future output predictable — a real weakness for a bearer credential,
+// not just short/guessable. crypto.randomBytes has no such recovery attack.
 function generateInviteId(): string {
-  return `inv_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  return `inv_${randomBytes(16).toString('base64url')}`;
 }
 
 async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsOrigin: string, uid: string, schoolId: string) {

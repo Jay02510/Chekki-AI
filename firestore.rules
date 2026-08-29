@@ -141,10 +141,30 @@ service cloud.firestore {
         // Firestore SDK, including quota fields (maxScansPerDay etc.) the
         // app's own client code never touches through this path (audit:
         // roster-update rule allowed unbounded field writes).
+        //
+        // This used to check only the INCOMING classId, never the
+        // student's CURRENT one — any teacher could write
+        // {classId: <their own class>, classStatus:'active'} onto an
+        // arbitrary users/{uid} doc (a parent at a totally different
+        // school), pulling a stranger into their roster and, via the read
+        // rule above (which grants access based on the now-matching
+        // classId), gaining read access to that stranger's profile (audit:
+        // cross-tenant roster hijack via unscoped classId write). The
+        // caller must now supervise the EXISTING classId too — every real
+        // client call already satisfies this: handleApproveStudent never
+        // touches classId at all, handleMoveStudent only ever targets a
+        // roster row the caller already sees (an already-supervised
+        // student), and decline/remove only ever set classId to null. No
+        // client path legitimately assigns an unenrolled (classId==null)
+        // stranger directly — that always goes through the server-side
+        // (Admin SDK, bypasses rules) pendingStudents/redeem.ts flow.
         (
+          resource.data.classId != null &&
+          (isClassTeacher(resource.data.classId) || isSchoolDirectorOfClass(resource.data.classId)) &&
           (
-            (request.resource.data.classId != null && (isClassTeacher(request.resource.data.classId) || isSchoolDirectorOfClass(request.resource.data.classId))) ||
-            (resource.data.classId != null && (isClassTeacher(resource.data.classId) || isSchoolDirectorOfClass(resource.data.classId)) && request.resource.data.classId == null)
+            request.resource.data.classId == null ||
+            isClassTeacher(request.resource.data.classId) ||
+            isSchoolDirectorOfClass(request.resource.data.classId)
           ) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['classId', 'classStatus', 'flaggedException'])
         )
@@ -507,19 +527,30 @@ service cloud.firestore {
         (resource.data.teacherUid != null && resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
       );
+      // The teacherUid-self-stamp disjunct previously on create/update/delete
+      // let ANY authenticated user (a parent, a teacher at a different
+      // school) create/take over a curriculum doc at any doc ID just by
+      // setting teacherUid to themselves — no relationship to the class
+      // required. api/analyze.ts reads curricula by deterministic IDs
+      // (${classId}_week_${n}), and classId is readable by every enrolled
+      // parent, so an attacker could pre-create a not-yet-saved week's
+      // curriculum and inject attacker-controlled vocab/phonics/answer-key
+      // content into the AI grading context for a whole class (audit:
+      // curriculum create/update/delete authorized by a self-stamped
+      // field). The real client (useCurriculumEditorState.ts) always
+      // stamps a matching classId alongside teacherUid, so isClassTeacher
+      // alone already covers every legitimate write — the self-stamp
+      // branch had no real use.
       allow create: if request.auth != null && (
         isClassTeacher(request.resource.data.classId) ||
-        (request.resource.data.teacherUid != null && request.resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
       ) && isValidCurriculum();
       allow update: if request.auth != null && (
         (isClassTeacher(resource.data.classId) && isClassTeacher(request.resource.data.classId)) ||
-        (resource.data.teacherUid == request.auth.uid && request.resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
       ) && isValidCurriculum();
       allow delete: if request.auth != null && (
         isClassTeacher(resource.data.classId) ||
-        (resource.data.teacherUid != null && resource.data.teacherUid == request.auth.uid) ||
         isAdmin()
       );
     }
