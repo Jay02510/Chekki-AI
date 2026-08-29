@@ -217,11 +217,26 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
 
 async function redeemSchoolCode(res: VercelResponse, uid: string, schoolCode: string) {
   const sanitized = schoolCode.toUpperCase().trim();
-  const schoolRef = adminDb.collection('schools').doc(sanitized);
   const userRef = adminDb.collection('users').doc(uid);
   const hasStoreSub = await hasActiveStoreSubscription(uid);
 
-  let schoolName = sanitized;
+  // This used to trust the school's own Firestore doc ID as "the code"
+  // (schoolRef = schools.doc(sanitized)) — real hagwon school IDs follow a
+  // guessable ACADEMYPREFIX_NNNN pattern (api/admin.ts's invoice-confirm
+  // path), so anyone knowing a target academy's name had only 10,000
+  // candidates to brute-force for free 'pro' access plus that school's
+  // schoolId auth claim, unlocking cross-tenant reads of its
+  // pendingStudents/invites (audit: school-code doc-ID-as-secret). Querying
+  // a genuine random schoolCode field instead mirrors redeemTeacherCode's
+  // already-correct pattern below.
+  const schoolQuery = await adminDb.collection('schools').where('schoolCode', '==', sanitized).limit(1).get();
+  if (schoolQuery.empty) {
+    return res.status(400).json({ error: 'Invalid school code. Please check again.' });
+  }
+  const schoolRef = schoolQuery.docs[0].ref;
+  const resolvedSchoolId = schoolRef.id;
+
+  let schoolName = resolvedSchoolId;
   try {
     await adminDb.runTransaction(async (t) => {
       const schoolDoc = await t.get(schoolRef);
@@ -230,7 +245,7 @@ async function redeemSchoolCode(res: VercelResponse, uid: string, schoolCode: st
       }
 
       const schoolData = schoolDoc.data() || {};
-      schoolName = schoolData.name || sanitized;
+      schoolName = schoolData.name || resolvedSchoolId;
       const usedByUids = schoolData.usedByUids || [];
       const maxUses = schoolData.maxUses ?? 5;
 
@@ -242,7 +257,7 @@ async function redeemSchoolCode(res: VercelResponse, uid: string, schoolCode: st
       }
 
       const updatePayload: Record<string, any> = {
-        schoolId: sanitized,
+        schoolId: resolvedSchoolId,
         schoolName,
         plan: 'pro',
         maxScansPerDay: 9999,

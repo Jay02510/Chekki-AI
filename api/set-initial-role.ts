@@ -29,7 +29,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const idToken = authHeader.split('Bearer ')[1].trim();
 
-  const { role, academyName, planId } = req.body || {};
+  const { role, academyName } = req.body || {};
   if (!ALLOWED_ROLES.has(role)) {
     return res.status(400).json({ error: 'Invalid role' });
   }
@@ -126,24 +126,32 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
         {
           resolvedSchoolId = `school_${uid}`;
-          const resolvedPlanId = typeof planId === 'string' ? planId : 'trial';
-          const seats = seatsForPlan(resolvedPlanId);
+          // A brand-new school is always a trial, full stop — planId is never
+          // read from the request body here. This is the self-serve signup
+          // path with no payment behind it; only api/admin.ts's
+          // confirm_invoice/upgrade_school (invoice-confirmed, ops-only) may
+          // set a paid planId. Trusting a client-sent planId let anyone POST
+          // {"planId":"enterprise"} and get 12 FT + 8 KT seats with no
+          // trialEndsAt (so the trial-expiry gate in create-class.ts /
+          // create-teacher-invite.ts never fired) — a free ₩590,000/mo plan,
+          // indefinitely (confirmed via seatsForPlan('enterprise') ->
+          // {ft:12,kt:8} and this branch's own resolvedPlanId==='trial' check
+          // skipping trialEndsAt for any other value).
+          const seats = seatsForPlan('trial');
           const schoolDoc: Record<string, any> = {
             name: schoolNameForUser,
             ownerUid: uid,
-            planId: resolvedPlanId,
+            planId: 'trial',
             seatsTotal: seats,
             usedByUids: [],
             createdAt: new Date().toISOString(),
+            // The "7-day free trial" promise was previously just landing-page
+            // copy — createdAt was stored but nothing ever read it to check
+            // whether 7 days had passed. trialEndsAt is the real, checkable
+            // deadline that api/create-class.ts and api/create-teacher-invite.ts
+            // gate new actions on.
+            trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           };
-          // The "7-day free trial" promise was previously just landing-page
-          // copy — createdAt was stored but nothing ever read it to check
-          // whether 7 days had passed. trialEndsAt is the real, checkable
-          // deadline that api/create-class.ts and api/create-teacher-invite.ts
-          // gate new actions on.
-          if (resolvedPlanId === 'trial') {
-            schoolDoc.trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-          }
           await adminDb.collection('schools').doc(resolvedSchoolId).set(schoolDoc, { merge: true });
         }
       }

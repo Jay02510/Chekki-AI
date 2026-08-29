@@ -7,6 +7,7 @@ import { applyCors } from './_lib/cors.js';
 import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
 import { notifyDirectors } from './_lib/notifications.js';
 import { createHash, timingSafeEqual } from 'crypto';
+import { generateJoinCode } from './_lib/joinCode.js';
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
 
@@ -352,6 +353,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         .set({
           name: schoolName.trim(),
           teacherCode: sanitizedTeacherCode,
+          // redeemSchoolCode (api/redeem.ts) used to trust the school's own
+          // Firestore doc ID as "the code" — this IS that doc ID
+          // (sanitizedSchoolId, shown to ops as "School Code (ID)" in
+          // AdminPage). Real hagwon school IDs follow a guessable
+          // ACADEMYPREFIX_NNNN pattern (see the invoice-confirm path below),
+          // so knowing a target academy's name left only 10,000 candidates
+          // to brute-force for free 'pro' access plus that school's
+          // schoolId auth claim — cross-tenant read access to its
+          // pendingStudents/invites (audit: school-code doc-ID-as-secret).
+          // A genuine random field, checked instead of the doc ID, closes
+          // that — same pattern teacherCode/redeemTeacherCode already use.
+          schoolCode: generateJoinCode(),
           maxUses: maxUses ? parseInt(maxUses, 10) : 5,
           usedByUids: [],
           seatsTotal: seatsForPlan(req.body?.planId),

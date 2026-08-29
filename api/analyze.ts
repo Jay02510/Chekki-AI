@@ -833,7 +833,14 @@ async function handler(req: any, res: any) {
         idempotencyDoc = await idempotencyRef.get();
         if (idempotencyDoc.exists) {
           const data = idempotencyDoc.data();
-          if (data?.status === 'completed') {
+          // Idempotency keys are client-supplied and this collection isn't
+          // scoped per-user in Firestore — without this check, presenting
+          // another user's key (leaked/logged, or a predictable generator)
+          // returned their cached response verbatim: a worksheet scan
+          // result carrying a child's name, homework photo OCR, and
+          // mistakes (audit: idempotency cache not owner-scoped). Treat a
+          // key belonging to someone else as a miss, not a hit.
+          if (data?.status === 'completed' && data.userId === decodedToken.uid) {
             return res.status(200).json(data.response);
           } else if (data?.status === 'processing') {
             // Check if the request is stuck (e.g. older than 5 minutes)

@@ -4,6 +4,7 @@ import { adminDb } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
 import { computeInvoicePricing } from './_lib/invoicePricing.js';
+import { generateJoinCode } from './_lib/joinCode.js';
 
 // This endpoint is public/unauthenticated (a sales lead form) and triggers a
 // real Resend email per call — rate limit hard so it can't be used to spam
@@ -78,7 +79,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { unitPrice, totalAmount } = computeInvoicePricing(planId, teacherCount, billingCycle);
     const isTrial = planId === 'trial';
-    const invoiceId = isTrial ? `TRIAL-${Date.now().toString().slice(-6)}` : `INV-${Date.now().toString().slice(-6)}`;
+    // A timestamp-derived suffix (last 6 digits of Date.now()) repeats
+    // identically every 1,000,000ms (~16m40s) — a forged request timed to
+    // land on that cycle, then written with .set() below (no existence
+    // check), silently overwrote a real pending invoice's email/contact
+    // info. Once ops later confirmed that invoice (api/admin.ts
+    // confirm_invoice), the attacker's email became the paid school's
+    // ownerEmail, letting them claim director access to it (audit:
+    // invoice-ID collision / overwrite). A random code has no such cycle.
+    const invoiceId = isTrial ? `TRIAL-${generateJoinCode()}` : `INV-${generateJoinCode()}`;
 
     const bankInfo = {
       bankName: 'Shinhan Bank (신한은행)',
@@ -126,7 +135,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // used to mean the customer got a payment email for an invoice that was
     // never actually persisted, so confirm_invoice would 404 once they paid
     // (Audit: silent invoice write failure).
-    await adminDb.collection('school_invoices').doc(invoiceId).set(invoicePayload);
+    // .create() rejects instead of silently overwriting if invoiceId is
+    // ever reused — the random code above makes an actual collision
+    // vanishingly unlikely, but this is what makes that guarantee real
+    // rather than assumed.
+    await adminDb.collection('school_invoices').doc(invoiceId).create(invoicePayload);
 
     // Escaped variants for HTML interpolation only — invoicePayload itself
     // stays raw for Firestore storage and admin-panel display.
