@@ -555,64 +555,77 @@ export const NativeKtDashboard: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* English Original Reference */}
-      <div className="space-y-1.5 p-4 rounded-2xl border bg-white/[0.02] border-white/10 text-xs">
-        <span className="font-bold text-zinc-400 block font-mono">{isKo ? '원어민 강사 원본 작성 메모:' : 'Original Foreign Teacher English Note:'}</span>
-        <p className="text-zinc-300 font-mono leading-relaxed">{englishSummary}</p>
-      </div>
+      {/* English Original Reference + Flagged Student Exceptions — only
+          meaningful for a real single-log review (generatedOutput carries
+          the actual raw English note + real per-student exception cards).
+          A consolidated group (skipInlineExceptions) always passes
+          studentReports:[] and english:'' here — its real exception text is
+          already folded into the editable script above — so these two
+          panels used to fall through their own `||`/ternary fallbacks to
+          hardcoded DEMO content ("Min-jun", a fabricated Photosynthesis
+          note) and show it as if it were this student's real data, on
+          every real KT review (audit: consolidated-group review shows
+          fabricated exception/English-note content as real). Hidden
+          entirely rather than fed fake data. */}
+      {!skipInlineExceptions && (
+        <>
+          <div className="space-y-1.5 p-4 rounded-2xl border bg-white/[0.02] border-white/10 text-xs">
+            <span className="font-bold text-zinc-400 block font-mono">{isKo ? '원어민 강사 원본 작성 메모:' : 'Original Foreign Teacher English Note:'}</span>
+            <p className="text-zinc-300 font-mono leading-relaxed">{englishSummary}</p>
+          </div>
 
-      {/* Flagged Student Exceptions */}
-      <div className="space-y-4 pt-4 border-t border-white/10">
-        <span className="text-xs font-bold text-amber-400 uppercase font-mono block">
-          ⚠️ {isKo ? '주의 필요 학생 집중 케어' : 'Flagged Student Exceptions'}
-        </span>
+          <div className="space-y-4 pt-4 border-t border-white/10">
+            <span className="text-xs font-bold text-amber-400 uppercase font-mono block">
+              ⚠️ {isKo ? '주의 필요 학생 집중 케어' : 'Flagged Student Exceptions'}
+            </span>
 
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {(generatedOutput?.studentReports && generatedOutput.studentReports.length > 0
-            ? generatedOutput.studentReports
-            : [
-                {
-                  studentName: 'Min-jun (민준)',
-                  koreanUpdate:
-                    '민준 학생은 오늘 수업 참여도는 밝았으나, Target 어휘인 Chloroplast 발음에 1:1 교정이 필요했습니다.',
-                  phoneTalkingPoints: [
-                    '1. 수업 참여도는 매우 우수하나 특정 곤란 어휘(Chloroplast) 복습이 필요함',
-                    '2. 가정 내 14페이지 어휘 카드 1회 함께 읽어보기 지도 권장',
-                    '3. 다음 시간 1:1 발음 교정 케어 진행 예정',
-                  ],
-                },
-              ]
-          ).map((std, idx) => (
-            <div
-              key={idx}
-              className={`p-4 rounded-2xl border space-y-3 ${
-                isNight ? 'bg-[#0a080c] border-amber-500/30' : 'bg-amber-50/60 border-amber-200'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-black text-sm text-amber-400 flex items-center gap-1.5 font-mono">
-                  <UserCheck size={16} weight="bold" />
-                  <span>{std.studentName}</span>
-                </span>
-                <span
-                  className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-                    (std as GeneratedReportOutput['studentReports'][number]).category === 'praise'
-                      ? 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30'
-                      : 'text-amber-400 bg-amber-500/20 border-amber-500/30'
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {(generatedOutput?.studentReports && generatedOutput.studentReports.length > 0
+                ? generatedOutput.studentReports
+                : [
+                    {
+                      studentName: 'Min-jun (민준)',
+                      koreanUpdate:
+                        '민준 학생은 오늘 수업 참여도는 밝았으나, Target 어휘인 Chloroplast 발음에 1:1 교정이 필요했습니다.',
+                      phoneTalkingPoints: [
+                        '1. 수업 참여도는 매우 우수하나 특정 곤란 어휘(Chloroplast) 복습이 필요함',
+                        '2. 가정 내 14페이지 어휘 카드 1회 함께 읽어보기 지도 권장',
+                        '3. 다음 시간 1:1 발음 교정 케어 진행 예정',
+                      ],
+                    },
+                  ]
+              ).map((std, idx) => (
+                <div
+                  key={idx}
+                  className={`p-4 rounded-2xl border space-y-3 ${
+                    isNight ? 'bg-[#0a080c] border-amber-500/30' : 'bg-amber-50/60 border-amber-200'
                   }`}
                 >
-                  {(std as GeneratedReportOutput['studentReports'][number]).category === 'praise'
-                    ? (isKo ? '칭찬' : 'Praise')
-                    : (isKo ? '주의 필요' : 'Attention')}
-                </span>
-              </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-sm text-amber-400 flex items-center gap-1.5 font-mono">
+                      <UserCheck size={16} weight="bold" />
+                      <span>{std.studentName}</span>
+                    </span>
+                    <span
+                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                        (std as GeneratedReportOutput['studentReports'][number]).category === 'praise'
+                          ? 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30'
+                          : 'text-amber-400 bg-amber-500/20 border-amber-500/30'
+                      }`}
+                    >
+                      {(std as GeneratedReportOutput['studentReports'][number]).category === 'praise'
+                        ? (isKo ? '칭찬' : 'Praise')
+                        : (isKo ? '주의 필요' : 'Attention')}
+                    </span>
+                  </div>
 
-              <p className="text-xs leading-relaxed text-zinc-300">{std.koreanUpdate}</p>
+                  <p className="text-xs leading-relaxed text-zinc-300">{std.koreanUpdate}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
