@@ -191,8 +191,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
             <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
               {activeTab === 'syllabus' ? <BookOpen size={22} weight="bold" /> : <FileText size={22} weight="bold" />}
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                   {activeTab === 'syllabus'
                     ? (isKo ? `📘 주간 학과목/교재 범위 설정 (Week ${selectedClass?.activeWeekNumber || 1})` : `📘 Course Syllabus & Scope (Week ${selectedClass?.activeWeekNumber || 1})`)
@@ -344,8 +344,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       </p>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-4 w-full justify-between px-2">
-                      <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 w-full justify-between px-2 flex-wrap">
+                      <div className="flex items-center gap-4 min-w-0">
                         {syllabusPreviewUrl ? (
                           <img
                             src={syllabusPreviewUrl}
@@ -362,8 +362,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                             <BookOpen size={22} weight="bold" />
                           </div>
                         )}
-                        <div className="text-left">
-                          <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                        <div className="text-left min-w-0">
+                          <h5 className={`text-sm font-bold flex items-center gap-2 flex-wrap ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                             <span>
                               {syllabusFileName
                                 ? (syllabusFileName.length > 28 ? syllabusFileName.substring(0, 25) + '...' : syllabusFileName)
@@ -604,8 +604,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       </p>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-4 w-full justify-between px-2">
-                      <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 w-full justify-between px-2 flex-wrap">
+                      <div className="flex items-center gap-4 min-w-0">
                         {worksheetPreviewUrl ? (
                           <img
                             src={worksheetPreviewUrl}
@@ -622,8 +622,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                             <FileText size={22} weight="bold" />
                           </div>
                         )}
-                        <div className="text-left">
-                          <h5 className={`text-sm font-bold flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                        <div className="text-left min-w-0">
+                          <h5 className={`text-sm font-bold flex items-center gap-2 flex-wrap ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                             <span>
                               {worksheetFileName
                                 ? (worksheetFileName.length > 28 ? worksheetFileName.substring(0, 25) + '...' : worksheetFileName)

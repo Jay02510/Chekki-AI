@@ -452,9 +452,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
           same regardless of which option is picked. Labeled accordingly so
           it doesn't imply a full re-tone of the message that isn't happening. */}
       <div className="p-4 rounded-2xl border bg-white/[0.02] border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs font-mono">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="font-bold text-zinc-400">💬 {isKo ? '인사말 스타일 (본문은 동일):' : 'Greeting Style (body text unchanged):'}</span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
               onClick={() => setScriptTone('formal')}

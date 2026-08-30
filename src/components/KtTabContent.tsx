@@ -100,45 +100,67 @@ export function KtTabContent(props: Props) {
             }}
             isNight={isNight}
             isKo={isKo}
+            // Opens the review panel inline under the selected row (accordion)
+            // instead of the caller having to scroll down to a fixed panel —
+            // reuses the same activeKtGroup data the standalone panel used.
+            renderActiveDetail={() => (
+              <NativeKtDashboard
+                key={props.activeKtGroup ? props.groupKey(props.activeKtGroup) : 'empty'}
+                isNight={isNight}
+                isKo={isKo}
+                className={props.activeKtGroup ? props.activeKtGroup.studentName : (props.activeClass?.name || '7세반 (샘플)')}
+                academyName={props.academyName}
+                userProfile={props.user}
+                generatedOutput={
+                  props.activeKtGroup
+                    ? {
+                        bilingualClassSummary: {
+                          // Consolidated draft: shared intro + every source
+                          // paragraph (general + exception) stacked below it,
+                          // already separated by blank lines — see
+                          // formatConsolidatedDraft. Exceptions are baked in
+                          // here rather than left to the exceptions-append
+                          // step below, so skipInlineExceptions avoids
+                          // duplicating them.
+                          korean: props.getConsolidatedDraft(props.activeKtGroup),
+                          english: '',
+                        },
+                        studentReports: [],
+                      }
+                    : null
+                }
+                skipInlineExceptions={!!props.activeKtGroup}
+                isMergingDraft={props.isMergingDraft}
+                pendingCount={Math.max(0, props.ktConsolidatedGroups.length - 1)}
+                onApprove={props.handleKtApprove}
+                onDirtyChange={props.setKtDraftDirty}
+              />
+            )}
           />
         </div>
       )}
-      {activeTab === 'kt_script' && (
+      {activeTab === 'kt_script' && props.ktPendingLogs.length === 0 && (
         <NativeKtDashboard
-          key={props.activeKtGroup ? props.groupKey(props.activeKtGroup) : 'empty'}
+          key="empty"
           isNight={isNight}
           isKo={isKo}
-          className={props.activeKtGroup ? props.activeKtGroup.studentName : (props.activeClass?.name || '7세반 (샘플)')}
+          className={props.activeClass?.name || '7세반 (샘플)'}
           academyName={props.academyName}
           userProfile={props.user}
-          generatedOutput={
-            props.activeKtGroup
-              ? {
-                  bilingualClassSummary: {
-                    // Consolidated draft: shared intro + every source
-                    // paragraph (general + exception) stacked below it,
-                    // already separated by blank lines — see
-                    // formatConsolidatedDraft. Exceptions are baked in here
-                    // rather than left to the exceptions-append step below,
-                    // so skipInlineExceptions avoids duplicating them.
-                    korean: props.getConsolidatedDraft(props.activeKtGroup),
-                    english: '',
-                  },
-                  studentReports: [],
-                }
-              : null
-          }
-          skipInlineExceptions={!!props.activeKtGroup}
+          generatedOutput={null}
+          skipInlineExceptions={false}
           isMergingDraft={props.isMergingDraft}
-          pendingCount={Math.max(0, props.ktConsolidatedGroups.length - 1)}
+          pendingCount={0}
           onApprove={props.handleKtApprove}
           onDirtyChange={props.setKtDraftDirty}
         />
       )}
 
       {activeTab === 'overview' && (
-        // KT Overview: lightweight summary only — stat cards + navigation hints.
-        // The class log form lives on its own kt_log tab now, not here.
+        // KT Overview: stat summary + the full student roster in one place
+        // (previously a separate "Student Roster" tab — collapsed together
+        // since a KT checking class status almost always wants both at
+        // once, and switching tabs just to see names was pure friction).
         <div className="space-y-6 animate-fade-in">
           <div className={`p-5 rounded-3xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
             <p className={`text-sm font-bold mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
@@ -155,7 +177,7 @@ export function KtTabContent(props: Props) {
             completedHomeworkCount={props.completedHomeworkCount}
             activeStudentsCount={props.activeStudentsCount}
           />
-          <div className={`p-5 rounded-3xl border flex items-center justify-between ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
+          <div className={`p-5 rounded-3xl border flex items-center justify-between flex-wrap gap-3 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
             <p className={`text-sm ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
               {isKo ? '학부모 알림톡 작성 & 1클릭 복사' : 'Write & copy parent KakaoTalk script'}
             </p>
@@ -167,6 +189,31 @@ export function KtTabContent(props: Props) {
               {isKo ? '알림톡 작성하기 →' : 'Go to Script →'}
             </button>
           </div>
+
+          {props.selectedClass && !props.selectedClass.isDemo && (
+            <StudentInvitePanel isNight={isNight} isKo={isKo} classId={props.selectedClass.id} />
+          )}
+          <NativeDirectorStudentsTab
+            isNight={isNight}
+            isKo={isKo}
+            pendingRoster={props.pendingRoster}
+            handleApproveStudent={props.handleApproveStudent}
+            handleDeclineStudent={props.handleDeclineStudent}
+          />
+          <StudentDatabaseGrid
+            isNight={isNight}
+            isKo={isKo}
+            activeRoster={props.activeRoster}
+            pendingRoster={props.pendingRoster}
+            invitedOnlyRosterRows={props.invitedOnlyRosterRows}
+            isLoadingRoster={props.isLoadingRoster}
+            fetchRosterAndMistakes={props.fetchRosterAndMistakes}
+            classes={props.classes}
+            selectedClass={props.selectedClass}
+            handleMoveStudent={props.handleMoveStudent}
+            handleRemoveStudent={props.handleRemoveStudent}
+            setSelectedStudentDetails={props.setSelectedStudentDetails}
+          />
         </div>
       )}
 
@@ -200,34 +247,6 @@ export function KtTabContent(props: Props) {
         />
       )}
 
-      {activeTab === 'students' && (
-        <div className="space-y-8">
-          {props.selectedClass && !props.selectedClass.isDemo && (
-            <StudentInvitePanel isNight={isNight} isKo={isKo} classId={props.selectedClass.id} />
-          )}
-          <NativeDirectorStudentsTab
-            isNight={isNight}
-            isKo={isKo}
-            pendingRoster={props.pendingRoster}
-            handleApproveStudent={props.handleApproveStudent}
-            handleDeclineStudent={props.handleDeclineStudent}
-          />
-          <StudentDatabaseGrid
-            isNight={isNight}
-            isKo={isKo}
-            activeRoster={props.activeRoster}
-            pendingRoster={props.pendingRoster}
-            invitedOnlyRosterRows={props.invitedOnlyRosterRows}
-            isLoadingRoster={props.isLoadingRoster}
-            fetchRosterAndMistakes={props.fetchRosterAndMistakes}
-            classes={props.classes}
-            selectedClass={props.selectedClass}
-            handleMoveStudent={props.handleMoveStudent}
-            handleRemoveStudent={props.handleRemoveStudent}
-            setSelectedStudentDetails={props.setSelectedStudentDetails}
-          />
-        </div>
-      )}
     </>
   );
 }

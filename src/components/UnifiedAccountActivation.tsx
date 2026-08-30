@@ -126,9 +126,9 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
         
         {/* Wizard Header Progress Bar */}
         <div className="space-y-4 text-left">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-500 font-black text-xs flex items-center justify-center border border-orange-500/30">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-500 font-black text-xs flex items-center justify-center border border-orange-500/30 shrink-0">
                 {step}/3
               </span>
               <h2 className="text-xl sm:text-2xl font-black tracking-tight">

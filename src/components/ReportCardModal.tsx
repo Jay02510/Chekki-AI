@@ -212,9 +212,9 @@ export const ReportCardModal: React.FC<Props> = ({
           {/* Weekly Consultation Talking Points — real AI, generated on demand
               from this student's actual logs in the selected range. */}
           <div className="mb-2 p-4 border border-orange-200 rounded-2xl bg-orange-50/50 space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <h4 className="font-black text-zinc-900 uppercase tracking-widest text-[11px] flex items-center gap-1.5">
-                <PhoneCall size={14} weight="bold" className="text-orange-600" />
+                <PhoneCall size={14} weight="bold" className="text-orange-600 shrink-0" />
                 <span>{isKo ? '학부모 상담 talking points' : 'Parent Consultation Talking Points'}</span>
               </h4>
               <button

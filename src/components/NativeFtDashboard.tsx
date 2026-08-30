@@ -133,6 +133,12 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
             completedHomeworkCount={completedHomeworkCount}
             activeStudentsCount={activeStudentsCount}
           />
+
+          {/* FT previously had no view showing enrolled student names at all
+              (only the count on the stat card above) — Director/KT get the
+              full StudentDatabaseGrid, but that table's move/remove actions
+              are director-level, so FT gets this read-only list instead. */}
+          <FtRosterList isNight={isThemeNight} isKo={isKo} roster={roster} />
         </div>
       )}
 
@@ -610,12 +616,12 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
             <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
               isThemeNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'
             }`}>
-              <div className={`flex items-center justify-between mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
+              <div className={`flex items-center justify-between flex-wrap gap-3 mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shrink-0">
                     <FileText size={22} weight="bold" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                       {isKo ? '제출된 원어민 평가 폼 내역' : 'Submitted Teacher Evaluation Forms'}
                     </h4>
@@ -753,6 +759,61 @@ export const FtStatCards: React.FC<FtStatCardsProps> = ({
         }
         sublabel={isKo ? '가입 승인 완료된 활동 원생 수' : 'Approved active student profiles'}
       />
+    </div>
+  );
+};
+
+interface FtRosterListProps {
+  isNight: boolean;
+  isKo: boolean;
+  roster: { uid: string; name: string; isPending?: boolean }[];
+}
+
+/**
+ * Read-only student name list for FT — deliberately not StudentDatabaseGrid
+ * (that has move/remove actions, which are director-level). This is just
+ * "who's in my class", the thing FT had no way to see before.
+ */
+const FtRosterList: React.FC<FtRosterListProps> = ({ isNight, isKo, roster }) => {
+  return (
+    <div
+      className={`p-1 rounded-[2rem] transition-colors ${
+        isNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
+      }`}
+    >
+      <div className={`rounded-[calc(2rem-0.25rem)] p-6 ${isNight ? 'bg-brand-dark' : 'bg-white'}`}>
+        <span
+          className={`text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 mb-4 ${
+            isNight ? 'text-zinc-400' : 'text-zinc-500'
+          }`}
+        >
+          <Users size={14} weight="bold" className="text-orange-500" />
+          <span>{isKo ? '학생 명단' : 'Students in Class'}</span>
+        </span>
+        {roster.length === 0 ? (
+          <p className="text-xs text-zinc-400">
+            {isKo ? '등록된 학생이 없습니다.' : 'No students enrolled yet.'}
+          </p>
+        ) : (
+          <ul className="flex flex-wrap gap-2">
+            {roster.map((s) => (
+              <li
+                key={s.uid}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold border ${
+                  isNight ? 'bg-white/5 border-white/10 text-zinc-100' : 'bg-zinc-50 border-zinc-200 text-zinc-900'
+                }`}
+              >
+                {s.name}
+                {s.isPending && (
+                  <span className="ml-1.5 text-orange-400 font-mono text-[10px]">
+                    {isKo ? '(가입 대기)' : '(pending)'}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

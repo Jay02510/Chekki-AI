@@ -470,8 +470,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
-      <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+        <div className="min-w-0">
           <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 font-mono block">
             {isKo ? '일일 수업 기록 양식' : 'DAILY CLASS LOG FORM'}
           </span>
@@ -479,7 +479,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             {isKo ? '오늘의 수업 및 학생 평가 기록' : 'Daily Classroom & Student Assessment Log'}
           </h2>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:shrink-0">
           <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-mono font-bold">
             ⚡ {isKo ? '약 30초 소요' : 'Takes about 30 seconds'}
           </span>

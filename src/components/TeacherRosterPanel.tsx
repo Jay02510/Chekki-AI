@@ -131,9 +131,9 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
         const assignedClassIds = new Set(localClasses.filter((c: any) => (c.assignedTeacherUids || []).includes(t.uid)).map((c: any) => c.id));
         return (
           <div key={t.uid} className={`p-4 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <h5 className={`font-bold text-sm ${isNight ? 'text-white' : 'text-zinc-900'}`}>{label}</h5>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="min-w-0">
+                <h5 className={`font-bold text-sm truncate ${isNight ? 'text-white' : 'text-zinc-900'}`}>{label}</h5>
                 <span className={`text-[10px] font-mono font-bold ${t.educatorRole === 'kt' ? 'text-blue-400' : 'text-orange-400'}`}>
                   {t.educatorRole === 'kt' ? 'Korean Teacher (KT)' : 'Foreign Teacher (FT)'}
                 </span>

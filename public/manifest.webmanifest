@@ -5,16 +5,16 @@
   "start_url": "/teacher",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#14283d",
-  "theme_color": "#14283d",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "icons": [
     {
-      "src": "https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_trim/w_192,h_192,c_pad,b_rgb:14283d/e_improve,e_sharpen/f_png/v1765769939/chekki-logo_q5xeux.png",
+      "src": "https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/c_crop,g_north_west,w_5,h_5/w_192,h_192,c_pad,b_rgb:050505/l_text:Arial_32_bold:Chekki,co_white/fl_layer_apply,g_center,x_-26/l_text:Arial_32_bold:AI,co_rgb:EA580C/fl_layer_apply,g_center,x_48/f_png/v1765769939/chekki-logo_q5xeux.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_trim/w_512,h_512,c_pad,b_rgb:14283d/e_improve,e_sharpen/f_png/v1765769939/chekki-logo_q5xeux.png",
+      "src": "https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/c_crop,g_north_west,w_5,h_5/w_512,h_512,c_pad,b_rgb:050505/l_text:Arial_84_bold:Chekki,co_white/fl_layer_apply,g_center,x_-68/l_text:Arial_84_bold:AI,co_rgb:EA580C/fl_layer_apply,g_center,x_128/f_png/v1765769939/chekki-logo_q5xeux.png",
       "sizes": "512x512",
       "type": "image/png"
     }
