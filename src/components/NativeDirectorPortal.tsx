@@ -3,7 +3,9 @@ import {
   Buildings,
   WarningCircle,
   SquaresFour,
-  CheckCircle
+  CheckCircle,
+  Confetti,
+  CreditCard
 } from '@phosphor-icons/react';
 import { collection, query, where, getCountFromServer, getDocs } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
@@ -201,7 +203,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-emerald-500/20 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center font-bold text-lg shrink-0">
-              🎉
+              <Confetti size={20} weight="bold" />
             </div>
             <div>
               <h4 className="font-black text-sm text-white flex items-center gap-2">
@@ -329,7 +331,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 : 'bg-zinc-100 border-zinc-200 text-zinc-700'
             }`}
           >
-            <span>💳</span>
+            <CreditCard size={16} weight="bold" />
             <span>Billing</span>
           </button>
         </div>

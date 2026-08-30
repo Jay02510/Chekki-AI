@@ -18,7 +18,12 @@ import {
   Receipt,
   X,
   List,
-  ShieldCheck
+  ShieldCheck,
+  Gift,
+  Envelope,
+  Lightning,
+  CreditCard,
+  Wallet
 } from '@phosphor-icons/react';
 import { SchoolLoopDiagram } from '../components/SchoolLoopDiagram';
 import { PLAN_SEATS, PLAN_LABELS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
@@ -614,7 +619,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           }`}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-lg flex-shrink-0">
-                🎁
+                <Gift size={20} weight="bold" />
               </div>
               <div>
                 <h4 className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
@@ -873,13 +878,13 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             onClick={() => openPlanModal('enterprise', 20, 10)}
             className={`pricing-card p-5 border rounded-3xl flex flex-col justify-between transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer group ${
               isNight 
-                ? 'bg-brand-dark border-white/10 hover:border-purple-500/50 hover:bg-zinc-900/30' 
-                : 'bg-white border-zinc-200 hover:border-purple-500/50 hover:shadow-xl shadow-sm'
+                ? 'bg-brand-dark border-white/10 hover:border-zinc-500/50 hover:bg-zinc-900/30'
+                : 'bg-white border-zinc-200 hover:border-zinc-400/50 hover:shadow-xl shadow-sm'
             }`}
           >
             <div>
               <div className="flex justify-between items-center mb-3">
-                <span className="px-2.5 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-500 text-[10px] font-black tracking-wider uppercase rounded-full">
+                <span className="px-2.5 py-1 bg-zinc-500/10 border border-zinc-500/20 text-zinc-400 text-[10px] font-black tracking-wider uppercase rounded-full">
                   {isKo ? '대형 학원 & 프랜차이즈' : 'LARGE ACADEMY & FRANCHISE'}
                 </span>
               </div>
@@ -915,7 +920,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
                   <span>{isKo ? '무제한 교사 계정 & 다중 캠퍼스 솔루션' : 'Unlimited Teacher Seats & Multi-Campus'}</span>
                 </li>
-                <li className="flex items-center gap-2 font-bold text-purple-400">
+                <li className="flex items-center gap-2 font-bold text-orange-400">
                   <Sparkle size={14} weight="bold" className="flex-shrink-0" />
                   <span>{isKo ? '체키 스쿨 프로의 모든 기능 포함' : 'Includes Everything in Chekki School Pro'}</span>
                 </li>
@@ -927,7 +932,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
                   <span>{isKo ? '전담 1:1 담당자 & 직통 핫라인 지원' : 'Dedicated Success Manager & Priority SLA'}</span>
                 </li>
-                <li className="flex items-center gap-2 font-bold text-purple-400">
+                <li className="flex items-center gap-2 font-bold text-orange-400">
                   <Sparkle size={14} weight="bold" className="flex-shrink-0" />
                   <span>{isKo ? '학원 전용 맞춤 브랜딩 앱 제작 옵션' : 'Custom Branded Parent Mobile App Option'}</span>
                 </li>
@@ -939,7 +944,11 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 e.stopPropagation();
                 openPlanModal('enterprise', 20, 10);
               }}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-2xl text-center transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] shadow-md cursor-pointer"
+              className={`w-full py-3 font-bold text-xs rounded-2xl text-center transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] shadow-md cursor-pointer ${
+                isNight
+                  ? 'bg-white/10 hover:bg-white/15 text-white border border-white/10'
+                  : 'bg-zinc-900 hover:bg-zinc-800 text-white'
+              }`}
             >
               {isKo ? '맞춤 요금 도입 문의' : 'Contact Enterprise Team'}
             </button>
@@ -1001,7 +1010,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-lg">
-                    ✉️
+                    <Envelope size={18} weight="bold" />
                   </div>
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
@@ -1191,8 +1200,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         <span>{isKo ? '1:1 상담 신청하기' : 'Submit Consultation Request'}</span>
                       )}
                     </button>
-                    <p className="text-[10px] text-zinc-400 text-center mt-2 font-mono">
-                      ✉️ support@chekkiai.com
+                    <p className="text-[10px] text-zinc-400 text-center mt-2 font-mono flex items-center justify-center gap-1">
+                      <Envelope size={12} weight="bold" /> support@chekkiai.com
                     </p>
                   </div>
                 </form>
@@ -1227,7 +1236,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-xl">
-                    ⚡
+                    <Lightning size={22} weight="bold" />
                   </div>
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
@@ -1382,7 +1391,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-lg">
-                    💳
+                    <CreditCard size={18} weight="bold" />
                   </div>
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
@@ -1433,21 +1442,21 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     onClick={() => setPaymentMethod('bank')}
                     className={`p-3 rounded-xl border text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-md col-span-2`}
                   >
-                    🏦 {isKo ? '계좌이체 / 전자세금계산서 청구 (공식)' : 'Corporate Bank Transfer & Tax Invoice'}
+                    <Bank size={14} weight="bold" /> {isKo ? '계좌이체 / 전자세금계산서 청구 (공식)' : 'Corporate Bank Transfer & Tax Invoice'}
                   </button>
                   <button
                     type="button"
                     disabled
                     className="p-2.5 rounded-xl border text-[11px] font-bold opacity-50 bg-white/5 border-white/10 text-zinc-400 flex items-center justify-center gap-1.5 cursor-not-allowed"
                   >
-                    💳 {isKo ? '신용카드 (출시 예정)' : 'Credit Card (Coming Soon)'}
+                    <CreditCard size={14} weight="bold" /> {isKo ? '신용카드 (출시 예정)' : 'Credit Card (Coming Soon)'}
                   </button>
                   <button
                     type="button"
                     disabled
                     className="p-2.5 rounded-xl border text-[11px] font-bold opacity-50 bg-white/5 border-white/10 text-zinc-400 flex items-center justify-center gap-1.5 cursor-not-allowed"
                   >
-                    💛 {isKo ? '카카오페이 (출시 예정)' : 'KakaoPay (Coming Soon)'}
+                    <Wallet size={14} weight="bold" /> {isKo ? '카카오페이 (출시 예정)' : 'KakaoPay (Coming Soon)'}
                   </button>
                 </div>
               </div>

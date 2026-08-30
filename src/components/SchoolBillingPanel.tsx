@@ -137,7 +137,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
           <button
             type="button"
             onClick={() => { setPlanRequestSent(false); setShowPlanModal(true); }}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 inline-block text-center"
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 inline-block text-center"
           >
             {isKo ? '요금제 변경 / 업그레이드' : 'Change Plan / Upgrade'}
           </button>
@@ -181,7 +181,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
             type="button"
             onClick={handleExport}
             disabled={isExporting}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 ${isNight ? 'bg-white/5 text-white hover:bg-white/10 border border-white/10' : 'bg-white text-zinc-900 hover:bg-zinc-100 border border-zinc-200'}`}
+            className={`px-4 py-2 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 disabled:opacity-50 ${isNight ? 'bg-white/5 text-white hover:bg-white/10 border border-white/10' : 'bg-white text-zinc-900 hover:bg-zinc-100 border border-zinc-200'}`}
           >
             {isExporting ? (isKo ? '내보내는 중...' : 'Exporting...') : (isKo ? '전체 데이터 내보내기' : 'Export All Data')}
           </button>
@@ -194,7 +194,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
               type="button"
               onClick={handleDeleteRequest}
               disabled={isRequestingDeletion}
-              className="px-4 py-2 text-xs font-bold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all active:scale-95 disabled:opacity-50"
+              className="px-4 py-2 text-xs font-bold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 disabled:opacity-50"
             >
               {isRequestingDeletion ? (isKo ? '요청 중...' : 'Requesting...') : (isKo ? '데이터 삭제 요청' : 'Request Data Deletion')}
             </button>
@@ -228,7 +228,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
                 <button
                   type="button"
                   onClick={() => setShowPlanModal(false)}
-                  className="w-full px-4 py-2 bg-zinc-200 hover:bg-zinc-300 text-zinc-900 text-xs font-bold rounded-xl transition-all active:scale-95"
+                  className="w-full px-4 py-2 bg-zinc-200 hover:bg-zinc-300 text-zinc-900 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-95"
                 >
                   {isKo ? '닫기' : 'Close'}
                 </button>
@@ -250,7 +250,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
                         setIsSubmittingPlanChange(false);
                         if (ok) setPlanRequestSent(true);
                       }}
-                      className={`w-full text-left px-4 py-3 rounded-xl border transition-all disabled:opacity-50 ${isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100'}`}
+                      className={`w-full text-left px-4 py-3 rounded-xl border transition-[color,background-color,border-color,box-shadow,transform] disabled:opacity-50 ${isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100'}`}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <span className={`block text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
@@ -273,7 +273,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
                 <button
                   type="button"
                   onClick={() => setShowPlanModal(false)}
-                  className={`w-full px-4 py-2 mt-2 text-xs font-bold rounded-xl transition-all active:scale-95 ${isNight ? 'bg-white/5 text-zinc-300 hover:bg-white/10' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
+                  className={`w-full px-4 py-2 mt-2 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 ${isNight ? 'bg-white/5 text-zinc-300 hover:bg-white/10' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
                 >
                   {isKo ? '취소' : 'Cancel'}
                 </button>
