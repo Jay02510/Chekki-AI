@@ -35,7 +35,7 @@
 > 
 > **Chekki AI 팀 드림**  
 > 🌐 Website: [https://chekkiai.com/schools](https://chekkiai.com/schools)  
-> 📞 문의: [전화번호 / 이메일]
+> 📞 문의: support@chekkiai.com / 010-5371-9266
 
 ---
 
@@ -64,7 +64,7 @@
 > 
 > **The Chekki AI Team**  
 > 🌐 [https://chekkiai.com/schools](https://chekkiai.com/schools)  
-> 📧 Contact: [Email / Phone]
+> 📧 Contact: support@chekkiai.com / +82-10-5371-9266
 
 ---
 
