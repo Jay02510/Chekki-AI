@@ -1726,7 +1726,14 @@ ${answerKeyLines.length > 0 ? '2a. ANSWER KEY PRIORITY: If a question on the sca
         throw new Error('TriggerFallback');
       }
     } catch (e: any) {
-      if (realUserPlan === 'pro') {
+      // A rate-limited/overloaded Gemini API used to trigger an immediate
+      // second call here for pro users — doubling load against an API
+      // that's already struggling, right when it's least likely to help.
+      // Let a transient failure propagate straight to the outer catch
+      // (which now returns a distinct AI_TEMPORARILY_UNAVAILABLE) instead.
+      const errText = `${e?.status || ''} ${e?.message || ''}`;
+      const isTransient = /429|503|RESOURCE_EXHAUSTED|UNAVAILABLE|overloaded/i.test(errText);
+      if (realUserPlan === 'pro' && !isTransient) {
         console.log(
           '[Backend] Fast pass failed or found 0 questions. Falling back to deep thinking (8000 tokens)...'
         );
@@ -1782,6 +1789,20 @@ ${answerKeyLines.length > 0 ? '2a. ANSWER KEY PRIORITY: If a question on the sca
     });
   } catch (error: any) {
     console.error('[Backend Security Error]:', error);
+    // Gemini rate-limited/overloaded (429 RESOURCE_EXHAUSTED, 503 UNAVAILABLE)
+    // used to fall through to the generic ANALYSIS_FAILED path, and the
+    // client showed "Analysis failed, retake the photo in better lighting" —
+    // actively wrong advice for a transient API outage that has nothing to
+    // do with the photo. Distinguish it so the client can show the right
+    // message and let the user just retry shortly.
+    const errText = `${error?.status || ''} ${error?.message || ''}`;
+    const isTransient = /429|503|RESOURCE_EXHAUSTED|UNAVAILABLE|overloaded/i.test(errText);
+    if (isTransient) {
+      return res.status(503).json({
+        error: 'AI_TEMPORARILY_UNAVAILABLE',
+        details: 'The AI service is temporarily busy. Please try again in a moment.',
+      });
+    }
     // error.message is the AI provider's own rejection reason (bad/undecodable
     // image, unsupported mimeType, etc.) — surfacing it lets the client show
     // something more actionable than a bare "ANALYSIS_FAILED" code, without

@@ -528,7 +528,11 @@ function AppContent() {
       msg.includes('429') ||
       msg.includes('Too Many Requests') ||
       msg.includes('prepayment') ||
-      msg.includes('credits are depleted')
+      msg.includes('credits are depleted') ||
+      msg.includes('AI_TEMPORARILY_UNAVAILABLE') ||
+      msg.includes('UNAVAILABLE') ||
+      msg.includes('503') ||
+      msg.includes('overloaded')
     ) {
       return isKo
         ? '일시적으로 서비스 요청이 많아 연결이 지연되고 있습니다. 잠시 후 다시 시도해 주세요!'
