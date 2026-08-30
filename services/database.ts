@@ -136,6 +136,11 @@ export const db = {
     // once, at the actual point of creation, means no future signup path
     // can add a user doc without it.
     await setDoc(doc(dbInstance, 'users', uid), { ...profile, uid, createdAt: new Date().toISOString() });
+    // Same choke-point reasoning as createdAt above: this is the one place
+    // every signup path passes through, so it's the only reliable place to
+    // fire a GA4 sign_up event without duplicating it across every provider
+    // branch in AuthContext.tsx.
+    this.logUserEvent('sign_up', { plan: profile.plan, has_school: !!profile.schoolId });
   },
 
   async updateUser(uid: string, updates: Partial<UserProfile>): Promise<void> {

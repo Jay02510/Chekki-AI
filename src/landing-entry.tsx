@@ -8,6 +8,7 @@ import '../landing.css';
 import { initSentry } from './lib/sentry';
 import { setPageMeta } from './lib/pageMeta';
 import { ToastProvider } from '../contexts/ToastContext';
+import { db } from '../services/database';
 
 initSentry();
 
@@ -71,6 +72,12 @@ function LandingRoot() {
         path: '/',
       });
     }
+    // Firebase Analytics (GA4) doesn't auto-log page_view on SPA route
+    // changes the way a classic multi-page site does — there's no full
+    // navigation for it to hook. Firing it here, once per pathname change,
+    // is what makes /schools, /faq, and / show up as real GA4 page views
+    // instead of all collapsing into one session-start event.
+    db.logUserEvent('page_view', { page_path: pathname, page_location: window.location.href });
   }, [pathname]);
 
   // classCode= is the invite-email "join this class" link (api/create-class.ts's

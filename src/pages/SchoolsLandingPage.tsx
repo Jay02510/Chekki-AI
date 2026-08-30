@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { db } from '../../services/database';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from 'framer-motion';
@@ -176,6 +177,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const openPlanModal = (planId: string, _defaultTeachers: number = 1, _minSeats: number = 1) => {
     setSelectedPlanId(planId);
     setShowPricingModal(true);
+    db.logUserEvent('schools_pricing_viewed', { plan_id: planId });
   };
 
   // State for form inputs (Pre-filled from localStorage if available)
@@ -1176,6 +1178,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         }),
                       });
                       if (!response.ok) throw new Error(`Request failed with ${response.status}`);
+                      db.logUserEvent('schools_consultation_submitted');
                       setConsultationSubmitted(true);
                     } catch (err) {
                       console.error('Consultation request failed:', err);
