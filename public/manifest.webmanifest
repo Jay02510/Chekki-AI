@@ -1,0 +1,22 @@
+{
+  "name": "Chekki AI for Schools",
+  "short_name": "Chekki Schools",
+  "description": "Teacher, director, and Korean Teacher portal for Chekki AI academy reporting.",
+  "start_url": "/teacher",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#14283d",
+  "theme_color": "#14283d",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_trim/w_192,h_192,c_pad,b_rgb:14283d/e_improve,e_sharpen/f_png/v1765769939/chekki-logo_q5xeux.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_trim/w_512,h_512,c_pad,b_rgb:14283d/e_improve,e_sharpen/f_png/v1765769939/chekki-logo_q5xeux.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

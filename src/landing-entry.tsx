@@ -149,3 +149,12 @@ root.render(
     <LandingRoot />
   </React.StrictMode>
 );
+
+// Registers the passthrough SW so the schools portal (/teacher, /admin) is
+// installable via "Add to Home Screen" on Android/Chrome. index.html only —
+// never loaded inside the Capacitor native app (app.html has its own entry).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
