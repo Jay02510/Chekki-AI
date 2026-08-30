@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="ko" class="dark">
 <head>
   <script>
     // Set html.dark and body colors before first paint, using the saved
@@ -29,9 +29,24 @@
   <meta property="og:title" content="Chekki AI: For Families and Teachers">
   <meta property="og:description" content="AI powered English tools for the home and the classroom.">
   <meta property="og:image" content="https://res.cloudinary.com/dginphpy4/image/upload/v1773201056/Link_Card_Preview_Image_-_1200x628_qdhohw.png">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://res.cloudinary.com/dginphpy4/image/upload/v1773201056/Link_Card_Preview_Image_-_1200x628_qdhohw.png">
+  <!-- Legacy geo meta — still read by some regional search engines (Naver
+       among them, which matters more than Google for Korean academy search
+       intent) even though Google itself ignores these in favor of ccTLD/
+       hreflang signals. -->
+  <meta name="geo.region" content="KR">
+  <meta name="geo.placename" content="South Korea">
   <title>ChekkiAI</title>
+  <!-- No locale-specific URLs exist (language is a client-side ?lang= toggle,
+       not a route) — self-referencing hreflang still tells crawlers this one
+       URL serves both languages rather than being mistaken for a single-
+       locale page, and points x-default at the bare URL. -->
+  <link rel="alternate" hreflang="ko" href="https://www.chekkiai.com/?lang=ko">
+  <link rel="alternate" hreflang="en" href="https://www.chekkiai.com/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://www.chekkiai.com/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300..800&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Patrick+Hand&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
@@ -41,10 +56,58 @@
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Chekki AI",
+    "legalName": "채키 AI (Chekki AI)",
     "url": "https://www.chekkiai.com/",
     "logo": "https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/e_dropshadow:azimuth_220;elevation_60;spread_20/f_png,e_improve,e_sharpen/v1765769939/chekki-logo_q5xeux.png",
     "description": "Chekki AI provides AI-powered homework scanning and pronunciation coaching for Korean families, and classroom/reporting automation for English-language academies.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "KR"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "South Korea"
+    },
+    "taxID": "814-14-03096",
+    "email": "support@chekkiai.com",
+    "telephone": "+82-10-5371-9266",
+    "knowsLanguage": ["ko", "en"],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "support@chekkiai.com",
+      "telephone": "+82-10-5371-9266",
+      "areaServed": "KR",
+      "availableLanguage": ["Korean", "English"]
+    },
     "sameAs": []
+  }
+  </script>
+  <!-- Distinct entity for the B2B academy/hagwon offering (/for-schools) —
+       Organization above describes the whole company; this scopes the
+       education-institution service specifically so a search for "학원
+       자동 채점 프로그램" or similar has a directly-matching entity, not
+       just the general company description. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "serviceType": "Academy homework grading and parent reporting automation",
+    "name": "Chekki AI for Academies",
+    "provider": {
+      "@type": "Organization",
+      "name": "Chekki AI"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "South Korea"
+    },
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "English-language academy (hagwon) directors and teachers"
+    },
+    "description": "AI-powered worksheet grading, curriculum tracking, and bilingual Korean parent reports for English-language academies (어학원) in South Korea.",
+    "url": "https://www.chekkiai.com/for-schools"
   }
   </script>
   <script type="application/ld+json">
