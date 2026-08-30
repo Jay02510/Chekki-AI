@@ -1292,7 +1292,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                     <button
                       type="submit"
                       disabled={isSubmittingConsultation}
-                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-98 flex items-center justify-center gap-2"
+                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2"
                     >
                       {isSubmittingConsultation ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
