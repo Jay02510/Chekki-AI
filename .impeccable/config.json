@@ -260,6 +260,14 @@
         "rule": "gray-on-color",
         "value": "text-zinc-900 on bg-orange-50/50",
         "createdAt": "2026-08-29T07:19:00.571Z"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "557",
+        "files": [
+          "src/components/NativeDirectorPortal.tsx"
+        ],
+        "createdAt": "2026-08-30T03:12:59.106Z"
       }
     ]
   }
