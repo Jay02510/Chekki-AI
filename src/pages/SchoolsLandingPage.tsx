@@ -23,7 +23,8 @@ import {
   Envelope,
   Lightning,
   CreditCard,
-  Wallet
+  Wallet,
+  CaretDown
 } from '@phosphor-icons/react';
 import { SchoolLoopDiagram } from '../components/SchoolLoopDiagram';
 import { PLAN_SEATS, PLAN_LABELS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
@@ -53,7 +54,52 @@ const PRICING_TIERS = Object.fromEntries(
   ])
 ) as Record<string, { id: string; nameEn: string; nameKo: string; seats: { ft: number; kt: number } } & typeof PRICING_BILLING[string]>;
 
+// Reused verbatim from the academy ("teacher") category of FaqPage.tsx's
+// FAQ_DATA — real, already-shipped content, not new copy — so this page's
+// objection-handling section doesn't duplicate/drift from the canonical
+// FAQ answers. Trimmed to the 5 most conversion-relevant for a director
+// deciding whether to try Chekki (trial terms, AI grading trust, core
+// mechanics), not every teacher-workflow question.
+const SCHOOL_FAQ_ITEMS = [
+  {
+    id: 't4',
+    questionKo: '학원용 7일 무료 체험 신청 조건 및 승인 절차는 어떻게 되나요?',
+    questionEn: 'What is required for the 7-Day Academy Free Trial?',
+    answerKo: '학원명, 담당자 성함, 이메일/연락처 3가지 필수 정보만 입력하시면 즉시 신청됩니다. 신용카드 등록이나 사업자번호 없이 신청 후 1시간 내 7일 전용 교사 승인 코드가 발급됩니다.',
+    answerEn: 'Only 3 basic fields are required: Academy Name, Contact Name, and Email/Phone. No credit card or tax documents required. Your 7-day access code is issued within 1 hour.',
+  },
+  {
+    id: 't5',
+    questionKo: '학생 손글씨 채점 시 일반 AI의 환각(Hallucination) 오답 우려는 없나요?',
+    questionEn: 'Are there concerns about AI OCR hallucinations misgrading student handwriting?',
+    answerKo: '체키는 학원 교재의 정답지 데이터(Ground-Truth)를 채점 기준으로 1차 대조하기 때문에, 일반 AI 파운데이션 모델의 환각 오류 없이 정밀한 채점 기준을 유지합니다.',
+    answerEn: "Chekki cross-references scans against your academy's ground-truth answer key, keeping grading precise and eliminating false AI grading hallucinations.",
+  },
+  {
+    id: 't2',
+    questionKo: '가정에서 학부모가 스캔한 오답 데이터는 어떻게 선생님께 전송되나요?',
+    questionEn: 'How do parent homework scans sync to the Teacher Dashboard?',
+    answerKo: '학부모님이 원장님/선생님께 받은 초대 링크로 Chekki 앱에 연동하면 자동으로 동기화됩니다. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 전송되어 개별 원생 활동에서 확인하실 수 있습니다.',
+    answerEn: 'Parents link their account via the invite their teacher sends them. Homework scans and red-bordered mistake data silently sync straight to your teacher dashboard in real-time.',
+  },
+  {
+    id: 't1',
+    questionKo: '매주 학급 주간 단어와 정답지를 일일이 타이핑해야 하나요?',
+    questionEn: 'Do teachers have to manually type weekly vocabulary words and answer keys?',
+    answerKo: '아닙니다! 교재 사진이나 PDF 파일을 한 번에 최대 5장까지 드롭하면 AI가 단어, 파닉스 패턴, 읽기 지문, 학부모용 정답 가이드를 3초 만에 자동으로 추출하여 대시보드에 등록해 줍니다.',
+    answerEn: 'No! Simply drop up to 5 textbook photos or multi-page PDFs at once. AI extracts target words, phonics rules, reading stories, and parent answer keys into your dashboard in seconds.',
+  },
+  {
+    id: 't3',
+    questionKo: '오답 맞춤 복습 프린트 및 학원 성적표는 어떻게 인쇄하나요?',
+    questionEn: 'How do I generate printable review sheets and academy branded report cards?',
+    answerKo: '교사 대시보드에서 1클릭으로 간편히 발급됩니다. "오답 맞춤 프린트 생성" 버튼을 누르면 학원 로고가 포함된 파닉스/단어 쓰기 맞춤 PDF가 생성되며, 원생 상세 정보에서 "맞춤 로고 성적표 인쇄"를 누르면 공식 학부모 리포트가 출력됩니다.',
+    answerEn: 'With a single click! Click "Generate Review Sheet" for an automated custom PDF worksheet, or click "Print Branded Report" inside any student profile for an official academy report card.',
+  },
+];
+
 const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
+  const [openFaqId, setOpenFaqId] = useState<string | null>(null);
   const { showToast } = useToast();
   const [language, setLanguage] = useState<'ko' | 'en'>(() => {
     if (typeof window !== 'undefined') {
@@ -953,6 +999,60 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               {isKo ? '맞춤 요금 도입 문의' : 'Contact Enterprise Team'}
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* --- FAQ: OBJECTION HANDLING BEFORE THE FINAL CTA ---
+          Reuses SCHOOL_FAQ_ITEMS (verbatim from FaqPage.tsx's teacher
+          category) so a director evaluating the trial doesn't have to
+          leave this page to find answers to the questions that actually
+          block a decision (trial terms, AI grading trust, core sync
+          mechanics) — those previously only lived on the separate /faq
+          page. */}
+      <section className="py-16 px-4 md:px-8 max-w-3xl mx-auto w-full">
+        <div className="mb-10 text-center">
+          <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.25em] mb-3 block">
+            {isKo ? '자주 묻는 질문' : 'FREQUENTLY ASKED'}
+          </span>
+          <h2 className={`font-display text-2xl sm:text-3xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+            {isKo ? '도입 전, 원장님들이 가장 많이 묻는 질문' : 'What Directors Ask Before Signing Up'}
+          </h2>
+        </div>
+        <div className="space-y-3">
+          {SCHOOL_FAQ_ITEMS.map((faq) => {
+            const isOpen = openFaqId === faq.id;
+            return (
+              <div
+                key={faq.id}
+                className={`border rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] duration-300 overflow-hidden ${
+                  isOpen
+                    ? isNight ? 'bg-brand-dark-elevated border-orange-500/40 shadow-lg' : 'bg-orange-50/40 border-orange-200 shadow-md'
+                    : isNight ? 'bg-brand-dark border-white/10 hover:border-white/20' : 'bg-white border-zinc-200 hover:border-zinc-300 shadow-sm'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
+                  aria-expanded={isOpen}
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer"
+                >
+                  <h3 className={`text-sm font-bold leading-snug ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                    {isKo ? faq.questionKo : faq.questionEn}
+                  </h3>
+                  <CaretDown
+                    size={16}
+                    weight="bold"
+                    className={`shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 text-orange-500' : 'text-zinc-400'}`}
+                  />
+                </button>
+                {isOpen && (
+                  <div className={`px-5 pb-5 text-xs leading-relaxed border-t pt-3 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-200/80 text-zinc-700'}`}>
+                    {isKo ? faq.answerKo : faq.answerEn}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
