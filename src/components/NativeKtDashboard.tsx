@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Copy, CheckCircle, Sparkle, UserCheck, X, Lock, Bell, BellSlash } from '@phosphor-icons/react';
+import {
+  Copy,
+  CheckCircle,
+  Sparkle,
+  UserCheck,
+  X,
+  Lock,
+  Bell,
+  BellSlash,
+  CaretDown,
+} from '@phosphor-icons/react';
 import { GeneratedReportOutput } from '../services/aiGenerator';
 import { UserProfile } from '../../types';
 import { getPermissionsForUser } from '../utils/permissions';
@@ -29,7 +39,10 @@ interface Props {
   // so it's the record parents see — never the raw FT note. Fired when the
   // KT copies the script to send, since that's the point they've committed
   // to this version being final.
-  onApprove?: (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) => Promise<boolean> | boolean | void;
+  onApprove?: (
+    approvedSummary: string,
+    approvedExceptions: { studentName: string; approvedText: string }[]
+  ) => Promise<boolean> | boolean | void;
   // Fires whenever the current draft has an unsaved edit (typed but not yet
   // copied/sent) — lets the parent warn before switching queue items or
   // tabs, since this component is keyed by the active group and fully
@@ -51,7 +64,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
   onApprove,
   onDirtyChange,
 }) => {
-  const isKo = isKoProp !== undefined ? isKoProp : (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
+  const isKo =
+    isKoProp !== undefined
+      ? isKoProp
+      : typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko';
   const permissions = getPermissionsForUser(userProfile);
 
   // Digest-email notification preferences (per-KT, not a school-wide
@@ -63,6 +79,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
   const [notifyHour, setNotifyHour] = useState(userProfile?.notifyDigestHourKst ?? 9);
   const [showNotifySettings, setShowNotifySettings] = useState(false);
   const [isSavingNotifyPrefs, setIsSavingNotifyPrefs] = useState(false);
+  // Collapses the greeting-style/character-count/urgent-filter options —
+  // three sibling controls in one card that otherwise wrap across several
+  // rows on mobile. Defaults closed on mobile-crowding feedback; the script
+  // textarea below stays always visible regardless of this toggle.
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
   const saveNotifyPrefs = async (enabled: boolean, hourKst: number) => {
     if (!userProfile?.uid) return;
@@ -87,7 +108,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
   // Live Editable State for Korean Teacher Review
   const [editedKoreanSummary, setEditedKoreanSummary] = useState(
     generatedOutput?.bilingualClassSummary.korean ||
-      (isKo 
+      (isKo
         ? '오늘 7A 반 원생들은 Unit 4 식물의 광합성(Photosynthesis) 어휘를 집중 학습했습니다. 모든 원생이 어휘 읽기 카드 활동에 밝고 적극적으로 참여하였습니다.'
         : 'Today in 7A, students focused on learning Unit 4 Photosynthesis vocabulary. All students actively and cheerfully participated in the vocabulary flashcard reading activity.')
   );
@@ -119,12 +140,15 @@ export const NativeKtDashboard: React.FC<Props> = ({
       setEnglishSummary((prev) => (prev === lastSyncedEnglishRef.current ? newEnglish : prev));
       lastSyncedEnglishRef.current = newEnglish;
     }
-  }, [generatedOutput?.bilingualClassSummary.korean, generatedOutput?.bilingualClassSummary.english]);
+  }, [
+    generatedOutput?.bilingualClassSummary.korean,
+    generatedOutput?.bilingualClassSummary.english,
+  ]);
 
   // 3-Stage Report Status State
-  const [reportStatus, setReportStatus] = useState<'pending_review' | 'edited_by_kt' | 'copied_sent'>(
-    generatedOutput?.status || 'pending_review'
-  );
+  const [reportStatus, setReportStatus] = useState<
+    'pending_review' | 'edited_by_kt' | 'copied_sent'
+  >(generatedOutput?.status || 'pending_review');
 
   useEffect(() => {
     onDirtyChange?.(reportStatus === 'edited_by_kt');
@@ -137,14 +161,18 @@ export const NativeKtDashboard: React.FC<Props> = ({
   const [filterUrgentOnly, setFilterUrgentOnly] = useState(false);
 
   const getToneHeader = () => {
-    if (scriptTone === 'friendly') return isKo ? `[어머님 안녕하세요! ${academyName}입니다 🌸]` : `[Hello Parents! This is ${academyName} 🌸]`;
+    if (scriptTone === 'friendly')
+      return isKo
+        ? `[어머님 안녕하세요! ${academyName}입니다 🌸]`
+        : `[Hello Parents! This is ${academyName} 🌸]`;
     if (scriptTone === 'concise') return `[${className} ${isKo ? '알림톡' : 'Report'}]`;
     return `[${academyName} ${isKo ? '학부모 알림톡' : 'Parent Update'}]`;
   };
 
-  const displayedStudentReports = generatedOutput?.studentReports && generatedOutput.studentReports.length > 0
-    ? generatedOutput.studentReports
-    : [];
+  const displayedStudentReports =
+    generatedOutput?.studentReports && generatedOutput.studentReports.length > 0
+      ? generatedOutput.studentReports
+      : [];
 
   const getFormattedScript = () => {
     // Exceptions (praise/attention flags) used to render only in this KT's
@@ -155,9 +183,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
     // NOT included below — it stays visible in this dashboard's own review
     // UI, but pasting untranslated English into a Korean parent chat isn't
     // useful to the parent it's meant for.
-    const exceptionsBlock = !skipInlineExceptions && displayedStudentReports.length > 0
-      ? `\n\n${displayedStudentReports.map((s) => `[${s.studentName}]\n${s.koreanUpdate}`).join('\n\n')}`
-      : '';
+    const exceptionsBlock =
+      !skipInlineExceptions && displayedStudentReports.length > 0
+        ? `\n\n${displayedStudentReports.map((s) => `[${s.studentName}]\n${s.koreanUpdate}`).join('\n\n')}`
+        : '';
     return `${getToneHeader()}\n${isKo ? '학급' : 'Class'}: ${className}\n\n${editedKoreanSummary}${exceptionsBlock}`.trim();
   };
 
@@ -217,7 +246,10 @@ export const NativeKtDashboard: React.FC<Props> = ({
     try {
       const result = await onApprove?.(
         editedKoreanSummary,
-        displayedStudentReports.map((s) => ({ studentName: s.studentName, approvedText: s.koreanUpdate }))
+        displayedStudentReports.map((s) => ({
+          studentName: s.studentName,
+          approvedText: s.koreanUpdate,
+        }))
       );
       if (result === false) return;
       setCopied(true);
@@ -237,7 +269,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
     return (
       <div
         className={`p-8 sm:p-12 rounded-3xl border shadow-2xl max-w-4xl mx-auto w-full text-center space-y-4 transition-colors ${
-          isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+          isNight
+            ? 'bg-brand-dark border-white/15 text-zinc-100'
+            : 'bg-white border-zinc-200 text-zinc-900'
         }`}
       >
         <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
@@ -258,7 +292,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
   return (
     <div
       className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 max-w-4xl mx-auto w-full transition-colors ${
-        isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
+        isNight
+          ? 'bg-brand-dark border-white/15 text-zinc-100'
+          : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
@@ -276,12 +312,16 @@ export const NativeKtDashboard: React.FC<Props> = ({
           </h2>
           {pendingCount > 0 && (
             <span className="mt-1 inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-red-500/15 border border-red-500/30 text-red-400 font-mono">
-              {isKo ? `대기 중인 리포트 ${pendingCount}건 더 있음` : `${pendingCount} more waiting in queue`}
+              {isKo
+                ? `대기 중인 리포트 ${pendingCount}건 더 있음`
+                : `${pendingCount} more waiting in queue`}
             </span>
           )}
           {isDemoContent && (
             <span className="mt-1 inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-purple-500/15 border border-purple-500/30 text-purple-300 font-mono">
-              {isKo ? '📋 샘플 미리보기 — 아직 실제 리포트 없음' : '📋 Sample preview — no real report yet'}
+              {isKo
+                ? '📋 샘플 미리보기 — 아직 실제 리포트 없음'
+                : '📋 Sample preview — no real report yet'}
             </span>
           )}
         </div>
@@ -300,14 +340,24 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 title={isKo ? '알림 설정' : 'Notification settings'}
                 aria-label={isKo ? '알림 설정' : 'Notification settings'}
               >
-                {notifyEnabled ? <Bell size={16} weight="bold" /> : <BellSlash size={16} weight="bold" />}
+                {notifyEnabled ? (
+                  <Bell size={16} weight="bold" />
+                ) : (
+                  <BellSlash size={16} weight="bold" />
+                )}
               </button>
               {showNotifySettings && (
-                <div className={`absolute top-full right-0 mt-2 z-30 w-72 p-4 rounded-2xl border shadow-2xl space-y-3 text-xs ${
-                  isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
-                }`}>
+                <div
+                  className={`absolute top-full right-0 mt-2 z-30 w-72 p-4 rounded-2xl border shadow-2xl space-y-3 text-xs ${
+                    isNight
+                      ? 'bg-brand-dark border-white/15 text-zinc-100'
+                      : 'bg-white border-zinc-200 text-zinc-900'
+                  }`}
+                >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold">{isKo ? '검토 대기 알림 이메일' : 'Pending-review digest email'}</span>
+                    <span className="font-bold">
+                      {isKo ? '검토 대기 알림 이메일' : 'Pending-review digest email'}
+                    </span>
                     <button
                       type="button"
                       onClick={() => {
@@ -318,7 +368,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
                       className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${notifyEnabled ? 'bg-orange-500' : 'bg-zinc-500/40'}`}
                       aria-label={isKo ? '알림 켜기/끄기' : 'Toggle notifications'}
                     >
-                      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-[left] ${notifyEnabled ? 'left-[18px]' : 'left-0.5'}`} />
+                      <span
+                        className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-[left] ${notifyEnabled ? 'left-[18px]' : 'left-0.5'}`}
+                      />
                     </button>
                   </div>
                   {notifyEnabled && (
@@ -335,11 +387,15 @@ export const NativeKtDashboard: React.FC<Props> = ({
                           saveNotifyPrefs(notifyEnabled, next);
                         }}
                         className={`w-full p-2 rounded-xl border text-xs font-bold outline-none ${
-                          isNight ? 'bg-white/5 border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                          isNight
+                            ? 'bg-white/5 border-white/10 text-white'
+                            : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                         }`}
                       >
                         {Array.from({ length: 24 }, (_, h) => (
-                          <option key={h} value={h}>{String(h).padStart(2, '0')}:00 KST</option>
+                          <option key={h} value={h}>
+                            {String(h).padStart(2, '0')}:00 KST
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -351,32 +407,24 @@ export const NativeKtDashboard: React.FC<Props> = ({
               )}
             </>
           )}
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className={`px-4 py-2.5 min-h-11 rounded-2xl font-bold text-xs border flex items-center justify-center gap-2 transition-colors cursor-pointer ${
-              isNight
-                ? 'bg-white/10 hover:bg-white/15 border-white/15 text-white'
-                : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-300 text-zinc-900'
-            }`}
-            title={isKo ? '학원 로고 리포트 PDF 인쇄' : 'Download/Print PDF Report with Custom Academy Logo Header'}
-          >
-            <span>📄</span>
-            <span>{isKo ? '학원 로고 PDF 인쇄' : 'Print Custom Logo PDF Report'}</span>
-          </button>
-
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               disabled={isDemoContent || isApproving}
-              title={isDemoContent ? (isKo ? '실제 리포트가 없어 복사할 수 없습니다' : 'No real report to copy yet') : undefined}
+              title={
+                isDemoContent
+                  ? isKo
+                    ? '실제 리포트가 없어 복사할 수 없습니다'
+                    : 'No real report to copy yet'
+                  : undefined
+              }
               onClick={handleCopyKakaoScript}
               className={`px-4 py-2.5 min-h-11 rounded-xl text-xs font-black shadow-lg transition-colors flex items-center gap-2 shrink-0 ${
                 isDemoContent || isApproving
                   ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
                   : copied
-                  ? 'bg-emerald-500 text-white shadow-emerald-500/20 cursor-pointer active:scale-95'
-                  : 'bg-orange-500 hover:bg-orange-600 text-black shadow-orange-500/20 cursor-pointer active:scale-95'
+                    ? 'bg-emerald-500 text-white shadow-emerald-500/20 cursor-pointer active:scale-95'
+                    : 'bg-orange-500 hover:bg-orange-600 text-black shadow-orange-500/20 cursor-pointer active:scale-95'
               }`}
             >
               {isApproving ? (
@@ -388,10 +436,16 @@ export const NativeKtDashboard: React.FC<Props> = ({
               )}
               <span>
                 {isApproving
-                  ? (isKo ? '저장 중...' : 'Saving...')
+                  ? isKo
+                    ? '저장 중...'
+                    : 'Saving...'
                   : copied
-                  ? (isKo ? '복사 완료! ✅' : 'Copied! ✅')
-                  : (isKo ? '대본 1클릭 복사' : '1-Click Copy Script')}
+                    ? isKo
+                      ? '복사 완료! ✅'
+                      : 'Copied! ✅'
+                    : isKo
+                      ? '대본 1클릭 복사'
+                      : '1-Click Copy Script'}
               </span>
             </button>
           </div>
@@ -400,14 +454,16 @@ export const NativeKtDashboard: React.FC<Props> = ({
           <p className="w-full text-right text-[11px] font-bold text-rose-400">
             {isKo
               ? '⚠️ 복사에 실패했습니다 — 발송 처리되지 않았습니다. 아래 텍스트를 직접 선택해 복사해주세요.'
-              : "⚠️ Copy failed — not marked as sent. Select the text below and copy it manually."}
+              : '⚠️ Copy failed — not marked as sent. Select the text below and copy it manually.'}
           </p>
         )}
       </div>
 
       {/* 3-Stage Report Status Badge Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 rounded-2xl border bg-white/[0.02] border-white/10 font-mono text-xs">
-        <span className="font-bold text-zinc-400">{isKo ? '리포트 검수 진행 상태:' : 'Report Review Status:'}</span>
+        <span className="font-bold text-zinc-400">
+          {isKo ? '리포트 검수 진행 상태:' : 'Report Review Status:'}
+        </span>
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             type="button"
@@ -450,84 +506,123 @@ export const NativeKtDashboard: React.FC<Props> = ({
       {/* Greeting Style & Character Counter Bar — only the header line
           changes below (getToneHeader()); the AI-generated body text is the
           same regardless of which option is picked. Labeled accordingly so
-          it doesn't imply a full re-tone of the message that isn't happening. */}
-      <div className="p-4 rounded-2xl border bg-white/[0.02] border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs font-mono">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-bold text-zinc-400">💬 {isKo ? '인사말 스타일 (본문은 동일):' : 'Greeting Style (body text unchanged):'}</span>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setScriptTone('formal')}
-              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
-                scriptTone === 'formal'
-                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
-                  : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-              }`}
-            >
-              🎩 {isKo ? '정중한 인사말 (기본)' : 'Formal Greeting (Standard)'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setScriptTone('friendly')}
-              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
-                scriptTone === 'friendly'
-                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
-                  : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-              }`}
-            >
-              🌸 {isKo ? '친근한 인사말' : 'Soft Greeting'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setScriptTone('concise')}
-              className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
-                scriptTone === 'concise'
-                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
-                  : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-              }`}
-            >
-              ⚡ {isKo ? '간결한 인사말' : 'Concise Greeting'}
-            </button>
-          </div>
-        </div>
-        <div className={`w-full md:w-auto px-3 py-1.5 rounded-xl border font-bold whitespace-nowrap overflow-x-auto ${
-          isNight ? 'bg-white/5 border-white/10 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-700'
-        }`}>
-          {getToneHeader()}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className={`px-3 py-1 rounded-xl border font-bold ${
-            charCount <= 500
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-              : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-          }`}>
-            💬 {isKo ? '카카오톡 분량' : 'KakaoTalk Length'}: {charCount} {isKo ? '자' : 'chars'} ({charCount <= 500 ? (isKo ? '적정 ~30초' : 'Ideal ~30s read') : (isKo ? '긴 분량 ~1분' : 'Long ~1m read')})
+          it doesn't imply a full re-tone of the message that isn't happening.
+          Collapsed by default (mobile-crowding feedback) — same
+          toggle-button + chevron shape as KtReviewQueue's isQueueOpen. */}
+      <div className="rounded-2xl border bg-white/[0.02] border-white/10 text-xs font-mono">
+        <button
+          type="button"
+          onClick={() => setIsOptionsOpen((prev) => !prev)}
+          className="w-full flex items-center justify-between gap-2 px-4 py-3 min-h-11 cursor-pointer"
+        >
+          <span className="font-bold text-zinc-400">
+            💬 {isKo ? '인사말 스타일 / 옵션' : 'Greeting Style / Options'}
           </span>
+          <CaretDown
+            size={14}
+            weight="bold"
+            className={`text-zinc-400 shrink-0 transition-transform ${isOptionsOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+        {isOptionsOpen && (
+          <div className="px-4 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setScriptTone('formal')}
+                  className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
+                    scriptTone === 'formal'
+                      ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
+                      : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  🎩 {isKo ? '정중한 인사말 (기본)' : 'Formal Greeting (Standard)'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScriptTone('friendly')}
+                  className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
+                    scriptTone === 'friendly'
+                      ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
+                      : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  🌸 {isKo ? '친근한 인사말' : 'Soft Greeting'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScriptTone('concise')}
+                  className={`px-3 py-1.5 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
+                    scriptTone === 'concise'
+                      ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-sm'
+                      : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  ⚡ {isKo ? '간결한 인사말' : 'Concise Greeting'}
+                </button>
+              </div>
+            </div>
+            <div
+              className={`w-full md:w-auto px-3 py-1.5 rounded-xl border font-bold whitespace-nowrap overflow-x-auto ${
+                isNight
+                  ? 'bg-white/5 border-white/10 text-zinc-300'
+                  : 'bg-zinc-50 border-zinc-200 text-zinc-700'
+              }`}
+            >
+              {getToneHeader()}
+            </div>
 
-          <button
-            type="button"
-            onClick={() => setFilterUrgentOnly(!filterUrgentOnly)}
-            className={`px-3 py-1 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
-              filterUrgentOnly
-                ? 'bg-red-500 border-red-500 text-white shadow-md'
-                : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-            }`}
-          >
-            🚨 {isKo ? '전화상담 필요만' : 'Urgent Call Only'} {filterUrgentOnly ? 'ON' : 'OFF'}
-          </button>
-        </div>
+            <div className="flex items-center gap-3">
+              <span
+                className={`px-3 py-1 rounded-xl border font-bold ${
+                  charCount <= 500
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                    : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                }`}
+              >
+                💬 {isKo ? '카카오톡 분량' : 'KakaoTalk Length'}: {charCount}{' '}
+                {isKo ? '자' : 'chars'} (
+                {charCount <= 500
+                  ? isKo
+                    ? '적정 ~30초'
+                    : 'Ideal ~30s read'
+                  : isKo
+                    ? '긴 분량 ~1분'
+                    : 'Long ~1m read'}
+                )
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setFilterUrgentOnly(!filterUrgentOnly)}
+                className={`px-3 py-1 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
+                  filterUrgentOnly
+                    ? 'bg-red-500 border-red-500 text-white shadow-md'
+                    : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                }`}
+              >
+                🚨 {isKo ? '전화상담 필요만' : 'Urgent Call Only'} {filterUrgentOnly ? 'ON' : 'OFF'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Editable Korean Summary Section */}
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold font-mono">
           <span className="text-orange-400 uppercase tracking-wider">
-            ✏️ {isKo ? '실시간 편집 가능 학부모 알림톡 대본 (복사 전 자유 수정)' : 'Live Editable Korean Script (Review & Tweak Before Copying)'}
+            ✏️{' '}
+            {isKo
+              ? '실시간 편집 가능 학부모 알림톡 대본 (복사 전 자유 수정)'
+              : 'Live Editable Korean Script (Review & Tweak Before Copying)'}
           </span>
           {isMergingDraft && (
             <span className="text-zinc-400 normal-case font-normal">
-              {isKo ? '⏳ 여러 수업 내용을 하나의 글로 다듬는 중...' : '⏳ Blending multiple class notes into one paragraph…'}
+              {isKo
+                ? '⏳ 여러 수업 내용을 하나의 글로 다듬는 중...'
+                : '⏳ Blending multiple class notes into one paragraph…'}
             </span>
           )}
         </div>
@@ -546,7 +641,12 @@ export const NativeKtDashboard: React.FC<Props> = ({
           }`}
         />
         <div className="flex justify-between items-center text-[11px] text-zinc-400 font-mono italic">
-          <span>ℹ️ {isKo ? '위 대본 문장을 직접 수정할 수 있습니다. 복사 버튼 클릭 시 수정된 내용이 복사됩니다.' : 'KT can edit any sentence above directly. Clicking copy will copy your edited version.'}</span>
+          <span>
+            ℹ️{' '}
+            {isKo
+              ? '위 대본 문장을 직접 수정할 수 있습니다. 복사 버튼 클릭 시 수정된 내용이 복사됩니다.'
+              : 'KT can edit any sentence above directly. Clicking copy will copy your edited version.'}
+          </span>
           {!permissions.canEditReports && (
             <span className="text-amber-400 font-bold flex items-center gap-1">
               <Lock size={12} /> {isKo ? '읽기 전용 권한' : 'Read-only Permission'}
@@ -570,7 +670,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
       {!skipInlineExceptions && (
         <>
           <div className="space-y-1.5 p-4 rounded-2xl border bg-white/[0.02] border-white/10 text-xs">
-            <span className="font-bold text-zinc-400 block font-mono">{isKo ? '원어민 강사 원본 작성 메모:' : 'Original Foreign Teacher English Note:'}</span>
+            <span className="font-bold text-zinc-400 block font-mono">
+              {isKo ? '원어민 강사 원본 작성 메모:' : 'Original Foreign Teacher English Note:'}
+            </span>
             <p className="text-zinc-300 font-mono leading-relaxed">{englishSummary}</p>
           </div>
 
@@ -608,14 +710,20 @@ export const NativeKtDashboard: React.FC<Props> = ({
                     </span>
                     <span
                       className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-                        (std as GeneratedReportOutput['studentReports'][number]).category === 'praise'
+                        (std as GeneratedReportOutput['studentReports'][number]).category ===
+                        'praise'
                           ? 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30'
                           : 'text-amber-400 bg-amber-500/20 border-amber-500/30'
                       }`}
                     >
-                      {(std as GeneratedReportOutput['studentReports'][number]).category === 'praise'
-                        ? (isKo ? '칭찬' : 'Praise')
-                        : (isKo ? '주의 필요' : 'Attention')}
+                      {(std as GeneratedReportOutput['studentReports'][number]).category ===
+                      'praise'
+                        ? isKo
+                          ? '칭찬'
+                          : 'Praise'
+                        : isKo
+                          ? '주의 필요'
+                          : 'Attention'}
                     </span>
                   </div>
 

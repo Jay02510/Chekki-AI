@@ -322,20 +322,31 @@ Teacher Notes: <teacher_notes>${payload.generalComments}</teacher_notes>
     logUsage('generate_report:summary', response);
     const text = response.text || '';
     const parts = text.split(/\n\n(?=[A-Z])/);
-    if (parts.length >= 2) {
-      return { korean: parts[0].trim(), english: parts.slice(1).join('\n\n').trim() };
+    let korean = parts.length >= 2 ? parts[0].trim() : text.trim();
+    const english = parts.length >= 2
+      ? parts.slice(1).join('\n\n').trim()
+      : `Today in ${payload.className}, students explored ${payload.lessonTopic} with ${payload.textbook}. They engaged in ${payload.activities.join(' and ')} with a ${payload.energyLevel.toLowerCase()} mood.`;
+    // Gemini is asked for Korean-then-English but doesn't always comply
+    // (e.g. returns English-only) — the split above has no way to catch
+    // that since it's just looking for a paragraph break. Verify the
+    // "korean" half actually contains Hangul before trusting it; a KT-facing
+    // "Korean script" field silently holding English is a parent-facing bug,
+    // not a cosmetic one.
+    if (!/[가-힣]/.test(korean)) {
+      korean = koreanFallback(payload);
     }
-    return {
-      korean: text.trim(),
-      english: `Today in ${payload.className}, students explored ${payload.lessonTopic} with ${payload.textbook}. They engaged in ${payload.activities.join(' and ')} with a ${payload.energyLevel.toLowerCase()} mood.`,
-    };
+    return { korean, english };
   } catch (err) {
     console.warn('Gemini API call fallback to deterministic template:', err);
     return {
-      korean: `오늘 ${payload.className} 수업에서는 ${payload.textbook} (${payload.lessonTopic})의 핵심 내용을 집중 학습했습니다. 원생들은 ${payload.activities.join(', ')} 활동에 ${payload.energyLevel === 'High Energy and Engaged' ? '매우 밝고 적극적으로' : '차분하게'} 참여하였습니다.`,
+      korean: koreanFallback(payload),
       english: `Today in ${payload.className}, students focused on ${payload.lessonTopic} using ${payload.textbook}. Everyone participated attentively during ${payload.activities.join(' and ')}.`,
     };
   }
+}
+
+function koreanFallback(payload: { className: string; date: string; lessonTopic: string; textbook: string; energyLevel: string; activities: string[] }): string {
+  return `오늘 ${payload.className} 수업에서는 ${payload.textbook} (${payload.lessonTopic})의 핵심 내용을 집중 학습했습니다. 원생들은 ${payload.activities.join(', ')} 활동에 ${payload.energyLevel === 'High Energy and Engaged' ? '매우 밝고 적극적으로' : '차분하게'} 참여하였습니다.`;
 }
 
 async function generateStudentExceptionReport(

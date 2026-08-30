@@ -200,7 +200,7 @@ export function DirectorTabContent(props: Props) {
           ) : props.schoolId ? (
             <TeacherInvitePanel
               isNight={isNight}
-              isKo={false}
+              isKo={isKo}
               schoolId={props.schoolId}
               seatsTotal={props.seatsTotal || { ft: 0, kt: 0 }}
               classes={props.classes
