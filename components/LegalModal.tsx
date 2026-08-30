@@ -240,6 +240,20 @@ export const LegalModal: React.FC<Props> = ({
                       이용자가 계정 탈퇴를 요청할 경우 수집된 개인정보는 즉시 파기됩니다.
                     </p>
 
+                    <p>
+                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>5. 학원(기관) 이용 시 처리 특칙</strong>
+                      <br />
+                      학원 원장/교사가 Chekki를 통해 학생 정보(이름, 반 배정, 학습지 이미지, 채점
+                      결과, 학부모 연락처)를 입력하는 경우, 해당 학원이 그 학생 개인정보에 대한
+                      개인정보처리자이며 Chekki(채키)는 학원과의 계약에 따라 이를 위탁 처리하는
+                      수탁자입니다. 학생 및 보호자에 대한 동의 확보는 학원의 책임입니다.
+                      <br />
+                      데이터는 학원의 서비스 이용 기간 동안 보관되며, 원장은 언제든지{' '}
+                      support@chekkiai.com 으로 요청하여 학원 데이터 전체의{' '}
+                      <strong>내보내기(export)</strong> 또는 <strong>삭제</strong>를 요청할 수
+                      있습니다. 삭제 요청은 확인 절차를 거쳐 통상 영업일 기준 30일 이내 처리됩니다.
+                    </p>
+
                     <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>개인정보 관리책임자: Benjamin Jason (support@chekkiai.com / 사업자등록번호: 814-14-03096)</p>
                   </div>
                 </div>
@@ -288,6 +302,22 @@ export const LegalModal: React.FC<Props> = ({
                       User data is retained until account deletion. You may delete your account and
                       all associated data at any time through the app settings, or by emailing{' '}
                       support@chekkiai.com to request deletion.
+                    </p>
+
+                    <p>
+                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>5. School/Institutional Use</strong>
+                      <br />
+                      When a school director or teacher enters student data into Chekki (student
+                      name, class assignment, worksheet images, grading results, parent contact
+                      info), that school is the data controller for that student data and Chekki
+                      acts as a processor under its agreement with the school. Obtaining consent
+                      from students/guardians is the school&apos;s responsibility.
+                      <br />
+                      Data is retained for the duration of the school&apos;s active use of the
+                      service. A director may request a full <strong>export</strong> or{' '}
+                      <strong>deletion</strong> of their school&apos;s data at any time by emailing
+                      support@chekkiai.com. Deletion requests are verified and typically processed
+                      within 30 business days.
                     </p>
 
                     <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>Data Protection Officer: Benjamin Jason (support@chekkiai.com / Biz Reg No: 814-14-03096)</p>

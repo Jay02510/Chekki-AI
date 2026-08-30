@@ -11,10 +11,11 @@ import { applyCors } from './_lib/cors.js';
 const MAX_LOGO_URL_LENGTH = 700_000;
 
 /**
- * Two director-only, schoolId-owner-checked actions merged into one
- * function to stay under Vercel Hobby's 12-function cap (same reasoning as
- * api/redeem.ts): updating the school's display name/logo, and checking
- * trial status. Which branch runs is decided by the `checkTrialStatus` flag.
+ * Director-only, schoolId-owner-checked actions merged into one function to
+ * stay under Vercel Hobby's 12-function cap (same reasoning as
+ * api/redeem.ts): updating the school's display name/logo, checking trial
+ * status, and requesting a data export/deletion. Which branch runs is
+ * decided by the `checkTrialStatus` / `dataRequest` flags.
  */
 async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res);
@@ -28,7 +29,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const idToken = authHeader.split('Bearer ')[1].trim();
 
-  const { academyName, logoUrl, checkTrialStatus } = req.body || {};
+  const { academyName, logoUrl, checkTrialStatus, dataRequest } = req.body || {};
 
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
@@ -36,6 +37,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (checkTrialStatus) {
       return await handleTrialStatus(res, uid);
+    }
+
+    if (dataRequest === 'export' || dataRequest === 'delete') {
+      return await handleDataRequest(res, uid, dataRequest);
     }
 
     if (!academyName || typeof academyName !== 'string' || !academyName.trim()) {
@@ -72,6 +77,85 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('[update-school-profile] error:', error);
     return res.status(500).json({ error: 'Failed to update school profile' });
   }
+}
+
+/**
+ * Director-only data export/deletion request (PIPA/GDPR-style data subject
+ * rights, exercised at the school level since the director is the one who
+ * entered the student data). 'export' returns everything tied to the school
+ * as JSON directly — the director owns this data, no human review needed to
+ * read it back. 'delete' does NOT hard-delete synchronously: bulk-deleting
+ * every student/parent record for an entire school is irreversible and
+ * affects people (parents/students) who never made the request themselves,
+ * so it's flagged on the school doc and routed to a human (support) to
+ * verify and process, same pattern most B2B ed-tech (Google Workspace,
+ * Clever) uses for org-level deletion.
+ */
+async function handleDataRequest(res: VercelResponse, uid: string, kind: 'export' | 'delete') {
+  const userSnap = await adminDb.collection('users').doc(uid).get();
+  const userData = userSnap.data();
+  if (!userSnap.exists || userData?.role !== 'director' || !userData?.schoolId) {
+    return res.status(403).json({ error: 'Only a director with a school can request data export/deletion' });
+  }
+  const schoolId = userData.schoolId as string;
+
+  const schoolRef = adminDb.collection('schools').doc(schoolId);
+  const schoolSnap = await schoolRef.get();
+  if (!schoolSnap.exists || schoolSnap.data()?.ownerUid !== uid) {
+    return res.status(403).json({ error: 'Not the owner of this school' });
+  }
+  const schoolData = schoolSnap.data() || {};
+
+  if (kind === 'export') {
+    const [usersSnap, classesSnap, pendingSnap] = await Promise.all([
+      adminDb.collection('users').where('schoolId', '==', schoolId).get(),
+      adminDb.collection('classes').where('schoolId', '==', schoolId).get(),
+      adminDb.collection('pendingStudents').where('schoolId', '==', schoolId).get(),
+    ]);
+    const classes = await Promise.all(
+      classesSnap.docs.map(async (classDoc) => {
+        const logsSnap = await classDoc.ref.collection('logs').get();
+        return {
+          id: classDoc.id,
+          ...classDoc.data(),
+          logs: logsSnap.docs.map((l) => ({ id: l.id, ...l.data() })),
+        };
+      })
+    );
+    return res.status(200).json({
+      exportedAt: new Date().toISOString(),
+      school: { id: schoolId, ...schoolData },
+      users: usersSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
+      pendingStudents: pendingSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
+      classes,
+    });
+  }
+
+  // kind === 'delete'
+  if (schoolData.deletionRequestedAt) {
+    return res.status(200).json({ success: true, alreadyRequested: true });
+  }
+  await schoolRef.update({ deletionRequestedAt: FieldValue.serverTimestamp() });
+
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const directorRecord = await adminAuth.getUser(uid).catch(() => null);
+  if (resendApiKey) {
+    // Best-effort notification to staff — the deletionRequestedAt flag on
+    // the school doc is the actual source of truth if this email fails, so
+    // an email hiccup doesn't need to fail the director's request.
+    fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'Chekki AI <billing@chekkiai.com>',
+        to: ['support@chekkiai.com'],
+        subject: `[Data Deletion Request] ${schoolData.name || schoolId}`,
+        html: `<p>School <strong>${schoolData.name || schoolId}</strong> (schoolId: ${schoolId}) requested full data deletion.</p><p>Director: ${directorRecord?.email || uid}</p>`,
+      }),
+    }).catch((err) => console.warn('[update-school-profile:dataRequest] staff notification failed:', err));
+  }
+
+  return res.status(200).json({ success: true });
 }
 
 /**

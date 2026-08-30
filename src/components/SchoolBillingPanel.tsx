@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { doc, collection, query, where, onSnapshot } from 'firebase/firestore';
-import { dbInstance } from '../../services/database';
+import { auth, dbInstance } from '../../services/database';
 import { PLAN_LABELS, PLAN_SEATS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
 
 interface Props {
@@ -30,6 +30,63 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [isSubmittingPlanChange, setIsSubmittingPlanChange] = useState(false);
   const [planRequestSent, setPlanRequestSent] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isRequestingDeletion, setIsRequestingDeletion] = useState(false);
+  const [deletionRequested, setDeletionRequested] = useState(false);
+  const [dataActionError, setDataActionError] = useState<string | null>(null);
+
+  const callDataRequest = async (kind: 'export' | 'delete') => {
+    const idToken = await auth.currentUser?.getIdToken();
+    const response = await fetch('/api/update-school-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+      body: JSON.stringify({ dataRequest: kind }),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || 'Request failed');
+    }
+    return response;
+  };
+
+  const handleExport = async () => {
+    setDataActionError(null);
+    setIsExporting(true);
+    try {
+      const response = await callDataRequest('export');
+      const data = await response.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `chekki-school-export-${schoolId}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setDataActionError(err.message || 'Export failed.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDeleteRequest = async () => {
+    const confirmed = window.confirm(
+      isKo
+        ? '학원의 모든 데이터(학생, 반, 채점 기록)에 대한 삭제를 요청합니다. 담당자 확인 후 처리됩니다. 계속하시겠습니까?'
+        : "This requests deletion of ALL your school's data (students, classes, grading records). Our team will verify and process it. Continue?"
+    );
+    if (!confirmed) return;
+    setDataActionError(null);
+    setIsRequestingDeletion(true);
+    try {
+      await callDataRequest('delete');
+      setDeletionRequested(true);
+    } catch (err: any) {
+      setDataActionError(err.message || 'Request failed.');
+    } finally {
+      setIsRequestingDeletion(false);
+    }
+  };
 
   useEffect(() => {
     if (!schoolId) return;
@@ -108,6 +165,42 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
             </h4>
           </div>
         </div>
+      </div>
+
+      <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+        <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">
+          {isKo ? '데이터 관리' : 'Data Management'}
+        </span>
+        <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+          {isKo
+            ? '학원의 모든 데이터를 내보내거나 삭제를 요청할 수 있습니다.'
+            : 'Export everything tied to your school, or request full deletion.'}
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={isExporting}
+            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 ${isNight ? 'bg-white/5 text-white hover:bg-white/10 border border-white/10' : 'bg-white text-zinc-900 hover:bg-zinc-100 border border-zinc-200'}`}
+          >
+            {isExporting ? (isKo ? '내보내는 중...' : 'Exporting...') : (isKo ? '전체 데이터 내보내기' : 'Export All Data')}
+          </button>
+          {deletionRequested ? (
+            <span className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 inline-flex items-center">
+              {isKo ? '삭제 요청 접수됨' : 'Deletion requested'}
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={handleDeleteRequest}
+              disabled={isRequestingDeletion}
+              className="px-4 py-2 text-xs font-bold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all active:scale-95 disabled:opacity-50"
+            >
+              {isRequestingDeletion ? (isKo ? '요청 중...' : 'Requesting...') : (isKo ? '데이터 삭제 요청' : 'Request Data Deletion')}
+            </button>
+          )}
+        </div>
+        {dataActionError && <p className="text-xs font-bold text-rose-400">{dataActionError}</p>}
       </div>
 
       {showPlanModal && (

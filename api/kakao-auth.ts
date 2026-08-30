@@ -26,6 +26,31 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // /v2/user/me only proves the token is *some* valid Kakao access token —
+    // it never checks which app requested it. Without this, an access token
+    // minted for a totally unrelated third-party Kakao app (leaked, phished,
+    // or from a malicious app the victim installed) would still pass here
+    // and log the caller in as that Kakao user (Audit: no app_id check on
+    // kakao-auth.ts). access_token_info returns the app_id that requested
+    // the token, which we pin to this app's own Kakao App ID.
+    const expectedAppId = process.env.KAKAO_APP_ID;
+    if (expectedAppId) {
+      const tokenInfoRes = await fetch('https://kapi.kakao.com/v1/user/access_token_info', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!tokenInfoRes.ok) {
+        const errText = await tokenInfoRes.text();
+        return res.status(tokenInfoRes.status).json({ error: `Kakao verification failed: ${errText}` });
+      }
+      const tokenInfo = (await tokenInfoRes.json()) as any;
+      if (String(tokenInfo?.app_id) !== String(expectedAppId)) {
+        console.error('[kakao-auth] Token app_id mismatch:', tokenInfo?.app_id);
+        return res.status(401).json({ error: 'This token was not issued for this app.' });
+      }
+    } else {
+      console.warn('[kakao-auth] KAKAO_APP_ID is not set — skipping app_id verification.');
+    }
+
     // Verify access token with Kakao API
     const kakaoRes = await fetch('https://kapi.kakao.com/v2/user/me', {
       headers: {
