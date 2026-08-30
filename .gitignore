@@ -33,3 +33,9 @@ keystore.properties
 *.mobileprovision
 local.properties
 
+# Claude Code local config — global skill packages and personal machine paths,
+# not project source (Audit: 3.7MB of unrelated skill files + local absolute
+# paths were accidentally tracked in this public repo)
+.claude/
+.agents/
+
