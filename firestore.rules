@@ -464,14 +464,22 @@ service cloud.firestore {
           isClassTeacher(classId) ||
           isAdmin()
         ) && request.resource.data.classId == classId;
-        // The only legitimate update is a KT (or co-teacher) reviewing and
-        // sending the log — writing the approved parent-facing text back
-        // onto the same doc. Restricted to just those fields so a teacher
-        // can't rewrite another teacher's original raw log after the fact.
+        // The only legitimate update is a KT reviewing and sending the log —
+        // writing the approved parent-facing text back onto the same doc.
+        // Restricted to just those fields, AND to callers whose own user doc
+        // says educatorRole == 'kt' (a get() on the caller's own uid, safe
+        // here since update rules are always single-document — the LIST-query
+        // get() limitation in isClassTeacher()'s comment only bites read
+        // rules). Without this, isClassTeacher(classId) alone let ANY
+        // assigned teacher — including the FT whose raw, unreviewed log this
+        // is — write reviewStatus/approvedSummary directly, self-approving a
+        // parent-facing report a KT never actually reviewed (Audit: KT
+        // review-gate bypassable via direct Firestore write).
         allow update: if request.auth != null && (
           isAdmin() ||
           (
             isClassTeacher(classId) &&
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.educatorRole == 'kt' &&
             request.resource.data.diff(resource.data).affectedKeys().hasOnly(
               ['approvedSummary', 'approvedExceptions', 'reviewStatus', 'reviewedByUid', 'reviewedByName', 'sentAt', 'reviewedStudentUids']
             )
