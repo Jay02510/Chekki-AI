@@ -40,6 +40,52 @@ The Weekly Insights tab now has a chat box. Ask directly about this week's troub
 
 ---
 
+Closed a Parent-Report Review Gap
+We found and closed a security gap where a foreign teacher's device could, in rare cases, push a parent report through without an actual Korean teacher review. Every report now strictly requires a Korean teacher's approval before it can be marked sent.
+
+Kakao Login Hardening
+Login via Kakao now verifies a token was issued specifically for the Chekki app, closing a theoretical cross-app token mix-up.
+
+School Data Export & Deletion
+Directors can now request a full export or deletion of their school's data directly, backing the schools-version privacy policy addendum.
+
+Clearer Errors During AI Outages
+If Gemini is temporarily overloaded or rate-limited, Chekki now says so plainly instead of telling you to retake a perfectly good photo.
+
+Faster for Everyone in Korea
+Moved our servers to the Seoul region so every scan and request has one less ocean to cross.
+
+FAQ Added to the Schools Page
+Directors browsing `/schools` can now find answers to common questions without leaving the page.
+
+Better Local Search Visibility
+Improved how Chekki AI shows up in local and Korean search results.
+
+---
+
+학부모 알림톡 검토 절차 보안 강화
+드문 경우지만 원어민 교사 기기에서 한국인 교사의 실제 검토 없이 학부모 알림톡이 발송될 수 있었던 보안 허점을 발견하여 차단했습니다. 이제 모든 알림톡은 발송 전 반드시 한국인 교사의 승인을 거쳐야 합니다.
+
+카카오 로그인 보안 강화
+카카오 로그인 시 토큰이 채키 앱을 위해 발급된 것인지 확인하도록 개선하여, 다른 앱 토큰이 혼동되는 이론적 가능성을 차단했습니다.
+
+학원 데이터 내보내기 & 삭제 요청
+원장님께서 이제 학원 데이터 전체를 직접 내보내거나 삭제 요청하실 수 있습니다. 학원용 개인정보처리방침 추가 조항을 뒷받침합니다.
+
+AI 일시 장애 시 더 명확한 안내
+Gemini AI가 일시적으로 과부하이거나 요청 제한에 걸렸을 때, 멀쩡한 사진을 다시 찍으라는 대신 정확한 상황을 안내합니다.
+
+한국 사용자를 위한 속도 개선
+서버를 서울 리전으로 이전하여 모든 스캔과 요청의 지연 시간을 줄였습니다.
+
+학원 페이지에 자주 묻는 질문 추가
+`/schools` 페이지를 둘러보는 원장님들께서 페이지를 떠나지 않고도 자주 묻는 질문에 대한 답을 찾을 수 있습니다.
+
+지역 검색 노출 개선
+채키 AI가 지역 및 한국어 검색 결과에 더 잘 노출되도록 개선했습니다.
+
+---
+
 Unified B2B Educator Invite-Link Authorization
 We've completely overhauled authentication for private English Kindergartens and hagwons! Directors can now set up their campus and instantly share 1-click invite links (`/teacher?invite=school-slug`). Foreign (FT) and Korean (KT) teachers join directly via sign-up without needing to type or remember authorization codes.
 

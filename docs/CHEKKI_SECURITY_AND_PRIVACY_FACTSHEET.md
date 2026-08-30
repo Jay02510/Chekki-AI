@@ -31,6 +31,13 @@
 ### C. Rate Limiting & DDOS Protection
 - Serverless API endpoints are protected by **Upstash Redis sliding-window rate limiters** (10 requests / 10s) and fallback memory limiters, preventing API abuse and storage exhaustion.
 
+### D. Third-Party Sign-In Verification
+- KakaoTalk sign-in tokens are verified against the specific app ID they were issued for, not just checked for general validity — preventing a token issued for an unrelated app from being used to authenticate against Chekki.
+
+### E. School Data Export & Deletion
+- Academy directors can request a full export of their school's data (rosters, class logs, curriculum) or request deletion, from the Billing panel in the director portal.
+- Deletion requests are reviewed and processed by our team (not instant/automatic) to prevent accidental irreversible data loss — standard practice matching Google Workspace for Education and similar education platforms.
+
 ---
 
 ## 3. Frequently Asked Questions (FAQ for Directors)
@@ -43,4 +50,4 @@ When a teacher account is deleted, their user UID is automatically removed from 
 
 ---
 
-*Verified & Published by Chekki AI Security Engineering Team — July 2026*
+*Verified & Published by Chekki AI Security Engineering Team — August 2026*

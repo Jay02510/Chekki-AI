@@ -6,6 +6,37 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 023 — Firestore rules let any assigned FT self-approve a class log, bypassing KT review
+
+**Date:** 2026-08-30
+**Status:** Resolved
+
+**Context:** Ran a deep end-to-end core-feature audit ahead of school-partnership outreach (3 parallel sub-audits: scan/grade flow, auth/authz, B2B/billing). `classes/{classId}/logs/{logId}`'s update rule gated the KT-approval fields (`approvedSummary`, `reviewStatus`, `sentAt`, etc.) on `isClassTeacher(classId)` alone — that helper checks only `request.auth.token.role == 'teacher'` plus class assignment, with no distinction between the foreign teacher (FT) who wrote the raw log and the Korean teacher (KT) who's supposed to review it before it goes to parents. The KT-only gate existed purely in the client (`useKtReviewQueue.ts`'s `educatorRole !== 'kt'` early-return, and `NativeKtDashboard` only being reachable for KT accounts). Any FT with devtools or a modified client could write `reviewStatus: 'sent'` directly onto their own unreviewed log, producing a parent-facing report that was never actually reviewed by a Korean teacher — defeating the entire compliance purpose of the two-teacher review step.
+
+**Decision:** Added a check to the update rule requiring the caller's own `users/{uid}` doc to have `educatorRole == 'kt'`, alongside the existing `isClassTeacher(classId)` and field-allowlist checks. This is a `get()` on the caller's own identity, which is safe here specifically because update rules are always single-document — the list-query-breaking limitation documented in #021 only applies to read rules backing a `query()`/list fetch.
+
+**Consequences:** Same residual gap as #021: **this rules file is not auto-deployed** — `firebase deploy --only firestore:rules` must be run by hand, and #021 already flagged that no CI step exists for it. This fix has zero effect until deployed. `educatorRole` itself lives only in Firestore (not synced to Auth custom claims the way `role`/`schoolId` are per #021) — fine for a single-document `get()` on an update rule, but if this check is ever needed inside a read rule backing a list query, it will hit the same failure mode #021 fixed and need the same claims-sync treatment first.
+
+---
+
+## 022 — Kakao token app_id verification, school data export/deletion, Gemini rate-limit UX, Seoul region pin
+
+**Date:** 2026-08-30
+**Status:** Resolved
+
+**Context:** Four independent pre-outreach fixes, bundled here since they landed the same day and are each too small alone for their own entry:
+
+- **Kakao token confusion**: `api/kakao-auth.ts` verified an access token was valid for *some* Kakao app (via `/v2/user/me`) but never checked it was issued *for this app specifically* — a token from a different Kakao app could authenticate against Chekki's backend.
+- **School data export/deletion**: no self-service path existed for a director to export or request deletion of their school's data, needed for the schools-version privacy policy addendum and basic data-protection best practice for a B2B processor relationship.
+- **Gemini rate-limit UX**: a Gemini 429/503 (transient outage/quota) surfaced the same "please retake the photo" message as a genuine bad-image analysis failure — misleading during any real outage.
+- **Vercel region**: serverless functions had no `regions` pin (defaulting to `iad1`/US East) while Firestore lives in `asia-northeast3` (Seoul) and the entire user base is in Korea — every API call paid a cross-Pacific round trip on top of the Firestore round trip.
+
+**Decision:** `kakao-auth.ts` now calls `/v1/user/access_token_info` and rejects tokens whose `app_id` doesn't match `KAKAO_APP_ID`. `api/update-school-profile.ts` gained a `dataRequest: 'export' | 'delete'` action (director-only, schoolId-ownership-checked, added as a third dispatched action rather than a new endpoint — Vercel Hobby's 12-function cap was already hit) returning a full JSON export or flagging `deletionRequestedAt` + emailing staff for human-processed deletion (flag-and-notify, not instant hard-delete, matching the Google Workspace/Clever precedent for irreversible bulk org data). `LegalModal.tsx`'s privacy section gained a school/institutional-use addendum (school = controller, Chekki = processor). `api/analyze.ts` now detects `429|503|RESOURCE_EXHAUSTED|UNAVAILABLE|overloaded` in the raw error and returns a distinct `AI_TEMPORARILY_UNAVAILABLE` code; `App.tsx`'s `translateError()` — the actual layer that renders the message, confirmed via live Playwright reproduction after an initial fix at the hook layer was silently overridden — now matches that code. `vercel.json` got `"regions": ["icn1"]`.
+
+**Consequences:** `KAKAO_APP_ID` must be set in Vercel env vars (`1462897` for the current app) or the check fails open with a console warning, not a hard failure — worth alerting on that warn in production. Deletion requests are not yet actually processed by anything automated; a human must act on the `deletionRequestedAt` flag/email.
+
+---
+
 ## 021 — Auth custom claims replace get(users/uid) in firestore.rules for role/schoolId checks
 
 **Date:** 2026-08-25

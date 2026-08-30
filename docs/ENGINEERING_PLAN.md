@@ -59,7 +59,7 @@ gantt
   1. Build auto-categorization worker grouping items by `item_type` (`phonics`, `grammar`, `vocabulary`).
   2. Write Gemini 3 prompt templates for generating fresh, curriculum-aligned exercises.
   3. Build client-side PDF renderer generating A4 printable practice sheets with original styling.
-  4. Develop **Automated Parent Progress Report Engine** compiling 30-day scan accuracy, mastery tables, and custom Korean Mom's Praise Scripts into shareable PDF & KakaoTalk image cards.
+  4. Develop **Automated Parent Progress Report Engine** compiling 30-day scan accuracy, mastery tables, and custom Korean Mom's Praise Scripts into shareable PDF & image cards. *(Note: `DECISIONS.md` #007 rejected a KakaoTalk share-sheet send button for KT reports — delivery stays manual copy-paste. Any future KakaoTalk output here should be scoped fresh, not revive that button.)*
 
 ---
 

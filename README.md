@@ -33,3 +33,10 @@ The current release includes the remaining audit remediation work for core produ
 - Added Sentry error monitoring for both the frontend (`@sentry/react`, via `VITE_SENTRY_DSN`) and the Vercel API functions (`@sentry/node`, via `SENTRY_DSN`); no-ops until those env vars are set.
 - Split `src/pages/TeacherPage.tsx` (was 4,678 lines, one component for all three staff roles) into role-scoped hooks and shell components — director/FT/KT each render from their own tab-content/sidebar-nav components off shared state hooks, cutting regression risk when one role's code changes.
 - Added two director-only dashboard tools: a sortable/searchable/filterable Student Database grid (`@tanstack/react-table`) and a Log Compliance Tracker (per-class daily log submission rollup with miss-streak badges) — both read/aggregate over existing data, no new backend.
+- Closed a Firestore rules gap where a foreign teacher could self-approve their own parent report and bypass Korean-teacher review entirely.
+- Fixed Kakao login token verification to check the token was issued for this app specifically, not just any Kakao app.
+- Added a director self-service flow to export or request deletion of a school's data, plus a schools-version privacy policy addendum.
+- Fixed a misleading "please retake the photo" error shown during a genuine Gemini rate-limit/outage instead of a real scan failure.
+- Pinned Vercel serverless functions to the Seoul region to cut cross-Pacific latency for Firestore round trips.
+- Added a FAQ section to the schools landing page.
+- Improved geo/local SEO signals (JSON-LD, hreflang, geo meta).
