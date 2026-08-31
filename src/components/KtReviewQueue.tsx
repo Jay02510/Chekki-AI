@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { CheckCircle, MagnifyingGlass, CaretDown } from '@phosphor-icons/react';
+import { CheckCircle, MagnifyingGlass, CaretDown, CheckSquare, Square, Sparkle } from '@phosphor-icons/react';
 
 export interface KtQueueLog {
   id: string;
@@ -19,6 +19,10 @@ interface Props {
   /** Renders the full review panel for the expanded row, inline in the list
    * (accordion) instead of the caller having to scroll to a panel below. */
   renderActiveDetail?: (log: KtQueueLog) => React.ReactNode;
+  /** Approves a batch of logs by id using each one's unedited AI draft.
+   * Only offered for logs with flaggedCount === 0 (see the checkbox gating
+   * below) — anything flagged still requires opening it and reading it. */
+  onBulkApprove?: (ids: string[]) => Promise<{ approved: number; skipped: number }>;
 }
 
 // Horizontal drag distance (px) past which a swipe collapses the expanded
@@ -34,10 +38,13 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
   isNight = true,
   isKo = false,
   renderActiveDetail,
+  onBulkApprove,
 }) {
   const [classFilter, setClassFilter] = useState('all');
   const [studentFilter, setStudentFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkApproving, setIsBulkApproving] = useState(false);
   // Collapses the whole queue section (search/filters + list) so a long
   // queue doesn't dominate the screen — independent from per-row expansion.
   const [isQueueOpen, setIsQueueOpen] = useState(true);
@@ -93,6 +100,36 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
       }),
     [logs, classFilter, studentFilter, search]
   );
+
+  // Only routine reports (nothing flagged) are selectable for bulk approve —
+  // a flagged one means the AI called out something specific about a
+  // student, and that always needs a human to actually read it first.
+  const selectableIds = useMemo(
+    () => filteredLogs.filter((l) => l.flaggedCount === 0).map((l) => l.id),
+    [filteredLogs]
+  );
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
+  const toggleSelectAll = () => {
+    setSelectedIds(allSelected ? new Set() : new Set(selectableIds));
+  };
+  const handleBulkApprove = async () => {
+    if (!onBulkApprove || selectedIds.size === 0 || isBulkApproving) return;
+    setIsBulkApproving(true);
+    try {
+      await onBulkApprove([...selectedIds]);
+      setSelectedIds(new Set());
+    } finally {
+      setIsBulkApproving(false);
+    }
+  };
 
   if (logs.length === 0) {
     return (
@@ -189,6 +226,54 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
             </div>
           </div>
 
+          {onBulkApprove && selectableIds.length > 0 && (
+            <div
+              className={`flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-2xl border ${
+                isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={toggleSelectAll}
+                className={`flex items-center gap-1.5 text-[11px] font-bold cursor-pointer ${isNight ? 'text-zinc-300 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'}`}
+              >
+                {allSelected ? (
+                  <CheckSquare size={16} weight="fill" className="text-orange-500" />
+                ) : (
+                  <Square size={16} />
+                )}
+                {isKo
+                  ? `이상 없음 전체 선택 (${selectableIds.length})`
+                  : `Select all clear (${selectableIds.length})`}
+              </button>
+              {selectedIds.size > 0 && (
+                <button
+                  type="button"
+                  onClick={handleBulkApprove}
+                  disabled={isBulkApproving}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black cursor-pointer active:scale-[0.98] ${
+                    isBulkApproving
+                      ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
+                      : 'bg-orange-500 hover:bg-orange-600 text-black'
+                  }`}
+                >
+                  {isBulkApproving ? (
+                    <Sparkle size={14} weight="bold" className="animate-spin" />
+                  ) : (
+                    <CheckCircle size={14} weight="bold" />
+                  )}
+                  {isBulkApproving
+                    ? isKo
+                      ? '승인 중...'
+                      : 'Approving...'
+                    : isKo
+                      ? `선택한 ${selectedIds.size}건 승인`
+                      : `Approve ${selectedIds.size} selected`}
+                </button>
+              )}
+            </div>
+          )}
+
           {filteredLogs.length === 0 ? (
             <div
               className={`px-4 py-3 rounded-2xl border text-xs font-medium ${
@@ -205,8 +290,28 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
                 const isActive = log.id === activeId;
                 const isCopied = log.id === justCopiedId;
                 const isExpanded = isActive && log.id === expandedId && !!renderActiveDetail;
+                const isSelectable = !!onBulkApprove && log.flaggedCount === 0;
+                const isSelected = selectedIds.has(log.id);
                 return (
-                  <div key={log.id}>
+                  <div key={log.id} className="flex items-center gap-1.5">
+                    {isSelectable && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSelect(log.id);
+                        }}
+                        aria-label={isKo ? '일괄 승인용 선택' : 'Select for bulk approve'}
+                        className="shrink-0 p-1 cursor-pointer"
+                      >
+                        {isSelected ? (
+                          <CheckSquare size={18} weight="fill" className="text-orange-500" />
+                        ) : (
+                          <Square size={18} className={isNight ? 'text-zinc-600' : 'text-zinc-400'} />
+                        )}
+                      </button>
+                    )}
+                    <div className="flex-1 min-w-0">
                     <button
                       type="button"
                       onClick={() => {
@@ -266,6 +371,7 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
                         {renderActiveDetail!(log)}
                       </div>
                     )}
+                    </div>
                   </div>
                 );
               })}

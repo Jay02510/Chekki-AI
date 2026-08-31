@@ -242,12 +242,35 @@ export const useWorksheetAnalysis = () => {
           if (e.name === 'AbortError') return;
           console.error('[useWorksheetAnalysis] Analysis error:', e.message, e);
 
-          const isGenericFail = !e.message || e.message === 'ANALYSIS_FAILED';
-          const errorMsg = isGenericFail
-            ? language === 'ko'
+          // Distinct failure modes (rate limit / offline / network / server
+          // outage) used to all collapse into "take a clearer picture" or a
+          // raw internal code like "NETWORK_ERROR: Check connectivity to
+          // ..." shown verbatim — misleading when the photo was fine and the
+          // real cause was an API outage or dropped connection.
+          let errorMsg: string;
+          if (e.message === 'OFFLINE_ERROR') {
+            errorMsg = language === 'ko'
+              ? '오프라인 상태예요. 인터넷 연결을 확인해주세요.'
+              : "You're offline. Please check your internet connection.";
+          } else if (e.message.startsWith('NETWORK_ERROR')) {
+            errorMsg = language === 'ko'
+              ? '네트워크 연결에 문제가 있어요. 잠시 후 다시 시도해주세요.'
+              : 'Network connection issue. Please try again in a moment.';
+          } else if (e.message.includes('Too Many Requests') || e.message.includes('429')) {
+            errorMsg = language === 'ko'
+              ? '요청이 많아 잠시 지연되고 있어요. 잠시 후 다시 시도해주세요.'
+              : "We're getting a lot of requests right now. Please try again shortly.";
+          } else if (e.message.includes('AI_TEMPORARILY_UNAVAILABLE') || e.message.includes('503')) {
+            errorMsg = language === 'ko'
+              ? 'AI 서버가 일시적으로 응답하지 않아요. 잠시 후 다시 시도해주세요.'
+              : 'The AI service is temporarily unavailable. Please try again shortly.';
+          } else if (!e.message || e.message === 'ANALYSIS_FAILED') {
+            errorMsg = language === 'ko'
               ? '분석에 실패했어요. 밝은 곳에서 사진을 다시 찍어주세요!'
-              : 'Analysis failed. Please try taking a clearer picture in good lighting!'
-            : e.message;
+              : 'Analysis failed. Please try taking a clearer picture in good lighting!';
+          } else {
+            errorMsg = e.message;
+          }
 
           setAnalysisState({
             status: 'error',

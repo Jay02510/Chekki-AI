@@ -35,6 +35,7 @@ interface Props {
   user: any;
   ktConsolidatedGroups: ConsolidatedStudentDay[];
   handleKtApprove: (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) => Promise<boolean>;
+  handleKtBulkApprove: (ids: string[]) => Promise<{ approved: number; skipped: number }>;
 
   // overview (KT)
   completionRate: number;
@@ -92,6 +93,7 @@ export function KtTabContent(props: Props) {
             logs={props.ktQueueLogs}
             activeId={props.activeKtGroup ? props.groupKey(props.activeKtGroup) : null}
             justCopiedId={props.justCopiedLogId}
+            onBulkApprove={props.handleKtBulkApprove}
             onSelect={(id) => {
               if (id === props.activeKtLogId) return;
               if (!props.confirmDiscardKtDraft()) return;

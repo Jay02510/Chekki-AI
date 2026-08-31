@@ -63,6 +63,10 @@ import {
   generateStudentExceptionReport,
   clearOfflineDraft,
   ClassLogPayload,
+  enqueuePendingLogSubmission,
+  getPendingLogQueue,
+  removePendingLogSubmission,
+  QueuedLogSubmission,
 } from '../services/aiGenerator';
 
 interface Props {
@@ -148,10 +152,24 @@ export default function TeacherPage({ isNight = true }: Props) {
   // same handleLogSubmit handler (KT via the kt_log tab's NativeTeacherLogForm).
   const [isSubmittingLog, setIsSubmittingLog] = useState(false);
 
-  const handleLogSubmit = async (payload: ClassLogPayload) => {
-    setIsSubmittingLog(true);
+  // Core submit: AI generation + Firestore persist, parameterized on
+  // classId/teacherUid/authorRole (rather than reading selectedClass/user/
+  // educatorRole directly) so the offline queue drain below can replay a
+  // queued submission for whichever class/role it was originally queued
+  // under, even if the live UI has since switched classes. Returns whether
+  // it actually reached Firestore — `isQueuedRetry` only changes whether a
+  // network failure here re-queues (a fresh submission) or is left for the
+  // next drain pass (an already-queued one, to avoid an infinite retry loop
+  // spamming toasts every time `online` fires).
+  const submitClassLog = async (
+    payload: ClassLogPayload,
+    classId: string,
+    teacherUid: string,
+    authorRole: 'ft' | 'kt',
+    isQueuedRetry = false
+  ): Promise<boolean> => {
     try {
-      const summary = await generateGeneralClassSummary({ ...payload, authorRole: educatorRole });
+      const summary = await generateGeneralClassSummary({ ...payload, authorRole });
       const studentReports = await Promise.all(
         payload.exceptions.map(async (ex) => {
           const updateText = await generateStudentExceptionReport(
@@ -186,55 +204,98 @@ export default function TeacherPage({ isNight = true }: Props) {
       // parents of enrolled students. Best-effort — an AI report was
       // already generated and shown, so a Firestore hiccup here shouldn't
       // block the teacher.
-      if (selectedClass?.id && !selectedClass.isDemo && user?.uid) {
-        try {
-          const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
-          const docRef = await addDoc(logsRef, {
-            ...payload,
-            classId: selectedClass.id,
-            teacherUid: user.uid,
-            createdAt: serverTimestamp(),
-            aiKoreanSummary: summary.korean,
-            aiEnglishSummary: summary.english,
-            aiStudentReports: studentReports,
-            reviewStatus: 'pending_review',
-          });
-          const newLog = { id: docRef.id, ...payload };
-          setSubmittedLogs((prev) => [newLog, ...prev]);
-          clearOfflineDraft();
-          setKtPendingLogs((prev) => [...prev, {
-            id: docRef.id,
-            classId: selectedClass.id,
-            aiKoreanSummary: summary.korean,
-            aiEnglishSummary: summary.english,
-            aiStudentReports: studentReports,
-          }]);
-          showToast({
-            type: 'success',
-            message: educatorRole === 'kt'
-              ? (isKo ? '✅ 일지가 저장되었습니다. 알림톡 대본 탭에서 검토 후 발송하세요.' : '✅ Log saved — review and send it from the Parent Script tab.')
-              : (isKo ? '✅ 한국인 교사에게 검토 요청을 보냈습니다!' : '✅ Sent to your KT for review!'),
-          });
+      const logsRef = collection(dbInstance, 'classes', classId, 'logs');
+      const docRef = await addDoc(logsRef, {
+        ...payload,
+        classId,
+        teacherUid,
+        createdAt: serverTimestamp(),
+        aiKoreanSummary: summary.korean,
+        aiEnglishSummary: summary.english,
+        aiStudentReports: studentReports,
+        reviewStatus: 'pending_review',
+      });
+      const newLog = { id: docRef.id, ...payload };
+      setSubmittedLogs((prev) => [newLog, ...prev]);
+      clearOfflineDraft();
+      setKtPendingLogs((prev) => [...prev, {
+        id: docRef.id,
+        classId,
+        aiKoreanSummary: summary.korean,
+        aiEnglishSummary: summary.english,
+        aiStudentReports: studentReports,
+      }]);
+      showToast({
+        type: 'success',
+        message: authorRole === 'kt'
+          ? (isKo ? '✅ 일지가 저장되었습니다. 알림톡 대본 탭에서 검토 후 발송하세요.' : '✅ Log saved — review and send it from the Parent Script tab.')
+          : (isKo ? '✅ 한국인 교사에게 검토 요청을 보냈습니다!' : '✅ Sent to your KT for review!'),
+      });
 
-          // No per-submission email to the KT here — a daily digest cron
-          // (api/create-teacher-invite.ts action=send_pending_digests)
-          // batches every pending_review log into one summary email instead
-          // of firing one email per FT submission (20 kids => 20 emails).
-          // This log is already visible in the KT's review queue above.
-        } catch (persistErr) {
-          console.error('Failed to save class log to Firestore:', persistErr);
-          // Previously silent: the UI still switched to the "success" kt_script
-          // tab even when this write failed, so the log never reached a KT on
-          // another device with no indication anything went wrong (Audit:
-          // silent FT->KT persist failure).
-          showToast({
-            type: 'error',
-            message: isKo
-              ? '⚠️ 일지가 클라우드에 저장되지 않았습니다. 다른 기기의 한국인 교사에게 전달되지 않을 수 있습니다.'
-              : "⚠️ This log wasn't saved to the cloud — it may not reach your co-teacher on another device.",
-          });
-        }
-      } else {
+      // No per-submission email to the KT here — a daily digest cron
+      // (api/create-teacher-invite.ts action=send_pending_digests)
+      // batches every pending_review log into one summary email instead
+      // of firing one email per FT submission (20 kids => 20 emails).
+      // This log is already visible in the KT's review queue above.
+      return true;
+    } catch (err) {
+      console.error('Failed to submit class log:', err);
+      // A no-signal classroom (common in academy basements) used to just
+      // fail this outright, forcing the FT to redo the whole form once back
+      // online. Queue it instead of losing it — the drain effect below
+      // retries automatically the moment connectivity returns.
+      if (typeof navigator !== 'undefined' && !navigator.onLine && !isQueuedRetry) {
+        enqueuePendingLogSubmission({ classId, teacherUid, authorRole, payload });
+        showToast({
+          type: 'success',
+          message: isKo
+            ? '📡 오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
+            : "📡 You're offline — this will send automatically once you're back online.",
+        });
+        return true;
+      }
+      if (!isQueuedRetry) {
+        showToast({
+          type: 'error',
+          message: isKo
+            ? '일지 생성에 실패했습니다. 다시 제출해주세요.'
+            : "Couldn't generate the report from your log. Please try submitting again.",
+        });
+      }
+      return false;
+    }
+  };
+
+  // Retries every queued offline submission — called once on mount (covers
+  // a submission queued in a previous session/tab) and again whenever the
+  // browser regains connectivity. Left in the queue (silently) on repeat
+  // failure so it retries next time rather than dropping the log.
+  const drainingQueueRef = useRef(false);
+  const drainPendingLogQueue = async () => {
+    if (drainingQueueRef.current) return;
+    const queue = getPendingLogQueue();
+    if (queue.length === 0) return;
+    drainingQueueRef.current = true;
+    try {
+      for (const item of queue as QueuedLogSubmission[]) {
+        const ok = await submitClassLog(item.payload, item.classId, item.teacherUid, item.authorRole, true);
+        if (ok) removePendingLogSubmission(item.localId);
+      }
+    } finally {
+      drainingQueueRef.current = false;
+    }
+  };
+  useEffect(() => {
+    drainPendingLogQueue();
+    window.addEventListener('online', drainPendingLogQueue);
+    return () => window.removeEventListener('online', drainPendingLogQueue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLogSubmit = async (payload: ClassLogPayload) => {
+    setIsSubmittingLog(true);
+    try {
+      if (!selectedClass?.id || selectedClass.isDemo || !user?.uid) {
         // No real class yet (demo/placeholder class, or classes still
         // loading) — the AI preview above is real, but there's nothing to
         // send to a KT. Without this the button looked broken: the form
@@ -245,15 +306,19 @@ export default function TeacherPage({ isNight = true }: Props) {
             ? '아직 등록된 학급이 없어 저장되지 않았습니다. 원장님께 학급 등록을 요청하세요.'
             : "This is a preview only — you're not assigned to a real class yet, so nothing was sent. Ask your director to add you to a class.",
         });
+        return;
       }
-    } catch (err) {
-      console.error('Failed to generate AI report from FT log:', err);
-      showToast({
-        type: 'error',
-        message: isKo
-          ? '일지 생성에 실패했습니다. 다시 제출해주세요.'
-          : "Couldn't generate the report from your log. Please try submitting again.",
-      });
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        enqueuePendingLogSubmission({ classId: selectedClass.id, teacherUid: user.uid, authorRole: educatorRole, payload });
+        showToast({
+          type: 'success',
+          message: isKo
+            ? '📡 오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
+            : "📡 You're offline — this will send automatically once you're back online.",
+        });
+        return;
+      }
+      await submitClassLog(payload, selectedClass.id, user.uid, educatorRole);
     } finally {
       setIsSubmittingLog(false);
     }
@@ -486,6 +551,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     ktQueueLogs,
     groupKey,
     handleKtApprove,
+    handleKtBulkApprove,
     formatConsolidatedDraft,
     getConsolidatedDraft,
     isMergingDraft,
@@ -2740,6 +2806,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 user={user}
                 ktConsolidatedGroups={ktConsolidatedGroups}
                 handleKtApprove={handleKtApprove}
+                handleKtBulkApprove={handleKtBulkApprove}
                 completionRate={completionRate}
                 completedHomeworkCount={completedHomeworkCount}
                 activeStudentsCount={activeStudentsCount}

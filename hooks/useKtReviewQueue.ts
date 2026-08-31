@@ -178,10 +178,15 @@ export function useKtReviewQueue(
   const getConsolidatedDraft = (g: ConsolidatedStudentDay) =>
     mergedDraft && mergedDraft.key === groupKey(g) ? mergedDraft.korean : formatConsolidatedDraft(g, isKo);
 
-  const handleKtApprove = async (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]): Promise<boolean> => {
-    if (!activeKtGroup || activeKtGroup.entries.length === 0 || !user?.uid) return false;
-    const activeGroupKey = groupKey(activeKtGroup);
-    const studentUid = activeKtGroup.studentUid;
+  const approveGroup = async (
+    group: ConsolidatedStudentDay,
+    approvedSummary: string,
+    approvedExceptions: { studentName: string; approvedText: string }[]
+  ): Promise<boolean> => {
+    if (!group || group.entries.length === 0 || !user?.uid) return false;
+    const activeGroupKey = groupKey(group);
+    const studentUid = group.studentUid;
+    const activeKtGroup = group;
     try {
       // A log doc covers the WHOLE class-day, not one student — a naive
       // overwrite here used to flip reviewStatus to 'sent' for every other
@@ -263,6 +268,28 @@ export function useKtReviewQueue(
     }
   };
 
+  const handleKtApprove = (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) =>
+    activeKtGroup ? approveGroup(activeKtGroup, approvedSummary, approvedExceptions) : Promise.resolve(false);
+
+  // Bulk-approve is intentionally restricted to groups with zero flagged
+  // exceptions. The whole point of the per-report KT review gate is to catch
+  // an AI mistake before a parent sees it — a flagged exception is exactly
+  // the case where the AI called out something specific about a student, so
+  // that one still needs a human to actually read it. This only fast-tracks
+  // the routine, nothing-flagged reports, using each one's unedited AI draft
+  // (matching what a KT would send if they clicked through without editing).
+  const handleKtBulkApprove = async (ids: string[]): Promise<{ approved: number; skipped: number }> => {
+    const eligible = ktConsolidatedGroups.filter(
+      (g) => ids.includes(groupKey(g)) && g.entries.every((e) => !e.exceptionParagraph)
+    );
+    let approved = 0;
+    for (const g of eligible) {
+      const ok = await approveGroup(g, getConsolidatedDraft(g), []);
+      if (ok) approved += 1;
+    }
+    return { approved, skipped: ids.length - approved };
+  };
+
   return {
     ktPendingLogs, setKtPendingLogs,
     activeKtLogId, setActiveKtLogId,
@@ -275,6 +302,7 @@ export function useKtReviewQueue(
     ktQueueLogs,
     groupKey,
     handleKtApprove,
+    handleKtBulkApprove,
     formatConsolidatedDraft,
     getConsolidatedDraft,
     isMergingDraft,

@@ -77,6 +77,51 @@ export function clearOfflineDraft(): void {
   }
 }
 
+// Pending-Submission Queue — a no-signal classroom used to just block the
+// "Send to KT" button with a hard failure, forcing the FT to keep the
+// device open and retry manually once signal came back (or worse, lose the
+// log). Queuing the full payload (not just the form draft above) lets
+// TeacherPage retry the actual submission — AI generation + Firestore
+// write — automatically once the connection returns.
+export interface QueuedLogSubmission {
+  localId: string;
+  classId: string;
+  teacherUid: string;
+  authorRole: 'ft' | 'kt';
+  payload: ClassLogPayload;
+  queuedAt: string;
+}
+
+const PENDING_QUEUE_KEY = 'chekki_pending_log_queue';
+
+export function getPendingLogQueue(): QueuedLogSubmission[] {
+  try {
+    const raw = localStorage.getItem(PENDING_QUEUE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function enqueuePendingLogSubmission(item: Omit<QueuedLogSubmission, 'localId' | 'queuedAt'>): void {
+  try {
+    const queue = getPendingLogQueue();
+    queue.push({ ...item, localId: `pending_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, queuedAt: new Date().toISOString() });
+    localStorage.setItem(PENDING_QUEUE_KEY, JSON.stringify(queue));
+  } catch (e) {
+    console.warn('Failed to queue offline log submission:', e);
+  }
+}
+
+export function removePendingLogSubmission(localId: string): void {
+  try {
+    const queue = getPendingLogQueue().filter((q) => q.localId !== localId);
+    localStorage.setItem(PENDING_QUEUE_KEY, JSON.stringify(queue));
+  } catch (e) {
+    console.warn('Failed to remove queued log submission:', e);
+  }
+}
+
 async function callGenerateReport(type: string, payload: unknown): Promise<any> {
   const idToken = await auth.currentUser?.getIdToken();
   if (!idToken) throw new Error('Not authenticated');

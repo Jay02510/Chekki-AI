@@ -9,6 +9,7 @@ import {
   Bell,
   BellSlash,
   CaretDown,
+  ShareNetwork,
 } from '@phosphor-icons/react';
 import { GeneratedReportOutput } from '../services/aiGenerator';
 import { UserProfile } from '../../types';
@@ -205,33 +206,54 @@ export const NativeKtDashboard: React.FC<Props> = ({
 
   const [copyFailed, setCopyFailed] = useState(false);
 
+  // Native share sheet lets the KT hand the pre-filled script straight to
+  // the KakaoTalk app (when installed) instead of switching apps and
+  // pasting manually — the KT still picks the recipient and taps Send
+  // inside KakaoTalk themselves, same human-review gate as copy/paste.
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
   const handleCopyKakaoScript = async () => {
     if (isDemoContent || isApproving) return;
     const fullText = currentFullText;
     setCopyFailed(false);
 
-    // Actually confirm the copy succeeded before treating this as "sent" —
-    // the clipboard call used to fire without being awaited, so a rejected
-    // promise resolved asynchronously after this function had already moved
-    // on to marking the report approved/sent regardless (Audit: unconfirmed
-    // clipboard write still marked "sent"). A KT relying on "Copied! ✅" to
-    // know they can paste into KakaoTalk needs that signal to be real.
+    // Actually confirm the copy/share succeeded before treating this as
+    // "sent" — the clipboard call used to fire without being awaited, so a
+    // rejected promise resolved asynchronously after this function had
+    // already moved on to marking the report approved/sent regardless
+    // (Audit: unconfirmed clipboard write still marked "sent"). A KT relying
+    // on "Copied! ✅" to know they can paste into KakaoTalk needs that
+    // signal to be real.
     let copySucceeded = false;
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(fullText);
+    if (canShare) {
+      try {
+        await navigator.share({ text: fullText });
         copySucceeded = true;
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = fullText;
-        document.body.appendChild(textarea);
-        textarea.select();
-        copySucceeded = document.execCommand('copy');
-        document.body.removeChild(textarea);
+      } catch (e) {
+        // User cancelled the share sheet — not a failure, just stop here
+        // without marking the report sent.
+        if ((e as Error)?.name === 'AbortError') return;
+        console.warn('Share failed, falling back to clipboard:', e);
       }
-    } catch (e) {
-      console.warn('Clipboard write failed:', e);
-      copySucceeded = false;
+    }
+
+    if (!copySucceeded) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(fullText);
+          copySucceeded = true;
+        } else {
+          const textarea = document.createElement('textarea');
+          textarea.value = fullText;
+          document.body.appendChild(textarea);
+          textarea.select();
+          copySucceeded = document.execCommand('copy');
+          document.body.removeChild(textarea);
+        }
+      } catch (e) {
+        console.warn('Clipboard write failed:', e);
+        copySucceeded = false;
+      }
     }
 
     if (!copySucceeded) {
@@ -431,6 +453,8 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 <Sparkle size={16} weight="bold" className="animate-spin" />
               ) : copied ? (
                 <CheckCircle size={16} weight="bold" />
+              ) : canShare ? (
+                <ShareNetwork size={16} weight="bold" />
               ) : (
                 <Copy size={16} weight="bold" />
               )}
@@ -441,11 +465,15 @@ export const NativeKtDashboard: React.FC<Props> = ({
                     : 'Saving...'
                   : copied
                     ? isKo
-                      ? '복사 완료! ✅'
-                      : 'Copied! ✅'
-                    : isKo
-                      ? '대본 1클릭 복사'
-                      : '1-Click Copy Script'}
+                      ? '완료! ✅'
+                      : 'Done! ✅'
+                    : canShare
+                      ? isKo
+                        ? '카카오톡으로 공유'
+                        : 'Share to KakaoTalk'
+                      : isKo
+                        ? '대본 1클릭 복사'
+                        : '1-Click Copy Script'}
               </span>
             </button>
           </div>
