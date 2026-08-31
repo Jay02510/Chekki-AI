@@ -764,7 +764,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
               }`}
             >
-              {isKo ? '솔로 플랜 시작' : 'Choose Solo Plan'}
+              {isKo ? '솔로 플랜 견적 요청' : 'Request a Quote'}
             </button>
           </div>
 
@@ -841,7 +841,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   : 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-sm'
               }`}
             >
-              {isKo ? '스타터 패키지 시작' : 'Choose Starter Pack'}
+              {isKo ? '스타터 패키지 견적 요청' : 'Request a Quote'}
             </button>
           </div>
 
@@ -917,7 +917,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               }}
               className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl text-center shadow-lg shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] cursor-pointer"
             >
-              {isKo ? '마스터 스쿨 프로 시작' : 'Choose Master School Pro'}
+              {isKo ? '마스터 스쿨 프로 견적 요청' : 'Request a Quote'}
             </button>
           </div>
 
@@ -1498,17 +1498,17 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   </div>
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
-                      {isKo ? '안전 결제 & 워크스페이스 생성' : 'SECURE PAYMENT & ACTIVATION'}
+                      {isKo ? '견적 요청 & 계좌이체 안내' : 'REQUEST A QUOTE'}
                     </span>
                     <h3 id="payment-modal-title" className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {isKo ? `${activePlan.nameKo} 결제` : `Checkout ${activePlan.nameEn}`}
+                      {isKo ? `${activePlan.nameKo} 견적 요청` : `Get a Quote — ${activePlan.nameEn}`}
                     </h3>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowPaymentModal(false)}
-                  aria-label={isKo ? '결제 창 닫기' : 'Close checkout'}
+                  aria-label={isKo ? '견적 요청 창 닫기' : 'Close quote request'}
                   className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
                     isNight
                       ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10'

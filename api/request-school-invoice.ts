@@ -5,6 +5,7 @@ import { applyCors } from './_lib/cors.js';
 import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
 import { computeInvoicePricing } from './_lib/invoicePricing.js';
 import { generateJoinCode } from './_lib/joinCode.js';
+import { captureException } from './_lib/sentry.js';
 
 // This endpoint is public/unauthenticated (a sales lead form) and triggers a
 // real Resend email per call — rate limit hard so it can't be used to spam
@@ -150,6 +151,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Send automated email via Resend
     const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      // Without this, a misconfigured env var silently drops both the
+      // customer confirmation and the internal sales notification — the
+      // invoice still gets created, but nobody (customer or ops) is told.
+      captureException(new Error('[request-school-invoice] RESEND_API_KEY is not set — invoice emails were not sent'));
+    }
     if (resendApiKey) {
       try {
         await fetch('https://api.resend.com/emails', {
@@ -202,6 +209,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         });
       } catch (emailErr) {
         console.error('[request-school-invoice] Failed to send email via Resend:', emailErr);
+        captureException(emailErr);
       }
 
       // Internal notification — the customer confirmation above was the only
@@ -236,6 +244,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         });
       } catch (internalEmailErr) {
         console.error('[request-school-invoice] Failed to send internal notification email:', internalEmailErr);
+        captureException(internalEmailErr);
       }
     }
 
