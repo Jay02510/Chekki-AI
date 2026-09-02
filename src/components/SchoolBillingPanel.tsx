@@ -154,6 +154,23 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
 
   const planLabel = planId ? (isKo ? PLAN_LABELS[planId]?.nameKo : PLAN_LABELS[planId]?.nameEn) || planId : '…';
 
+  // No renewal/next-billing-date field exists anywhere for school billing
+  // (only trialEndsAt, for the trial tier) — derived instead from the most
+  // recently *paid* invoice for the current plan: paidAt + 30 or 365 days
+  // depending on that invoice's billingCycle. Approximate (a manual plan
+  // change mid-cycle isn't accounted for) but the only real signal
+  // available without adding a new tracked field.
+  const renewsAt = React.useMemo(() => {
+    if (!invoices || !planId || planId === 'trial') return null;
+    const paidForPlan = invoices
+      .filter((inv) => inv.status === 'paid' && inv.planId === planId && inv.paidAt)
+      .sort((a, b) => new Date(b.paidAt).getTime() - new Date(a.paidAt).getTime());
+    const latest = paidForPlan[0];
+    if (!latest) return null;
+    const cycleDays = latest.billingCycle === 'yearly' ? 365 : 30;
+    return new Date(new Date(latest.paidAt).getTime() + cycleDays * 24 * 60 * 60 * 1000);
+  }, [invoices, planId]);
+
   return (
     <div className="space-y-6 animate-fade-in text-left">
       <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
@@ -162,6 +179,11 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
             <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">Current Plan</span>
             <h4 className={`font-black text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>{planLabel}</h4>
             {createdAt && <p className="text-[11px] text-zinc-400 mt-0.5">Since {new Date(createdAt).toLocaleDateString()}</p>}
+            {renewsAt && (
+              <p className="text-[11px] text-zinc-400 mt-0.5">
+                {isKo ? `다음 결제일: ${renewsAt.toLocaleDateString()}` : `Renews ${renewsAt.toLocaleDateString()}`}
+              </p>
+            )}
           </div>
           <button
             type="button"

@@ -78,7 +78,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'One or more fields exceed the maximum allowed length.' });
     }
 
-    const { unitPrice, totalAmount } = computeInvoicePricing(planId, teacherCount, billingCycle);
+    const normalizedBillingCycle = billingCycle === 'yearly' ? 'yearly' : 'monthly';
+    const { unitPrice, totalAmount } = computeInvoicePricing(planId, teacherCount, normalizedBillingCycle);
     const isTrial = planId === 'trial';
     // A timestamp-derived suffix (last 6 digits of Date.now()) repeats
     // identically every 1,000,000ms (~16m40s) — a forged request timed to
@@ -116,6 +117,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       planName: planName || 'Starter Plan',
       teacherCount: Math.max(1, Number(teacherCount)),
       studentCount: String(studentCount || '').trim(),
+      // Wasn't persisted before — SchoolBillingPanel needs it to compute a
+      // renewal/next-billing date from the most recent paid invoice
+      // (paidAt + 30 or 365 days), which it couldn't do without knowing
+      // which cycle that invoice was actually billed on.
+      billingCycle: normalizedBillingCycle,
       unitPrice,
       totalAmount,
       status: 'pending_payment',

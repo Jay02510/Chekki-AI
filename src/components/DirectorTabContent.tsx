@@ -113,6 +113,30 @@ export function DirectorTabContent(props: Props) {
 
       {activeTab === 'students' && (
         <div className="space-y-8">
+          {(() => {
+            // lastScanDate already exists on every activeRoster row (feeds
+            // StudentDatabaseGrid's "Last Active" column below) — nobody
+            // aggregated it into a single "who's gone quiet" signal, so a
+            // director had to eyeball every row's timestamp themselves to
+            // spot a cooling-off parent (Audit: no inactive-student flag).
+            const INACTIVE_DAYS = 7;
+            const cutoff = Date.now() - INACTIVE_DAYS * 24 * 60 * 60 * 1000;
+            const inactive = props.activeRoster.filter((s: any) => {
+              const t = s.lastScanDate ? new Date(s.lastScanDate).getTime() : NaN;
+              return !Number.isFinite(t) || t < cutoff;
+            });
+            if (inactive.length === 0) return null;
+            return (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
+                <span className="text-lg">⚠️</span>
+                <p className="text-xs font-bold text-amber-400">
+                  {isKo
+                    ? `${inactive.length}명의 학생이 ${INACTIVE_DAYS}일 이상 스캔하지 않았습니다.`
+                    : `${inactive.length} student${inactive.length === 1 ? '' : 's'} ${inactive.length === 1 ? 'hasn\'t' : 'haven\'t'} scanned in ${INACTIVE_DAYS}+ days.`}
+                </p>
+              </div>
+            );
+          })()}
           {props.selectedClass && !props.selectedClass.isDemo && (
             <StudentInvitePanel
               isNight={isNight}
