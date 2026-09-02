@@ -215,7 +215,7 @@ export const ReportCardModal: React.FC<Props> = ({
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h4 className="font-black text-zinc-900 uppercase tracking-widest text-[11px] flex items-center gap-1.5">
                 <PhoneCall size={14} weight="bold" className="text-orange-600 shrink-0" />
-                <span>{isKo ? '학부모 상담 talking points' : 'Parent Consultation Talking Points'}</span>
+                <span>{isKo ? '학부모 상담 요점' : 'Parent Consultation Talking Points'}</span>
               </h4>
               <button
                 type="button"

@@ -249,7 +249,7 @@ export const LegalModal: React.FC<Props> = ({
                       수탁자입니다. 학생 및 보호자에 대한 동의 확보는 학원의 책임입니다.
                       <br />
                       데이터는 학원의 서비스 이용 기간 동안 보관되며, 원장은 언제든지{' '}
-                      support@chekkiai.com 으로 요청하여 학원 데이터 전체의{' '}
+                      support@chekkiai.com 으로 연락하여 학원 데이터 전체의{' '}
                       <strong>내보내기(export)</strong> 또는 <strong>삭제</strong>를 요청할 수
                       있습니다. 삭제 요청은 확인 절차를 거쳐 통상 영업일 기준 30일 이내 처리됩니다.
                     </p>

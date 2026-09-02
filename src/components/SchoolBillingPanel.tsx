@@ -264,7 +264,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
                       </div>
                       {seats && (
                         <span className={`block text-[11px] mt-1 font-mono ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                          {seats.ft} FT + {seats.kt} KT {isKo ? '석' : 'seats'}
+                          {seats.ft} FT + {seats.kt} KT {isKo ? '좌석' : 'seats'}
                         </span>
                       )}
                     </button>

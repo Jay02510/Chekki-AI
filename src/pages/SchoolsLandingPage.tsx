@@ -707,7 +707,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </span>
               </div>
               <h3 className={`text-base font-black mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '공부방 / 개인 교습소 (1석)' : 'Solo Tutor & Study Room (1 Seat)'}
+                {isKo ? '공부방 / 개인 교습소 (좌석 1개)' : 'Solo Tutor & Study Room (1 Seat)'}
               </h3>
               <div className="mb-3">
                 <div className="flex items-baseline gap-1">
@@ -736,7 +736,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <ul className={`space-y-2.5 text-[11px] mb-5 border-t pt-3 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '교사 계정 1석 (단독 관리)' : '1 Teacher Seat (Full Access)'}</span>
+                  <span>{isKo ? '교사 계정 좌석 1개 (단독 관리)' : '1 Teacher Seat (Full Access)'}</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
@@ -813,7 +813,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <ul className={`space-y-2.5 text-[11px] mb-5 border-t pt-3 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '교사 계정 최대 3석 (원어민 1 + 한국인 2)' : 'Up to 3 Teacher Seats (1 FT + 2 KTs)'}</span>
+                  <span>{isKo ? '교사 계정 좌석 최대 3개 (원어민 1 + 한국인 2)' : 'Up to 3 Teacher Seats (1 FT + 2 KTs)'}</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
@@ -893,7 +893,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <ul className={`space-y-2.5 text-[11px] mb-5 border-t pt-3 ${isNight ? 'border-white/10 text-zinc-300' : 'border-zinc-200 text-zinc-700'}`}>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '교사 계정 최대 10석 & 학부모 무제한' : 'Up to 10 Teacher Seats & Unlimited Parents'}</span>
+                  <span>{isKo ? '교사 계정 좌석 최대 10개 & 학부모 무제한' : 'Up to 10 Teacher Seats & Unlimited Parents'}</span>
                 </li>
                 <li className="flex items-center gap-1.5 font-bold text-orange-500">
                   <Sparkle size={14} weight="bold" className="flex-shrink-0" />
