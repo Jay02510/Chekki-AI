@@ -38,6 +38,14 @@
 - Academy directors can request a full export of their school's data (rosters, class logs, curriculum) or request deletion, from the Billing panel in the director portal.
 - Deletion requests are reviewed and processed by our team (not instant/automatic) to prevent accidental irreversible data loss — standard practice matching Google Workspace for Education and similar education platforms.
 
+### F. Offline Log Queue (Device-Local Storage)
+- FT/KT log submissions made with no network signal are queued in the browser's `localStorage` on the teacher's device and retried automatically on reconnect — nothing is silently dropped in a no-signal classroom.
+- Queued entries never leave the device until the retry succeeds and are cleared once synced; no separate offline data store exists server-side.
+
+### G. Parent-Report Handoff via KakaoTalk Share
+- Sending a KT parent report uses the device's native Web Share API to hand the report text directly to the installed KakaoTalk app (falling back to clipboard copy if unsupported).
+- This is a user-initiated share of a single report at the moment the teacher taps "send" — Chekki does not auto-post to KakaoTalk or transmit report data to Kakao's servers itself; the human-in-the-loop send gate from Section D is unchanged.
+
 ---
 
 ## 3. Frequently Asked Questions (FAQ for Directors)
@@ -50,4 +58,4 @@ When a teacher account is deleted, their user UID is automatically removed from 
 
 ---
 
-*Verified & Published by Chekki AI Security Engineering Team — August 2026*
+*Verified & Published by Chekki AI Security Engineering Team — Last updated September 2, 2026*

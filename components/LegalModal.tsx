@@ -33,7 +33,7 @@ export const LegalModal: React.FC<Props> = ({
   };
 
   const { title, icon } = getHeader();
-  const date = '최종 수정일: 2025년 10월 24일';
+  const date = '최종 수정일 / Last updated: 2026년 9월 2일 (Sep 2, 2026)';
   const { isClosing, close } = useModalExit(onClose);
 
   // This is a client-rendered SPA, so a URL fragment like /privacy#deletion
