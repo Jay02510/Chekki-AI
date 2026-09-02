@@ -8,7 +8,7 @@ export type TabId =
   | 'students'
   | 'classes'
   | 'teacher_assignment'
-  | 'log_compliance'
+  | 'billing'
   | 'history'
   | 'curriculum'
   | 'director_hq'

@@ -4,13 +4,11 @@ import {
   WarningCircle,
   SquaresFour,
   CheckCircle,
-  Confetti,
-  CreditCard
+  Confetti
 } from '@phosphor-icons/react';
 import { collection, query, where, getCountFromServer, getDocs } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
-import { SchoolBillingPanel } from './SchoolBillingPanel';
 import { ActivityFeed } from './ActivityFeed';
 
 interface Props {
@@ -45,7 +43,10 @@ interface Props {
   curriculumPassage?: string;
   onResolveFlag?: (studentUid: string) => void;
   onRequestSeatExpansion?: (extraSeats: number) => Promise<boolean>;
-  onRequestPlanChange?: (planId: string, planName: string) => Promise<boolean>;
+  // Billing lives as its own top-level director tab now (was a sub-tab of
+  // this portal) — the trial banner's "Upgrade Plan" CTA still needs
+  // somewhere to send the director, so the parent wires that navigation in.
+  onNavigateToBilling?: () => void;
 }
 
 export const NativeDirectorPortal: React.FC<Props> = ({
@@ -68,9 +69,9 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   curriculumPassage = '',
   onResolveFlag = () => {},
   onRequestSeatExpansion,
-  onRequestPlanChange,
+  onNavigateToBilling,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'exceptions' | 'billing'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'exceptions'>('overview');
 
   // Campus-wide roster + flag counts — previously TOTAL ROSTER and FLAGGED
   // EXCEPTIONS only reflected whichever single class was selected
@@ -254,7 +255,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           </div>
           <button
             type="button"
-            onClick={() => setActiveTab('billing')}
+            onClick={onNavigateToBilling}
             className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-colors shrink-0 cursor-pointer whitespace-nowrap"
           >
             {isKo ? '플랜 업그레이드 →' : 'Upgrade Plan →'}
@@ -318,21 +319,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             {flaggedStudents.length > 0 && (
               <span className="w-2 h-2 rounded-full bg-rose-500 absolute -top-1 -right-1 animate-ping" />
             )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('billing')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
-              activeTab === 'billing'
-                ? 'bg-orange-500 border-orange-500 text-black shadow-md'
-                : isNight
-                ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-            }`}
-          >
-            <CreditCard size={16} weight="bold" />
-            <span>Billing</span>
           </button>
         </div>
       </div>
@@ -592,19 +578,6 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             </div>
           )}
         </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* TAB 3: BILLING — plan, seats, trial/renewal, always checkable */}
-      {/* ========================================================================= */}
-      {activeTab === 'billing' && (
-        schoolId ? (
-          <SchoolBillingPanel isNight={isNight} isKo={isKo} schoolId={schoolId} seatsTotal={seatsTotal || { ft: 0, kt: 0 }} trialStatus={trialStatus} onRequestPlanChange={onRequestPlanChange} />
-        ) : (
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
-            School profile still loading — billing info will be available once it finishes.
-          </div>
-        )
       )}
 
       {/* SEAT EXPANSION REQUEST MODAL */}

@@ -2749,6 +2749,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 isNight={isThemeNight}
                 isKo={isKo}
                 activeTab={activeTab}
+                setActiveTab={setActiveTab}
                 academyName={displayedAcademyName}
                 academyLogo={academyLogo}
                 schoolId={user?.schoolId || undefined}

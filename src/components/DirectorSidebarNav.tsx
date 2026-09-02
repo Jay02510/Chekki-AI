@@ -1,5 +1,5 @@
 import React from 'react';
-import { Buildings, Users, Table, UserGear, ClipboardText, CaretRight } from '@phosphor-icons/react';
+import { Buildings, Users, Table, UserGear, CreditCard, CaretRight } from '@phosphor-icons/react';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
@@ -113,9 +113,9 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
         </button>
 
         <button
-          onClick={() => setActiveTab('log_compliance')}
+          onClick={() => setActiveTab('billing')}
           className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-            activeTab === 'log_compliance'
+            activeTab === 'billing'
               ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
               : isNight
                 ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
@@ -124,15 +124,15 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
         >
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-xl transition-colors ${
-              activeTab === 'log_compliance'
+              activeTab === 'billing'
                 ? 'bg-orange-500/20 text-orange-500'
                 : isNight ? 'bg-white/5 text-rose-400 group-hover:text-white' : 'bg-rose-100 text-rose-600 group-hover:text-zinc-900'
             }`}>
-              <ClipboardText size={18} weight="bold" />
+              <CreditCard size={18} weight="bold" />
             </div>
-            <span>{isKo ? '📋 일지 제출 현황' : '📋 Log Compliance'}</span>
+            <span>{isKo ? '💳 요금제 및 결제' : '💳 Billing'}</span>
           </div>
-          <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'log_compliance' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+          <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'billing' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
         </button>
       </div>
     </>

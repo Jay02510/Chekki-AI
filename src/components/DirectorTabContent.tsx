@@ -5,7 +5,7 @@ import { StudentInvitePanel } from './StudentInvitePanel';
 import { StudentDatabaseGrid } from './StudentDatabaseGrid';
 import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { TeacherRosterPanel } from './TeacherRosterPanel';
-import { LogComplianceTracker } from './LogComplianceTracker';
+import { SchoolBillingPanel } from './SchoolBillingPanel';
 import { useLogCompliance } from '../../hooks/useLogCompliance';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
@@ -13,6 +13,7 @@ interface Props {
   isNight: boolean;
   isKo: boolean;
   activeTab: TabId;
+  setActiveTab: (tab: TabId) => void;
   academyName: string;
   academyLogo?: string;
   schoolId: string | undefined;
@@ -62,8 +63,8 @@ export function DirectorTabContent(props: Props) {
   // teacherName and missStreak already exist on ComplianceRow, so reusing
   // this hook here is what makes each class row worth a dedicated tab
   // instead of just a list of the same buttons already in the header.
-  const { complianceRows, isLoading: isLoadingCompliance } = useLogCompliance(
-    activeTab === 'log_compliance' || activeTab === 'classes' ? props.classes : []
+  const { complianceRows } = useLogCompliance(
+    activeTab === 'classes' ? props.classes : []
   );
 
   return (
@@ -79,7 +80,6 @@ export function DirectorTabContent(props: Props) {
           seatsTotal={props.seatsTotal}
           trialStatus={props.trialStatus}
           onRequestSeatExpansion={props.onRequestSeatExpansion}
-          onRequestPlanChange={props.onRequestPlanChange}
           pendingRoster={props.pendingRoster}
           activeRoster={props.activeRoster}
           classes={props.classes}
@@ -90,7 +90,25 @@ export function DirectorTabContent(props: Props) {
           curriculumTopic={props.curriculumTopic}
           curriculumPassage={props.curriculumPassage}
           onResolveFlag={props.onResolveFlag}
+          onNavigateToBilling={() => props.setActiveTab('billing')}
         />
+      )}
+
+      {activeTab === 'billing' && (
+        props.schoolId ? (
+          <SchoolBillingPanel
+            isNight={isNight}
+            isKo={isKo}
+            schoolId={props.schoolId}
+            seatsTotal={props.seatsTotal}
+            trialStatus={props.trialStatus}
+            onRequestPlanChange={props.onRequestPlanChange}
+          />
+        ) : (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
+            School profile still loading — billing info will be available once it finishes.
+          </div>
+        )
       )}
 
       {activeTab === 'students' && (
@@ -217,10 +235,52 @@ export function DirectorTabContent(props: Props) {
                           </div>
                         </div>
                         {isSelected && (
-                          <div className={`px-4 pb-4 text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                            {isKo
-                              ? '배정 교사 관리는 "교사 배정" 탭에서 할 수 있습니다.'
-                              : 'Manage which teachers are assigned from the Teacher Assignment tab.'}
+                          <div className={`mx-4 mb-4 p-4 rounded-xl border space-y-3 ${isNight ? 'bg-black/20 border-white/10' : 'bg-white border-zinc-200'}`}>
+                            <div className="grid grid-cols-3 gap-3">
+                              <div>
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{isKo ? '담임 교사' : 'Teacher'}</p>
+                                <p className={`text-xs font-bold mt-0.5 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{compliance?.teacherName || '—'}</p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{isKo ? '배정 교사 수' : 'Teachers Assigned'}</p>
+                                <p className={`text-xs font-bold mt-0.5 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{(c.assignedTeacherUids || []).length}</p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{isKo ? '원생 수' : 'Students'}</p>
+                                <p className={`text-xs font-bold mt-0.5 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{studentCount}</p>
+                              </div>
+                            </div>
+
+                            {compliance && (
+                              <div>
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-1.5">
+                                  {isKo ? '최근 14일 일지 제출' : 'Last 14 days, log submitted'}
+                                </p>
+                                <div className="flex gap-1 overflow-x-auto pb-1">
+                                  {compliance.days.map((d) => (
+                                    <div
+                                      key={d.date}
+                                      title={d.date}
+                                      className={`w-5 h-5 rounded flex items-center justify-center text-[9px] shrink-0 ${
+                                        d.submitted
+                                          ? 'bg-emerald-500/20 text-emerald-400'
+                                          : d.isToday
+                                            ? (isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-500')
+                                            : 'bg-rose-500/20 text-rose-400'
+                                      }`}
+                                    >
+                                      {d.submitted ? '✓' : d.isToday ? '·' : '✕'}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            <p className={`text-[11px] ${isNight ? 'text-zinc-500' : 'text-zinc-500'}`}>
+                              {isKo
+                                ? '배정 교사 관리는 "교사 배정" 탭에서 할 수 있습니다.'
+                                : 'Manage which teachers are assigned from the Teacher Assignment tab.'}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -269,14 +329,6 @@ export function DirectorTabContent(props: Props) {
         </div>
       )}
 
-      {activeTab === 'log_compliance' && (
-        <LogComplianceTracker
-          isNight={isNight}
-          isKo={isKo}
-          complianceRows={complianceRows}
-          isLoading={isLoadingCompliance}
-        />
-      )}
     </>
   );
 }
