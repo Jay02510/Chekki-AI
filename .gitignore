@@ -38,4 +38,6 @@ local.properties
 # paths were accidentally tracked in this public repo)
 .claude/
 .agents/
+.gemini/
+.cursor/
 
