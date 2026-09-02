@@ -260,8 +260,8 @@ export default function ChekkiAiBentoGrid({ isNight = true, isKo = false }: Prop
                 }`} />
                 
                 <img 
-                  src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png" 
-                  alt="Chekki Mascot" 
+                  src="/assets/chekki-mascot.webp"
+                  alt="Chekki Mascot"
                   className="w-full h-full object-contain relative z-10 drop-shadow-[0_15px_35px_rgba(249,115,22,0.4)] group-hover:scale-105 transition-transform duration-700"
                 />
               </div>

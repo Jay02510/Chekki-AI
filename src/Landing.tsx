@@ -414,7 +414,7 @@ export default function Home() {
         <div className="hero-mascot group flex-1 w-full relative h-[400px] md:h-[650px] flex justify-center md:justify-end items-center">
           <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[480px] aspect-square rounded-full blur-[120px] ${isNight ? 'bg-brand/20' : 'bg-brand/35'}`} />
           <img
-            src="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal,f_png/v1771383933/Chekki_Futuristic_Background_i8foqe.png"
+            src="/assets/chekki-mascot.webp"
             alt="Chekki Mascot"
             className="w-full max-w-[440px] md:max-w-[500px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(249,115,22,0.3)] relative z-10 group-hover:scale-105 transition-transform duration-700"
           />
