@@ -154,34 +154,55 @@ export function DirectorTabContent(props: Props) {
                   .filter((c: any) => !c.isDemo)
                   .map((c: any) => {
                     const isSelected = props.selectedClass?.id === c.id;
+                    // Clicking a row only ever set it as the "active class"
+                    // for other tabs (log form, script, etc.) — nothing
+                    // visibly changed on THIS screen, so it looked like the
+                    // click did nothing (Audit: director clicks a class,
+                    // sees no info about it). Student count is computed
+                    // from roster data the parent already fetched — no new
+                    // network call — so an expanded row costs nothing extra.
+                    const studentCount =
+                      props.activeRoster.filter((r: any) => r.classId === c.id).length +
+                      props.pendingRoster.filter((r: any) => r.classId === c.id).length;
                     return (
                       <div
                         key={c.id}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => props.onSelectClass(c.id)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); props.onSelectClass(c.id); } }}
-                        className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-colors ${
+                        className={`rounded-2xl border transition-colors ${
                           isSelected
                             ? (isNight ? 'bg-orange-500/10 border-orange-500/40' : 'bg-orange-50 border-orange-300')
                             : (isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100')
                         }`}
                       >
-                        <div>
-                          <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                            {c.name}{isSelected ? ` · ${isKo ? '선택됨' : 'Selected'}` : ''}
-                          </p>
-                          <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
-                            {c.level || 'General'} · {(c.assignedTeacherUids || []).length} {isKo ? '명 배정' : 'teacher(s) assigned'}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); props.onDeleteClass(c.id); }}
-                          className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 cursor-pointer transition-colors shrink-0"
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => props.onSelectClass(c.id)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); props.onSelectClass(c.id); } }}
+                          className="flex items-center justify-between p-4 cursor-pointer"
                         >
-                          {isKo ? '삭제' : 'Delete'}
-                        </button>
+                          <div>
+                            <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                              {c.name}{isSelected ? ` · ${isKo ? '선택됨' : 'Selected'}` : ''}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                              {c.level || 'General'} · {(c.assignedTeacherUids || []).length} {isKo ? '명 배정' : 'teacher(s) assigned'} · {studentCount} {isKo ? '명 원생' : 'student(s)'}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); props.onDeleteClass(c.id); }}
+                            className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 cursor-pointer transition-colors shrink-0"
+                          >
+                            {isKo ? '삭제' : 'Delete'}
+                          </button>
+                        </div>
+                        {isSelected && (
+                          <div className={`px-4 pb-4 text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                            {isKo
+                              ? '배정 교사 관리는 "교사 배정" 탭에서 할 수 있습니다.'
+                              : 'Manage which teachers are assigned from the Teacher Assignment tab.'}
+                          </div>
+                        )}
                       </div>
                     );
                   })}

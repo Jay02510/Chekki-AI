@@ -29,7 +29,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const idToken = authHeader.split('Bearer ')[1].trim();
 
-  const { academyName, logoUrl, checkTrialStatus, dataRequest } = req.body || {};
+  const { academyName, logoUrl, checkTrialStatus, dataRequest, listInvoices } = req.body || {};
 
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
@@ -41,6 +41,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (dataRequest === 'export' || dataRequest === 'delete') {
       return await handleDataRequest(res, uid, dataRequest);
+    }
+
+    if (listInvoices) {
+      return await handleListInvoices(res, uid);
     }
 
     if (!academyName || typeof academyName !== 'string' || !academyName.trim()) {
@@ -156,6 +160,40 @@ async function handleDataRequest(res: VercelResponse, uid: string, kind: 'export
   }
 
   return res.status(200).json({ success: true });
+}
+
+/**
+ * Director-facing billing history: every school_invoices doc tied to this
+ * director's schoolId. school_invoices is server-only (firestore.rules:
+ * `allow read, write: if false`), so before this a director had no way to
+ * see a plan-change/seat-expansion request they'd already submitted, or
+ * check its status, once the confirmation modal closed.
+ */
+async function handleListInvoices(res: VercelResponse, uid: string) {
+  const userSnap = await adminDb.collection('users').doc(uid).get();
+  const userData = userSnap.data();
+  if (!userSnap.exists || userData?.role !== 'director' || !userData?.schoolId) {
+    return res.status(403).json({ error: 'Only a director with a school can view billing history' });
+  }
+  const schoolId = userData.schoolId as string;
+
+  const snap = await adminDb
+    .collection('school_invoices')
+    .where('schoolId', '==', schoolId)
+    .orderBy('createdAt', 'desc')
+    .limit(50)
+    .get();
+
+  return res.status(200).json({
+    invoices: snap.docs.map((d) => {
+      const data = d.data();
+      // bankInfo carries the same account number shown on the invoice email
+      // already sent to this director — nothing sensitive is added here,
+      // but it's still omitted since the UI only needs status/pricing.
+      const { bankInfo, ...rest } = data;
+      return rest;
+    }),
+  });
 }
 
 /**

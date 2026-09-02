@@ -34,6 +34,8 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
   const [isRequestingDeletion, setIsRequestingDeletion] = useState(false);
   const [deletionRequested, setDeletionRequested] = useState(false);
   const [dataActionError, setDataActionError] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<any[] | null>(null);
+  const [invoicesError, setInvoicesError] = useState<string | null>(null);
 
   const callDataRequest = async (kind: 'export' | 'delete') => {
     const idToken = await auth.currentUser?.getIdToken();
@@ -100,6 +102,33 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
       (err) => console.warn('Failed to load school billing info:', err)
     );
     return () => unsub();
+  }, [schoolId]);
+
+  // school_invoices is server-only (firestore.rules denies client reads) —
+  // a director previously had no way to see a plan-change/seat-expansion
+  // request they'd already submitted once the confirmation modal closed
+  // (Audit: "no way to track requests made"). One-shot fetch, not a
+  // subscription — billing history doesn't need to be live.
+  const fetchInvoices = async () => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch('/api/update-school-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ listInvoices: true }),
+      });
+      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Failed to load billing history');
+      const data = await response.json();
+      setInvoices(data.invoices || []);
+    } catch (err: any) {
+      setInvoicesError(err.message || 'Failed to load billing history');
+    }
+  };
+
+  useEffect(() => {
+    if (!schoolId) return;
+    fetchInvoices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schoolId]);
 
   useEffect(() => {
@@ -203,6 +232,47 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
         {dataActionError && <p className="text-xs font-bold text-rose-400">{dataActionError}</p>}
       </div>
 
+      <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+        <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">
+          {isKo ? '요청 내역' : 'Billing History'}
+        </span>
+        {invoicesError ? (
+          <p className="text-xs font-bold text-rose-400">{invoicesError}</p>
+        ) : invoices === null ? (
+          <p className={`text-xs ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>{isKo ? '불러오는 중...' : 'Loading...'}</p>
+        ) : invoices.length === 0 ? (
+          <p className={`text-xs ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+            {isKo ? '아직 요청한 청구서가 없습니다.' : 'No billing requests yet.'}
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {invoices.map((inv) => (
+              <div
+                key={inv.invoiceId}
+                className={`flex items-center justify-between gap-3 p-3 rounded-xl border text-xs ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}
+              >
+                <div>
+                  <p className={`font-bold font-mono ${isNight ? 'text-white' : 'text-zinc-900'}`}>{inv.invoiceId}</p>
+                  <p className="text-zinc-400 mt-0.5">
+                    {inv.planName} · {inv.teacherCount} {isKo ? '명' : 'teacher(s)'} · {new Date(inv.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className={`font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>₩{Number(inv.totalAmount || 0).toLocaleString()}</p>
+                  <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                    inv.status === 'paid'
+                      ? 'bg-emerald-500/10 text-emerald-400'
+                      : 'bg-amber-500/10 text-amber-400'
+                  }`}>
+                    {inv.status === 'paid' ? (isKo ? '결제 확인됨' : 'Payment Confirmed') : (isKo ? '입금 대기' : 'Pending Payment')}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {showPlanModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowPlanModal(false)} />
@@ -213,7 +283,9 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
               </h4>
               {!planRequestSent && (
                 <p className={`text-xs mt-1 ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  {isKo ? '월간 요금 기준입니다. 요청 후 담당자가 이메일로 결제 방법을 안내합니다.' : 'Prices shown are monthly. Our team will email you payment details after you request.'}
+                  {isKo
+                    ? '월간 요금 기준입니다. 요청 즉시 계좌이체 정보가 담긴 청구서 이메일이 발송되며, 입금 확인 후 24시간 이내에 활성화됩니다.'
+                    : "Prices shown are monthly. You'll get an invoice email with bank transfer details right away — activation follows within 24 hours of us confirming payment."}
                 </p>
               )}
             </div>
@@ -222,8 +294,8 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
               <div className="space-y-4">
                 <p className={`text-sm ${isNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
                   {isKo
-                    ? '요청이 접수되었습니다. 담당자가 확인 후 이메일로 연락드립니다.'
-                    : 'Request sent. Our team will follow up by email to confirm and complete the change.'}
+                    ? '요청이 접수되었습니다. 계좌이체 정보가 담긴 청구서를 이메일로 보내드렸습니다 — 입금 확인 후 24시간 이내에 활성화됩니다.'
+                    : "Request sent — check your email for an invoice with bank transfer details. We'll activate it within 24 hours of confirming payment."}
                 </p>
                 <button
                   type="button"
@@ -248,7 +320,10 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
                         setIsSubmittingPlanChange(true);
                         const ok = await onRequestPlanChange?.(id, isKo ? label.nameKo : label.nameEn);
                         setIsSubmittingPlanChange(false);
-                        if (ok) setPlanRequestSent(true);
+                        if (ok) {
+                          setPlanRequestSent(true);
+                          fetchInvoices();
+                        }
                       }}
                       className={`w-full text-left px-4 py-3 rounded-xl border transition-[color,background-color,border-color,box-shadow,transform] disabled:opacity-50 ${isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100'}`}
                     >
