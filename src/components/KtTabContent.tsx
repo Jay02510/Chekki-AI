@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { KtReviewQueue } from './KtReviewQueue';
 import { NativeKtDashboard } from './NativeKtDashboard';
 import { FtStatCards } from './NativeFtDashboard';
@@ -75,6 +75,13 @@ interface Props {
 // component with FT), students (shared component with director).
 export function KtTabContent(props: Props) {
   const { isNight, isKo, activeTab } = props;
+  // Roster invite/upload is an occasional admin action, not part of a KT's
+  // routine "did today's reports get done" check — collapsed behind a
+  // toggle so it doesn't render its own student table by default, stacked
+  // right above StudentDatabaseGrid's table of the same students (Audit:
+  // KT overview showed every student twice, in two different tables with
+  // two different status vocabularies).
+  const [showInvitePanel, setShowInvitePanel] = useState(false);
 
   return (
     <>
@@ -164,24 +171,9 @@ export function KtTabContent(props: Props) {
         // since a KT checking class status almost always wants both at
         // once, and switching tabs just to see names was pure friction).
         <div className="space-y-6 animate-fade-in">
-          <div className={`p-5 rounded-3xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
-            <p className={`text-sm font-bold mb-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-              {isKo ? '한국인 담임 교사 현황 요약' : 'KT Class Summary'}
-            </p>
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
               {isKo ? '선택된 반:' : 'Active class:'} <span className="font-mono font-bold">{props.activeClass?.name || '—'}</span>
-            </p>
-          </div>
-          <FtStatCards
-            isNight={isNight}
-            isKo={isKo}
-            completionRate={props.completionRate}
-            completedHomeworkCount={props.completedHomeworkCount}
-            activeStudentsCount={props.activeStudentsCount}
-          />
-          <div className={`p-5 rounded-3xl border flex items-center justify-between flex-wrap gap-3 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-md'}`}>
-            <p className={`text-sm ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
-              {isKo ? '학부모 알림톡 작성 & 1클릭 복사' : 'Write & copy parent KakaoTalk script'}
             </p>
             <button
               type="button"
@@ -191,9 +183,28 @@ export function KtTabContent(props: Props) {
               {isKo ? '알림톡 작성하기 →' : 'Go to Script →'}
             </button>
           </div>
+          <FtStatCards
+            isNight={isNight}
+            isKo={isKo}
+            completionRate={props.completionRate}
+            completedHomeworkCount={props.completedHomeworkCount}
+            activeStudentsCount={props.activeStudentsCount}
+          />
 
           {props.selectedClass && !props.selectedClass.isDemo && (
-            <StudentInvitePanel isNight={isNight} isKo={isKo} classId={props.selectedClass.id} />
+            showInvitePanel ? (
+              <StudentInvitePanel isNight={isNight} isKo={isKo} classId={props.selectedClass.id} />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowInvitePanel(true)}
+                className={`w-full py-3 rounded-2xl border border-dashed text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+                  isNight ? 'border-white/15 text-zinc-400 hover:text-white hover:border-white/30' : 'border-zinc-300 text-zinc-500 hover:text-zinc-900 hover:border-zinc-400'
+                }`}
+              >
+                {isKo ? '+ 학생 초대 / 명단 관리' : '+ Invite Students / Manage Roster'}
+              </button>
+            )
           )}
           <NativeDirectorStudentsTab
             isNight={isNight}

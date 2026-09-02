@@ -1712,7 +1712,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     const planSeats = seatsForPlan(activationPlanId);
     const planLabel = labelsForPlan(activationPlanId);
     return (
-      <div className="fixed inset-0 z-[500] overflow-y-auto bg-brand-dark text-zinc-200 flex items-center justify-center p-4 selection:bg-orange-500 selection:text-white">
+      <div className="fixed inset-0 z-[500] overflow-y-auto bg-brand-dark text-zinc-200 flex items-start sm:items-center justify-center px-4 py-8 sm:py-4 selection:bg-orange-500 selection:text-white">
         <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
         <div className="relative w-full max-w-md p-1.5 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col">
           <div className="bg-brand-dark rounded-[calc(2.5rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center">
