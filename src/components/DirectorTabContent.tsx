@@ -56,8 +56,14 @@ export function DirectorTabContent(props: Props) {
   // unconditionally on every DirectorTabContent render (director_hq,
   // students — any tab), reading Firestore for a view the director might
   // never open (audit: unnecessary reads on every portal visit).
+  // Also fetched for 'classes': that tab used to just duplicate the header's
+  // class switcher/New Class/Delete controls with nothing else to show for
+  // itself (Audit: "All Classes" tab doesn't do or show anything useful) —
+  // teacherName and missStreak already exist on ComplianceRow, so reusing
+  // this hook here is what makes each class row worth a dedicated tab
+  // instead of just a list of the same buttons already in the header.
   const { complianceRows, isLoading: isLoadingCompliance } = useLogCompliance(
-    activeTab === 'log_compliance' ? props.classes : []
+    activeTab === 'log_compliance' || activeTab === 'classes' ? props.classes : []
   );
 
   return (
@@ -154,6 +160,7 @@ export function DirectorTabContent(props: Props) {
                   .filter((c: any) => !c.isDemo)
                   .map((c: any) => {
                     const isSelected = props.selectedClass?.id === c.id;
+                    const compliance = complianceRows.find((row) => row.classId === c.id);
                     // Clicking a row only ever set it as the "active class"
                     // for other tabs (log form, script, etc.) — nothing
                     // visibly changed on THIS screen, so it looked like the
@@ -185,16 +192,29 @@ export function DirectorTabContent(props: Props) {
                               {c.name}{isSelected ? ` · ${isKo ? '선택됨' : 'Selected'}` : ''}
                             </p>
                             <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
-                              {c.level || 'General'} · {(c.assignedTeacherUids || []).length} {isKo ? '명 배정' : 'teacher(s) assigned'} · {studentCount} {isKo ? '명 원생' : 'student(s)'}
+                              {c.level || 'General'} · {compliance?.teacherName || `${(c.assignedTeacherUids || []).length} ${isKo ? '명 배정' : 'teacher(s)'}`} · {studentCount} {isKo ? '명 원생' : 'student(s)'}
                             </p>
                           </div>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); props.onDeleteClass(c.id); }}
-                            className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 cursor-pointer transition-colors shrink-0"
-                          >
-                            {isKo ? '삭제' : 'Delete'}
-                          </button>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {compliance && (
+                              compliance.missStreak > 0 ? (
+                                <span className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-400 text-[10px] font-bold border border-rose-500/30">
+                                  🔥 {compliance.missStreak}{isKo ? '일 미제출' : `-day miss streak`}
+                                </span>
+                              ) : (
+                                <span className="px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
+                                  ✓ {isKo ? '제출 완료' : 'Up to date'}
+                                </span>
+                              )
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); props.onDeleteClass(c.id); }}
+                              className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 cursor-pointer transition-colors shrink-0"
+                            >
+                              {isKo ? '삭제' : 'Delete'}
+                            </button>
+                          </div>
                         </div>
                         {isSelected && (
                           <div className={`px-4 pb-4 text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
