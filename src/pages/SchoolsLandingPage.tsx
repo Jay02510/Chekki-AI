@@ -28,7 +28,6 @@ import {
   CaretDown
 } from '@phosphor-icons/react';
 import { SchoolLoopDiagram } from '../components/SchoolLoopDiagram';
-import ReliabilityStats from '../components/ReliabilityStats';
 import { PLAN_SEATS, PLAN_LABELS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useToast } from '../../contexts/ToastContext';
@@ -419,8 +418,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <ArrowRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
-
-          <ReliabilityStats isNight={isNight} isKo={isKo} />
         </div>
 
         {/* Right: Teacher Mascot Image Side (Holding Laptop) */}

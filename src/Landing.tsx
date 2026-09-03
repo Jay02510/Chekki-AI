@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import ChekkiAiBentoGrid from './components/ChekkiAiBentoGrid';
 import ParentReliefStrip from './components/ParentReliefStrip';
-import ReliabilityStats from './components/ReliabilityStats';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from 'framer-motion';
@@ -409,7 +408,6 @@ export default function Home() {
           </div>
 
           <ParentReliefStrip isNight={isNight} isKo={isKo} />
-          <ReliabilityStats isNight={isNight} isKo={isKo} />
         </div>
 
         {/* Hero Transparent Mascot Image */}
