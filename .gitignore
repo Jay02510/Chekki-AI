@@ -41,3 +41,4 @@ local.properties
 .gemini/
 .cursor/
 
+.env*
