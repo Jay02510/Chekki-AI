@@ -18,6 +18,15 @@ if (!BASE_URL) {
   throw new Error('Set BASE_URL to the staging preview URL, e.g. BASE_URL=https://chekki-xxxx.vercel.app k6 run tests/load/ask-question.js');
 }
 
+// Preview deployments sit behind Vercel's Deployment Protection SSO wall —
+// every request 401s before reaching the app unless this bypass secret is
+// sent. Generated once in Vercel dashboard > Settings > Deployment
+// Protection > Protection Bypass for Automation.
+const BYPASS_SECRET = __ENV.VERCEL_PROTECTION_BYPASS;
+if (!BYPASS_SECRET) {
+  throw new Error('Set VERCEL_PROTECTION_BYPASS to the bypass secret from Vercel dashboard > Settings > Deployment Protection.');
+}
+
 const latency = new Trend('chekki_ask_question_duration', true);
 
 const QUESTIONS = [
@@ -54,7 +63,12 @@ export default function () {
   const res = http.post(
     `${BASE_URL}/api/analyze`,
     JSON.stringify({ task: 'ask_question', question, history: [] }),
-    { headers: { 'Content-Type': 'application/json' } }
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-vercel-protection-bypass': BYPASS_SECRET,
+      },
+    }
   );
 
   latency.add(res.timings.duration);
