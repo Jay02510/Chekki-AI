@@ -22,6 +22,52 @@ function logUsage(task: string, response: any) {
   );
 }
 
+// Fills a response schema (the same Type.OBJECT/ARRAY/STRING trees passed as
+// config.responseSchema below) with placeholder values recursively, so a
+// mocked call returns something shaped close enough to the real thing for
+// downstream parsing to succeed.
+function mockStubFromSchema(schema: any): any {
+  if (!schema) return {};
+  switch (schema.type) {
+    case Type.OBJECT: {
+      const obj: Record<string, any> = {};
+      for (const key of Object.keys(schema.properties || {})) {
+        obj[key] = mockStubFromSchema(schema.properties[key]);
+      }
+      return obj;
+    }
+    case Type.ARRAY:
+      return [mockStubFromSchema(schema.items)];
+    case Type.INTEGER:
+    case Type.NUMBER:
+      return 1;
+    case Type.BOOLEAN:
+      return true;
+    default:
+      return schema.enum ? schema.enum[0] : 'Mock response (MOCK_GEMINI=true)';
+  }
+}
+
+// MOCK_GEMINI=true (set on Vercel Preview only) swaps every Gemini call for
+// a same-shaped stub so load/stress tests never hit the real API — no cost,
+// no quota, no real-model latency skewing the numbers being measured.
+const MOCK_GEMINI = process.env.MOCK_GEMINI === 'true';
+
+function createGenAI() {
+  if (!MOCK_GEMINI) return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  return {
+    models: {
+      generateContent: async (req: any) => {
+        const isJson = req?.config?.responseSchema || req?.config?.responseMimeType === 'application/json';
+        const text = isJson
+          ? JSON.stringify(mockStubFromSchema(req?.config?.responseSchema))
+          : 'Mock response text (MOCK_GEMINI=true)';
+        return { text, usageMetadata: undefined };
+      },
+    },
+  } as any;
+}
+
 export const config = {
   maxDuration: 300,
   api: {
@@ -479,9 +525,9 @@ Historical Logs: ${historicalLogs}
 }
 
 async function handleGenerateReportTask(res: any, body: any) {
-  if (!process.env.API_KEY) return res.status(500).json({ error: 'API_KEY_MISSING' });
+  if (!MOCK_GEMINI && !process.env.API_KEY) return res.status(500).json({ error: 'API_KEY_MISSING' });
   const { type, payload } = body || {};
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = createGenAI();
 
   try {
     if (type === 'summary') {
@@ -565,7 +611,7 @@ const VOICE_LOG_FILL_SCHEMA = {
 };
 
 async function handleVoiceLogFillTask(res: any, body: any) {
-  if (!process.env.API_KEY) return res.status(500).json({ error: 'API_KEY_MISSING' });
+  if (!MOCK_GEMINI && !process.env.API_KEY) return res.status(500).json({ error: 'API_KEY_MISSING' });
 
   const { audio, mimeType, history, currentFields, language = 'ko', phase = 'general' } = body || {};
   if (!audio || typeof audio !== 'string') return res.status(400).json({ error: 'INVALID_AUDIO_DATA' });
@@ -652,7 +698,7 @@ LANGUAGE STANDARD: This content is read by a Korean Teacher and then relayed to 
   ];
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = createGenAI();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: conversationContents,
@@ -1074,9 +1120,9 @@ async function handler(req: any, res: any) {
       }
     }
 
-    if (!process.env.API_KEY) return res.status(500).json({ error: 'API_KEY_MISSING' });
+    if (!MOCK_GEMINI && !process.env.API_KEY) return res.status(500).json({ error: 'API_KEY_MISSING' });
 
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = createGenAI();
 
     const mode = body?.mode;
 
