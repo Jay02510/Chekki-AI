@@ -134,7 +134,9 @@ export function useRosterAnalytics(
   // the parent having joined the app. Same query pattern as
   // StudentInvitePanel.tsx. Keyed with a `pending:` prefix so it can never
   // collide with a real Firebase Auth uid.
-  const [pendingStudentsForRoster, setPendingStudentsForRoster] = useState<{ uid: string; name: string }[]>([]);
+  const [pendingStudentsForRoster, setPendingStudentsForRoster] = useState<
+    { uid: string; name: string; parentEmail: string; pendingStudentId: string }[]
+  >([]);
   useEffect(() => {
     if (!selectedClass?.id || selectedClass.isDemo) {
       setPendingStudentsForRoster([]);
@@ -148,7 +150,12 @@ export function useRosterAnalytics(
           snap.docs
             .map((d) => ({ id: d.id, ...d.data() } as any))
             .filter((d) => d?.status === 'invited' && d?.name)
-            .map((d) => ({ uid: `pending:${d.id}`, name: d.name as string }))
+            .map((d) => ({
+              uid: `pending:${d.id}`,
+              name: d.name as string,
+              parentEmail: d.parentEmail || '',
+              pendingStudentId: d.id as string,
+            }))
         );
       },
       (err) => console.warn('Failed to load pending students for roster:', err)
@@ -191,7 +198,8 @@ export function useRosterAnalytics(
     uid: s.uid,
     studentName: s.name,
     name: '',
-    email: '',
+    email: s.parentEmail,
+    pendingStudentId: s.pendingStudentId,
     classStatus: 'active',
     hasScannedThisWeek: false,
     lastScanDate: null,

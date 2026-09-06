@@ -191,20 +191,13 @@ export function KtTabContent(props: Props) {
             activeStudentsCount={props.activeStudentsCount}
           />
 
-          {props.selectedClass && !props.selectedClass.isDemo && (
-            showInvitePanel ? (
-              <StudentInvitePanel isNight={isNight} isKo={isKo} classId={props.selectedClass.id} />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowInvitePanel(true)}
-                className={`w-full py-3 rounded-2xl border border-dashed text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
-                  isNight ? 'border-white/15 text-zinc-400 hover:text-white hover:border-white/30' : 'border-zinc-300 text-zinc-500 hover:text-zinc-900 hover:border-zinc-400'
-                }`}
-              >
-                {isKo ? '+ 학생 초대 / 명단 관리' : '+ Invite Students / Manage Roster'}
-              </button>
-            )
+          {props.selectedClass && !props.selectedClass.isDemo && showInvitePanel && (
+            <StudentInvitePanel
+              isNight={isNight}
+              isKo={isKo}
+              classId={props.selectedClass.id}
+              onClose={() => setShowInvitePanel(false)}
+            />
           )}
           <NativeDirectorStudentsTab
             isNight={isNight}
@@ -226,6 +219,7 @@ export function KtTabContent(props: Props) {
             handleMoveStudent={props.handleMoveStudent}
             handleRemoveStudent={props.handleRemoveStudent}
             setSelectedStudentDetails={props.setSelectedStudentDetails}
+            onOpenInvitePanel={() => setShowInvitePanel(true)}
           />
         </div>
       )}

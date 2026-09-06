@@ -8,9 +8,9 @@ import {
   flexRender,
   type SortingState,
 } from '@tanstack/react-table';
-import { Warning, MagnifyingGlass, DownloadSimple, CaretUp, CaretDown, CaretUpDown, CheckCircle } from '@phosphor-icons/react';
+import { Warning, MagnifyingGlass, DownloadSimple, CaretUp, CaretDown, CaretUpDown, CheckCircle, UserPlus, PaperPlaneTilt, Trash } from '@phosphor-icons/react';
 import { downloadCSV } from '../utils/csvExport';
-import { StatTile } from './ui/StatTile';
+import { resendPendingInvite, addEmailAndSendInvite, removePendingInvite } from '../utils/studentInviteApi';
 
 interface Props {
   isNight: boolean;
@@ -25,6 +25,7 @@ interface Props {
   handleMoveStudent: (uid: string, targetClassId: string) => void;
   handleRemoveStudent: (uid: string) => void;
   setSelectedStudentDetails: (student: any) => void;
+  onOpenInvitePanel: () => void;
 }
 
 type Row = {
@@ -32,6 +33,7 @@ type Row = {
   studentName: string;
   parentName: string;
   parentEmail: string;
+  pendingStudentId: string;
   className: string;
   classId: string;
   status: string;
@@ -66,6 +68,7 @@ export function StudentDatabaseGrid({
   handleMoveStudent,
   handleRemoveStudent,
   setSelectedStudentDetails,
+  onOpenInvitePanel,
 }: Props) {
   const [globalFilter, setGlobalFilter] = useState('');
   const [classFilter, setClassFilter] = useState('');
@@ -82,6 +85,25 @@ export function StudentDatabaseGrid({
       await action();
     } finally {
       setIsActionBusy(false);
+    }
+  };
+
+  // Invited-only rows (pending, no parent redemption yet) manage their own
+  // resend/add-email/remove here now — this table absorbed that from
+  // StudentInvitePanel's own duplicate status table (Audit: same students
+  // shown twice, in two tables with two different status vocabularies).
+  const [inviteActionBusyId, setInviteActionBusyId] = useState<string | null>(null);
+  const [addEmailForPendingId, setAddEmailForPendingId] = useState<string | null>(null);
+  const [addEmailValue, setAddEmailValue] = useState('');
+  const runInviteAction = async (pendingStudentId: string, action: () => Promise<unknown>) => {
+    if (inviteActionBusyId) return;
+    setInviteActionBusyId(pendingStudentId);
+    try {
+      await action();
+    } catch (err) {
+      console.warn('Invite action failed:', err);
+    } finally {
+      setInviteActionBusyId(null);
     }
   };
 
@@ -106,6 +128,7 @@ export function StudentDatabaseGrid({
       studentName: s.studentName || 'Unnamed',
       parentName: s.name || '',
       parentEmail: s.email || '',
+      pendingStudentId: s.pendingStudentId || '',
       className: classNameById.get(s.classId) || '',
       classId: s.classId || '',
       status: s.__status,
@@ -138,9 +161,14 @@ export function StudentDatabaseGrid({
       columnHelper.accessor('parentName', {
         header: isKo ? '학부모' : 'Parent',
         cell: (info) => info.row.original.isInvitedOnly ? (
-          <span className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-sky-500/10 border border-sky-500/20 text-sky-400 w-fit inline-block">
-            {isKo ? '미가입 (초대됨)' : 'Not yet joined'}
-          </span>
+          <div className="flex flex-col gap-1 items-start">
+            <span className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-sky-500/10 border border-sky-500/20 text-sky-400 w-fit inline-block">
+              {isKo ? '미가입 (초대됨)' : 'Not yet joined'}
+            </span>
+            {info.row.original.parentEmail && (
+              <span className="text-[10px] text-zinc-400 font-mono">{info.row.original.parentEmail}</span>
+            )}
+          </div>
         ) : (
           <div>
             <p className="font-bold">{info.getValue()}</p>
@@ -180,10 +208,78 @@ export function StudentDatabaseGrid({
           const row = info.row.original;
           if (row.status !== 'active') return null;
           if (row.isInvitedOnly) {
+            const pendingId = row.pendingStudentId;
+            const busy = inviteActionBusyId === pendingId;
+            if (addEmailForPendingId === pendingId) {
+              return (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!addEmailValue.trim()) return;
+                    runInviteAction(pendingId, () => addEmailAndSendInvite(pendingId, addEmailValue.trim())).then(() => {
+                      setAddEmailForPendingId(null);
+                      setAddEmailValue('');
+                    });
+                  }}
+                  className="flex items-center justify-end gap-2"
+                >
+                  <input
+                    type="email"
+                    autoFocus
+                    value={addEmailValue}
+                    onChange={(e) => setAddEmailValue(e.target.value)}
+                    placeholder="parent@email.com"
+                    required
+                    className={`min-w-0 w-40 p-2 rounded-lg border text-[10px] font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'}`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="px-2.5 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white text-[10px] font-bold cursor-pointer transition-colors"
+                  >
+                    {isKo ? '발송' : 'Send'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setAddEmailForPendingId(null); setAddEmailValue(''); }}
+                    className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 text-[10px] font-bold cursor-pointer transition-colors"
+                  >
+                    {isKo ? '취소' : 'Cancel'}
+                  </button>
+                </form>
+              );
+            }
             return (
-              <span className="text-[10px] text-zinc-500 italic">
-                {isKo ? '위 초대 목록에서 관리' : 'Manage in Invite Students above'}
-              </span>
+              <div className="flex items-center justify-end gap-2">
+                {row.parentEmail ? (
+                  <button
+                    onClick={() => runInviteAction(pendingId, () => resendPendingInvite(pendingId))}
+                    disabled={busy}
+                    title={isKo ? '재전송' : 'Resend'}
+                    className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
+                  >
+                    <PaperPlaneTilt size={12} weight="bold" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setAddEmailForPendingId(pendingId); setAddEmailValue(''); }}
+                    disabled={busy}
+                    title={isKo ? '이메일 추가하고 초대 발송' : 'Add email and send invite'}
+                    className="px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center gap-1"
+                  >
+                    <PaperPlaneTilt size={12} weight="bold" />
+                    <span className="text-[10px] font-bold">{isKo ? '이메일 추가' : 'Add Email'}</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => runInviteAction(pendingId, () => removePendingInvite(pendingId))}
+                  disabled={busy}
+                  title={isKo ? '삭제' : 'Remove'}
+                  className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
+                >
+                  <Trash size={12} weight="bold" />
+                </button>
+              </div>
             );
           }
           return (
@@ -221,7 +317,18 @@ export function StudentDatabaseGrid({
         },
       }),
     ],
-    [isKo, isNight, classes, handleMoveStudent, handleRemoveStudent, setSelectedStudentDetails, isActionBusy]
+    [
+      isKo,
+      isNight,
+      classes,
+      handleMoveStudent,
+      handleRemoveStudent,
+      setSelectedStudentDetails,
+      isActionBusy,
+      inviteActionBusyId,
+      addEmailForPendingId,
+      addEmailValue,
+    ]
   );
 
   const table = useReactTable({
@@ -252,9 +359,9 @@ export function StudentDatabaseGrid({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-        <div className="flex flex-col sm:flex-row gap-3 flex-1">
-          <div className={`relative flex-1 max-w-xs`}>
+      <div className="flex flex-wrap items-center gap-3 justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full max-w-[220px] sm:w-56">
             <MagnifyingGlass size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
@@ -278,8 +385,36 @@ export function StudentDatabaseGrid({
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          {!isLoadingRoster && activeRoster.length > 0 && (
+            <span
+              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border ${
+                isNight ? 'bg-white/5 border-white/10 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-700'
+              }`}
+            >
+              <CheckCircle size={14} weight="bold" className="text-orange-500" />
+              {isKo ? '이번 주 스캔' : 'Scanned this week'}:{' '}
+              <span className={isNight ? 'text-white' : 'text-zinc-900'}>
+                {activeRoster.filter((s) => s.hasScannedThisWeek).length}/{activeRoster.length}
+              </span>
+              <span className="text-zinc-500">
+                (
+                {Math.round(
+                  (activeRoster.filter((s) => s.hasScannedThisWeek).length / activeRoster.length) * 100
+                )}
+                %)
+              </span>
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenInvitePanel}
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97]"
+          >
+            <UserPlus size={14} weight="bold" />
+            <span>{isKo ? '학생 초대' : 'Invite Students'}</span>
+          </button>
           <button
             type="button"
             onClick={fetchRosterAndMistakes}
@@ -303,27 +438,6 @@ export function StudentDatabaseGrid({
           </button>
         </div>
       </div>
-
-      {!isLoadingRoster && activeRoster.length > 0 && (
-        <div className="max-w-xs">
-          <StatTile
-            isNight={isNight}
-            label={isKo ? '이번 주 스캔 완료' : 'Scanned This Week'}
-            icon={<CheckCircle size={14} weight="bold" className="text-orange-500" />}
-            ring={{
-              value: Math.round(
-                (activeRoster.filter((s) => s.hasScannedThisWeek).length / activeRoster.length) * 100
-              ),
-            }}
-            value={
-              <>
-                {activeRoster.filter((s) => s.hasScannedThisWeek).length}
-                <span className="text-sm font-normal text-zinc-400"> / {activeRoster.length}</span>
-              </>
-            }
-          />
-        </div>
-      )}
 
       <div className={`p-1 rounded-[2.5rem] ${isNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'}`}>
         <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 ${isNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'}`}>

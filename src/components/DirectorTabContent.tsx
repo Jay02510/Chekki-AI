@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NativeDirectorPortal } from './NativeDirectorPortal';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
 import { StudentInvitePanel } from './StudentInvitePanel';
@@ -52,6 +52,12 @@ interface Props {
 // combined switchboard is dropped (it always resolved true here anyway).
 export function DirectorTabContent(props: Props) {
   const { isNight, isKo, activeTab } = props;
+  // Invite/roster management is an occasional admin action, not part of
+  // scanning the day's student list — a modal instead of an always-rendered
+  // panel keeps this off the page by default, so the same students don't
+  // show up in two tables at once (Audit: students tab always showed every
+  // student twice — once in the invite panel, once in StudentDatabaseGrid).
+  const [showInvitePanel, setShowInvitePanel] = useState(false);
   // Only query when the director is actually viewing this tab — this hook
   // fires one logs-subcollection query per class, and was previously called
   // unconditionally on every DirectorTabContent render (director_hq,
@@ -137,7 +143,7 @@ export function DirectorTabContent(props: Props) {
               </div>
             );
           })()}
-          {props.selectedClass && !props.selectedClass.isDemo && (
+          {props.selectedClass && !props.selectedClass.isDemo && showInvitePanel && (
             <StudentInvitePanel
               isNight={isNight}
               isKo={isKo}
@@ -145,6 +151,7 @@ export function DirectorTabContent(props: Props) {
               classes={props.classes
                 .filter((c: any) => !c.isDemo)
                 .map((c: any) => ({ id: c.id, name: c.name }))}
+              onClose={() => setShowInvitePanel(false)}
             />
           )}
           <NativeDirectorStudentsTab
@@ -167,6 +174,7 @@ export function DirectorTabContent(props: Props) {
             handleMoveStudent={props.handleMoveStudent}
             handleRemoveStudent={props.handleRemoveStudent}
             setSelectedStudentDetails={props.setSelectedStudentDetails}
+            onOpenInvitePanel={() => setShowInvitePanel(true)}
           />
         </div>
       )}
