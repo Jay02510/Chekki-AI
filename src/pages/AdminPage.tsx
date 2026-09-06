@@ -89,6 +89,9 @@ export default function AdminPage() {
   const [assignSchoolIdInput, setAssignSchoolIdInput] = useState('');
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showCreateSchoolModal, setShowCreateSchoolModal] = useState(false);
+  const [upgradeSchoolIdInput, setUpgradeSchoolIdInput] = useState('');
+  const [upgradeSchoolPlanInput, setUpgradeSchoolPlanInput] = useState('school_pro');
+  const [showUpgradeSchoolModal, setShowUpgradeSchoolModal] = useState(false);
   const createSchoolDialogRef = useDialogA11y<HTMLDivElement>({
     isOpen: showCreateSchoolModal,
     onClose: () => setShowCreateSchoolModal(false),
@@ -96,6 +99,10 @@ export default function AdminPage() {
   const assignTeacherDialogRef = useDialogA11y<HTMLDivElement>({
     isOpen: showAssignModal,
     onClose: () => setShowAssignModal(false),
+  });
+  const upgradeSchoolDialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: showUpgradeSchoolModal,
+    onClose: () => setShowUpgradeSchoolModal(false),
   });
 
   const handleFetchInvoices = async () => {
@@ -353,6 +360,36 @@ export default function AdminPage() {
     } catch (err: any) {
       console.error(err);
       setMessage({ text: err.message || 'Error assigning teacher', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpgradeSchool = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          passcode,
+          action: 'upgrade_school',
+          schoolId: upgradeSchoolIdInput,
+          planId: upgradeSchoolPlanInput,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upgrade school');
+      }
+      setMessage({ text: `✅ School upgraded to ${upgradeSchoolPlanInput}!`, type: 'success' });
+      setShowUpgradeSchoolModal(false);
+      handleFetchSchools();
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error upgrading school', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -1533,6 +1570,16 @@ export default function AdminPage() {
                                 <div className="flex items-center justify-end gap-2">
                                   <button
                                     onClick={() => {
+                                      setUpgradeSchoolIdInput(school.schoolId);
+                                      setUpgradeSchoolPlanInput(school.planId && school.planId !== 'trial' ? school.planId : 'school_pro');
+                                      setShowUpgradeSchoolModal(true);
+                                    }}
+                                    className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                                  >
+                                    Upgrade Plan
+                                  </button>
+                                  <button
+                                    onClick={() => {
                                       setAssignSchoolIdInput(school.schoolId);
                                       setAssignEmailInput('');
                                       setShowAssignModal(true);
@@ -1729,6 +1776,93 @@ export default function AdminPage() {
                             className="flex-1 py-3.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white font-black uppercase tracking-wider rounded-xl transition shadow-lg text-xs"
                           >
                             Assign Teacher
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+                {showUpgradeSchoolModal && (
+                  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div
+                      ref={upgradeSchoolDialogRef}
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="upgrade-school-title"
+                      tabIndex={-1}
+                      className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative"
+                    >
+                      <h3 id="upgrade-school-title" className="text-lg font-black uppercase tracking-wider mb-4">
+                        Upgrade School Plan
+                      </h3>
+                      <p className="text-xs text-zinc-400 mb-4">
+                        Use this once payment is confirmed outside the app (e.g. a paid invoice). Sets the plan, updates seat totals from the server-owned table, and clears any trial expiry.
+                      </p>
+                      <form onSubmit={handleUpgradeSchool} className="space-y-4">
+                        <div>
+                          <label htmlFor="upgrade-school-id" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                            School
+                          </label>
+                          <div className="relative">
+                            <select
+                              id="upgrade-school-id"
+                              required
+                              value={upgradeSchoolIdInput}
+                              onChange={(e) => setUpgradeSchoolIdInput(e.target.value)}
+                              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-medium appearance-none"
+                            >
+                              <option value="">-- Choose School --</option>
+                              {schools.map((s) => (
+                                <option key={s.schoolId} value={s.schoolId}>
+                                  {s.name} ({s.schoolId})
+                                </option>
+                              ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-400">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <label htmlFor="upgrade-school-plan" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                            New Plan
+                          </label>
+                          <div className="relative">
+                            <select
+                              id="upgrade-school-plan"
+                              required
+                              value={upgradeSchoolPlanInput}
+                              onChange={(e) => setUpgradeSchoolPlanInput(e.target.value)}
+                              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-medium appearance-none"
+                            >
+                              <option value="solo">Solo (1 FT / 0 KT)</option>
+                              <option value="starter">Starter (2 FT / 1 KT)</option>
+                              <option value="school_pro">School Pro (6 FT / 4 KT)</option>
+                              <option value="enterprise">Enterprise (12 FT / 8 KT)</option>
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-zinc-400">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowUpgradeSchoolModal(false)}
+                            className="flex-1 py-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold uppercase tracking-wider rounded-xl transition text-xs"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black uppercase tracking-wider rounded-xl transition shadow-lg text-xs"
+                          >
+                            Upgrade School
                           </button>
                         </div>
                       </form>
