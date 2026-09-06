@@ -257,7 +257,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                             {isKo ? '주간 학습 커리큘럼 탭에서 이번 주 단어를 등록해 주세요.' : 'Go to the Curriculum tab to add target vocabulary words.'}
                           </p>
                           <button
-                            onClick={() => setActiveTab('curriculum')}
+                            onClick={() => setActiveTab('syllabus')}
                             className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-[background-color,transform] active:scale-[0.97] cursor-pointer"
                           >
                             + {isKo ? '단어 등록하러 가기' : 'Add Weekly Words'}
@@ -288,7 +288,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                                     <span>{count} {isKo ? '명 틀림' : 'Mistakes'}</span>
                                   </span>
                                 ) : (
-                                  <button onClick={() => setActiveTab('curriculum')} className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-1.5">
+                                  <button onClick={() => setActiveTab('syllabus')} className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-1.5">
                                     <Check size={14} weight="bold" />
                                     <span>{isKo ? '오답 없음' : 'Clear'}</span>
                                   </button>
@@ -330,7 +330,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                             <span>{isKo ? '설정 상태: 정상 반영됨' : 'Status: Ready for class'}</span>
                             <button
                               type="button"
-                              onClick={() => setActiveTab('curriculum')}
+                              onClick={() => setActiveTab('syllabus')}
                               className="text-orange-500 hover:underline font-bold cursor-pointer"
                             >
                               {isKo ? '주제 수정하기 →' : 'Edit Theme →'}
@@ -352,7 +352,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                           </p>
                           <button
                             type="button"
-                            onClick={() => setActiveTab('curriculum')}
+                            onClick={() => setActiveTab('syllabus')}
                             className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] active:scale-[0.97] cursor-pointer"
                           >
                             + {isKo ? '주제 등록하기' : 'Add Topic'}
@@ -464,7 +464,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                           </p>
                           <button
                             type="button"
-                            onClick={() => setActiveTab('curriculum')}
+                            onClick={() => setActiveTab('syllabus')}
                             className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] active:scale-[0.97] cursor-pointer"
                           >
                             + {isKo ? '지문 등록하기' : 'Add Reading Passage'}
@@ -500,7 +500,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                             <span>{isKo ? '교사 추가 커스텀 필드' : 'Custom teacher notes field'}</span>
                             <button
                               type="button"
-                              onClick={() => setActiveTab('curriculum')}
+                              onClick={() => setActiveTab('syllabus')}
                               className="text-purple-400 hover:underline font-bold cursor-pointer"
                             >
                               {isKo ? '내용 편집하기 →' : 'Edit Other Field →'}
@@ -522,7 +522,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                           </p>
                           <button
                             type="button"
-                            onClick={() => setActiveTab('curriculum')}
+                            onClick={() => setActiveTab('syllabus')}
                             className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] active:scale-[0.97] cursor-pointer"
                           >
                             + {isKo ? '참고 사항 추가' : 'Add Notes'}
