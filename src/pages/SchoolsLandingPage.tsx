@@ -432,6 +432,39 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
+      {/* --- AI READINESS QUIZ BANNER: links out to ai-readiness.chekkiai.com --- */}
+      <section className="px-4 md:px-8 max-w-7xl mx-auto w-full">
+        <div className={`max-w-2xl mx-auto p-4 border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left transition-colors ${
+          isNight
+            ? 'bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border-orange-500/30'
+            : 'bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 border-orange-200 shadow-sm'
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-lg flex-shrink-0">
+              <ChartBar size={20} weight="bold" />
+            </div>
+            <div>
+              <h4 className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {isKo ? '우리 학원의 AI 준비도는? 60초 무료 진단' : "Is your hagwon AI-ready? Free 60-second check"}
+              </h4>
+              <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {isKo
+                  ? '간단한 질문에 답하고 우리 학원의 AI 채점 도입 준비도 점수를 받아보세요.'
+                  : 'Answer a few questions and get your readiness score before you switch to AI grading.'}
+              </p>
+            </div>
+          </div>
+          <a
+            href="https://ai-readiness.chekkiai.com?utm_source=chekki_schools&utm_medium=banner&utm_campaign=ai_readiness"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-xl transition-[color,background-color,border-color,box-shadow,transform] shadow-md active:scale-[0.97] whitespace-nowrap cursor-pointer text-center"
+          >
+            {isKo ? 'AI 준비도 진단하기' : 'Check My Readiness'}
+          </a>
+        </div>
+      </section>
+
       {/* --- CORE LOOP DIAGRAM: establishes the mental model --- */}
       <SchoolLoopDiagram isNight={isNight} isKo={isKo} />
       {/* Interactive live-preview widget removed — its 'syllabus' tab
