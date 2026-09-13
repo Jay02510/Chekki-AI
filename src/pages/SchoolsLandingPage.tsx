@@ -176,8 +176,15 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
   const openPlanModal = (planId: string, _defaultTeachers: number = 1, _minSeats: number = 1) => {
     setSelectedPlanId(planId);
-    setShowPricingModal(true);
     db.logUserEvent('schools_pricing_viewed', { plan_id: planId });
+    // school_pro/enterprise are big enough deals to need a live sales
+    // conversation (and are where pilot-partnership pricing gets offered)
+    // instead of self-serve checkout.
+    if (planId === 'school_pro' || planId === 'enterprise') {
+      setShowConsultationModal(true);
+    } else {
+      setShowPricingModal(true);
+    }
   };
 
   // State for form inputs (Pre-filled from localStorage if available)
@@ -188,6 +195,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [studentCount, setStudentCount] = useState('');
   const [bizRegNumber, setBizRegNumber] = useState('');
   const [copiedBank, setCopiedBank] = useState(false);
+  const [interestedInPilot, setInterestedInPilot] = useState(false);
 
   const activePlan = PRICING_TIERS[selectedPlanId as keyof typeof PRICING_TIERS] || PRICING_TIERS.school_pro;
 
@@ -1208,6 +1216,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                           email,
                           consultationMessage,
                           type: '1:1-consultation',
+                          planId: selectedPlanId,
+                          interestedInPilot,
                         }),
                       });
                       if (!response.ok) throw new Error(`Request failed with ${response.status}`);
@@ -1323,6 +1333,18 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       }`}
                     />
                   </div>
+
+                  <label className="flex items-center gap-2 text-xs cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={interestedInPilot}
+                      onChange={(e) => setInterestedInPilot(e.target.checked)}
+                      className="w-4 h-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
+                      {isKo ? '파일럿 파트너십 요금에 관심 있어요' : "I'm interested in pilot partnership pricing"}
+                    </span>
+                  </label>
 
                   <div className="pt-2">
                     <button

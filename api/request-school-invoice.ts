@@ -63,6 +63,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // this existing school (via admin.ts upgrade_school) instead of
       // mistaking it for a brand-new academy signup.
       schoolId,
+      interestedInPilot = false,
     } = body || {};
 
     if (!academyName || !contactName || !email) {
@@ -134,6 +135,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // future authorization or upgrade decision without first verifying
       // requester ownership of the school (audit: Low finding).
       ...(schoolId ? { schoolId: String(schoolId).trim() } : {}),
+      ...(interestedInPilot ? { interestedInPilot: true } : {}),
     };
 
     // Store in Firestore school_invoices collection. This write must succeed —
@@ -236,6 +238,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
             html: `
               <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 16px;">
                 <p>New school invoice request pending payment.</p>
+                ${invoicePayload.interestedInPilot ? '<p style="color: #b45309; font-weight: bold;">⚑ Requested pilot partnership pricing — contact before confirming invoice as-is.</p>' : ''}
                 <table style="border-collapse: collapse; font-size: 14px;">
                   <tr><td style="padding: 4px 12px 4px 0; color: #666;">Invoice ID</td><td><strong>${invoiceId}</strong></td></tr>
                   <tr><td style="padding: 4px 12px 4px 0; color: #666;">Academy</td><td>${safeAcademyName}</td></tr>
