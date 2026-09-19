@@ -440,6 +440,35 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
+      {/* APP SCREENSHOTS */}
+      <section className={`py-24 px-4 md:px-8 max-w-7xl mx-auto w-full ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+        <h2 className="text-3xl md:text-4xl font-black tracking-tight text-center mb-12">
+          {isKo ? '플랫폼 살펴보기' : 'See the platform'}
+        </h2>
+        <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+          {[
+            { url: '/screenshots/schools/02-landing-schools.png', label: isKo ? '학교용 랜딩' : 'Schools Landing' },
+            { url: '/screenshots/schools/06-director-hq-dashboard.png', label: isKo ? '원장 HQ 대시보드' : 'Director HQ Dashboard' },
+            { url: '/screenshots/schools/07-director-students-tab-clean.png', label: isKo ? '학생 명단' : 'Student Roster' },
+            { url: '/screenshots/schools/11-ft-class-scanner-log.png', label: isKo ? '채점 로그' : 'Class Scanner Log' },
+            { url: '/screenshots/schools/13-ft-worksheet-scanner.png', label: isKo ? '워크시트 스캐너' : 'Worksheet Scanner' },
+            { url: '/screenshots/schools/16-kt-weekly-report-generator.png', label: isKo ? '주간 리포트 생성' : 'Weekly Report Generator' },
+          ].map((shot) => (
+            <figure key={shot.url} className="shrink-0 w-[260px] md:w-[300px] snap-start">
+              <img
+                src={shot.url}
+                alt={shot.label}
+                loading="lazy"
+                className={`w-full h-auto rounded-2xl border shadow-lg ${isNight ? 'border-white/10' : 'border-zinc-200'}`}
+              />
+              <figcaption className={`mt-3 text-sm text-center ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {shot.label}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
       {/* --- AI READINESS QUIZ BANNER: links out to ai-readiness.chekkiai.com --- */}
       <section className="px-4 md:px-8 max-w-7xl mx-auto w-full">
         <div className={`max-w-2xl mx-auto p-4 border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left transition-colors ${
