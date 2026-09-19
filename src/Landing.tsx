@@ -487,8 +487,8 @@ export default function Home() {
         title={isKo ? '앱 살펴보기' : 'See the app'}
         isNight={isNight}
         shots={[
-          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/3_ub3ej3.png', label: isKo ? '온보딩' : 'Onboarding' },
           { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/2_yobnjt.png', label: isKo ? '홈 화면' : 'Homescreen' },
+          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/9_xyzk0q.png', label: isKo ? '교습 가이드' : 'Teaching Guide' },
           { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/6_b6x7pg.png', label: isKo ? '정답 오버레이' : 'Answers Overlay' },
           { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/11_qvahas.png', label: isKo ? '학습 대시보드' : 'Learning Dashboard' },
           { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118117/13_o2cun7.png', label: isKo ? '플래시카드' : 'Flashcards' },

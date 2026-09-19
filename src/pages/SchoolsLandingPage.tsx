@@ -448,7 +448,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         shots={[
           { url: '/screenshots/schools/06-director-hq-dashboard.png', label: isKo ? '원장 HQ 대시보드' : 'Director HQ Dashboard' },
           { url: '/screenshots/schools/07-director-students-tab-clean.png', label: isKo ? '학생 명단' : 'Student Roster' },
-          { url: '/screenshots/schools/11-ft-class-scanner-log.png', label: isKo ? '채점 로그' : 'Class Scanner Log' },
+          { url: '/screenshots/schools/14-kt-kakaotalk-script.png', label: isKo ? '카카오톡 스크립트 생성' : 'KakaoTalk Script Generator' },
           { url: '/screenshots/schools/13-ft-worksheet-scanner.png', label: isKo ? '워크시트 스캐너' : 'Worksheet Scanner' },
           { url: '/screenshots/schools/16-kt-weekly-report-generator.png', label: isKo ? '주간 리포트 생성' : 'Weekly Report Generator' },
         ]}
