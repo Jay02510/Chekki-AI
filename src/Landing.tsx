@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import ChekkiAiBentoGrid from './components/ChekkiAiBentoGrid';
 import ParentReliefStrip from './components/ParentReliefStrip';
+import ScreenshotGallery from './components/ScreenshotGallery';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from 'framer-motion';
@@ -482,33 +483,17 @@ export default function Home() {
       </section>
 
       {/* APP SCREENSHOTS */}
-      <section className={`py-24 px-4 md:px-8 max-w-7xl mx-auto w-full ${isNight ? 'text-white' : 'text-slate-900'}`}>
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center mb-12">
-          {isKo ? '앱 살펴보기' : 'See the app'}
-        </h2>
-        <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0">
-          {[
-            { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118476/Screenshot_2026-07-15_at_9.26.57_PM_ozpruh.png', label: isKo ? '랜딩 페이지' : 'Landing Page' },
-            { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/3_ub3ej3.png', label: isKo ? '온보딩' : 'Onboarding' },
-            { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/2_yobnjt.png', label: isKo ? '홈 화면' : 'Homescreen' },
-            { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/6_b6x7pg.png', label: isKo ? '정답 오버레이' : 'Answers Overlay' },
-            { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/11_qvahas.png', label: isKo ? '학습 대시보드' : 'Learning Dashboard' },
-            { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118117/13_o2cun7.png', label: isKo ? '플래시카드' : 'Flashcards' },
-          ].map((shot) => (
-            <figure key={shot.url} className="shrink-0 w-[260px] md:w-[300px] snap-start">
-              <img
-                src={shot.url}
-                alt={shot.label}
-                loading="lazy"
-                className={`w-full h-auto rounded-2xl border shadow-lg ${isNight ? 'border-white/10' : 'border-slate-200'}`}
-              />
-              <figcaption className={`mt-3 text-sm text-center ${isNight ? 'text-white/60' : 'text-slate-600'}`}>
-                {shot.label}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
+      <ScreenshotGallery
+        title={isKo ? '앱 살펴보기' : 'See the app'}
+        isNight={isNight}
+        shots={[
+          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/3_ub3ej3.png', label: isKo ? '온보딩' : 'Onboarding' },
+          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/2_yobnjt.png', label: isKo ? '홈 화면' : 'Homescreen' },
+          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/6_b6x7pg.png', label: isKo ? '정답 오버레이' : 'Answers Overlay' },
+          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/11_qvahas.png', label: isKo ? '학습 대시보드' : 'Learning Dashboard' },
+          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118117/13_o2cun7.png', label: isKo ? '플래시카드' : 'Flashcards' },
+        ]}
+      />
 
       {/* PROMPT-PAL STYLE AI BENTO GRID WITH PAIN-POINT TO SOLUTION EXPLANATIONS */}
       <ChekkiAiBentoGrid isNight={isNight} isKo={isKo} />
