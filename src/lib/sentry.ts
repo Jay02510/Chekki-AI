@@ -15,6 +15,9 @@ export function initSentry() {
     dsn,
     environment: import.meta.env.MODE,
     tracesSampleRate: 0,
+    // In-app browser webviews inject calls to page lifecycle hooks
+    // (onLoad/onHide/onUnload) that this app never defines.
+    ignoreErrors: [/Can't find variable: on(Load|Show|Hide|Unload)$/],
   });
   initialized = true;
 }
