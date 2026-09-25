@@ -749,13 +749,13 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 <button
                   aria-label="Open Dashboard"
                   onClick={() => onOpenDashboard && onOpenDashboard()}
-                  className={`h-12 px-5 rounded-full bg-orange-500 text-black hover:bg-orange-600 flex items-center justify-center font-black text-xs uppercase tracking-widest transition-[background-color,transform] duration-200 active:scale-[0.98] group shadow-sm shrink-0`}
+                  className={`h-12 px-5 rounded-full bg-orange-500 text-black hover:bg-orange-600 flex items-center justify-center font-black text-xs transition-[background-color,transform] duration-200 active:scale-[0.98] group shadow-sm shrink-0`}
                   title={language === 'ko' ? '대시보드 열기' : 'Open Dashboard'}
                 >
-                  <span className="group-hover:scale-[1.02] transition-transform">DASH</span>
+                  <span className="group-hover:scale-[1.02] transition-transform">{language === 'ko' ? '대시보드' : 'Dashboard'}</span>
                 </button>
                 <button
-                  aria-label="Share"
+                  aria-label={language === 'ko' ? '이미지 저장' : 'Save image'}
                   onClick={handleShare}
                   disabled={isSharing}
                   className={`w-12 h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center active:scale-[0.97] transition-transform duration-[160ms] ease-out border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
@@ -790,7 +790,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   )}
                 </button>
                 <button
-                  aria-label="Close"
+                  aria-label={t('tt_close')}
                   onClick={onClose}
                   className={`w-12 h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center text-lg active:scale-[0.97] transition-transform duration-[160ms] ease-out border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
                   title={t('tt_close')}

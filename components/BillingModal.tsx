@@ -33,6 +33,9 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
     const p = subscriptionRecord?.subscription_platform;
     if (!p || p === 'none') return null;
     const badgeContent = () => {
+      // Premium provided through the parent's academy (school invite) —
+      // rendered the raw enum "SCHOOL_CODE" before.
+      if (p === 'school_code') return language === 'ko' ? '학원 제공' : 'Provided by your academy';
       if (p === 'apple')
         return (
           <>
@@ -211,6 +214,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
                 </h3>
                 {platformBadge()}
                 <div className="space-y-1.5 text-zinc-400 font-medium text-sm">
+                  {subscriptionRecord.subscription_platform !== 'school_code' && (
                   <p>
                     {t('billing_plan')}:{' '}
                     <span className="text-orange-500 font-black">
@@ -219,6 +223,7 @@ export const BillingModal: React.FC<Props> = ({ onClose, isNight = true }) => {
                         : t('sub_monthly')}
                     </span>
                   </p>
+                  )}
                   {user?.subscriptionStartedAt && (
                     <p>
                       {t('billing_started')}: {formatDate(user.subscriptionStartedAt)}

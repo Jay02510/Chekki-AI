@@ -191,7 +191,7 @@ export function ScannedModal({
                   </p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 bg-orange-500 text-black font-mono font-bold text-[10px] rounded-lg uppercase shrink-0">
+              <span className="px-2.5 py-1 bg-orange-500 text-black font-bold text-[10px] rounded-lg uppercase shrink-0">
                 Chekki App Sync
               </span>
             </div>
@@ -263,7 +263,7 @@ export function ScannedModal({
                 {/* LEFT COLUMN: Scanned Physical Paper Preview with Green Answer Overlay Ink */}
                 <div className="lg:col-span-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold font-mono text-orange-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold text-orange-400 uppercase tracking-widest flex items-center gap-1.5">
                       <Eye size={14} weight="bold" />
                       <span>{isKo ? '스캔 원본 & AI 정답 잉크' : 'Scanned Paper & Answer Ink'}</span>
                     </span>
@@ -286,7 +286,7 @@ export function ScannedModal({
                       <div className="relative w-full rounded-2xl bg-white p-6 min-h-[380px] text-zinc-900">
                         <div className="border-b-2 border-zinc-900 pb-3 mb-6 flex justify-between items-end">
                           <div>
-                            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold">PHYSICAL WORKSHEET SCAN</span>
+                            <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">PHYSICAL WORKSHEET SCAN</span>
                             <h4 className="text-base font-black tracking-tight text-zinc-900 font-sans">
                               {activeDisplayObj?.topic || (isKo ? '스캔된 자료' : 'Scanned Document')}
                             </h4>

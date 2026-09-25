@@ -9,6 +9,7 @@ import {
   FileText,
   Warning,
   Check,
+  Plus,
 } from '@phosphor-icons/react';
 import { NativeTeacherLogForm } from './NativeTeacherLogForm';
 import { InsightsChatPanel } from './InsightsChatPanel';
@@ -170,62 +171,28 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                         </div>
                         <div>
                           <h4 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                            {isKo ? '주간 AI 커리큘럼 & 오답 분석' : 'Weekly AI Curriculum & Insights'}
+                            {isKo ? '이번 주 인사이트' : "This week's insights"}
                           </h4>
-                          <p className="text-[11px] text-zinc-400 font-medium">
-                            {isKo ? 'AI가 추출한 이번 주 학습 목표와 오답 현황' : 'AI-extracted weekly learning targets & student statistics'}
-                          </p>
                         </div>
                       </div>
 
-                      {/* Slide Prev/Next Controls */}
-                      <div className="flex items-center gap-2 self-start sm:self-auto">
-                        <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-full border ${
-                          isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-600'
-                        }`}>
-                          {curriculumSlideIndex + 1} / 5
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setCurriculumSlideIndex((prev) => (prev === 0 ? 4 : prev - 1))}
-                            aria-label="Previous slide"
-                            className={`w-11 h-11 rounded-xl border flex items-center justify-center text-xs font-bold transition-[background-color,transform] cursor-pointer active:scale-95 ${
-                              isThemeNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
-                            }`}
-                            title="Previous Slide"
-                          >
-                            ◀
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setCurriculumSlideIndex((prev) => (prev === 4 ? 0 : prev + 1))}
-                            aria-label="Next slide"
-                            className={`w-11 h-11 rounded-xl border flex items-center justify-center text-xs font-bold transition-[background-color,transform] cursor-pointer active:scale-95 ${
-                              isThemeNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
-                            }`}
-                            title="Next Slide"
-                          >
-                            ▶
-                          </button>
-                        </div>
-                      </div>
                     </div>
 
                     {/* Slide Pill Tabs Bar */}
-                    <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-6 custom-scrollbar">
+                    <div className="flex flex-wrap items-center gap-1.5 pb-2 mb-6">
                       {[
-                        { id: 0, labelEn: 'Words', labelKo: '복습 단어', icon: '🔤' },
-                        { id: 1, labelEn: 'Week Theme', labelKo: '주간 테마', icon: '🎯' },
-                        { id: 2, labelEn: 'Phonics', labelKo: '파닉스 규칙', icon: '🔊' },
-                        { id: 3, labelEn: 'Reading Passage', labelKo: '본문 지문', icon: '📖' },
-                        { id: 4, labelEn: 'Other Notes', labelKo: '기타 참고', icon: '📝' },
+                        { id: 0, labelEn: 'Words', labelKo: '복습 단어' },
+                        { id: 1, labelEn: 'Theme', labelKo: '주간 테마' },
+                        { id: 2, labelEn: 'Phonics', labelKo: '파닉스' },
+                        { id: 3, labelEn: 'Passage', labelKo: '본문' },
+                        { id: 4, labelEn: 'Notes', labelKo: '기타' },
                       ].map((slide) => (
                         <button
                           key={slide.id}
                           type="button"
                           onClick={() => setCurriculumSlideIndex(slide.id)}
-                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                          aria-pressed={curriculumSlideIndex === slide.id}
+                          className={`px-3.5 min-h-10 rounded-xl text-xs font-bold transition-colors shrink-0 cursor-pointer flex items-center gap-1.5 ${
                             curriculumSlideIndex === slide.id
                               ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20'
                               : isThemeNight
@@ -233,7 +200,6 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                                 : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600 border border-zinc-200'
                           }`}
                         >
-                          <span>{slide.icon}</span>
                           <span>{isKo ? slide.labelKo : slide.labelEn}</span>
                         </button>
                       ))}
@@ -280,7 +246,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                             <div key={word} className={`flex items-center justify-between p-4 border rounded-2xl transition-colors ${
                               isThemeNight ? 'bg-brand-dark border-white/5 hover:border-white/10' : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300'
                             }`}>
-                              <span className={`text-sm font-bold font-mono tracking-wide ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{word}</span>
+                              <span className={`text-sm font-bold ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{word}</span>
                               <div className="flex items-center gap-3">
                                 {count > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 border border-red-500/20 text-red-500 flex items-center gap-1.5">
@@ -288,10 +254,10 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                                     <span>{count} {isKo ? '명 틀림' : 'Mistakes'}</span>
                                   </span>
                                 ) : (
-                                  <button onClick={() => setActiveTab('curriculum')} className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-1.5">
+                                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-1.5">
                                     <Check size={14} weight="bold" />
-                                    <span>{isKo ? '오답 없음' : 'Clear'}</span>
-                                  </button>
+                                    <span>{isKo ? '오답 없음' : 'No mistakes'}</span>
+                                  </span>
                                 )}
                               </div>
                             </div>
@@ -310,7 +276,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                         }`}>
                           <div>
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-[10px] uppercase font-bold tracking-widest text-orange-500 font-mono">
+                              <span className="text-[10px] uppercase font-bold tracking-widest text-orange-500">
                                 {isKo ? 'Week ' + (activeClass?.activeWeekNumber || 1) + ' 대주제' : 'Week ' + (activeClass?.activeWeekNumber || 1) + ' Target Topic'}
                               </span>
                               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-500 border border-orange-500/20">
@@ -371,7 +337,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                         }`}>
                           <div>
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400 font-mono">
+                              <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400">
                                 {isKo ? '타겟 음가 & 조합 규칙' : 'Phonics Sound Blends'}
                               </span>
                               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
@@ -432,7 +398,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                         }`}>
                           <div>
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-500 font-mono">
+                              <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-500">
                                 {isKo ? '본문 읽기 지문' : 'Target Reading Passage'}
                               </span>
                               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
@@ -483,7 +449,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                         }`}>
                           <div>
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-[10px] uppercase font-bold tracking-widest text-purple-400 font-mono">
+                              <span className="text-[10px] uppercase font-bold tracking-widest text-purple-400">
                                 {isKo ? '기타 학습 참고 사항 (Other)' : 'Supplementary Notes (Other)'}
                               </span>
                               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
@@ -623,13 +589,8 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                   </div>
                   <div className="min-w-0">
                     <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {isKo ? '제출된 원어민 평가 폼 내역' : 'Submitted Teacher Evaluation Forms'}
+                      {isKo ? '제출한 일지' : 'Submitted logs'}
                     </h4>
-                    <p className="text-xs text-zinc-400 mt-0.5">
-                      {isKo
-                        ? '원어민 강사가 모바일에서 작성한 출석 및 관찰 일지 내역입니다. 학부모 알림톡 대본으로 1초 변환됩니다.'
-                        : 'Daily classroom evaluation logs submitted by foreign teachers. Auto-translated into Korean parent scripts.'}
-                    </p>
                   </div>
                 </div>
 
@@ -642,10 +603,10 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }, 200);
                   }}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-md transition-[background-color,transform] active:scale-[0.97] cursor-pointer flex items-center gap-1.5"
+                  className="px-4 min-h-11 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-xl transition-[background-color,transform] active:scale-[0.97] cursor-pointer flex items-center gap-1.5"
                 >
-                  <Sparkle size={14} weight="bold" />
-                  <span>{isKo ? '⚡ 폼 작성 체험하기' : 'Test FT Log Form'}</span>
+                  <Plus size={14} weight="bold" />
+                  <span>{isKo ? '새 일지' : 'New log'}</span>
                 </button>
               </div>
 
@@ -658,12 +619,12 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                   </div>
                   <div className="space-y-1.5 max-w-md mx-auto">
                     <h5 className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                      {isKo ? '아직 제출된 평가 폼이 없습니다' : 'No Submitted Forms Found'}
+                      {isKo ? '아직 제출한 일지가 없습니다' : 'No logs yet'}
                     </h5>
                     <p className="text-xs text-zinc-400 leading-relaxed">
                       {isKo
-                        ? '원어민 선생님이 30초 모바일 평가 폼을 제출하면 이곳에서 실시간으로 대본을 검수하고 복사할 수 있습니다.'
-                        : 'When foreign teachers submit daily 30s evaluation logs, their responses and generated Korean KakaoTalk scripts will appear here.'}
+                        ? '일지를 제출하면 여기에서 한국인 선생님의 검토 상태를 확인할 수 있습니다.'
+                        : "Submitted logs appear here with their KT review status."}
                     </p>
                   </div>
                 </div>
@@ -673,22 +634,22 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                     <div key={log.id || idx} className={`p-5 rounded-2xl border transition-colors ${
                       isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
                     }`}>
-                      <div className="flex items-center justify-between pb-3 border-b border-white/5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-orange-400">{log.className || 'Class'}</span>
-                          <span className="text-xs text-zinc-400 font-mono">• {log.date}</span>
+                      <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/5">
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm text-orange-400 truncate">{log.className || (isKo ? '학급' : 'Class')}</p>
+                          <p className="text-xs text-zinc-400">{log.date}</p>
                         </div>
                         {log.reviewStatus === 'sent' ? (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-                            {isKo ? '학부모 발송 완료' : 'Sent to Parents'}
+                          <span className="shrink-0 whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                            {isKo ? '발송 완료' : 'Sent'}
                           </span>
                         ) : (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400">
-                            {isKo ? 'KT 검토 대기 중' : 'Waiting on KT Review'}
+                          <span className="shrink-0 whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                            {isKo ? '검토 대기' : 'In review'}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-300 pt-3 leading-relaxed">
+                      <p className="text-sm text-zinc-300 pt-3 leading-relaxed">
                         {log.generalComments || log.lessonTopic}
                       </p>
                       {log.reviewStatus === 'sent' && log.reviewedByName && (

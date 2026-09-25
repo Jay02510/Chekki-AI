@@ -151,7 +151,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       <div className="space-y-8 mb-10 flex-1 overflow-y-auto custom-scrollbar px-2 -mx-2">
         {/* Age Select */}
         <div>
-          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
+          <label className="block text-xs font-bold text-zinc-400 mb-4">
             {language === 'ko' ? '아이의 연령' : "Child's Age"}
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -181,7 +181,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
         {/* Level Select */}
         <div>
-          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
+          <label className="block text-xs font-bold text-zinc-400 mb-4">
             {language === 'ko' ? '영어 학습 경험' : 'English Experience'}
           </label>
           <div className="flex flex-col gap-3">
@@ -223,7 +223,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
         {/* Parent Level Select */}
         <div>
-          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
+          <label className="block text-xs font-bold text-zinc-400 mb-4">
             {language === 'ko' ? '엄마/아빠의 영어 수준' : "Parent's English Level"}
           </label>
           <div className="flex flex-col gap-3">
@@ -276,7 +276,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           whileTap={{ scale: 0.98 }}
           onClick={handleProfileSubmit}
           disabled={!selectedAge || !selectedLevel || !parentLevel || isSubmitting}
-          className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black uppercase text-xs tracking-[0.15em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed group shadow-[0_10px_20px_rgba(255,255,255,0.1)]"
+          className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed group shadow-[0_10px_20px_rgba(255,255,255,0.1)]"
         >
           <span className="relative z-10">
             {isSubmitting
@@ -293,7 +293,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <div className="flex justify-center">
           <button
             onClick={onSkip}
-            className="text-zinc-400 py-2 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
+            className="text-zinc-400 min-h-11 px-4 font-bold text-xs hover:text-white transition-colors cursor-pointer"
           >
             {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
           </button>
@@ -344,7 +344,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={nextAction}
-          className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black uppercase text-xs tracking-[0.15em] transition-colors shadow-[0_10px_20px_rgba(255,255,255,0.1)] group"
+          className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black text-sm transition-colors shadow-[0_10px_20px_rgba(255,255,255,0.1)] group"
         >
           <span className="relative z-10">
             {isLast
@@ -362,14 +362,14 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <div className="flex justify-center mt-3">
           <button
             onClick={onSkip}
-            className="text-zinc-400 py-1 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
+            className="text-zinc-400 min-h-11 px-4 font-bold text-xs hover:text-white transition-colors cursor-pointer"
           >
             {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
           </button>
         </div>
 
         <div className="flex justify-center gap-3 mt-5">
-          {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+          {[0, 6, 7].map((i) => (
             <motion.div
               key={i}
               layout
@@ -406,20 +406,6 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       >
         {/* Inner Core */}
         <div className="relative w-full h-full bg-brand-dark rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
-          {step < 6 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute top-6 left-6 z-50"
-            >
-              <button
-                onClick={onSkip}
-                className="bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-[10px] font-bold px-4 py-1.5 rounded-full backdrop-blur-md transition-[background-color,color,border-color] tracking-widest uppercase border border-white/5 hover:border-white/20 shadow-lg"
-              >
-                {language === 'ko' ? '건너뛰기' : 'Skip'}
-              </button>
-            </motion.div>
-          )}
 
           <AnimatePresence mode="wait">
             {step === 0 &&
@@ -429,12 +415,14 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 'Welcome to Chekki',
                 '우리 아이의 완벽한 AI 영어 튜터를 만나보세요.',
                 "Meet your child's new personal AI English Tutor.",
-                () => setStep(1),
+                // Straight to the profile — the 5-slide feature tour (steps
+                // 1–5) repeated HelpView and made first login 8 screens long.
+                () => setStep(6),
                 false,
                 <div className="flex flex-col gap-4 mt-2 w-full max-w-[280px] mx-auto mb-8">
                   <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] text-left">
-                      {language === 'ko' ? '언어 (Language)' : 'Language'}
+                    <label className="text-xs font-bold text-zinc-400 text-left">
+                      {language === 'ko' ? '언어' : 'Language'}
                     </label>
                     <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
                       {/* Active Background for Language */}
@@ -459,8 +447,8 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
                   {setIsNight && (
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] text-left">
-                        {language === 'ko' ? '테마 (View)' : 'View'}
+                      <label className="text-xs font-bold text-zinc-400 text-left">
+                        {language === 'ko' ? '화면' : 'Theme'}
                       </label>
                       <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
                         {/* Active Background for Theme */}
@@ -485,7 +473,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                               d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
                             />
                           </svg>
-                          Light
+                          {language === 'ko' ? '밝게' : 'Light'}
                         </button>
                         <button
                           onClick={() => setIsNight(true)}
@@ -504,57 +492,12 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                               d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
                             />
                           </svg>
-                          Dark
+                          {language === 'ko' ? '어둡게' : 'Dark'}
                         </button>
                       </div>
                     </div>
                   )}
                 </div>
-              )}
-            {step === 1 &&
-              renderEducationalStep(
-                '/assets/onboarding_icon_grader_1782545224150.png',
-                '찰칵! 1초 채점',
-                'Instant Grader',
-                '아이가 푼 문제집을 촬영하세요. AI가 손글씨를 인식해 즉시 채점하고 정답을 알려줍니다.',
-                'Take a picture of the homework. Chekki will instantly grade their handwriting and show you the answers.',
-                () => setStep(2)
-              )}
-            {step === 2 &&
-              renderEducationalStep(
-                '/assets/onboarding_icon_dashboard_1782545238800.png',
-                '자동 오답 노트',
-                'Learning Dashboard',
-                '틀린 문제는 자동으로 학습 대시보드에 저장됩니다. 번거롭게 따로 기록할 필요가 없어요.',
-                'Wrong answers are automatically saved to your Dashboard. No need to manually keep track.',
-                () => setStep(3)
-              )}
-            {step === 3 &&
-              renderEducationalStep(
-                '/assets/onboarding_icon_loop_1782545249835.png',
-                '스마트 맞춤 학습지',
-                'Smart Practice Sheets',
-                '저장된 오답을 모아 맞춤형 복습 프린트물을 만들어주세요. 빈틈없는 영어 학습이 완성됩니다.',
-                'Generate practice worksheets from their mistakes. Close the learning gap easily and effectively.',
-                () => setStep(4)
-              )}
-            {step === 4 &&
-              renderEducationalStep(
-                '/assets/onboarding_icon_grading_status.png',
-                '한눈에 보는 채점 결과',
-                'Grading Status at a Glance',
-                '학습지 리스트에서 빨간색과 초록색 박스로 채점 결과를 한눈에 확인해보세요. 오답을 찾기 위해 카드를 일일이 열어볼 필요가 없습니다.',
-                'Spot correct and incorrect answers instantly on your worksheet list. No need to expand each card to find mistakes.',
-                () => setStep(5)
-              )}
-            {step === 5 &&
-              renderEducationalStep(
-                '/assets/bento_speed_mode.png',
-                '빠른 채점 & AI 튜터',
-                'Speed Grading & AI Tutor',
-                '빠른 채점 모드로 즉시 채점하거나, 튜터 모드로 맞춤형 개인 과외 선생님이 되게 하세요.',
-                `Choose "Speed Mode" to instantly grade handwriting. Or let the AI tailor its vocabulary and be your child's personal tutor in "Tutor Mode".`,
-                () => setStep(6)
               )}
             {step === 6 && renderProfileForm()}
             {step === 7 && (
@@ -634,7 +577,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
                 <div className="w-full mt-auto pt-6">
                   <div className="flex justify-center gap-3 mb-4">
-                    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    {[0, 6, 7].map((i) => (
                       <motion.div
                         key={i}
                         layout
@@ -644,7 +587,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                   </div>
                   <button
                     onClick={onComplete}
-                    className="text-zinc-400 py-2 font-bold uppercase text-[10px] tracking-[0.2em] hover:text-white transition-colors cursor-pointer"
+                    className="text-zinc-400 min-h-11 px-4 font-bold text-xs hover:text-white transition-colors cursor-pointer"
                   >
                     {language === 'ko' ? '나중에 입력할게요' : 'Skip for now'}
                   </button>

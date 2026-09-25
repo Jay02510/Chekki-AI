@@ -283,7 +283,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
       <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${isNight ? 'bg-brand-dark' : 'bg-white'}`}>
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
               <UserPlus size={22} weight="bold" />
             </div>
             <div>
@@ -299,7 +299,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setShowAddForm((v) => !v)}
-              className="px-3.5 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-bold border border-blue-500/30 cursor-pointer transition-colors flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-xs font-bold border border-orange-500/30 cursor-pointer transition-colors flex items-center gap-1.5"
             >
               <UserPlus size={14} weight="bold" />
               {isKo ? '학생 추가' : 'Add Student'}
@@ -362,7 +362,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white text-xs font-bold cursor-pointer transition-colors"
+              className="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black text-xs font-bold cursor-pointer transition-colors"
             >
               {isSubmitting ? '...' : newEmail.trim() ? (isKo ? '초대 발송' : 'Send Invite') : (isKo ? '명단에 추가' : 'Add to Roster')}
             </button>
@@ -370,9 +370,9 @@ export const StudentInvitePanel: React.FC<Props> = ({
         )}
 
         {previewRows && (
-          <div className="mb-6 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20">
+          <div className="mb-6 p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-blue-400">
+              <p className="text-xs font-bold text-orange-400">
                 {isKo ? `${previewRows.length}명 확인됨 — 검토 후 전송하세요` : `${previewRows.length} student(s) found — review before sending`}
               </p>
               <button type="button" onClick={() => { setPreviewRows(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="text-zinc-400 hover:text-white cursor-pointer">
@@ -395,7 +395,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
               type="button"
               disabled={isSubmitting}
               onClick={() => void submitStudents(previewRows)}
-              className="w-full py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white text-xs font-bold cursor-pointer transition-colors"
+              className="w-full py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black text-xs font-bold cursor-pointer transition-colors"
             >
               {isSubmitting ? '...' : isKo ? `${previewRows.length}명 전체 초대` : `Invite all ${previewRows.length}`}
             </button>
@@ -414,9 +414,9 @@ export const StudentInvitePanel: React.FC<Props> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left border-collapse">
               <thead>
-                <tr className={`border-b text-zinc-500 font-bold uppercase tracking-wider text-[10px] ${isNight ? 'border-white/5' : 'border-zinc-200'}`}>
+                <tr className={`border-b text-zinc-500 font-bold text-xs ${isNight ? 'border-white/5' : 'border-zinc-200'}`}>
                   <th className="pb-3 pl-1">{isKo ? '학생' : 'Student'}</th>
-                  <th className="pb-3">{isKo ? '학부모 이메일' : 'Parent Email'}</th>
+                  <th className="pb-3 hidden sm:table-cell">{isKo ? '학부모 이메일' : 'Parent email'}</th>
                   <th className="pb-3">{isKo ? '상태' : 'Status'}</th>
                   <th className="pb-3 text-right pr-1">{isKo ? '작업' : 'Actions'}</th>
                 </tr>
@@ -425,22 +425,29 @@ export const StudentInvitePanel: React.FC<Props> = ({
                 {pending.map((s) => (
                   <React.Fragment key={s.id}>
                     <tr>
-                      <td className={`py-3 pl-1 font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{s.name}</td>
-                      <td className="py-3 font-mono text-zinc-400">
-                        {s.parentEmail || <span className="italic text-zinc-600">{isKo ? '이메일 없음' : 'no email yet'}</span>}
+                      <td className={`py-3 pl-1 pr-2 font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                        {s.name}
+                        {/* Phones: email moves under the name — as its own
+                            column it pushed Status/Actions off-screen. */}
+                        <div className="sm:hidden mt-0.5 font-normal text-zinc-400 break-all">
+                          {s.parentEmail || (isKo ? '이메일 없음' : 'No email yet')}
+                        </div>
+                      </td>
+                      <td className="py-3 pr-2 text-zinc-400 hidden sm:table-cell break-all">
+                        {s.parentEmail || <span className="text-zinc-500">{isKo ? '이메일 없음' : 'No email yet'}</span>}
                       </td>
                       <td className="py-3">
                         {s.status === 'redeemed' ? (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                            ✓ {isKo ? '가입됨' : 'Joined'}
+                          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                            {isKo ? '가입됨' : 'Joined'}
                           </span>
                         ) : s.parentEmail ? (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                            ⏳ {isKo ? '초대됨' : 'Invited'}
+                          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                            {isKo ? '초대됨' : 'Invited'}
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                            📋 {isKo ? '학급 명단만' : 'Class roster only'}
+                          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap bg-white/5 border border-white/10 text-zinc-300">
+                            {isKo ? '명단만' : 'Roster only'}
                           </span>
                         )}
                       </td>
@@ -451,7 +458,8 @@ export const StudentInvitePanel: React.FC<Props> = ({
                             onClick={() => handleResend(s.id)}
                             disabled={busyId === s.id}
                             title={isKo ? '재전송' : 'Resend'}
-                            className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
+                            aria-label={isKo ? `${s.name} 초대 재전송` : `Resend invite to ${s.name}`}
+                            className="w-10 h-10 justify-center rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
                           >
                             <PaperPlaneTilt size={12} weight="bold" />
                           </button>
@@ -462,10 +470,10 @@ export const StudentInvitePanel: React.FC<Props> = ({
                             onClick={() => { setAddEmailForId(s.id); setAddEmailValue(''); }}
                             disabled={busyId === s.id}
                             title={isKo ? '이메일 추가하고 초대 발송' : 'Add email and send invite'}
-                            className="px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center gap-1"
+                            className="px-2.5 min-h-10 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center gap-1"
                           >
                             <PaperPlaneTilt size={12} weight="bold" />
-                            <span className="text-[10px] font-bold">{isKo ? '이메일 추가' : 'Add Email'}</span>
+                            <span className="text-xs font-bold">{isKo ? '이메일' : 'Email'}</span>
                           </button>
                         )}
                         <button
@@ -473,7 +481,8 @@ export const StudentInvitePanel: React.FC<Props> = ({
                           onClick={() => setRemoveConfirm({ id: s.id, label: s.name })}
                           disabled={busyId === s.id}
                           title={isKo ? '삭제' : 'Remove'}
-                          className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
+                          aria-label={isKo ? `${s.name} 삭제` : `Remove ${s.name}`}
+                          className="w-10 h-10 justify-center rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
                         >
                           <Trash size={12} weight="bold" />
                         </button>
@@ -484,7 +493,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
                         <td colSpan={4} className="pb-3">
                           <form
                             onSubmit={(e) => { e.preventDefault(); void handleSendFirstInvite(s.id); }}
-                            className="flex items-center gap-2 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20"
+                            className="flex items-center gap-2 p-3 rounded-xl bg-orange-500/5 border border-orange-500/20"
                           >
                             <input
                               type="email"
@@ -498,7 +507,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
                             <button
                               type="submit"
                               disabled={busyId === s.id}
-                              className="px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white text-[11px] font-bold cursor-pointer transition-colors"
+                              className="px-3 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black text-[11px] font-bold cursor-pointer transition-colors"
                             >
                               {isKo ? '발송' : 'Send'}
                             </button>

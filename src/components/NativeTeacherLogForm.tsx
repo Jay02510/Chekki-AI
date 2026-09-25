@@ -38,6 +38,18 @@ interface Props {
   demoScripted?: boolean;
 }
 
+// Textbook rarely changes day to day for a class — prefill from the last
+// submitted log when the class has no curriculum textbook set.
+const LAST_TEXTBOOK_KEY = 'chekki_last_textbook_';
+const readLastTextbook = (cls?: string) => {
+  if (!cls) return '';
+  try {
+    return localStorage.getItem(LAST_TEXTBOOK_KEY + cls) || '';
+  } catch {
+    return '';
+  }
+};
+
 const SCRIPTED_VOICE_FILL: VoiceFillFields = {
   lessonTopic: 'Unit 4: Photosynthesis & Plant Growth',
   textbook: 'Bricks Reading 150 (Book 1)',
@@ -155,7 +167,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   const [className, setClassName] = useState(selectedClassName || (isDemo ? DEMO_CLASS_NAME : ''));
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [lessonTopic, setLessonTopic] = useState(isDemo ? DEMO_LESSON_TOPIC : (selectedLessonTopic || ''));
-  const [textbook, setTextbook] = useState(selectedTextbookName || (isDemo ? DEMO_TEXTBOOK : ''));
+  const [textbook, setTextbook] = useState(
+    () => selectedTextbookName || (isDemo ? DEMO_TEXTBOOK : readLastTextbook(selectedClassName)),
+  );
   const [energyLevel, setEnergyLevel] = useState<string>(isDemo ? DEMO_ENERGY_LEVEL : '');
 
   useEffect(() => {
@@ -444,6 +458,11 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isRealLogIncomplete) return;
+    try {
+      localStorage.setItem(LAST_TEXTBOOK_KEY + className, textbook);
+    } catch {
+      /* storage blocked — prefill is a convenience only */
+    }
     // Clearing here ran synchronously before onSubmitLog's async work (AI
     // report generation, then the Firestore write) had even started — if
     // either step failed (network drop mid-submit) or the tab was
@@ -471,54 +490,39 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
       }`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
-        <div className="min-w-0">
-          <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 font-mono block">
-            {isKo ? '일일 수업 기록 양식' : 'DAILY CLASS LOG FORM'}
-          </span>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight">
-            {isKo ? '오늘의 수업 및 학생 평가 기록' : 'Daily Classroom & Student Assessment Log'}
-          </h2>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:shrink-0">
-          <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-mono font-bold">
-            ⚡ {isKo ? '약 30초 소요' : 'Takes about 30 seconds'}
-          </span>
-          {!isDemo && (
-            <button
-              type="button"
-              onClick={() => setShowVoiceFill((prev) => !prev)}
-              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-[background-color,transform] cursor-pointer active:scale-95 ${
-                showVoiceFill
-                  ? 'bg-orange-500 border-orange-500 text-black'
-                  : isNight
-                  ? 'bg-white/5 border-white/10 text-orange-400 hover:bg-white/10'
-                  : 'bg-orange-50 border-orange-200 text-orange-500 hover:bg-orange-100'
-              }`}
-              aria-label={isKo ? '음성으로 입력' : 'Fill by voice'}
-              title={isKo ? '음성으로 입력' : 'Fill by voice'}
-            >
-              <Microphone size={16} weight="fill" />
-            </button>
-          )}
-          {isDemo && demoScripted && (
-            <button
-              type="button"
-              onClick={playScriptedVoiceFill}
-              disabled={isPlayingScriptedVoiceFill}
-              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-[background-color,transform] cursor-pointer active:scale-95 disabled:cursor-default ${
-                isPlayingScriptedVoiceFill
-                  ? 'bg-orange-500 border-orange-500 text-black animate-pulse'
-                  : isNight
-                  ? 'bg-white/5 border-white/10 text-orange-400 hover:bg-white/10'
-                  : 'bg-orange-50 border-orange-200 text-orange-500 hover:bg-orange-100'
-              }`}
-              aria-label={isKo ? '음성으로 입력 (데모)' : 'Fill by voice (demo)'}
-              title={isKo ? '음성으로 입력 — 체험하기' : 'Fill by voice — try it'}
-            >
-              <Microphone size={16} weight="fill" />
-            </button>
-          )}
-        </div>
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight min-w-0">
+          {isKo ? '오늘의 수업 기록' : "Today's class log"}
+        </h2>
+        {!isDemo && (
+          <button
+            type="button"
+            onClick={() => setShowVoiceFill((prev) => !prev)}
+            className={`px-4 min-h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-black transition-[background-color,transform] cursor-pointer active:scale-95 ${
+              showVoiceFill
+                ? 'bg-orange-500/20 text-orange-400'
+                : 'bg-orange-500 hover:bg-orange-600 text-black'
+            }`}
+            aria-pressed={showVoiceFill}
+          >
+            <Microphone size={16} weight="fill" />
+            {isKo ? '음성으로 채우기' : 'Fill by voice'}
+          </button>
+        )}
+        {isDemo && demoScripted && (
+          <button
+            type="button"
+            onClick={playScriptedVoiceFill}
+            disabled={isPlayingScriptedVoiceFill}
+            className={`px-4 min-h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-black transition-[background-color,transform] cursor-pointer active:scale-95 disabled:cursor-default ${
+              isPlayingScriptedVoiceFill
+                ? 'bg-orange-500/20 text-orange-400 animate-pulse'
+                : 'bg-orange-500 hover:bg-orange-600 text-black'
+            }`}
+          >
+            <Microphone size={16} weight="fill" />
+            {isKo ? '음성으로 채우기 (체험)' : 'Fill by voice (demo)'}
+          </button>
+        )}
       </div>
 
       {/* Draft Restored Banner */}
@@ -568,9 +572,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Class & Date */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div className="space-y-1.5">
-            <label htmlFor="log-class-name" className="text-xs font-bold text-zinc-400 block font-mono">{isKo ? '학급명 *' : 'Class Name *'}</label>
+            <label htmlFor="log-class-name" className="text-xs font-bold text-zinc-400 block">{isKo ? '학급명 *' : 'Class Name *'}</label>
             {isDemo ? (
               <select
                 id="log-class-name"
@@ -596,7 +600,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 }`}
               >
                 <span>{selectedClassName || (isKo ? '선택된 학급 없음' : 'No class selected')}</span>
-                <span className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wide text-zinc-400 shrink-0">
+                <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-zinc-400 shrink-0">
                   <Lock size={12} weight="bold" />
                   {isRealClassSynced ? (isKo ? '동기화됨' : 'Synced') : (isKo ? '미리보기' : 'Preview')}
                 </span>
@@ -605,7 +609,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="log-date" className="text-xs font-bold text-zinc-400 block font-mono">{isKo ? '날짜 *' : 'Date *'}</label>
+            <label htmlFor="log-date" className="text-xs font-bold text-zinc-400 block">{isKo ? '날짜 *' : 'Date *'}</label>
             <input
               id="log-date"
               type="date"
@@ -621,7 +625,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         {/* Lesson Topic & Textbook */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label htmlFor="log-lesson-topic" className="text-xs font-bold text-zinc-400 block font-mono">{isKo ? '수업 주제 *' : 'Lesson Topic *'}</label>
+            <label htmlFor="log-lesson-topic" className="text-xs font-bold text-zinc-400 block">{isKo ? '수업 주제 *' : 'Lesson Topic *'}</label>
             <input
               id="log-lesson-topic"
               type="text"
@@ -636,7 +640,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="log-textbook" className="text-xs font-bold text-zinc-400 block font-mono">{isKo ? '교재 *' : 'Textbook *'}</label>
+            <label htmlFor="log-textbook" className="text-xs font-bold text-zinc-400 block">{isKo ? '교재 *' : 'Textbook *'}</label>
             <input
               id="log-textbook"
               type="text"
@@ -653,14 +657,15 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
         {/* Class Energy Level */}
         <div className="space-y-2">
-          <span id="log-energy-label" className="text-xs font-bold text-zinc-400 block font-mono">{isKo ? '수업 분위기 *' : 'Class Energy Level *'}</span>
-          <div role="group" aria-labelledby="log-energy-label" className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <span id="log-energy-label" className="text-xs font-bold text-zinc-400 block">{isKo ? '수업 분위기 *' : 'Class energy *'}</span>
+          <div role="group" aria-labelledby="log-energy-label" className="flex flex-wrap gap-2">
             {energyOptions.map((opt) => (
               <button
                 key={opt}
                 type="button"
                 onClick={() => setEnergyLevel(opt)}
-                className={`p-3 rounded-xl border text-xs font-bold transition-colors text-left flex items-center justify-between cursor-pointer ${
+                aria-pressed={energyLevel === opt}
+                className={`px-3.5 min-h-11 rounded-xl border text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                   energyLevel === opt
                     ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-md'
                     : isNight
@@ -677,7 +682,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
         {/* Daily Activities Multi-Select */}
         <div className="space-y-2">
-          <span id="log-activities-label" className="text-xs font-bold text-zinc-400 block font-mono">{isKo ? '오늘의 활동 (다중 선택) *' : 'Daily Activities (Multi-Select) *'}</span>
+          <span id="log-activities-label" className="text-xs font-bold text-zinc-400 block">{isKo ? '오늘의 활동 (여러 개 선택) *' : 'Activities (pick any) *'}</span>
           <div role="group" aria-labelledby="log-activities-label" className="flex flex-wrap gap-2">
             {activityOptions.map((act) => {
               const active = activities.includes(act);
@@ -705,15 +710,14 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         {/* General Class Comments */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="log-general-comments" className="text-xs font-bold text-zinc-400 block font-mono">{isKo ? '전체 수업 코멘트' : 'General Class Comments'}</label>
-            <span className="text-[10px] text-orange-400 font-mono">{isKo ? '아래 프리셋 1탭 입력' : '1-Tap Presets Below'}</span>
+            <label htmlFor="log-general-comments" className="text-xs font-bold text-zinc-400 block">{isKo ? '수업 코멘트' : 'Class comments'}</label>
           </div>
           <textarea
             id="log-general-comments"
             value={generalComments}
             onChange={(e) => setGeneralComments(e.target.value)}
             rows={3}
-            className={`w-full p-3.5 rounded-xl border text-xs leading-relaxed focus:outline-none focus:border-orange-500 font-mono ${
+            className={`w-full p-3.5 rounded-xl border text-xs leading-relaxed focus:outline-none focus:border-orange-500 ${
               isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
             }`}
             placeholder={isKo ? '전체 수업 코멘트를 입력하세요...' : 'Type general class notes here...'}
@@ -737,7 +741,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 onClick={() => setGeneralComments(preset)}
                 className="px-2.5 py-1 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[11px] font-medium border border-orange-500/20 transition-colors cursor-pointer"
               >
-                {isKo ? '+ 프리셋: ' : '+ Preset: '}{preset.slice(0, 32)}...
+                + {preset.length > 32 ? `${preset.slice(0, 32)}…` : preset}
               </button>
             ))}
           </div>
@@ -745,27 +749,27 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
         {/* Student Exceptions Section */}
         <div className="space-y-3 pt-2 border-t border-white/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="text-xs font-bold text-orange-400 uppercase font-mono block">
-                {isKo ? '학생 개별 노트' : 'Student Notes'}
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <label className="text-sm font-bold block">
+                {isKo ? '학생별 노트' : 'Student notes'}
               </label>
-              <span className="text-[11px] text-zinc-400 font-mono">{isKo ? '맞춤 학부모 업데이트가 필요한 학생을 표시하세요' : 'Flag specific students needing tailored parent updates'}</span>
+              <span className="text-xs text-zinc-400">{isKo ? '학부모에게 따로 전할 내용이 있는 학생' : 'Students with something to tell their parents'}</span>
             </div>
 
             <button
               type="button"
               onClick={handleOpenAddModal}
-              className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-black rounded-xl text-xs font-bold transition-[background-color,transform] cursor-pointer flex items-center gap-1 shadow-md active:scale-95"
+              className="px-3.5 min-h-11 shrink-0 whitespace-nowrap border border-orange-500/40 text-orange-400 hover:bg-orange-500/10 rounded-xl text-xs font-bold transition-[background-color,transform] cursor-pointer flex items-center gap-1 active:scale-95"
             >
               <Plus size={14} weight="bold" />
-              <span>{isKo ? '+ 학생 추가' : '+ Add A Student'}</span>
+              <span>{isKo ? '학생 추가' : 'Add student'}</span>
             </button>
           </div>
 
           {/* List of Flagged Exceptions */}
           {exceptions.length === 0 ? (
-            <p className="text-xs text-zinc-400 italic py-2 font-mono">{isKo ? '이번 수업에 추가된 학생 노트가 없습니다.' : 'No student exceptions added for this class session.'}</p>
+            <p className="text-xs text-zinc-400 py-2">{isKo ? '아직 추가된 학생이 없습니다.' : 'No students added yet.'}</p>
           ) : (
             <div className="space-y-2">
               {exceptions.map((ex, idx) => (
@@ -851,7 +855,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           )}
         </button>
         {missingFieldLabels.length > 0 && (
-          <p className="text-[11px] text-amber-400 font-mono text-center -mt-3">
+          <p className="text-xs text-amber-400 text-center -mt-3">
             {isKo ? '누락된 항목: ' : 'Missing: '}{missingFieldLabels.join(', ')}
           </p>
         )}
@@ -895,7 +899,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             <div className="space-y-3">
               {/* Praise vs Attention Category Toggle */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-zinc-400 font-mono block">{isKo ? '분류 선택 *' : 'Update Category *'}</label>
+                <label className="text-xs font-bold text-zinc-400 block">{isKo ? '분류 선택 *' : 'Update Category *'}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -969,7 +973,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="exception-details-field" className="text-xs font-bold text-zinc-400 block font-mono">{isKo ? '세부 내용 *' : 'Details *'}</label>
+                <label htmlFor="exception-details-field" className="text-xs font-bold text-zinc-400 block">{isKo ? '세부 내용 *' : 'Details *'}</label>
                 <textarea
                   id="exception-details-field"
                   value={modalDetails}

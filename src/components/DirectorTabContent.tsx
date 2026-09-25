@@ -229,55 +229,48 @@ export function DirectorTabContent(props: Props) {
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); props.onSelectClass(c.id); } }}
                           className="flex items-center justify-between p-4 cursor-pointer"
                         >
-                          <div>
+                          <div className="min-w-0">
                             <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                              {c.name}{isSelected ? ` · ${isKo ? '선택됨' : 'Selected'}` : ''}
+                              {c.name}
                             </p>
-                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
-                              {c.level || 'General'} · {compliance?.teacherName || `${(c.assignedTeacherUids || []).length} ${isKo ? '명 배정' : 'teacher(s)'}`} · {studentCount} {isKo ? '명 원생' : 'student(s)'}
+                            <p className="text-xs text-zinc-400">
+                              {c.level || (isKo ? '일반' : 'General')} · {compliance?.teacherName || `${(c.assignedTeacherUids || []).length} ${isKo ? '명 배정' : 'teacher(s)'}`} · {studentCount} {isKo ? '명 원생' : 'student(s)'}
                             </p>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             {compliance && (
                               compliance.missStreak > 0 ? (
-                                <span className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-400 text-[10px] font-bold border border-rose-500/30">
-                                  🔥 {compliance.missStreak}{isKo ? '일 미제출' : `-day miss streak`}
+                                <span className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-400 text-[11px] font-bold whitespace-nowrap border border-rose-500/30">
+                                  {isKo ? `${compliance.missStreak}일 미제출` : `${compliance.missStreak} days missed`}
                                 </span>
                               ) : (
-                                <span className="px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
-                                  ✓ {isKo ? '제출 완료' : 'Up to date'}
+                                <span className="px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[11px] font-bold whitespace-nowrap border border-emerald-500/30">
+                                  {isKo ? '제출 완료' : 'Up to date'}
                                 </span>
                               )
                             )}
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); props.onDeleteClass(c.id); }}
-                              className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 cursor-pointer transition-colors shrink-0"
-                            >
-                              {isKo ? '삭제' : 'Delete'}
-                            </button>
                           </div>
                         </div>
                         {isSelected && (
                           <div className={`mx-4 mb-4 p-4 rounded-xl border space-y-3 ${isNight ? 'bg-black/20 border-white/10' : 'bg-white border-zinc-200'}`}>
                             <div className="grid grid-cols-3 gap-3">
                               <div>
-                                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{isKo ? '담임 교사' : 'Teacher'}</p>
+                                <p className="text-[11px] font-bold text-zinc-500">{isKo ? '담임 교사' : 'Teacher'}</p>
                                 <p className={`text-xs font-bold mt-0.5 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{compliance?.teacherName || '—'}</p>
                               </div>
                               <div>
-                                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{isKo ? '배정 교사 수' : 'Teachers Assigned'}</p>
+                                <p className="text-[11px] font-bold text-zinc-500">{isKo ? '배정 교사' : 'Assigned'}</p>
                                 <p className={`text-xs font-bold mt-0.5 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{(c.assignedTeacherUids || []).length}</p>
                               </div>
                               <div>
-                                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{isKo ? '원생 수' : 'Students'}</p>
+                                <p className="text-[11px] font-bold text-zinc-500">{isKo ? '원생 수' : 'Students'}</p>
                                 <p className={`text-xs font-bold mt-0.5 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{studentCount}</p>
                               </div>
                             </div>
 
                             {compliance && (
                               <div>
-                                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-1.5">
+                                <p className="text-[11px] font-bold text-zinc-500 mb-1.5">
                                   {isKo ? '최근 14일 일지 제출' : 'Last 14 days, log submitted'}
                                 </p>
                                 <div className="flex gap-1 overflow-x-auto pb-1">
@@ -305,6 +298,16 @@ export function DirectorTabContent(props: Props) {
                                 ? '배정 교사 관리는 "교사 배정" 탭에서 할 수 있습니다.'
                                 : 'Manage which teachers are assigned from the Teacher Assignment tab.'}
                             </p>
+                            {/* Delete lives inside the expanded row (still behind
+                                handleDeleteClass's confirm) rather than on
+                                every collapsed row. */}
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); props.onDeleteClass(c.id); }}
+                              className="min-h-11 px-3 text-xs font-bold text-rose-400 hover:underline cursor-pointer"
+                            >
+                              {isKo ? '이 학급 삭제' : 'Delete this class'}
+                            </button>
                           </div>
                         )}
                       </div>
@@ -341,6 +344,7 @@ export function DirectorTabContent(props: Props) {
           {props.schoolId ? (
             <TeacherRosterPanel
               isNight={isNight}
+              isKo={isKo}
               schoolId={props.schoolId}
               classes={props.classes}
               onAssignmentChanged={props.onClassesChanged}

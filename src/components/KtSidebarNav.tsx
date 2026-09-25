@@ -39,7 +39,7 @@ export function KtSidebarNav({ isNight, isKo, activeTab, setActiveTab, showRepor
           }`}>
             <Sparkle size={18} weight="fill" />
           </div>
-          <span>{isKo ? '⚡ 알림톡 대본 & 1클릭 복사' : '⚡ KakaoTalk Parent Script'}</span>
+          <span>{isKo ? '학부모 리포트' : 'Parent reports'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'kt_script' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
@@ -62,7 +62,7 @@ export function KtSidebarNav({ isNight, isKo, activeTab, setActiveTab, showRepor
           }`}>
             <ChartBar size={18} weight="bold" />
           </div>
-          <span>{isKo ? '반 출석·채점 현황 & 원생 명단' : 'Class Overview & Roster'}</span>
+          <span>{isKo ? '학급 현황' : 'Class overview'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
@@ -85,7 +85,7 @@ export function KtSidebarNav({ isNight, isKo, activeTab, setActiveTab, showRepor
           }`}>
             <Notebook size={18} weight="bold" />
           </div>
-          <span>{isKo ? '✏️ 오늘 수업 일지 작성' : "✏️ Submit Today's Log"}</span>
+          <span>{isKo ? '오늘의 일지' : 'Daily log'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'kt_log' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
@@ -108,7 +108,7 @@ export function KtSidebarNav({ isNight, isKo, activeTab, setActiveTab, showRepor
           }`}>
             <FileText size={18} weight="bold" />
           </div>
-          <span>{isKo ? '📄 워크시트 채점기' : '📄 Worksheet Scanner'}</span>
+          <span>{isKo ? '정답지 올리기' : 'Answer key'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'homework' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
@@ -135,7 +135,7 @@ export function KtSidebarNav({ isNight, isKo, activeTab, setActiveTab, showRepor
           }`}>
             <Sparkle size={18} weight="fill" />
           </div>
-          <span>{isKo ? '📊 학부모 성적표 발급기' : '📊 Generate Weekly Report'}</span>
+          <span>{isKo ? '주간 리포트' : 'Weekly report'}</span>
         </div>
         <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
           showReportCardModal

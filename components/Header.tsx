@@ -10,6 +10,7 @@ import { ProgressiveOnboardingModal } from './ProgressiveOnboardingModal';
 import { LegalModal } from './LegalModal';
 import { ASSETS } from '../constants';
 import { SCREENSHOT_MODE } from '../config';
+import { Capacitor } from '@capacitor/core';
 
 interface Props {
   onReset: () => void;
@@ -79,12 +80,12 @@ export const Header: React.FC<Props> = ({
       )}
       {showSupport && <LegalModal type="support" onClose={() => setShowSupport(false)} />}
 
-      <header className={`fixed ${pushedDownByBanner ? 'top-[76px] md:top-6' : 'top-4 md:top-6'} left-0 right-0 z-50 transition-[top] duration-200 ease-[var(--ease-premium)] px-4 flex justify-center pt-[env(safe-area-inset-top)] pointer-events-none`}>
+      <header className={`fixed ${pushedDownByBanner ? 'top-[76px] md:top-6' : 'top-4 md:top-6'} left-0 right-0 z-50 transition-[top] duration-200 ease-[var(--ease-premium)] px-2 md:px-4 flex justify-center pt-[env(safe-area-inset-top)] pointer-events-none`}>
         <div
-          className={`p-1.5 md:p-2 rounded-full pointer-events-auto backdrop-blur-3xl shadow-2xl transition-[background-color,box-shadow] duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-black/20 ring-1 ring-white/10 shadow-black/80' : 'bg-black/5 ring-1 ring-black/5 shadow-zinc-300/50'}`}
+          className={`p-1 md:p-2 rounded-full pointer-events-auto backdrop-blur-3xl shadow-2xl transition-[background-color,box-shadow] duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-black/20 ring-1 ring-white/10 shadow-black/80' : 'bg-black/5 ring-1 ring-black/5 shadow-zinc-300/50'}`}
         >
           <div
-            className={`relative w-full max-w-3xl h-12 md:h-14 flex items-center justify-between gap-2 px-3 md:px-5 rounded-full border transition-[background-color,border-color,box-shadow] duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-brand-dark/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]' : 'bg-white/90 border-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]'}`}
+            className={`relative w-full max-w-3xl h-12 md:h-14 flex items-center justify-between gap-1.5 px-2 md:px-5 rounded-full border transition-[background-color,border-color,box-shadow] duration-200 ease-[var(--ease-premium)] ${isNight ? 'bg-brand-dark/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]' : 'bg-white/90 border-zinc-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]'}`}
           >
             <div
               role="button"
@@ -109,23 +110,39 @@ export const Header: React.FC<Props> = ({
             </div>
 
             <div className="flex items-center gap-1.5 md:gap-4 h-full flex-shrink-0">
-              {/* Back to Landing Page Button */}
+              {/* Back to Landing Page Button — web only: in the native bundle
+                  "/" is the app itself (build:mobile swaps app.html into
+                  index.html), so this just reloaded the app. */}
+              {!Capacitor.isNativePlatform() && (
               <a
                 href="/"
-                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-11 rounded-full text-xs font-bold transition-colors duration-200 ${
+                className={`${showSpeedToggle && !(isAuthenticated && user) ? 'hidden sm:flex' : 'flex'} items-center gap-1.5 px-3 py-1.5 min-h-11 rounded-full text-xs font-bold transition-colors duration-200 ${
                   isNight
                     ? 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
                     : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200'
                 }`}
                 title={language === 'ko' ? '메인 랜딩페이지로 이동' : 'Back to Main Landing Page'}
+                aria-label={language === 'ko' ? '메인으로' : 'Home'}
               >
                 <House weight="bold" size={14} />
-                <span>{language === 'ko' ? '메인으로' : 'Home'}</span>
+                <span className="hidden sm:inline">{language === 'ko' ? '메인으로' : 'Home'}</span>
               </a>
+              )}
 
               <div className="flex items-center gap-2 md:gap-4">
+                {/* Phone widths: one tap-to-switch button — the two-segment
+                    toggle plus the Tutor/Speed toggle overflowed a 390px
+                    header on the result screen. */}
+                <button
+                  type="button"
+                  onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+                  aria-label={language === 'ko' ? 'Switch to English' : '한국어로 전환'}
+                  className={`sm:hidden min-w-11 min-h-11 px-3 rounded-full border text-xs font-black ${isNight ? 'bg-white/5 border-white/10 text-zinc-200' : 'bg-zinc-100 border-zinc-200 text-zinc-800'}`}
+                >
+                  {language === 'ko' ? 'EN' : '한'}
+                </button>
                 <div
-                  className={`relative flex items-center ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-200'} p-1 rounded-full border overflow-hidden`}
+                  className={`relative hidden sm:flex items-center ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-200'} p-1 rounded-full border overflow-hidden`}
                 >
                   {/* Sliding indicator */}
                   <div
@@ -208,7 +225,7 @@ export const Header: React.FC<Props> = ({
               {isAuthenticated && user ? (
                 <div className="flex items-center gap-4 pl-1 relative flex-shrink-0">
                   <button
-                    aria-label="Open account menu"
+                    aria-label={language === 'ko' ? '계정 메뉴 열기' : 'Open account menu'}
                     aria-haspopup="true"
                     aria-expanded={showUserMenu}
                     className="relative h-11 w-11 bg-gradient-to-br from-zinc-800 to-zinc-700 rounded-full flex items-center justify-center text-zinc-300 font-bold border border-white/10 shadow-inner cursor-pointer btn-press group-hover:scale-[1.02] uppercase select-none text-xs md:text-sm group"

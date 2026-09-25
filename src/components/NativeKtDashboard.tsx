@@ -115,8 +115,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
   );
 
   const [englishSummary, setEnglishSummary] = useState(
-    generatedOutput?.bilingualClassSummary.english ||
-      'Today in 7A, students actively practiced Unit 4 Photosynthesis vocabulary. Everyone participated attentively during the reading drill.'
+    generatedOutput
+      ? generatedOutput.bilingualClassSummary.english || ''
+      : 'Today in 7A, students actively practiced Unit 4 Photosynthesis vocabulary. Everyone participated attentively during the reading drill.'
   );
 
   // This component stays mounted (same key) while the KT works through a
@@ -159,7 +160,6 @@ export const NativeKtDashboard: React.FC<Props> = ({
 
   // 3-Tone Script Switcher State
   const [scriptTone, setScriptTone] = useState<'formal' | 'friendly' | 'concise'>('formal');
-  const [filterUrgentOnly, setFilterUrgentOnly] = useState(false);
 
   const getToneHeader = () => {
     if (scriptTone === 'friendly')
@@ -321,26 +321,16 @@ export const NativeKtDashboard: React.FC<Props> = ({
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">
-              {isKo ? '검토 및 발송' : 'REVIEW & SEND'}
-            </span>
-            <span className="text-[10px] text-amber-400 font-mono font-bold">
-              {isKo ? '🔒 자동발송 없음 (검수 후 복사)' : '🔒 No Auto-Send (Edit First)'}
-            </span>
-          </div>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight">
-            {isKo ? '한국인 담임 교사 & 상담 대시보드' : 'Korean Teacher & Counselor Dashboard'}
+            {isKo ? '학부모 리포트 검토' : 'Review parent report'}
           </h2>
           {pendingCount > 0 && (
-            <span className="mt-1 inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-red-500/15 border border-red-500/30 text-red-400 font-mono">
-              {isKo
-                ? `대기 중인 리포트 ${pendingCount}건 더 있음`
-                : `${pendingCount} more waiting in queue`}
-            </span>
+            <p className={`mt-1 text-xs font-bold ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              {isKo ? `${pendingCount}건 더 대기 중` : `${pendingCount} more waiting`}
+            </p>
           )}
           {isDemoContent && (
-            <span className="mt-1 inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-purple-500/15 border border-purple-500/30 text-purple-300 font-mono">
+            <span className="mt-1 inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-purple-500/15 border border-purple-500/30 text-purple-300">
               {isKo
                 ? '📋 샘플 미리보기 — 아직 실제 리포트 없음'
                 : '📋 Sample preview — no real report yet'}
@@ -397,7 +387,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   </div>
                   {notifyEnabled && (
                     <div className="space-y-1.5">
-                      <label htmlFor="kt-notify-hour" className="text-zinc-400 font-mono block">
+                      <label htmlFor="kt-notify-hour" className="text-zinc-400 block">
                         {isKo ? '선호 시간 (한국 시간)' : 'Preferred time (KST)'}
                       </label>
                       <select
@@ -465,15 +455,15 @@ export const NativeKtDashboard: React.FC<Props> = ({
                     : 'Saving...'
                   : copied
                     ? isKo
-                      ? '완료! ✅'
-                      : 'Done! ✅'
+                      ? '완료'
+                      : 'Done'
                     : canShare
                       ? isKo
                         ? '카카오톡으로 공유'
                         : 'Share to KakaoTalk'
                       : isKo
-                        ? '대본 1클릭 복사'
-                        : '1-Click Copy Script'}
+                        ? '메시지 복사'
+                        : 'Copy message'}
               </span>
             </button>
           </div>
@@ -487,49 +477,6 @@ export const NativeKtDashboard: React.FC<Props> = ({
         )}
       </div>
 
-      {/* 3-Stage Report Status Badge Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 rounded-2xl border bg-white/[0.02] border-white/10 font-mono text-xs">
-        <span className="font-bold text-zinc-400">
-          {isKo ? '리포트 검수 진행 상태:' : 'Report Review Status:'}
-        </span>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <button
-            type="button"
-            onClick={() => setReportStatus('pending_review')}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-colors cursor-pointer ${
-              reportStatus === 'pending_review'
-                ? 'bg-red-500/20 border-red-500 text-red-400 shadow-sm'
-                : 'bg-white/5 border-white/10 text-zinc-400'
-            }`}
-          >
-            🔴 {isKo ? '검수 대기' : 'PENDING REVIEW'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setReportStatus('edited_by_kt')}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-colors cursor-pointer ${
-              reportStatus === 'edited_by_kt'
-                ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm'
-                : 'bg-white/5 border-white/10 text-zinc-400'
-            }`}
-          >
-            🟡 {isKo ? '교사 수정완료' : 'EDITED BY KT'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setReportStatus('copied_sent')}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-colors cursor-pointer ${
-              reportStatus === 'copied_sent'
-                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm'
-                : 'bg-white/5 border-white/10 text-zinc-400'
-            }`}
-          >
-            🟢 {isKo ? '발송 완료' : 'COPIED & SENT'}
-          </button>
-        </div>
-      </div>
 
       {/* Greeting Style & Character Counter Bar — only the header line
           changes below (getToneHeader()); the AI-generated body text is the
@@ -544,7 +491,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           className="w-full flex items-center justify-between gap-2 px-4 py-3 min-h-11 cursor-pointer"
         >
           <span className="font-bold text-zinc-400">
-            💬 {isKo ? '인사말 스타일 / 옵션' : 'Greeting Style / Options'}
+            {isKo ? '인사말 스타일' : 'Greeting style'}
           </span>
           <CaretDown
             size={14}
@@ -621,17 +568,6 @@ export const NativeKtDashboard: React.FC<Props> = ({
                 )
               </span>
 
-              <button
-                type="button"
-                onClick={() => setFilterUrgentOnly(!filterUrgentOnly)}
-                className={`px-3 py-1 min-h-11 rounded-xl font-bold border transition-colors cursor-pointer ${
-                  filterUrgentOnly
-                    ? 'bg-red-500 border-red-500 text-white shadow-md'
-                    : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                }`}
-              >
-                🚨 {isKo ? '전화상담 필요만' : 'Urgent Call Only'} {filterUrgentOnly ? 'ON' : 'OFF'}
-              </button>
             </div>
           </div>
         )}
@@ -639,12 +575,9 @@ export const NativeKtDashboard: React.FC<Props> = ({
 
       {/* Editable Korean Summary Section */}
       <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold font-mono">
-          <span className="text-orange-400 uppercase tracking-wider">
-            ✏️{' '}
-            {isKo
-              ? '실시간 편집 가능 학부모 알림톡 대본 (복사 전 자유 수정)'
-              : 'Live Editable Korean Script (Review & Tweak Before Copying)'}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold">
+          <span className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
+            {isKo ? '학부모 메시지 — 보내기 전에 수정하세요' : 'Parent message — edit before sending'}
           </span>
           {isMergingDraft && (
             <span className="text-zinc-400 normal-case font-normal">
@@ -659,7 +592,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
           value={editedKoreanSummary}
           onChange={(e) => permissions.canEditReports && setEditedKoreanSummary(e.target.value)}
           disabled={!permissions.canEditReports}
-          rows={4}
+          rows={8}
           className={`w-full p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed focus:outline-none transition-colors font-sans ${
             !permissions.canEditReports ? 'opacity-60 cursor-not-allowed' : ''
           } ${
@@ -668,19 +601,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
               : 'bg-orange-50/50 border-orange-200 text-zinc-900 focus:border-orange-500'
           }`}
         />
-        <div className="flex justify-between items-center text-[11px] text-zinc-400 font-mono italic">
-          <span>
-            ℹ️{' '}
-            {isKo
-              ? '위 대본 문장을 직접 수정할 수 있습니다. 복사 버튼 클릭 시 수정된 내용이 복사됩니다.'
-              : 'KT can edit any sentence above directly. Clicking copy will copy your edited version.'}
-          </span>
-          {!permissions.canEditReports && (
-            <span className="text-amber-400 font-bold flex items-center gap-1">
-              <Lock size={12} /> {isKo ? '읽기 전용 권한' : 'Read-only Permission'}
-            </span>
-          )}
-        </div>
+        {!permissions.canEditReports && (
+          <p className="text-[11px] text-amber-400 font-bold flex items-center gap-1">
+            <Lock size={12} /> {isKo ? '읽기 전용 권한' : 'Read-only'}
+          </p>
+        )}
       </div>
 
       {/* English Original Reference + Flagged Student Exceptions — only
@@ -697,21 +622,27 @@ export const NativeKtDashboard: React.FC<Props> = ({
           entirely rather than fed fake data. */}
       {!skipInlineExceptions && (
         <>
+          {englishSummary && (
           <div className="space-y-1.5 p-4 rounded-2xl border bg-white/[0.02] border-white/10 text-xs">
-            <span className="font-bold text-zinc-400 block font-mono">
-              {isKo ? '원어민 강사 원본 작성 메모:' : 'Original Foreign Teacher English Note:'}
+            <span className="font-bold text-zinc-400 block">
+              {isKo ? '원어민 선생님 원문' : "Teacher's original note"}
             </span>
-            <p className="text-zinc-300 font-mono leading-relaxed">{englishSummary}</p>
+            <p className="text-zinc-300 leading-relaxed">{englishSummary}</p>
           </div>
+          )}
 
+          {/* A real log with no flagged students used to fall through to the
+              fabricated "Min-jun" card below as if it were real — the sample
+              card now only appears on the labeled sample preview. */}
+          {(displayedStudentReports.length > 0 || isDemoContent) && (
           <div className="space-y-4 pt-4 border-t border-white/10">
-            <span className="text-xs font-bold text-amber-400 uppercase font-mono block">
-              ⚠️ {isKo ? '주의 필요 학생 집중 케어' : 'Flagged Student Exceptions'}
+            <span className="text-sm font-bold text-amber-400 block">
+              {isKo ? '학생별 노트' : 'Student notes'}
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {(generatedOutput?.studentReports && generatedOutput.studentReports.length > 0
-                ? generatedOutput.studentReports
+              {(displayedStudentReports.length > 0
+                ? displayedStudentReports
                 : [
                     {
                       studentName: 'Min-jun (민준)',
@@ -732,7 +663,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-sm text-amber-400 flex items-center gap-1.5 font-mono">
+                    <span className="font-black text-sm text-amber-400 flex items-center gap-1.5">
                       <UserCheck size={16} weight="bold" />
                       <span>{std.studentName}</span>
                     </span>
@@ -760,6 +691,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
               ))}
             </div>
           </div>
+          )}
         </>
       )}
     </div>

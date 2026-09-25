@@ -209,7 +209,7 @@ export const VoiceFillAssistant: React.FC<Props> = ({
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 font-mono flex items-center gap-1.5">
+        <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-1.5">
           <Sparkle size={14} weight="fill" />
           {language === 'ko' ? '음성으로 입력하기' : 'Fill by voice'}
         </span>

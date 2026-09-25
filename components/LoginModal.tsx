@@ -23,7 +23,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
     signUp,
     sendResetEmail,
   } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isKo = language === 'ko';
   const [viewMode, setViewMode] = useState<'login' | 'signup' | 'forgot'>(() => {
     // Director-pushed invites almost always target a parent who has never
     // signed up (see StudentInvitePanel doc comment) — defaulting to Login
@@ -60,6 +61,12 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
   } catch (e) {
     // ignore
   }
+  const badCredsMsg = isKo ? '이메일 또는 비밀번호가 올바르지 않아요.' : 'Invalid email or password. Please try again.';
+  // Raw SDK error strings (English, often technical) were shown to users
+  // for Google/Kakao — details stay in console.error.
+  const socialFailMsg = isKo
+    ? '로그인에 실패했어요. 다시 시도하거나 이메일로 로그인해주세요.'
+    : 'Sign-in failed. Please try again or use your email.';
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -70,13 +77,13 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
       if (viewMode === 'login') {
         await signIn(email, password);
       } else if (viewMode === 'signup') {
-        if (!name.trim()) throw new Error('Please enter your name.');
-        if (!email.includes('@')) throw new Error('Please enter a valid email address.');
-        if (password.length < 6) throw new Error('Password must be at least 6 characters.');
+        if (!name.trim()) throw new Error(isKo ? '이름을 입력해주세요.' : 'Please enter your name.');
+        if (!email.includes('@')) throw new Error(isKo ? '올바른 이메일을 입력해주세요.' : 'Please enter a valid email address.');
+        if (password.length < 6) throw new Error(isKo ? '비밀번호는 6자 이상이어야 합니다.' : 'Password must be at least 6 characters.');
         await signUp(name, email, password);
       } else if (viewMode === 'forgot') {
         await sendResetEmail(email);
-        setSuccess('Check your inbox for a password reset link!');
+        setSuccess(isKo ? '메일함에서 비밀번호 재설정 링크를 확인해주세요.' : 'Check your inbox for a password reset link.');
         setTimeout(() => setViewMode('login'), 5000);
       }
     } catch (err: any) {
@@ -88,30 +95,31 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
           // Safe to reveal here: this is the user's own invited email, not
           // an attacker probing an arbitrary address.
           setViewMode('signup');
-          msg = "No account found with this email yet — let's create one to join your class.";
+          msg = isKo
+            ? '이 이메일로 가입된 계정이 없어요. 가입하고 학급에 참여하세요.'
+            : "No account found with this email yet — let's create one to join your class.";
         } else {
           // Deliberately identical to auth/wrong-password below — telling an
           // untargeted login attempt "no account" vs "wrong password" lets an
           // attacker enumerate registered emails one guess at a time.
-          msg = 'Invalid email or password. Please try again.';
+          msg = badCredsMsg;
         }
       }
-      if (err.code === 'auth/wrong-password') msg = 'Invalid email or password. Please try again.';
-      if (err.code === 'auth/invalid-credential')
-        msg = 'Invalid email or password. Please try again.';
+      if (err.code === 'auth/wrong-password') msg = badCredsMsg;
+      if (err.code === 'auth/invalid-credential') msg = badCredsMsg;
       if (err.code === 'auth/email-already-in-use') {
         if (viewMode === 'signup' && pendingClassCode) {
           // Symmetric case: defaulted to Sign Up for the invite but this
           // parent already has an account — flip them to Sign In instead.
           setViewMode('login');
-          msg = 'You already have an account with this email — sign in instead.';
+          msg = isKo ? '이미 가입된 이메일이에요. 로그인해주세요.' : 'You already have an account with this email — sign in instead.';
         } else {
-          msg = 'Email already registered.';
+          msg = isKo ? '이미 가입된 이메일입니다.' : 'Email already registered.';
         }
       }
-      if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
+      if (err.code === 'auth/invalid-email') msg = isKo ? '올바른 이메일을 입력해주세요.' : 'Please enter a valid email address.';
       if (err.code === 'auth/too-many-requests')
-        msg = 'Too many attempts. Please wait and try again.';
+        msg = isKo ? '시도 횟수가 너무 많아요. 잠시 후 다시 시도해주세요.' : 'Too many attempts. Please wait and try again.';
       setError(msg);
     } finally {
       setIsLoading(false);
@@ -141,9 +149,9 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
 
       // Friendly messages for common actual failures
       if (errorMsg.includes('network')) {
-        setError('Network error. Please check your internet connection.');
+        setError(isKo ? '네트워크 오류입니다. 인터넷 연결을 확인해주세요.' : 'Network error. Please check your internet connection.');
       } else {
-        setError('Sign-in failed. Please try again or use your email.');
+        setError(socialFailMsg);
       }
     } finally {
       setIsLoading(false);
@@ -167,7 +175,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         return;
       }
       console.error('[LoginModal] Google Sign-In Error:', err);
-      setError(err.message || 'Google Sign-In failed. Please try again.');
+      setError(socialFailMsg);
     } finally {
       setIsLoading(false);
     }
@@ -190,22 +198,22 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
         return;
       }
       console.error('[LoginModal] Kakao Sign-In Error:', err);
-      setError(err.message || 'Kakao Sign-In failed. Please try again.');
+      setError(socialFailMsg);
     } finally {
       setIsLoading(false);
     }
   };
 
   const getTitle = () => {
-    if (viewMode === 'login') return 'Welcome Back!';
-    if (viewMode === 'signup') return 'Create Account';
-    return 'Reset Password';
+    if (viewMode === 'login') return isKo ? '다시 오신 걸 환영해요' : 'Welcome back';
+    if (viewMode === 'signup') return isKo ? '계정 만들기' : 'Create account';
+    return isKo ? '비밀번호 재설정' : 'Reset password';
   };
 
   const getSubtitle = () => {
-    if (viewMode === 'login') return 'Sign in to continue your teaching journey';
-    if (viewMode === 'signup') return 'Join Chekki to make homework time happy';
-    return "Enter your email and we'll send you a recovery link";
+    if (viewMode === 'login') return isKo ? '로그인하고 아이의 숙제를 확인하세요' : "Sign in to check your child's homework";
+    if (viewMode === 'signup') return isKo ? '채키와 함께 즐거운 숙제 시간을 만들어요' : 'Join Chekki to make homework time happy';
+    return isKo ? '이메일로 재설정 링크를 보내드릴게요' : "Enter your email and we'll send you a recovery link";
   };
 
   return (
@@ -266,7 +274,9 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
 
               {pendingClassCode && (
                 <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-2xl text-emerald-500 text-[11px] mb-5 font-semibold break-keep text-center">
-                  🎓 {viewMode === 'signup' ? 'Sign up' : 'Sign in'} with the email your teacher invited to finish joining your class — no code needed here, it'll link automatically.
+                  {isKo
+                    ? '선생님이 초대한 이메일로 가입/로그인하면 학급에 자동으로 연결됩니다.'
+                    : 'Use the email your teacher invited — you’ll join the class automatically.'}
                 </div>
               )}
 
@@ -329,8 +339,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                       autoComplete="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Parent's Name"
-                      aria-label="Your name"
+                      placeholder={isKo ? '학부모 이름' : "Parent's name"}
+                      aria-label={isKo ? '이름' : 'Your name'}
                       className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-[background-color,border-color,box-shadow] text-xs font-semibold placeholder:text-zinc-500`}
                       required
                     />
@@ -357,8 +367,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                     autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email Address"
-                    aria-label="Email address"
+                    placeholder={isKo ? '이메일' : 'Email'}
+                    aria-label={isKo ? '이메일' : 'Email address'}
                     className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-4 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-[background-color,border-color,box-shadow] text-xs font-semibold placeholder:text-zinc-500`}
                     required
                   />
@@ -386,14 +396,16 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                         autoComplete={viewMode === 'signup' ? 'new-password' : 'current-password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
-                        aria-label="Password"
+                        placeholder={isKo ? '비밀번호' : 'Password'}
+                        aria-label={isKo ? '비밀번호' : 'Password'}
                         className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800/80 text-white focus:bg-black' : 'bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white'} border rounded-2xl pl-11 pr-12 py-3.5 outline-none focus:border-brand-orange focus:ring-2 focus:ring-orange-500/20 transition-[background-color,border-color,box-shadow] text-xs font-semibold placeholder:text-zinc-500`}
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
+                        aria-label={isKo ? '비밀번호 보기' : 'Show password'}
+                        aria-pressed={showPassword}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-brand-orange transition-colors duration-250"
                       >
                         {showPassword ? (
@@ -439,7 +451,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                           onClick={() => setViewMode('forgot')}
                           className="text-[10px] text-zinc-400 hover:text-brand-orange font-bold transition-colors duration-250"
                         >
-                          Forgot Password?
+                          {isKo ? '비밀번호를 잊으셨나요?' : 'Forgot password?'}
                         </button>
                       </div>
                     )}
@@ -453,27 +465,39 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 >
                   {isLoading
                     ? viewMode === 'login'
-                      ? 'Signing in...'
+                      ? isKo ? '로그인 중...' : 'Signing in...'
                       : viewMode === 'signup'
-                        ? 'Creating account...'
-                        : 'Sending link...'
+                        ? isKo ? '계정 만드는 중...' : 'Creating account...'
+                        : isKo ? '보내는 중...' : 'Sending link...'
                     : viewMode === 'login'
-                      ? 'Sign In'
+                      ? isKo ? '로그인' : 'Sign in'
                       : viewMode === 'signup'
-                        ? 'Sign Up'
-                        : 'Send Reset Link'}
+                        ? isKo ? '가입하기' : 'Sign up'
+                        : isKo ? '재설정 링크 보내기' : 'Send reset link'}
                 </button>
               </form>
 
               <div className="relative flex py-4 items-center">
                 <div className="flex-grow border-t border-zinc-200 dark:border-white/5"></div>
-                <span className="flex-shrink mx-4 text-[9px] text-zinc-400 font-black uppercase tracking-[0.2em]">
-                  or continue with
+                <span className="flex-shrink mx-4 text-xs text-zinc-400 font-bold">
+                  {isKo ? '또는' : 'or'}
                 </span>
                 <div className="flex-grow border-t border-zinc-200 dark:border-white/5"></div>
               </div>
 
               <div className="space-y-2.5">
+                <button
+                  type="button"
+                  onClick={handleKakaoSignIn}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#191919] font-bold py-3.5 rounded-2xl shadow-lg shadow-yellow-500/10 hover:bg-[#FADA0A] transition-[background-color,opacity,transform] duration-200 transform active:scale-[0.98] disabled:opacity-50 text-xs"
+                >
+                  <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3c-4.97 0-9 3.185-9 7.11 0 2.507 1.642 4.718 4.11 5.922l-.83 3.037c-.075.28.188.528.454.356l3.585-2.378c.552.077 1.114.118 1.681.118 4.97 0 9-3.185 9-7.11S16.97 3 12 3z" />
+                  </svg>
+                  {isKo ? '카카오로 계속하기' : 'Continue with Kakao'}
+                </button>
+
                 {Capacitor.getPlatform() !== 'android' && (
                   <button
                     type="button"
@@ -484,7 +508,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                     <svg className="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17.062 10.97c.03-2.52 2.06-3.73 2.15-3.79-1.17-1.71-2.99-1.94-3.64-1.97-1.54-.16-3.01.91-3.79.91-.78 0-1.99-.89-3.29-.86-1.71.03-3.29.99-4.17 2.54-1.79 3.11-.46 7.71 1.28 10.22.85 1.23 1.86 2.61 3.19 2.56 1.28-.05 1.76-.83 3.31-.83 1.54 0 1.99.83 3.34.8 1.36-.03 2.23-1.25 3.07-2.48 1.05-1.51 1.39-2.98 1.42-3.05-.03-.01-2.73-1.04-2.76-4.15zm-2.82-7.14c.7-1.02 1.15-2.07.91-3.61-1.14.05-2.52.76-3.34 1.71-.73.85-1.37 1.94-1.17 3.04 1.26.1 2.52-.77 3.6-1.14z" />
                     </svg>
-                    Continue with Apple
+                    {isKo ? 'Apple로 계속하기' : 'Continue with Apple'}
                   </button>
                 )}
 
@@ -512,20 +536,9 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  Continue with Google
+                  {isKo ? 'Google로 계속하기' : 'Continue with Google'}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={handleKakaoSignIn}
-                  disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#191919] font-bold py-3.5 rounded-2xl shadow-lg shadow-yellow-500/10 hover:bg-[#FADA0A] transition-[background-color,opacity,transform] duration-200 transform active:scale-[0.98] disabled:opacity-50 text-xs"
-                >
-                  <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 3c-4.97 0-9 3.185-9 7.11 0 2.507 1.642 4.718 4.11 5.922l-.83 3.037c-.075.28.188.528.454.356l3.585-2.378c.552.077 1.114.118 1.681.118 4.97 0 9-3.185 9-7.11S16.97 3 12 3z" />
-                  </svg>
-                  Continue with Kakao
-                </button>
               </div>
 
               <div className="mt-8 flex flex-col items-center gap-4">
@@ -538,15 +551,15 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                 >
                   {viewMode === 'login' ? (
                     <>
-                      New to Chekki? <span className="text-brand-orange">Sign Up</span>
+                      {isKo ? '처음이신가요?' : 'New to Chekki?'} <span className="text-brand-orange">{isKo ? '가입하기' : 'Sign up'}</span>
                     </>
                   ) : viewMode === 'signup' ? (
                     <>
-                      Already have an account? <span className="text-brand-orange">Sign In</span>
+                      {isKo ? '이미 계정이 있나요?' : 'Already have an account?'} <span className="text-brand-orange">{isKo ? '로그인' : 'Sign in'}</span>
                     </>
                   ) : (
                     <>
-                      <span className="text-brand-orange">Back to Sign In</span>
+                      <span className="text-brand-orange">{isKo ? '로그인으로 돌아가기' : 'Back to sign in'}</span>
                     </>
                   )}
                 </button>
@@ -555,42 +568,42 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
 
                 <button
                   onClick={close}
-                  className="text-zinc-400 text-[10px] hover:text-brand-orange font-black uppercase tracking-widest transition-colors duration-250 underline underline-offset-2"
+                  className="text-zinc-400 text-xs hover:text-brand-orange font-bold transition-colors duration-250 underline underline-offset-2"
                 >
                   {t('login_guest_link')}
                 </button>
 
-                <div className="text-[8px] text-zinc-600 text-center uppercase tracking-widest leading-relaxed mt-2 flex flex-wrap justify-center gap-x-2 gap-y-1 px-4">
-                  <span>By continuing, you agree to our</span>
+                <div className="text-[11px] text-zinc-500 text-center leading-relaxed mt-2 flex flex-wrap justify-center gap-x-2 gap-y-1 px-4">
+                  <span>{isKo ? '계속하면 다음에 동의하는 것으로 간주됩니다' : 'By continuing, you agree to our'}</span>
                   <button
                     onClick={() => setShowLegal('terms')}
                     className="underline text-zinc-400 hover:text-zinc-400"
                   >
-                    Terms
+                    {isKo ? '이용약관' : 'Terms'}
                   </button>
                   <button
                     onClick={() => setShowLegal('privacy')}
                     className="underline text-zinc-400 hover:text-zinc-400"
                   >
-                    Privacy
+                    {isKo ? '개인정보' : 'Privacy'}
                   </button>
                   <button
                     onClick={() => setShowLegal('support')}
                     className="underline text-zinc-400 hover:text-zinc-400"
                   >
-                    Support
+                    {isKo ? '고객지원' : 'Support'}
                   </button>
                   <button
                     onClick={() => setShowLegal('refund')}
                     className="underline text-zinc-400 hover:text-zinc-400"
                   >
-                    Refund
+                    {isKo ? '환불' : 'Refund'}
                   </button>
                   <button
                     onClick={() => setShowLegal('youth')}
                     className="underline text-zinc-400 hover:text-zinc-400"
                   >
-                    Youth
+                    {isKo ? '청소년 보호' : 'Youth'}
                   </button>
                 </div>
               </div>

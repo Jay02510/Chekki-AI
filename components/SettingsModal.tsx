@@ -439,7 +439,9 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                               ? t('sub_platformApple')
                               : subscriptionRecord.subscription_platform === 'google'
                                 ? t('sub_platformGoogle')
-                                : t('sub_platformWeb')}
+                                : subscriptionRecord.subscription_platform === 'school_code'
+                                  ? (language === 'ko' ? '학원 제공' : 'Provided by your academy')
+                                  : t('sub_platformWeb')}
                           </p>
                         </div>
                       </div>

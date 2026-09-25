@@ -96,7 +96,9 @@ export function useLogCompliance(classes: any[]) {
               missStreak++;
             }
 
-            const teacherName = c.teacherName || c.assignedTeacherNames?.[0] || (c.teacherUid ? c.teacherUid.slice(0, 8) : '—');
+            // No uid fallback — a raw uid fragment ("bsOsrr2K") rendered as the
+            // teacher's name. Empty lets callers show the assigned count.
+            const teacherName = c.teacherName || c.assignedTeacherNames?.[0] || '';
 
             return {
               classId: c.id,

@@ -1759,19 +1759,19 @@ export default function TeacherPage({ isNight = true }: Props) {
                   }`}
                 >
                   <ChalkboardTeacher size={14} weight="bold" />
-                  <span>{isKo ? '교사 로그인' : 'Teacher Access'}</span>
+                  <span>{isKo ? '선생님' : 'Teacher'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => { setLoginRole('director'); setAuthError(''); }}
                   className={`flex-1 py-2 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer flex items-center justify-center gap-1.5 ${
                     loginRole === 'director'
-                      ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                      ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
                   <Buildings size={14} weight="bold" />
-                  <span>{isKo ? '원장님 HQ 로그인' : 'Director Admin'}</span>
+                  <span>{isKo ? '원장님' : 'Director'}</span>
                 </button>
               </div>
             )}
@@ -1787,20 +1787,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <p className="text-xs font-bold text-white">{isKo ? '가입 후 학원명이 표시됩니다' : "You'll see your academy's name once you sign up."}</p>
                 </div>
               </div>
-            ) : (
-              <div className={`mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold ${
-                loginRole === 'director'
-                  ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
-                  : 'bg-orange-500/10 border border-orange-500/20 text-orange-400'
-              }`}>
-                {loginRole === 'director' ? <Buildings size={12} weight="bold" /> : <ChalkboardTeacher size={12} weight="bold" />}
-                <span>
-                  {loginRole === 'director'
-                    ? (isKo ? '원장님 전용 HQ 관리자 포털' : 'Director HQ Admin Access')
-                    : (isKo ? '교사 전용 포털' : 'Teacher Access Portal')}
-                </span>
-              </div>
-            )}
+            ) : null /* role toggle + heading already name the role */}
 
             {/* Auth Mode Toggle (Login vs Sign Up) — hidden for a plan-linked
                 director signup, replaced by a small "already have an
@@ -1846,7 +1833,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     ? `${planLabel.nameKo} 원장님 계정 생성 — FT ${planSeats.ft}석, KT ${planSeats.kt}석`
                     : `Create your Director account for ${planLabel.nameEn} — ${planSeats.ft} FT seats, ${planSeats.kt} KT seats`)
                 : authMode === 'login'
-                ? (loginRole === 'director' ? (isKo ? '원장님 HQ 로그인' : 'Director HQ Login') : (isKo ? '교사 포털 로그인' : 'Teacher Portal Login'))
+                ? (loginRole === 'director' ? (isKo ? '원장님 로그인' : 'Director sign-in') : (isKo ? '선생님 로그인' : 'Teacher sign-in'))
                 : (loginRole === 'director' ? (isKo ? '원장님 계정 생성' : 'Create Director Account') : (isKo ? '교사 계정 생성' : 'Create Teacher Account'))}
             </h2>
             <p className={`text-zinc-400 text-xs text-center leading-relaxed max-w-xs ${isPlanSignup ? 'mb-2' : 'mb-6'}`}>
@@ -1859,7 +1846,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     ? (isKo ? '캠퍼스 전체 커리큘럼, 일간 숙제 제출률 및 보고서 총괄 대시보드로 이동합니다.' : 'Log in to view campus curriculum streams, homework status, and student reports.')
                     : (isKo ? '학습지 관리 및 분석을 위해 교사 계정으로 로그인해 주세요.' : 'Log in with your teacher credentials to access your dashboard.'))
                 : (loginRole === 'director'
-                    ? (isKo ? '학원명을 등록하고 즉시 원장님 전용 대시보드를 개설하세요.' : 'Register your academy and activate your Director HQ Dashboard.')
+                    ? (isKo ? '학원명을 등록하고 즉시 원장님 전용 대시보드를 개설하세요.' : 'Register your academy and open your director dashboard.')
                     : inviteSlug
                     ? (isKo ? '아래 정보를 입력해 계정을 만드세요.' : 'Fill in your details below to create your account.')
                     : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
@@ -1884,7 +1871,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             <form onSubmit={handleSignIn} className="w-full space-y-4">
               {authMode === 'signup' && (
                 <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                  <label className="text-xs font-bold text-zinc-400 pl-1">
                     {loginRole === 'director' ? (isKo ? '원장님 성함' : 'Director Name') : (isKo ? '선생님 성함' : 'Teacher Full Name')}
                   </label>
                   <input
@@ -1900,7 +1887,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
               {authMode === 'signup' && loginRole === 'director' && (
                 <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                  <label className="text-xs font-bold text-zinc-400 pl-1">
                     {isKo ? '학원명' : 'Academy Name'}
                   </label>
                   <input
@@ -1915,8 +1902,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               )}
 
               <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                  {inviteSlug && authMode === 'signup' ? (isKo ? '이메일 확인' : 'Confirm your email') : 'Email'}
+                <label className="text-xs font-bold text-zinc-400 pl-1">
+                  {inviteSlug && authMode === 'signup' ? (isKo ? '이메일 확인' : 'Confirm your email') : (isKo ? '이메일' : 'Email')}
                 </label>
                 <input
                   type="email"
@@ -1929,8 +1916,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               </div>
 
               <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-                  Password
+                <label className="text-xs font-bold text-zinc-400 pl-1">
+                  {isKo ? '비밀번호' : 'Password'}
                 </label>
                 <input
                   type="password"
@@ -1944,7 +1931,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
               {authMode === 'signup' && (
                 <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                  <label className="text-xs font-bold text-zinc-400 pl-1">
                     {isKo ? '비밀번호 확인' : 'Confirm Password'}
                   </label>
                   <input
@@ -2118,7 +2105,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </div>
 
                 <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">{isKo ? '선생님 성함' : 'Your Name'}</label>
+                  <label className="text-xs font-bold text-zinc-400 pl-1">{isKo ? '선생님 성함' : 'Your Name'}</label>
                   <input
                     type="text"
                     value={welcomeName}
@@ -2144,7 +2131,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 )}
 
                 <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">{isKo ? '선생님 역할' : 'Your Role'}</label>
+                  <label className="text-xs font-bold text-zinc-400 pl-1">{isKo ? '선생님 역할' : 'Your Role'}</label>
                   {user?.educatorRole ? (
                     // Role was already decided by the director's invite (audit
                     // §21d) — this is a read-only confirmation, not a choice.
@@ -2431,10 +2418,10 @@ export default function TeacherPage({ isNight = true }: Props) {
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent pointer-events-none" />
         
         {/* Top Header Control Bar */}
-        <header className={`p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-4 relative z-20 shrink-0 transition-colors ${
+        <header className={`p-3 sm:p-6 border-b flex flex-wrap items-center justify-between gap-2 sm:gap-4 relative z-20 shrink-0 transition-colors ${
           isThemeNight ? 'bg-brand-dark/90 border-white/5 text-white' : 'bg-white/90 border-zinc-200 text-zinc-900 shadow-xs'
         }`}>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 w-full sm:w-auto sm:flex-1">
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
@@ -2454,11 +2441,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 (week nav, roster, overview stats) is showing — with it
                 gone, a director with more than one class had no way to
                 switch between them at all. */}
-            <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500">
-              <ChalkboardTeacher size={20} weight="bold" />
-            </div>
-
-            <div className="relative">
+            <div className="relative min-w-0 flex-1 sm:flex-none sm:max-w-xs">
               {/* isDemo is a client-only placeholder so the rest of the page
                   can safely read selectedClass.joinCode etc before real
                   classes load — it should never appear as a switchable
@@ -2479,7 +2462,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                       const found = realClasses.find(c => c.id === e.target.value);
                       if (found) setSelectedClass(found);
                     }}
-                    className={`font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
+                    className={`w-full min-h-11 truncate font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
                       isThemeNight ? 'bg-brand-dark border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
                     }`}
                   >
@@ -2506,45 +2489,14 @@ export default function TeacherPage({ isNight = true }: Props) {
               )}
             </div>
 
-            {/* Create/Delete are gated to whoever actually owns the class
-                doc server-side (firestore.rules: teacherUid == requester or
-                admin — in practice the director who created it). Showing
-                these to FT/KT used to mean the button existed but silently
-                failed the permission check on click, surfacing as a
-                misleading "removed on this device only" sync warning
-                instead of a clear "you can't do that" (Audit: delete-class
-                button visible to whoever can't actually delete). */}
-            {(loginRole === 'director' || user?.role === 'director') && (
-              <button
-                type="button"
-                onClick={() => setShowCreateClassModal(true)}
-                className="group px-3.5 py-2.5 border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] font-bold text-xs shrink-0 active:scale-[0.97] flex items-center gap-1.5 cursor-pointer"
-                title={isKo ? '새 학급 추가' : 'Add New Class'}
-              >
-                <Plus size={16} weight="bold" className="group-hover:rotate-90 transition-transform" />
-                <span className="hidden sm:inline">{isKo ? '새 학급' : 'New Class'}</span>
-              </button>
-            )}
-            {selectedClass && !selectedClass.isDemo && (loginRole === 'director' || user?.role === 'director') && (
-              <button
-                type="button"
-                onClick={() => handleDeleteClass(selectedClass.id)}
-                disabled={isDeletingClass}
-                className={`text-xs font-bold px-3 py-2 border rounded-2xl flex items-center gap-1.5 transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-[0.97] disabled:opacity-50 ${
-                  isThemeNight 
-                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' 
-                    : 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
-                }`}
-                title={isKo ? '현재 선택된 학급 삭제' : 'Delete selected class'}
-              >
-                <Trash size={14} weight="bold" />
-                <span className="hidden lg:inline">{isKo ? '학급 삭제' : 'Delete'}</span>
-              </button>
-            )}
+            {/* New/Delete class live in the Classes tab (onNewClassClick /
+                onDeleteClass) — the toolbar copies put a delete button on
+                every director screen and wrapped the toolbar to 3 rows on
+                phones. */}
           </div>
 
           {/* Right Controls: Active Week Counter + Language Switcher + Theme Toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {selectedClass && !selectedClass.isDemo && (
               <div className="flex items-center gap-2">
                 <div className={`border rounded-2xl flex items-center overflow-hidden p-1 shadow-inner ${
@@ -2564,12 +2516,12 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="button"
                     onClick={() => setShowWeekCalendarModal(true)}
-                    className={`px-3 py-1 text-xs font-black min-w-[3.4rem] text-center font-mono rounded-lg transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
+                    className={`px-3 py-1 text-xs font-black min-w-[3.4rem] whitespace-nowrap text-center rounded-lg transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
                       isThemeNight ? 'text-white hover:bg-white/10 hover:text-orange-400' : 'text-zinc-900 hover:bg-zinc-200 hover:text-orange-600'
                     }`}
                     title={isKo ? '클릭하여 학기 주차별 커리큘럼 업로드 캘린더 열기' : 'Click to view semester calendar'}
                   >
-                    W{selectedClass?.activeWeekNumber || 1}
+                    {isKo ? `${selectedClass?.activeWeekNumber || 1}주차` : `Week ${selectedClass?.activeWeekNumber || 1}`}
                   </button>
                   <button
                     type="button"
@@ -2608,9 +2560,9 @@ export default function TeacherPage({ isNight = true }: Props) {
                 isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-200'
               }`}
               title="Switch Language / 언어 변경"
+              aria-label={language === 'ko' ? 'Switch to English' : '한국어로 전환'}
             >
-              <span>🌐</span>
-              <span>{language === 'ko' ? '한국어' : 'EN'}</span>
+              <span className="whitespace-nowrap">{language === 'ko' ? 'EN' : '한국어'}</span>
             </button>
 
             {/* Theme Toggle (Light / Dark) */}
@@ -3001,15 +2953,15 @@ export default function TeacherPage({ isNight = true }: Props) {
                       }`}>
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 text-orange-500 font-bold rounded-lg text-[9px] uppercase tracking-wider font-mono">
+                            <span className="px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 text-orange-500 font-bold rounded-lg text-[9px] uppercase tracking-wider">
                               {m.type || 'Phonics'}
                             </span>
                             {m.isResolved || m.attemptNumber > 1 ? (
-                              <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-bold rounded-md text-[9px] uppercase font-mono">
+                              <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-bold rounded-md text-[9px] uppercase">
                                 ⚡ {isKo ? '2차 재도전 수정 완료' : 'Fixed on Rescan'}
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 font-bold rounded-md text-[9px] uppercase font-mono">
+                              <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 font-bold rounded-md text-[9px] uppercase">
                                 📋 {isKo ? '1차 스캔 기록' : '1st Scan Attempt'}
                               </span>
                             )}
@@ -3109,7 +3061,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
               <form onSubmit={handleCreateClass} className="space-y-4">
                 <div className="space-y-2 text-left">
-                  <label htmlFor="new-class-name" className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                  <label htmlFor="new-class-name" className="text-xs font-bold text-zinc-400 pl-1">
                     {isKo ? '반 이름' : 'Class Name'}
                   </label>
                   <input
@@ -3126,7 +3078,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <label htmlFor="new-class-level" className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+                  <label htmlFor="new-class-level" className="text-xs font-bold text-zinc-400 pl-1">
                     {isKo ? '대상 학년' : 'Class Level'}
                   </label>
                   <select
@@ -3207,18 +3159,18 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <Gear size={24} weight="bold" />
                 </div>
                 <div>
-                  <span className={`text-[10px] font-bold uppercase tracking-widest block font-mono ${
+                  <span className={`text-[10px] font-bold uppercase tracking-widest block ${
                     loginRole === 'director' || user?.role === 'director' ? 'text-amber-400' : 'text-orange-500'
                   }`}>
                     {loginRole === 'director' || user?.role === 'director' 
-                      ? (isKo ? '🏢 원장님 HQ 전용 설정' : '🏢 DIRECTOR HQ SETTINGS')
+                      ? (isKo ? '원장님 설정' : 'Director settings')
                       : (educatorRole === 'kt' 
                           ? (isKo ? '👩‍🏫 한국인 교사 계정 설정' : '👩‍🏫 KOREAN TEACHER (KT) SETTINGS')
                           : (isKo ? '👨‍🏫 원어민 교사 계정 설정' : '👨‍🏫 FOREIGN TEACHER (FT) SETTINGS'))}
                   </span>
                   <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                     {loginRole === 'director' || user?.role === 'director'
-                      ? (isKo ? '원장님 HQ 환경 설정' : 'Director HQ Account & Settings')
+                      ? (isKo ? '원장님 설정' : 'Director settings')
                       : (educatorRole === 'kt'
                           ? (isKo ? '한국인 선생님 환경 설정' : 'Korean Teacher Account & Settings')
                           : (isKo ? '원어민 선생님 환경 설정' : 'Foreign Teacher Account & Settings'))}
@@ -3231,7 +3183,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <div className={`p-4 border rounded-2xl space-y-2 ${
                   isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
                 }`}>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block">
                     {isKo ? '계정 프로필 정보' : 'ACCOUNT PROFILE'}
                   </span>
                   <div className="flex justify-between items-center text-xs">

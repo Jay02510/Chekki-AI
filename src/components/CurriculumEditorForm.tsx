@@ -193,19 +193,16 @@ export const CurriculumEditorForm: React.FC<Props> = ({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h4 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                <h4 className={`text-lg sm:text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
                   {activeTab === 'syllabus'
-                    ? (isKo ? `📘 주간 학과목/교재 범위 설정 (Week ${selectedClass?.activeWeekNumber || 1})` : `📘 Course Syllabus & Scope (Week ${selectedClass?.activeWeekNumber || 1})`)
-                    : (isKo ? `📄 일간 워크시트 및 오답 채점 (Week ${selectedClass?.activeWeekNumber || 1})` : `📄 Daily Homework Worksheet Scanner (Week ${selectedClass?.activeWeekNumber || 1})`)}
+                    ? (isKo ? `${selectedClass?.activeWeekNumber || 1}주차 수업 범위` : `Week ${selectedClass?.activeWeekNumber || 1} syllabus`)
+                    : (isKo ? `${selectedClass?.activeWeekNumber || 1}주차 정답지` : `Week ${selectedClass?.activeWeekNumber || 1} answer key`)}
                 </h4>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono">
-                  ✍️ {isKo ? `담당 교사: ${user?.name || user?.email?.split('@')[0] || '원어민 교사'}` : `Assigned: ${user?.name || user?.email?.split('@')[0] || 'FT Teacher'}`}
-                </span>
               </div>
               <p className="text-xs text-zinc-400 mt-0.5">
                 {activeTab === 'syllabus'
                   ? (isKo ? '선택된 학급의 교재목차, 주차별 학습 주제, 어휘 및 파닉스 범위를 구성합니다.' : 'Configure course textbook, weekly topics, vocabulary lists, and phonics targets.')
-                  : (isKo ? '학생이 작성한 매일 워크시트 종이를 스캔하여 학부모 채점 그린 잉크 오버레이를 생성합니다.' : 'Upload scanned physical student worksheet papers to generate Green Ink overlays.')}
+                  : (isKo ? '이번 주 워크시트 정답지를 올리면 학부모 앱이 이 정답으로 채점합니다.' : "Upload this week's worksheet answer key — the parent app grades against it.")}
               </p>
             </div>
           </div>
@@ -238,66 +235,25 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               </div>
             )}
 
-            {/* Target Class & Target Textbook Selection Lock Bar */}
-            <div className={`p-4 rounded-2xl border space-y-3 mb-6 transition-all ${
-              isThemeNight ? 'bg-orange-500/5 border-orange-500/20' : 'bg-orange-50/60 border-orange-200'
-            }`}>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div>
-                  <span className="text-[10px] font-mono font-black text-orange-500 uppercase tracking-widest block">
-                    📌 {isKo ? '적용 학급반 & 교재 지정 (Target Class & Textbook Lock)' : 'Target Class & Textbook Lock'}
-                  </span>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">
-                    {isKo
-                      ? '현재 업로드 중인 커리큘럼이 적용될 학급반과 교재명을 정확히 지정하세요. 폼 및 대시보드가 실시간 동기화됩니다.'
-                      : 'Specify the exact class and textbook name for this upload. Auto-syncs with teacher forms to prevent wrong-class logs.'}
-                  </p>
-                </div>
+            {/* Class is picked in the page toolbar's switcher — the second
+                class <select> that used to live here was a duplicate. Only
+                the textbook field is specific to this tab. */}
+            {activeTab === 'syllabus' && (
+              <div className="space-y-1 mb-6">
+                <label className="text-xs font-bold text-zinc-400 block">
+                  {isKo ? '교재명' : 'Textbook'}
+                </label>
+                <input
+                  type="text"
+                  value={selectedTextbookName}
+                  onChange={(e) => setSelectedTextbookName(e.target.value)}
+                  placeholder={isKo ? '예: Bricks Reading 150 (Book 1)' : 'e.g. Bricks Reading 150 (Book 1)'}
+                  className={`w-full p-2.5 min-h-11 rounded-xl border text-sm font-bold outline-none focus:border-orange-500 ${
+                    isThemeNight ? 'bg-brand-dark border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
+                  }`}
+                />
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                {/* Target Class Selector */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-                    {isKo ? '적용 학급반 (Target Class)' : 'Target Class'}
-                  </label>
-                  <select
-                    value={selectedClass?.id || ''}
-                    onChange={(e) => {
-                      const target = classes.find(c => c.id === e.target.value);
-                      if (target) setSelectedClass(target);
-                    }}
-                    className={`w-full p-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 cursor-pointer ${
-                      isThemeNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-                    }`}
-                  >
-                    {classes.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        🏫 {c.name} ({c.level || 'Active Class'})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Target Textbook Name Input — Syllabus tab only */}
-                {activeTab === 'syllabus' && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-                    {isKo ? '교재명 (Textbook Title)' : 'Textbook Title'}
-                  </label>
-                  <input
-                    type="text"
-                    value={selectedTextbookName}
-                    onChange={(e) => setSelectedTextbookName(e.target.value)}
-                    placeholder="E.g. Bricks Reading 150 (Book 1)"
-                    className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 ${
-                      isThemeNight ? 'bg-brand-dark border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
-                    }`}
-                  />
-                </div>
-                )}
-              </div>
-            </div>
+            )}
 
             {/* MODE 1: SYLLABUS & COURSE DURATION MANAGER */}
             {uploadMode === 'syllabus' && (
@@ -534,36 +490,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
             {/* MODE 2: DAILY HOMEWORK WORKSHEET & ANSWER KEY SCANNER */}
             {activeTab === 'homework' && (
               <div className="space-y-4">
-                {/* FT Quick Week Switcher Header Bar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-orange-400">⚡ ACTIVE SCANNING WEEK:</span>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateWeek(-1)}
-                        className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-all cursor-pointer active:scale-95"
-                      >
-                        ‹ Prev
-                      </button>
-                      <span className="px-3 py-1 rounded-xl bg-orange-500/20 text-orange-400 font-black text-xs border border-orange-500/30 font-mono">
-                        Week {selectedClass?.activeWeekNumber || 1}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateWeek(1)}
-                        className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-all cursor-pointer active:scale-95"
-                      >
-                        Next ›
-                      </button>
-                    </div>
-                  </div>
-                  <span className="text-[11px] text-zinc-400 font-mono">
-                    Class: {selectedClass?.name || '7A'}
-                  </span>
-                </div>
-
-
+                {/* Week is changed from the page toolbar (same handleUpdateWeek). */}
                 <div
                   onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
                   onDragLeave={() => setIsDraggingFile(false)}
@@ -627,10 +554,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                             <span>
                               {worksheetFileName
                                 ? (worksheetFileName.length > 28 ? worksheetFileName.substring(0, 25) + '...' : worksheetFileName)
-                                : (isKo ? '📄 일간 워크시트/정답지 업로드 (Photo/PDF)' : '📄 Upload Homework Worksheet / Answer Key (Photo/PDF)')}
-                            </span>
-                            <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-[9px] font-black uppercase rounded-md border border-orange-500/30">
-                              Answer Key Mode
+                                : (isKo ? '정답지 사진 또는 PDF 올리기' : 'Upload answer key (photo or PDF)')}
                             </span>
                           </h5>
                           <p className="text-xs text-zinc-400 mt-0.5">
@@ -676,8 +600,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
                         {/* Rescan actions — replace the current worksheet with a new photo */}
                         <label className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
-                          <span>📷</span>
-                          <span>{isKo ? '카메라 바로 촬영' : 'Camera Snap'}</span>
+                          <span>{isKo ? '카메라로 찍기' : 'Take photo'}</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -1130,7 +1053,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               </div>
             )}
 
-            <div className={`flex items-center gap-4 justify-between pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
+            <div className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
               {curriculumLastEditedByName ? (
                 <p className="text-[11px] text-zinc-400">
                   {isKo ? '마지막 수정: ' : 'Last edited by '}
@@ -1140,12 +1063,12 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   )}
                 </p>
               ) : <span />}
-              <div className="flex gap-4">
+              <div className="flex gap-3">
               <button
                 type="button"
                 onClick={loadCurriculum}
                 disabled={isSavingCurriculum}
-                className={`px-6 py-3.5 rounded-2xl text-xs font-bold border transition-all active:scale-[0.98] cursor-pointer ${
+                className={`px-5 min-h-12 whitespace-nowrap shrink-0 rounded-2xl text-sm font-bold border transition-all active:scale-[0.98] cursor-pointer ${
                   isThemeNight ? 'bg-brand-dark hover:bg-white/5 text-zinc-400 hover:text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
                 }`}
               >
@@ -1155,13 +1078,13 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               <button
                 type="submit"
                 disabled={isSavingCurriculum}
-                className="group px-7 py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
+                className="group flex-1 sm:flex-none px-6 min-h-12 whitespace-nowrap bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
               >
                 {isSavingCurriculum ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span>{isKo ? '주간 계획 저장' : 'Save Curriculum'}</span>
+                    <span>{isKo ? '저장' : 'Save'}</span>
                     <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <CheckCircle size={14} weight="bold" />
                     </div>

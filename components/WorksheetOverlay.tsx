@@ -468,10 +468,10 @@ export const WorksheetOverlay: React.FC<Props> = ({
               onClick={handleToggleAnswers}
               className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-[background-color,border-color,color,transform] active:scale-[0.97] border-2 ${
                 showAnswers
-                  ? 'bg-blue-500 text-white border-blue-400 shadow-sm'
+                  ? 'bg-white text-black border-white shadow-sm'
                   : isNight
-                    ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-blue-500/50 hover:text-blue-400'
-                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-blue-500/50 hover:text-blue-500'
+                    ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-orange-500/50 hover:text-orange-400'
+                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-orange-500/50 hover:text-orange-500'
               }`}
             >
               {showAnswers
@@ -551,8 +551,8 @@ export const WorksheetOverlay: React.FC<Props> = ({
                       onClick={handleToggleAnswers}
                       className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-[background-color,border-color,color,transform] active:scale-[0.97] border-2 ${
                         showAnswers
-                          ? 'bg-blue-500 text-white border-blue-400 shadow-sm'
-                          : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-blue-500/50 hover:text-blue-400'
+                          ? 'bg-white text-black border-white shadow-sm'
+                          : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-orange-500/50 hover:text-orange-400'
                       }`}
                     >
                       {showAnswers

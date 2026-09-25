@@ -162,7 +162,7 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
             : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100'
         }`}
       >
-        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">
+        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
           {isKo
             ? `검토 대기열 (${filteredLogs.length}/${logs.length}건)`
             : `Review Queue (${filteredLogs.length}/${logs.length})`}
@@ -332,22 +332,22 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
                         {isCopied && <CheckCircle size={14} weight="fill" className="shrink-0" />}
                         <span className="text-xs font-bold truncate">{log.studentName}</span>
                         {log.className && (
-                          <span className="text-[10px] font-mono opacity-70 truncate">
+                          <span className="text-xs opacity-70 truncate">
                             {log.className}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {log.date && (
-                          <span className="text-[10px] font-mono opacity-70">{log.date}</span>
+                          <span className="text-xs opacity-70">{log.date}</span>
                         )}
                         {log.flaggedCount > 0 && (
-                          <span className="text-[10px] font-mono font-bold text-amber-400">
+                          <span className="text-xs font-bold text-amber-400">
                             ⚠️ {log.flaggedCount}
                           </span>
                         )}
                         {isCopied && (
-                          <span className="text-[10px] font-mono font-bold">
+                          <span className="text-xs font-bold">
                             {isKo ? '복사됨' : 'Copied'}
                           </span>
                         )}

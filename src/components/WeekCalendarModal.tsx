@@ -56,7 +56,7 @@ export const WeekCalendarModal: React.FC<Props> = ({
               <Calendar size={24} weight="bold" />
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 font-mono">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500">
                 {isKo ? '주차별 커리큘럼 업로드 현황' : 'CURRICULUM UPLOAD CALENDAR'}
               </span>
               <h3 id="week-calendar-title" className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>

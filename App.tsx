@@ -987,7 +987,9 @@ function AppContent() {
         </main>
 
         {/* --- PROFESSIONAL BUSINESS FOOTER --- */}
-        {!isLocked && (
+        {/* Business-registration footer is for the web; native users reach
+            the same legal pages from Settings. */}
+        {!isLocked && !Capacitor.isNativePlatform() && (
           <Footer
             isNight={isNight}
             language={language}

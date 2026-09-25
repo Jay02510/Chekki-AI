@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { KtReviewQueue } from './KtReviewQueue';
 import { NativeKtDashboard } from './NativeKtDashboard';
-import { FtStatCards } from './NativeFtDashboard';
 import { NativeTeacherLogForm } from './NativeTeacherLogForm';
 import { CurriculumEditorForm } from './CurriculumEditorForm';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
@@ -171,25 +170,16 @@ export function KtTabContent(props: Props) {
         // since a KT checking class status almost always wants both at
         // once, and switching tabs just to see names was pure friction).
         <div className="space-y-6 animate-fade-in">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-              {isKo ? '선택된 반:' : 'Active class:'} <span className="font-mono font-bold">{props.activeClass?.name || '—'}</span>
-            </p>
-            <button
-              type="button"
-              onClick={() => props.setActiveTab('kt_script')}
-              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl transition-all cursor-pointer"
-            >
-              {isKo ? '알림톡 작성하기 →' : 'Go to Script →'}
-            </button>
-          </div>
-          <FtStatCards
-            isNight={isNight}
-            isKo={isKo}
-            completionRate={props.completionRate}
-            completedHomeworkCount={props.completedHomeworkCount}
-            activeStudentsCount={props.activeStudentsCount}
-          />
+          {/* Class name lives in the toolbar switcher, and StudentDatabaseGrid
+              below already shows this week's scan rate plus every student —
+              the FtStatCards pair here repeated both numbers. */}
+          <button
+            type="button"
+            onClick={() => props.setActiveTab('kt_script')}
+            className="w-full sm:w-auto px-4 min-h-11 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-xl transition-colors cursor-pointer"
+          >
+            {isKo ? '학부모 리포트 검토하기 →' : 'Review parent reports →'}
+          </button>
 
           {props.selectedClass && !props.selectedClass.isDemo && (
             showInvitePanel ? (

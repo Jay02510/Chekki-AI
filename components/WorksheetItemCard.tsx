@@ -163,7 +163,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
 
             <div className="flex-1 min-w-0">
               <h4
-                className={`text-sm md:text-lg font-bold leading-relaxed transition-colors break-words min-w-0 ${isActive ? (isNight ? 'text-white' : 'text-zinc-900') : isNight ? 'text-zinc-500' : 'text-zinc-600'} ${item.question_translation ? 'mb-1' : 'mb-3'}`}
+                className={`text-sm md:text-lg font-bold leading-relaxed transition-colors break-words min-w-0 ${isActive ? (isNight ? 'text-white' : 'text-zinc-900') : isNight ? 'text-zinc-300' : 'text-zinc-700'} ${item.question_translation ? 'mb-1' : 'mb-3'}`}
               >
                 {item.question_text.replace(/^\d+[.)\s]+/, '')}
               </h4>

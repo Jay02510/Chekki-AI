@@ -214,25 +214,16 @@ export const CameraView: React.FC<Props> = ({
     ];
 
     return (
-      <div className="w-full max-w-md md:max-w-xl mx-auto mt-4 mb-2 grid grid-cols-3 gap-2 px-1">
-        {tips.map((tip, idx) => (
-          <div
-            key={idx}
-            className={`relative group p-2.5 rounded-2xl border flex flex-col items-center text-center gap-1 transition-colors ${
-              isNight
-                ? 'bg-zinc-900/30 border-white/5 hover:bg-zinc-900/50'
-                : 'bg-orange-50/20 border-orange-100/30 shadow-[0_4px_12px_rgba(0,0,0,0.015)] lg:hover:border-orange-500/30'
-            }`}
-          >
-            <span className="text-sm md:text-base leading-none">{tip.emoji}</span>
-            <span
-              className={`text-[9px] md:text-xs font-black uppercase tracking-widest leading-none ${isNight ? 'text-zinc-400' : 'text-zinc-800'}`}
-            >
-              {tip.label}
-            </span>
-          </div>
+      <p
+        className={`mt-3 text-xs md:text-sm font-bold flex items-center justify-center gap-3 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
+      >
+        {tips.map((tip) => (
+          <span key={tip.label} title={tip.desc} className="flex items-center gap-1">
+            <span aria-hidden="true">{tip.emoji}</span>
+            {tip.label}
+          </span>
         ))}
-      </div>
+      </p>
     );
   };
 
@@ -407,10 +398,10 @@ export const CameraView: React.FC<Props> = ({
                   title={t('btn_guest_scan')}
                 >
                   <div
-                    className={`w-16 h-16 md:w-28 md:h-28 rounded-full ${isNight ? 'bg-[#1a1a1a] border-white/10' : 'bg-orange-500 border-white/20'} flex items-center justify-center shadow-md transition-[transform,box-shadow] duration-200 ease-[var(--ease-premium)] group-hover:scale-110 group-hover:shadow-lg border-4 active:scale-90 `}
+                    className={`w-16 h-16 md:w-28 md:h-28 rounded-full bg-orange-500 border-white/20 flex items-center justify-center shadow-lg shadow-orange-500/30 transition-[transform,box-shadow] duration-200 ease-[var(--ease-premium)] group-hover:scale-110 group-hover:shadow-lg border-4 active:scale-90 `}
                   >
                     <svg
-                      className="w-8 h-8 md:w-14 md:h-14 text-white"
+                      className="w-8 h-8 md:w-14 md:h-14 text-black"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -430,7 +421,7 @@ export const CameraView: React.FC<Props> = ({
                     </svg>
                   </div>
                   <span
-                    className={`text-xs md:text-lg font-black tracking-wider transition-colors ${isNight ? 'text-zinc-500 group-hover:text-white' : 'text-zinc-400 group-hover:text-zinc-900'}`}
+                    className={`text-xs md:text-lg font-black tracking-wider transition-colors ${isNight ? 'text-white' : 'text-zinc-900'}`}
                   >
                     {isAuthenticated ? t('btn_upload') : t('btn_guest_scan')}
                   </span>
@@ -442,20 +433,6 @@ export const CameraView: React.FC<Props> = ({
                   </div>
                 </button>
 
-                <div className="mt-4 animate-fade-in-up">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenHelp?.();
-                    }}
-                    className={`px-6 py-2.5 rounded-full border ${isNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 shadow-sm'} text-[10px] md:text-xs font-black tracking-wider transition-colors duration-200 flex items-center gap-2 group/help`}
-                  >
-                    {language === 'ko' ? '❓ 3단계 사용 가이드 보기' : '❓ View 3-Step Scan Guide'}
-                    <span className="opacity-0 group-hover/help:opacity-100 group-hover/help:translate-x-1 transition-[opacity,transform]">
-                      →
-                    </span>
-                  </button>
-                </div>
               </>
             )}
           </div>
@@ -584,7 +561,7 @@ export const CameraView: React.FC<Props> = ({
             {user.schoolName && (
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-1 shadow-xl backdrop-blur-sm">
                 <span className="text-xs">🏫</span>
-                <span className="text-[8px] md:text-xs font-black text-indigo-400 uppercase tracking-[0.1em]">
+                <span className="text-xs font-bold text-indigo-300">
                   {user.schoolName}
                 </span>
               </div>
@@ -605,18 +582,6 @@ export const CameraView: React.FC<Props> = ({
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
-            {isPro && user.schoolId && (
-              <div
-                className={`border rounded-full py-2.5 px-6 flex items-center gap-4 shadow-2xl transition-colors duration-200 bg-indigo-500/10 border-white/20 backdrop-blur-md`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs">🏫</span>
-                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                    {user.schoolName || 'School Active'}
-                  </span>
-                </div>
-              </div>
-            )}
             {!isPro && (
               <div
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-2 shadow-sm ${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-100 border-zinc-200'}`}
@@ -673,7 +638,6 @@ export const CameraView: React.FC<Props> = ({
             />
           )}
           {renderDropZone('large')}
-          {renderTrustAndSteps()}
           {minimal ? null : renderFeatureBanner()}
         </div>
       </div>

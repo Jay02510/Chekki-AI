@@ -78,7 +78,7 @@ export const StatTile: React.FC<StatTileProps> = ({
       >
         <div className="flex items-center justify-between mb-4">
           <span
-            className={`text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 ${
+            className={`text-xs font-bold flex items-center gap-1.5 ${
               isNight ? 'text-zinc-400' : 'text-zinc-500'
             }`}
           >

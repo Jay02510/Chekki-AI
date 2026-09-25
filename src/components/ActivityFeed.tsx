@@ -62,7 +62,7 @@ export const ActivityFeed: React.FC<Props> = ({ isNight = true, isKo = false, sc
     <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
       <div className="flex items-center gap-2">
         <ClockCounterClockwise size={16} weight="bold" className="text-zinc-400" />
-        <span className="text-[10px] font-bold text-zinc-400 uppercase font-mono tracking-wider">
+        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
           {isKo ? '최근 활동' : 'Recent Activity'}
         </span>
       </div>
@@ -72,7 +72,7 @@ export const ActivityFeed: React.FC<Props> = ({ isNight = true, isKo = false, sc
             <span className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
               <span className="font-bold">{entry.actorName}</span>{' '}
               {isKo ? (LABELS[entry.type]?.ko || entry.type) : (LABELS[entry.type]?.en || entry.type)}{' '}
-              <span className="font-mono">{entry.targetLabel}</span>
+              <span className="font-bold">{entry.targetLabel}</span>
             </span>
             {entry.createdAt && (
               <span className="text-[10px] text-zinc-400 shrink-0">

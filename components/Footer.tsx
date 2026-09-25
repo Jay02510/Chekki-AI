@@ -78,8 +78,8 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
         </div>
       </div>
       <div className="max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p className="text-[10px] md:text-xs text-zinc-600 font-bold uppercase tracking-widest">
-          © 2026 CHEKKI AI. ALL RIGHTS RESERVED.
+        <p className="text-[11px] md:text-xs text-zinc-500 font-bold">
+          © 2026 Chekki AI. All rights reserved.
         </p>
         <div className="flex gap-4 md:gap-6">
           <a
@@ -90,33 +90,33 @@ export const Footer: React.FC<FooterProps> = ({ isNight, language, onLegalClick 
               window.history.pushState({}, '', '/faq');
               window.dispatchEvent(new PopStateEvent('popstate'));
             }}
-            className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors"
+            className="text-[10px] md:text-xs text-zinc-400 hover:text-orange-500 font-bold transition-colors"
           >
             FAQ
           </a>
           <button
             onClick={() => onLegalClick('privacy')}
-            className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors"
+            className="text-[10px] md:text-xs text-zinc-400 hover:text-orange-500 font-bold transition-colors"
           >
-            Privacy
+            {language === 'ko' ? '개인정보처리방침' : 'Privacy'}
           </button>
           <button
             onClick={() => onLegalClick('terms')}
-            className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors"
+            className="text-[10px] md:text-xs text-zinc-400 hover:text-orange-500 font-bold transition-colors"
           >
-            Terms
+            {language === 'ko' ? '이용약관' : 'Terms'}
           </button>
           <button
             onClick={() => onLegalClick('support')}
-            className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors"
+            className="text-[10px] md:text-xs text-zinc-400 hover:text-orange-500 font-bold transition-colors"
           >
-            Support
+            {language === 'ko' ? '고객지원' : 'Support'}
           </button>
           <button
             onClick={() => onLegalClick('refund')}
-            className="text-[10px] md:text-xs text-zinc-600 hover:text-orange-500 font-bold uppercase tracking-widest transition-colors"
+            className="text-[10px] md:text-xs text-zinc-400 hover:text-orange-500 font-bold transition-colors"
           >
-            Refund
+            {language === 'ko' ? '환불정책' : 'Refund'}
           </button>
         </div>
       </div>

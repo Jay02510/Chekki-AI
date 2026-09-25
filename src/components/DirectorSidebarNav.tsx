@@ -33,7 +33,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
           }`}>
             <Buildings size={18} weight="bold" />
           </div>
-          <span>{isKo ? '🏢 원장님 HQ 총괄 대시보드' : '🏢 Director HQ Dashboard'}</span>
+          <span>{isKo ? '대시보드' : 'Dashboard'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'director_hq' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
@@ -61,7 +61,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
             }`}>
               <Users size={18} weight="bold" />
             </div>
-            <span>{isKo ? '👥 학생 관리' : '👥 Students'}</span>
+            <span>{isKo ? '학생' : 'Students'}</span>
           </div>
           <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
         </button>
@@ -84,7 +84,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
             }`}>
               <Table size={18} weight="bold" />
             </div>
-            <span>{isKo ? '🏫 학급 관리' : '🏫 Classes'}</span>
+            <span>{isKo ? '학급' : 'Classes'}</span>
           </div>
           <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'classes' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
         </button>
@@ -107,7 +107,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
             }`}>
               <UserGear size={18} weight="bold" />
             </div>
-            <span>{isKo ? '🧑‍🏫 선생님 배정' : '🧑‍🏫 Teacher Assignment'}</span>
+            <span>{isKo ? '선생님 배정' : 'Teachers'}</span>
           </div>
           <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'teacher_assignment' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
         </button>
@@ -130,7 +130,7 @@ export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: P
             }`}>
               <CreditCard size={18} weight="bold" />
             </div>
-            <span>{isKo ? '💳 요금제 및 결제' : '💳 Billing'}</span>
+            <span>{isKo ? '결제' : 'Billing'}</span>
           </div>
           <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'billing' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
         </button>

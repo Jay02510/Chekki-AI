@@ -176,9 +176,9 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
       <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div>
-            <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">Current Plan</span>
+            <span className="text-xs font-bold text-zinc-400 block">{isKo ? '현재 요금제' : 'Current plan'}</span>
             <h4 className={`font-black text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>{planLabel}</h4>
-            {createdAt && <p className="text-[11px] text-zinc-400 mt-0.5">Since {new Date(createdAt).toLocaleDateString()}</p>}
+            {createdAt && <p className="text-[11px] text-zinc-400 mt-0.5">{isKo ? `시작일: ${new Date(createdAt).toLocaleDateString()}` : `Since ${new Date(createdAt).toLocaleDateString()}`}</p>}
             {renewsAt && (
               <p className="text-[11px] text-zinc-400 mt-0.5">
                 {isKo ? `다음 결제일: ${renewsAt.toLocaleDateString()}` : `Renews ${renewsAt.toLocaleDateString()}`}
@@ -204,22 +204,22 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
 
         <div className="grid grid-cols-2 gap-4">
           <div className={`p-4 rounded-xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 block font-mono">FT Seats</span>
+            <span className="text-xs font-bold text-zinc-400 block">{isKo ? '원어민 선생님 좌석' : 'FT seats'}</span>
             <h4 className={`text-xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-              {usedSeats.ft} <span className="text-xs font-normal text-zinc-400">/ {seatsTotal.ft} used</span>
+              {usedSeats.ft} <span className="text-xs font-normal text-zinc-400">/ {seatsTotal.ft} {isKo ? '사용' : 'used'}</span>
             </h4>
           </div>
           <div className={`p-4 rounded-xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400 block font-mono">KT Seats</span>
+            <span className="text-xs font-bold text-zinc-400 block">{isKo ? '한국인 선생님 좌석' : 'KT seats'}</span>
             <h4 className={`text-xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-              {usedSeats.kt} <span className="text-xs font-normal text-zinc-400">/ {seatsTotal.kt} used</span>
+              {usedSeats.kt} <span className="text-xs font-normal text-zinc-400">/ {seatsTotal.kt} {isKo ? '사용' : 'used'}</span>
             </h4>
           </div>
         </div>
       </div>
 
       <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-        <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">
+        <span className="text-xs font-bold text-zinc-400 block">
           {isKo ? '데이터 관리' : 'Data Management'}
         </span>
         <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
@@ -255,7 +255,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
       </div>
 
       <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-        <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">
+        <span className="text-xs font-bold text-zinc-400 block">
           {isKo ? '요청 내역' : 'Billing History'}
         </span>
         {invoicesError ? (

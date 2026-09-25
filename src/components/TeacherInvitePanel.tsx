@@ -256,10 +256,10 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
         <h3 className="font-black text-sm">{isKo ? '선생님 초대' : 'Invite Teachers'}</h3>
         <div className="flex gap-2 text-[11px] font-mono font-bold">
           <span className="px-2 py-1 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20">
-            FT {remainingFt}/{seatsTotal.ft}
+            FT {isKo ? `${remainingFt}석 남음` : `${remainingFt} left`}
           </span>
           <span className="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
-            KT {remainingKt}/{seatsTotal.kt}
+            KT {isKo ? `${remainingKt}석 남음` : `${remainingKt} left`}
           </span>
         </div>
       </div>

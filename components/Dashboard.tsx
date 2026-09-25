@@ -467,7 +467,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           <ParentClassLogs classId={user.classId} studentName={user.studentName} language={language} />
         )}
 
-        {/* B2B Customer Acquisition Banner: Invite Academy Director */}
+        {/* B2B Customer Acquisition Banner: Invite Academy Director — hidden
+            once the parent is linked to a school (their academy already
+            uses Chekki). */}
+        {!user?.schoolId && (
         <div className="mb-6 p-4 md:p-5 rounded-2xl bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-purple-500/15 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center shrink-0">
@@ -525,6 +528,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             <span>{language === 'ko' ? '원장님 초대장 전송 / 복사' : 'Share / Copy Director Invite'}</span>
           </button>
         </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
           <div
@@ -596,8 +600,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   </div>
                 ) : (
                   <>
-                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-2">
-                      Past Mistakes
+                    <h3 className="text-xs font-bold text-zinc-400 mb-2">
+                      {language === 'ko' ? '지난 오답' : 'Past mistakes'}
                     </h3>
                     {mistakes.length === 0 ? (
                       <div className="flex flex-col items-center justify-center p-8 text-center h-full">

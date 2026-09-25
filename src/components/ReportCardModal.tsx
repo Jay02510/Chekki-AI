@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Printer, Sparkle, PhoneCall } from '@phosphor-icons/react';
+import { X, Printer, Sparkle, PhoneCall, ShareNetwork } from '@phosphor-icons/react';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { dbInstance } from '../../services/database';
 import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
@@ -255,29 +257,34 @@ export const ReportCardModal: React.FC<Props> = ({
             )}
           </div>
 
-          {/* Print Action Bar */}
-          <div className="mt-6 pt-4 border-t border-zinc-200 flex justify-between items-center">
-            <p className="text-[10px] text-zinc-400 font-mono">
-              {isKo ? 'Chekki AI B2B Academy Platform' : 'Chekki AI B2B Academy Platform'}
-            </p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-xs rounded-xl border border-zinc-300 transition-all cursor-pointer"
-              >
-                {isKo ? '닫기' : 'Close'}
-              </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                disabled={talkingPoints === null || talkingPoints.length === 0}
-                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
-              >
-                <Printer size={16} weight="bold" />
-                <span>{isKo ? '인쇄 / PDF 발급' : 'Print / Export PDF'}</span>
-              </button>
-            </div>
+          {/* Print Action Bar — window.print() is a no-op inside the iOS/
+              Android WebView, so native shares the talking points as text.
+              Close lives in the header (X). */}
+          <div className="mt-6 pt-4 border-t border-zinc-200">
+            <button
+              type="button"
+              onClick={async () => {
+                if (!Capacitor.isNativePlatform()) {
+                  window.print();
+                  return;
+                }
+                const name = selectedStudentDetails?.studentName || selectedStudentDetails?.name || '';
+                try {
+                  await Share.share({ title: name, text: `${name}\n\n${(talkingPoints || []).join('\n')}` });
+                } catch {
+                  /* user dismissed the share sheet */
+                }
+              }}
+              disabled={talkingPoints === null || talkingPoints.length === 0}
+              className="w-full sm:w-auto sm:ml-auto px-6 min-h-12 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {Capacitor.isNativePlatform() ? <ShareNetwork size={16} weight="bold" /> : <Printer size={16} weight="bold" />}
+              <span>
+                {Capacitor.isNativePlatform()
+                  ? (isKo ? '공유하기' : 'Share')
+                  : (isKo ? '인쇄 / PDF 저장' : 'Print / Save PDF')}
+              </span>
+            </button>
           </div>
         </div>
       </div>

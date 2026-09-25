@@ -8,7 +8,7 @@ import {
   flexRender,
   type SortingState,
 } from '@tanstack/react-table';
-import { Warning, MagnifyingGlass, DownloadSimple, CaretUp, CaretDown, CaretUpDown, CheckCircle } from '@phosphor-icons/react';
+import { ArrowClockwise, Warning, MagnifyingGlass, DownloadSimple, CaretUp, CaretDown, CaretUpDown, CheckCircle } from '@phosphor-icons/react';
 import { downloadCSV } from '../utils/csvExport';
 import { StatTile } from './ui/StatTile';
 
@@ -286,10 +286,9 @@ export function StudentDatabaseGrid({
             className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] ${
               isNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
             }`}
-            title="Refresh parent scans & roster"
           >
-            <span>🔄</span>
-            <span>{isKo ? '동기화 새로고침' : 'Refresh Live Sync'}</span>
+            <ArrowClockwise size={14} weight="bold" />
+            <span>{isKo ? '새로고침' : 'Refresh'}</span>
           </button>
           <button
             type="button"

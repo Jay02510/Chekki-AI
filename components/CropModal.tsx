@@ -82,8 +82,12 @@ export const CropModal: React.FC<Props> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const { isClosing, close } = useModalExit(onClose);
   const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: close });
-  const [box, setBox] = useState<Box>({ x: 10, y: 10, w: 80, h: 80 });
+  const [box, setBox] = useState<Box>({ x: 3, y: 3, w: 94, h: 94 });
   const [lowResWarning, setLowResWarning] = useState(false);
+  // One "Grade" button: an untouched frame grades the original photo, an
+  // adjusted frame grades the crop (replaces separate Grade Original /
+  // Crop & Grade / Cancel buttons).
+  const [adjusted, setAdjusted] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -104,7 +108,8 @@ export const CropModal: React.FC<Props> = ({
     try {
       const rotated = await rotateImage90(currentImage);
       setCurrentImage(rotated);
-      setBox({ x: 10, y: 10, w: 80, h: 80 });
+      setBox({ x: 3, y: 3, w: 94, h: 94 });
+      setAdjusted(false);
     } catch (err) {
       console.error('Failed to rotate image:', err);
     } finally {
@@ -115,7 +120,11 @@ export const CropModal: React.FC<Props> = ({
   const handleCropSubmit = async () => {
     setIsProcessing(true);
     try {
-      const cropped = await cropImage(currentImage, box);
+      if (!adjusted && currentImage === imageSrc) {
+        onGradeOriginal();
+        return;
+      }
+      const cropped = await cropImage(currentImage, adjusted ? box : { x: 0, y: 0, w: 100, h: 100 });
       onCropComplete(cropped);
     } catch (err) {
       console.error('Failed to crop image:', err);
@@ -127,6 +136,7 @@ export const CropModal: React.FC<Props> = ({
   const startDrag = (e: React.PointerEvent, handler: 'TL' | 'TR' | 'BL' | 'BR' | 'move') => {
     e.preventDefault();
     e.stopPropagation();
+    setAdjusted(true);
 
     const container = containerRef.current;
     if (!container) return;
@@ -215,22 +225,21 @@ export const CropModal: React.FC<Props> = ({
           >
             <div>
               <h3 id="crop-modal-title" className="text-lg md:text-xl font-black tracking-tight">
-                {isKo ? '📸 이미지 편집' : '📸 Edit Image'}
+                {isKo ? '채점할 영역 확인' : 'Check the photo'}
               </h3>
               <p
                 className={`text-xs mt-1 leading-normal ${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-medium font-korean`}
               >
                 {isKo
-                  ? '모서리를 조절해 채점할 영역을 선택하세요. 옆으로 누운 사진은 회전시켜주세요.'
-                  : 'Drag corners to frame the worksheet. Rotate sideways photos upright.'}
+                  ? '필요하면 모서리를 끌어 영역을 맞추세요. 그대로 두면 전체 사진을 채점합니다.'
+                  : 'Drag the corners to frame the worksheet, or leave it to grade the whole photo.'}
               </p>
             </div>
             <button
               onClick={close}
               disabled={isProcessing}
-              className={`p-2 rounded-full transition-colors ${isNight ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100'}`}
-              title="Close"
-              aria-label="Close"
+              className={`w-11 h-11 shrink-0 flex items-center justify-center rounded-full transition-colors ${isNight ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100'}`}
+              aria-label={isKo ? '닫기' : 'Close'}
             >
               ✕
             </button>
@@ -328,14 +337,14 @@ export const CropModal: React.FC<Props> = ({
             <button
               onClick={handleRotate}
               disabled={isProcessing}
-              className={`px-4 py-1.5 rounded-full border text-[11px] md:text-xs font-bold tracking-wider flex items-center gap-1.5 transition-[background-color,color] duration-200 ${
+              className={`px-4 min-h-11 rounded-full border text-xs font-bold tracking-wider flex items-center gap-1.5 transition-[background-color,color] duration-200 ${
                 isNight
                   ? 'bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800'
                   : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
               } disabled:opacity-50`}
             >
-              <span>🔄</span>
-              <span>{isKo ? '90° 회전' : 'Rotate 90°'}</span>
+              <span aria-hidden="true">↻</span>
+              <span>{isKo ? '회전' : 'Rotate'}</span>
             </button>
           </div>
 
@@ -344,38 +353,14 @@ export const CropModal: React.FC<Props> = ({
             className={`p-4 border-t flex flex-col sm:flex-row justify-end gap-2.5 shrink-0 ${isNight ? 'border-zinc-900 bg-zinc-950/60' : 'border-zinc-100 bg-zinc-50/60'}`}
           >
             <button
-              onClick={close}
-              disabled={isProcessing}
-              className={`w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-bold transition-[background-color,color] ${
-                isNight
-                  ? 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800/40'
-                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 border border-zinc-200/40'
-              } disabled:opacity-50`}
-            >
-              {isKo ? '취소' : 'Cancel'}
-            </button>
-
-            <button
-              onClick={onGradeOriginal}
-              disabled={isProcessing}
-              className={`w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-bold border transition-[background-color,color] ${
-                isNight
-                  ? 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:text-white'
-                  : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950'
-              } disabled:opacity-50`}
-            >
-              {isKo ? '원본 채점' : 'Grade Original'}
-            </button>
-
-            <button
               onClick={handleCropSubmit}
               disabled={isProcessing}
-              className="w-full sm:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/10 transition-[background-color,transform] active:scale-[0.98] flex items-center justify-center gap-1.5"
+              className="w-full px-6 min-h-12 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-black text-sm rounded-xl shadow-lg shadow-orange-500/10 transition-[background-color,transform] active:scale-[0.98] flex items-center justify-center gap-1.5"
             >
               {isProcessing ? (
                 <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <span>✂️ {isKo ? '영역 자르고 채점' : 'Crop & Grade'}</span>
+                <span>{isKo ? '채점하기' : 'Grade'}</span>
               )}
             </button>
           </div>

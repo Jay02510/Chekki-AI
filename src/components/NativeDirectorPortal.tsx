@@ -265,62 +265,51 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 
       {/* Portal Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 font-mono">
-              DIRECTOR ADMIN PORTAL
-            </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
-              Campus Manager
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <h3 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-              {academyLogo ? (
-                <img src={academyLogo} alt="" className="w-6 h-6 rounded-lg object-cover" />
-              ) : (
-                <Buildings size={24} className="text-orange-500" />
-              )}
-              <span>{academyName}</span>
-            </h3>
-          </div>
-        </div>
+        <h3 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+          {academyLogo ? (
+            <img src={academyLogo} alt="" className="w-6 h-6 rounded-lg object-cover" />
+          ) : (
+            <Buildings size={24} className="text-orange-500" />
+          )}
+          <span>{academyName}</span>
+        </h3>
 
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
-              activeTab === 'overview'
-                ? 'bg-orange-500 border-orange-500 text-black shadow-md'
-                : isNight
-                ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-            }`}
-          >
-            <SquaresFour size={16} weight="bold" />
-            <span>Overview</span>
-          </button>
+        {/* Tab Navigation — the exceptions tab only exists while something
+            is actually flagged; at zero it was a dead tab plus a duplicate
+            "0" stat card. */}
+        {(flaggedStudents.length > 0 || activeTab === 'exceptions') && (
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab('overview')}
+              className={`px-4 py-2 min-h-11 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
+                activeTab === 'overview'
+                  ? 'bg-orange-500 border-orange-500 text-black shadow-md'
+                  : isNight
+                  ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                  : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+              }`}
+            >
+              <SquaresFour size={16} weight="bold" />
+              <span>{isKo ? '개요' : 'Overview'}</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('exceptions')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border relative ${
-              activeTab === 'exceptions'
-                ? 'bg-orange-500 border-orange-500 text-black shadow-md'
-                : isNight
-                ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-            }`}
-          >
-            <WarningCircle size={16} weight="bold" className="text-amber-400" />
-            <span>Flagged Exceptions ({flaggedStudents.length})</span>
-            {flaggedStudents.length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-rose-500 absolute -top-1 -right-1 animate-ping" />
-            )}
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('exceptions')}
+              className={`px-4 py-2 min-h-11 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
+                activeTab === 'exceptions'
+                  ? 'bg-orange-500 border-orange-500 text-black shadow-md'
+                  : isNight
+                  ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                  : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+              }`}
+            >
+              <WarningCircle size={16} weight="bold" className="text-amber-400" />
+              <span>{isKo ? `주의 학생 ${flaggedStudents.length}명` : `Flagged students (${flaggedStudents.length})`}</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -330,53 +319,42 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* ========================================================================= */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-fade-in text-left">
-          {/* High-Level Metric Cards — Overview-only (previously shown above
-              every tab, wrapping to 3 rows on mobile and pushing each tab's
-              own content down; every other tab already has its own more-
-              detailed view of the same numbers, so this is now a one-line
-              horizontally-scrollable strip, same pattern as KtReviewQueue's
-              chip list, scoped to the tab where it's actually a summary. */}
+          {/* Metric strip — action items first (pending review, flagged),
+              then campus totals. Horizontally scrollable on mobile. */}
           <div className="flex items-center gap-3 overflow-x-auto pb-1">
             <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">CAMPUS CLASSES</span>
-              <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {classes.filter((c: any) => !c.isDemo).length}{' '}
-                <span className="text-xs font-normal text-zinc-400">Active</span>
+              <span className="text-xs font-bold text-zinc-400 block">{isKo ? '검토 대기 일지' : 'Logs awaiting review'}</span>
+              <h4 className={`text-2xl font-black mt-1 whitespace-nowrap ${logReviewStats.pending > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                {logReviewStats.pending}{' '}
+                <span className="text-xs font-normal text-zinc-400">{isKo ? `· ${logReviewStats.sent}건 발송됨` : `· ${logReviewStats.sent} sent`}</span>
               </h4>
             </div>
             <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">TOTAL ROSTER</span>
-              <h4 className="text-2xl font-black text-orange-400 mt-1">{totalRosterCount} <span className="text-xs font-normal text-zinc-400">Enrolled</span></h4>
+              <span className="text-xs font-bold text-zinc-400 block">{isKo ? '학급' : 'Classes'}</span>
+              <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {classes.filter((c: any) => !c.isDemo).length}
+              </h4>
+            </div>
+            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+              <span className="text-xs font-bold text-zinc-400 block">{isKo ? '학생' : 'Students'}</span>
+              <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{totalRosterCount}</h4>
             </div>
             <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">STAFF SEAT QUOTA</span>
-                {planId === 'trial' ? (
-                  <span className="text-[10px] font-bold text-zinc-400 whitespace-nowrap" title="Paid seat expansion isn't available during the free trial">
-                    Upgrade to add seats
-                  </span>
-                ) : (
+                <span className="text-xs font-bold text-zinc-400 block">{isKo ? '교사 좌석' : 'Staff seats'}</span>
+                {planId !== 'trial' && (
                   <button
                     type="button"
                     onClick={() => setShowSeatExpansionModal(true)}
-                    className="text-[10px] font-bold text-orange-400 hover:underline cursor-pointer whitespace-nowrap"
+                    className="text-xs font-bold text-orange-400 hover:underline cursor-pointer whitespace-nowrap"
                   >
-                    + Add Seats
+                    {isKo ? '+ 추가' : '+ Add'}
                   </button>
                 )}
               </div>
-              <h4 className="text-2xl font-black text-emerald-400 mt-1 whitespace-nowrap">
-                {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)} <span className="text-xs font-normal text-zinc-400">Total ({seatsTotal?.ft || 0} FT / {seatsTotal?.kt || 0} KT)</span>
-              </h4>
-            </div>
-            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">FLAGGED EXCEPTIONS</span>
-              <h4 className="text-2xl font-black text-amber-400 mt-1">{flaggedStudents.length} <span className="text-xs font-normal text-zinc-400">Unresolved</span></h4>
-            </div>
-            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block font-mono">DAILY LOG REVIEW</span>
-              <h4 className={`text-2xl font-black mt-1 whitespace-nowrap ${logReviewStats.pending > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {logReviewStats.pending} <span className="text-xs font-normal text-zinc-400">Awaiting KT Review ({logReviewStats.sent} sent)</span>
+              <h4 className={`text-2xl font-black mt-1 whitespace-nowrap ${isNight ? 'text-white' : 'text-zinc-900'}`}>
+                {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)}{' '}
+                <span className="text-xs font-normal text-zinc-400">({seatsTotal?.ft || 0} FT / {seatsTotal?.kt || 0} KT)</span>
               </h4>
             </div>
           </div>
@@ -393,16 +371,16 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               genuine empty state until a real class exists. */}
           {!selectedClass || selectedClass.isDemo ? (
             <div className={`p-8 rounded-2xl border text-center ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>No class yet</p>
-              <p className="text-xs text-zinc-400 mt-1">Create your first class to see this week&apos;s vocab and student status here.</p>
+              <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>{isKo ? '아직 학급이 없습니다' : 'No class yet'}</p>
+              <p className="text-xs text-zinc-400 mt-1">{isKo ? '첫 학급을 만들면 이번 주 어휘와 학생 현황이 여기에 표시됩니다.' : "Create your first class to see this week's vocab and student status here."}</p>
             </div>
           ) : (
             <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
                 <div>
-                  <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-widest block">This Week</span>
+                  <span className="text-xs font-bold text-zinc-400 block">{isKo ? '이번 주' : 'This week'}</span>
                   <h4 className={`font-black text-base sm:text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {selectedClass.name || selectedClass.className || 'Class'} • Week {selectedClass.activeWeekNumber || 1}
+                    {selectedClass.name || selectedClass.className || 'Class'} • {isKo ? `${selectedClass.activeWeekNumber || 1}주차` : `Week ${selectedClass.activeWeekNumber || 1}`}
                   </h4>
                 </div>
                 {flaggedStudents.length > 0 && (
@@ -411,15 +389,15 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                     onClick={() => setActiveTab('exceptions')}
                     className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold cursor-pointer hover:bg-amber-500/20 transition-colors"
                   >
-                    ⚠️ {flaggedStudents.length} Flagged — Review
+                    {isKo ? `주의 학생 ${flaggedStudents.length}명 확인` : `Review ${flaggedStudents.length} flagged`}
                   </button>
                 )}
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-orange-400 uppercase font-mono tracking-wider block mb-2">Target Vocab</span>
+                <span className="text-xs font-bold text-zinc-400 block mb-2">{isKo ? '목표 어휘' : 'Target vocab'}</span>
                 {weeklyVocabWords.length === 0 ? (
-                  <p className="text-xs text-zinc-400">No vocab set for this week yet — add it from the Curriculum tab.</p>
+                  <p className="text-xs text-zinc-400">{isKo ? '이번 주 어휘가 아직 없습니다 — 커리큘럼 탭에서 추가하세요.' : 'No vocab set for this week yet — add it from the Curriculum tab.'}</p>
                 ) : (
                   <div className="flex flex-wrap gap-1.5">
                     {weeklyVocabWords.map((word) => (
@@ -437,11 +415,11 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-orange-400 uppercase font-mono tracking-wider block mb-2">
-                  Student Status ({activeRoster.length})
+                <span className="text-xs font-bold text-zinc-400 block mb-2">
+                  {isKo ? `학생 현황 (${activeRoster.length})` : `Students (${activeRoster.length})`}
                 </span>
                 {activeRoster.length === 0 ? (
-                  <p className="text-xs text-zinc-400">No active students in this class yet.</p>
+                  <p className="text-xs text-zinc-400">{isKo ? '아직 학생이 없습니다.' : 'No active students in this class yet.'}</p>
                 ) : (
                   <ul className="text-xs space-y-1.5">
                     {activeRoster.map((student: any) => (
@@ -449,19 +427,19 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                         key={student.uid || student.studentName}
                         className={`flex justify-between items-center p-2 rounded ${isNight ? 'bg-white/5' : 'bg-white border border-zinc-200'}`}
                       >
-                        <span className="font-medium">{student.studentName || student.name || 'Unnamed'}</span>
+                        <span className="font-medium">{student.studentName || student.name || (isKo ? '이름 없음' : 'Unnamed')}</span>
                         {student.flaggedException || student.weeklyMistakesCount > 0 ? (
                           <span className="text-[10px] font-bold text-amber-400 flex items-center gap-1">
                             <WarningCircle size={12} weight="fill" />
-                            {student.weeklyMistakesCount > 0 ? `${student.weeklyMistakesCount} Error(s) Flagged` : 'Flagged'}
+                            {student.weeklyMistakesCount > 0 ? (isKo ? `오답 ${student.weeklyMistakesCount}개` : `${student.weeklyMistakesCount} mistakes`) : (isKo ? '주의' : 'Flagged')}
                           </span>
                         ) : student.hasScannedThisWeek ? (
                           <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
                             <CheckCircle size={12} weight="fill" />
-                            Synced
+                            {isKo ? '스캔 완료' : 'Scanned'}
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold text-zinc-400">No scan yet</span>
+                          <span className="text-xs font-bold text-zinc-400">{isKo ? '스캔 전' : 'No scan yet'}</span>
                         )}
                       </li>
                     ))}
@@ -483,18 +461,19 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
             <WarningCircle size={20} className="text-amber-400 shrink-0 mt-0.5" />
             <div className="space-y-1 text-xs">
-              <h4 className="font-bold text-amber-400">Director Exception Oversight Center</h4>
+              <h4 className="font-bold text-amber-400">{isKo ? '주의 학생' : 'Flagged students'}</h4>
               <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
-                Students flagged by a teacher from the roster&apos;s student detail view for
-                academic or behavioral issues. Resolving a flag here clears it.
+                {isKo
+                  ? '선생님이 학습·생활 문제로 표시한 학생입니다. 해결을 누르면 표시가 사라집니다.'
+                  : 'Students a teacher flagged for academic or behavior issues. Resolving clears the flag.'}
               </p>
             </div>
           </div>
 
           {logReviewStats.byClass.length > 0 && (
             <div className={`p-4 rounded-2xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <h4 className="text-xs font-bold text-zinc-400 uppercase font-mono tracking-wider">
-                Daily Logs Awaiting KT Review
+              <h4 className="text-xs font-bold text-zinc-400">
+                {isKo ? '검토 대기 일지' : 'Logs awaiting review'}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {logReviewStats.byClass.map((c) => (
@@ -502,7 +481,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                     key={c.classId}
                     className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400"
                   >
-                    {c.className}: {c.pending} pending
+                    {c.className}: {isKo ? `${c.pending}건 대기` : `${c.pending} pending`}
                   </span>
                 ))}
               </div>
@@ -511,7 +490,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 
           {flaggedStudents.length === 0 ? (
             <div className={`p-12 rounded-2xl border text-center text-xs ${isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-50 border-zinc-200 text-zinc-500'}`}>
-              No students are currently flagged.
+              {isKo ? '주의 표시된 학생이 없습니다.' : 'No students are currently flagged.'}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -524,7 +503,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-black text-sm text-white">{st.studentName || st.name || 'Unnamed'}</h4>
+                      <h4 className="font-black text-sm text-white">{st.studentName || st.name || (isKo ? '이름 없음' : 'Unnamed')}</h4>
                       <span className="text-xs text-orange-400 font-mono">{st.email}</span>
                     </div>
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
@@ -533,20 +512,20 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                   </div>
 
                   <div className={`p-4 rounded-xl border text-xs leading-relaxed ${isNight ? 'bg-brand-dark border-white/5 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-800'}`}>
-                    <span className="text-[10px] font-bold uppercase font-mono text-zinc-400 block mb-1">
-                      Flagged Reason by {st.flaggedException?.teacherName}:
+                    <span className="text-xs font-bold text-zinc-400 block mb-1">
+                      {isKo ? `${st.flaggedException?.teacherName} 선생님 메모` : `Note from ${st.flaggedException?.teacherName}`}
                     </span>
                     <p>{st.flaggedException?.reason}</p>
                   </div>
 
                   {phoneScriptFor === st.uid && (
                     <div className={`p-4 rounded-xl border text-xs leading-relaxed space-y-1 ${isNight ? 'bg-orange-500/5 border-orange-500/20 text-zinc-300' : 'bg-orange-50 border-orange-200 text-zinc-800'}`}>
-                      <span className="text-[10px] font-bold uppercase font-mono text-orange-400 block mb-1">
-                        Phone Talking Points
+                      <span className="text-xs font-bold text-orange-400 block mb-1">
+                        {isKo ? '통화 요점' : 'Call talking points'}
                       </span>
-                      <p>1. Acknowledge class effort</p>
-                      <p>2. Address: {st.flaggedException?.reason}</p>
-                      <p>3. Agree on one concrete follow-up step with the parent before ending the call.</p>
+                      <p>{isKo ? '1. 수업 노력 인정하기' : '1. Acknowledge class effort'}</p>
+                      <p>{isKo ? '2. 논의: ' : '2. Address: '}{st.flaggedException?.reason}</p>
+                      <p>{isKo ? '3. 통화 전에 학부모와 구체적인 후속 조치 하나 정하기' : '3. Agree on one concrete follow-up step with the parent before ending the call.'}</p>
                     </div>
                   )}
 
@@ -556,8 +535,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                       onClick={() => setPhoneScriptFor((prev) => (prev === st.uid ? null : st.uid))}
                       className="px-3 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold rounded-lg border border-orange-500/30 flex items-center gap-1.5 cursor-pointer transition-colors"
                     >
-                      <span>📞</span>
-                      <span>{phoneScriptFor === st.uid ? 'Hide Phone Script' : 'View Phone Script'}</span>
+                      <span>{phoneScriptFor === st.uid ? (isKo ? '통화 요점 숨기기' : 'Hide call notes') : (isKo ? '통화 요점 보기' : 'Call notes')}</span>
                     </button>
                     <button
                       type="button"
@@ -570,7 +548,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                       }}
                       className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold rounded-lg border border-emerald-500/30 cursor-pointer transition-colors"
                     >
-                      Resolve
+                      {isKo ? '해결' : 'Resolve'}
                     </button>
                   </div>
                 </div>
@@ -635,7 +613,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 </p>
 
                 <div className="space-y-2">
-                  <label className="font-bold text-zinc-400 block font-mono">추가 교사 석 수 선택:</label>
+                  <label className="font-bold text-zinc-400 block">추가 교사 석 수 선택:</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[+1, +3, +5].map((count) => (
                       <button

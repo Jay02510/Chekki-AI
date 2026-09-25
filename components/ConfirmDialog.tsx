@@ -26,6 +26,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const { isClosing, close } = useModalExit(onCancel);
   const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose: close });
   const isDestructive = variant === 'destructive';
+  // Same localStorage read NativeTeacherLogForm uses — this dialog renders
+  // on staff pages too, not only under LanguageProvider.
+  let isKo = false;
+  try {
+    isKo = localStorage.getItem('chekki_lang') === 'ko';
+  } catch {
+    /* storage blocked */
+  }
   return (
     <div className="fixed inset-0 z-[10010] flex items-center justify-center p-4">
       <div
@@ -88,14 +96,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               disabled={isSaving}
               className={`w-full ${isDestructive ? 'bg-red-600 hover:bg-red-700 text-white' : isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black uppercase text-xs transition-[background-color,transform] active:scale-[0.97] disabled:opacity-50`}
             >
-              {confirmText || 'Confirm'}
+              {confirmText || (isKo ? '확인' : 'Confirm')}
             </button>
             <button
               onClick={close}
               disabled={isSaving}
               className={`w-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'} py-4 rounded-2xl font-black uppercase text-xs transition-[background-color,transform] active:scale-[0.97] disabled:opacity-50`}
             >
-              {cancelText || 'Cancel'}
+              {cancelText || (isKo ? '취소' : 'Cancel')}
             </button>
           </div>
         </div>

@@ -12,6 +12,7 @@ interface SchoolTeacher {
 
 interface Props {
   isNight?: boolean;
+  isKo?: boolean;
   schoolId: string;
   classes: any[];
   // Real refetch of the parent's `classes` state (TeacherPage's
@@ -33,7 +34,7 @@ interface Props {
  * role/schoolId directly, so this panel is a thin UI over that endpoint, not
  * a second place those checks are implemented.
  */
-export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, classes, onAssignmentChanged }) => {
+export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, isKo = false, schoolId, classes, onAssignmentChanged }) => {
   const [teachers, setTeachers] = useState<SchoolTeacher[]>([]);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
@@ -90,7 +91,7 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
       // sync reflects this assignment instead of overwriting it back out.
       onAssignmentChanged?.();
     } catch (err: any) {
-      setMessage({ text: err.message || 'Failed to update assignment.', type: 'error' });
+      setMessage({ text: err.message || (isKo ? '배정을 변경하지 못했습니다.' : 'Failed to update assignment.'), type: 'error' });
     } finally {
       setBusyKey(null);
     }
@@ -105,9 +106,9 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
     setMessage(null);
     try {
       await callEndpoint('/api/create-teacher-invite', { action: 'remove', teacherUid });
-      setMessage({ text: `${label} removed.`, type: 'success' });
+      setMessage({ text: isKo ? `${label} 선생님을 삭제했습니다.` : `${label} removed.`, type: 'success' });
     } catch (err: any) {
-      setMessage({ text: err.message || 'Failed to remove teacher.', type: 'error' });
+      setMessage({ text: err.message || (isKo ? '선생님을 삭제하지 못했습니다.' : 'Failed to remove teacher.'), type: 'error' });
     } finally {
       setBusyKey(null);
     }
@@ -116,7 +117,9 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
   if (teachers.length === 0) {
     return (
       <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-zinc-400 font-bold">
-        No teachers have accepted an invite yet. Once one does, they&apos;ll appear here for class assignment.
+        {isKo
+          ? '아직 초대를 수락한 선생님이 없습니다. 수락하면 여기에서 학급을 배정할 수 있습니다.'
+          : "No teachers have accepted an invite yet. Once one does, they'll appear here for class assignment."}
       </div>
     );
   }
@@ -134,22 +137,22 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="min-w-0">
                 <h5 className={`font-bold text-sm truncate ${isNight ? 'text-white' : 'text-zinc-900'}`}>{label}</h5>
-                <span className={`text-[10px] font-mono font-bold ${t.educatorRole === 'kt' ? 'text-blue-400' : 'text-orange-400'}`}>
-                  {t.educatorRole === 'kt' ? 'Korean Teacher (KT)' : 'Foreign Teacher (FT)'}
+                <span className="text-xs font-bold text-zinc-400">
+                  {t.educatorRole === 'kt' ? (isKo ? '한국인 선생님 (KT)' : 'Korean teacher (KT)') : (isKo ? '원어민 선생님 (FT)' : 'Foreign teacher (FT)')}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => handleRemoveTeacher(t.uid, label)}
                 disabled={busyKey === t.uid}
-                className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 disabled:opacity-40 cursor-pointer transition-colors"
+                className="min-h-11 px-3 rounded-lg text-rose-400 text-xs font-bold hover:bg-rose-500/10 disabled:opacity-40 cursor-pointer transition-colors"
               >
-                {busyKey === t.uid ? 'Removing…' : 'Remove'}
+                {busyKey === t.uid ? (isKo ? '삭제 중…' : 'Removing…') : (isKo ? '삭제' : 'Remove')}
               </button>
             </div>
 
             {localClasses.length === 0 ? (
-              <p className="text-[11px] text-zinc-400">No classes to assign yet.</p>
+              <p className="text-xs text-zinc-400">{isKo ? '배정할 학급이 없습니다.' : 'No classes to assign yet.'}</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {localClasses.map((c: any) => {
@@ -161,7 +164,8 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
                       type="button"
                       onClick={() => handleToggleAssignment(c.id, t.uid, isAssigned)}
                       disabled={busyKey === key}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-[background-color,border-color,opacity] cursor-pointer disabled:opacity-40 ${
+                      aria-pressed={isAssigned}
+                      className={`px-3 min-h-10 rounded-lg text-xs font-bold border transition-[background-color,border-color,opacity] cursor-pointer disabled:opacity-40 ${
                         isAssigned
                           ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
                           : isNight
@@ -182,8 +186,12 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, schoolId, 
 
       {removeConfirm && (
         <ConfirmDialog
-          title={`Remove ${removeConfirm.label} from this school? They'll lose access to all classes immediately.`}
-          confirmText="Remove"
+          title={
+            isKo
+              ? `${removeConfirm.label} 선생님을 학원에서 삭제할까요? 모든 학급 접근 권한이 즉시 사라집니다.`
+              : `Remove ${removeConfirm.label} from this school? They'll lose access to all classes immediately.`
+          }
+          confirmText={isKo ? '삭제' : 'Remove'}
           variant="destructive"
           isNight={isNight}
           onConfirm={() => {

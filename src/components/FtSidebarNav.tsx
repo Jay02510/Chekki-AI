@@ -36,7 +36,7 @@ export function FtSidebarNav({ isNight, isKo, activeTab, setActiveTab }: Props) 
           }`}>
             <ChartBar size={18} weight="bold" />
           </div>
-          <span>{isKo ? '클래스 스캐너 & 일지' : 'Class Scanner & Log'}</span>
+          <span>{isKo ? '오늘의 일지' : 'Daily log'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
@@ -59,7 +59,7 @@ export function FtSidebarNav({ isNight, isKo, activeTab, setActiveTab }: Props) 
           }`}>
             <Sparkle size={18} weight="bold" />
           </div>
-          <span>{isKo ? '📚 주간 커리큘럼 & 오답 분석' : '📚 Weekly Insights'}</span>
+          <span>{isKo ? '주간 인사이트' : 'Weekly insights'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'insights' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
@@ -82,7 +82,7 @@ export function FtSidebarNav({ isNight, isKo, activeTab, setActiveTab }: Props) 
           }`}>
             <FileText size={18} weight="bold" />
           </div>
-          <span>{isKo ? '📄 워크시트 채점기' : '📄 Worksheet Scanner'}</span>
+          <span>{isKo ? '정답지 올리기' : 'Answer key'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'homework' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
@@ -105,7 +105,7 @@ export function FtSidebarNav({ isNight, isKo, activeTab, setActiveTab }: Props) 
           }`}>
             <ClockCounterClockwise size={18} weight="bold" />
           </div>
-          <span>{isKo ? '📜 작성한 일지 이력' : '📜 Log History'}</span>
+          <span>{isKo ? '일지 기록' : 'Log history'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'history' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
