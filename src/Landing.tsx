@@ -482,21 +482,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* APP SCREENSHOTS */}
+      {/* PROMPT-PAL STYLE AI BENTO GRID WITH PAIN-POINT TO SOLUTION EXPLANATIONS */}
+      <ChekkiAiBentoGrid isNight={isNight} isKo={isKo} />
+
+      {/* APP SCREENSHOTS — after the bento so the shots back up claims already made */}
       <ScreenshotGallery
         title={isKo ? '앱 살펴보기' : 'See the app'}
         isNight={isNight}
         shots={[
-          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/2_yobnjt.png', label: isKo ? '홈 화면' : 'Homescreen' },
-          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/9_xyzk0q.png', label: isKo ? '교습 가이드' : 'Teaching Guide' },
+          { url: isKo ? 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/1_sfnxrq.png' : 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/2_yobnjt.png', label: isKo ? '학습지 스캔' : 'Scan a Worksheet' },
+          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1790347662/IMG_2623_pf8zvn.jpg', label: isKo ? '채점 결과' : 'Graded Results' },
           { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118119/6_b6x7pg.png', label: isKo ? '정답 오버레이' : 'Answers Overlay' },
-          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/11_qvahas.png', label: isKo ? '학습 대시보드' : 'Learning Dashboard' },
-          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118117/13_o2cun7.png', label: isKo ? '플래시카드' : 'Flashcards' },
+          { url: isKo ? 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/8_iolhr6.png' : 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/9_xyzk0q.png', label: isKo ? '티칭 가이드' : 'Teaching Guide' },
+          { url: 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/10_wmr2lw.png', label: isKo ? 'AI 보이스 코치' : 'AI Voice Coach' },
+          { url: isKo ? 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/12_uce2qr.png' : 'https://res.cloudinary.com/dginphpy4/image/upload/v1784118118/11_qvahas.png', label: isKo ? '학습 대시보드' : 'Learning Dashboard' },
         ]}
       />
-
-      {/* PROMPT-PAL STYLE AI BENTO GRID WITH PAIN-POINT TO SOLUTION EXPLANATIONS */}
-      <ChekkiAiBentoGrid isNight={isNight} isKo={isKo} />
 
       {/* BEYOND THE APP - EDUCATOR HUB */}
       <section id="educators" className="py-32 md:py-48 px-4 md:px-8 max-w-7xl mx-auto w-full">

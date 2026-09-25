@@ -441,19 +441,6 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
         </div>
       </section>
 
-      {/* APP SCREENSHOTS */}
-      <ScreenshotGallery
-        title={isKo ? '플랫폼 살펴보기' : 'See the platform'}
-        isNight={isNight}
-        shots={[
-          { url: '/screenshots/schools/06-director-hq-dashboard.png', label: isKo ? '원장 HQ 대시보드' : 'Director HQ Dashboard' },
-          { url: '/screenshots/schools/07-director-students-tab-clean.png', label: isKo ? '학생 명단' : 'Student Roster' },
-          { url: '/screenshots/schools/14-kt-kakaotalk-script.png', label: isKo ? '카카오톡 스크립트 생성' : 'KakaoTalk Script Generator' },
-          { url: '/screenshots/schools/13-ft-worksheet-scanner.png', label: isKo ? '워크시트 스캐너' : 'Worksheet Scanner' },
-          { url: '/screenshots/schools/16-kt-weekly-report-generator.png', label: isKo ? '주간 리포트 생성' : 'Weekly Report Generator' },
-        ]}
-      />
-
       {/* --- AI READINESS QUIZ BANNER: links out to ai-readiness.chekkiai.com --- */}
       <section className="px-4 md:px-8 max-w-7xl mx-auto w-full">
         <div className={`max-w-2xl mx-auto p-4 border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left transition-colors ${
@@ -489,6 +476,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
       {/* --- CORE LOOP DIAGRAM: establishes the mental model --- */}
       <SchoolLoopDiagram isNight={isNight} isKo={isKo} />
+
+      {/* APP SCREENSHOTS — after the loop diagram so each screen has context */}
+      <ScreenshotGallery
+        title={isKo ? '플랫폼 살펴보기' : 'See the platform'}
+        isNight={isNight}
+        variant="wide"
+        shots={[
+          { url: '/screenshots/schools/06-director-hq-dashboard.png', label: isKo ? '원장 HQ 대시보드' : 'Director HQ Dashboard' },
+          { url: '/screenshots/schools/07-director-students-tab-clean.png', label: isKo ? '학생 명단' : 'Student Roster' },
+          { url: '/screenshots/schools/14-kt-kakaotalk-script.png', label: isKo ? '카카오톡 스크립트 생성' : 'KakaoTalk Script Generator' },
+          { url: '/screenshots/schools/13-ft-worksheet-scanner.png', label: isKo ? '워크시트 스캐너' : 'Worksheet Scanner' },
+          { url: '/screenshots/schools/16-kt-weekly-report-generator.png', label: isKo ? '주간 리포트 생성' : 'Weekly Report Generator' },
+        ]}
+      />
       {/* Interactive live-preview widget removed — its 'syllabus' tab
           (NativeCurriculumPreseed) was demo-only marketing theater sitting
           under a "real components, not mockups" label that wasn't true for
