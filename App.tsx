@@ -219,6 +219,10 @@ function AppContent() {
   });
   const [showHelp, setShowHelp] = useState(false);
   const platform = Capacitor.getPlatform();
+  // Staff accounts on native can opt into the parent UI (one account, one role).
+  const [staffAsParent, setStaffAsParent] = useState(() => {
+    try { return localStorage.getItem('chekki_staff_as_parent') === '1'; } catch { return false; }
+  });
 
   // Stashes a `?classCode=` param (the parent/student join-code deep link)
   // for the auth-gated redemption effect further down to pick up. Shared by
@@ -651,10 +655,10 @@ function AppContent() {
   // silently falling straight through to the parent/consumer UI below with
   // no explanation, a dead end for any staff account (Audit: native app
   // covers only one of four roles). Tell them explicitly instead.
-  if (platform !== 'web' && isAuthenticated && (user?.role === 'teacher' || user?.role === 'director')) {
+  if (platform !== 'web' && isAuthenticated && !staffAsParent && (user?.role === 'teacher' || user?.role === 'director')) {
     return (
       <div className={`min-h-[100dvh] flex items-center justify-center p-6 text-center ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'}`}>
-        <div className="max-w-sm space-y-4">
+        <div className="w-full max-w-sm space-y-4">
           <ChekkiMascot className="w-16 h-16 mx-auto opacity-80" />
           <h2 className="text-lg font-black">
             {language === 'ko' ? '교사/원장 대시보드는 웹에서만 이용 가능합니다' : 'Teacher & Director tools are web-only'}
@@ -664,6 +668,29 @@ function AppContent() {
               ? '이 앱은 학부모용입니다. 교사/원장 대시보드는 모바일 브라우저에서 chekki.ai/teacher 로 접속해 주세요.'
               : 'This app is for parents. Please open chekki.ai/teacher in your mobile browser to reach your dashboard.'}
           </p>
+          <a
+            href="https://chekki.ai/teacher"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full rounded-xl bg-brand py-3 font-bold text-white"
+          >
+            {language === 'ko' ? '브라우저에서 열기' : 'Open in browser'}
+          </a>
+          <button
+            onClick={() => {
+              try { localStorage.setItem('chekki_staff_as_parent', '1'); } catch {}
+              setStaffAsParent(true);
+            }}
+            className="block w-full rounded-xl border border-zinc-300 py-3 font-bold"
+          >
+            {language === 'ko' ? '학부모 기능 사용하기' : 'Continue as parent'}
+          </button>
+          <button
+            onClick={logout}
+            className="block w-full rounded-xl py-3 font-bold text-zinc-500"
+          >
+            {language === 'ko' ? '로그아웃' : 'Sign out'}
+          </button>
         </div>
       </div>
     );
@@ -1020,15 +1047,15 @@ function AppContent() {
               text-shadow: 0 0 20px rgba(249, 115, 22, 0.1);
             }
             .prose-answer em {
-              color: #ff2e97; /* more vibrant pink */
+              color: #f97316; /* brand-orange (One Accent Rule) */
               font-style: italic;
               font-weight: 700;
             }
             .prose-answer mark {
-              background: linear-gradient(120deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
-              color: #22d3ee; /* cyan-400 */
+              background: rgba(249, 115, 22, 0.15);
+              color: #f97316; /* brand-orange */
               padding: 0 4px;
-              border-radius: 4px;
+              border-radius: 0.75rem; /* rounded-xl */
               font-weight: 700;
             }
             .prose-answer p {

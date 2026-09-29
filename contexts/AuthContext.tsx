@@ -242,7 +242,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: 'test@example.com',
         name: 'Reviewer',
         plan: 'pro',
-        role: finalProfile?.role || 'teacher',
+        // Native builds only ship the parent UI — a staff role here locks the
+        // App Store reviewer behind the "web-only" screen.
+        role: Capacitor.isNativePlatform() ? 'parent' : finalProfile?.role || 'teacher',
         maxScansPerDay: 9999,
         maxQuestionsPerDay: 9999,
       };
