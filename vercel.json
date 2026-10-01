@@ -30,7 +30,27 @@
       "destination": "/app.html"
     },
     {
-      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher|school|schools|for-schools|faq|insights|reports|report-studio)",
+      "source": "/en",
+      "destination": "/en.html"
+    },
+    {
+      "source": "/en/faq",
+      "destination": "/en/faq.html"
+    },
+    {
+      "source": "/en/schools",
+      "destination": "/en/schools.html"
+    },
+    {
+      "source": "/faq",
+      "destination": "/faq.html"
+    },
+    {
+      "source": "/(school|schools|for-schools)",
+      "destination": "/schools.html"
+    },
+    {
+      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher|insights|reports|report-studio)",
       "destination": "/index.html"
     }
   ],

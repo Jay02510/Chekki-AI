@@ -6,6 +6,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from 'framer-motion';
 import { copyToClipboard } from '../utils/clipboard';
+import { langPath, switchLang, urlLang } from './lib/lang';
 import {
   PlayCircle,
   GraduationCap,
@@ -41,7 +42,7 @@ export default function Home() {
     return true;
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isKo, setIsKo] = useState<boolean>(true);
+  const isKo = urlLang() === 'ko';
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [copiedInvite, setCopiedInvite] = useState(false);
 
@@ -56,10 +57,6 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
     if (typeof window !== 'undefined') {
-      const savedLang = localStorage.getItem('chekki_lang');
-      if (savedLang) {
-        setIsKo(savedLang === 'ko');
-      }
       const savedTheme = localStorage.getItem('chekki_theme');
       if (savedTheme === 'light') {
         setIsNight(false);
@@ -69,13 +66,7 @@ export default function Home() {
     }
   }, []);
 
-  const toggleLanguage = () => {
-    const next = !isKo;
-    setIsKo(next);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('chekki_lang', next ? 'ko' : 'en');
-    }
-  };
+  const toggleLanguage = () => switchLang(isKo ? 'en' : 'ko');
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -226,7 +217,7 @@ export default function Home() {
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-6">
             <a
-              href={isKo ? '/schools?lang=ko' : '/schools?lang=en'}
+              href={langPath('/schools')}
               className={`text-sm font-medium transition-colors ${
                 isNight ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
@@ -298,7 +289,7 @@ export default function Home() {
           <nav className="flex flex-col items-center gap-6 text-xl font-bold text-white">
             <button
               type="button"
-              onClick={() => setIsKo(!isKo)}
+              onClick={toggleLanguage}
               className="px-4 py-2 rounded-full bg-brand text-white text-sm font-bold flex items-center gap-2 mb-4"
             >
               <Globe size={18} />
@@ -322,7 +313,7 @@ export default function Home() {
 
 
             <a
-              href="/schools"
+              href={langPath('/schools')}
               onClick={() => setMobileMenuOpen(false)}
               className="text-brand font-black hover:scale-105 transition-transform"
             >
@@ -471,7 +462,7 @@ export default function Home() {
           {/* FOR SCHOOLS CTA BUTTON IN THE SECOND SECTION (PER USER REQUEST) */}
           <div className="mt-12 flex justify-center">
             <a
-              href="/schools"
+              href={langPath('/schools')}
               className="group relative overflow-hidden px-8 py-4 bg-brand hover:bg-brand/90 text-white font-bold rounded-full text-lg flex items-center gap-3 transition-transform duration-500 active:scale-95 shadow-2xl shadow-brand/30"
             >
               <Buildings size={22} weight="fill" />
@@ -818,7 +809,7 @@ export default function Home() {
           </a>
 
           <a
-            href="/schools"
+            href={langPath('/schools')}
             className="group relative overflow-hidden pl-10 pr-3 py-3 bg-orange-500/20 border border-orange-500/40 text-orange-300 font-bold rounded-full text-xl flex items-center justify-between gap-8 transition-transform duration-700 active:scale-[0.98] shadow-2xl hover:bg-orange-500/30"
           >
             <span className="relative z-20 tracking-wide">{isKo ? '학원/교사 안내' : 'For Schools'}</span>
@@ -849,7 +840,7 @@ export default function Home() {
               onClick={(e) => {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'instant' });
-                window.history.pushState({}, '', '/faq');
+                window.history.pushState({}, '', langPath('/faq'));
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
               className="hover:text-orange-400 transition-colors"
@@ -1003,7 +994,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => {
-                  window.location.href = '/schools';
+                  window.location.href = langPath('/schools');
                 }}
                 className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs rounded-2xl transition-[background-color] cursor-pointer text-center"
               >

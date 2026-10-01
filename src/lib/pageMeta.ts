@@ -1,49 +1,60 @@
 /**
  * index.html is shared by ~12 different routes (/, /schools, /teacher, /faq,
- * ...), so its static <title>/<meta description>/<link canonical> can only
- * ever be correct for one of them. This sets the real per-route values once
- * the SPA knows which page it's rendering — covers real users and any
- * JS-executing crawler (Googlebot). Non-JS crawlers still only see the
- * static index.html defaults; there's no fix for that short of per-route
- * static files or full SSR.
+ * ...). Landing routes get prerendered HTML at build time (vite.config.ts);
+ * this keeps <head> right during client-side navigation between them, and for
+ * routes that aren't prerendered (/teacher).
  */
+import type { Lang } from './lang';
+
+const SITE = 'https://www.chekkiai.com';
+
 export interface PageMeta {
   title: string;
   description: string;
+  /** Korean (unprefixed) path. */
   path: string;
+  /** Set for routes that exist in both languages; adds hreflang + /en canonical. */
+  lang?: Lang;
 }
 
-function upsertMeta(name: string, content: string) {
-  let el = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
+function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
+  let el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
   if (!el) {
     el = document.createElement('meta');
-    el.setAttribute('name', name);
+    el.setAttribute(attr, key);
     document.head.appendChild(el);
   }
   el.setAttribute('content', content);
 }
 
-function upsertOgMeta(property: string, content: string) {
-  let el = document.querySelector<HTMLMetaElement>(`meta[property="${property}"]`);
+function upsertLink(rel: string, hreflang: string | null, href: string | null) {
+  const selector = hreflang ? `link[rel="${rel}"][hreflang="${hreflang}"]` : `link[rel="${rel}"]`;
+  let el = document.querySelector<HTMLLinkElement>(selector);
+  if (href === null) {
+    el?.remove();
+    return;
+  }
   if (!el) {
-    el = document.createElement('meta');
-    el.setAttribute('property', property);
+    el = document.createElement('link');
+    el.setAttribute('rel', rel);
+    if (hreflang) el.setAttribute('hreflang', hreflang);
     document.head.appendChild(el);
   }
-  el.setAttribute('content', content);
+  el.setAttribute('href', href);
 }
 
-export function setPageMeta({ title, description, path }: PageMeta) {
+export function setPageMeta({ title, description, path, lang }: PageMeta) {
+  const ko = SITE + path;
+  const en = SITE + (path === '/' ? '/en' : `/en${path}`);
+  const url = lang === 'en' ? en : ko;
   document.title = title;
-  upsertMeta('description', description);
-  upsertOgMeta('og:title', title);
-  upsertOgMeta('og:description', description);
-
-  let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-  if (!canonical) {
-    canonical = document.createElement('link');
-    canonical.setAttribute('rel', 'canonical');
-    document.head.appendChild(canonical);
-  }
-  canonical.setAttribute('href', `https://www.chekkiai.com${path}`);
+  document.documentElement.lang = lang ?? 'ko';
+  upsertMeta('name', 'description', description);
+  upsertMeta('property', 'og:title', title);
+  upsertMeta('property', 'og:description', description);
+  upsertMeta('property', 'og:url', url);
+  upsertLink('canonical', null, url);
+  upsertLink('alternate', 'ko', lang ? ko : null);
+  upsertLink('alternate', 'en', lang ? en : null);
+  upsertLink('alternate', 'x-default', lang ? ko : null);
 }

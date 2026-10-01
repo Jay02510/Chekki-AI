@@ -29,7 +29,10 @@
   <meta name="theme-color" content="#050505">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="https://res.cloudinary.com/dginphpy4/image/upload/e_background_removal/c_crop,g_north_west,w_5,h_5/w_192,h_192,c_pad,b_rgb:050505/l_text:Arial_32_bold:Chekki,co_white/fl_layer_apply,g_center,x_-26/l_text:Arial_32_bold:AI,co_rgb:EA580C/fl_layer_apply,g_center,x_48/f_png/v1765769939/chekki-logo_q5xeux.png">
-  <meta name="description" content="Chekki AI – AI homework help for Korean parents, and ESL lesson planning tools for teachers.">
+  <meta name="description" content="채키 AI(Chekki AI) – 영어 숙제 사진 한 장으로 5초 AI 채점, 원어민 발음 코칭, 한국어 엄마표 가이드. 영유·어학원 학원용 자동 채점과 카카오톡 학부모 리포트까지. AI English homework checker for Korean families and hagwons.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chekki AI">
+  <meta property="og:url" content="https://www.chekkiai.com/">
   <meta property="og:title" content="Chekki AI: For Families and Teachers">
   <meta property="og:description" content="AI powered English tools for the home and the classroom.">
   <meta property="og:image" content="https://res.cloudinary.com/dginphpy4/image/upload/v1773201056/Link_Card_Preview_Image_-_1200x628_qdhohw.png">
@@ -43,13 +46,12 @@
        hreflang signals. -->
   <meta name="geo.region" content="KR">
   <meta name="geo.placename" content="South Korea">
-  <title>ChekkiAI</title>
-  <!-- No locale-specific URLs exist (language is a client-side ?lang= toggle,
-       not a route) — self-referencing hreflang still tells crawlers this one
-       URL serves both languages rather than being mistaken for a single-
-       locale page, and points x-default at the bare URL. -->
-  <link rel="alternate" hreflang="ko" href="https://www.chekkiai.com/?lang=ko">
-  <link rel="alternate" hreflang="en" href="https://www.chekkiai.com/?lang=en">
+  <title>채키 AI (Chekki AI) | 영어 숙제 AI 채점 · 발음 코칭 · 학원 리포트</title>
+  <link rel="canonical" href="https://www.chekkiai.com/">
+  <!-- Korean at /x, English at /en/x. vite.config.ts rewrites these per
+       route in the prerendered files. -->
+  <link rel="alternate" hreflang="ko" href="https://www.chekkiai.com/">
+  <link rel="alternate" hreflang="en" href="https://www.chekkiai.com/en">
   <link rel="alternate" hreflang="x-default" href="https://www.chekkiai.com/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -84,7 +86,12 @@
       "areaServed": "KR",
       "availableLanguage": ["Korean", "English"]
     },
-    "sameAs": []
+    "sameAs": [
+      "https://apps.apple.com/app/id6741479840",
+      "https://play.google.com/store/apps/details?id=com.chekkiai.app",
+      "https://www.instagram.com/chekki__ai",
+      "https://www.youtube.com/@ChekkiAI"
+    ]
   }
   </script>
   <!-- Distinct entity for the B2B academy/hagwon offering (/for-schools) —
@@ -122,6 +129,9 @@
     "applicationCategory": "EducationalApplication",
     "operatingSystem": "Web, iOS, Android",
     "description": "AI homework help for Korean parents and ESL lesson planning and reporting tools for teachers and academy directors.",
+    "url": "https://www.chekkiai.com/",
+    "downloadUrl": ["https://apps.apple.com/app/id6741479840", "https://play.google.com/store/apps/details?id=com.chekkiai.app"],
+    "inLanguage": ["ko", "en"],
     "offers": {
       "@type": "Offer",
       "price": "0",

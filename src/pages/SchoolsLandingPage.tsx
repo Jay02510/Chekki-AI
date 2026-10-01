@@ -33,6 +33,7 @@ import { PLAN_SEATS, PLAN_LABELS, PRICING_BILLING } from '../../api/_lib/pricing
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useToast } from '../../contexts/ToastContext';
 import { copyToClipboard } from '../../utils/clipboard';
+import { langPath, switchLang, urlLang } from '../lib/lang';
 
 interface Props {
   isNight: boolean;
@@ -103,29 +104,8 @@ const SCHOOL_FAQ_ITEMS = [
 const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [openFaqId, setOpenFaqId] = useState<string | null>(null);
   const { showToast } = useToast();
-  const [language, setLanguage] = useState<'ko' | 'en'>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const paramLang = params.get('lang');
-      if (paramLang === 'en' || paramLang === 'ko') {
-        localStorage.setItem('chekki_lang', paramLang);
-        return paramLang;
-      }
-      const saved = localStorage.getItem('chekki_lang');
-      if (saved === 'en' || saved === 'ko') return saved;
-    }
-    return 'ko';
-  });
-
-  const handleLangToggle = () => {
-    const next = language === 'ko' ? 'en' : 'ko';
-    setLanguage(next);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('chekki_lang', next);
-    }
-  };
-
-  const isKo = language === 'ko';
+  const isKo = urlLang() === 'ko';
+  const handleLangToggle = () => switchLang(isKo ? 'en' : 'ko');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleTheme = () => {
@@ -289,7 +269,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             href="/"
             onClick={(e) => {
               e.preventDefault();
-              window.location.href = isKo ? '/?lang=ko' : '/?lang=en';
+              window.location.href = langPath('/');
             }}
             className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
             title={isKo ? '메인 랜딩페이지로 이동' : 'Back to Main Landing Page'}
@@ -313,7 +293,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               title="Switch Language / 언어 변경"
             >
               <Globe size={14} weight="bold" className="text-brand" />
-              <span>{language === 'ko' ? '한국어' : 'English'}</span>
+              <span>{isKo ? '한국어' : 'English'}</span>
             </button>
 
             {/* Sun / Moon Theme Toggle */}
@@ -1872,7 +1852,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               onClick={(e) => {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'instant' });
-                window.history.pushState({}, '', '/');
+                window.history.pushState({}, '', langPath('/'));
                 window.dispatchEvent(new PopStateEvent('popstate'));
               }}
               className="hover:text-orange-500 transition-colors"

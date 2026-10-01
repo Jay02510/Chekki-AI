@@ -1,23 +1,35 @@
-# Chekki AI
+# Chekki AI (채키 AI)
 
-> Chekki AI is a homework and classroom automation platform for Korean families and English-language academies (hagwons). It has two products: a free/paid consumer app for parents and children (AI worksheet scanning, answer checking, pronunciation coaching), and a B2B academy platform that turns Foreign Teacher (FT) class logs into Korean-language KakaoTalk parent updates automatically, reviewed by a Korean Teacher (KT) before sending.
+> Chekki AI is a homework and classroom automation platform for Korean families and English-language academies (hagwons, 어학원, 영어유치원). It has two products: a free/paid consumer app for parents and children (AI worksheet scanning, answer checking, pronunciation coaching), and a B2B academy platform that grades home scans against the class's real weekly answer key and turns Foreign Teacher (FT) class logs into Korean-language KakaoTalk parent updates, reviewed by a Korean Teacher (KT) before sending. Tagline: "채점은 채키가, 칭찬은 엄마가" (Grading by Chekki, praise by Mom).
 
 ## For families
-- Parents scan a child's completed paper worksheet with the app; Chekki AI (Google Gemini multimodal OCR) checks answers against any academy workbook or commercial publisher without fixed templates, no manual answer key needed.
+- Parents photograph a child's completed paper worksheet; Chekki AI (Google Gemini multimodal OCR) grades it in under 5 seconds against any academy workbook or commercial publisher (Poly, GATE, PSA and others) without fixed templates or a manual answer key.
+- Gives parents a Korean-language coaching script ("엄마, 이렇게 알려주세요"), so parents who aren't confident in English can still help.
+- Wrong answers can be retried with a second-attempt rescan.
 - Pronunciation coaching uses standard North American English text-to-speech and speech recognition calibrated for children's voices.
-- Free tier: 3 scans/day. Paid tier: unlimited scans.
-- Ad-free, designed for children as young as 6.
+- Free tier: 3 scans/day. Pro tier: unlimited scans, a fraction of private tutoring cost.
+- Ad-free, designed for children as young as 6. Kids work on paper; the phone is only used for a quick scan.
+- Available on iOS (https://apps.apple.com/app/id6741479840), Android (https://play.google.com/store/apps/details?id=com.chekkiai.app) and web.
 
 ## For academies (hagwons)
+- Teachers upload the week's answer key once (scanned and OCR'd); every home scan is graded against it, so grading matches the academy's textbook rather than an AI guess.
+- Parent mistakes at home show up on the teacher dashboard before the next class.
 - Foreign Teacher (FT) logs a class session in under 30 seconds.
-- Korean Teacher (KT) reviews an AI-drafted Korean-language KakaoTalk parent update before it's sent — human-in-the-loop, no auto-send.
+- Korean Teacher (KT) reviews an AI-drafted Korean KakaoTalk parent update before it's sent — human-in-the-loop, no auto-send.
+- Printable review sheets from each student's wrong answers, and academy-branded report cards.
 - Directors get an aggregate dashboard across classes and teachers.
-- Plans scale from solo tutors to multi-branch academy franchises.
+- Plans: 7-day free academy trial, solo tutor / study room, starter academy, School Pro, large academy and franchise.
 
 ## Key pages
-- Homepage (families): https://www.chekkiai.com/
-- FAQ: https://www.chekkiai.com/faq
-- Academies / B2B: https://www.chekkiai.com/schools
+Korean pages are at the root; English versions are under /en.
+- Homepage (families): https://www.chekkiai.com/ (English: https://www.chekkiai.com/en)
+- FAQ: https://www.chekkiai.com/faq (English: https://www.chekkiai.com/en/faq)
+- Academies / B2B: https://www.chekkiai.com/schools (English: https://www.chekkiai.com/en/schools)
 - Teacher & Director portal: https://www.chekkiai.com/teacher
 - Privacy policy: https://www.chekkiai.com/privacy
 - Terms of use: https://www.chekkiai.com/terms
+
+## Contact
+- support@chekkiai.com
+- Instagram: https://www.instagram.com/chekki__ai
+- YouTube: https://www.youtube.com/@ChekkiAI

@@ -7,6 +7,8 @@ import App from '../App';
 import '../landing.css';
 import { initSentry } from './lib/sentry';
 import { setPageMeta } from './lib/pageMeta';
+import { landingMeta, TEACHER_META } from './data/seo';
+import { normalizeLangUrl, stripLang, urlLang } from './lib/lang';
 import { ToastProvider } from '../contexts/ToastContext';
 import { db } from '../services/database';
 
@@ -32,21 +34,17 @@ function LandingRoot() {
     });
   };
 
-  const [pathname, setPathname] = useState(window.location.pathname);
+  const [pathname, setPathname] = useState(stripLang(window.location.pathname));
 
   useEffect(() => {
-    const handlePopState = () => setPathname(window.location.pathname);
+    const handlePopState = () => setPathname(stripLang(window.location.pathname));
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   useEffect(() => {
     if (pathname === '/faq' || pathname.startsWith('/faq')) {
-      setPageMeta({
-        title: 'FAQ | Chekki AI',
-        description: "Answers to common questions about Chekki AI's homework scanning, pronunciation coaching, safety, and pricing for families.",
-        path: '/faq',
-      });
+      setPageMeta(landingMeta('faq', urlLang()));
     } else if (
       pathname === '/school' ||
       pathname === '/schools' ||
@@ -54,30 +52,18 @@ function LandingRoot() {
       pathname.startsWith('/school/') ||
       pathname.startsWith('/schools/')
     ) {
-      setPageMeta({
-        title: 'Chekki AI for Academies | Hagwon Homework & Parent Reporting Automation',
-        description: 'Chekki turns Foreign Teacher class logs into Korean KakaoTalk parent updates automatically — homework grading, curriculum tools, and reporting built for English-language academies.',
-        path: '/schools',
-      });
+      setPageMeta(landingMeta('schools', urlLang()));
     } else if (pathname.startsWith('/teacher')) {
-      setPageMeta({
-        title: 'Teacher & Director Portal | Chekki AI',
-        description: 'Sign in to the Chekki AI teacher and director dashboard to manage classes, review homework scans, and send parent reports.',
-        path: '/teacher',
-      });
+      setPageMeta(TEACHER_META);
     } else if (pathname === '/' || pathname === '') {
-      setPageMeta({
-        title: 'Chekki AI: For Families and Teachers',
-        description: 'Chekki AI – AI homework help for Korean parents, and ESL lesson planning tools for teachers.',
-        path: '/',
-      });
+      setPageMeta(landingMeta('home', urlLang()));
     }
     // Firebase Analytics (GA4) doesn't auto-log page_view on SPA route
     // changes the way a classic multi-page site does — there's no full
     // navigation for it to hook. Firing it here, once per pathname change,
     // is what makes /schools, /faq, and / show up as real GA4 page views
     // instead of all collapsing into one session-start event.
-    db.logUserEvent('page_view', { page_path: pathname, page_location: window.location.href });
+    db.logUserEvent('page_view', { page_path: window.location.pathname, page_location: window.location.href });
   }, [pathname]);
 
   // classCode= is the invite-email "join this class" link (api/create-class.ts's
@@ -144,7 +130,7 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
-root.render(
+if (!normalizeLangUrl()) root.render(
   <React.StrictMode>
     <LandingRoot />
   </React.StrictMode>
