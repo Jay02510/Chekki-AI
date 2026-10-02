@@ -21,11 +21,11 @@ export const ROUTE_META: Record<'home' | 'faq' | 'schools', { path: string; ko: 
   faq: {
     path: '/faq',
     ko: {
-      title: '자주 묻는 질문 (FAQ) | 채키 AI',
+      title: '자주 묻는 질문 (FAQ) | 채키 AI 영어 숙제 채점 · 가격 · 사용법',
       description: '채키 AI 영어 숙제 채점, 발음 코칭, 가격, 학원 무료 체험에 대해 자주 묻는 질문과 답변.',
     },
     en: {
-      title: 'FAQ | Chekki AI',
+      title: 'Chekki AI FAQ | Pricing, Homework Grading & How It Works',
       description: 'Answers about Chekki AI homework scanning, pronunciation coaching, pricing, and the 7-day academy free trial.',
     },
   },
