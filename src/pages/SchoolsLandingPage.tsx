@@ -279,6 +279,20 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
             </span>
           </a>
 
+          {/* Desktop Nav Links — same slot and style as the parent landing's. */}
+          <nav className="hidden md:flex items-center gap-6">
+            <a
+              href="https://blog.naver.com/chekkiai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`text-sm font-medium transition-colors ${
+                isNight ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {isKo ? '블로그' : 'Blog'}
+            </a>
+          </nav>
+
           {/* Right Action Cluster */}
           <div className="hidden md:flex items-center gap-3">
             {/* KO / EN LANGUAGE TOGGLE */}
@@ -356,6 +370,15 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               <Globe size={18} />
               <span>{isKo ? '언어 변경 (Current: 한국어)' : 'Switch Language (Current: English)'}</span>
             </button>
+            <a
+              href="https://blog.naver.com/chekkiai"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="hover:text-brand transition-colors"
+            >
+              {isKo ? '블로그' : 'Blog'}
+            </a>
             <a
               href="/teacher"
               onClick={() => setMobileMenuOpen(false)}
@@ -1884,6 +1907,15 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               className="hover:text-orange-500 transition-colors"
             >
               {isKo ? '자주 묻는 질문 (FAQ)' : 'FAQ'}
+            </a>
+            <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
+            <a
+              href="https://blog.naver.com/chekkiai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-orange-500 transition-colors"
+            >
+              {isKo ? '블로그' : 'Blog'}
             </a>
             <span className={isNight ? 'text-zinc-800' : 'text-zinc-300'}>|</span>
             <a

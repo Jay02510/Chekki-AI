@@ -224,6 +224,16 @@ export default function Home() {
             >
               {isKo ? '학원/교사 안내' : 'For Schools'}
             </a>
+            <a
+              href="https://blog.naver.com/chekkiai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`text-sm font-medium transition-colors ${
+                isNight ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {isKo ? '블로그' : 'Blog'}
+            </a>
           </nav>
 
           {/* Right Action Cluster */}
@@ -328,6 +338,16 @@ export default function Home() {
               className="hover:text-brand transition-colors"
             >
               {isKo ? '모바일 앱 다운로드' : 'Download App'}
+            </a>
+
+            <a
+              href="https://blog.naver.com/chekkiai"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="hover:text-brand transition-colors"
+            >
+              {isKo ? '블로그' : 'Blog'}
             </a>
           </nav>
         </div>
@@ -846,6 +866,15 @@ export default function Home() {
               className="hover:text-orange-400 transition-colors"
             >
               {isKo ? '자주 묻는 질문 (FAQ)' : 'FAQ'}
+            </a>
+            <span className="text-white/20">|</span>
+            <a
+              href="https://blog.naver.com/chekkiai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-orange-400 transition-colors"
+            >
+              {isKo ? '블로그' : 'Blog'}
             </a>
             <span className="text-white/20">|</span>
             <a
