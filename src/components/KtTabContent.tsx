@@ -100,6 +100,7 @@ export function KtTabContent(props: Props) {
             activeId={props.activeKtGroup ? props.groupKey(props.activeKtGroup) : null}
             justCopiedId={props.justCopiedLogId}
             onBulkApprove={props.handleKtBulkApprove}
+            onBeforeClose={props.confirmDiscardKtDraft}
             onSelect={(id) => {
               if (id === props.activeKtLogId) return;
               if (!props.confirmDiscardKtDraft()) return;

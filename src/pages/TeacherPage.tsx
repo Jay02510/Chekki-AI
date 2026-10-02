@@ -16,6 +16,7 @@ import { useRosterAnalytics } from '../../hooks/useRosterAnalytics';
 import { useNotifications } from '../../hooks/useNotifications';
 import { DirectorSidebarNav } from '../components/DirectorSidebarNav';
 import { KtSidebarNav } from '../components/KtSidebarNav';
+import { TeacherMobileTabBar } from '../components/TeacherMobileTabBar';
 import { FtSidebarNav } from '../components/FtSidebarNav';
 import { DirectorTabContent } from '../components/DirectorTabContent';
 import { NotificationBell } from '../components/NotificationBell';
@@ -2433,6 +2434,18 @@ export default function TeacherPage({ isNight = true }: Props) {
         </div>
       </aside>
 
+      {!isDirectorUser && (
+        <TeacherMobileTabBar
+          isNight={isThemeNight}
+          isKo={isKo}
+          educatorRole={educatorRole}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          pendingCount={ktQueueLogs.length}
+          onMore={() => setIsSidebarOpen(true)}
+        />
+      )}
+
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col min-w-0 relative overflow-y-auto transition-colors ${
         isThemeNight ? 'bg-brand-dark text-white' : 'bg-slate-50 text-zinc-900'
@@ -2448,7 +2461,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               type="button"
               onClick={() => setIsSidebarOpen(true)}
               aria-label={isKo ? '메뉴 열기' : 'Open menu'}
-              className={`md:hidden p-2.5 rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer shrink-0 border ${
+              // Teachers get the bottom tab bar's "More" instead on phones.
+              className={`${isDirectorUser ? 'md:hidden' : 'hidden'} p-2.5 rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer shrink-0 border ${
                 isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900'
               }`}
             >
@@ -2603,7 +2617,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         </header>
 
         {/* Tab Content Rendering Container */}
-        <section className="p-3 sm:p-6 md:p-8 flex-1 relative z-10">
+        <section className={`p-3 sm:p-6 md:p-8 flex-1 relative z-10 ${isDirectorUser ? '' : 'pb-24 md:pb-8'}`}>
           {/* Someone opened a teacher/director invite link while already
               signed into a different account in this browser — invites are
               only redeemed by the unauthenticated signup form (see

@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import { CheckCircle, MagnifyingGlass, CaretDown, CheckSquare, Square, Sparkle } from '@phosphor-icons/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { CheckCircle, MagnifyingGlass, CaretDown, CaretLeft, CheckSquare, Square, Sparkle } from '@phosphor-icons/react';
 
 export interface KtQueueLog {
   id: string;
@@ -23,7 +24,29 @@ interface Props {
    * Only offered for logs with flaggedCount === 0 (see the checkbox gating
    * below) — anything flagged still requires opening it and reading it. */
   onBulkApprove?: (ids: string[]) => Promise<{ approved: number; skipped: number }>;
+  /** Asked before closing an open review — return false to keep it open
+   * (unsaved edit). Closing unmounts the review panel, discarding edits. */
+  onBeforeClose?: () => boolean;
 }
+
+// Below md the open review takes the whole screen instead of expanding
+// inside the list row, where nested padding left a ~250px-wide editor.
+const MOBILE_QUERY = '(max-width: 767px)';
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const onChange = () => setIsMobile(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return isMobile;
+}
+
+// Search/filters only earn their space once the list is long enough to scan.
+const FILTER_MIN_ITEMS = 8;
 
 // Horizontal drag distance (px) past which a swipe collapses the expanded
 // row. Collapse only hides the inline panel — it never touches review/
@@ -39,7 +62,13 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
   isKo = false,
   renderActiveDetail,
   onBulkApprove,
+  onBeforeClose,
 }) {
+  const isMobile = useIsMobile();
+  const closeExpanded = () => {
+    if (onBeforeClose && !onBeforeClose()) return;
+    setExpandedId(null);
+  };
   const [classFilter, setClassFilter] = useState('all');
   const [studentFilter, setStudentFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -74,7 +103,7 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
   };
   const handleTouchEnd = () => {
     if (Math.abs(dragX) > SWIPE_DISMISS_THRESHOLD) {
-      setExpandedId(null);
+      closeExpanded();
     }
     setDragX(0);
     dragStartX.current = null;
@@ -176,6 +205,7 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
 
       {isQueueOpen && (
         <>
+          {logs.length >= FILTER_MIN_ITEMS && (
           <div className="flex flex-wrap items-center justify-end gap-2">
             <div className="flex flex-wrap items-center gap-1.5">
               <div
@@ -225,6 +255,7 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
               )}
             </div>
           </div>
+          )}
 
           {onBulkApprove && selectableIds.length > 0 && (
             <div
@@ -315,8 +346,12 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
                     <button
                       type="button"
                       onClick={() => {
+                        if (isActive && expandedId === log.id) {
+                          closeExpanded();
+                          return;
+                        }
                         onSelect(log.id);
-                        setExpandedId((prev) => (isActive && prev === log.id ? null : log.id));
+                        setExpandedId(log.id);
                       }}
                       className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 min-h-11 rounded-2xl border text-left transition-all cursor-pointer active:scale-[0.99] ${
                         isCopied
@@ -354,7 +389,36 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
                       </div>
                     </button>
 
-                    {isExpanded && (
+                    {isExpanded && isMobile && createPortal(
+                      <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={log.studentName}
+                        className={`fixed inset-0 z-[380] overflow-y-auto ${isNight ? 'bg-brand-dark' : 'bg-slate-50'}`}
+                      >
+                        <div
+                          className={`sticky top-0 z-20 flex items-center gap-2 px-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 border-b backdrop-blur-md ${
+                            isNight ? 'bg-brand-dark/90 border-white/10' : 'bg-white/90 border-zinc-200'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={closeExpanded}
+                            className={`min-h-11 px-2 flex items-center gap-1 text-sm font-bold cursor-pointer ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}
+                          >
+                            <CaretLeft size={18} weight="bold" />
+                            {isKo ? '검토함' : 'Inbox'}
+                          </button>
+                          <div className="min-w-0 flex-1 text-right pr-2">
+                            <p className="text-sm font-black truncate">{log.studentName}</p>
+                            {log.className && <p className="text-[11px] text-zinc-400 truncate">{log.className}</p>}
+                          </div>
+                        </div>
+                        <div className="p-3 pb-28">{renderActiveDetail!(log)}</div>
+                      </div>,
+                      document.body
+                    )}
+                    {isExpanded && !isMobile && (
                       <div
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}

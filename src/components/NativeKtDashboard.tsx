@@ -419,7 +419,11 @@ export const NativeKtDashboard: React.FC<Props> = ({
               )}
             </>
           )}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Phones: pinned to the bottom of the full-screen review (see
+              KtReviewQueue) so sending is always one thumb-reach away. */}
+          <div className={`flex items-center gap-2 shrink-0 max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-30 max-md:p-3 max-md:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] max-md:border-t max-md:backdrop-blur-md ${
+            isNight ? 'max-md:bg-brand-dark/90 max-md:border-white/10' : 'max-md:bg-white/90 max-md:border-zinc-200'
+          }`}>
             <button
               type="button"
               disabled={isDemoContent || isApproving}
@@ -431,7 +435,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
                   : undefined
               }
               onClick={handleCopyKakaoScript}
-              className={`px-4 py-2.5 min-h-11 rounded-xl text-xs font-black shadow-lg transition-colors flex items-center gap-2 shrink-0 ${
+              className={`px-4 py-2.5 min-h-11 max-md:flex-1 max-md:min-h-12 max-md:text-sm max-md:justify-center rounded-xl text-xs font-black shadow-lg transition-colors flex items-center gap-2 shrink-0 ${
                 isDemoContent || isApproving
                   ? 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
                   : copied
