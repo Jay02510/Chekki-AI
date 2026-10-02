@@ -149,9 +149,11 @@ export async function generateGeneralClassSummary(payload: ClassLogPayload): Pro
     return await callGenerateReport('summary', payload);
   } catch (err) {
     console.warn('generate-report call fallback to deterministic template:', err);
+    // Activities/energy are optional on the log form — skip that sentence when empty.
+    const hasActivities = payload.activities.length > 0;
     return {
-      korean: `오늘 ${payload.className} 수업에서는 ${payload.textbook} (${payload.lessonTopic})의 핵심 내용을 집중 학습했습니다. 원생들은 ${payload.activities.join(', ')} 활동에 ${payload.energyLevel === 'High Energy and Engaged' ? '매우 밝고 적극적으로' : '차분하게'} 참여하였습니다.`,
-      english: `Today in ${payload.className}, students focused on ${payload.lessonTopic} using ${payload.textbook}. Everyone participated attentively during ${payload.activities.join(' and ')}.`,
+      korean: `오늘 ${payload.className} 수업에서는 ${payload.textbook} (${payload.lessonTopic})의 핵심 내용을 집중 학습했습니다.${hasActivities ? ` 원생들은 ${payload.activities.join(', ')} 활동에 ${payload.energyLevel === 'High Energy and Engaged' ? '매우 밝고 적극적으로' : '차분하게'} 참여하였습니다.` : ''}`,
+      english: `Today in ${payload.className}, students focused on ${payload.lessonTopic} using ${payload.textbook}.${hasActivities ? ` Everyone participated attentively during ${payload.activities.join(' and ')}.` : ''}`,
     };
   }
 }

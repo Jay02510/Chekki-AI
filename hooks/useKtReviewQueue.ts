@@ -134,19 +134,24 @@ export function useKtReviewQueue(
   // two classes, or two teachers submitting for the same class the same
   // day) reads as several people's notes stacked back to back — see
   // formatConsolidatedDraft. Rewriting it into one flowing paragraph so it
-  // reads like the KT wrote it themselves. A single-entry group already
-  // reads naturally (each source paragraph is prompted to stand on its own),
-  // so it's left as the plain stacked/formatted text — no AI call needed.
+  // reads like the KT wrote it themselves. Only a group with a single
+  // paragraph (no student note) skips the AI call.
   const [mergedDraft, setMergedDraft] = useState<{ key: string; korean: string } | null>(null);
   const [isMergingDraft, setIsMergingDraft] = useState(false);
   useEffect(() => {
-    if (!activeKtGroup || activeKtGroup.entries.length <= 1) {
+    // Merge whenever there's more than one paragraph — including a single
+    // log's class summary + this student's note. Those are generated
+    // separately, so stacked they repeat the same praise words, which native
+    // Korean readers spot as machine-written.
+    const paragraphs = activeKtGroup
+      ? activeKtGroup.entries.flatMap((e) => [e.generalParagraph, e.exceptionParagraph].filter(Boolean) as string[])
+      : [];
+    if (!activeKtGroup || paragraphs.length <= 1) {
       setMergedDraft(null);
       setIsMergingDraft(false);
       return;
     }
     const key = groupKey(activeKtGroup);
-    const paragraphs = activeKtGroup.entries.flatMap((e) => [e.generalParagraph, e.exceptionParagraph].filter(Boolean) as string[]);
     let cancelled = false;
     setIsMergingDraft(true);
     mergeConsolidatedReport(activeKtGroup.studentName, paragraphs, isKo)

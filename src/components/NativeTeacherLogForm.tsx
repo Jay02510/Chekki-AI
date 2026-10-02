@@ -4,7 +4,6 @@ import { ClassLogPayload, saveOfflineDraft, getOfflineDraft, clearOfflineDraft }
 import { VoiceFillException, VoiceFillFields } from '../services/voiceFill';
 import { UserProfile } from '../../types';
 import { getPermissionsForUser } from '../utils/permissions';
-import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { VoiceFillAssistant } from './VoiceFillAssistant';
 
 interface Props {
@@ -192,8 +191,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   // Offline Draft Notification State
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
 
-  // Voice Fill Assistant State
-  const [showVoiceFill, setShowVoiceFill] = useState(false);
+  // Voice is the default way in — the form below doubles as its review
+  // screen. "Type instead" closes it.
+  const [showVoiceFill, setShowVoiceFill] = useState(!isDemo);
   const [isPlayingScriptedVoiceFill, setIsPlayingScriptedVoiceFill] = useState(false);
 
   const playScriptedVoiceFill = () => {
@@ -338,6 +338,31 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
     setShowExceptionModal(true);
   };
 
+  // Voice results land in the form immediately; this keeps one step of undo.
+  // Read through a ref so a turn that finishes after the teacher typed
+  // something snapshots what's actually on screen, not a stale render.
+  const formStateRef = useRef({ lessonTopic, textbook, energyLevel, activities, generalComments, exceptions });
+  formStateRef.current = { lessonTopic, textbook, energyLevel, activities, generalComments, exceptions };
+  const undoSnapshotRef = useRef<typeof formStateRef.current | null>(null);
+
+  const handleVoiceApply = (fields: VoiceFillFields, newExceptions: VoiceFillException[]) => {
+    undoSnapshotRef.current = formStateRef.current;
+    handleVoiceFieldsUpdate(fields);
+    if (newExceptions.length > 0) handleVoiceExceptionsAdd(newExceptions);
+  };
+
+  const handleVoiceUndo = () => {
+    const snap = undoSnapshotRef.current;
+    if (!snap) return;
+    setLessonTopic(snap.lessonTopic);
+    setTextbook(snap.textbook);
+    setEnergyLevel(snap.energyLevel);
+    setActivities(snap.activities);
+    setGeneralComments(snap.generalComments);
+    setExceptions(snap.exceptions);
+    undoSnapshotRef.current = null;
+  };
+
   const handleVoiceExceptionsAdd = (newExceptions: VoiceFillException[]) => {
     setExceptions((prev) => [
       ...prev,
@@ -378,10 +403,6 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
     setModalStudentUid((prev) => (effectiveRoster.some((s) => s.uid === prev) ? prev : effectiveRoster[0].uid));
   }, [effectiveRoster.map((s) => s.uid).join('|')]);
 
-  const exceptionDialogRef = useDialogA11y<HTMLDivElement>({
-    isOpen: showExceptionModal,
-    onClose: () => setShowExceptionModal(false),
-  });
 
   // Auto-save offline draft to localStorage on change
   useEffect(() => {
@@ -446,7 +467,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   };
 
   const isRealLogIncomplete =
-    !isDemo && (!className.trim() || !lessonTopic.trim() || !textbook.trim() || !energyLevel || activities.length === 0);
+    !isDemo && (!className.trim() || !lessonTopic.trim() || !textbook.trim());
 
   const missingFieldLabels = isDemo
     ? []
@@ -454,8 +475,6 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         !className.trim() && (isKo ? '학급명' : 'Class Name'),
         !lessonTopic.trim() && (isKo ? '수업 주제' : 'Lesson Topic'),
         !textbook.trim() && (isKo ? '교재' : 'Textbook'),
-        !energyLevel && (isKo ? '수업 분위기' : 'Energy Level'),
-        activities.length === 0 && (isKo ? '활동' : 'Activities'),
       ].filter((label): label is string => Boolean(label));
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -567,8 +586,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         <VoiceFillAssistant
           isNight={isNight}
           currentFields={{ lessonTopic, textbook, energyLevel, activities, generalComments }}
-          onFieldsUpdate={handleVoiceFieldsUpdate}
-          onExceptionsAdd={handleVoiceExceptionsAdd}
+          onApply={handleVoiceApply}
+          onUndo={handleVoiceUndo}
           onClose={() => setShowVoiceFill(false)}
         />
       )}
@@ -660,13 +679,13 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
         {/* Class Energy Level */}
         <div className="space-y-2">
-          <span id="log-energy-label" className="text-xs font-bold text-zinc-400 block">{isKo ? '수업 분위기 *' : 'Class energy *'}</span>
+          <span id="log-energy-label" className="text-xs font-bold text-zinc-400 block">{isKo ? '수업 분위기 (선택)' : 'Class energy (optional)'}</span>
           <div role="group" aria-labelledby="log-energy-label" className="flex flex-wrap gap-2">
             {energyOptions.map((opt) => (
               <button
                 key={opt}
                 type="button"
-                onClick={() => setEnergyLevel(opt)}
+                onClick={() => setEnergyLevel((prev) => (prev === opt ? '' : opt))}
                 aria-pressed={energyLevel === opt}
                 className={`px-3.5 min-h-11 rounded-xl border text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                   energyLevel === opt
@@ -685,7 +704,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
         {/* Daily Activities Multi-Select */}
         <div className="space-y-2">
-          <span id="log-activities-label" className="text-xs font-bold text-zinc-400 block">{isKo ? '오늘의 활동 (여러 개 선택) *' : 'Activities (pick any) *'}</span>
+          <span id="log-activities-label" className="text-xs font-bold text-zinc-400 block">{isKo ? '오늘의 활동 (선택)' : 'Activities (optional)'}</span>
           <div role="group" aria-labelledby="log-activities-label" className="flex flex-wrap gap-2">
             {activityOptions.map((act) => {
               const active = activities.includes(act);
@@ -837,44 +856,14 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               ))}
             </div>
           )}
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isSubmitting || isRealLogIncomplete}
-          className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-[background-color,transform,opacity] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
-        >
-          {isSubmitting ? (
-            <>
-              <Sparkle size={18} className="animate-spin" />
-              <span>{isKo ? '한국인 교사에게 전송 중...' : 'Sending to KT...'}</span>
-            </>
-          ) : (
-            <>
-              <Sparkle size={18} weight="fill" />
-              <span>{isKo ? '한국인 교사에게 검토 요청' : 'Send to KT for Review'}</span>
-            </>
-          )}
-        </button>
-        {missingFieldLabels.length > 0 && (
-          <p className="text-xs text-amber-400 text-center -mt-3">
-            {isKo ? '누락된 항목: ' : 'Missing: '}{missingFieldLabels.join(', ')}
-          </p>
-        )}
-      </form>
-
-      {/* Student Exception Pop-up Modal (Exact match to Screenshot 5) */}
-      {showExceptionModal && (
-        <div className="fixed inset-0 z-[400] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          {/* Inline student-note editor (was a pop-up modal — one more
+              layer than a quick "Ji-woo did great" note needs). */}
+          {showExceptionModal && (
           <div
-            ref={exceptionDialogRef}
-            role="dialog"
-            aria-modal="true"
+            role="group"
             aria-labelledby="exception-modal-title"
-            tabIndex={-1}
-            className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 ${
-              isNight ? 'bg-brand-dark border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+            className={`p-4 rounded-2xl border space-y-4 ${
+              isNight ? 'bg-white/[0.03] border-orange-500/30 text-white' : 'bg-orange-50/50 border-orange-200 text-zinc-900'
             }`}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -952,6 +941,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     type="text"
                     value={customStudentInput}
                     onChange={(e) => setCustomStudentInput(e.target.value)}
+                    // Inline inside the log <form> now — Enter here must not submit the whole log.
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                     placeholder={isKo ? '학생 이름 입력 (예: David / 김다윗)...' : 'Enter student name (e.g. David / 김다윗)...'}
                     className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
                       isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
@@ -1038,8 +1029,39 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               </div>
             </div>
           </div>
+          )}
         </div>
-      )}
+
+        {/* Submit Button — sticky on phones, sitting just above the
+            TeacherMobileTabBar, so it's reachable without scrolling the form. */}
+        <div className="max-md:sticky max-md:bottom-[calc(env(safe-area-inset-bottom)+4rem)] max-md:z-20 space-y-2">
+        <button
+          type="submit"
+          disabled={isSubmitting || isRealLogIncomplete}
+          className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-[background-color,transform,opacity] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <Sparkle size={18} className="animate-spin" />
+              <span>{isKo ? '한국인 교사에게 전송 중...' : 'Sending to KT...'}</span>
+            </>
+          ) : (
+            <>
+              <Sparkle size={18} weight="fill" />
+              <span>{isKo ? '한국인 교사에게 검토 요청' : 'Send to KT for Review'}</span>
+            </>
+          )}
+        </button>
+        {missingFieldLabels.length > 0 && (
+          <p className="text-center">
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-amber-500 backdrop-blur-md ${isNight ? 'bg-brand-dark/80' : 'bg-white/80'}`}>
+              {isKo ? '누락된 항목: ' : 'Missing: '}{missingFieldLabels.join(', ')}
+            </span>
+          </p>
+        )}
+        </div>
+      </form>
+
     </div>
   );
 };
