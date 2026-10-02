@@ -224,6 +224,7 @@ export function KtTabContent(props: Props) {
         <div className="animate-fade-in">
           <NativeTeacherLogForm
             isNight={isNight}
+            isKo={isKo}
             onSubmitLog={props.handleLogSubmit}
             isSubmitting={props.isSubmittingLog}
             userProfile={props.user}

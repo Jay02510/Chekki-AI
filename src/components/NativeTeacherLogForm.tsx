@@ -9,6 +9,8 @@ import { VoiceFillAssistant } from './VoiceFillAssistant';
 
 interface Props {
   isNight?: boolean;
+  /** Falls back to the stored language when omitted (landing demo). */
+  isKo?: boolean;
   onSubmitLog: (payload: ClassLogPayload) => void;
   isSubmitting?: boolean;
   userProfile?: UserProfile | null;
@@ -146,6 +148,7 @@ const DEMO_EXCEPTIONS: LogException[] = [
 
 export const NativeTeacherLogForm: React.FC<Props> = ({
   isNight = true,
+  isKo: isKoProp,
   onSubmitLog,
   isSubmitting = false,
   userProfile,
@@ -161,7 +164,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   // authorRole === 'kt' branch in api/analyze.ts), not just FTs — it needs
   // Korean labels for that audience, same pattern NativeKtDashboard already
   // uses since no isKo prop is threaded down to this component today.
-  const isKo = typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko';
+  const isKo = isKoProp ?? (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
   const permissions = getPermissionsForUser(userProfile);
   const effectiveRoster = roster.length > 0 ? roster : (isDemo ? DEMO_ROSTER : []);
   const [className, setClassName] = useState(selectedClassName || (isDemo ? DEMO_CLASS_NAME : ''));

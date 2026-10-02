@@ -104,6 +104,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
           <div id="interactive" className="mb-8">
             <NativeTeacherLogForm
               isNight={isThemeNight}
+              isKo={isKo}
               onSubmitLog={handleFtLogSubmit}
               isSubmitting={isSubmittingFtLog}
               userProfile={user}

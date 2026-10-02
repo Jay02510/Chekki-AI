@@ -2389,6 +2389,28 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
+            {/* Language/theme live in the header on sm+; on phones they'd
+                push the header to a second row, so they sit here instead. */}
+            <button
+              type="button"
+              onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+              className={`sm:hidden p-2 rounded-xl text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
+                isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
+              }`}
+              aria-label={language === 'ko' ? 'Switch to English' : '한국어로 전환'}
+            >
+              {language === 'ko' ? 'EN' : '한'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsThemeNight(!isThemeNight)}
+              className={`sm:hidden p-2 rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
+                isThemeNight ? 'text-amber-400 hover:bg-white/10' : 'text-indigo-600 hover:bg-zinc-200'
+              }`}
+              aria-label={isThemeNight ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isThemeNight ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
+            </button>
             <button
               onClick={() => { setResetPwStatus(null); setShowSettingsModal(true); }}
               className={`p-2 rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
@@ -2421,7 +2443,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         <header className={`p-3 sm:p-6 border-b flex flex-wrap items-center justify-between gap-2 sm:gap-4 relative z-20 shrink-0 transition-colors ${
           isThemeNight ? 'bg-brand-dark/90 border-white/5 text-white' : 'bg-white/90 border-zinc-200 text-zinc-900 shadow-xs'
         }`}>
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 w-full sm:w-auto sm:flex-1">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
@@ -2556,7 +2578,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             <button
               type="button"
               onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-              className={`px-3.5 py-2 min-h-11 border rounded-xl text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] flex items-center gap-1.5 cursor-pointer active:scale-[0.96] ${
+              className={`hidden sm:flex px-3.5 py-2 min-h-11 border rounded-xl text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] items-center gap-1.5 cursor-pointer active:scale-[0.96] ${
                 isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-200'
               }`}
               title="Switch Language / 언어 변경"
@@ -2570,7 +2592,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               type="button"
               onClick={() => setIsThemeNight(!isThemeNight)}
               aria-label={isThemeNight ? 'Switch to light mode' : 'Switch to dark mode'}
-              className={`min-w-11 min-h-11 flex items-center justify-center border rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-[0.96] ${
+              className={`hidden sm:flex min-w-11 min-h-11 items-center justify-center border rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-[0.96] ${
                 isThemeNight ? 'bg-white/5 border-white/10 text-amber-400 hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-indigo-600 hover:bg-zinc-200'
               }`}
               title={isThemeNight ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
@@ -2581,7 +2603,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         </header>
 
         {/* Tab Content Rendering Container */}
-        <section className="p-6 md:p-8 flex-1 relative z-10">
+        <section className="p-3 sm:p-6 md:p-8 flex-1 relative z-10">
           {/* Someone opened a teacher/director invite link while already
               signed into a different account in this browser — invites are
               only redeemed by the unauthenticated signup form (see

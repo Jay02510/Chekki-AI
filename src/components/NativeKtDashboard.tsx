@@ -313,7 +313,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
 
   return (
     <div
-      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 max-w-4xl mx-auto w-full transition-colors ${
+      className={`p-4 sm:p-8 rounded-3xl border shadow-2xl space-y-6 max-w-4xl mx-auto w-full transition-colors ${
         isNight
           ? 'bg-brand-dark border-white/15 text-zinc-100'
           : 'bg-white border-zinc-200 text-zinc-900'
@@ -590,7 +590,7 @@ export const NativeKtDashboard: React.FC<Props> = ({
 
         <textarea
           value={editedKoreanSummary}
-          onChange={(e) => permissions.canEditReports && setEditedKoreanSummary(e.target.value)}
+          onChange={(e) => permissions.canEditReports && handleTextChange(e.target.value)}
           disabled={!permissions.canEditReports}
           rows={8}
           className={`w-full p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed focus:outline-none transition-colors font-sans ${

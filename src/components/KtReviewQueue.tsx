@@ -364,7 +364,7 @@ export const KtReviewQueue: React.FC<Props> = React.memo(function KtReviewQueue(
                           opacity:
                             1 - Math.min(Math.abs(dragX) / (SWIPE_DISMISS_THRESHOLD * 2), 0.6),
                         }}
-                        className={`rounded-b-2xl border border-t-0 p-3 transition-[opacity] ${
+                        className={`rounded-b-2xl border border-t-0 p-1 sm:p-3 transition-[opacity] ${
                           isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-300'
                         }`}
                       >
