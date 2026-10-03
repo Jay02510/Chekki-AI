@@ -24,7 +24,6 @@ interface Props {
   onRequestPlanChange: (planId: string, planName: string) => Promise<boolean>;
   pendingRoster: any[];
   activeRoster: any[];
-  invitedOnlyRosterRows?: any[];
   classes: any[];
   onClassesChanged?: () => void;
   selectedClass: any;
@@ -159,7 +158,7 @@ export function DirectorTabContent(props: Props) {
             isKo={isKo}
             activeRoster={props.activeRoster}
             pendingRoster={props.pendingRoster}
-            invitedOnlyRosterRows={props.invitedOnlyRosterRows}
+            // Invited-but-not-joined students live in the invite panel above.
             isLoadingRoster={props.isLoadingRoster}
             fetchRosterAndMistakes={props.fetchRosterAndMistakes}
             classes={props.classes}

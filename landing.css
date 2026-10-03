@@ -175,3 +175,14 @@
     }
   }
 }
+
+/* Schools dashboards (TeacherPage adds .schools-ui to <body>): iOS Safari
+   zooms into any field under 16px on focus, and the web dashboards can't
+   disable zoom like the native app does. */
+@media (max-width: 767px) {
+  body.schools-ui input,
+  body.schools-ui select,
+  body.schools-ui textarea {
+    font-size: 16px;
+  }
+}

@@ -10,8 +10,8 @@ interface Props {
   isNight?: boolean;
   /** Falls back to the stored language when omitted (landing demo). */
   isKo?: boolean;
-  onSubmitLog: (payload: ClassLogPayload) => void;
-  isSubmitting?: boolean;
+  /** Returns true once the log is safely queued, which clears the form. */
+  onSubmitLog: (payload: ClassLogPayload) => boolean | void;
   userProfile?: UserProfile | null;
   selectedClassName?: string;
   selectedTextbookName?: string;
@@ -149,7 +149,6 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   isNight = true,
   isKo: isKoProp,
   onSubmitLog,
-  isSubmitting = false,
   userProfile,
   selectedClassName,
   selectedTextbookName,
@@ -193,6 +192,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   // Voice is the default way in — the form below doubles as its review
   // screen. "Type instead" closes it.
   const [showVoiceFill, setShowVoiceFill] = useState(!isDemo);
+  // Remounts the voice panel after a submit so last class's "Heard:" clears.
+  const [voiceFillKey, setVoiceFillKey] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
   const [isPlayingScriptedVoiceFill, setIsPlayingScriptedVoiceFill] = useState(false);
 
   const playScriptedVoiceFill = () => {
@@ -273,8 +275,10 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
     if (isDemo) return;
     const draft = getOfflineDraft();
     if (!draft) return;
+    // Textbook and a curriculum-matching topic are prefills, not typing —
+    // counting them showed "draft restored" on every visit after a submit.
     const hasContent =
-      draft.lessonTopic || draft.textbook || draft.energyLevel ||
+      (draft.lessonTopic && draft.lessonTopic !== selectedLessonTopic) || draft.energyLevel ||
       (draft.activities && draft.activities.length > 0) ||
       draft.generalComments || (draft.exceptions && draft.exceptions.length > 0);
     if (!hasContent) return;
@@ -491,7 +495,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
     // copy was already gone with nothing to fall back on. onSubmitLog's
     // caller (TeacherPage.tsx's handleLogSubmit) now clears it itself, only
     // once the log has actually persisted.
-    onSubmitLog({
+    const accepted = onSubmitLog({
       className,
       date,
       lessonTopic,
@@ -502,11 +506,25 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
       exceptions,
       enrolledStudentUids: effectiveRoster.map((s) => s.uid),
     });
+    // Queued safely — clear for the next class. Class, date and textbook
+    // usually carry over, so they stay.
+    if (accepted && !isDemo) {
+      setLessonTopic(selectedLessonTopic || '');
+      setEnergyLevel('');
+      setActivities([]);
+      setGeneralComments('');
+      setExceptions([]);
+      setHasDraftRestored(false);
+      undoSnapshotRef.current = null;
+      setVoiceFillKey((k) => k + 1);
+      rootRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
     <div
-      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl transition-colors max-w-3xl mx-auto w-full ${
+      ref={rootRef}
+      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl transition-colors max-w-3xl mx-auto w-full scroll-mt-4 ${
         isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
       }`}
     >
@@ -579,6 +597,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
       {!isDemo && showVoiceFill && (
         <VoiceFillAssistant
+          key={voiceFillKey}
           isNight={isNight}
           currentFields={{ lessonTopic, textbook, energyLevel, activities, generalComments }}
           onApply={handleVoiceApply}
@@ -597,7 +616,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 id="log-class-name"
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
-                className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
+                className={`w-full p-3 rounded-xl border text-base md:text-xs font-bold focus:outline-none focus:border-orange-500 ${
                   isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                 }`}
               >
@@ -612,7 +631,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               // one option, which looked broken since a dropdown implies
               // there should be more to pick from.
               <div
-                className={`w-full p-3 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 ${
+                className={`w-full p-3 rounded-xl border text-base md:text-xs font-bold flex items-center justify-between gap-2 ${
                   isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                 }`}
               >
@@ -632,7 +651,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 ${
+              className={`w-full p-3 rounded-xl border text-base md:text-xs font-bold focus:outline-none focus:border-orange-500 ${
                 isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
               }`}
             />
@@ -650,7 +669,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               value={lessonTopic}
               onChange={(e) => setLessonTopic(e.target.value)}
               placeholder={isKo ? '예: Unit 4: 광합성' : 'e.g. Unit 4: Photosynthesis'}
-              className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
+              className={`w-full p-3 rounded-xl border text-base md:text-xs focus:outline-none focus:border-orange-500 ${
                 isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
               }`}
             />
@@ -665,7 +684,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               value={textbook}
               onChange={(e) => setTextbook(e.target.value)}
               placeholder={isKo ? '예: Bricks Reading 150' : 'e.g. Bricks Reading 150'}
-              className={`w-full p-3 rounded-xl border text-xs focus:outline-none focus:border-orange-500 ${
+              className={`w-full p-3 rounded-xl border text-base md:text-xs focus:outline-none focus:border-orange-500 ${
                 isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
               }`}
             />
@@ -734,34 +753,11 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             value={generalComments}
             onChange={(e) => setGeneralComments(e.target.value)}
             rows={3}
-            className={`w-full p-3.5 rounded-xl border text-xs leading-relaxed focus:outline-none focus:border-orange-500 ${
+            className={`w-full p-3.5 rounded-xl border text-base md:text-xs leading-relaxed focus:outline-none focus:border-orange-500 ${
               isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
             }`}
             placeholder={isKo ? '전체 수업 코멘트를 입력하세요...' : 'Type general class notes here...'}
           />
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {(isKo
-              ? [
-                  '⭐ 학생들이 읽기 활동에 매우 적극적으로 참여했습니다.',
-                  '📝 모든 학생이 어휘 숙제를 기한 내에 완료했습니다.',
-                  '🗣️ 팀 퀴즈에서 말하기 참여도가 훌륭했습니다.',
-                ]
-              : [
-                  '⭐ Students engaged very enthusiastically with reading drills.',
-                  '📝 All students completed vocabulary homework on time.',
-                  '🗣️ Great active speaking participation during team quiz.',
-                ]
-            ).map((preset, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setGeneralComments(preset)}
-                className="px-2.5 py-1 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[11px] font-medium border border-orange-500/20 transition-colors cursor-pointer"
-              >
-                + {preset.length > 32 ? `${preset.slice(0, 32)}…` : preset}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Student Exceptions Section */}
@@ -939,7 +935,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     // Inline inside the log <form> now — Enter here must not submit the whole log.
                     onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                     placeholder={isKo ? '학생 이름 입력 (예: David / 김다윗)...' : 'Enter student name (e.g. David / 김다윗)...'}
-                    className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
+                    className={`w-full p-3 rounded-xl border text-base md:text-xs font-bold focus:outline-none ${
                       isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                     }`}
                   />
@@ -948,7 +944,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     id="exception-student-field"
                     value={modalStudentUid}
                     onChange={(e) => setModalStudentUid(e.target.value)}
-                    className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none ${
+                    className={`w-full p-3 rounded-xl border text-base md:text-xs font-bold focus:outline-none ${
                       isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                     }`}
                   >
@@ -978,7 +974,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                           ? 'Describe positive milestone (e.g. 100% quiz score, excellent pronunciation, helped classmates)...'
                           : 'Explain focus issue (e.g. missing homework, tardy, hesitant during speaking drill)...')
                   }
-                  className={`w-full p-3 rounded-xl border text-xs font-medium focus:outline-none ${
+                  className={`w-full p-3 rounded-xl border text-base md:text-xs font-medium focus:outline-none ${
                     isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
                   }`}
                 />
@@ -1032,20 +1028,15 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         <div className="max-md:sticky max-md:bottom-[calc(env(safe-area-inset-bottom)+4rem)] max-md:z-20 space-y-2">
         <button
           type="submit"
-          disabled={isSubmitting || isRealLogIncomplete}
+          disabled={isRealLogIncomplete}
           className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/25 transition-[background-color,transform,opacity] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
         >
-          {isSubmitting ? (
-            <>
-              <Sparkle size={18} className="animate-spin" />
-              <span>{isKo ? '한국인 교사에게 전송 중...' : 'Sending to KT...'}</span>
-            </>
-          ) : (
-            <>
-              <Sparkle size={18} weight="fill" />
-              <span>{isKo ? '한국인 교사에게 검토 요청' : 'Send to KT for Review'}</span>
-            </>
-          )}
+          <Sparkle size={18} weight="fill" />
+          <span>
+            {userProfile?.educatorRole === 'kt'
+              ? (isKo ? '일지 저장' : 'Save log')
+              : (isKo ? '한국인 교사에게 검토 요청' : 'Send to KT for Review')}
+          </span>
         </button>
         {missingFieldLabels.length > 0 && (
           <p className="text-center">

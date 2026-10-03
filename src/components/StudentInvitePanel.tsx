@@ -38,6 +38,9 @@ export const StudentInvitePanel: React.FC<Props> = ({
   classes = [],
 }) => {
   const [pending, setPending] = useState<PendingStudent[]>([]);
+  // Joined students are managed in the roster table below; listing them here too
+  // showed every student twice.
+  const waiting = pending.filter((p) => p.status !== 'redeemed');
   const [hasLoaded, setHasLoaded] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
@@ -291,7 +294,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
                 {isKo ? '학생 초대하기' : 'Invite Students'}
               </h4>
               <p className="text-xs text-zinc-400 leading-normal">
-                {isKo ? '학부모가 직접 코드를 입력하지 않아도, 이메일로 바로 초대할 수 있습니다.' : 'Push an invite to a parent\'s email instead of waiting on the self-serve code.'}
+                {isKo ? '학부모 이메일로 초대 링크를 보냅니다. 가입한 학생은 아래 학생 명단으로 옮겨집니다.' : "Email each parent an invite link. Once they join, the student moves to the roster below."}
               </p>
             </div>
           </div>
@@ -406,9 +409,11 @@ export const StudentInvitePanel: React.FC<Props> = ({
           <p className="text-xs text-zinc-400 text-center py-6">
             {isKo ? '초대 목록 불러오는 중...' : 'Loading invite list...'}
           </p>
-        ) : pending.length === 0 ? (
+        ) : waiting.length === 0 ? (
           <p className="text-xs text-zinc-400 text-center py-6">
-            {isKo ? '아직 초대한 학생이 없습니다.' : 'No students invited yet.'}
+            {pending.length === 0
+              ? (isKo ? '아직 초대한 학생이 없습니다.' : 'No students invited yet.')
+              : (isKo ? '초대한 학부모가 모두 가입했습니다.' : 'Everyone you invited has joined.')}
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -422,7 +427,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
                 </tr>
               </thead>
               <tbody className={`divide-y ${isNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
-                {pending.map((s) => (
+                {waiting.map((s) => (
                   <React.Fragment key={s.id}>
                     <tr>
                       <td className={`py-3 pl-1 pr-2 font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>

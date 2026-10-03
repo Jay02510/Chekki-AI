@@ -13,8 +13,7 @@ interface Props {
   activeClass: any;
   selectedTextbookName: string;
   ftDashboardRoster: { uid: string; name: string; isPending?: boolean }[];
-  handleLogSubmit: (payload: any) => void;
-  isSubmittingLog: boolean;
+  handleLogSubmit: (payload: any) => boolean;
   completionRate: number;
   completedHomeworkCount: number;
   activeStudentsCount: number;
@@ -52,7 +51,6 @@ export function FtTabContent(props: Props) {
           selectedTextbookName={props.selectedTextbookName}
           roster={props.ftDashboardRoster}
           handleFtLogSubmit={props.handleLogSubmit}
-          isSubmittingFtLog={props.isSubmittingLog}
           completionRate={props.completionRate}
           completedHomeworkCount={props.completedHomeworkCount}
           activeStudentsCount={props.activeStudentsCount}

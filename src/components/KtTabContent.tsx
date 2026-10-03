@@ -19,13 +19,13 @@ interface Props {
   confirmDiscardKtDraft: () => boolean;
   setKtDraftDirty: (dirty: boolean) => void;
   approveClassLog: (log: PendingClassLog, summary: string, notes: ApprovedNote[]) => Promise<boolean>;
+  discardClassLog: (log: PendingClassLog) => Promise<boolean>;
   academyName: string;
   user: any;
   activeClass: any;
 
   // kt_log
-  handleLogSubmit: (payload: any) => void;
-  isSubmittingLog: boolean;
+  handleLogSubmit: (payload: any) => boolean;
   selectedTextbookName: string | undefined;
   ftDashboardRoster: { uid: string; name: string; isPending?: boolean }[];
 
@@ -64,6 +64,7 @@ export function KtTabContent(props: Props) {
           academyName={props.academyName}
           user={props.user}
           approve={props.approveClassLog}
+          discard={props.discardClassLog}
           setDirty={props.setKtDraftDirty}
           confirmDiscard={props.confirmDiscardKtDraft}
         />
@@ -99,7 +100,6 @@ export function KtTabContent(props: Props) {
             isNight={isNight}
             isKo={isKo}
             onSubmitLog={props.handleLogSubmit}
-            isSubmitting={props.isSubmittingLog}
             userProfile={props.user}
             selectedClassName={props.activeClass?.name}
             selectedTextbookName={props.selectedTextbookName}

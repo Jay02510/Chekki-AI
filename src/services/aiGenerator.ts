@@ -103,13 +103,17 @@ export function getPendingLogQueue(): QueuedLogSubmission[] {
   }
 }
 
-export function enqueuePendingLogSubmission(item: Omit<QueuedLogSubmission, 'localId' | 'queuedAt'>): void {
+/** Returns the queued item, or null when storage is unavailable. */
+export function enqueuePendingLogSubmission(item: Omit<QueuedLogSubmission, 'localId' | 'queuedAt'>): QueuedLogSubmission | null {
   try {
     const queue = getPendingLogQueue();
-    queue.push({ ...item, localId: `pending_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, queuedAt: new Date().toISOString() });
+    const queued = { ...item, localId: `pending_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, queuedAt: new Date().toISOString() };
+    queue.push(queued);
     localStorage.setItem(PENDING_QUEUE_KEY, JSON.stringify(queue));
+    return queued;
   } catch (e) {
-    console.warn('Failed to queue offline log submission:', e);
+    console.warn('Failed to queue log submission:', e);
+    return null;
   }
 }
 

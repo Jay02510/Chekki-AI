@@ -80,6 +80,11 @@ export default function TeacherPage({ isNight = true }: Props) {
   const { language, setLanguage } = useLanguage();
   const isKo = language === 'ko';
   const [isThemeNight, setIsThemeNight] = useState(isNight);
+  // Scopes the 16px-field rule in index.css (no iOS focus zoom) to Schools.
+  useEffect(() => {
+    document.body.classList.add('schools-ui');
+    return () => document.body.classList.remove('schools-ui');
+  }, []);
   const [confirmDialog, setConfirmDialog] = useState<{
     title: string;
     onConfirm: () => void;
@@ -149,9 +154,9 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [authError, setAuthError] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Log-submit in-flight flag — shared by FT and KT, both submit through the
-  // same handleLogSubmit handler (KT via the kt_log tab's NativeTeacherLogForm).
-  const [isSubmittingLog, setIsSubmittingLog] = useState(false);
+  // Queue ids of submissions being sent right now, so the drain below never
+  // sends the same log twice while a fresh submit is still in flight.
+  const inFlightLogIdsRef = useRef(new Set<string>());
 
   // Core submit: AI generation + Firestore persist, parameterized on
   // classId/teacherUid/authorRole (rather than reading selectedClass/user/
@@ -170,9 +175,10 @@ export default function TeacherPage({ isNight = true }: Props) {
     isQueuedRetry = false
   ): Promise<boolean> => {
     try {
-      const summary = await generateGeneralClassSummary({ ...payload, authorRole });
-      const studentReports = await Promise.all(
-        payload.exceptions.map(async (ex) => {
+      // Summary and student notes are independent AI calls — run together.
+      const [summary, studentReports] = await Promise.all([
+        generateGeneralClassSummary({ ...payload, authorRole }),
+        Promise.all(payload.exceptions.map(async (ex) => {
           const updateText = await generateStudentExceptionReport(
             ex.studentName,
             payload.lessonTopic,
@@ -191,8 +197,8 @@ export default function TeacherPage({ isNight = true }: Props) {
             phoneTalkingPoints: [],
             category: ex.type,
           };
-        })
-      );
+        })),
+      ]);
       // Stay on the FT's own dashboard after submit — the kt_script tab
       // is the KT's review workspace, not an FT-facing "success" screen.
       // FT gets a toast confirmation below instead of being bounced there.
@@ -210,6 +216,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         ...payload,
         classId,
         teacherUid,
+        teacherName: user?.name || '',
         createdAt: serverTimestamp(),
         aiKoreanSummary: summary.korean,
         aiEnglishSummary: summary.english,
@@ -284,8 +291,14 @@ export default function TeacherPage({ isNight = true }: Props) {
     drainingQueueRef.current = true;
     try {
       for (const item of queue as QueuedLogSubmission[]) {
-        const ok = await submitClassLog(item.payload, item.classId, item.teacherUid, item.authorRole, true);
-        if (ok) removePendingLogSubmission(item.localId);
+        if (inFlightLogIdsRef.current.has(item.localId)) continue;
+        inFlightLogIdsRef.current.add(item.localId);
+        try {
+          const ok = await submitClassLog(item.payload, item.classId, item.teacherUid, item.authorRole, true);
+          if (ok) removePendingLogSubmission(item.localId);
+        } finally {
+          inFlightLogIdsRef.current.delete(item.localId);
+        }
       }
     } finally {
       drainingQueueRef.current = false;
@@ -298,36 +311,58 @@ export default function TeacherPage({ isNight = true }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleLogSubmit = async (payload: ClassLogPayload) => {
-    setIsSubmittingLog(true);
-    try {
-      if (!selectedClass?.id || selectedClass.isDemo || !user?.uid) {
-        // No real class yet (demo/placeholder class, or classes still
-        // loading) — the AI preview above is real, but there's nothing to
-        // send to a KT. Without this the button looked broken: the form
-        // just sat there with no toast and no visible change.
-        showToast({
-          type: 'error',
-          message: isKo
-            ? '아직 등록된 학급이 없어 저장되지 않았습니다. 원장님께 학급 등록을 요청하세요.'
-            : "This is a preview only — you're not assigned to a real class yet, so nothing was sent. Ask your director to add you to a class.",
-        });
-        return;
-      }
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        enqueuePendingLogSubmission({ classId: selectedClass.id, teacherUid: user.uid, authorRole: educatorRole, payload });
-        showToast({
-          type: 'success',
-          message: isKo
-            ? '📡 오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
-            : "📡 You're offline — this will send automatically once you're back online.",
-        });
-        return;
-      }
-      await submitClassLog(payload, selectedClass.id, user.uid, educatorRole);
-    } finally {
-      setIsSubmittingLog(false);
+  // Returns true once the log is safe (queued locally), so the form can
+  // clear right away. AI drafting (~10s) and the Firestore write continue in
+  // the background; the queue retries on the next load or reconnect if the
+  // tab closes or the network drops before it finishes.
+  const handleLogSubmit = (payload: ClassLogPayload): boolean => {
+    if (!selectedClass?.id || selectedClass.isDemo || !user?.uid) {
+      // No real class yet (demo/placeholder class, or classes still
+      // loading) — there's nothing to send to a KT.
+      showToast({
+        type: 'error',
+        message: isKo
+          ? '아직 등록된 학급이 없어 저장되지 않았습니다. 원장님께 학급 등록을 요청하세요.'
+          : "This is a preview only — you're not assigned to a real class yet, so nothing was sent. Ask your director to add you to a class.",
+      });
+      return false;
     }
+    const item = { classId: selectedClass.id, teacherUid: user.uid, authorRole: educatorRole, payload };
+    const queued = enqueuePendingLogSubmission(item);
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      if (!queued) return false;
+      showToast({
+        type: 'success',
+        message: isKo
+          ? '📡 오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
+          : "📡 You're offline — this will send automatically once you're back online.",
+      });
+      return true;
+    }
+    showToast({
+      type: 'success',
+      message: educatorRole === 'kt'
+        ? (isKo ? '일지를 저장하는 중입니다. 잠시 후 학부모 리포트에 나타납니다.' : 'Saving your log. It will appear in Parent reports in a moment.')
+        : (isKo ? 'KT에게 보내는 중입니다. 다른 작업을 계속하셔도 됩니다.' : 'Sending to your KT. You can keep working.'),
+    });
+    if (queued) inFlightLogIdsRef.current.add(queued.localId);
+    void submitClassLog(payload, item.classId, item.teacherUid, item.authorRole, true)
+      .then((ok) => {
+        if (ok && queued) removePendingLogSubmission(queued.localId);
+        if (!ok) {
+          showToast({
+            type: 'error',
+            message: queued
+              ? (isKo ? '아직 전송되지 않았습니다. 다시 접속하거나 인터넷이 연결되면 자동으로 다시 시도합니다.' : "Couldn't send yet. Chekki will retry automatically when you reopen this page or reconnect.")
+              : (isKo ? '일지 전송에 실패했습니다. 다시 제출해주세요.' : "Couldn't send your log. Please submit it again."),
+          });
+        }
+      })
+      .finally(() => {
+        if (queued) inFlightLogIdsRef.current.delete(queued.localId);
+      });
+    // Without local storage there's no retry copy, so keep the form filled.
+    return !!queued;
   };
 
 
@@ -535,6 +570,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     ktLogsLoadError,
     confirmDiscardKtDraft,
     approveClassLog,
+    discardClassLog,
   } = useKtReviewQueue(educatorRole, classes, user, showToast, isKo);
 
   // Tab state (Phase 5 of the buzzing-nibbling-hearth TeacherPage split) —
@@ -1712,7 +1748,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                 since the role isn't a choice in that case (audit §21d), and
                 also hidden for a plan-linked director signup (picked a plan
                 on /schools) since that's already role-locked to director. */}
-            {!(inviteSlug && authMode === 'signup') && !isPlanSignup && (
+            {/* Sign-in doesn't need a role choice — the account's own role
+                decides which dashboard opens. The toggle only matters for
+                creating an account. */}
+            {authMode === 'signup' && !inviteSlug && !isPlanSignup && (
               <div className="w-full flex p-1 bg-brand-dark border border-white/10 rounded-2xl mb-4">
                 <button
                   type="button"
@@ -1798,7 +1837,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     ? `${planLabel.nameKo} 원장님 계정 생성 — FT ${planSeats.ft}석, KT ${planSeats.kt}석`
                     : `Create your Director account for ${planLabel.nameEn} — ${planSeats.ft} FT seats, ${planSeats.kt} KT seats`)
                 : authMode === 'login'
-                ? (loginRole === 'director' ? (isKo ? '원장님 로그인' : 'Director sign-in') : (isKo ? '선생님 로그인' : 'Teacher sign-in'))
+                ? (isKo ? '로그인' : 'Sign in')
                 : (loginRole === 'director' ? (isKo ? '원장님 계정 생성' : 'Create Director Account') : (isKo ? '교사 계정 생성' : 'Create Teacher Account'))}
             </h2>
             <p className={`text-zinc-400 text-xs text-center leading-relaxed max-w-xs ${isPlanSignup ? 'mb-2' : 'mb-6'}`}>
@@ -1807,9 +1846,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     ? (isKo ? '신용카드 등록 없이 7일 무료 체험이 바로 시작됩니다.' : 'Free for 7 days, no payment required now.')
                     : (isKo ? '가입 즉시 원장님 전용 대시보드가 개설됩니다. 결제는 대시보드에서 별도로 안내드립니다.' : 'Your Director dashboard activates immediately after signup — billing is handled separately from your dashboard.'))
                 : authMode === 'login'
-                ? (loginRole === 'director'
-                    ? (isKo ? '캠퍼스 전체 커리큘럼, 일간 숙제 제출률 및 보고서 총괄 대시보드로 이동합니다.' : 'Log in to view campus curriculum streams, homework status, and student reports.')
-                    : (isKo ? '학습지 관리 및 분석을 위해 교사 계정으로 로그인해 주세요.' : 'Log in with your teacher credentials to access your dashboard.'))
+                ? (isKo ? '선생님과 원장님 모두 여기에서 로그인합니다.' : 'Teachers and directors both sign in here.')
                 : (loginRole === 'director'
                     ? (isKo ? '학원명을 등록하고 즉시 원장님 전용 대시보드를 개설하세요.' : 'Register your academy and open your director dashboard.')
                     : inviteSlug
@@ -1939,6 +1976,15 @@ export default function TeacherPage({ isNight = true }: Props) {
                 )}
               </button>
             </form>
+            {authMode === 'login' && !inviteSlug && !isPlanSignup && loginRole === 'teacher' && (
+              <button
+                type="button"
+                onClick={() => { setLoginRole('director'); setAuthMode('signup'); setAuthError(''); }}
+                className="mt-5 min-h-11 text-xs text-zinc-400 hover:text-zinc-200 underline underline-offset-2 cursor-pointer transition-colors"
+              >
+                {isKo ? '새 학원이신가요? 원장님 계정 만들기' : 'New academy? Create a director account'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -1947,6 +1993,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
 
   const activeClass = selectedClass || fallbackDemoClass;
+  const isKtInbox = !isDirectorUser && educatorRole === 'kt' && activeTab === 'kt_script';
 
 
   if (showActivationWizard) {
@@ -2417,7 +2464,9 @@ export default function TeacherPage({ isNight = true }: Props) {
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent pointer-events-none" />
         
         {/* Top Header Control Bar */}
-        <header className={`p-3 sm:p-6 border-b flex flex-wrap items-center justify-between gap-2 sm:gap-4 relative z-20 shrink-0 transition-colors ${
+        {/* The KT inbox spans every class, so the class switcher does nothing
+            there; on phones the header would be empty, so it hides too. */}
+        <header className={`p-3 sm:p-6 border-b flex flex-wrap items-center justify-between gap-2 sm:gap-4 relative z-20 shrink-0 transition-colors ${isKtInbox ? 'max-md:hidden' : ''} ${
           isThemeNight ? 'bg-brand-dark/90 border-white/5 text-white' : 'bg-white/90 border-zinc-200 text-zinc-900 shadow-xs'
         }`}>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -2441,7 +2490,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 (week nav, roster, overview stats) is showing — with it
                 gone, a director with more than one class had no way to
                 switch between them at all. */}
-            <div className="relative min-w-0 flex-1 sm:flex-none sm:max-w-xs">
+            <div className={`relative min-w-0 flex-1 sm:flex-none sm:max-w-xs ${isKtInbox ? 'hidden' : ''}`}>
               {/* isDemo is a client-only placeholder so the rest of the page
                   can safely read selectedClass.joinCode etc before real
                   classes load — it should never appear as a switchable
@@ -2515,7 +2564,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     type="button"
                     onClick={() => handleUpdateWeek(-1)}
                     disabled={(selectedClass?.activeWeekNumber || 1) <= 1}
-                    className={`w-11 h-11 flex items-center justify-center rounded-xl text-sm font-black transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer disabled:opacity-20 active:scale-95 ${
+                    className={`hidden sm:flex w-11 h-11 items-center justify-center rounded-xl text-sm font-black transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer disabled:opacity-20 active:scale-95 ${
                       isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
                     }`}
                     title={isKo ? '이전 주차' : 'Previous week'}
@@ -2525,17 +2574,18 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="button"
                     onClick={() => setShowWeekCalendarModal(true)}
-                    className={`px-3 py-1 text-xs font-black min-w-[3.4rem] whitespace-nowrap text-center rounded-lg transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
+                    className={`px-3 py-1 min-h-11 text-xs font-black min-w-[3.4rem] whitespace-nowrap text-center rounded-lg transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
                       isThemeNight ? 'text-white hover:bg-white/10 hover:text-orange-400' : 'text-zinc-900 hover:bg-zinc-200 hover:text-orange-600'
                     }`}
                     title={isKo ? '클릭하여 학기 주차별 커리큘럼 업로드 캘린더 열기' : 'Click to view semester calendar'}
                   >
+                    {/* Phones drop the −/+ buttons; this opens the calendar to change week. */}
                     {isKo ? `${selectedClass?.activeWeekNumber || 1}주차` : `Week ${selectedClass?.activeWeekNumber || 1}`}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleUpdateWeek(1)}
-                    className={`w-11 h-11 flex items-center justify-center rounded-xl text-sm font-black transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-95 ${
+                    className={`hidden sm:flex w-11 h-11 items-center justify-center rounded-xl text-sm font-black transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-95 ${
                       isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
                     }`}
                     title={isKo ? '다음 주차' : 'Next week'}
@@ -2721,7 +2771,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                 onRequestPlanChange={handleRequestPlanChange}
                 pendingRoster={pendingRoster}
                 activeRoster={activeRoster}
-                invitedOnlyRosterRows={invitedOnlyRosterRows}
                 classes={classes}
                 onClassesChanged={() => fetchClasses()}
                 selectedClass={selectedClass}
@@ -2755,11 +2804,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                 confirmDiscardKtDraft={confirmDiscardKtDraft}
                 setKtDraftDirty={setKtDraftDirty}
                 approveClassLog={approveClassLog}
+                discardClassLog={discardClassLog}
                 activeClass={activeClass}
                 academyName={displayedAcademyName}
                 user={user}
                 handleLogSubmit={handleLogSubmit}
-                isSubmittingLog={isSubmittingLog}
                 selectedTextbookName={selectedTextbookName}
                 ftDashboardRoster={ftDashboardRoster}
                 uploadMode={uploadMode}
@@ -2787,7 +2836,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                 selectedTextbookName={selectedTextbookName}
                 ftDashboardRoster={ftDashboardRoster}
                 handleLogSubmit={handleLogSubmit}
-                isSubmittingLog={isSubmittingLog}
                 completionRate={completionRate}
                 completedHomeworkCount={completedHomeworkCount}
                 activeStudentsCount={activeStudentsCount}

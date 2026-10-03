@@ -22,8 +22,7 @@ interface Props {
   activeClass: any;
   selectedTextbookName: string;
   roster: { uid: string; name: string; isPending?: boolean }[];
-  handleFtLogSubmit: (payload: ClassLogPayload) => void | Promise<void>;
-  isSubmittingFtLog: boolean;
+  handleFtLogSubmit: (payload: ClassLogPayload) => boolean;
   completionRate: number;
   completedHomeworkCount: number;
   activeStudentsCount: number;
@@ -63,7 +62,6 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
   selectedTextbookName,
   roster,
   handleFtLogSubmit,
-  isSubmittingFtLog,
   completionRate,
   completedHomeworkCount,
   activeStudentsCount,
@@ -94,7 +92,6 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
               isNight={isThemeNight}
               isKo={isKo}
               onSubmitLog={handleFtLogSubmit}
-              isSubmitting={isSubmittingFtLog}
               userProfile={user}
               selectedClassName={activeClass?.name}
               selectedTextbookName={selectedTextbookName}
@@ -200,6 +197,10 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                         {log.reviewStatus === 'sent' ? (
                           <span className="shrink-0 whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
                             {isKo ? '발송 완료' : 'Sent'}
+                          </span>
+                        ) : log.reviewStatus === 'discarded' ? (
+                          <span className="shrink-0 whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/5 border border-white/10 text-zinc-400">
+                            {isKo ? '보내지 않음' : 'Not sent'}
                           </span>
                         ) : (
                           <span className="shrink-0 whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400">

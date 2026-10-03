@@ -80,8 +80,10 @@ export function useLogCompliance(classes: any[]) {
             const snap = await getDocs(logsQuery);
             const submittedDates = new Set(snap.docs.map((d) => d.data().date));
             const todayLogs = snap.docs.map((d) => d.data()).filter((l) => l.date === todayIso);
-            const todayStatus: ComplianceRow['todayStatus'] =
-              todayLogs.length === 0 ? 'none' : todayLogs.some((l) => l.reviewStatus !== 'sent') ? 'pending' : 'sent';
+            // Discarded logs (duplicates/mistakes) don't count either way.
+            const todayStatus: ComplianceRow['todayStatus'] = todayLogs.some((l) => l.reviewStatus === 'pending_review')
+              ? 'pending'
+              : todayLogs.some((l) => l.reviewStatus === 'sent') ? 'sent' : 'none';
 
             const dayResults = days.map((date) => ({
               date,

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Bell, BellSlash, CaretLeft, CaretRight, CheckCircle, Copy, Sparkle } from '@phosphor-icons/react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
-import { logDate, type ApprovedNote, type PendingClassLog } from '../../hooks/useKtReviewQueue';
+import { logDate, logTime, type ApprovedNote, type PendingClassLog } from '../../hooks/useKtReviewQueue';
 import type { UserProfile } from '../../types';
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
   academyName: string;
   user: UserProfile | null;
   approve: (log: PendingClassLog, summary: string, notes: ApprovedNote[]) => Promise<boolean>;
+  discard: (log: PendingClassLog) => Promise<boolean>;
   setDirty: (dirty: boolean) => void;
   confirmDiscard: () => boolean;
 }
@@ -59,7 +60,7 @@ async function shareOrCopy(text: string): Promise<'shared' | 'copied' | 'cancell
 // summary once and every student note on one screen, approves once, and
 // every family in the class gets it in the app. KakaoTalk copies are
 // optional, offered after publishing.
-export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, approve, setDirty, confirmDiscard }: Props) {
+export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, approve, discard, setDirty, confirmDiscard }: Props) {
   const isMobile = useIsMobile();
   // A snapshot, not an id: after approval the log leaves `logs`, but the
   // review stays on screen to show the done state and KakaoTalk copies.
@@ -118,6 +119,13 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
       }}
       setDirty={setDirty}
       onNext={goNext}
+      onDiscard={async () => {
+        const msg = isKo
+          ? '이 일지를 학부모께 보내지 않고 삭제할까요? (중복이거나 잘못 제출된 경우)'
+          : 'Discard this log without sending it to parents? Use this for duplicates or mistakes.';
+        if (!window.confirm(msg)) return;
+        if (await discard(current)) goNext();
+      }}
     />
   );
 
@@ -178,7 +186,7 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold truncate">{log.className || (isKo ? '수업' : 'Class')}</span>
                       <span className={`block text-xs mt-0.5 truncate ${muted}`}>
-                        {[logDate(log), log.lessonTopic].filter(Boolean).join(' · ')}
+                        {[`${logDate(log)} ${logTime(log)}`.trim(), log.lessonTopic].filter(Boolean).join(' · ')}
                       </span>
                     </span>
                     {notes > 0 && (
@@ -233,11 +241,18 @@ interface ReviewProps {
   approve: (summary: string, notes: ApprovedNote[]) => Promise<boolean>;
   setDirty: (dirty: boolean) => void;
   onNext: () => void;
+  onDiscard: () => void;
 }
 
-const rowsFor = (text: string) => Math.min(14, Math.max(4, Math.ceil(text.length / 55) + text.split('\n').length));
+// Grow textareas to fit their text — on a phone a fixed height hid most of
+// the summary behind an inner scroll.
+const autoSize = (el: HTMLTextAreaElement | null) => {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = `${el.scrollHeight + 2}px`;
+};
 
-function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, setDirty, onNext }: ReviewProps) {
+function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, setDirty, onNext, onDiscard }: ReviewProps) {
   const initialSummary = log.aiKoreanSummary || '';
   const initialNotes = (log.aiStudentReports || []).map((r) => r.koreanUpdate || '');
   const [summary, setSummary] = useState(initialSummary);
@@ -289,7 +304,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
 
   const panel = isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200';
   const muted = isNight ? 'text-zinc-400' : 'text-zinc-500';
-  const field = `w-full p-3.5 rounded-2xl border text-base md:text-sm leading-relaxed outline-none transition-colors focus:border-orange-500 ${
+  const field = `w-full p-3.5 rounded-2xl border resize-none overflow-hidden text-base md:text-sm leading-relaxed outline-none transition-colors focus:border-orange-500 ${
     isNight ? 'bg-black/30 border-white/10 text-white' : 'bg-zinc-50 border-zinc-200 text-zinc-900'
   }`;
   const copyButton = (key: string, text: string, label: string) => (
@@ -311,7 +326,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
     <article className={`rounded-3xl border ${panel}`}>
       <header className={`p-5 sm:p-6 border-b ${isNight ? 'border-white/10' : 'border-zinc-200'}`}>
         <h3 className="text-lg sm:text-xl font-black tracking-tight break-keep">{className || (isKo ? '수업' : 'Class')}</h3>
-        <p className={`text-sm mt-1 ${muted}`}>{[date, log.lessonTopic].filter(Boolean).join(' · ')}</p>
+        <p className={`text-sm mt-1 ${muted}`}>{[date, log.lessonTopic, log.teacherName].filter(Boolean).join(' · ')}</p>
       </header>
 
       {status === 'done' ? (
@@ -369,8 +384,9 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
               <textarea
                 id={`kt-summary-${log.id}`}
                 value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                rows={rowsFor(summary)}
+                ref={autoSize}
+                onChange={(e) => { setSummary(e.target.value); autoSize(e.target); }}
+                rows={3}
                 className={field}
               />
               {log.aiEnglishSummary && (
@@ -414,8 +430,9 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                     <textarea
                       id={`kt-note-${log.id}-${i}`}
                       value={notes[i]}
-                      onChange={(e) => setNotes((prev) => prev.map((n, j) => (j === i ? e.target.value : n)))}
-                      rows={rowsFor(notes[i])}
+                      ref={autoSize}
+                      onChange={(e) => { setNotes((prev) => prev.map((n, j) => (j === i ? e.target.value : n))); autoSize(e.target); }}
+                      rows={3}
                       className={field}
                     />
                   </div>
@@ -447,6 +464,14 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
               ) : (
                 `Approve and send to ${families} ${families === 1 ? 'family' : 'families'}`
               )}
+            </button>
+            <button
+              type="button"
+              onClick={onDiscard}
+              disabled={status === 'saving'}
+              className={`mt-2 w-full min-h-11 text-sm font-bold cursor-pointer transition-colors disabled:opacity-40 ${isNight ? 'text-zinc-400 hover:text-red-400' : 'text-zinc-500 hover:text-red-600'}`}
+            >
+              {isKo ? '보내지 않고 삭제 (중복·실수)' : "Discard, don't send (duplicate or mistake)"}
             </button>
           </footer>
         </>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/react';
-import { collection, doc, getDocs, orderBy, limit as fbLimit, query, serverTimestamp, where, writeBatch } from 'firebase/firestore';
+import { collection, doc, getDocs, orderBy, limit as fbLimit, query, serverTimestamp, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { dbInstance } from '../services/database';
 import type { UserProfile } from '../types';
 import { parentReportRecipients, type ApprovedNote } from '../src/services/parentReports';
@@ -16,6 +16,7 @@ export interface PendingClassLog {
   className?: string;
   date?: string;
   lessonTopic?: string;
+  teacherName?: string;
   createdAt?: any;
   aiKoreanSummary?: string;
   aiEnglishSummary?: string;
@@ -27,6 +28,12 @@ export interface PendingClassLog {
   }>;
   enrolledStudentUids?: string[];
 }
+
+/** Submit time (HH:MM), to tell apart two logs for the same class and day. */
+export const logTime = (log: PendingClassLog) => {
+  const d = log.createdAt?.toDate?.();
+  return d ? `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : '';
+};
 
 export const logDate = (log: PendingClassLog) =>
   log.date || (log.createdAt?.toDate ? log.createdAt.toDate().toISOString().slice(0, 10) : '');
@@ -92,7 +99,9 @@ export function useKtReviewQueue(
             return snap.docs.map((d) => ({ id: d.id, classId: c.id, className: c.name, ...d.data() } as PendingClassLog));
           })
         );
-        setKtPendingLogs(perClassLogs.flat().reverse()); // oldest pending first
+        // Oldest first across all classes (each class query comes back newest-first).
+        const ms = (l: PendingClassLog) => l.createdAt?.toMillis?.() ?? 0;
+        setKtPendingLogs(perClassLogs.flat().sort((a, b) => ms(a) - ms(b)));
       } catch (err) {
         console.error('Failed to load cross-class KT review queue:', err);
         Sentry.captureException(err, {
@@ -150,11 +159,32 @@ export function useKtReviewQueue(
     }
   };
 
+  // Duplicate or mistaken submission: take it out of the queue without
+  // sending anything to parents.
+  const discardClassLog = async (log: PendingClassLog): Promise<boolean> => {
+    if (!user?.uid) return false;
+    try {
+      await updateDoc(doc(dbInstance, 'classes', log.classId, 'logs', log.id), {
+        reviewStatus: 'discarded',
+        reviewedByUid: user.uid,
+        reviewedByName: user.name || user.email || 'Unknown teacher',
+      });
+      setKtPendingLogs((prev) => prev.filter((l) => l.id !== log.id));
+      setKtDraftDirty(false);
+      return true;
+    } catch (err) {
+      console.error('Failed to discard log:', err);
+      showToast({ type: 'error', message: isKo ? '삭제하지 못했습니다. 다시 시도해주세요.' : "Couldn't discard it. Please try again." });
+      return false;
+    }
+  };
+
   return {
     ktPendingLogs, setKtPendingLogs,
     ktDraftDirty, setKtDraftDirty,
     ktLogsLoadError,
     confirmDiscardKtDraft,
     approveClassLog,
+    discardClassLog,
   };
 }
