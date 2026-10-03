@@ -24,6 +24,8 @@ export interface ComplianceRow {
   teacherName: string;
   days: { date: string; submitted: boolean; isToday: boolean }[];
   missStreak: number;
+  /** Today's log(s): none yet, any still waiting for KT review, or all sent. */
+  todayStatus: 'none' | 'pending' | 'sent';
 }
 
 // Cross-class rollup of "did the assigned teacher submit a log today" —
@@ -77,6 +79,9 @@ export function useLogCompliance(classes: any[]) {
             const logsQuery = query(logsRef, where('date', '>=', days[0]), orderBy('date', 'asc'));
             const snap = await getDocs(logsQuery);
             const submittedDates = new Set(snap.docs.map((d) => d.data().date));
+            const todayLogs = snap.docs.map((d) => d.data()).filter((l) => l.date === todayIso);
+            const todayStatus: ComplianceRow['todayStatus'] =
+              todayLogs.length === 0 ? 'none' : todayLogs.some((l) => l.reviewStatus !== 'sent') ? 'pending' : 'sent';
 
             const dayResults = days.map((date) => ({
               date,
@@ -106,6 +111,7 @@ export function useLogCompliance(classes: any[]) {
               teacherName,
               days: dayResults,
               missStreak,
+              todayStatus,
             } as ComplianceRow;
           })
         );

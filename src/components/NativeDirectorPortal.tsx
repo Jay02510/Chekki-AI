@@ -10,6 +10,7 @@ import { collection, query, where, getCountFromServer, getDocs } from 'firebase/
 import { dbInstance } from '../../services/database';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { ActivityFeed } from './ActivityFeed';
+import { useLogCompliance, type ComplianceRow } from '../../hooks/useLogCompliance';
 
 interface Props {
   isNight?: boolean;
@@ -125,6 +126,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
     return () => { cancelled = true; };
   }, [classes]);
 
+  const { complianceRows, isLoading: isLoadingCompliance } = useLogCompliance(classes);
   const totalRosterCount = campusRoster.activeCount + campusRoster.pendingCount;
   const flaggedStudents = campusRoster.flagged;
 
@@ -319,16 +321,15 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* ========================================================================= */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-fade-in text-left">
-          {/* Metric strip — action items first (pending review, flagged),
-              then campus totals. Horizontally scrollable on mobile. */}
+          <DirectorTodayPanel
+            isNight={isNight}
+            isKo={isKo}
+            rows={complianceRows}
+            isLoading={isLoadingCompliance}
+          />
+
+          {/* Campus totals. Horizontally scrollable on mobile. */}
           <div className="flex items-center gap-3 overflow-x-auto pb-1">
-            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <span className="text-xs font-bold text-zinc-400 block">{isKo ? '검토 대기 일지' : 'Logs awaiting review'}</span>
-              <h4 className={`text-2xl font-black mt-1 whitespace-nowrap ${logReviewStats.pending > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {logReviewStats.pending}{' '}
-                <span className="text-xs font-normal text-zinc-400">{isKo ? `· ${logReviewStats.sent}건 발송됨` : `· ${logReviewStats.sent} sent`}</span>
-              </h4>
-            </div>
             <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
               <span className="text-xs font-bold text-zinc-400 block">{isKo ? '학급' : 'Classes'}</span>
               <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
@@ -664,3 +665,63 @@ export const NativeDirectorPortal: React.FC<Props> = ({
     </div>
   );
 };
+
+// The director's first question each day: did every class get logged, and
+// did parents get the report? Per class, from today's logs only
+// (useLogCompliance.todayStatus) — an older backlog shows in the KT inbox.
+function DirectorTodayPanel({
+  isNight,
+  isKo,
+  rows,
+  isLoading,
+}: {
+  isNight: boolean;
+  isKo: boolean;
+  rows: ComplianceRow[];
+  isLoading: boolean;
+}) {
+  if (rows.length === 0 && !isLoading) return null;
+  const muted = isNight ? 'text-zinc-400' : 'text-zinc-500';
+  const statusFor = (row: ComplianceRow) => {
+    if (row.todayStatus === 'none') return { key: 'none', label: isKo ? '아직 일지 없음' : 'Not logged yet', tone: isNight ? 'bg-white/10 text-zinc-300' : 'bg-zinc-100 text-zinc-600' };
+    if (row.todayStatus === 'pending') return { key: 'pending', label: isKo ? 'KT 검토 대기' : 'Waiting for KT review', tone: isNight ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-100 text-amber-800' };
+    return { key: 'sent', label: isKo ? '학부모 전달 완료' : 'Sent to parents', tone: isNight ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-800' };
+  };
+  const sentCount = rows.filter((r) => statusFor(r).key === 'sent').length;
+
+  return (
+    <section className={`rounded-2xl border ${isNight ? 'border-white/10' : 'border-zinc-200'}`}>
+      <header className={`flex items-baseline justify-between gap-3 px-5 py-4 border-b ${isNight ? 'border-white/10' : 'border-zinc-200'}`}>
+        <h4 className="font-black text-base">{isKo ? '오늘' : 'Today'}</h4>
+        {!isLoading && (
+          <span className={`text-sm ${muted}`}>
+            {isKo ? `${rows.length}개 반 중 ${sentCount}개 전달 완료` : `${sentCount} of ${rows.length} classes sent`}
+          </span>
+        )}
+      </header>
+      {isLoading && rows.length === 0 ? (
+        <p className={`px-5 py-4 text-sm ${muted}`}>{isKo ? '불러오는 중...' : 'Loading...'}</p>
+      ) : (
+        <ul className={`divide-y ${isNight ? 'divide-white/5' : 'divide-zinc-100'}`}>
+          {rows.map((row) => {
+            const status = statusFor(row);
+            return (
+              <li key={row.classId} className="flex items-center justify-between gap-3 px-5 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold truncate">{row.className}</p>
+                  <p className={`text-xs truncate ${row.missStreak >= 2 ? (isNight ? 'text-red-400' : 'text-red-600') : muted}`}>
+                    {[
+                      row.teacherName,
+                      row.missStreak >= 2 && (isKo ? `${row.missStreak}일 연속 미제출` : `Missed ${row.missStreak} days in a row`),
+                    ].filter(Boolean).join(' · ')}
+                  </p>
+                </div>
+                <span className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-bold ${status.tone}`}>{status.label}</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}

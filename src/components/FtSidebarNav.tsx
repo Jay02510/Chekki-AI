@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChartBar, Sparkle, FileText, ClockCounterClockwise, CaretRight } from '@phosphor-icons/react';
+import { ChartBar, FileText, ClockCounterClockwise, CaretRight } from '@phosphor-icons/react';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 }
 
 // FT's sidebar nav (Phase 6 of the buzzing-nibbling-hearth TeacherPage
-// split) — overview/insights/homework/history tabs. Purely presentational.
+// split) — overview/homework/history tabs. Purely presentational.
 //
 // The Syllabus/Curriculum Setup tab is intentionally omitted here (demo:
 // OCR scan flow not battle-tested enough for live demo, matching the
@@ -39,29 +39,6 @@ export function FtSidebarNav({ isNight, isKo, activeTab, setActiveTab }: Props) 
           <span>{isKo ? '오늘의 일지' : 'Daily log'}</span>
         </div>
         <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'overview' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-      </button>
-
-      <button
-        onClick={() => setActiveTab('insights')}
-        className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-          activeTab === 'insights'
-            ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-            : isNight
-              ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-              : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-        }`}
-      >
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-xl transition-colors ${
-            activeTab === 'insights'
-              ? 'bg-orange-500/20 text-orange-500'
-              : isNight ? 'bg-white/5 text-amber-400 group-hover:text-white' : 'bg-amber-100 text-amber-600 group-hover:text-zinc-900'
-          }`}>
-            <Sparkle size={18} weight="bold" />
-          </div>
-          <span>{isKo ? '주간 인사이트' : 'Weekly insights'}</span>
-        </div>
-        <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'insights' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
       </button>
 
       <button

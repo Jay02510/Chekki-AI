@@ -22,8 +22,9 @@ interface Props {
   fetchRosterAndMistakes: () => void;
   classes: any[];
   selectedClass: any;
-  handleMoveStudent: (uid: string, targetClassId: string) => void;
-  handleRemoveStudent: (uid: string) => void;
+  /** Omit both for a read-only roster (KT): only Details stays. */
+  handleMoveStudent?: (uid: string, targetClassId: string) => void;
+  handleRemoveStudent?: (uid: string) => void;
   setSelectedStudentDetails: (student: any) => void;
 }
 
@@ -180,6 +181,7 @@ export function StudentDatabaseGrid({
           const row = info.row.original;
           if (row.status !== 'active') return null;
           if (row.isInvitedOnly) {
+            if (!handleRemoveStudent) return null;
             return (
               <span className="text-[10px] text-zinc-500 italic">
                 {isKo ? '위 초대 목록에서 관리' : 'Manage in Invite Students above'}
@@ -188,6 +190,7 @@ export function StudentDatabaseGrid({
           }
           return (
             <div className="flex items-center justify-end gap-2">
+              {handleMoveStudent && (
               <select
                 onChange={(e) => e.target.value && runAction(() => handleMoveStudent(row.uid, e.target.value))}
                 value=""
@@ -201,6 +204,8 @@ export function StudentDatabaseGrid({
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
+              )}
+              {handleRemoveStudent && (
               <button
                 onClick={() => runAction(() => handleRemoveStudent(row.uid))}
                 disabled={isActionBusy}
@@ -208,6 +213,7 @@ export function StudentDatabaseGrid({
               >
                 {isKo ? '삭제' : 'Remove'}
               </button>
+              )}
               <button
                 onClick={() => setSelectedStudentDetails(row.raw)}
                 className={`px-3 py-1.5 border font-bold rounded-lg text-[10px] active:scale-[0.95] cursor-pointer ${

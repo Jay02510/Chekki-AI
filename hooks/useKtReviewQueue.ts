@@ -1,34 +1,56 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/react';
-import { collection, doc, getDocs, orderBy, limit as fbLimit, query, runTransaction, serverTimestamp, where } from 'firebase/firestore';
+import { collection, doc, getDocs, orderBy, limit as fbLimit, query, serverTimestamp, where, writeBatch } from 'firebase/firestore';
 import { dbInstance } from '../services/database';
-import { consolidateStudentReports, consolidatedDraftIntro, formatConsolidatedDraft, ConsolidatedStudentDay } from '../src/services/consolidateStudentReports';
-import { mergeConsolidatedReport } from '../src/services/aiGenerator';
 import type { UserProfile } from '../types';
+import { parentReportRecipients, type ApprovedNote } from '../src/services/parentReports';
+
+export type { ApprovedNote };
 
 type ToastFn = (opts: { type: 'error' | 'success'; message: string }) => void;
 
-// Owns the KT-only review-queue state: the cross-class pending-log query, its
-// consolidated-by-student-day view, and the approve/send flow. Kept separate
-// from the FT log-submission code path (which still lives in TeacherPage and
-// writes into this hook's `setKtPendingLogs`/`setActiveKtLogId` — the actual
-// FT->KT handoff is genuinely shared state, not KT-exclusive, see the
-// TeacherPage comment on handleLogSubmit).
+/** One FT/KT class-day submission waiting for KT review (classes/{id}/logs/{id}). */
+export interface PendingClassLog {
+  id: string;
+  classId: string;
+  className?: string;
+  date?: string;
+  lessonTopic?: string;
+  createdAt?: any;
+  aiKoreanSummary?: string;
+  aiEnglishSummary?: string;
+  aiStudentReports?: Array<{
+    studentName: string;
+    studentUid?: string | null;
+    koreanUpdate: string;
+    category?: 'praise' | 'attention';
+  }>;
+  enrolledStudentUids?: string[];
+}
+
+export const logDate = (log: PendingClassLog) =>
+  log.date || (log.createdAt?.toDate ? log.createdAt.toDate().toISOString().slice(0, 10) : '');
+
+// Owns the KT review queue: every pending class-day log across the KT's
+// classes, reviewed and approved one class-day at a time.
+//
+// Approval writes two things in one batch:
+//  - the log doc itself (approvedSummary = the class paragraph only,
+//    approvedExceptions = the per-student notes) for staff views, and
+//  - one classes/{classId}/parentReports/{logId}_{uid} doc per enrolled
+//    student, holding the class paragraph plus only THAT student's note.
+// Parents read only their own parentReports doc — the log doc carries every
+// child's note, so it stays staff-only (see firestore.rules).
 export function useKtReviewQueue(
   educatorRole: 'ft' | 'kt',
   classes: any[],
-  selectedClass: { id: string } | null | undefined,
   user: UserProfile | null,
   showToast: ToastFn,
-  isKo: boolean,
-  studentNamesByUid: Record<string, string>
+  isKo: boolean
 ) {
-  const [ktPendingLogs, setKtPendingLogs] = useState<any[]>([]);
-  const [activeKtLogId, setActiveKtLogId] = useState<string | null>(null);
+  const [ktPendingLogs, setKtPendingLogs] = useState<PendingClassLog[]>([]);
   const [ktDraftDirty, setKtDraftDirty] = useState(false);
-  const [justCopiedLogId, setJustCopiedLogId] = useState<string | null>(null);
   const [ktLogsLoadError, setKtLogsLoadError] = useState(false);
-  const ktApproveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const confirmDiscardKtDraft = () => {
     if (!ktDraftDirty) return true;
@@ -50,18 +72,13 @@ export function useKtReviewQueue(
     return () => window.removeEventListener('beforeunload', handler);
   }, [ktDraftDirty]);
 
-  // KT review queue, cross-class: every pending log from every class this
-  // KT has access to (`classes`, already loaded via fetchClasses's
-  // owned+assigned query), not just whichever class is currently selected —
-  // required so a student in two classes with two different FTs shows up
-  // for consolidation under one student-day card instead of two invisible
-  // halves.
+  // Cross-class: every pending log from every class this KT can access, not
+  // just the class selected in the header.
   useEffect(() => {
     if (educatorRole !== 'kt') return;
     const realClasses = classes.filter((c: any) => c?.id && !c.isDemo);
     if (realClasses.length === 0) {
       setKtPendingLogs([]);
-      setActiveKtLogId(null);
       return;
     }
     setKtLogsLoadError(false);
@@ -72,17 +89,12 @@ export function useKtReviewQueue(
             const logsRef = collection(dbInstance, 'classes', c.id, 'logs');
             const logsQuery = query(logsRef, where('reviewStatus', '==', 'pending_review'), orderBy('createdAt', 'desc'), fbLimit(50));
             const snap = await getDocs(logsQuery);
-            return snap.docs.map((d) => ({ id: d.id, classId: c.id, className: c.name, ...d.data() } as any));
+            return snap.docs.map((d) => ({ id: d.id, classId: c.id, className: c.name, ...d.data() } as PendingClassLog));
           })
         );
         setKtPendingLogs(perClassLogs.flat().reverse()); // oldest pending first
       } catch (err) {
         console.error('Failed to load cross-class KT review queue:', err);
-        // No telemetry on this catch before now — a permission-denied here
-        // shares the same class-membership dependency as TeacherPage's
-        // fetchClasses (which does capture to Sentry), but this query could
-        // fail silently with zero record if it hit the same underlying
-        // issue instead.
         Sentry.captureException(err, {
           tags: { area: 'ktReviewQueue' },
           extra: { educatorRole, classIds: realClasses.map((c: any) => c.id) },
@@ -92,224 +104,57 @@ export function useKtReviewQueue(
     })();
   }, [educatorRole, classes.map((c: any) => c?.id).join('|')]);
 
-  // Cancel any pending KT-approve "remove from queue" timeout when switching
-  // classes or unmounting, so it can't fire against a different class's
-  // freshly-loaded log list.
-  useEffect(() => {
-    return () => {
-      if (ktApproveTimeoutRef.current) clearTimeout(ktApproveTimeoutRef.current);
-    };
-  }, [selectedClass?.id]);
-
-  // Consolidated per-student-per-day view of the cross-class pending queue
-  // — a student in two classes with two different FTs used to produce two
-  // entirely separate review items; this groups everything touching them
-  // that day (keyed on studentUid, see consolidateStudentReports) into one
-  // review unit instead of leaving the KT to notice and merge by hand.
-  const ktConsolidatedGroups = useMemo(
-    () => consolidateStudentReports(ktPendingLogs, user?.schoolName || 'Chekki Master Academy', studentNamesByUid),
-    [ktPendingLogs, user, studentNamesByUid]
-  );
-  const groupKey = (g: ConsolidatedStudentDay) => g.studentUid || `custom:${g.studentName.trim().toLowerCase()}:${g.date}`;
-  const activeKtGroup = ktConsolidatedGroups.find((g) => groupKey(g) === activeKtLogId) || ktConsolidatedGroups[0] || null;
-  // KtReviewQueue is memoized, but a fresh .map() literal built inline in JSX
-  // on every render would defeat that regardless — this is the one place the
-  // derived shape actually needs to be recomputed (audit action #6).
-  const ktQueueLogs = useMemo(
-    () =>
-      ktConsolidatedGroups.map((g) => ({
-        id: groupKey(g),
-        studentName: g.studentName,
-        // A student can appear in more than one class the same day (see
-        // consolidateStudentReports) — join every distinct source class name
-        // so the queue's class filter can match on any of them.
-        className: [...new Set(g.entries.map((e) => e.className).filter(Boolean))].join(', '),
-        date: g.date,
-        flaggedCount: g.entries.filter((e) => !!e.exceptionParagraph).length,
-      })),
-    [ktConsolidatedGroups]
-  );
-
-  // A consolidated group backed by more than one source entry (a student in
-  // two classes, or two teachers submitting for the same class the same
-  // day) reads as several people's notes stacked back to back — see
-  // formatConsolidatedDraft. Rewriting it into one flowing paragraph so it
-  // reads like the KT wrote it themselves. Only a group with a single
-  // paragraph (no student note) skips the AI call.
-  const [mergedDraft, setMergedDraft] = useState<{ key: string; korean: string } | null>(null);
-  const [isMergingDraft, setIsMergingDraft] = useState(false);
-  useEffect(() => {
-    // Merge whenever there's more than one paragraph — including a single
-    // log's class summary + this student's note. Those are generated
-    // separately, so stacked they repeat the same praise words, which native
-    // Korean readers spot as machine-written.
-    const paragraphs = activeKtGroup
-      ? activeKtGroup.entries.flatMap((e) => [e.generalParagraph, e.exceptionParagraph].filter(Boolean) as string[])
-      : [];
-    if (!activeKtGroup || paragraphs.length <= 1) {
-      setMergedDraft(null);
-      setIsMergingDraft(false);
-      return;
-    }
-    const key = groupKey(activeKtGroup);
-    let cancelled = false;
-    setIsMergingDraft(true);
-    mergeConsolidatedReport(activeKtGroup.studentName, paragraphs, isKo)
-      .then((korean) => {
-        if (cancelled || !korean) return;
-        setMergedDraft({ key, korean: `${consolidatedDraftIntro(activeKtGroup, isKo)}\n\n${korean}` });
-      })
-      .finally(() => {
-        if (!cancelled) setIsMergingDraft(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // studentName is a real dependency, not just groupKey: studentNamesByUid
-    // (roster names) can resolve asynchronously after this effect first
-    // fires, and a student's group.studentName falls back to their raw
-    // Firestore uid until it does (confirmed live — a merge fired before the
-    // roster loaded produced "Daily Report for QJEYGCek93PLL..." instead of
-    // the student's real name). Keying only on groupKey meant that once the
-    // uid-based merge ran, the real name resolving later never re-triggered
-    // it. Re-running when the name changes is a cheap, bounded one-time
-    // correction, not a churn risk — a resolved name doesn't change again.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeKtGroup ? groupKey(activeKtGroup) : null, activeKtGroup?.studentName]);
-
-  // What NativeKtDashboard should actually show: the AI-merged single
-  // paragraph once ready, else the stacked fallback while it's loading (or
-  // if the merge call failed) — never a blank state.
-  const getConsolidatedDraft = (g: ConsolidatedStudentDay) =>
-    mergedDraft && mergedDraft.key === groupKey(g) ? mergedDraft.korean : formatConsolidatedDraft(g, isKo);
-
-  const approveGroup = async (
-    group: ConsolidatedStudentDay,
-    approvedSummary: string,
-    approvedExceptions: { studentName: string; approvedText: string }[]
-  ): Promise<boolean> => {
-    if (!group || group.entries.length === 0 || !user?.uid) return false;
-    const activeGroupKey = groupKey(group);
-    const studentUid = group.studentUid;
-    const activeKtGroup = group;
+  const approveClassLog = async (log: PendingClassLog, summary: string, notes: ApprovedNote[]): Promise<boolean> => {
+    if (!user?.uid) return false;
+    const reviewedByName = user.name || user.email || 'Unknown teacher';
+    const recipients = parentReportRecipients(log.enrolledStudentUids, notes);
     try {
-      // A log doc covers the WHOLE class-day, not one student — a naive
-      // overwrite here used to flip reviewStatus to 'sent' for every other
-      // student sharing the same doc, silently dropping them from the queue
-      // before a KT ever reviewed them (confirmed live: approving one
-      // student removed a second, unrelated student's pending report).
-      // Each source log is updated in its own transaction so "has every
-      // enrolled student on this doc been reviewed yet" is read fresh
-      // rather than assumed.
-      await Promise.all(
-        activeKtGroup.entries.map(async (e) => {
-          const logRef = doc(dbInstance, 'classes', e.classId, 'logs', e.logId);
-          await runTransaction(dbInstance, async (tx) => {
-            const snap = await tx.get(logRef);
-            if (!snap.exists()) return;
-            const data = snap.data() as any;
-            const existingReviewed: string[] = data.reviewedStudentUids || [];
-            const reviewedStudentUids = studentUid && !existingReviewed.includes(studentUid)
-              ? [...existingReviewed, studentUid]
-              : existingReviewed;
-            const enrolledUids: string[] = data.enrolledStudentUids || [];
-            const isComplete = !studentUid || enrolledUids.length === 0 || enrolledUids.every((u) => reviewedStudentUids.includes(u));
-
-            // Merge this student's exception into whatever's already been
-            // approved on the doc by another student's review, instead of
-            // clobbering it.
-            const existingExceptions: { studentName: string; approvedText: string }[] = data.approvedExceptions || [];
-            const mergedExceptions = [
-              ...existingExceptions.filter((ex) => !approvedExceptions.some((n) => n.studentName === ex.studentName)),
-              ...approvedExceptions,
-            ];
-
-            tx.update(logRef, {
-              approvedSummary,
-              approvedExceptions: mergedExceptions,
-              reviewedStudentUids,
-              reviewStatus: isComplete ? 'sent' : 'pending_review',
-              reviewedByUid: user.uid,
-              reviewedByName: user?.name || user?.email || 'Unknown teacher',
-              ...(isComplete ? { sentAt: serverTimestamp() } : {}),
-            });
-          });
-        })
-      );
-      // Mirror the same reviewedStudentUids update into local state — the
-      // consolidated-groups memo re-derives from this, so this student's
-      // card drops out while any other student still sharing the same log
-      // doc stays visible (instead of the whole doc vanishing by id).
-      const touchedLogIds = new Set(activeKtGroup.sourceLogIds);
-      setJustCopiedLogId(activeGroupKey);
-      if (ktApproveTimeoutRef.current) clearTimeout(ktApproveTimeoutRef.current);
-      ktApproveTimeoutRef.current = setTimeout(() => {
-        setKtPendingLogs((prev) =>
-          prev.map((l) => {
-            if (!touchedLogIds.has(l.id)) return l;
-            const existing: string[] = l.reviewedStudentUids || [];
-            if (!studentUid || existing.includes(studentUid)) return l;
-            return { ...l, reviewedStudentUids: [...existing, studentUid] };
-          })
-        );
-        setJustCopiedLogId((cur) => (cur === activeGroupKey ? null : cur));
-        ktApproveTimeoutRef.current = null;
-      }, 1400);
+      const batch = writeBatch(dbInstance);
+      batch.update(doc(dbInstance, 'classes', log.classId, 'logs', log.id), {
+        approvedSummary: summary,
+        approvedExceptions: notes,
+        reviewedStudentUids: recipients.map((r) => r.studentUid),
+        reviewStatus: 'sent',
+        reviewedByUid: user.uid,
+        reviewedByName,
+        sentAt: serverTimestamp(),
+      });
+      for (const { studentUid: uid, note } of recipients) {
+        batch.set(doc(dbInstance, 'classes', log.classId, 'parentReports', `${log.id}_${uid}`), {
+          classId: log.classId,
+          logId: log.id,
+          studentUid: uid,
+          className: log.className || '',
+          date: logDate(log),
+          lessonTopic: log.lessonTopic || '',
+          summary,
+          note,
+          reviewedByName,
+          sentAt: serverTimestamp(),
+        });
+      }
+      await batch.commit();
+      setKtPendingLogs((prev) => prev.filter((l) => l.id !== log.id));
+      setKtDraftDirty(false);
       return true;
     } catch (err) {
       console.error('Failed to save KT-reviewed report:', err);
-      // The UI (copy/share buttons) previously reported success regardless of
-      // this write's outcome, so a failed approve silently never reached
-      // parents with no indication to the KT that it didn't go through
-      // (Audit: silent FT->KT persist failure). NativeKtDashboard now awaits
-      // this return value before showing its own "sent" state.
+      Sentry.captureException(err, { tags: { area: 'ktApprove' }, extra: { classId: log.classId, logId: log.id } });
       showToast({
         type: 'error',
         message: isKo
-          ? '⚠️ 학부모 전송 승인이 저장되지 않았습니다. 다시 시도해주세요.'
-          : "⚠️ The approval wasn't saved — parents won't see this yet. Please try again.",
+          ? '⚠️ 승인이 저장되지 않았습니다. 학부모에게 아직 보이지 않습니다. 다시 시도해주세요.'
+          : "⚠️ The approval wasn't saved, so parents can't see it yet. Please try again.",
       });
       return false;
     }
   };
 
-  const handleKtApprove = (approvedSummary: string, approvedExceptions: { studentName: string; approvedText: string }[]) =>
-    activeKtGroup ? approveGroup(activeKtGroup, approvedSummary, approvedExceptions) : Promise.resolve(false);
-
-  // Bulk-approve is intentionally restricted to groups with zero flagged
-  // exceptions. The whole point of the per-report KT review gate is to catch
-  // an AI mistake before a parent sees it — a flagged exception is exactly
-  // the case where the AI called out something specific about a student, so
-  // that one still needs a human to actually read it. This only fast-tracks
-  // the routine, nothing-flagged reports, using each one's unedited AI draft
-  // (matching what a KT would send if they clicked through without editing).
-  const handleKtBulkApprove = async (ids: string[]): Promise<{ approved: number; skipped: number }> => {
-    const eligible = ktConsolidatedGroups.filter(
-      (g) => ids.includes(groupKey(g)) && g.entries.every((e) => !e.exceptionParagraph)
-    );
-    let approved = 0;
-    for (const g of eligible) {
-      const ok = await approveGroup(g, getConsolidatedDraft(g), []);
-      if (ok) approved += 1;
-    }
-    return { approved, skipped: ids.length - approved };
-  };
-
   return {
     ktPendingLogs, setKtPendingLogs,
-    activeKtLogId, setActiveKtLogId,
     ktDraftDirty, setKtDraftDirty,
-    justCopiedLogId,
-    ktLogsLoadError, setKtLogsLoadError,
+    ktLogsLoadError,
     confirmDiscardKtDraft,
-    ktConsolidatedGroups,
-    activeKtGroup,
-    ktQueueLogs,
-    groupKey,
-    handleKtApprove,
-    handleKtBulkApprove,
-    formatConsolidatedDraft,
-    getConsolidatedDraft,
-    isMergingDraft,
+    approveClassLog,
   };
 }

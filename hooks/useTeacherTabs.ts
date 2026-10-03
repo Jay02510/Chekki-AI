@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 export type TabId =
   | 'overview'
-  | 'insights'
   | 'syllabus'
   | 'homework'
   | 'students'

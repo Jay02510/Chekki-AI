@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tray, Notebook, UsersThree, ChartLineUp, ClockCounterClockwise, DotsThreeOutline } from '@phosphor-icons/react';
+import { Tray, Notebook, UsersThree, ClockCounterClockwise, DotsThreeOutline } from '@phosphor-icons/react';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
@@ -27,7 +27,6 @@ export function TeacherMobileTabBar({ isNight, isKo, educatorRole, activeTab, se
         ]
       : [
           { id: 'overview', label: isKo ? '오늘의 일지' : 'Daily log', Icon: Notebook },
-          { id: 'insights', label: isKo ? '인사이트' : 'Insights', Icon: ChartLineUp },
           { id: 'history', label: isKo ? '기록' : 'History', Icon: ClockCounterClockwise },
         ];
 

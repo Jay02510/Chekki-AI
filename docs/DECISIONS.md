@@ -6,6 +6,19 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 024 — KT reviews once per class, and parents read their own per-student report
+
+**Date:** 2026-10-03
+**Status:** Resolved
+
+**Context:** Teacher feedback: the KT side of Chekki Schools was too clunky, especially on a phone. The review queue made one card per enrolled student, so a class of 12 meant 12 cards (10 of them the same class summary), and each approval needed its own trip through the share sheet into KakaoTalk. Two existing bugs also sat underneath. Firestore rules gave parents no read access to class logs, so the parent app's "Teacher's Class Reports" never showed anything. And each approval wrote that student's personal report, note included, into the shared log's `approvedSummary`, so opening parent access would have shown one child's note to every family in the class.
+
+**Decision:** The app is the record and KakaoTalk is optional. The KT inbox (`KtInbox.tsx`) lists one item per class-day. The KT edits the class summary and each student note on one screen and approves once. Approval (`useKtReviewQueue.approveClassLog`) writes the class paragraph and notes back to the log (staff-only), plus one `classes/{classId}/parentReports/{logId}_{studentUid}` doc per enrolled student holding the summary and only that student's note. Parents read only docs where `studentUid` is their own uid. After approving, the KT can copy one class message for the group chat and one message per student who has a note. The per-student consolidation across classes, the AI "merge" call, bulk approve, and the greeting-style picker were removed. At the same time: the active week became director-only (it's class-wide), the director dashboard opens with a Today panel (logged, waiting for review, or sent, per class), KTs get a read-only roster (join requests only), and the FT Insights tab became one "This week" card above the log form, keeping the most-missed homework words.
+
+**Consequences:** About 3 actions per class instead of 1 per student. Needs `firebase deploy --only firestore:rules,firestore:indexes` for the new collection and index. `ParentClassLogs.tsx` is parent-app code, so native users only see reports after the next store build. Logs approved before this change have no parentReports, so parents won't see that history. A student in two classes now gets two separate reports, one per class.
+
+---
+
 ## 023 — Firestore rules let any assigned FT self-approve a class log, bypassing KT review
 
 **Date:** 2026-08-30

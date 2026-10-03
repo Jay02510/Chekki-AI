@@ -464,7 +464,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         style={{ animationDelay: '200ms' }}
       >
         {user?.classId && user?.classStatus === 'active' && (
-          <ParentClassLogs classId={user.classId} studentName={user.studentName} language={language} />
+          <ParentClassLogs classId={user.classId} studentUid={user.uid} studentName={user.studentName} language={language} />
         )}
 
         {/* B2B Customer Acquisition Banner: Invite Academy Director — hidden

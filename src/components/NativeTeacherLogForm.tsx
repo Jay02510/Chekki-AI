@@ -161,8 +161,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 }) => {
   // This form is submitted by KTs too (see generateGeneralClassSummary's
   // authorRole === 'kt' branch in api/analyze.ts), not just FTs — it needs
-  // Korean labels for that audience, same pattern NativeKtDashboard already
-  // uses since no isKo prop is threaded down to this component today.
+  // Korean labels for that audience.
   const isKo = isKoProp ?? (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
   const permissions = getPermissionsForUser(userProfile);
   const effectiveRoster = roster.length > 0 ? roster : (isDemo ? DEMO_ROSTER : []);
@@ -369,7 +368,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
       ...newExceptions.map((ex): LogException => {
         // Voice transcription can't produce a uid directly — best-effort
         // match against the roster by exact name so a spoken exception for
-        // a known student still joins into consolidation; unmatched names
+        // a known student gets their note in the app; unmatched names
         // fall back to standalone (studentUid: null), same as a custom-typed
         // name. When no exact match exists, try a closest-match suggestion
         // instead of just silently discarding the connection — a misheard
@@ -515,16 +514,12 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         <h2 className="text-xl sm:text-2xl font-black tracking-tight min-w-0">
           {isKo ? '오늘의 수업 기록' : "Today's class log"}
         </h2>
-        {!isDemo && (
+        {/* The open voice panel has its own "Type instead" close. */}
+        {!isDemo && !showVoiceFill && (
           <button
             type="button"
-            onClick={() => setShowVoiceFill((prev) => !prev)}
-            className={`px-4 min-h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-black transition-[background-color,transform] cursor-pointer active:scale-95 ${
-              showVoiceFill
-                ? 'bg-orange-500/20 text-orange-400'
-                : 'bg-orange-500 hover:bg-orange-600 text-black'
-            }`}
-            aria-pressed={showVoiceFill}
+            onClick={() => setShowVoiceFill(true)}
+            className="px-4 min-h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-black transition-[background-color,transform] cursor-pointer active:scale-95 bg-orange-500 hover:bg-orange-600 text-black"
           >
             <Microphone size={16} weight="fill" />
             {isKo ? '음성으로 채우기' : 'Fill by voice'}
@@ -803,7 +798,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 >
                   <div className="p-3 flex items-start justify-between gap-3">
                     <div>
-                      <span className="font-black text-amber-400 block font-mono">⚠️ {ex.studentName}</span>
+                      <span className="font-black text-amber-400 block">{ex.studentName}</span>
                       <p className="text-xs leading-relaxed mt-0.5 opacity-90">{ex.details}</p>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">

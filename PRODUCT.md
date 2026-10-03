@@ -17,7 +17,7 @@ Four roles, two connected surfaces:
 - **Korean Teacher (KT)** — bilingual staff member who liaises with parents; reviews the FT's log, corrects the Korean parent-facing version, sends it.
 - **Director** — academy owner/admin; sets up classes, invites staff and parents, sees the whole campus at a glance.
 
-FT/KT/Director each get their own dashboard (`NativeFtDashboard`, `NativeKtDashboard`, `NativeDirectorPortal`) rendered from one shared router (`src/pages/TeacherPage.tsx`), gated by role.
+FT/KT/Director each get their own dashboard (`NativeFtDashboard`, `KtInbox`, `NativeDirectorPortal`) rendered from one shared router (`src/pages/TeacherPage.tsx`), gated by role.
 
 ## Product Purpose
 

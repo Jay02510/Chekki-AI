@@ -9,6 +9,14 @@
       ]
     },
     {
+      "collectionGroup": "parentReports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "studentUid", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "school_invoices",
       "queryScope": "COLLECTION",
       "fields": [

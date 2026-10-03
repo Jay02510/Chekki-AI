@@ -53,7 +53,6 @@ interface Props {
   setWorksheetPreviewUrl: (v: string | null) => void;
   setWorksheetScannedData: (v: any) => void;
   setWorksheetFileName: (v: string) => void;
-  handleUpdateWeek: (delta: number) => void;
   curriculumTopic: string;
   setCurriculumTopic: (v: string) => void;
   curriculumVocab: string;
@@ -143,7 +142,6 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   setWorksheetPreviewUrl,
   setWorksheetScannedData,
   setWorksheetFileName,
-  handleUpdateWeek,
   curriculumTopic,
   setCurriculumTopic,
   curriculumVocab,
@@ -490,7 +488,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
             {/* MODE 2: DAILY HOMEWORK WORKSHEET & ANSWER KEY SCANNER */}
             {activeTab === 'homework' && (
               <div className="space-y-4">
-                {/* Week is changed from the page toolbar (same handleUpdateWeek). */}
+                {/* Uploads go to the class's active week, which the director sets. */}
                 <div
                   onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
                   onDragLeave={() => setIsDraggingFile(false)}

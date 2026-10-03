@@ -18,15 +18,9 @@ interface Props {
   completionRate: number;
   completedHomeworkCount: number;
   activeStudentsCount: number;
-  curriculumSlideIndex: number;
-  setCurriculumSlideIndex: React.Dispatch<React.SetStateAction<number>>;
   activeVocabWords: string[];
-  isLoadingRoster: boolean;
   sortedTroubleWords: { word: string; count: number }[];
   curriculumTopic: string;
-  curriculumPhonics: string;
-  curriculumPassage: string;
-  curriculumOther: string;
   submittedLogs: any[];
 
   // homework (CurriculumEditorForm)
@@ -34,7 +28,6 @@ interface Props {
   classes: any[];
   selectedClass: any;
   setSelectedClass: (c: any) => void;
-  handleUpdateWeek: (weekNumber: number) => void;
   curriculumEditor: any;
 }
 
@@ -63,17 +56,10 @@ export function FtTabContent(props: Props) {
           completionRate={props.completionRate}
           completedHomeworkCount={props.completedHomeworkCount}
           activeStudentsCount={props.activeStudentsCount}
-          curriculumSlideIndex={props.curriculumSlideIndex}
-          setCurriculumSlideIndex={props.setCurriculumSlideIndex}
           activeVocabWords={props.activeVocabWords}
-          hasVocabData={props.activeVocabWords.length > 0}
-          isLoadingRoster={props.isLoadingRoster}
           sortedTroubleWords={props.sortedTroubleWords}
           setActiveTab={props.setActiveTab}
           curriculumTopic={props.curriculumTopic}
-          curriculumPhonics={props.curriculumPhonics}
-          curriculumPassage={props.curriculumPassage}
-          curriculumOther={props.curriculumOther}
           submittedLogs={props.submittedLogs}
         />
       </ErrorBoundary>
@@ -88,7 +74,6 @@ export function FtTabContent(props: Props) {
           classes={props.classes}
           selectedClass={props.selectedClass}
           setSelectedClass={props.setSelectedClass}
-          handleUpdateWeek={props.handleUpdateWeek}
           {...props.curriculumEditor}
         />
       )}

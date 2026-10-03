@@ -42,7 +42,7 @@ It later grew a second half: academies (hagwons/English Kindergartens) wanted th
 | **Korean Teacher (KT)** | Bilingual staff member, liaises with parents. | Review the FT's log, make sure the Korean parent-facing version is right, send it. |
 | **Director** | Academy owner/admin. | Set up classes, invite staff and parents, see the whole campus at a glance. |
 
-Each role gets its own dashboard (`NativeFtDashboard`, `NativeKtDashboard`, `NativeDirectorPortal`) rendered from one shared router (`src/pages/TeacherPage.tsx`), gated by `user.role` / `educatorRole`. The parent-facing app is a separate surface entirely (`App.tsx` root, mobile-first).
+Each role gets its own dashboard (`NativeFtDashboard`, `KtInbox`, `NativeDirectorPortal`) rendered from one shared router (`src/pages/TeacherPage.tsx`), gated by `user.role` / `educatorRole`. The parent-facing app is a separate surface entirely (`App.tsx` root, mobile-first).
 
 ---
 
@@ -70,7 +70,7 @@ flowchart TD
 2. **Teacher answer-key upload → grading context.** FT/KT uploads the week's worksheet (`CurriculumEditorForm`, `mode: 'textbook_curriculum_ocr'`) → extracted into a `curriculums` Firestore doc keyed by class + week → injected into the grading prompt for any student scan against that class/week, so the AI grades against a real answer key instead of inferring one. This is what makes the school product materially more accurate than the standalone parent app.
 3. **Mistake flagging → teacher visibility.** Red-bordered mistakes from student scans aggregate into a "trouble words" view and a flagged-exceptions list on the Director/FT dashboards, so a teacher can see what the whole class is missing without reading every scan individually.
 4. **Syllabus/textbook upload.** Separate from #2 — FT/KT can upload a syllabus, table of contents, or textbook index (`mode: 'syllabus_course_plan'`) to set the term-level scope (vocab/phonics range across many units), distinct from a single week's answer key. *Why it exists:* the weekly worksheet upload only teaches the AI one week at a time, cold, right before that week starts. The syllabus front-loads the whole term's vocab/phonics scope up front, so the AI already has curriculum context before the first worksheet of the term is ever scanned — fewer hallucinated corrections early on, and grading stays consistent across weeks instead of resetting each time. See `DECISIONS.md` #008 for how it coexists with #2 without overwriting it.
-5. **FT log → KT review → parent send.** FT fills a ~30-second form (`NativeTeacherLogForm`) describing the day's class. AI translates/drafts a Korean parent update. KT reviews, edits if needed, and sends (`NativeKtDashboard`, states: `pending_review` → `edited_by_kt` → `copied_sent`).
+5. **FT log → KT review → parent send.** FT fills a ~30-second form (`NativeTeacherLogForm`) describing the day's class. AI translates/drafts a Korean parent update. KT reviews the class-day once (class summary plus each student note), edits if needed, and approves (`KtInbox`, `pending_review` → `sent`). Each family reads their own report in the parent app (`parentReports`); KakaoTalk copies are optional. See DECISIONS.md #024.
 6. **Access.** A parent or teacher gets into a class exactly one way: a director-generated, single-use invite (email link, with the code as a manual-entry fallback if the link doesn't open). The old self-serve shared class code was removed — see `DECISIONS.md` #001.
 
 ---

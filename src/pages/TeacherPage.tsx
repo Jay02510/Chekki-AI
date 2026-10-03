@@ -219,17 +219,22 @@ export default function TeacherPage({ isNight = true }: Props) {
       const newLog = { id: docRef.id, ...payload };
       setSubmittedLogs((prev) => [newLog, ...prev]);
       clearOfflineDraft();
-      setKtPendingLogs((prev) => [...prev, {
-        id: docRef.id,
-        classId,
-        aiKoreanSummary: summary.korean,
-        aiEnglishSummary: summary.english,
-        aiStudentReports: studentReports,
-      }]);
+      // Only the KT's own inbox shows pending logs — an FT's submit lands
+      // in the KT's queue on their next load.
+      if (authorRole === 'kt') {
+        setKtPendingLogs((prev) => [...prev, {
+          ...payload,
+          id: docRef.id,
+          classId,
+          aiKoreanSummary: summary.korean,
+          aiEnglishSummary: summary.english,
+          aiStudentReports: studentReports,
+        }]);
+      }
       showToast({
         type: 'success',
         message: authorRole === 'kt'
-          ? (isKo ? '✅ 일지가 저장되었습니다. 알림톡 대본 탭에서 검토 후 발송하세요.' : '✅ Log saved — review and send it from the Parent Script tab.')
+          ? (isKo ? '✅ 일지가 저장되었습니다. 학부모 리포트에서 검토 후 보내세요.' : '✅ Log saved. Review and send it from Parent reports.')
           : (isKo ? '✅ 한국인 교사에게 검토 요청을 보냈습니다!' : '✅ Sent to your KT for review!'),
       });
 
@@ -492,7 +497,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   const {
     selectedTextbookName,
     curriculumTopic, curriculumVocab, curriculumPhonics, curriculumPassage, curriculumOther,
-    curriculumAnswerKey, curriculumSlideIndex, setCurriculumSlideIndex,
+    curriculumAnswerKey,
     scannedData, showScannedModal, setShowScannedModal, setScannedData,
     activeScannedModalType,
     selectedScannedTopic, setSelectedScannedTopic, selectedScannedVocab, setSelectedScannedVocab,
@@ -510,8 +515,6 @@ export default function TeacherPage({ isNight = true }: Props) {
   // Roster & weekly-completion analytics — extracted into a hook (Phase 3
   // of the buzzing-nibbling-hearth TeacherPage split, see the hook's own
   // comment for why it's not scoped "FT-only" despite the plan's name).
-  // Called here (not near its other consumers further down) so
-  // invitedOnlyRosterRows is available for studentNamesByUid below.
   const {
     getWeeklyVocabWords,
     getWeeklyPhonicsRules,
@@ -526,37 +529,13 @@ export default function TeacherPage({ isNight = true }: Props) {
     invitedOnlyRosterRows,
   } = useRosterAnalytics(studentsData, curriculumVocab, curriculumPhonics, selectedClass);
 
-  // Roster uid -> display name, for consolidation: a log doc only carries a
-  // name for students it flagged that day (aiStudentReports); an enrolled-
-  // but-not-flagged student has no name anywhere in the log itself, only
-  // their uid in enrolledStudentUids, so this resolves it from the roster
-  // instead of falling back to the raw uid string. Merges in invitedOnlyRosterRows
-  // (pending:${id} students with no users/{uid} doc) so KT reports show their
-  // real name instead of the raw pending:xxx key.
-  const studentNamesByUid = useMemo(
-    () => Object.fromEntries([
-      ...(studentsData || []).filter((s: any) => s?.uid && s?.name).map((s: any) => [s.uid, s.name]),
-      ...invitedOnlyRosterRows.filter((s: any) => s?.uid && s?.studentName).map((s: any) => [s.uid, s.studentName]),
-    ]),
-    [studentsData, invitedOnlyRosterRows]
-  );
   const {
     ktPendingLogs, setKtPendingLogs,
-    activeKtLogId, setActiveKtLogId,
-    ktDraftDirty, setKtDraftDirty,
-    justCopiedLogId,
-    ktLogsLoadError, setKtLogsLoadError,
+    setKtDraftDirty,
+    ktLogsLoadError,
     confirmDiscardKtDraft,
-    ktConsolidatedGroups,
-    activeKtGroup,
-    ktQueueLogs,
-    groupKey,
-    handleKtApprove,
-    handleKtBulkApprove,
-    formatConsolidatedDraft,
-    getConsolidatedDraft,
-    isMergingDraft,
-  } = useKtReviewQueue(educatorRole, classes, selectedClass, user, showToast, isKo, studentNamesByUid);
+    approveClassLog,
+  } = useKtReviewQueue(educatorRole, classes, user, showToast, isKo);
 
   // Tab state (Phase 5 of the buzzing-nibbling-hearth TeacherPage split) —
   // declared here rather than up with the rest of the per-role state because
@@ -694,15 +673,8 @@ export default function TeacherPage({ isNight = true }: Props) {
   useEffect(() => {
     if (!selectedClass?.id || selectedClass.isDemo) {
       setSubmittedLogs([]);
-      if (educatorRole !== 'kt') {
-        setKtPendingLogs([]);
-        setActiveKtLogId(null);
-      }
-      setKtLogsLoadError(false);
       return;
     }
-    setKtLogsLoadError(false);
-    if (educatorRole !== 'kt') setActiveKtLogId(null);
     (async () => {
       try {
         const logsRef = collection(dbInstance, 'classes', selectedClass.id, 'logs');
@@ -710,19 +682,11 @@ export default function TeacherPage({ isNight = true }: Props) {
         const snap = await getDocs(logsQuery);
         const allLogs = snap.docs.map((d) => ({ id: d.id, classId: selectedClass.id, ...d.data() } as any));
         setSubmittedLogs(allLogs);
-        if (educatorRole !== 'kt') {
-          setKtPendingLogs(
-            allLogs
-              .filter((l) => l.reviewStatus === 'pending_review')
-              .reverse() // oldest pending first
-          );
-        }
       } catch (err) {
         console.error('Failed to load class log history:', err);
-        setKtLogsLoadError(true);
       }
     })();
-  }, [selectedClass?.id, educatorRole]);
+  }, [selectedClass?.id]);
 
   // Show teacher onboarding once when first authenticated with no classes.
   // Directors get their own dedicated activation wizard (see the effect below) —
@@ -2441,7 +2405,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           educatorRole={educatorRole}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          pendingCount={ktQueueLogs.length}
+          pendingCount={ktPendingLogs.length}
           onMore={() => setIsSidebarOpen(true)}
         />
       )}
@@ -2533,7 +2497,16 @@ export default function TeacherPage({ isNight = true }: Props) {
 
           {/* Right Controls: Active Week Counter + Language Switcher + Theme Toggle */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {selectedClass && !selectedClass.isDemo && (
+            {/* The active week is class-wide (every teacher and parent sees
+                it), so only directors can change it. Teachers get a label. */}
+            {selectedClass && !selectedClass.isDemo && !isDirectorUser && (
+              <span className={`hidden sm:inline-flex items-center min-h-11 px-3.5 rounded-xl border text-xs font-black whitespace-nowrap ${
+                isThemeNight ? 'border-white/10 text-zinc-300' : 'border-zinc-300 text-zinc-700'
+              }`}>
+                {isKo ? `${selectedClass?.activeWeekNumber || 1}주차` : `Week ${selectedClass?.activeWeekNumber || 1}`}
+              </span>
+            )}
+            {selectedClass && !selectedClass.isDemo && isDirectorUser && (
               <div className="flex items-center gap-2">
                 <div className={`border rounded-2xl flex items-center overflow-hidden p-1 shadow-inner ${
                   isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-100 border-zinc-300'
@@ -2779,26 +2752,12 @@ export default function TeacherPage({ isNight = true }: Props) {
                 setActiveTab={setActiveTab}
                 ktLogsLoadError={ktLogsLoadError}
                 ktPendingLogs={ktPendingLogs}
-                ktQueueLogs={ktQueueLogs}
-                activeKtGroup={activeKtGroup}
-                justCopiedLogId={justCopiedLogId}
-                activeKtLogId={activeKtLogId}
                 confirmDiscardKtDraft={confirmDiscardKtDraft}
                 setKtDraftDirty={setKtDraftDirty}
-                setActiveKtLogId={setActiveKtLogId}
-                groupKey={groupKey}
-                formatConsolidatedDraft={formatConsolidatedDraft}
-                getConsolidatedDraft={getConsolidatedDraft}
-                isMergingDraft={isMergingDraft}
+                approveClassLog={approveClassLog}
                 activeClass={activeClass}
                 academyName={displayedAcademyName}
                 user={user}
-                ktConsolidatedGroups={ktConsolidatedGroups}
-                handleKtApprove={handleKtApprove}
-                handleKtBulkApprove={handleKtBulkApprove}
-                completionRate={completionRate}
-                completedHomeworkCount={completedHomeworkCount}
-                activeStudentsCount={activeStudentsCount}
                 handleLogSubmit={handleLogSubmit}
                 isSubmittingLog={isSubmittingLog}
                 selectedTextbookName={selectedTextbookName}
@@ -2807,7 +2766,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                 classes={classes}
                 selectedClass={selectedClass}
                 setSelectedClass={setSelectedClass}
-                handleUpdateWeek={handleUpdateWeek}
                 curriculumEditor={curriculumEditor}
                 pendingRoster={pendingRoster}
                 activeRoster={activeRoster}
@@ -2815,8 +2773,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                 isLoadingRoster={isLoadingRoster}
                 handleApproveStudent={handleApproveStudent}
                 handleDeclineStudent={handleDeclineStudent}
-                handleRemoveStudent={handleRemoveStudent}
-                handleMoveStudent={handleMoveStudent}
                 fetchRosterAndMistakes={fetchRosterAndMistakes}
                 setSelectedStudentDetails={setSelectedStudentDetails}
               />
@@ -2835,21 +2791,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                 completionRate={completionRate}
                 completedHomeworkCount={completedHomeworkCount}
                 activeStudentsCount={activeStudentsCount}
-                curriculumSlideIndex={curriculumSlideIndex}
-                setCurriculumSlideIndex={setCurriculumSlideIndex}
                 activeVocabWords={activeVocabWords}
-                isLoadingRoster={isLoadingRoster}
                 sortedTroubleWords={sortedTroubleWords}
                 curriculumTopic={curriculumTopic}
-                curriculumPhonics={curriculumPhonics}
-                curriculumPassage={curriculumPassage}
-                curriculumOther={curriculumOther}
                 submittedLogs={submittedLogs}
                 uploadMode={uploadMode}
                 classes={classes}
                 selectedClass={selectedClass}
                 setSelectedClass={setSelectedClass}
-                handleUpdateWeek={handleUpdateWeek}
                 curriculumEditor={curriculumEditor}
               />
             )}

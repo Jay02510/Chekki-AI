@@ -1,59 +1,52 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { dbInstance } from '../services/database';
 import { ChalkboardTeacher } from '@phosphor-icons/react';
 
-interface ApprovedException {
-  studentName: string;
-  approvedText: string;
-}
-
-interface ClassLogEntry {
+// classes/{classId}/parentReports/{logId}_{studentUid} — written when a KT
+// approves a class log (hooks/useKtReviewQueue.ts). Holds the class summary
+// plus only this child's own note, so a parent never reads other children's.
+interface ParentReport {
   id: string;
   className?: string;
   date?: string;
   lessonTopic?: string;
-  reviewStatus?: 'pending_review' | 'sent';
-  approvedSummary?: string;
-  approvedExceptions?: ApprovedException[];
+  summary?: string;
+  note?: string | null;
 }
 
 interface Props {
   classId: string;
+  studentUid?: string | null;
   studentName?: string | null;
   language: string;
 }
 
-export const ParentClassLogs: React.FC<Props> = ({ classId, studentName, language }) => {
-  const [logs, setLogs] = useState<ClassLogEntry[]>([]);
+export const ParentClassLogs: React.FC<Props> = ({ classId, studentUid, studentName, language }) => {
+  const [logs, setLogs] = useState<ParentReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const isKo = language === 'ko';
 
   useEffect(() => {
-    if (!classId) return;
+    if (!classId || !studentUid) return;
     (async () => {
       setIsLoading(true);
       try {
-        const logsRef = collection(dbInstance, 'classes', classId, 'logs');
-        // No `where('reviewStatus', ...)` here — combining it with orderBy on a
-        // different field needs a composite index this project doesn't
-        // provision. Pull the recent window and filter to KT-reviewed,
-        // sent logs client-side instead — parents must only ever see the
-        // KT-approved version, never the raw FT note underneath it.
-        const logsQuery = query(logsRef, orderBy('createdAt', 'desc'), limit(50));
-        const snap = await getDocs(logsQuery);
-        const sent = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() } as ClassLogEntry))
-          .filter((l) => l.reviewStatus === 'sent')
-          .slice(0, 20);
-        setLogs(sent);
+        const reportsQuery = query(
+          collection(dbInstance, 'classes', classId, 'parentReports'),
+          where('studentUid', '==', studentUid),
+          orderBy('date', 'desc'),
+          limit(20)
+        );
+        const snap = await getDocs(reportsQuery);
+        setLogs(snap.docs.map((d) => ({ id: d.id, ...d.data() } as ParentReport)));
       } catch (err) {
-        console.error('Failed to load class logs for parent view:', err);
+        console.error('Failed to load class reports for parent view:', err);
       } finally {
         setIsLoading(false);
       }
     })();
-  }, [classId]);
+  }, [classId, studentUid]);
 
   if (isLoading) return null;
   if (logs.length === 0) return null;
@@ -76,11 +69,7 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentName, languag
         </div>
 
         <div className="space-y-3">
-          {logs.map((log) => {
-            const myNote = studentName
-              ? log.approvedExceptions?.find((ex) => ex.studentName === studentName)
-              : undefined;
-            return (
+          {logs.map((log) => (
               <div key={log.id} className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50 dark:border-white/10 dark:bg-brand-dark">
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 dark:border-white/5">
                   <span className="font-bold text-sm text-blue-600 dark:text-blue-400">{log.className}</span>
@@ -92,20 +81,19 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentName, languag
                     {log.lessonTopic}
                   </p>
                 )}
-                {log.approvedSummary && (
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{log.approvedSummary}</p>
+                {log.summary && (
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-2 leading-relaxed whitespace-pre-line">{log.summary}</p>
                 )}
-                {myNote && (
+                {log.note && (
                   <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
                     <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
-                      {isKo ? `${studentName} 관련 메모` : `Note about ${studentName}`}
+                      {studentName ? (isKo ? `${studentName} 관련 메모` : `Note about ${studentName}`) : (isKo ? '우리 아이 메모' : 'Note about your child')}
                     </span>
-                    <p className="text-xs text-amber-900 dark:text-amber-100 mt-1 leading-relaxed">{myNote.approvedText}</p>
+                    <p className="text-sm text-amber-900 dark:text-amber-100 mt-1 leading-relaxed whitespace-pre-line">{log.note}</p>
                   </div>
                 )}
               </div>
-            );
-          })}
+          ))}
         </div>
       </div>
     </div>

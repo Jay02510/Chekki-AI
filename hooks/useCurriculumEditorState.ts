@@ -28,7 +28,7 @@ type ShowToast = ReturnType<typeof useToast>['showToast'];
 // Extracted from TeacherPage (Phase 1 of the incremental split — see
 // buzzing-nibbling-hearth plan) because it was the cleanest, most
 // role-exclusive contiguous state block in that file. A few derived values
-// (curriculumTopic/Vocab/Phonics/Passage/Other, curriculumSlideIndex) are
+// (curriculumTopic/Vocab/Phonics/Passage/Other) are
 // also consumed outside the curriculum tab (NativeDirectorPortal,
 // NativeFtDashboard), so this hook returns them alongside the setters those
 // other consumers still need.
@@ -56,7 +56,6 @@ export function useCurriculumEditorState(
   const [curriculumAnswerKey, setCurriculumAnswerKey] = useState<Array<{ questionText: string; answer: string }>>([]);
   const [curriculumLastEditedByName, setCurriculumLastEditedByName] = useState('');
   const [curriculumLastEditedAt, setCurriculumLastEditedAt] = useState('');
-  const [curriculumSlideIndex, setCurriculumSlideIndex] = useState(0);
   const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
   // loadCurriculum captures `targetClass` by closure at call time with no
   // cancellation — switching selectedClass while a fetch is still in flight
@@ -731,7 +730,6 @@ ${questionsHtml}
     curriculumAnswerKey, setCurriculumAnswerKey,
     curriculumLastEditedByName, setCurriculumLastEditedByName,
     curriculumLastEditedAt, setCurriculumLastEditedAt,
-    curriculumSlideIndex, setCurriculumSlideIndex,
     isLoadingCurriculum, isSavingCurriculum, isGeneratingWorksheet,
     isDraggingFile, setIsDraggingFile,
     isScanningTextbook,
