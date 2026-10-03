@@ -110,7 +110,7 @@ export function StudentDatabaseGrid({
       className: classNameById.get(s.classId) || '',
       classId: s.classId || '',
       status: s.__status,
-      lastScanDate: s.lastScanDate || '',
+      lastScanDate: String(s.lastScanDate || '').slice(0, 10), // ISO timestamp -> date
       weeklyMistakesCount: s.weeklyMistakesCount || 0,
       flagged: !!s.flaggedException,
       isInvitedOnly: !!s.isInvitedOnly,
@@ -122,6 +122,54 @@ export function StudentDatabaseGrid({
     () => (classFilter ? data.filter((r) => r.classId === classFilter) : data),
     [data, classFilter]
   );
+
+  const actionsFor = (row: Row) => {
+    if (row.status !== 'active') return null;
+    if (row.isInvitedOnly) {
+      if (!handleRemoveStudent) return null;
+      return (
+        <span className="text-[10px] text-zinc-500 italic">
+          {isKo ? '위 초대 목록에서 관리' : 'Manage in Invite Students above'}
+        </span>
+      );
+    }
+    return (
+      <div className="flex items-center justify-end gap-2">
+        {handleMoveStudent && (
+        <select
+          onChange={(e) => e.target.value && runAction(() => handleMoveStudent(row.uid, e.target.value))}
+          value=""
+          disabled={isActionBusy}
+          className={`text-[10px] font-bold px-2.5 py-1.5 max-md:min-h-11 max-md:px-4 max-md:text-xs rounded-lg cursor-pointer outline-none appearance-none disabled:opacity-40 disabled:cursor-not-allowed ${
+            isNight ? 'bg-brand-dark border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
+          }`}
+        >
+          <option value="">{isKo ? '반 이동' : 'Move'}</option>
+          {classes.filter((c) => c.id !== row.classId).map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+        )}
+        {handleRemoveStudent && (
+        <button
+          onClick={() => runAction(() => handleRemoveStudent(row.uid))}
+          disabled={isActionBusy}
+          className="px-3 py-1.5 max-md:min-h-11 max-md:px-4 max-md:text-xs border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-lg text-[10px] active:scale-[0.95] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {isKo ? '삭제' : 'Remove'}
+        </button>
+        )}
+        <button
+          onClick={() => setSelectedStudentDetails(row.raw)}
+          className={`px-3 py-1.5 max-md:min-h-11 max-md:px-4 max-md:text-xs border font-bold rounded-lg text-[10px] active:scale-[0.95] cursor-pointer ${
+            isNight ? 'border-white/10 bg-brand-dark hover:bg-white/5 text-orange-400' : 'border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-orange-600'
+          }`}
+        >
+          {isKo ? '상세' : 'Details'}
+        </button>
+      </div>
+    );
+  };
 
   const columns = useMemo(
     () => [
@@ -177,54 +225,7 @@ export function StudentDatabaseGrid({
       columnHelper.display({
         id: 'actions',
         header: isKo ? '관리' : 'Actions',
-        cell: (info) => {
-          const row = info.row.original;
-          if (row.status !== 'active') return null;
-          if (row.isInvitedOnly) {
-            if (!handleRemoveStudent) return null;
-            return (
-              <span className="text-[10px] text-zinc-500 italic">
-                {isKo ? '위 초대 목록에서 관리' : 'Manage in Invite Students above'}
-              </span>
-            );
-          }
-          return (
-            <div className="flex items-center justify-end gap-2">
-              {handleMoveStudent && (
-              <select
-                onChange={(e) => e.target.value && runAction(() => handleMoveStudent(row.uid, e.target.value))}
-                value=""
-                disabled={isActionBusy}
-                className={`text-[10px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer outline-none appearance-none disabled:opacity-40 disabled:cursor-not-allowed ${
-                  isNight ? 'bg-brand-dark border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
-                }`}
-              >
-                <option value="">{isKo ? '반 이동' : 'Move'}</option>
-                {classes.filter((c) => c.id !== row.classId).map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-              )}
-              {handleRemoveStudent && (
-              <button
-                onClick={() => runAction(() => handleRemoveStudent(row.uid))}
-                disabled={isActionBusy}
-                className="px-3 py-1.5 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-lg text-[10px] active:scale-[0.95] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {isKo ? '삭제' : 'Remove'}
-              </button>
-              )}
-              <button
-                onClick={() => setSelectedStudentDetails(row.raw)}
-                className={`px-3 py-1.5 border font-bold rounded-lg text-[10px] active:scale-[0.95] cursor-pointer ${
-                  isNight ? 'border-white/10 bg-brand-dark hover:bg-white/5 text-orange-400' : 'border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-orange-600'
-                }`}
-              >
-                {isKo ? '상세' : 'Details'}
-              </button>
-            </div>
-          );
-        },
+        cell: (info) => actionsFor(info.row.original),
       }),
     ],
     [isKo, isNight, classes, handleMoveStudent, handleRemoveStudent, setSelectedStudentDetails, isActionBusy]
@@ -331,7 +332,7 @@ export function StudentDatabaseGrid({
       )}
 
       <div className={`p-1 rounded-[2.5rem] ${isNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'}`}>
-        <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 ${isNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'}`}>
+        <div className={`rounded-[calc(2.5rem-0.25rem)] p-5 sm:p-8 ${isNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'}`}>
           {isLoadingRoster ? (
             <div className="flex items-center justify-center min-h-[30vh]">
               <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
@@ -341,7 +342,36 @@ export function StudentDatabaseGrid({
               {isKo ? '표시할 학생이 없습니다.' : 'No students match this view.'}
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* Phones: one card per student — as a table, the actions column
+                sat off-screen to the right. */}
+            <ul className={`md:hidden divide-y ${isNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
+              {table.getRowModel().rows.map(({ original: r }) => (
+                <li key={r.uid} className="py-4 first:pt-0 last:pb-0 space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-black text-sm flex items-center gap-1.5">
+                        {r.studentName}
+                        {r.flagged && <Warning size={14} weight="fill" className="text-amber-500" />}
+                      </p>
+                      <p className="text-xs text-zinc-400 break-all">
+                        {r.isInvitedOnly ? (isKo ? '미가입 (초대됨)' : 'Not yet joined') : [r.parentName, r.parentEmail].filter(Boolean).join(' · ')}
+                      </p>
+                    </div>
+                    {r.status !== 'active' && (
+                      <span className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold border bg-orange-500/10 border-orange-500/20 text-orange-500">
+                        {isKo ? '대기중' : 'Pending'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-zinc-400">
+                    {[r.className, r.lastScanDate && `${isKo ? '마지막 스캔' : 'Last scan'} ${r.lastScanDate}`].filter(Boolean).join(' · ')}
+                  </p>
+                  <div className="flex justify-start">{actionsFor(r)}</div>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-xs text-left border-collapse">
                 <thead>
                   {table.getHeaderGroups().map((headerGroup) => (
@@ -378,6 +408,7 @@ export function StudentDatabaseGrid({
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
       </div>

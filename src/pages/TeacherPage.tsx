@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -2836,7 +2836,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                 selectedTextbookName={selectedTextbookName}
                 ftDashboardRoster={ftDashboardRoster}
                 handleLogSubmit={handleLogSubmit}
-                completionRate={completionRate}
                 completedHomeworkCount={completedHomeworkCount}
                 activeStudentsCount={activeStudentsCount}
                 activeVocabWords={activeVocabWords}

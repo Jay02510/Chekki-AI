@@ -1,12 +1,9 @@
 import React from 'react';
 import {
-  TrendUp,
-  Users,
   FileText,
   Plus,
 } from '@phosphor-icons/react';
 import { NativeTeacherLogForm } from './NativeTeacherLogForm';
-import { StatTile } from './ui/StatTile';
 import { ClassLogPayload } from '../services/aiGenerator';
 
 interface TroubleWord {
@@ -23,7 +20,6 @@ interface Props {
   selectedTextbookName: string;
   roster: { uid: string; name: string; isPending?: boolean }[];
   handleFtLogSubmit: (payload: ClassLogPayload) => boolean;
-  completionRate: number;
   completedHomeworkCount: number;
   activeStudentsCount: number;
   activeVocabWords: string[];
@@ -62,7 +58,6 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
   selectedTextbookName,
   roster,
   handleFtLogSubmit,
-  completionRate,
   completedHomeworkCount,
   activeStudentsCount,
   activeVocabWords,
@@ -84,6 +79,8 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
             topic={curriculumTopic}
             vocabWords={activeVocabWords}
             troubleWords={sortedTroubleWords}
+            scannedCount={completedHomeworkCount}
+            studentCount={activeStudentsCount}
           />
 
           {/* 30s Foreign Teacher Mobile Class Log Entry */}
@@ -100,32 +97,6 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
               isRealClassSynced={!activeClass?.isDemo}
             />
           </div>
-          {/* NOTE: Duplicate worksheet scanner that previously lived here was
-              removed (Audit §7). It is now exclusively on the Homework tab.
-              The 5-slide curriculum carousel and AI tip panel that used to
-              sit below the stats also moved out, to their own Insights tab
-              (Audit: FT overview still not simple) — a teacher checking in
-              before class shouldn't have to scroll past carousel slides to
-              reach the thing they actually came to do: log today's class.
-              Overview is now just the log form + the two stats teachers
-              actually check daily. The "Active Class" stat card was dropped
-              entirely rather than relocated — the sidebar/header already
-              shows the active class name, so it was pure duplication. */}
-
-          {/* Top Double-Bezel Stats Cards */}
-          <FtStatCards
-            isNight={isThemeNight}
-            isKo={isKo}
-            completionRate={completionRate}
-            completedHomeworkCount={completedHomeworkCount}
-            activeStudentsCount={activeStudentsCount}
-          />
-
-          {/* FT previously had no view showing enrolled student names at all
-              (only the count on the stat card above) — Director/KT get the
-              full StudentDatabaseGrid, but that table's move/remove actions
-              are director-level, so FT gets this read-only list instead. */}
-          <FtRosterList isNight={isThemeNight} isKo={isKo} roster={roster} />
         </div>
       )}
 
@@ -229,115 +200,6 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
   );
 });
 
-interface FtStatCardsProps {
-  isNight: boolean;
-  isKo: boolean;
-  completionRate: number;
-  completedHomeworkCount: number;
-  activeStudentsCount: number;
-}
-
-/**
- * Extracted so TeacherPage.tsx can render this directly instead of
- * hand-duplicating the stat-card block (previously drifted independently,
- * one variant not even using the double-bezel construction). One source
- * of truth for the FT/KT overview stats going forward.
- */
-export const FtStatCards: React.FC<FtStatCardsProps> = ({
-  isNight,
-  isKo,
-  completionRate,
-  completedHomeworkCount,
-  activeStudentsCount,
-}) => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <StatTile
-        isNight={isNight}
-        label={isKo ? '숙제 완료율' : 'Completion Rate'}
-        icon={<TrendUp size={14} weight="bold" className="text-orange-500" />}
-        badge={{ text: `${completionRate}%`, tone: 'emerald' }}
-        ring={{ value: completionRate }}
-        value={
-          <>
-            {completedHomeworkCount}{' '}
-            <span className="text-sm font-normal text-zinc-400">
-              / {activeStudentsCount} {isKo ? '명 완료' : 'Students'}
-            </span>
-          </>
-        }
-      />
-      <StatTile
-        isNight={isNight}
-        label={isKo ? '등록 원생 수' : 'Enrolled Students'}
-        icon={<Users size={14} weight="bold" className="text-orange-500" />}
-        badge={{ text: isKo ? '활동 원생' : 'ACTIVE ROSTER', tone: 'neutral' }}
-        value={
-          <>
-            {activeStudentsCount} <span className="text-sm font-normal text-zinc-400">{isKo ? '명 등록' : 'Children'}</span>
-          </>
-        }
-        sublabel={isKo ? '가입 승인 완료된 활동 원생 수' : 'Approved active student profiles'}
-      />
-    </div>
-  );
-};
-
-interface FtRosterListProps {
-  isNight: boolean;
-  isKo: boolean;
-  roster: { uid: string; name: string; isPending?: boolean }[];
-}
-
-/**
- * Read-only student name list for FT — deliberately not StudentDatabaseGrid
- * (that has move/remove actions, which are director-level). This is just
- * "who's in my class", the thing FT had no way to see before.
- */
-const FtRosterList: React.FC<FtRosterListProps> = ({ isNight, isKo, roster }) => {
-  return (
-    <div
-      className={`p-1 rounded-[2rem] transition-colors ${
-        isNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
-      }`}
-    >
-      <div className={`rounded-[calc(2rem-0.25rem)] p-6 ${isNight ? 'bg-brand-dark' : 'bg-white'}`}>
-        <span
-          className={`text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 mb-4 ${
-            isNight ? 'text-zinc-400' : 'text-zinc-500'
-          }`}
-        >
-          <Users size={14} weight="bold" className="text-orange-500" />
-          <span>{isKo ? '학생 명단' : 'Students in Class'}</span>
-        </span>
-        {roster.length === 0 ? (
-          <p className="text-xs text-zinc-400">
-            {isKo ? '등록된 학생이 없습니다.' : 'No students enrolled yet.'}
-          </p>
-        ) : (
-          <ul className="flex flex-wrap gap-2">
-            {roster.map((s) => (
-              <li
-                key={s.uid}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold border ${
-                  isNight ? 'bg-white/5 border-white/10 text-zinc-100' : 'bg-zinc-50 border-zinc-200 text-zinc-900'
-                }`}
-              >
-                {s.name}
-                {s.isPending && (
-                  <span className="ml-1.5 text-orange-400 font-mono text-[10px]">
-                    {isKo ? '(가입 대기)' : '(pending)'}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-};
-
 // This week at a glance, above the log form: the topic, and which target
 // words the class is getting wrong on scanned homework (the class-level
 // mistake view from the core loop) so the teacher can cover them in class.
@@ -348,6 +210,8 @@ function WeekFocusCard({
   topic,
   vocabWords,
   troubleWords,
+  scannedCount,
+  studentCount,
 }: {
   isNight: boolean;
   isKo: boolean;
@@ -355,9 +219,11 @@ function WeekFocusCard({
   topic: string;
   vocabWords: string[];
   troubleWords: TroubleWord[];
+  scannedCount: number;
+  studentCount: number;
 }) {
   const missed = troubleWords.filter((w) => w.count > 0);
-  if (!topic.trim() && vocabWords.length === 0) return null;
+  if (!topic.trim() && vocabWords.length === 0 && studentCount === 0) return null;
   const muted = isNight ? 'text-zinc-400' : 'text-zinc-500';
   return (
     <section className={`max-w-3xl mx-auto w-full p-5 rounded-3xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200'}`}>
@@ -365,6 +231,13 @@ function WeekFocusCard({
         {isKo ? `${weekNumber}주차` : `Week ${weekNumber}`}
         {topic.trim() && <span className={`font-bold ${muted}`}> · {topic.trim()}</span>}
       </h3>
+      {studentCount > 0 && (
+        <p className={`text-sm ${muted}`}>
+          {isKo
+            ? `숙제 스캔: ${studentCount}명 중 ${scannedCount}명 완료`
+            : `Homework scanned this week: ${scannedCount} of ${studentCount}`}
+        </p>
+      )}
       {vocabWords.length > 0 && (
         <div className="space-y-2">
           <p className={`text-sm ${muted}`}>

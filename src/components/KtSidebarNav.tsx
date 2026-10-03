@@ -135,15 +135,8 @@ export function KtSidebarNav({ isNight, isKo, activeTab, setActiveTab, showRepor
           }`}>
             <Sparkle size={18} weight="fill" />
           </div>
-          <span>{isKo ? '주간 리포트' : 'Weekly report'}</span>
+          <span>{isKo ? '학부모 상담 노트' : 'Parent call notes'}</span>
         </div>
-        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
-          showReportCardModal
-            ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-            : isNight ? 'bg-white/5 text-zinc-500 border-white/10' : 'bg-zinc-100 text-zinc-500 border-zinc-200'
-        }`}>
-          GENERATE
-        </span>
       </button>
     </>
   );

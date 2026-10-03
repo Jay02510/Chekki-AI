@@ -557,7 +557,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                           </h5>
                           <p className="text-xs text-zinc-400 mt-0.5">
                             {worksheetFileName
-                              ? (isKo ? '독립 저장됨: 새 워크시트 스캔' : 'Stored independently. Click to rescan worksheet.')
+                              ? (isKo ? '다시 올리면 새로 스캔합니다.' : 'Drop or add a new photo to rescan.')
                               : (isKo ? '오늘의 워크시트 사진이나 PDF를 드롭하면 학부모용 정답 가이드를 자동 생성합니다.' : 'Drag & drop worksheet photo. AI creates parent answer key overlays.')}
                           </p>
                         </div>
@@ -594,11 +594,11 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                         )}
 
                         {/* Divider between "view this one" and "replace/remove it" */}
-                        <div className="w-px h-6 bg-white/10 mx-0.5" />
+                        {(worksheetPreviewUrl || worksheetScannedData) && <div className="w-px h-6 bg-white/10 mx-0.5" />}
 
                         {/* Rescan actions — replace the current worksheet with a new photo */}
                         <label className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
-                          <span>{isKo ? '카메라로 찍기' : 'Take photo'}</span>
+                          <span>{isKo ? '사진 올리기' : 'Add photo'}</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -618,6 +618,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                             wiping the current one (Audit: delete action
                             disguised as an add action, teacher had no visible
                             way to remove a bad scan). */}
+                        {(worksheetFileName || worksheetScannedData) && (
                         <button
                           type="button"
                           onClick={() => {
@@ -630,6 +631,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                           <Trash size={14} weight="bold" />
                           <span>{isKo ? '삭제' : 'Remove'}</span>
                         </button>
+                        )}
                       </div>
                     </div>
                   )}

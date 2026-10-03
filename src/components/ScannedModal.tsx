@@ -543,7 +543,7 @@ export function ScannedModal({
               className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
             >
               <CheckCircle size={16} weight="bold" />
-              <span>{isKo ? '선택 항목을 주간 커리큘럼에 적용' : 'Apply Selected to Curriculum'}</span>
+              <span>{isKo ? '선택 항목 적용하고 저장' : 'Apply and save'}</span>
             </button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { dbInstance, auth } from '../services/database';
 import { compressImage, stripDataUrlPrefix, getMimeTypeFromDataUrl } from '../services/compressImage';
@@ -448,8 +448,20 @@ export function useCurriculumEditorState(
       });
     }
     setShowScannedModal(false);
-    setScanStatusMessage(isKo ? '선택한 학급 커리큘럼 항목이 성공적으로 적용되었습니다!' : 'Selected items successfully applied to your weekly curriculum!');
+    setScanStatusMessage(isKo ? '이번 주 커리큘럼에 저장했습니다. 학부모 스캔은 이 정답지로 채점됩니다.' : "Saved to this week. Parents' scans are graded against this answer key.");
+    // Apply used to stop here, leaving a separate Save button the teacher
+    // had to notice — skip it and the answer key never reached grading.
+    setSaveAfterApply(true);
   };
+
+  // Runs one render after Apply so the save reads the applied values.
+  const [saveAfterApply, setSaveAfterApply] = useState(false);
+  useEffect(() => {
+    if (!saveAfterApply) return;
+    setSaveAfterApply(false);
+    void handleSaveCurriculum({ preventDefault() {} } as React.FormEvent);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveAfterApply]);
 
   const loadCurriculum = async () => {
     const targetClass = selectedClass || fallbackDemoClass;

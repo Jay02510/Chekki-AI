@@ -3,7 +3,6 @@ import { Sparkle, Plus, X, Check, UserPlus, Lock, FloppyDisk, Microphone, Pencil
 import { ClassLogPayload, saveOfflineDraft, getOfflineDraft, clearOfflineDraft } from '../services/aiGenerator';
 import { VoiceFillException, VoiceFillFields } from '../services/voiceFill';
 import { UserProfile } from '../../types';
-import { getPermissionsForUser } from '../utils/permissions';
 import { VoiceFillAssistant } from './VoiceFillAssistant';
 
 interface Props {
@@ -162,7 +161,6 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   // authorRole === 'kt' branch in api/analyze.ts), not just FTs — it needs
   // Korean labels for that audience.
   const isKo = isKoProp ?? (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
-  const permissions = getPermissionsForUser(userProfile);
   const effectiveRoster = roster.length > 0 ? roster : (isDemo ? DEMO_ROSTER : []);
   const [className, setClassName] = useState(selectedClassName || (isDemo ? DEMO_CLASS_NAME : ''));
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);

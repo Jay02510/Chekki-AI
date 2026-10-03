@@ -185,21 +185,10 @@ export async function generateStudentExceptionReport(
 /**
  * 3. Parent Consultation Phone Prep Report Generator
  */
+// Throws on failure so ReportCardModal shows its error state — no generic
+// placeholder points that look like real observations.
 export async function generatePhoneConsultationPrep(studentName: string, historicalLogs: string): Promise<string[]> {
-  try {
-    const { points } = await callGenerateReport('phonePrep', { studentName, historicalLogs });
-    return Array.isArray(points) && points.length > 0
-      ? points
-      : [
-          `${studentName} 원생의 최근 학습 태도 및 주차별 어휘 성취도 점검`,
-          `수업 중 집중도 향상을 위한 가정 내 1:1 맞춤 읽기 지도 권장`,
-          `다음 주 차 타겟 어휘 선제 복습 및 학원 차원의 밀착 케어 진행`,
-        ];
-  } catch (err) {
-    return [
-      `${studentName} 원생의 교재 이수 현황 및 수업 참여도 공유`,
-      `가정 내 어휘 복습 지도 방안 안내`,
-      `원내 1:1 보충 케어 스케줄 협의`,
-    ];
-  }
+  const { points } = await callGenerateReport('phonePrep', { studentName, historicalLogs });
+  if (!Array.isArray(points) || points.length === 0) throw new Error('No talking points returned');
+  return points;
 }
