@@ -251,21 +251,6 @@ export default defineConfig(({ mode }) => ({
         main: resolve(__dirname, 'index.html'),
         app: resolve(__dirname, 'app.html'),
       },
-      output: {
-        manualChunks(id) {
-          // xlsx is only dynamically imported inside StudentInvitePanel's
-          // Excel-upload handler — dumping it into the eager `vendor` chunk
-          // (like everything else in node_modules) would defeat that lazy
-          // load and add ~370KB gzip to every page load for a feature only
-          // directors/KTs use, and rarely.
-          if (id.includes('node_modules/xlsx')) {
-            return undefined;
-          }
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        },
-      },
     },
   },
 }));

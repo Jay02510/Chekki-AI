@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../services/database';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from 'framer-motion';
@@ -34,6 +33,8 @@ import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useToast } from '../../contexts/ToastContext';
 import { copyToClipboard } from '../../utils/clipboard';
 import { langPath, switchLang, urlLang } from '../lib/lang';
+import { FAQ_DATA } from '../data/faq';
+import { track } from '../lib/track';
 
 interface Props {
   isNight: boolean;
@@ -57,49 +58,9 @@ const PRICING_TIERS = Object.fromEntries(
   ])
 ) as Record<string, { id: string; nameEn: string; nameKo: string; seats: { ft: number; kt: number } } & typeof PRICING_BILLING[string]>;
 
-// Reused verbatim from the academy ("teacher") category of FaqPage.tsx's
-// FAQ_DATA — real, already-shipped content, not new copy — so this page's
-// objection-handling section doesn't duplicate/drift from the canonical
-// FAQ answers. Trimmed to the 5 most conversion-relevant for a director
-// deciding whether to try Chekki (trial terms, AI grading trust, core
-// mechanics), not every teacher-workflow question.
-const SCHOOL_FAQ_ITEMS = [
-  {
-    id: 't4',
-    questionKo: '학원용 7일 무료 체험 신청 조건 및 승인 절차는 어떻게 되나요?',
-    questionEn: 'What is required for the 7-Day Academy Free Trial?',
-    answerKo: '학원명, 담당자 성함, 이메일/연락처 3가지 필수 정보만 입력하시면 즉시 신청됩니다. 신용카드 등록이나 사업자번호 없이 신청 후 1시간 내 7일 전용 교사 승인 코드가 발급됩니다.',
-    answerEn: 'Only 3 basic fields are required: Academy Name, Contact Name, and Email/Phone. No credit card or tax documents required. Your 7-day access code is issued within 1 hour.',
-  },
-  {
-    id: 't5',
-    questionKo: '학생 손글씨 채점 시 일반 AI의 환각(Hallucination) 오답 우려는 없나요?',
-    questionEn: 'Are there concerns about AI OCR hallucinations misgrading student handwriting?',
-    answerKo: '체키는 학원 교재의 정답지 데이터(Ground-Truth)를 채점 기준으로 1차 대조하기 때문에, 일반 AI 파운데이션 모델의 환각 오류 없이 정밀한 채점 기준을 유지합니다.',
-    answerEn: "Chekki cross-references scans against your academy's ground-truth answer key, keeping grading precise and eliminating false AI grading hallucinations.",
-  },
-  {
-    id: 't2',
-    questionKo: '가정에서 학부모가 스캔한 오답 데이터는 어떻게 선생님께 전송되나요?',
-    questionEn: 'How do parent homework scans sync to the Teacher Dashboard?',
-    answerKo: '학부모님이 원장님/선생님께 받은 초대 링크로 Chekki 앱에 연동하면 자동으로 동기화됩니다. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 전송되어 개별 원생 활동에서 확인하실 수 있습니다.',
-    answerEn: 'Parents link their account via the invite their teacher sends them. Homework scans and red-bordered mistake data silently sync straight to your teacher dashboard in real-time.',
-  },
-  {
-    id: 't1',
-    questionKo: '매주 학급 주간 단어와 정답지를 일일이 타이핑해야 하나요?',
-    questionEn: 'Do teachers have to manually type weekly vocabulary words and answer keys?',
-    answerKo: '아닙니다! 교재 사진이나 PDF 파일을 한 번에 최대 5장까지 드롭하면 AI가 단어, 파닉스 패턴, 읽기 지문, 학부모용 정답 가이드를 3초 만에 자동으로 추출하여 대시보드에 등록해 줍니다.',
-    answerEn: 'No! Simply drop up to 5 textbook photos or multi-page PDFs at once. AI extracts target words, phonics rules, reading stories, and parent answer keys into your dashboard in seconds.',
-  },
-  {
-    id: 't3',
-    questionKo: '오답 맞춤 복습 프린트 및 학원 성적표는 어떻게 인쇄하나요?',
-    questionEn: 'How do I generate printable review sheets and academy branded report cards?',
-    answerKo: '교사 대시보드에서 1클릭으로 간편히 발급됩니다. "오답 맞춤 프린트 생성" 버튼을 누르면 학원 로고가 포함된 파닉스/단어 쓰기 맞춤 PDF가 생성되며, 원생 상세 정보에서 "맞춤 로고 성적표 인쇄"를 누르면 공식 학부모 리포트가 출력됩니다.',
-    answerEn: 'With a single click! Click "Generate Review Sheet" for an automated custom PDF worksheet, or click "Print Branded Report" inside any student profile for an official academy report card.',
-  },
-];
+// The 5 academy FAQs most relevant to a director deciding on the trial —
+// pulled from FAQ_DATA so this page and /faq can't drift apart.
+const SCHOOL_FAQ_ITEMS = ['t4', 't5', 't2', 't1', 't3'].map((id) => FAQ_DATA.find((f) => f.id === id)!);
 
 const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
   const [openFaqId, setOpenFaqId] = useState<string | null>(null);
@@ -157,7 +118,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
 
   const openPlanModal = (planId: string, _defaultTeachers: number = 1, _minSeats: number = 1) => {
     setSelectedPlanId(planId);
-    db.logUserEvent('schools_pricing_viewed', { plan_id: planId });
+    track('schools_pricing_viewed', { plan_id: planId });
     // school_pro/enterprise are big enough deals to need a live sales
     // conversation (and are where pilot-partnership pricing gets offered)
     // instead of self-serve checkout.
@@ -587,8 +548,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </h3>
                 <p className={`text-xs sm:text-sm leading-relaxed ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>
                   {isKo
-                    ? '학부모는 원장님이 보내주신 초대 링크만 누르면 끝. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 자동 전송됩니다.'
-                    : "Parents tap the invite link their academy sends — no typing required. Homework scans & mistake data silently sync straight to your teacher dashboard."}
+                    ? '학부모는 학원에서 받은 초대 링크만 누르면 끝. 집에서 스캔한 숙제의 오답과 점수가 교사 대시보드에 자동으로 쌓입니다.'
+                    : "Parents tap the invite link their academy sends — no typing required. Mistakes and scores from homework scanned at home show up on your teacher dashboard automatically."}
                 </p>
               </div>
             </div>
@@ -803,7 +764,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '한/영 이중언어 알림톡 자동 생성' : 'Bilingual KakaoTalk Generator'}</span>
+                  <span>{isKo ? '한/영 학부모 리포트 자동 작성' : 'Bilingual Parent Report Drafts'}</span>
                 </li>
                 <li className="flex items-center gap-1.5 font-bold text-orange-400">
                   <Sparkle size={14} weight="bold" className="flex-shrink-0" />
@@ -866,7 +827,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
               </div>
               <p className={`text-[11px] mb-4 leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {isKo 
-                  ? '원어민/한국인 교사 모바일 평가 폼 & 카카오톡 알림톡 자동 생성을 위한 소형 학원용 패키지.' 
+                  ? '원어민/한국인 교사 모바일 수업 일지와 한국어 학부모 리포트 작성을 위한 소형 학원용 패키지.' 
                   : 'Streamlined teacher logs & KakaoTalk report generation for foreign & Korean teachers.'}
               </p>
               <ul className={`space-y-2.5 text-[11px] mb-5 border-t pt-3 ${isNight ? 'border-white/5 text-zinc-300' : 'border-zinc-100 text-zinc-700'}`}>
@@ -880,7 +841,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle size={14} weight="bold" className="text-emerald-500 flex-shrink-0" />
-                  <span>{isKo ? '한/영 이중언어 알림톡 생성' : 'Bilingual KakaoTalk Script Generator'}</span>
+                  <span>{isKo ? '한/영 학부모 리포트 작성' : 'Bilingual Parent Report Drafts'}</span>
                 </li>
                 <li className="flex items-center gap-1.5 font-bold text-orange-400">
                   <Sparkle size={14} weight="bold" className="flex-shrink-0" />
@@ -1064,7 +1025,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
       </section>
 
       {/* --- FAQ: OBJECTION HANDLING BEFORE THE FINAL CTA ---
-          Reuses SCHOOL_FAQ_ITEMS (verbatim from FaqPage.tsx's teacher
+          Reuses SCHOOL_FAQ_ITEMS (from src/data/faq.ts's teacher
           category) so a director evaluating the trial doesn't have to
           leave this page to find answers to the questions that actually
           block a decision (trial terms, AI grading trust, core sync
@@ -1239,7 +1200,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                         }),
                       });
                       if (!response.ok) throw new Error(`Request failed with ${response.status}`);
-                      db.logUserEvent('schools_consultation_submitted');
+                      track('schools_consultation_submitted');
                       setConsultationSubmitted(true);
                     } catch (err) {
                       console.error('Consultation request failed:', err);
@@ -1489,10 +1450,10 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                   <div className={`p-3 rounded-xl border ${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
                     <div className="flex items-center gap-2 mb-1">
                       <CheckCircle size={16} weight="bold" className="text-emerald-400 shrink-0" />
-                      <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? 'KT 카카오 알림톡 대본 1클릭 복사' : 'Bilingual KakaoTalk Comment Generator'}</p>
+                      <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? 'KT 검토 후 학부모 리포트 발송' : 'KT-Reviewed Parent Reports'}</p>
                     </div>
                     <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                      {isKo ? '원어민 30초 로그 ➔ 한국인 교사 분할 화면 검수 & 카톡 1클릭 전송' : 'Turns 30-sec native teacher logs into split-screen Korean parent updates'}
+                      {isKo ? '원어민 30초 일지 ➔ AI 한국어 초안 ➔ 한국인 교사 검수 후 학부모 앱으로 발송 (카톡 공유 문구도 제공)' : 'Native teacher\'s 30-sec log ➔ AI Korean draft ➔ KT review ➔ sent to the parent app (with a KakaoTalk share copy)'}
                     </p>
                   </div>
 
@@ -1502,7 +1463,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '원장님 통합 관제 HQ 포털' : 'Director Central HQ Portal'}</p>
                     </div>
                     <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                      {isKo ? '교사 초청 링크 1클릭 발급, 반별 출석 & 수업 보고 실시간 통계' : '1-click staff invite link generator, class attendance & real-time analytics'}
+                      {isKo ? '교사·학부모 초대, 반별 수업 일지 제출 현황과 원생 활동을 한 화면에서' : 'Invite staff and parents, see each class\'s log submissions and student activity in one place'}
                     </p>
                   </div>
 
@@ -1512,7 +1473,7 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
                       <p className={`font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>{isKo ? '학부모 전용 모바일 앱 100% 무료' : 'FREE Parent Mobile App Included'}</p>
                     </div>
                     <p className={`text-[11px] leading-relaxed ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                      {isKo ? '학부모님 추가 요금 없이 1초 성적 확인 앱 무료 제공' : 'Zero cost for parents to view digital grade updates and monthly reports'}
+                      {isKo ? '학부모님은 추가 요금 없이 앱에서 숙제 채점과 수업 리포트를 확인' : 'No cost for parents to see homework grading and class reports in the app'}
                     </p>
                   </div>
                 </div>

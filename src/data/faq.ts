@@ -20,8 +20,8 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: "Mom's English",
     questionKo: '영어 발음이나 문법에 자신 없는 엄마도 아이 숙제를 도울 수 있나요?',
     questionEn: 'Can moms who lack confidence in English pronunciation help with homework?',
-    answerKo: '네, 완벽히 가능합니다! 채키 AI는 엄마가 영어 선생님 역할을 직접 맡을 필요가 없도록 설계되었습니다. 숙제 사진을 찍으면 5초 이내로 AI가 채점하고, 엄마가 아이에게 들려줄 한국어 칭찬 가이드("엄마, 이렇게 알려주세요")와 정확한 원어민 음성을 제공합니다.',
-    answerEn: 'Yes, absolutely! Chekki AI eliminates the pressure for moms to act as English teachers. Simply snap a photo, and Chekki provides grading in well under 5 seconds, warm Korean coaching tips, and native pronunciation audio.'
+    answerKo: '네, 완벽히 가능합니다! 채키 AI는 엄마가 영어 선생님 역할을 직접 맡을 필요가 없도록 설계되었습니다. 숙제 사진을 찍으면 몇 초 안에 AI가 채점하고, 엄마가 아이에게 들려줄 한국어 칭찬 가이드("엄마, 이렇게 알려주세요")와 정확한 원어민 음성을 제공합니다.',
+    answerEn: 'Yes, absolutely! Chekki AI eliminates the pressure for moms to act as English teachers. Simply snap a photo, and Chekki grades it in seconds, with warm Korean coaching tips, and native pronunciation audio.'
   },
   {
     id: 'p2',
@@ -50,8 +50,8 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: 'Academy Key Sync',
     questionKo: '영유/어학원 교재 정답지와 AI 채점 결과가 일치하나요?',
     questionEn: 'Does Chekki sync with English Kindergarten & Academy textbook answer keys?',
-    answerKo: '네, 정확하게 연동됩니다. 다니고 계신 학원의 초대를 받아 연동하면, 학원에서 입력한 이번 주 타겟 단어, 파닉스 규칙, 읽기 지문과 100% 연동되어 일반 AI의 환각 오류 없이 채점됩니다.',
-    answerEn: "Yes! Once your academy invites you, Chekki evaluates scans against the teacher's active textbook keys, eliminating false AI grading errors."
+    answerKo: '학원 초대로 연결하면, 선생님이 올린 이번 주 단어·파닉스·지문·정답지를 기준으로 채점합니다. 정답지에 있는 문항은 그 정답을 그대로 기준으로 삼고, 정답지에 없는 문항만 AI가 직접 판단합니다.',
+    answerEn: "Once your academy invites you, Chekki grades against the words, phonics, passage and answer key your teacher uploaded for this week. Questions covered by the key use the teacher's answer; only questions outside it are judged by the AI."
   },
   {
     id: 'p5',
@@ -72,8 +72,8 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: 'Multi-Page AI Scan',
     questionKo: '매주 학급 주간 단어와 정답지를 일일이 타이핑해야 하나요?',
     questionEn: 'Do teachers have to manually type weekly vocabulary words and answer keys?',
-    answerKo: '아닙니다! 교재 사진이나 PDF 파일을 한 번에 최대 5장까지 드롭하면 AI가 단어, 파닉스 패턴, 읽기 지문, 학부모용 정답 가이드를 3초 만에 자동으로 추출하여 대시보드에 등록해 줍니다. 1클릭 칩 삭제/추가 기능으로 원하는 항목만 자유롭게 편집하실 수 있습니다.',
-    answerEn: 'No! Simply drop up to 5 textbook photos or multi-page PDFs at once. AI extracts target words, phonics rules, reading stories, and parent answer keys into your dashboard in seconds. You can easily add or delete items with 1-click interactive chips.'
+    answerKo: '아닙니다. 교재 사진이나 PDF를 한 번에 최대 5장까지 올리면 AI가 단어, 파닉스 패턴, 읽기 지문, 정답을 추출해 대시보드에 채워 넣습니다. 추출된 항목은 칩을 눌러 바로 추가/삭제할 수 있어 확인 후 저장만 하시면 됩니다.',
+    answerEn: 'No. Drop up to 5 textbook photos or PDF pages at once and AI extracts target words, phonics rules, reading passages and answers into your dashboard. Review the chips, add or remove items, and save.'
   },
   {
     id: 't2',
@@ -82,8 +82,8 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: 'Invite-Link Sync',
     questionKo: '가정에서 학부모가 스캔한 오답 데이터는 어떻게 선생님께 전송되나요?',
     questionEn: 'How do parent homework scans sync to the Teacher Dashboard?',
-    answerKo: '학부모님이 원장님/선생님께 받은 초대 링크로 Chekki 앱에 연동하면 자동으로 동기화됩니다. 집에서 스캔한 빨간 테두리 오답과 점수가 교사 대시보드로 실시간 전송되어 개별 원생 활동에서 확인하실 수 있습니다.',
-    answerEn: "Parents link their account via the invite their teacher sends them. Homework scans and red-bordered mistake data silently sync straight to your teacher dashboard in real-time."
+    answerKo: '학부모님이 학원에서 받은 개별 초대로 Chekki 앱에 연결하면, 집에서 스캔한 숙제의 오답과 점수가 교사 대시보드의 원생별 활동에 자동으로 쌓입니다.',
+    answerEn: "Parents connect through the personal invite their academy sends. From then on, mistakes and scores from homework they scan at home appear automatically in each student's activity on your dashboard."
   },
   {
     id: 't3',
@@ -92,8 +92,8 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: 'Printable Review',
     questionKo: '오답 맞춤 복습 프린트 및 학원 성적표는 어떻게 인쇄하나요?',
     questionEn: 'How do I generate printable review sheets and academy branded report cards?',
-    answerKo: '교사 대시보드에서 1클릭으로 간편히 발급됩니다. "오답 맞춤 프린트 생성" 버튼을 누르면 학원 로고가 포함된 파닉스/단어 쓰기 맞춤 PDF가 생성되며, 원생 상세 정보에서 "맞춤 로고 성적표 인쇄"를 누르면 공식 학부모 리포트가 출력됩니다.',
-    answerEn: 'With a single click! Click "Generate Review Sheet" for an automated custom PDF worksheet, or click "Print Branded Report" inside any student profile for an official academy report card.'
+    answerKo: '원생 상세 화면에서 학부모용 리포트 카드를 바로 인쇄할 수 있습니다(등록하신 학원 로고가 함께 표시됩니다). 틀린 문제 복습 학습지는 학부모 앱의 오답 노트에서 아이가 실제로 틀린 문제로 만들 수 있습니다.',
+    answerEn: "Print a parent report card from any student's detail view (with your academy logo, if you've added one). Review worksheets are made in the parent app's mistake notebook from the questions each child actually missed."
   },
   {
     id: 't4',
@@ -102,18 +102,18 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: '7-Day Free Trial',
     questionKo: '학원용 7일 무료 체험 신청 조건 및 승인 절차는 어떻게 되나요?',
     questionEn: 'What is required for the 7-Day Academy Free Trial?',
-    answerKo: '학원명, 담당자 성함, 이메일/연락처 3가지 필수 정보만 입력하시면 즉시 신청됩니다. 신용카드 등록이나 사업자번호 없이 신청 후 1시간 내 7일 전용 교사 승인 코드가 발급됩니다.',
-    answerEn: 'Only 3 basic fields are required: Academy Name, Contact Name, and Email/Phone. No credit card or tax documents required. Your 7-day access code is issued within 1 hour.'
+    answerKo: '학원명과 원장님 이메일로 가입하시면 7일 체험이 바로 시작됩니다. 신용카드나 사업자번호는 필요 없습니다.',
+    answerEn: 'Sign up with your academy name and email and the 7-day trial starts right away. No credit card or business registration needed.'
   },
   {
     id: 't5',
     category: 'teacher',
-    tagKo: 'AI 오답 정밀도',
-    tagEn: 'AI Precision',
-    questionKo: '학생 손글씨 채점 시 일반 AI의 환각(Hallucination) 오답 우려는 없나요?',
-    questionEn: 'Are there concerns about AI OCR hallucinations misgrading student handwriting?',
-    answerKo: '체키는 학원 교재의 정답지 데이터(Ground-Truth)를 채점 기준으로 1차 대조하기 때문에, 일반 AI 파운데이션 모델의 환각 오류 없이 정밀한 채점 기준을 유지합니다.',
-    answerEn: 'Chekki cross-references scans against your academy\'s ground-truth answer key, keeping grading precise and eliminating false AI grading hallucinations.'
+    tagKo: '채점 정확도',
+    tagEn: 'Grading Accuracy',
+    questionKo: 'AI가 아이 손글씨를 잘못 채점할 수도 있나요?',
+    questionEn: 'Can the AI misgrade a child\'s handwriting?',
+    answerKo: '가능성은 있습니다. 그래서 선생님이 그 주 정답지를 올리면 채점 시 그 정답을 먼저 기준으로 대조합니다. 정답지에 있는 문항은 AI가 정답을 추측하지 않고, 정답지에 없는 문항만 AI가 판단합니다. 손글씨가 많이 흐리면 읽기 오류가 생길 수 있으니, 정답지를 올릴수록 정확해집니다.',
+    answerEn: 'It can happen, which is why answer keys matter. When a teacher uploads the week\'s key, grading checks against it first: questions on the key use the teacher\'s answer instead of an AI guess, and only questions outside it are judged by the AI. Very messy handwriting can still be misread.'
   },
   {
     id: 't6',

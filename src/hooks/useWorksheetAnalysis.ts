@@ -202,12 +202,7 @@ export const useWorksheetAnalysis = () => {
               isLegible: result.worksheet_summary?.is_handwriting_legible !== false,
             };
 
-            // 1. Local Storage Dual-Persistence Sync
-            const localClassKey = `class_scans_${activeClassId}`;
-            const existingLocal = JSON.parse(localStorage.getItem(localClassKey) || '[]');
-            localStorage.setItem(localClassKey, JSON.stringify([scanPayload, ...existingLocal].slice(0, 100)));
-
-            // 2. Firestore Sync (Async background operation)
+            // Background sync to the class so the teacher dashboard sees it.
             if (dbInstance) {
               const scanDocRef = doc(dbInstance, 'classes', activeClassId, 'studentScans', scanPayload.id);
               setDoc(scanDocRef, scanPayload).catch(err => console.warn('Background scan sync warning:', err));

@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import * as Sentry from '@sentry/react';
-import { UserProfile, SubscriptionRecord, SubscriptionPlatform } from '../types';
+import { UserProfile, SubscriptionRecord } from '../types';
 import { auth, db, dbInstance } from '../services/database';
-import { doc, updateDoc, increment, arrayRemove, deleteDoc } from 'firebase/firestore';
+import { doc, deleteDoc } from 'firebase/firestore';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -14,7 +14,6 @@ import {
   OAuthProvider,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
   getRedirectResult,
   signInWithCredential,
   signInWithCustomToken,
@@ -94,7 +93,7 @@ interface AuthContextType {
     childEnglishLevel: string,
     parentEnglishLevel: string
   ) => Promise<void>;
-  updateClassroomProfile: (classId: string, studentName: string) => Promise<void>;
+  updateStudentName: (studentName: string) => Promise<void>;
   joinClassWithCode: (classCode: string) => Promise<boolean>;
   redeemClassCodeDetailed: (classCode: string) => Promise<{ success: boolean; schoolName?: string; className?: string; error?: string; wrongAccount?: boolean }>;
   leaveClassroom: () => Promise<void>;
@@ -497,7 +496,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 plan: 'pro',
                 maxScansPerDay: 9999,
                 maxQuestionsPerDay: 9999,
-                schoolId: code.toUpperCase().trim(),
+                schoolId: data.schoolId,
                 schoolName: data.schoolName,
                 subscriptionPlatform: 'school_code',
               };
@@ -1014,32 +1013,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await db.updateUser(firebaseUser.uid, updates);
   };
 
-  const updateClassroomProfile = async (classId: string, studentName: string) => {
-    if (userProfile?.email === 'test@example.com' || userProfile?.email === 'expired@example.com') {
-      setUserProfile({
-        ...userProfile,
-        classId,
-        studentName,
-        classStatus: classId ? 'pending' : null,
-      });
-      return;
-    }
+  // classId/classStatus are server-owned (redeem.ts); only the child's
+  // display name is the parent's to edit.
+  const updateStudentName = async (studentName: string) => {
     if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) return;
-
-    // Only set pending if a non-empty class ID is selected and it differs from current classId
-    const isNewEnrollment = classId && classId !== userProfile.classId;
-    const classStatus = isNewEnrollment
-      ? 'pending'
-      : classId
-        ? userProfile.classStatus || 'pending'
-        : null;
-
-    const updates = {
-      classId: classId || null,
-      studentName: studentName.trim() || null,
-      classStatus: classStatus || null,
-    };
-
+    const updates = { studentName: studentName.trim() || null };
     setUserProfile({ ...userProfile, ...updates });
     await db.updateUser(firebaseUser.uid, updates);
   };
@@ -1047,17 +1025,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteAccount = async () => {
     if (!firebaseUser) return;
     try {
-      if (userProfile?.schoolId) {
-        try {
-          const schoolRef = doc(dbInstance, 'schools', userProfile.schoolId);
-          await updateDoc(schoolRef, {
-            usedByUids: arrayRemove(firebaseUser.uid),
-          });
-        } catch (sErr) {
-          console.warn('Failed to remove user UID from school doc during account deletion:', sErr);
-        }
-      }
-
       // Clean up the users/{uid}/data/mistakes subcollection doc — deleting
       // the parent user doc does NOT cascade to subcollections in Firestore,
       // so this used to survive account deletion as an orphaned record of a
@@ -1225,7 +1192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const data = await response.json();
         if (data.success) {
           const updates: Partial<UserProfile> = {
-            schoolId: schoolCode.toUpperCase().trim(),
+            schoolId: data.schoolId,
             schoolName: data.schoolName,
             plan: 'pro',
             maxScansPerDay: 9999,
@@ -1264,7 +1231,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             schoolId: data.schoolId,
             schoolName: data.schoolName,
             classId: data.classId,
-            classStatus: 'pending',
+            classStatus: 'active',
             plan: 'pro',
             maxScansPerDay: 9999,
             maxQuestionsPerDay: 9999,
@@ -1309,7 +1276,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           schoolId: data.schoolId,
           schoolName: data.schoolName,
           classId: data.classId,
-          classStatus: 'pending',
+          classStatus: 'active',
           plan: 'pro',
           maxScansPerDay: 9999,
           maxQuestionsPerDay: 9999,
@@ -1331,18 +1298,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const leaveClassroom = async () => {
     if (!firebaseUser || !userProfile || firebaseUser.isAnonymous) return;
-    const isPaidUser = subscriptionRecord && subscriptionRecord.subscription_status === 'active';
-    const updates = {
+    const idToken = await firebaseUser.getIdToken();
+    const response = await fetch(`${API_BASE_URL}/api/redeem`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+      body: JSON.stringify({ leaveClass: true }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Failed to leave class.');
+    const isPro = data.plan === 'pro';
+    setUserProfile({
+      ...userProfile,
       classId: null,
       classStatus: null,
       schoolId: null,
       schoolName: null,
-      plan: (isPaidUser ? 'pro' : 'free') as 'free' | 'pro',
-      maxScansPerDay: isPaidUser ? 9999 : FREE_DAILY_LIMIT,
-      maxQuestionsPerDay: isPaidUser ? 9999 : 5,
-    };
-    setUserProfile({ ...userProfile, ...updates });
-    await db.updateUser(firebaseUser.uid, updates);
+      plan: isPro ? 'pro' : 'free',
+      maxScansPerDay: isPro ? 9999 : FREE_DAILY_LIMIT,
+      maxQuestionsPerDay: isPro ? 9999 : 5,
+    });
   };
 
   const upgradeToPro = async (code?: string): Promise<boolean> => {
@@ -1474,7 +1448,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         openLoginModal,
         closeLoginModal,
         updateChildProfile,
-        updateClassroomProfile,
+        updateStudentName,
         joinClassWithCode,
         redeemClassCodeDetailed,
         leaveClassroom,

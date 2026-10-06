@@ -4,6 +4,7 @@ import { adminDb, adminAuth, syncAuthClaims } from './_lib/firebaseAdmin.js';
 import { seatsForPlan } from './_lib/pricingTiers.js';
 import { applyCors } from './_lib/cors.js';
 import { createRateLimiter } from './_lib/rateLimit.js';
+import { isEmailVerified, sendVerificationEmail, VERIFY_EMAIL_MESSAGE } from './_lib/emailVerification.js';
 
 const checkSetRoleLimit = createRateLimiter('set_initial_role', 10, 60);
 
@@ -29,7 +30,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const idToken = authHeader.split('Bearer ')[1].trim();
 
-  const { role, academyName } = req.body || {};
+  const { role, academyName, skipVerificationEmail } = req.body || {};
   if (!ALLOWED_ROLES.has(role)) {
     return res.status(400).json({ error: 'Invalid role' });
   }
@@ -66,9 +67,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // `chekki_teacher_seats` number that nothing ever enforced).
       const existingSchoolId = userSnap.data()?.schoolId;
       let resolvedSchoolId: string;
-      let schoolNameForUser = typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy';
+      const schoolNameForUser = typeof academyName === 'string' && academyName.trim() ? academyName.trim() : 'New Academy';
 
+      // Only reuse a school this account actually owns — a parent's doc
+      // carries their academy's schoolId, and reusing it here used to make
+      // any parent the director of their child's academy.
+      let ownsExistingSchool = false;
       if (existingSchoolId) {
+        const existingSchool = await adminDb.collection('schools').doc(existingSchoolId).get();
+        ownsExistingSchool = existingSchool.exists && existingSchool.data()?.ownerUid === uid;
+      }
+
+      if (ownsExistingSchool) {
         resolvedSchoolId = existingSchoolId;
       } else {
         // Cross-reference by email: did this person already pay via the
@@ -82,6 +92,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         const email = (decodedToken.email || '').toLowerCase();
         let claimedSchool: { id: string; name?: string } | null = null;
         if (email) {
+          // Claiming a paid school by email alone needs proof the caller owns
+          // that inbox — email/password signup doesn't verify it.
+          const pendingForEmail = await adminDb
+            .collection('schools')
+            .where('ownerEmail', '==', email)
+            .where('ownerUid', '==', null)
+            .limit(1)
+            .get();
+          if (!pendingForEmail.empty && !(await isEmailVerified(uid))) {
+            if (!skipVerificationEmail) await sendVerificationEmail(email);
+            return res.status(403).json({ error: VERIFY_EMAIL_MESSAGE, needsEmailVerification: true });
+          }
+
           // Read-then-update inside a transaction — otherwise two concurrent
           // signups for the same invoiced email could both pass the
           // `pendingSnap.empty` check and both claim the same school (Audit:

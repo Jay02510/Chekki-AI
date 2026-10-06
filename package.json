@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "test": "vitest run",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-chekki \"vitest run --config vitest.rules.config.ts\"",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,css,md}\"",
@@ -51,6 +52,7 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
     "@tailwindcss/postcss": "^4.2.4",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",

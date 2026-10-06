@@ -10,10 +10,6 @@
       "destination": "/api/redeem"
     },
     {
-      "source": "/api/redeem-teacher-code",
-      "destination": "/api/redeem"
-    },
-    {
       "source": "/api/redeem-invite",
       "destination": "/api/redeem"
     },
@@ -50,7 +46,7 @@
       "destination": "/schools.html"
     },
     {
-      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher|insights|reports|report-studio)",
+      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher)",
       "destination": "/index.html"
     }
   ],

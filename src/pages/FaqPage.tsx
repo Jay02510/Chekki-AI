@@ -124,7 +124,7 @@ export default function FaqPage({ isNight = true, setIsNight }: Props) {
           </h1>
           <p className={`text-sm sm:text-base max-w-xl mx-auto ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
             {isKo 
-              ? '학부모용 무프롬프트 스캔부터 학원용 3초 AI 교재 등록 및 1클릭 성적표 발급까지 한눈에 확인하세요.' 
+              ? '학부모용 무프롬프트 스캔부터 학원용 AI 교재 등록과 리포트 카드 인쇄까지 한눈에 확인하세요.' 
               : 'Everything you need to know about Chekki AI for parents and academies.'}
           </p>
         </div>

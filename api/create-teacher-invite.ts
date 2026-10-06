@@ -1,12 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/withSentry.js';
-import { adminDb, adminAuth } from './_lib/firebaseAdmin.js';
+import { adminDb, adminAuth, syncAuthClaims } from './_lib/firebaseAdmin.js';
 import { maxInvitesForRole } from './_lib/seatLimits.js';
 import { applyCors } from './_lib/cors.js';
 import { FieldValue } from 'firebase-admin/firestore';
 import { createRateLimiter } from './_lib/rateLimit.js';
 import { isValidAssignPayload, isValidRemoveTeacherPayload, canRemoveTeacher } from './_lib/rosterValidation.js';
 import { randomBytes } from 'crypto';
+import { sendEmail, isEmailConfigured, escapeHtml, emailLayout, emailButton } from './_lib/email.js';
 
 const checkTeacherInviteLimit = createRateLimiter('teacher_invite', 20, 60);
 
@@ -143,57 +144,21 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
   const linkOrigin = corsOrigin.startsWith('http') ? corsOrigin : 'https://www.chekkiai.com';
   const inviteUrl = `${linkOrigin}/teacher?invite=${inviteId}`;
 
-  // Email the invite directly if we have an address — reuses the same
-  // Resend integration already wired up for invoice emails (audit §22),
-  // so the director doesn't have to manually forward a link.
-  const resendApiKey = process.env.RESEND_API_KEY;
-  // Tracked so the response can tell the director whether the email
-  // actually went out — fetch doesn't throw on a non-2xx, so a rejected
-  // Resend request (bad key, unverified domain, malformed payload) used to
-  // fail completely silently and "Invite sent!" showed regardless (Audit:
-  // invite email reports success while the send failed).
-  let emailSent = false;
-  if (resendApiKey && cleanEmail) {
-    try {
-      const emailResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Chekki AI <billing@chekkiai.com>',
-          to: [cleanEmail],
-          subject: `[Chekki AI] ${schoolData.name || 'Your academy'}에서 선생님을 초대했습니다 (${role.toUpperCase()})`,
-          html: `
-            <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
-              <div style="text-align: center; margin-bottom: 24px;">
-                <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
-              </div>
-              <p style="font-size: 15px; color: #e4e4e7;">${schoolData.name || 'An academy'}에서 회원님을 <strong>${role === 'ft' ? '원어민 선생님(FT)' : '한국인 선생님(KT)'}</strong>으로 초대했습니다.</p>
-              <p style="font-size: 14px; color: #e4e4e7;">배정된 학급: <strong style="color: #f97316;">${className}</strong></p>
-              <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 링크로 접속해 비밀번호만 설정하면 바로 시작할 수 있습니다.</p>
-              <div style="text-align: center; margin: 24px 0;">
-                <a href="${inviteUrl}" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">초대 수락하기</a>
-              </div>
-              <p style="font-size: 12px; color: #71717a; text-align: center;">${inviteUrl}</p>
-              <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
-                문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.
-              </p>
-            </div>
-          `,
-        }),
-      });
-      if (emailResponse.ok) {
-        emailSent = true;
-      } else {
-        const body = await emailResponse.text().catch(() => '');
-        console.error('[create-teacher-invite] Resend API rejected the request:', emailResponse.status, body, cleanEmail);
-      }
-    } catch (emailErr) {
-      console.warn('[create-teacher-invite] Resend email failed (invite still created):', emailErr);
-    }
-  }
+  // Email the invite directly if we have an address, so the director
+  // doesn't have to forward a link. emailSent reports what actually happened.
+  const emailSent = cleanEmail
+    ? await sendEmail({
+        to: cleanEmail,
+        subject: `[Chekki AI] ${schoolData.name || 'Your academy'}에서 선생님을 초대했습니다 (${role.toUpperCase()})`,
+        html: emailLayout(`
+          <p style="font-size: 15px; color: #e4e4e7;">${escapeHtml(schoolData.name || 'An academy')}에서 회원님을 <strong>${role === 'ft' ? '원어민 선생님(FT)' : '한국인 선생님(KT)'}</strong>으로 초대했습니다.</p>
+          <p style="font-size: 14px; color: #e4e4e7;">배정된 학급: <strong style="color: #f97316;">${escapeHtml(className)}</strong></p>
+          <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 링크로 접속해 가입(또는 로그인)하면 바로 시작할 수 있습니다.</p>
+          ${emailButton(inviteUrl, '초대 수락하기')}
+          <p style="font-size: 12px; color: #71717a; text-align: center;">${inviteUrl}</p>
+        `),
+      })
+    : false;
 
   return res.status(200).json({
     success: true,
@@ -202,7 +167,7 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
     role,
     email: cleanEmail || null,
     emailSent,
-    resendConfigured: !!resendApiKey,
+    resendConfigured: isEmailConfigured(),
   });
 }
 
@@ -255,6 +220,10 @@ async function handleRemoveTeacher(req: VercelRequest, res: VercelResponse, call
     educatorRole: FieldValue.delete(),
     removedFromSchoolAt: new Date().toISOString(),
   });
+  // Claims are copied from the user doc, not live — without a re-sync the
+  // removed teacher keeps role/schoolId in their token indefinitely.
+  await syncAuthClaims(teacherUid);
+  await adminAuth.revokeRefreshTokens(teacherUid);
 
   const inviteSnap = await adminDb
     .collection('invites')
@@ -314,142 +283,91 @@ async function handleRevokeInvite(req: VercelRequest, res: VercelResponse, schoo
  * been mentioned in a digest, it's not repeated in tomorrow's even though
  * `reviewStatus` stays `pending_review` until the KT actually reviews it.
  */
+// Runs once a day at 00:00 UTC = 09:00 KST (vercel.json crons).
 interface KtDigestRecipient {
   email: string;
   enabled: boolean;
-  hourKst: number;
-}
-
-// Cron now runs hourly (see vercel.json) so it can serve each KT's own
-// preferred hour instead of one fixed daily slot for everyone — this
-// computes which hour it currently is in KST to filter against.
-function currentKstHour(): number {
-  const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000); // UTC+9, no DST
-  return kstNow.getUTCHours();
 }
 
 async function handleSendPendingDigests(_req: VercelRequest, res: VercelResponse) {
-  const classesSnap = await adminDb.collection('classes').get();
-  const thisHourKst = currentKstHour();
+  // Marking logs as digested without a working sender would silently drop them.
+  if (!isEmailConfigured()) {
+    return res.status(500).json({ error: 'RESEND_API_KEY is not configured' });
+  }
 
-  // schoolId -> Map<ktEmail, { className, count }[]>
+  // One collection-group query (served by the logs reviewStatus+createdAt
+  // index) instead of reading every class in the database plus a query each.
+  const pendingSnap = await adminDb
+    .collectionGroup('logs')
+    .where('reviewStatus', '==', 'pending_review')
+    .orderBy('createdAt', 'desc')
+    .get();
+  const logsByClass = new Map<string, FirebaseFirestore.QueryDocumentSnapshot[]>();
+  for (const logDoc of pendingSnap.docs) {
+    if (logDoc.data()?.digestNotifiedAt) continue;
+    const classRef = logDoc.ref.parent.parent;
+    if (!classRef) continue;
+    logsByClass.set(classRef.id, [...(logsByClass.get(classRef.id) || []), logDoc]);
+  }
+
   const byKtEmail = new Map<string, { className: string; count: number }[]>();
   const logRefsToMark: FirebaseFirestore.DocumentReference[] = [];
-  const ktRecipientCache = new Map<string, KtDigestRecipient[]>(); // classId -> resolved KT recipients
 
-  for (const classDoc of classesSnap.docs) {
-    const classData = classDoc.data() || {};
+  const toRecipient = (data: FirebaseFirestore.DocumentData | undefined): KtDigestRecipient | null => {
+    const email = data?.email;
+    if (typeof email !== 'string' || !email) return null;
+    return {
+      email,
+      enabled: data?.notifyDigestEnabled !== false, // absent = enabled
+    };
+  };
+
+  for (const [classId, newLogs] of logsByClass) {
+    const classSnap = await adminDb.collection('classes').doc(classId).get();
+    const classData = classSnap.data() || {};
     const schoolId = classData.schoolId as string | undefined;
     if (!schoolId) continue;
 
-    const logsSnap = await classDoc.ref
-      .collection('logs')
-      .where('reviewStatus', '==', 'pending_review')
-      .get();
-    const newLogs = logsSnap.docs.filter((d) => !d.data()?.digestNotifiedAt);
-    if (newLogs.length === 0) continue;
-
-    let ktRecipients = ktRecipientCache.get(classDoc.id);
-    if (!ktRecipients) {
-      const toRecipient = (data: FirebaseFirestore.DocumentData | undefined): KtDigestRecipient | null => {
-        const email = data?.email;
-        if (typeof email !== 'string' || !email) return null;
-        return {
-          email,
-          enabled: data?.notifyDigestEnabled !== false, // absent = enabled, matches the pre-existing always-9am default
-          hourKst: typeof data?.notifyDigestHourKst === 'number' ? data.notifyDigestHourKst : 9,
-        };
-      };
-
-      const assignedTeacherUids: string[] = Array.isArray(classData.assignedTeacherUids)
-        ? classData.assignedTeacherUids
-        : [];
-      ktRecipients = [];
-      if (assignedTeacherUids.length > 0) {
-        const assignedSnaps = await Promise.all(
-          assignedTeacherUids.map((u) => adminDb.collection('users').doc(u).get())
-        );
-        ktRecipients = assignedSnaps
-          .filter((s) => s.exists && s.data()?.educatorRole === 'kt')
-          .map((s) => toRecipient(s.data()))
-          .filter((r): r is KtDigestRecipient => !!r);
-      }
-      if (ktRecipients.length === 0) {
-        const ktSnap = await adminDb
-          .collection('users')
-          .where('schoolId', '==', schoolId)
-          .where('educatorRole', '==', 'kt')
-          .get();
-        ktRecipients = ktSnap.docs
-          .map((d) => toRecipient(d.data()))
-          .filter((r): r is KtDigestRecipient => !!r);
-      }
-      ktRecipientCache.set(classDoc.id, ktRecipients);
+    // Prefer KTs assigned to this class; fall back to every KT at the school.
+    const assignedTeacherUids: string[] = Array.isArray(classData.assignedTeacherUids) ? classData.assignedTeacherUids : [];
+    const assignedSnaps = await Promise.all(assignedTeacherUids.map((u) => adminDb.collection('users').doc(u).get()));
+    let ktRecipients = assignedSnaps
+      .filter((snap) => snap.exists && snap.data()?.educatorRole === 'kt')
+      .map((snap) => toRecipient(snap.data()))
+      .filter((r): r is KtDigestRecipient => !!r);
+    if (ktRecipients.length === 0) {
+      const ktSnap = await adminDb.collection('users').where('schoolId', '==', schoolId).where('educatorRole', '==', 'kt').get();
+      ktRecipients = ktSnap.docs.map((d) => toRecipient(d.data())).filter((r): r is KtDigestRecipient => !!r);
     }
 
-    // Only recipients whose preference is enabled and whose preferred hour
-    // is right now. Known limitation: digestNotifiedAt is a per-log flag,
-    // not per-recipient — if this class has two KTs on different preferred
-    // hours, whichever hour's run marks these logs first suppresses the
-    // digest for the other KT's later hour. Fine for the common one-KT-
-    // per-class case; a real fix needs a per-recipient marker.
-    const eligibleThisHour = ktRecipients.filter((r) => r.enabled && r.hourKst === thisHourKst);
-    if (eligibleThisHour.length === 0) continue; // leave newLogs unmarked so a later hour can still catch them
+    const eligible = ktRecipients.filter((r) => r.enabled);
+    if (eligible.length === 0) continue;
 
-    for (const { email } of eligibleThisHour) {
-      const existing = byKtEmail.get(email) || [];
-      existing.push({ className: classData.name || classDoc.id, count: newLogs.length });
-      byKtEmail.set(email, existing);
+    for (const { email } of eligible) {
+      byKtEmail.set(email, [...(byKtEmail.get(email) || []), { className: classData.name || classId, count: newLogs.length }]);
     }
     logRefsToMark.push(...newLogs.map((d) => d.ref));
   }
 
-  const resendApiKey = process.env.RESEND_API_KEY;
   let sent = 0;
-  if (resendApiKey) {
-    for (const [email, entries] of byKtEmail.entries()) {
-      const totalCount = entries.reduce((sum, e) => sum + e.count, 0);
-      const listHtml = entries
-        .map((e) => `<li style="margin-bottom:4px;">${e.className}: ${e.count}건</li>`)
-        .join('');
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${resendApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: 'Chekki AI <billing@chekkiai.com>',
-            to: [email],
-            subject: `[Chekki AI] 검토 대기 중인 수업 일지 ${totalCount}건`,
-            html: `
-              <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
-                <div style="text-align: center; margin-bottom: 24px;">
-                  <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
-                </div>
-                <p style="font-size: 15px; color: #e4e4e7;">오늘 원어민 선생님들이 제출한 수업 일지 ${totalCount}건이 검토를 기다리고 있습니다.</p>
-                <ul style="font-size: 14px; color: #a1a1aa; line-height: 1.6; padding-left: 20px;">${listHtml}</ul>
-                <div style="text-align: center; margin: 24px 0;">
-                  <a href="https://www.chekkiai.com/teacher" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 검토하기</a>
-                </div>
-                <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
-                  문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.
-                </p>
-              </div>
-            `,
-          }),
-        });
-        sent += 1;
-      } catch (emailErr) {
-        console.warn('[create-teacher-invite:send_pending_digests] Resend email failed:', email, emailErr);
-      }
-    }
+  for (const [email, entries] of byKtEmail.entries()) {
+    const totalCount = entries.reduce((sum, e) => sum + e.count, 0);
+    const listHtml = entries
+      .map((e) => `<li style="margin-bottom:4px;">${escapeHtml(e.className)}: ${e.count}건</li>`)
+      .join('');
+    const ok = await sendEmail({
+      to: email,
+      subject: `[Chekki AI] 검토 대기 중인 수업 일지 ${totalCount}건`,
+      html: emailLayout(`
+        <p style="font-size: 15px; color: #e4e4e7;">선생님들이 제출한 수업 일지 ${totalCount}건이 검토를 기다리고 있습니다.</p>
+        <ul style="font-size: 14px; color: #a1a1aa; line-height: 1.6; padding-left: 20px;">${listHtml}</ul>
+        ${emailButton('https://www.chekkiai.com/teacher', '지금 검토하기')}
+      `),
+    });
+    if (ok) sent += 1;
   }
 
-  await Promise.all(
-    logRefsToMark.map((ref) => ref.update({ digestNotifiedAt: FieldValue.serverTimestamp() }))
-  );
+  await Promise.all(logRefsToMark.map((ref) => ref.update({ digestNotifiedAt: FieldValue.serverTimestamp() })));
 
   return res.status(200).json({ success: true, digestsSent: sent, logsMarked: logRefsToMark.length });
 }

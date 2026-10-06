@@ -8,6 +8,7 @@ import { createRateLimiter, clientIp } from './_lib/rateLimit.js';
 import { notifyDirectors } from './_lib/notifications.js';
 import { createHash, timingSafeEqual } from 'crypto';
 import { generateJoinCode } from './_lib/joinCode.js';
+import { sendEmail, escapeHtml, emailLayout, emailButton } from './_lib/email.js';
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
 
@@ -72,7 +73,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { passcode, action, uid, email, duration, schoolId, schoolName, teacherCode, maxUses } =
+  const { passcode, action, uid, email, duration, schoolId, schoolName, maxUses } =
     req.body || {};
 
   if (!ADMIN_PASSCODE) {
@@ -101,6 +102,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Unauthorized: Invalid Passcode' });
   }
 
+  // The passcode alone was a single shared secret gating impersonation and
+  // deletion. Also require a signed-in account listed in admins/{uid} (the
+  // same collection firestore.rules' isAdmin() checks).
+  const adminAuthHeader = req.headers.authorization;
+  if (!adminAuthHeader || !adminAuthHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Admin login required. Sign in to Chekki with your admin account first.' });
+  }
+  let adminUid: string;
+  try {
+    adminUid = (await authDb.verifyIdToken(adminAuthHeader.split('Bearer ')[1].trim())).uid;
+  } catch {
+    return res.status(401).json({ error: 'Admin session expired. Sign in again.' });
+  }
+  const adminDoc = await adminDb.collection('admins').doc(adminUid).get();
+  if (!adminDoc.exists) {
+    return res.status(403).json({ error: 'This account is not an admin.' });
+  }
+
   // Persistent audit trail for every admin action (not just console output,
   // which is easy to lose in Vercel's rolling log retention). The passcode
   // is shared/anonymous, so this is the only record of what an admin did.
@@ -111,6 +130,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     await adminDb.collection('adminAuditLog').add({
       action,
+      adminUid,
       uid: uid || null,
       email: email || null,
       schoolId: schoolId || null,
@@ -216,6 +236,49 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       return res.status(200).json({ success: true, message: 'User upgraded successfully' });
+    } else if (action === 'create_pro_user') {
+      // Server-side so the admin's own session isn't replaced by the new
+      // account (client createUserWithEmailAndPassword signs in as it).
+      const { password, name, duration: proDuration } = req.body || {};
+      if (!email || typeof email !== 'string') return res.status(400).json({ error: 'Missing email' });
+      if (typeof password !== 'string' || password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+      }
+      const cleanEmail = email.toLowerCase().trim();
+      let created;
+      try {
+        created = await authDb.createUser({ email: cleanEmail, password, displayName: name || undefined });
+      } catch (e: any) {
+        if (e.code === 'auth/email-already-exists') {
+          return res.status(409).json({ error: 'This email is already registered — use the Upgrade tab.', alreadyExists: true });
+        }
+        throw e;
+      }
+      const years = proDuration === 'lifetime' ? 100 : proDuration === '1_year' ? 1 : 0;
+      const nextBilling = new Date();
+      if (years) nextBilling.setFullYear(nextBilling.getFullYear() + years);
+      else nextBilling.setMonth(nextBilling.getMonth() + 1);
+      const today = new Date().toISOString().split('T')[0];
+      await adminDb.collection('users').doc(created.uid).set({
+        uid: created.uid,
+        name: name || 'User',
+        email: cleanEmail,
+        role: 'parent',
+        plan: 'pro',
+        scansUsedToday: 0,
+        lastScanDate: today,
+        maxScansPerDay: 9999,
+        questionsUsedToday: 0,
+        lastQuestionDate: today,
+        maxQuestionsPerDay: 9999,
+        schoolId: null,
+        schoolName: null,
+        subscriptionStartedAt: new Date().toISOString(),
+        nextBillingDate: nextBilling.toISOString(),
+        subscriptionPlatform: 'admin_upgrade',
+        createdAt: new Date().toISOString(),
+      });
+      return res.status(200).json({ success: true, uid: created.uid });
     } else if (action === 'downgrade') {
       if (!uid) return res.status(400).json({ error: 'Missing uid' });
 
@@ -341,18 +404,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     } else if (action === 'create_school') {
       if (!schoolId) return res.status(400).json({ error: 'Missing schoolId (School Code)' });
       if (!schoolName) return res.status(400).json({ error: 'Missing schoolName' });
-      if (!teacherCode) return res.status(400).json({ error: 'Missing teacherCode' });
 
       const sanitizedSchoolId = sanitizeSchoolId(schoolId);
       if (!sanitizedSchoolId) return res.status(400).json({ error: 'Invalid schoolId' });
-      const sanitizedTeacherCode = teacherCode.toUpperCase().trim();
 
       await adminDb
         .collection('schools')
         .doc(sanitizedSchoolId)
         .set({
           name: schoolName.trim(),
-          teacherCode: sanitizedTeacherCode,
           // redeemSchoolCode (api/redeem.ts) used to trust the school's own
           // Firestore doc ID as "the code" — this IS that doc ID
           // (sanitizedSchoolId, shown to ops as "School Code (ID)" in
@@ -363,7 +423,6 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           // schoolId auth claim — cross-tenant read access to its
           // pendingStudents/invites (audit: school-code doc-ID-as-secret).
           // A genuine random field, checked instead of the doc ID, closes
-          // that — same pattern teacherCode/redeemTeacherCode already use.
           schoolCode: generateJoinCode(),
           maxUses: maxUses ? parseInt(maxUses, 10) : 5,
           usedByUids: [],
@@ -379,7 +438,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         return {
           schoolId: doc.id,
           name: data.name || '',
-          teacherCode: data.teacherCode || '',
+          schoolCode: data.schoolCode || '',
           maxUses: data.maxUses ?? 5,
           usedByUids: data.usedByUids || [],
           createdAt: data.createdAt || null,
@@ -442,6 +501,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
             schoolId: FieldValue.delete(),
             schoolName: FieldValue.delete(),
             role: FieldValue.delete(),
+            educatorRole: FieldValue.delete(),
+            classId: null,
+            classStatus: null,
             plan: 'free',
             maxScansPerDay: 2,
             maxQuestionsPerDay: 5,
@@ -449,6 +511,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           });
         });
         await batch.commit();
+        // Claims don't follow the user doc on their own.
+        await Promise.allSettled(teachersSnapshot.docs.map((d) => syncAuthClaims(d.id)));
       }
 
       await adminDb.collection('schools').doc(sanitizedSchoolId).delete();
@@ -474,8 +538,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const invoiceRef = adminDb.collection('school_invoices').doc(invoiceId);
 
       let invoiceData: Record<string, any>;
-      let sanitizedSchoolId: string;
-      let teacherCode: string;
+      let resolvedSchoolId: string;
+      let upgradedExisting = false;
       try {
         const result = await adminDb.runTransaction(async (t) => {
           const invoiceSnap = await t.get(invoiceRef);
@@ -484,68 +548,54 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           }
           const data = invoiceSnap.data() || {};
 
-          // A double-click, timeout retry, or concurrent request against the
-          // same invoiceId used to create a second school (with its own
-          // teacherCode) every time it ran, silently orphaning the first one
-          // and its seats. Confirming is now a no-op past the first call
-          // (Audit: confirm_invoice idempotency).
+          // Idempotent: a double-click or retry must not create a second school.
           if (data.status === 'paid') {
-            throw {
-              httpStatus: 200,
-              alreadyPaid: true,
-              schoolId: data.generatedSchoolId,
-              teacherCode: data.generatedTeacherCode,
-            };
+            throw { httpStatus: 200, alreadyPaid: true, schoolId: data.generatedSchoolId };
+          }
+
+          const planId = data.planId || 'starter';
+          const seatsTotal = seatsForPlan(planId);
+          const paidUpdate = { status: 'paid', paidAt: new Date().toISOString() };
+
+          // An already-onboarded director requesting seats from their own
+          // portal sends schoolId — upgrade that school instead of minting a
+          // second, disconnected one.
+          if (typeof data.schoolId === 'string' && isValidExistingDocId(data.schoolId)) {
+            const existingRef = adminDb.collection('schools').doc(data.schoolId);
+            const existingSnap = await t.get(existingRef);
+            if (existingSnap.exists) {
+              t.update(existingRef, { planId, seatsTotal, trialEndsAt: FieldValue.delete() });
+              t.update(invoiceRef, { ...paidUpdate, generatedSchoolId: data.schoolId });
+              return { data, schoolId: data.schoolId, upgradedExisting: true };
+            }
           }
 
           const academyPrefix = sanitizeSchoolId((data.academyName || 'SCHOOL').replace(/\s+/g, '-')).slice(0, 10) || 'SCHOOL';
-          const newSchoolId = `${academyPrefix}_${Date.now().toString().slice(-4)}`;
-          const newTeacherCode = `${newSchoolId.split('_')[0]}-TEACHER`;
+          const newSchoolId = `${academyPrefix}_${generateJoinCode()}`;
 
-          // 1. Create school in schools collection
-          // ownerEmail (not ownerUid — this director likely has no account yet,
-          // invoice-first customers pay before ever signing up) marks who should
-          // become this school's director once they do sign up or redeem the
-          // teacherCode. redeemTeacherCode (api/redeem.ts) and set-initial-role.ts
-          // both check this to claim the school instead of the invoiced director
-          // silently landing as a plain 'teacher', or minting a second, orphaned
-          // trial school for the same real business (Audit: director path divergence).
+          // No account exists yet for an invoice-first director. ownerEmail
+          // lets set-initial-role.ts hand them this school when they sign up
+          // as a director with that (verified) email.
           t.set(adminDb.collection('schools').doc(newSchoolId), {
             name: data.academyName || 'B2B Academy',
-            teacherCode: newTeacherCode,
-            maxUses: data.teacherCount || 5,
+            planId,
+            seatsTotal,
             usedByUids: [],
             ownerEmail: (data.email || '').toLowerCase() || null,
             ownerUid: null,
-            // Seat pool for the new director-invite system (§21) — derived from
-            // the confirmed invoice's plan, same server-owned table used by
-            // set-initial-role.ts, never a client-supplied number.
-            seatsTotal: seatsForPlan(data.planId),
             createdAt: new Date().toISOString(),
           });
+          t.update(invoiceRef, { ...paidUpdate, generatedSchoolId: newSchoolId });
 
-          // 2. Mark invoice as paid
-          t.update(invoiceRef, {
-            status: 'paid',
-            paidAt: new Date().toISOString(),
-            generatedSchoolId: newSchoolId,
-            generatedTeacherCode: newTeacherCode,
-          });
-
-          return { data, schoolId: newSchoolId, teacherCode: newTeacherCode };
+          return { data, schoolId: newSchoolId, upgradedExisting: false };
         });
 
         invoiceData = result.data;
-        sanitizedSchoolId = result.schoolId;
-        teacherCode = result.teacherCode;
+        resolvedSchoolId = result.schoolId;
+        upgradedExisting = result.upgradedExisting;
       } catch (error: any) {
         if (error && error.alreadyPaid) {
-          return res.status(200).json({
-            success: true,
-            message: 'Invoice already confirmed',
-            schoolId: error.schoolId,
-            teacherCode: error.teacherCode,
-          });
+          return res.status(200).json({ success: true, message: 'Invoice already confirmed', schoolId: error.schoolId });
         }
         if (error && typeof error.httpStatus === 'number') {
           return res.status(error.httpStatus).json({ error: error.message });
@@ -553,117 +603,47 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         throw error;
       }
 
-      // 3. Send automated activation email via Resend
-      const resendApiKey = process.env.RESEND_API_KEY;
-      if (resendApiKey && invoiceData.email) {
-        try {
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${resendApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: 'Chekki AI <billing@chekkiai.com>',
-              to: [invoiceData.email],
-              subject: `🎉 [Chekki AI] ${invoiceData.academyName || '학원'} 입금 확인 및 교사 인증 코드 안내`,
-              html: `
-                <div style="font-family: 'Apple SD Gothic Neo', -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 28px; background-color: #030305; color: #f4f4f5; border-radius: 20px; border: 1px solid #27272a;">
-                  <!-- Header -->
-                  <div style="text-align: center; margin-bottom: 28px;">
-                    <h1 style="font-size: 32px; font-weight: 900; margin: 0; color: #ffffff; letter-spacing: -0.5px;">Chekki<span style="color: #f97316;">ai</span></h1>
-                    <div style="display: inline-block; background-color: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 9999px; padding: 4px 14px; margin-top: 8px;">
-                      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #34d399;">🎉 학원 계정 승인 완료</span>
-                    </div>
-                  </div>
-
-                  <p style="font-size: 15px; color: #e4e4e7; margin-bottom: 8px;">안녕하세요 <strong>${invoiceData.contactName || '선생님'}</strong> 님,</p>
-                  <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6; margin-bottom: 24px;">
-                    입금이 정상 확인되었습니다. <strong>${invoiceData.academyName || '학원'}</strong>의 교사 전용 인증 코드가 등록되었습니다.
-                  </p>
-
-                  <!-- Teacher Code Card -->
-                  <div style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.12) 0%, rgba(249, 115, 22, 0.04) 100%); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 16px; padding: 22px; margin-bottom: 24px; text-align: center;">
-                    <p style="font-size: 11px; font-weight: 800; color: #fb923c; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 1.5px;">🔑 교사 전용 인증 코드</p>
-                    <p style="font-size: 28px; font-weight: 900; color: #ffffff; letter-spacing: 3px; margin: 8px 0; font-family: monospace; text-shadow: 0 2px 10px rgba(249, 115, 22, 0.3);">${teacherCode}</p>
-                    <p style="font-size: 12px; color: #a1a1aa; margin: 6px 0 0 0;">(최대 등록 가능 교사: ${invoiceData.teacherCount || 5}명)</p>
-                  </div>
-
-                  <!-- Teacher Instructions -->
-                  <div style="background-color: #121215; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
-                    <h3 style="margin: 0 0 12px 0; color: #ffffff; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                      👨‍🏫 교사 계정 시작 방법
-                    </h3>
-                    <ol style="margin: 0; padding-left: 20px; font-size: 13px; color: #a1a1aa; line-height: 1.8;">
-                      <li><a href="https://www.chekkiai.com/teacher" style="color: #f97316; font-weight: bold; text-decoration: underline;">chekkiai.com/teacher</a> 에 접속합니다.</li>
-                      <li>계정이 없으신 경우 <strong>회원가입</strong>, 계정이 있으신 경우 <strong>로그인</strong>을 완료합니다.</li>
-                      <li>로그인 후 나타나는 인증창에 위 <strong>교사 인증 코드</strong>를 입력합니다.</li>
-                      <li>Pro 교사 권한이 활성화되면 학급을 생성하고 6자리 <strong>학급 Join 코드</strong>를 발급받으세요.</li>
-                    </ol>
-                  </div>
-
-                  <!-- Parent App Download & QR Code Section -->
-                  <div style="background-color: #121215; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 24px; text-align: center;">
-                    <h3 style="margin: 0 0 8px 0; color: #ffffff; font-size: 15px; font-weight: 700;">
-                      📲 학부모 앱 설치 안내 (iOS / Android 공용)
-                    </h3>
-                    <p style="font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 16px;">
-                      학부모님이 스마트폰에서 Chekki AI 앱을 설치하면 숙제 검출 및 오답 데이터가 교사 대시보드와 자동 연동됩니다.
-                    </p>
-
-                    <div style="margin: 16px 0;">
-                      <a href="https://urlgeni.us/chekki" target="_blank" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 800; font-size: 14px; text-decoration: none; padding: 14px 28px; border-radius: 12px; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);">
-                        📲 Chekki 앱 다운로드 받기 (App Store / Google Play)
-                      </a>
-                    </div>
-
-                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #27272a;">
-                      <p style="font-size: 11px; color: #71717a; margin-bottom: 8px;">PC/모니터로 확인 중이신 경우 스마트폰 카메라로 아래 QR 코드를 스캔하세요:</p>
-                      <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://urlgeni.us/chekki" alt="Chekki App Download QR Code" style="border-radius: 8px; border: 2px solid #27272a; width: 130px; height: 130px; margin: 0 auto;" />
-                    </div>
-                  </div>
-
-                  <!-- Copy-Paste Notice Template for Parents -->
-                  <div style="background-color: #18181c; border: 1px dashed rgba(249, 115, 22, 0.4); border-radius: 16px; padding: 20px; margin-bottom: 24px;">
-                    <p style="font-size: 12px; font-weight: 800; color: #f97316; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px;">
-                      📋 [학부모 단톡방 / 카카오톡 전송용 안내 문구]
-                    </p>
-                    <p style="font-size: 11px; color: #71717a; margin-bottom: 12px;">아래 문구를 복사하여 학부모 단체 카카오톡/밴드/문자로 전송해 주세요:</p>
-                    
-                    <div style="background-color: #09090b; border: 1px solid #27272a; border-radius: 10px; padding: 14px; font-size: 12px; color: #d4d4d8; line-height: 1.7; font-family: monospace; white-space: pre-wrap;">[${invoiceData.academyName || '학원명'}] Chekki AI 학부모 앱 설치 안내
-
-안녕하세요 학부모님! 
-우리 학원에서는 학생들의 체계적인 학습 관리 및 오답 분석을 위해 Chekki AI 시스템을 도입하였습니다.
-
-아래 링크를 통해 스마트폰에 Chekki 앱을 설치해 주세요!
-
-📲 Chekki 앱 다운로드:
-https://urlgeni.us/chekki
-
-앱 설치 후 로그인하여 학원에서 안내드리는 6자리 학급 코드를 입력해주시면 가정 숙제 검수 데이터가 선생님과 자동 연동됩니다.
-
-감사합니다.</div>
-                  </div>
-
-                  <!-- Footer -->
-                  <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px; line-height: 1.6;">
-                    문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316; text-decoration: underline;">support@chekkiai.com</a> 로 언제든 연락해 주세요.<br/>
-                    © 2026 Chekki AI Inc. All rights reserved.
-                  </p>
-                </div>
-              `,
-            }),
-          });
-        } catch (emailErr) {
-          console.error('[admin:confirm_invoice] Failed to send email via Resend:', emailErr);
-        }
+      if (upgradedExisting) {
+        await notifyDirectors(resolvedSchoolId, {
+          type: 'plan_upgraded',
+          title: 'Payment confirmed',
+          body: `Your school's plan was upgraded to ${invoiceData.planId || 'starter'}.`,
+          meta: { planId: invoiceData.planId || 'starter' },
+        });
       }
+
+      const academyName = escapeHtml(invoiceData.academyName || '학원');
+      const contactName = escapeHtml(invoiceData.contactName || '원장');
+      const ownerEmail = escapeHtml(invoiceData.email || '');
+      const emailSent = invoiceData.email
+        ? await sendEmail({
+            to: invoiceData.email,
+            subject: `[Chekki AI] ${invoiceData.academyName || '학원'} 입금 확인 안내`,
+            html: emailLayout(
+              upgradedExisting
+                ? `
+              <p style="font-size: 15px; color: #e4e4e7;">안녕하세요 <strong>${contactName}</strong> 님,</p>
+              <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">입금이 확인되어 <strong>${academyName}</strong>의 플랜이 업그레이드되었습니다. 대시보드에서 바로 선생님을 추가로 초대하실 수 있습니다.</p>
+              ${emailButton('https://www.chekkiai.com/teacher', '대시보드 열기')}`
+                : `
+              <p style="font-size: 15px; color: #e4e4e7;">안녕하세요 <strong>${contactName}</strong> 님,</p>
+              <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">입금이 확인되어 <strong>${academyName}</strong> 학원 계정이 준비되었습니다.</p>
+              <ol style="font-size: 14px; color: #a1a1aa; line-height: 1.8; padding-left: 20px;">
+                <li>아래 버튼으로 접속해 <strong>원장(Director)</strong>으로 가입해 주세요. 반드시 이 이메일(<strong>${ownerEmail}</strong>)로 가입해야 학원이 자동 연결됩니다.</li>
+                <li>이메일 인증 링크가 오면 눌러주세요.</li>
+                <li>대시보드에서 반을 만들고 선생님과 학생(학부모)을 초대하세요. 학부모님께는 개별 초대 메일이 발송됩니다.</li>
+              </ol>
+              ${emailButton('https://www.chekkiai.com/teacher', '원장 계정 만들기')}`
+            ),
+          })
+        : false;
 
       return res.status(200).json({
         success: true,
-        message: 'Payment confirmed and School Account Activated!',
-        schoolId: sanitizedSchoolId,
-        teacherCode: teacherCode,
+        message: upgradedExisting ? 'Payment confirmed — existing school upgraded.' : 'Payment confirmed and school account created.',
+        schoolId: resolvedSchoolId,
+        upgradedExisting,
+        emailSent,
       });
     } else if (action === 'delete_invoice') {
       // Dismiss a test/erroneous invoice request. Only removes the request
@@ -774,215 +754,6 @@ https://urlgeni.us/chekki
       if (!uid) return res.status(400).json({ error: 'Missing uid' });
       const customToken = await authDb.createCustomToken(uid);
       return res.status(200).json({ success: true, customToken });
-    } else if (action === 'purge_demo_data') {
-      // Finds and (only when dryRun === false) deletes: (1) any user whose
-      // email contains "demo" or "test", and (2) orphaned curriculums/demo_*
-      // docs — leftovers from the shared placeholder id bug where every
-      // account's empty-state preview used the literal id "demo" (fixed
-      // client-side, but past writes under that id are still sitting in
-      // Firestore). Defaults to a dry run so the caller always sees exactly
-      // what would be deleted before committing to it.
-      const dryRun = req.body?.dryRun !== false;
-      const DEMO_EMAIL_PATTERN = /demo|test/i;
-
-      const usersSnap = await adminDb.collection('users').get();
-      const matchedUsers = usersSnap.docs.filter((d) => DEMO_EMAIL_PATTERN.test(d.data()?.email || ''));
-
-      const curriculumsSnap = await adminDb.collection('curriculums').get();
-      const matchedCurriculums = curriculumsSnap.docs.filter((d) => d.id.startsWith('demo_') || d.id.startsWith('demo_week_'));
-
-      if (dryRun) {
-        return res.status(200).json({
-          success: true,
-          dryRun: true,
-          users: matchedUsers.map((d) => ({ uid: d.id, email: d.data()?.email || null })),
-          curriculumDocIds: matchedCurriculums.map((d) => d.id),
-        });
-      }
-
-      let deletedUsers = 0;
-      for (const userDoc of matchedUsers) {
-        try {
-          await adminDb.collection('users').doc(userDoc.id).delete();
-          deletedUsers++;
-        } catch (e) {
-          console.error('[purge_demo_data] Failed to delete user doc:', userDoc.id, e);
-        }
-        try {
-          await authDb.deleteUser(userDoc.id);
-        } catch (e: any) {
-          if (e.code !== 'auth/user-not-found') {
-            console.error('[purge_demo_data] Failed to delete Auth user:', userDoc.id, e);
-          }
-        }
-      }
-
-      let deletedCurriculums = 0;
-      for (const curriculumDoc of matchedCurriculums) {
-        try {
-          await adminDb.collection('curriculums').doc(curriculumDoc.id).delete();
-          deletedCurriculums++;
-        } catch (e) {
-          console.error('[purge_demo_data] Failed to delete curriculum doc:', curriculumDoc.id, e);
-        }
-      }
-
-      return res.status(200).json({ success: true, dryRun: false, deletedUsers, deletedCurriculums });
-    } else if (action === 'sweep_orphaned_class_assignments') {
-      // Cleanup for a class of stale data left by the pre-fix client-side
-      // class-delete path (silently permission-denied, so the class doc
-      // survived) and the schoolId-sanitization bug (delete_school/
-      // upgrade_school retargeting the wrong doc): a class's teacherUid or
-      // assignedTeacherUids can still list a uid whose own user doc's
-      // schoolId no longer matches the class's schoolId (moved/removed from
-      // that school) or whose user doc is gone entirely. isSchoolDirectorOfClass()/
-      // isClassTeacher() in firestore.rules both do a schoolId/role
-      // cross-check against the class doc, so a single such stale entry
-      // permission-denies the *entire* array-contains query for that uid —
-      // this is why a director's fetchClasses() could throw
-      // "Missing or insufficient permissions" for a brand-new account with
-      // zero real classes.
-      const dryRun = req.body?.dryRun !== false;
-
-      const classesSnap = await adminDb.collection('classes').get();
-      const userCache = new Map<string, any | null>();
-      const getUser = async (targetUid: string) => {
-        if (userCache.has(targetUid)) return userCache.get(targetUid);
-        const snap = await adminDb.collection('users').doc(targetUid).get();
-        const val = snap.exists ? snap.data() : null;
-        userCache.set(targetUid, val);
-        return val;
-      };
-
-      const findings: Array<{
-        classId: string;
-        className: string;
-        classSchoolId: string | null;
-        field: 'teacherUid' | 'assignedTeacherUids';
-        uid: string;
-        reason: string;
-      }> = [];
-
-      for (const classDoc of classesSnap.docs) {
-        const data = classDoc.data();
-        const classSchoolId = data.schoolId || null;
-        const uidsToCheck: Array<{ field: 'teacherUid' | 'assignedTeacherUids'; uid: string }> = [];
-        if (data.teacherUid) uidsToCheck.push({ field: 'teacherUid', uid: data.teacherUid });
-        if (Array.isArray(data.assignedTeacherUids)) {
-          for (const u of data.assignedTeacherUids) uidsToCheck.push({ field: 'assignedTeacherUids', uid: u });
-        }
-
-        for (const { field, uid: checkUid } of uidsToCheck) {
-          const userData = await getUser(checkUid);
-          if (!userData) {
-            findings.push({ classId: classDoc.id, className: data.name || classDoc.id, classSchoolId, field, uid: checkUid, reason: 'user_missing' });
-          } else if (userData.schoolId !== classSchoolId) {
-            findings.push({ classId: classDoc.id, className: data.name || classDoc.id, classSchoolId, field, uid: checkUid, reason: 'schoolId_mismatch' });
-          }
-        }
-      }
-
-      if (dryRun) {
-        return res.status(200).json({ success: true, dryRun: true, findingsCount: findings.length, findings });
-      }
-
-      let fixedClasses = 0;
-      const byClass = new Map<string, typeof findings>();
-      for (const f of findings) {
-        if (!byClass.has(f.classId)) byClass.set(f.classId, []);
-        byClass.get(f.classId)!.push(f);
-      }
-      for (const [classId, classFindings] of byClass.entries()) {
-        const update: Record<string, any> = {};
-        if (classFindings.some((f) => f.field === 'teacherUid')) {
-          update.teacherUid = FieldValue.delete();
-        }
-        const staleAssigned = classFindings.filter((f) => f.field === 'assignedTeacherUids').map((f) => f.uid);
-        if (staleAssigned.length > 0) {
-          update.assignedTeacherUids = FieldValue.arrayRemove(...staleAssigned);
-        }
-        await adminDb.collection('classes').doc(classId).update(update);
-        fixedClasses++;
-      }
-
-      return res.status(200).json({ success: true, dryRun: false, fixedClasses, findingsCount: findings.length, findings });
-    } else if (action === 'debug_director_classes') {
-      // Read-only diagnostic — dumps the RAW server-side truth for one
-      // account instead of reasoning about the client's possibly-stale
-      // AuthContext cache. TeacherPage.tsx's fetchClasses trusts
-      // client-side `user.schoolId` (stale-while-revalidate from
-      // localStorage, see contexts/AuthContext.tsx's cached-profile
-      // comment) to build its schoolId-scoped query; if that value is out
-      // of sync with what's actually in Firestore, the query silently
-      // filters on the wrong id. This surfaces the mismatch directly
-      // (audit: "couldn't load classes" persisted after two rounds of
-      // logically-sound fixes — needed real data, not more reasoning).
-      const { email } = req.body || {};
-      if (!email || typeof email !== 'string') {
-        return res.status(400).json({ error: 'email is required' });
-      }
-      const cleanEmail = email.toLowerCase().trim();
-      const userQuery = await adminDb.collection('users').where('email', '==', cleanEmail).limit(1).get();
-      if (userQuery.empty) {
-        return res.status(404).json({ error: 'No user found with that email' });
-      }
-      const userDoc = userQuery.docs[0];
-      const userData = userDoc.data();
-      const uid = userDoc.id;
-      const realSchoolId = userData.schoolId || null;
-
-      // firestore.rules' isSchoolDirectorOfClass() does
-      // get(users/$(request.auth.uid)).data.role — with no exists() guard
-      // (unlike isClassTeacher() right above it, which explicitly guards
-      // for this same reason). If the signed-in Firebase Auth UID has no
-      // matching users/{uid} doc, that .data access crashes the rule
-      // evaluation and Firestore fails closed as permission-denied for
-      // every read gated by that function — which is nearly everything a
-      // director does. This checks whether that's actually happening here.
-      let authUid: string | null = null;
-      let authUidMatchesFirestoreDoc: boolean | null = null;
-      try {
-        const authUser = await authDb.getUserByEmail(cleanEmail);
-        authUid = authUser.uid;
-        authUidMatchesFirestoreDoc = authUser.uid === uid;
-      } catch (e: any) {
-        authUid = null;
-        authUidMatchesFirestoreDoc = null;
-      }
-
-      const [byTeacherUid, byAssigned, bySchoolId] = await Promise.all([
-        adminDb.collection('classes').where('teacherUid', '==', uid).get(),
-        adminDb.collection('classes').where('assignedTeacherUids', 'array-contains', uid).get(),
-        realSchoolId
-          ? adminDb.collection('classes').where('schoolId', '==', realSchoolId).get()
-          : Promise.resolve({ docs: [] } as any),
-      ]);
-
-      const summarize = (snap: any) =>
-        snap.docs.map((d: any) => ({
-          id: d.id,
-          name: d.data().name,
-          schoolId: d.data().schoolId,
-          teacherUid: d.data().teacherUid,
-          assignedTeacherUids: d.data().assignedTeacherUids || [],
-          createdAt: d.data().createdAt || null,
-        }));
-
-      return res.status(200).json({
-        success: true,
-        user: {
-          uid,
-          email: userData.email,
-          role: userData.role || null,
-          schoolId: realSchoolId,
-          educatorRole: userData.educatorRole || null,
-          authUid,
-          authUidMatchesFirestoreDoc,
-        },
-        classesByTeacherUid: summarize(byTeacherUid),
-        classesByAssignedTeacherUids: summarize(byAssigned),
-        classesBySchoolId: summarize(bySchoolId),
-      });
     } else if (action === 'backfill_auth_claims') {
       // One-time sweep: every existing account was assigned role/schoolId
       // before Auth custom claims existed, so none of them carry the claims
@@ -1018,125 +789,6 @@ https://urlgeni.us/chekki
         });
       }
       return res.status(200).json({ success: true, totalUsers: usersSnap.size, updated, failed, failedUids });
-    } else if (action === 'simulate_client_read') {
-      // debug_director_classes proved the data and the Auth UID are both
-      // correct — but it reads via the Admin SDK, which bypasses
-      // firestore.rules entirely, so it can't explain a client-side
-      // permission-denied. This mints a real custom token for the target
-      // uid and runs the SAME three queries TeacherPage.tsx's fetchClasses
-      // runs, through the actual client SDK (firestore.rules enforced,
-      // exactly like the browser), to see which specific query fails and
-      // why — real rule evaluation instead of reading rule text and
-      // guessing a third time.
-      const { email } = req.body || {};
-      if (!email || typeof email !== 'string') {
-        return res.status(400).json({ error: 'email is required' });
-      }
-      const cleanEmail = email.toLowerCase().trim();
-      const userQuery = await adminDb.collection('users').where('email', '==', cleanEmail).limit(1).get();
-      if (userQuery.empty) {
-        return res.status(404).json({ error: 'No user found with that email' });
-      }
-      const targetUid = userQuery.docs[0].id;
-      const targetSchoolId = userQuery.docs[0].data().schoolId || null;
-      const sampleClassSnap = await adminDb.collection('classes').where('teacherUid', '==', targetUid).limit(1).get();
-      const sampleClassId = sampleClassSnap.empty ? null : sampleClassSnap.docs[0].id;
-
-      // Admin SDK bypasses rules entirely — ground truth on exactly what's
-      // in the doc(s) the client-side classId-filtered query keeps denying
-      // on, instead of reasoning about rule text further.
-      const sampleClassDoc = sampleClassId ? sampleClassSnap.docs[0].data() : null;
-      const rawPendingByClassId = sampleClassId
-        ? (await adminDb.collection('pendingStudents').where('classId', '==', sampleClassId).get()).docs.map((d) => ({ id: d.id, ...d.data() }))
-        : [];
-
-      const customToken = await authDb.createCustomToken(targetUid);
-
-      const { initializeApp: initClientApp, getApps: getClientApps, getApp: getClientApp, deleteApp } = await import('firebase/app');
-      const { getAuth: getClientAuth, signInWithCustomToken } = await import('firebase/auth');
-      const { getFirestore: getClientFirestore, collection, query: fbQuery, where, getDocs, doc, getDoc } = await import('firebase/firestore');
-
-      const firebaseConfig = {
-        apiKey: 'AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k',
-        authDomain: 'homework-assistant-c00b9.firebaseapp.com',
-        projectId: 'homework-assistant-c00b9',
-        storageBucket: 'homework-assistant-c00b9.firebasestorage.app',
-        messagingSenderId: '123535525914',
-        appId: '1:123535525914:web:decc3f5b3e3ffee4a0a9a3',
-      };
-      const appName = `simulate-${Date.now()}`;
-      const clientApp = getClientApps().some((a) => a.name === appName)
-        ? getClientApp(appName)
-        : initClientApp(firebaseConfig, appName);
-      const clientAuth = getClientAuth(clientApp);
-      const db = getClientFirestore(clientApp);
-
-      const results: Record<string, any> = {};
-      try {
-        await signInWithCustomToken(clientAuth, customToken);
-
-        const tryQuery = async (label: string, q: any) => {
-          try {
-            const snap = await getDocs(q);
-            results[label] = { ok: true, docCount: snap.docs.length };
-          } catch (e: any) {
-            results[label] = { ok: false, code: e?.code || null, message: e?.message || String(e) };
-          }
-        };
-
-        await tryQuery('teacherUid_eq_uid', fbQuery(collection(db, 'classes'), where('teacherUid', '==', targetUid)));
-        await tryQuery('assignedTeacherUids_array_contains_uid', fbQuery(collection(db, 'classes'), where('assignedTeacherUids', 'array-contains', targetUid)));
-        if (targetSchoolId) {
-          await tryQuery('schoolId_eq_schoolId', fbQuery(collection(db, 'classes'), where('schoolId', '==', targetSchoolId)));
-        }
-
-        try {
-          const d = await getDoc(doc(db, 'users', targetUid));
-          results['own_users_doc_read'] = { ok: true, exists: d.exists(), role: d.data()?.role, schoolId: d.data()?.schoolId };
-        } catch (e: any) {
-          results['own_users_doc_read'] = { ok: false, code: e?.code || null, message: e?.message || String(e) };
-        }
-
-        // Distinguishes a plain single-doc get() (rule runs once, directly)
-        // from a list/query (Firestore must prove the rule holds for every
-        // possible result up front) — a get() succeeding where the
-        // equivalent list fails would confirm this is specifically a
-        // list-query limitation on get()-based rules, not a broken rule.
-        if (sampleClassId) {
-          try {
-            const d = await getDoc(doc(db, 'classes', sampleClassId));
-            results['single_class_doc_get'] = { ok: true, exists: d.exists(), classId: sampleClassId };
-          } catch (e: any) {
-            results['single_class_doc_get'] = { ok: false, code: e?.code || null, message: e?.message || String(e), classId: sampleClassId };
-          }
-
-          // Reproduces the "student added but never appears" report exactly
-          // — same collections, same query shape, as StudentInvitePanel and
-          // fetchRosterAndMistakes, but with firestore.rules actually
-          // enforced (unlike the Admin SDK reads elsewhere in this action).
-          await tryQuery('pendingStudents_classId_eq', fbQuery(collection(db, 'pendingStudents'), where('classId', '==', sampleClassId)));
-          await tryQuery('users_classId_eq', fbQuery(collection(db, 'users'), where('classId', '==', sampleClassId)));
-        }
-        if (targetSchoolId) {
-          await tryQuery('pendingStudents_schoolId_eq', fbQuery(collection(db, 'pendingStudents'), where('schoolId', '==', targetSchoolId)));
-        }
-
-        // The ID token minted for this session should carry whatever custom
-        // claims are currently set on the account — if role/schoolId here
-        // don't match the Firestore user doc's own fields, every rule that
-        // reads request.auth.token.* is silently checking stale/wrong values
-        // no amount of query retrying can fix.
-        try {
-          const tokenResult = await clientAuth.currentUser?.getIdTokenResult();
-          results['id_token_claims'] = { role: tokenResult?.claims?.role ?? null, schoolId: tokenResult?.claims?.schoolId ?? null };
-        } catch (e: any) {
-          results['id_token_claims'] = { error: e?.message || String(e) };
-        }
-      } finally {
-        await deleteApp(clientApp).catch(() => {});
-      }
-
-      return res.status(200).json({ success: true, targetUid, targetSchoolId, sampleClassId, sampleClassDoc, rawPendingByClassId, results });
     } else {
       return res.status(400).json({ error: 'Invalid action' });
     }

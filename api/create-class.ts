@@ -7,6 +7,7 @@ import { createRateLimiter } from './_lib/rateLimit.js';
 import { generateJoinCode } from './_lib/joinCode.js';
 import { isValidAddStudentsPayload, EMAIL_RE } from './_lib/rosterValidation.js';
 import { FieldValue } from 'firebase-admin/firestore';
+import { sendEmail, isEmailConfigured, escapeHtml, emailLayout, emailButton } from './_lib/email.js';
 
 const checkCreateClassLimit = createRateLimiter('create_class', 20, 60);
 const checkAddStudentsLimit = createRateLimiter('add_students', 20, 60);
@@ -130,22 +131,14 @@ async function handleCreateClassAction(req: VercelRequest, res: VercelResponse, 
 }
 
 /**
- * A per-invite code, distinct from the class's shared joinCode. The shared
- * joinCode is meant to be reused by every parent in the class; a pushed
- * invite needs to be single-use (Audit: invite links/codes must only work
- * once) so it can't be forwarded or reused after the intended parent
- * already redeemed it. Checked against both classes.joinCode and existing
- * pendingStudents.inviteCode so an invite code can never collide with (or
- * be shadowed by) a real class code.
+ * Single-use per-student invite code. Checked against existing
+ * pendingStudents codes so a live code is never handed out twice.
  */
 async function generateUniqueInviteCode(): Promise<string> {
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = generateJoinCode();
-    const [classMatch, inviteMatch] = await Promise.all([
-      adminDb.collection('classes').where('joinCode', '==', code).limit(1).get(),
-      adminDb.collection('pendingStudents').where('inviteCode', '==', code).limit(1).get(),
-    ]);
-    if (classMatch.empty && inviteMatch.empty) return code;
+    const match = await adminDb.collection('pendingStudents').where('inviteCode', '==', code).limit(1).get();
+    if (match.empty) return code;
   }
   throw new Error('Failed to generate a unique invite code');
 }
@@ -161,15 +154,6 @@ async function requireDirectorOrKt(uid: string) {
   return { schoolId: userData.schoolId as string };
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
 async function sendStudentInviteEmail(opts: {
   parentEmail: string;
   studentName: string;
@@ -177,58 +161,21 @@ async function sendStudentInviteEmail(opts: {
   schoolName: string;
   inviteCode: string;
 }): Promise<boolean> {
-  const resendApiKey = process.env.RESEND_API_KEY;
-  if (!resendApiKey) return false;
-  // Director/KT-entered fields (student name, class/school name) go into a
-  // parent-facing email — escaped so a compromised or malicious staff
-  // account can't inject arbitrary HTML/links into it (Audit: unescaped
-  // user input in HTML email templates).
-  const safeStudentName = escapeHtml(opts.studentName);
-  const safeClassName = escapeHtml(opts.className);
-  const safeSchoolName = escapeHtml(opts.schoolName);
-  try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'Chekki AI <billing@chekkiai.com>',
-        to: [opts.parentEmail],
-        subject: `[Chekki AI] ${opts.studentName} 학생 학급 등록 안내`,
-        html: `
-          <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
-            <div style="text-align: center; margin-bottom: 24px;">
-              <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
-            </div>
-            <p style="font-size: 15px; color: #e4e4e7;"><strong>${safeSchoolName}</strong>에서 <strong>${safeStudentName}</strong> 학생을 <strong>${safeClassName}</strong> 학급에 등록했습니다.</p>
-            <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 버튼을 누르면 가입 코드가 자동으로 연결됩니다 — 따로 입력하실 필요 없습니다. 계정이 없으시면 버튼을 누른 뒤 뜨는 화면에서 <strong>"Sign Up"</strong>을 눌러 새로 만들어 주시면 됩니다. 이미 계정이 있으시면 그 이메일로 로그인만 하시면 자동으로 연결됩니다.</p>
-            <div style="text-align: center; margin: 24px 0;">
-              <a href="https://www.chekkiai.com/?classCode=${opts.inviteCode}" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">지금 가입하기</a>
-            </div>
-            <p style="font-size: 12px; color: #71717a; text-align: center; margin: 0 0 8px 0;">버튼이 안 열리면 이 코드를 앱/사이트에 직접 입력해 주세요 (1회용):</p>
-            <div style="background-color: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 12px; padding: 16px; margin: 0 0 24px 0; text-align: center;">
-              <p style="margin: 0; font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 4px; font-family: monospace;">${opts.inviteCode}</p>
-            </div>
-            <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
-              문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.
-            </p>
-          </div>
-        `,
-      }),
-    });
-    if (!response.ok) {
-      // fetch doesn't throw on a non-2xx — a rejected Resend request (bad
-      // API key, unverified sender domain, malformed payload) used to fail
-      // completely silently here, so "Invited N student(s)!" showed in the
-      // director's UI even when zero emails actually went out.
-      const body = await response.text().catch(() => '');
-      console.error('[create-class:add_students] Resend API rejected the request:', response.status, body, opts.parentEmail);
-      return false;
-    }
-    return true;
-  } catch (emailErr) {
-    console.warn('[create-class:add_students] Resend email failed:', opts.parentEmail, emailErr);
-    return false;
-  }
+  // Staff-entered names go into a parent-facing email — escaped so a
+  // compromised staff account can't inject HTML/links into it.
+  return sendEmail({
+    to: opts.parentEmail,
+    subject: `[Chekki AI] ${opts.studentName} 학생 학급 등록 안내`,
+    html: emailLayout(`
+      <p style="font-size: 15px; color: #e4e4e7;"><strong>${escapeHtml(opts.schoolName)}</strong>에서 <strong>${escapeHtml(opts.studentName)}</strong> 학생을 <strong>${escapeHtml(opts.className)}</strong> 학급에 등록했습니다.</p>
+      <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 버튼을 누르면 가입 코드가 자동으로 연결됩니다 — 따로 입력하실 필요 없습니다. 계정이 없으시면 버튼을 누른 뒤 뜨는 화면에서 <strong>"Sign Up"</strong>을 눌러 새로 만들어 주시면 됩니다. 이미 계정이 있으시면 그 이메일로 로그인만 하시면 자동으로 연결됩니다.</p>
+      ${emailButton(`https://www.chekkiai.com/?classCode=${opts.inviteCode}`, '지금 가입하기')}
+      <p style="font-size: 12px; color: #71717a; text-align: center; margin: 0 0 8px 0;">버튼이 안 열리면 이 코드를 앱/사이트에 직접 입력해 주세요 (1회용):</p>
+      <div style="background-color: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 12px; padding: 16px; text-align: center;">
+        <p style="margin: 0; font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 4px; font-family: monospace;">${opts.inviteCode}</p>
+      </div>
+    `),
+  });
 }
 
 // Class deletion previously went straight from the client (deleteDoc)
@@ -261,8 +208,21 @@ async function handleDeleteClass(req: VercelRequest, res: VercelResponse, uid: s
     return res.status(404).json({ error: 'That class does not belong to your school' });
   }
 
-  await classRef.delete();
-  return res.status(200).json({ success: true });
+  // A bare doc delete left logs/parentReports/studentScans subcollections,
+  // curriculum docs and pending invites behind, and students still pointing
+  // at a class that no longer exists.
+  const [studentsSnap, pendingSnap, curriculumSnap] = await Promise.all([
+    adminDb.collection('users').where('classId', '==', classId).get(),
+    adminDb.collection('pendingStudents').where('classId', '==', classId).get(),
+    adminDb.collection('curriculums').where('classId', '==', classId).get(),
+  ]);
+  const batch = adminDb.batch();
+  studentsSnap.docs.forEach((d) => batch.update(d.ref, { classId: null, classStatus: null }));
+  pendingSnap.docs.forEach((d) => batch.delete(d.ref));
+  curriculumSnap.docs.forEach((d) => batch.delete(d.ref));
+  await batch.commit();
+  await adminDb.recursiveDelete(classRef);
+  return res.status(200).json({ success: true, unenrolledStudents: studentsSnap.size });
 }
 
 async function handleAddStudents(req: VercelRequest, res: VercelResponse, uid: string) {
@@ -344,7 +304,7 @@ async function handleAddStudents(req: VercelRequest, res: VercelResponse, uid: s
     added: created.length,
     addedWithoutEmail: created.length - withEmail.length,
     emailsSent,
-    resendConfigured: !!process.env.RESEND_API_KEY,
+    resendConfigured: isEmailConfigured(),
   });
 }
 
@@ -393,7 +353,7 @@ async function handleResendStudentInvite(req: VercelRequest, res: VercelResponse
   });
   if (!sent) {
     return res.status(502).json({
-      error: process.env.RESEND_API_KEY
+      error: isEmailConfigured()
         ? 'Failed to send the email. Please try again.'
         : 'Email sending is not configured for this deployment.',
     });

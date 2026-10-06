@@ -34,21 +34,20 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // kakao-auth.ts). access_token_info returns the app_id that requested
     // the token, which we pin to this app's own Kakao App ID.
     const expectedAppId = process.env.KAKAO_APP_ID;
-    if (expectedAppId) {
-      const tokenInfoRes = await fetch('https://kapi.kakao.com/v1/user/access_token_info', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!tokenInfoRes.ok) {
-        const errText = await tokenInfoRes.text();
-        return res.status(tokenInfoRes.status).json({ error: `Kakao verification failed: ${errText}` });
-      }
-      const tokenInfo = (await tokenInfoRes.json()) as any;
-      if (String(tokenInfo?.app_id) !== String(expectedAppId)) {
-        console.error('[kakao-auth] Token app_id mismatch:', tokenInfo?.app_id);
-        return res.status(401).json({ error: 'This token was not issued for this app.' });
-      }
-    } else {
-      console.warn('[kakao-auth] KAKAO_APP_ID is not set — skipping app_id verification.');
+    if (!expectedAppId) {
+      console.error('[kakao-auth] KAKAO_APP_ID is not set — refusing to log anyone in.');
+      return res.status(500).json({ error: 'Kakao login is not configured.' });
+    }
+    const tokenInfoRes = await fetch('https://kapi.kakao.com/v1/user/access_token_info', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!tokenInfoRes.ok) {
+      return res.status(401).json({ error: 'Kakao verification failed.' });
+    }
+    const tokenInfo = (await tokenInfoRes.json()) as any;
+    if (String(tokenInfo?.app_id) !== String(expectedAppId)) {
+      console.error('[kakao-auth] Token app_id mismatch:', tokenInfo?.app_id);
+      return res.status(401).json({ error: 'This token was not issued for this app.' });
     }
 
     // Verify access token with Kakao API
@@ -59,8 +58,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (!kakaoRes.ok) {
-      const errText = await kakaoRes.text();
-      return res.status(kakaoRes.status).json({ error: `Kakao verification failed: ${errText}` });
+      return res.status(401).json({ error: 'Kakao verification failed.' });
     }
 
     const kakaoUser = (await kakaoRes.json()) as any;

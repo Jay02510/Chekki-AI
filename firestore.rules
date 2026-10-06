@@ -9,12 +9,6 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    // Helper: Check if user belongs to a school
-    function userBelongsToSchool(schoolId) {
-      return request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == schoolId;
-    }
-
     // Helper: Check if parent belongs to a class
     function userBelongsToClass(classId) {
       return request.auth != null && 
@@ -119,19 +113,31 @@ service cloud.firestore {
         )
       );
 
+      // Self-signup creates a plain free parent doc only. role/schoolId/
+      // classId/educatorRole are server-assigned (set-initial-role, redeem,
+      // admin) — server endpoints and syncAuthClaims trust them, so a
+      // self-stamped schoolId here used to mean director access to any school.
       allow create: if request.auth != null && (
-        isAdmin() || 
-        (request.auth.uid == userId && 
-         request.resource.data.plan == 'free' && 
-         request.resource.data.maxScansPerDay == 2 && 
-         request.resource.data.maxQuestionsPerDay == 5)
+        isAdmin() ||
+        (request.auth.uid == userId &&
+         request.resource.data.plan == 'free' &&
+         request.resource.data.maxScansPerDay == 2 &&
+         request.resource.data.maxQuestionsPerDay == 5 &&
+         request.resource.data.get('role', 'parent') == 'parent' &&
+         request.resource.data.get('schoolId', null) == null &&
+         request.resource.data.get('schoolName', null) == null &&
+         request.resource.data.get('classId', null) == null &&
+         request.resource.data.get('classStatus', null) == null &&
+         request.resource.data.get('educatorRole', null) == null &&
+         request.resource.data.get('pendingStudentId', null) == null &&
+         request.resource.data.get('subscriptionPlatform', null) == null)
       );
       allow delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
       
       allow update: if request.auth != null && (
         isAdmin() || 
         // User updating their own profile
-        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'schoolId', 'schoolName', 'educatorRole', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate'])) ||
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'schoolId', 'schoolName', 'educatorRole', 'classId', 'classStatus', 'flaggedException', 'pendingStudentId', 'subscriptionPlatform', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate'])) ||
         // Teacher or director updating classroom fields (roster
         // approve/decline/remove/move, flaggedException) on a student in
         // their own class/school. Allowlisted (hasOnly) rather than
@@ -301,9 +307,12 @@ service cloud.firestore {
       // against this collection, a list query, which get(users/uid) denies
       // outright. request.auth.token.schoolId preserves the exact same
       // same-school check with zero get() calls.
+      // Director only: parents and teachers carry a schoolId claim too, and
+      // an inviteId with no email on it is a bearer credential for a
+      // teacher seat.
       allow read: if request.auth != null && (
         isAdmin() ||
-        (resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId)
+        (request.auth.token.role == 'director' && resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId)
       );
       allow write: if false;
     }
@@ -334,7 +343,7 @@ service cloud.firestore {
       // rewritten for). Same disjunct added here.
       allow read: if request.auth != null && (
         isAdmin() ||
-        (resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId) ||
+        (request.auth.token.role == 'director' && resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId) ||
         (resource.data.classId != null && (isClassTeacher(resource.data.classId) || isSchoolDirectorOfClass(resource.data.classId)))
       );
       allow write: if false;
@@ -354,11 +363,12 @@ service cloud.firestore {
       // collection.
       allow read: if request.auth != null && (
         isAdmin() ||
-        (resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId)
+        (request.auth.token.role == 'director' && resource.data.schoolId != null && request.auth.token.schoolId == resource.data.schoolId)
       );
       allow create: if request.auth != null &&
+        request.auth.token.role in ['director', 'teacher'] &&
         request.resource.data.actorUid == request.auth.uid &&
-        request.resource.data.schoolId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId;
+        request.resource.data.schoolId == request.auth.token.schoolId;
       allow update, delete: if false;
     }
 
@@ -408,7 +418,7 @@ service cloud.firestore {
       // create unlimited classes on a 1-seat plan (audit §2/§10/§18).
       allow create: if request.auth != null && isAdmin();
       // Co-teacher assignment (assignedTeacherUids) only ever happens
-      // server-side via api/assign-class-teacher.ts (Admin SDK) — director-
+      // server-side via api/create-teacher-invite.ts action=assign — director-
       // authorized and school-membership-checked there. This rule only
       // covers day-to-day field updates (e.g. activeWeekNumber) by whoever
       // is already an owner or assigned teacher, not who can become one.
@@ -432,16 +442,9 @@ service cloud.firestore {
         ) ||
         isAdmin()
       );
-      // A director could see any class in their school (isSchoolDirectorOfClass,
-      // via the read rule) but not delete one they didn't personally create —
-      // teacherUid == request.auth.uid was the only path. A single-doc
-      // operation, so isSchoolDirectorOfClass()'s get() calls are fine here
-      // (not the list-query limitation the read rule above works around).
-      allow delete: if request.auth != null && (
-        resource.data.teacherUid == request.auth.uid ||
-        isSchoolDirectorOfClass(classId) ||
-        isAdmin()
-      );
+      // Deletes go through api/create-class.ts (delete_class), which also
+      // cleans up subcollections, curriculum, invites and enrolled students.
+      allow delete: if request.auth != null && isAdmin();
 
       // Class logs (FT/KT daily log entries). One log doc covers the WHOLE
       // class for that day — approvedExceptions is an array of every

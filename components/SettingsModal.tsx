@@ -29,7 +29,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
     firebaseUser,
     setShowPaywall,
     subscriptionRecord,
-    updateClassroomProfile,
+    updateStudentName,
     joinClassWithCode,
     leaveClassroom,
   } = useAuth();
@@ -156,13 +156,13 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
     try {
       await updateProfile(name);
       if (user?.schoolId && user?.classId) {
-        await updateClassroomProfile(user.classId, studentName);
+        await updateStudentName(studentName);
       }
       setSuccessMsg(t('settings_saved'));
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (e) {
       console.error('Failed to save settings:', e);
-      // updateUser/updateClassroomProfile used to swallow write failures
+      // updateUser/updateStudentName used to swallow write failures
       // silently, so this catch never ran and the user had no way to know
       // their changes weren't actually saved (Audit: swallowed write errors).
       setSaveErrorMsg(
@@ -1003,7 +1003,12 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
           isNight={isNight}
           onConfirm={() => {
             setShowLeaveClassConfirm(false);
-            leaveClassroom();
+            leaveClassroom().catch((e) => {
+              console.error('Failed to leave class:', e);
+              setSaveErrorMsg(
+                language === 'ko' ? '학급 탈퇴에 실패했습니다. 다시 시도해주세요.' : "Couldn't leave the class. Please try again."
+              );
+            });
           }}
           onCancel={() => setShowLeaveClassConfirm(false)}
         />

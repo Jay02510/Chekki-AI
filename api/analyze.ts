@@ -7,6 +7,11 @@ import crypto from 'crypto';
 import { adminDb, adminAuth as adminAuthClient } from './_lib/firebaseAdmin.js';
 import { applyCors } from './_lib/cors.js';
 import { parseAiJson } from './_lib/aiJson.js';
+import { createRateLimiter } from './_lib/rateLimit.js';
+
+// Staff report drafting/voice fill: generous for a real teacher's day, a
+// ceiling on anyone scripting it.
+const checkStaffAiDailyLimit = createRateLimiter('staff_ai_daily', 300, 86400);
 
 // Cheapest possible cost visibility: every Gemini response carries token
 // counts on usageMetadata, but nothing in this file ever read them — there
@@ -814,19 +819,20 @@ async function handler(req: any, res: any) {
   }
   // --- END RATE LIMITING ---
 
-  // task === 'generate_report' bypasses the OCR-specific idempotency/scan-limit
-  // logic below entirely — auth + rate limiting above already gate it, and
-  // decodedToken is guaranteed non-null here since requiresAuth was true.
-  if (task === 'generate_report') {
-    return handleGenerateReportTask(res, body);
-  }
-
-  // task === 'voice_log_fill' bypasses the OCR-specific idempotency/scan-limit
-  // logic below entirely, same as generate_report — auth + rate limiting above
-  // already gate it, and decodedToken is guaranteed non-null here since
-  // requiresAuth was true for this task.
-  if (task === 'voice_log_fill') {
-    return handleVoiceLogFillTask(res, body);
+  // Staff-only text tasks skip the OCR idempotency/scan-quota path below.
+  // They used to accept any signed-in account — including anonymous guest
+  // sessions — as free, unmetered Gemini access.
+  if (task === 'generate_report' || task === 'voice_log_fill') {
+    const callerSnap = await adminDb.collection('users').doc(decodedToken.uid).get();
+    const callerRole = callerSnap.data()?.role;
+    if (callerRole !== 'teacher' && callerRole !== 'director') {
+      return res.status(403).json({ error: 'STAFF_ONLY' });
+    }
+    const { success: underDailyCap } = await checkStaffAiDailyLimit(decodedToken.uid);
+    if (!underDailyCap) {
+      return res.status(429).json({ error: 'DAILY_LIMIT_REACHED' });
+    }
+    return task === 'generate_report' ? handleGenerateReportTask(res, body) : handleVoiceLogFillTask(res, body);
   }
 
   // --- IDEMPOTENCY KEY CHECK ---
@@ -1024,7 +1030,11 @@ async function handler(req: any, res: any) {
     // --- DETERMINISTIC IMAGE CACHE LOOKUP ---
     let cacheKey = '';
     const isAnalysisTask = !['generate', 'refine', 'generate_worksheet', 'ask_question'].includes(task);
-    if (image && typeof image === 'string' && isAnalysisTask) {
+    // Enrolled students are graded against their class's answer key, which
+    // the cache key doesn't capture — don't serve or store them a shared,
+    // ungrounded result.
+    const isEnrolledStudent = !!(userData?.classId && userData?.classStatus === 'active');
+    if (image && typeof image === 'string' && isAnalysisTask && !isEnrolledStudent) {
       try {
         const paramString = JSON.stringify({
           childAge: childAge || '',
@@ -1789,6 +1799,9 @@ ${answerKeyLines.length > 0 ? '2a. ANSWER KEY PRIORITY: If a question on the sca
               items: finalItems,
             },
             createdAt: FieldValue.serverTimestamp(),
+            // Children's homework analysis shouldn't be kept indefinitely —
+            // a Firestore TTL policy on expiresAt deletes it after 30 days.
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           });
         console.log(`[cache] Successfully cached analysis for key: ${cacheKey}`);
       } catch (cacheWriteErr) {

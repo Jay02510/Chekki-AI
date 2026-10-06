@@ -480,21 +480,22 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
   );
 }
 
-// Per-KT daily email listing what's waiting — same defaults as the cron
-// (api/create-teacher-invite.ts) when the fields are absent.
+// Per-KT daily email listing what's waiting. Sent at 9:00 KST — the daily
+// cron in vercel.json (Vercel Hobby allows one run a day, so no per-KT hour).
 function DigestSettings({ isNight, isKo, user }: { isNight: boolean; isKo: boolean; user: UserProfile | null }) {
   const [open, setOpen] = useState(false);
   const [enabled, setEnabled] = useState(user?.notifyDigestEnabled !== false);
-  const [hour, setHour] = useState(user?.notifyDigestHourKst ?? 9);
   const [saving, setSaving] = useState(false);
   if (!user?.uid) return null;
 
-  const save = async (nextEnabled: boolean, nextHour: number) => {
+  const save = async (nextEnabled: boolean) => {
+    setEnabled(nextEnabled);
     setSaving(true);
     try {
-      await updateDoc(doc(dbInstance, 'users', user.uid!), { notifyDigestEnabled: nextEnabled, notifyDigestHourKst: nextHour });
+      await updateDoc(doc(dbInstance, 'users', user.uid!), { notifyDigestEnabled: nextEnabled });
     } catch (err) {
       console.warn('Failed to save KT notification preferences:', err);
+      setEnabled(!nextEnabled);
     } finally {
       setSaving(false);
     }
@@ -522,33 +523,13 @@ function DigestSettings({ isNight, isKo, user }: { isNight: boolean; isKo: boole
             <input
               type="checkbox"
               checked={enabled}
-              onChange={(e) => {
-                setEnabled(e.target.checked);
-                save(e.target.checked, hour);
-              }}
+              onChange={(e) => save(e.target.checked)}
               className="w-5 h-5 accent-orange-500 cursor-pointer"
             />
           </label>
-          {enabled && (
-            <label className="block space-y-1.5">
-              <span className={isNight ? 'text-zinc-400' : 'text-zinc-500'}>{isKo ? '받을 시간 (한국 시간)' : 'Time (KST)'}</span>
-              <select
-                value={hour}
-                onChange={(e) => {
-                  const next = Number(e.target.value);
-                  setHour(next);
-                  save(enabled, next);
-                }}
-                className={`w-full min-h-11 px-3 rounded-xl border text-base md:text-sm font-bold outline-none focus:border-orange-500 ${
-                  isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
-                }`}
-              >
-                {Array.from({ length: 24 }, (_, h) => (
-                  <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
-                ))}
-              </select>
-            </label>
-          )}
+          <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            {isKo ? '매일 오전 9시(한국 시간)에 검토 대기 일지를 이메일로 알려드립니다.' : 'Sent every morning at 9:00 KST when logs are waiting.'}
+          </p>
           {saving && <p className="text-xs text-zinc-400">{isKo ? '저장 중...' : 'Saving...'}</p>}
         </div>
       )}

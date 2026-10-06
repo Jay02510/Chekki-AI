@@ -68,7 +68,6 @@ export interface UserProfile {
   // behavior: enabled, 9am KST — see api/create-teacher-invite.ts's
   // handleSendPendingDigests cron.
   notifyDigestEnabled?: boolean;
-  notifyDigestHourKst?: number;
 }
 
 // --- Subscription System ---

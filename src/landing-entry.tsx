@@ -1,16 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import SchoolsLandingPage from './pages/SchoolsLandingPage';
 import FaqPage from './pages/FaqPage';
 import Landing from './Landing';
-import App from '../App';
 import '../landing.css';
 import { initSentry } from './lib/sentry';
 import { setPageMeta } from './lib/pageMeta';
 import { landingMeta, TEACHER_META } from './data/seo';
 import { normalizeLangUrl, stripLang, urlLang } from './lib/lang';
 import { ToastProvider } from '../contexts/ToastContext';
-import { db } from '../services/database';
+import { track } from './lib/track';
+
+// The parent app/staff portal is only needed on its own routes — loading it
+// eagerly made every marketing-page visitor download all of it.
+const App = lazy(() => import('../App'));
 
 initSentry();
 
@@ -63,7 +66,7 @@ function LandingRoot() {
     // navigation for it to hook. Firing it here, once per pathname change,
     // is what makes /schools, /faq, and / show up as real GA4 page views
     // instead of all collapsing into one session-start event.
-    db.logUserEvent('page_view', { page_path: window.location.pathname, page_location: window.location.href });
+    track('page_view', { page_path: window.location.pathname, page_location: window.location.href });
   }, [pathname]);
 
   // classCode= is the invite-email "join this class" link (api/create-class.ts's
@@ -97,7 +100,11 @@ function LandingRoot() {
     pathname.startsWith('/youth') ||
     pathname.startsWith('/support')
   ) {
-    return <App />;
+    return (
+      <Suspense fallback={null}>
+        <App />
+      </Suspense>
+    );
   }
 
   // School Landing Page route: chekkiai.com/school (also /schools and /for-schools)

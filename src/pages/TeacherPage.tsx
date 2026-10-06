@@ -495,7 +495,9 @@ export default function TeacherPage({ isNight = true }: Props) {
         const response = await fetch('/api/set-initial-role', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-          body: JSON.stringify({ role: pendingRole }),
+          // The signup attempt already sent the verification email; retries
+          // on later visits shouldn't send another each time.
+          body: JSON.stringify({ role: pendingRole, skipVerificationEmail: true }),
         });
         if (response.ok) {
           localStorage.removeItem(`chekki_pending_role_sync_${uid}`);
@@ -1127,7 +1129,15 @@ export default function TeacherPage({ isNight = true }: Props) {
                 }),
               });
               if (!response.ok) {
-                console.warn('Server-side role assignment failed, using localStorage fallback:', await response.text());
+                const failure = await response.json().catch(() => ({}));
+                console.warn('Server-side role assignment failed, using localStorage fallback:', failure);
+                if (failure.needsEmailVerification) {
+                  window.alert(
+                    isKo
+                      ? `결제하신 학원을 연결하려면 이메일 인증이 필요합니다. ${email} 로 보낸 인증 링크를 누른 뒤 이 페이지를 새로고침해 주세요.`
+                      : `To connect your paid academy, please verify your email. Click the link we sent to ${email}, then reload this page.`
+                  );
+                }
                 // Retried automatically by the pendingRoleSync effect below
                 // on this device — the role otherwise only lives in
                 // localStorage and silently vanishes on any other
@@ -1456,28 +1466,27 @@ export default function TeacherPage({ isNight = true }: Props) {
     if (!targetClass?.id) return;
     setIsLoadingRoster(true);
     try {
-      // 1. Fetch dual-persisted class scans from LocalStorage
-      const localClassKey = `class_scans_${targetClass.id}`;
-      const localScans: any[] = JSON.parse(localStorage.getItem(localClassKey) || '[]');
-
-      // 2. Fetch class scans + roster from Firestore — skip for the demo/
-      // no-class placeholder, its docs are never created server-side so
-      // this would only ever produce a permission-denied console error.
-      const firestoreScans: any[] = [];
+      // Class scans + roster from Firestore — skipped for the demo/no-class
+      // placeholder, whose docs never exist server-side.
+      const allClassScans: any[] = [];
       let rosterDocs: any[] = [];
       if (!targetClass.isDemo) {
         try {
+          // Newest first, capped: this used to read the class's entire scan
+          // history on every class/week switch, growing all term.
           const scansQ = query(
-            collection(dbInstance, 'classes', targetClass.id, 'studentScans')
+            collection(dbInstance, 'classes', targetClass.id, 'studentScans'),
+            orderBy('scannedAt', 'desc'),
+            fbLimit(500)
           );
           const scansSnap = await getDocs(scansQ);
-          scansSnap.forEach(sDoc => firestoreScans.push({ id: sDoc.id, ...sDoc.data() }));
+          scansSnap.forEach(sDoc => allClassScans.push({ id: sDoc.id, ...sDoc.data() }));
         } catch (sErr) {
-          console.warn('Firestore class scans fetch warning (using local fallback):', sErr);
+          console.warn('Firestore class scans fetch failed:', sErr);
           setSyncWarning(
             isKo
-              ? '⚠️ 클라우드에서 채점 기록을 불러오지 못해 이 기기에 저장된 정보만 표시하고 있습니다.'
-              : "⚠️ Couldn't load scan history from the cloud — showing only what's saved on this device."
+              ? '⚠️ 클라우드에서 채점 기록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'
+              : "⚠️ Couldn't load scan history from the cloud. Please try again shortly."
           );
         }
 
@@ -1489,12 +1498,6 @@ export default function TeacherPage({ isNight = true }: Props) {
         rosterDocs = snap.docs;
       }
 
-      // Merge scans by ID
-      const scansMap = new Map();
-      firestoreScans.forEach(s => scansMap.set(s.id, s));
-      localScans.forEach(s => { if (!scansMap.has(s.id)) scansMap.set(s.id, s); });
-      const allClassScans = Array.from(scansMap.values());
-
       // 3. Build roster from fetched users
       const students: any[] = [];
 
@@ -1502,7 +1505,8 @@ export default function TeacherPage({ isNight = true }: Props) {
         const student: any = { uid: userDoc.id, ...userDoc.data() };
         
         // Match scans for this student
-        const studentScans = allClassScans.filter(s => s.studentUid === student.uid || s.studentName === student.name);
+        // By uid only — matching on name too mixed up two kids with the same name.
+        const studentScans = allClassScans.filter(s => s.studentUid === student.uid);
         
         // Extract all red-bordered mistakes from scan records
         const scanMistakes: any[] = [];
@@ -1529,30 +1533,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         students.push(student);
       }
 
-      // If no student roster users exist yet, map student scans directly so guest scans display
-      if (students.length === 0 && allClassScans.length > 0) {
-        const guestMap = new Map();
-        allClassScans.forEach(s => {
-          const sUid = s.studentUid || 'guest_student';
-          if (!guestMap.has(sUid)) {
-            guestMap.set(sUid, {
-              uid: sUid,
-              name: s.studentName || 'Home Student',
-              classStatus: 'active',
-              lastScanDate: s.scannedAt,
-              scans: [s],
-              mistakes: s.redBorderedMistakes || [],
-            });
-          } else {
-            const existing = guestMap.get(sUid);
-            existing.scans.push(s);
-            existing.mistakes = [...existing.mistakes, ...(s.redBorderedMistakes || [])];
-          }
-        });
-        setStudentsData(Array.from(guestMap.values()));
-      } else {
-        setStudentsData(students);
-      }
+      setStudentsData(students);
     } catch (err: any) {
       // users/{userId}'s read rule now depends on request.auth.token.role/
       // schoolId (custom claims) — the SDK's cached ID token can still be

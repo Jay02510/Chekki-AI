@@ -6,7 +6,7 @@ import { applyCors } from './_lib/cors.js';
 import { createRateLimiter } from './_lib/rateLimit.js';
 import { notifyDirectors } from './_lib/notifications.js';
 
-// Codes (classCode/schoolCode/teacherCode) are short, guessable strings with
+// Codes (classCode/schoolCode) are short, guessable strings with
 // real value behind them (free pro access, class enrollment) — this endpoint
 // had no throttle, so a script could brute-force valid codes at full request
 // speed. Keyed per-uid (post auth) so it can't be dodged by rotating IPs on
@@ -14,9 +14,9 @@ import { notifyDirectors } from './_lib/notifications.js';
 const checkRedeemLimit = createRateLimiter('redeem', 10, 60);
 
 /**
- * Merged redeem-class-code / redeem-school-code / redeem-teacher-code /
- * redeem-invite into one function to stay under Vercel Hobby's 12-function
- * cap. Old paths still work via vercel.json rewrites (needed for already-
+ * Merged redeem-class-code / redeem-school-code / redeem-invite (plus the
+ * parent leave-class action) into one function to stay under Vercel Hobby's
+ * 12-function cap. Old paths still work via vercel.json rewrites (needed for already-
  * shipped iOS/Android builds that call the old URLs directly), so which
  * branch runs is decided by which body field is present, matching each
  * endpoint's original request shape exactly.
@@ -48,7 +48,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const idToken = authHeader.split('Bearer ')[1].trim();
 
-  const { classCode, schoolCode, teacherCode, inviteId } = req.body || {};
+  const { classCode, schoolCode, inviteId, leaveClass } = req.body || {};
 
   // Real codes here are 6 chars; inviteId is ~25. A wildly oversized value
   // (5000+ chars) used to sail past this into a Firestore
@@ -59,7 +59,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // user into thinking their login broke instead of the code being invalid
   // (audit: oversized code produces a wrong error message). Rejecting early
   // with a clear message avoids that query entirely.
-  if ([classCode, schoolCode, teacherCode, inviteId].some((v) => typeof v === 'string' && v.length > 100)) {
+  if ([classCode, schoolCode, inviteId].some((v) => typeof v === 'string' && v.length > 100)) {
     return res.status(400).json({ error: 'Invalid code format.' });
   }
 
@@ -76,10 +76,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (classCode) return await redeemClassCode(res, uid, decodedToken.email, classCode);
     if (schoolCode) return await redeemSchoolCode(res, uid, schoolCode);
-    if (teacherCode) return await redeemTeacherCode(res, uid, decodedToken.email, teacherCode);
     if (inviteId) return await redeemInvite(res, uid, decodedToken.email, inviteId);
+    if (leaveClass === true) return await leaveClassroom(res, uid);
 
-    return res.status(400).json({ error: 'Missing classCode, schoolCode, teacherCode, or inviteId' });
+    return res.status(400).json({ error: 'Missing classCode, schoolCode, or inviteId' });
   } catch (error: any) {
     console.error('[redeem] error:', error);
     return res.status(401).json({ error: 'Authentication failed' });
@@ -174,14 +174,10 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
         updatePayload.studentName = invitedStudentName;
       }
 
-      // Only reset an already-approved membership back to 'pending' if this is
-      // actually a different class. Without this check, a duplicate redemption
-      // request (double-tap, a re-scanned QR code) silently kicked an already-
-      // approved family back into the teacher's approval queue for no reason
-      // (Audit: redemption idempotency).
-      if (!(existingUserData.classId === classId && existingUserData.classStatus === 'approved')) {
-        updatePayload.classStatus = 'pending';
-      }
+      // The invite itself is the approval: staff named this student and sent
+      // the code to this family (or handed it over in person), so there's no
+      // second approval step.
+      updatePayload.classStatus = 'active';
 
       // Don't overwrite a real, paid subscription's platform label with the
       // school-code tag — a family with an independent RevenueCat subscription
@@ -213,8 +209,8 @@ async function redeemClassCode(res: VercelResponse, uid: string, email: string |
 
   await notifyDirectors(schoolId, {
     type: 'student_joined',
-    title: 'New student join request',
-    body: `${invitedStudentName || email || 'A student'} requested to join ${classData.name || 'a class'} — approve them in Student Roster.`,
+    title: 'Student joined',
+    body: `${invitedStudentName || email || 'A student'} joined ${classData.name || 'a class'}.`,
     meta: { classId, uid },
   });
 
@@ -296,88 +292,9 @@ async function redeemSchoolCode(res: VercelResponse, uid: string, schoolCode: st
 
   return res.status(200).json({
     success: true,
+    schoolId: resolvedSchoolId,
     schoolName,
     message: 'School code redeemed successfully',
-  });
-}
-
-async function redeemTeacherCode(res: VercelResponse, uid: string, callerEmailRaw: string | undefined, teacherCode: string) {
-  const sanitized = teacherCode.toUpperCase().trim();
-
-  const schoolsRef = adminDb.collection('schools');
-  const qSnapshot = await schoolsRef.where('teacherCode', '==', sanitized).limit(1).get();
-
-  if (qSnapshot.empty) {
-    return res.status(400).json({ error: 'Invalid teacher authorization code. Please verify.' });
-  }
-
-  const schoolRef = qSnapshot.docs[0].ref;
-  const schoolId = schoolRef.id;
-  const callerEmail = (callerEmailRaw || '').toLowerCase();
-  const hasStoreSub = await hasActiveStoreSubscription(uid);
-
-  let schoolName = schoolId;
-  let isOwnerClaim = false;
-  try {
-    await adminDb.runTransaction(async (t) => {
-      const schoolDoc = await t.get(schoolRef);
-      const schoolData = schoolDoc.data() || {};
-      schoolName = schoolData.name || schoolId;
-
-      // Invoice-first customers (api/admin.ts confirm_invoice) only ever get a
-      // teacherCode to hand out — this is often the first time the director
-      // themselves creates an account. If their email matches the school's
-      // recorded owner and nobody has claimed it yet, grant them 'director'
-      // (and bind ownerUid) instead of silently making them a plain 'teacher'
-      // on a school they can't administer (Audit: director path divergence).
-      isOwnerClaim = !!callerEmail && !schoolData.ownerUid && schoolData.ownerEmail === callerEmail;
-
-      if (!isOwnerClaim) {
-        const usedByUids = schoolData.usedByUids || [];
-        const maxUses = schoolData.maxUses ?? 5;
-        // Cap check moved inside the transaction so two concurrent redemptions
-        // against the last open seat can't both pass it (Audit: non-transactional
-        // cap checks).
-        if (!usedByUids.includes(uid) && usedByUids.length >= maxUses) {
-          throw { httpStatus: 400, message: 'This teacher authorization code has reached its maximum usage limit.' };
-        }
-      }
-
-      const updatePayload: Record<string, any> = {
-        role: isOwnerClaim ? 'director' : 'teacher',
-        schoolId,
-        schoolName,
-        plan: 'pro',
-        maxScansPerDay: 9999,
-        maxQuestionsPerDay: 9999,
-      };
-      if (!hasStoreSub) {
-        updatePayload.subscriptionPlatform = 'school_code';
-      }
-
-      t.set(adminDb.collection('users').doc(uid), updatePayload, { merge: true });
-
-      if (isOwnerClaim) {
-        t.update(schoolRef, { ownerUid: uid });
-      } else {
-        t.update(schoolRef, { usedByUids: FieldValue.arrayUnion(uid) });
-      }
-    });
-  } catch (error: any) {
-    if (error && typeof error.httpStatus === 'number') {
-      return res.status(error.httpStatus).json({ error: error.message });
-    }
-    throw error;
-  }
-
-  await syncAuthClaims(uid);
-
-  return res.status(200).json({
-    success: true,
-    schoolId,
-    schoolName,
-    role: isOwnerClaim ? 'director' : 'teacher',
-    message: isOwnerClaim ? 'Director account activated successfully' : 'Teacher registration completed successfully',
   });
 }
 
@@ -502,6 +419,31 @@ async function redeemInvite(res: VercelResponse, uid: string, callerEmailRaw: st
     invitedByName,
     className,
   });
+}
+
+// Parent leaving their class. classId/schoolId/plan are server-owned fields
+// (firestore.rules blocks self-writes), so this can't happen client-side.
+async function leaveClassroom(res: VercelResponse, uid: string) {
+  const userRef = adminDb.collection('users').doc(uid);
+  const userSnap = await userRef.get();
+  const userData = userSnap.data() || {};
+  if (userData.role === 'teacher' || userData.role === 'director') {
+    return res.status(400).json({ error: 'Staff accounts are removed by their director, not by leaving a class.' });
+  }
+  const hasStoreSub = await hasActiveStoreSubscription(uid);
+  await userRef.update({
+    classId: null,
+    classStatus: null,
+    schoolId: null,
+    schoolName: null,
+    pendingStudentId: FieldValue.delete(),
+    plan: hasStoreSub ? 'pro' : 'free',
+    maxScansPerDay: hasStoreSub ? 9999 : 2,
+    maxQuestionsPerDay: hasStoreSub ? 9999 : 5,
+    ...(hasStoreSub ? {} : { subscriptionPlatform: FieldValue.delete() }),
+  });
+  await syncAuthClaims(uid);
+  return res.status(200).json({ success: true, plan: hasStoreSub ? 'pro' : 'free' });
 }
 
 export default withSentry(handler);

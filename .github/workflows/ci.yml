@@ -25,6 +25,14 @@ jobs:
       - name: Test
         run: npm test
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Firestore rules tests
+        run: npm i -g firebase-tools && npm run test:rules
+
       - name: Lint
         # Report-only: repo has a pre-existing baseline of lint errors/warnings
         # not yet triaged, so this step is informational and won't block PRs

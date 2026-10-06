@@ -1,16 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { ChekkiMascot } from '../../components/Icons';
-import { auth, dbInstance } from '../../services/database';
-import {
-  createUserWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  signInWithCustomToken,
-} from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { auth } from '../../services/database';
+import { sendPasswordResetEmail, signInWithCustomToken } from 'firebase/auth';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { StatTile } from '../components/ui/StatTile';
+
+// api/admin.ts requires the signed-in admin's ID token alongside the passcode.
+async function adminHeaders(): Promise<Record<string, string>> {
+  const token = await auth.currentUser?.getIdToken();
+  return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+}
 
 // Skeleton rows for these admin tables, matching the real column count, so
 // the header/search bar stay in place while data loads instead of the whole
@@ -65,12 +65,7 @@ export default function AdminPage() {
   const [usersLoadFailed, setUsersLoadFailed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUids, setSelectedUids] = useState<Set<string>>(new Set());
-  const [isPurgingDemoData, setIsPurgingDemoData] = useState(false);
-  const [isSweepingOrphans, setIsSweepingOrphans] = useState(false);
   const [isBackfillingClaims, setIsBackfillingClaims] = useState(false);
-  const [debugEmail, setDebugEmail] = useState('');
-  const [isDebuggingClasses, setIsDebuggingClasses] = useState(false);
-  const [debugResult, setDebugResult] = useState<any>(null);
 
   // Invoices State
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -83,7 +78,6 @@ export default function AdminPage() {
   const [schoolSearchQuery, setSchoolSearchQuery] = useState('');
   const [schoolIdInput, setSchoolIdInput] = useState('');
   const [schoolNameInput, setSchoolNameInput] = useState('');
-  const [schoolTeacherCodeInput, setSchoolTeacherCodeInput] = useState('');
   const [schoolMaxUsesInput, setSchoolMaxUsesInput] = useState(5);
   const [assignEmailInput, setAssignEmailInput] = useState('');
   const [assignSchoolIdInput, setAssignSchoolIdInput] = useState('');
@@ -110,7 +104,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'list_invoices' }),
       });
       const data = await response.json();
@@ -136,7 +130,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'list_invites' }),
       });
       const data = await response.json();
@@ -170,7 +164,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'revoke_invite', inviteId }),
       });
       const data = await response.json();
@@ -203,14 +197,17 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'confirm_invoice', invoiceId }),
       });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || 'Failed to confirm invoice');
       }
-      setMessage({ text: `✅ ${data.message} Teacher Code: ${data.teacherCode}`, type: 'success' });
+      setMessage({
+        text: `✅ ${data.message} School: ${data.schoolId}${data.emailSent === false ? ' — confirmation email NOT sent, contact the director directly.' : ''}`,
+        type: data.emailSent === false ? 'error' : 'success',
+      });
       handleFetchInvoices();
     } catch (err: any) {
       console.error(err);
@@ -238,7 +235,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'delete_invoice', invoiceId }),
       });
       const data = await response.json();
@@ -258,7 +255,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'list' }),
       });
       const data = await response.json();
@@ -281,7 +278,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'list_schools' }),
       });
       const data = await response.json();
@@ -304,13 +301,12 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({
           passcode,
           action: 'create_school',
           schoolId: schoolIdInput,
           schoolName: schoolNameInput,
-          teacherCode: schoolTeacherCodeInput,
           maxUses: schoolMaxUsesInput,
         }),
       });
@@ -321,7 +317,6 @@ export default function AdminPage() {
       setMessage({ text: '✅ School created successfully!', type: 'success' });
       setSchoolIdInput('');
       setSchoolNameInput('');
-      setSchoolTeacherCodeInput('');
       setSchoolMaxUsesInput(5);
       setShowCreateSchoolModal(false);
       handleFetchSchools();
@@ -340,7 +335,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({
           passcode,
           action: 'assign_teacher',
@@ -372,7 +367,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({
           passcode,
           action: 'upgrade_school',
@@ -413,7 +408,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'delete_school', schoolId }),
       });
       const data = await response.json();
@@ -447,7 +442,7 @@ export default function AdminPage() {
         (s) =>
           s.name.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
           s.schoolId.toLowerCase().includes(schoolSearchQuery.toLowerCase()) ||
-          s.teacherCode.toLowerCase().includes(schoolSearchQuery.toLowerCase())
+          (s.schoolCode || '').toLowerCase().includes(schoolSearchQuery.toLowerCase())
       ),
     [schools, schoolSearchQuery]
   );
@@ -462,7 +457,7 @@ export default function AdminPage() {
       // so no admin secret ever ships in the client bundle.
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode: passcode.trim(), action: 'list' }),
       });
       if (response.ok) {
@@ -483,73 +478,23 @@ export default function AdminPage() {
     setMessage({ text: '', type: '' });
 
     try {
-      // 0. Sanitize inputs
       const cleanEmail = email.toLowerCase().trim();
-      const cleanPassword = password.trim();
-
-      // 1. Create purely via Auth
-      let uid = '';
-      try {
-        const res = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPassword);
-        uid = res.user.uid;
-      } catch (authErr: any) {
-        if (authErr.code === 'auth/email-already-in-use') {
-          // Auth account exists — route straight into the Upgrade tab (same
-          // /api/admin action:'upgrade' flow as handleUpgradeUser) instead of
-          // dead-ending. That endpoint looks the user up by email in
-          // Firestore, so it can still 404 if the Auth account exists but
-          // never got a Firestore users/ doc (a rarer data-integrity gap) —
-          // handleUpgradeUser's own error path already surfaces that clearly.
-          setEmail(cleanEmail);
-          setMode('upgrade');
-          setMessage({
-            text: 'This email is already registered — switched you to the Upgrade tab. Just hit Upgrade to elevate it to Pro.',
-            type: 'error',
-          });
-          setLoading(false);
-          return;
-        }
-        throw authErr;
-      }
-
-      // 2. Provision Free Profile first to satisfy Firestore rules
-      const profile: any = {
-        name,
-        email: cleanEmail,
-        plan: 'free',
-        scansUsedToday: 0,
-        lastScanDate: new Date().toISOString().split('T')[0],
-        maxScansPerDay: 2,
-        maxQuestionsPerDay: 5,
-        uid,
-      };
-
-      await setDoc(doc(dbInstance, 'users', uid), profile);
-
-      // 3. Immediately call the serverless admin-upgrade endpoint to elevate to Pro
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          passcode,
-          action: 'upgrade',
-          email: cleanEmail,
-          duration,
-        }),
+        headers: await adminHeaders(),
+        body: JSON.stringify({ passcode, action: 'create_pro_user', email: cleanEmail, password: password.trim(), name, duration }),
       });
-
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(
-          data.error ||
-            'User created as FREE, but failed to elevate to PRO. Please use the Upgrade tab.'
-        );
+      if (data.alreadyExists) {
+        setEmail(cleanEmail);
+        setMode('upgrade');
+        setMessage({
+          text: 'This email is already registered — switched you to the Upgrade tab. Just hit Upgrade to elevate it to Pro.',
+          type: 'error',
+        });
+        return;
       }
-
-      // 4. Immediately log out so admin session isn't replaced by the new user
-      await signOut(auth);
+      if (!response.ok) throw new Error(data.error || 'Error creating user');
 
       setMessage({ text: '✅ Pro User Created Successfully!', type: 'success' });
       setEmail('');
@@ -573,9 +518,7 @@ export default function AdminPage() {
 
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: await adminHeaders(),
         body: JSON.stringify({
           passcode,
           action: 'upgrade',
@@ -632,9 +575,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: await adminHeaders(),
         body: JSON.stringify({
           passcode,
           action: 'delete',
@@ -675,7 +616,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'delete', uid }),
       });
       const data = await response.json();
@@ -738,7 +679,7 @@ export default function AdminPage() {
       try {
         const response = await fetch('/api/admin', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: await adminHeaders(),
           body: JSON.stringify({ passcode, action: 'delete', uid }),
         });
         if (!response.ok) throw new Error();
@@ -760,118 +701,13 @@ export default function AdminPage() {
     setLoading(false);
   };
 
-  const handlePurgeDemoData = async () => {
-    setIsPurgingDemoData(true);
-    setMessage({ text: '', type: '' });
-    try {
-      const response = await fetch('/api/admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode, action: 'purge_demo_data', dryRun: true }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to scan for demo data');
-
-      const userCount = data.users?.length || 0;
-      const curriculumCount = data.curriculumDocIds?.length || 0;
-      if (userCount === 0 && curriculumCount === 0) {
-        setMessage({ text: 'No demo/test users or leftover demo curriculum docs found.', type: 'success' });
-        setIsPurgingDemoData(false);
-        return;
-      }
-
-      const emailPreview = (data.users || []).slice(0, 8).map((u: any) => u.email).join(', ');
-      const moreCount = userCount > 8 ? ` +${userCount - 8} more` : '';
-
-      setConfirmDialog({
-        title: `Permanently delete ${userCount} demo/test user${userCount !== 1 ? 's' : ''} (${emailPreview}${moreCount}) and ${curriculumCount} leftover curriculum doc${curriculumCount !== 1 ? 's' : ''}? This cannot be undone.`,
-        confirmText: `Delete ${userCount + curriculumCount} Item${userCount + curriculumCount !== 1 ? 's' : ''}`,
-        variant: 'destructive',
-        onConfirm: () => {
-          setConfirmDialog(null);
-          void performPurgeDemoData();
-        },
-      });
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Error scanning for demo data', type: 'error' });
-    } finally {
-      setIsPurgingDemoData(false);
-    }
-  };
-
-  const performPurgeDemoData = async () => {
-    setIsPurgingDemoData(true);
-    setMessage({ text: '', type: '' });
-    try {
-      const response = await fetch('/api/admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode, action: 'purge_demo_data', dryRun: false }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to purge demo data');
-
-      setMessage({
-        text: `✅ Deleted ${data.deletedUsers} demo/test user${data.deletedUsers !== 1 ? 's' : ''} and ${data.deletedCurriculums} leftover curriculum doc${data.deletedCurriculums !== 1 ? 's' : ''}.`,
-        type: 'success',
-      });
-      await handleFetchUsers();
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Error purging demo data', type: 'error' });
-    } finally {
-      setIsPurgingDemoData(false);
-    }
-  };
-
-  const handleDebugDirectorClasses = async () => {
-    if (!debugEmail.trim()) return;
-    setIsDebuggingClasses(true);
-    setDebugResult(null);
-    setMessage({ text: '', type: '' });
-    try {
-      const response = await fetch('/api/admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode, action: 'debug_director_classes', email: debugEmail.trim() }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Lookup failed');
-      setDebugResult(data);
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Error looking up account', type: 'error' });
-    } finally {
-      setIsDebuggingClasses(false);
-    }
-  };
-
-  const handleSimulateClientRead = async () => {
-    if (!debugEmail.trim()) return;
-    setIsDebuggingClasses(true);
-    setDebugResult(null);
-    setMessage({ text: '', type: '' });
-    try {
-      const response = await fetch('/api/admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode, action: 'simulate_client_read', email: debugEmail.trim() }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Simulation failed');
-      setDebugResult(data);
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Error simulating client read', type: 'error' });
-    } finally {
-      setIsDebuggingClasses(false);
-    }
-  };
-
   const handleBackfillAuthClaims = async () => {
     setIsBackfillingClaims(true);
     setMessage({ text: '', type: '' });
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'backfill_auth_claims' }),
       });
       const data = await response.json();
@@ -884,70 +720,6 @@ export default function AdminPage() {
       setMessage({ text: err.message || 'Error backfilling auth claims', type: 'error' });
     } finally {
       setIsBackfillingClaims(false);
-    }
-  };
-
-  const handleSweepOrphanedAssignments = async () => {
-    setIsSweepingOrphans(true);
-    setMessage({ text: '', type: '' });
-    try {
-      const response = await fetch('/api/admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode, action: 'sweep_orphaned_class_assignments', dryRun: true }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to scan for orphaned assignments');
-
-      const findingsCount = data.findingsCount || 0;
-      if (findingsCount === 0) {
-        setMessage({ text: 'No orphaned class assignments found.', type: 'success' });
-        setIsSweepingOrphans(false);
-        return;
-      }
-
-      const classPreview = (data.findings || [])
-        .slice(0, 8)
-        .map((f: any) => `${f.className} (${f.field}: ${f.reason})`)
-        .join(', ');
-      const moreCount = findingsCount > 8 ? ` +${findingsCount - 8} more` : '';
-
-      setConfirmDialog({
-        title: `Remove ${findingsCount} stale teacher assignment${findingsCount !== 1 ? 's' : ''} (${classPreview}${moreCount})? Each one is currently permission-denying the ENTIRE class list for the affected teacher/director whenever it's queried — this only removes the dangling uid reference, not the class itself.`,
-        confirmText: `Clean Up ${findingsCount} Assignment${findingsCount !== 1 ? 's' : ''}`,
-        variant: 'destructive',
-        onConfirm: () => {
-          setConfirmDialog(null);
-          void performSweepOrphanedAssignments();
-        },
-      });
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Error scanning for orphaned assignments', type: 'error' });
-    } finally {
-      setIsSweepingOrphans(false);
-    }
-  };
-
-  const performSweepOrphanedAssignments = async () => {
-    setIsSweepingOrphans(true);
-    setMessage({ text: '', type: '' });
-    try {
-      const response = await fetch('/api/admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode, action: 'sweep_orphaned_class_assignments', dryRun: false }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to clean up orphaned assignments');
-
-      setMessage({
-        text: `✅ Cleaned up ${data.fixedClasses} class${data.fixedClasses !== 1 ? 'es' : ''} (${data.findingsCount} stale reference${data.findingsCount !== 1 ? 's' : ''} removed).`,
-        type: 'success',
-      });
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Error cleaning up orphaned assignments', type: 'error' });
-    } finally {
-      setIsSweepingOrphans(false);
     }
   };
 
@@ -978,7 +750,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'downgrade', uid }),
       });
       const data = await response.json();
@@ -1010,7 +782,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await adminHeaders(),
         body: JSON.stringify({ passcode, action: 'impersonate', uid }),
       });
       const data = await response.json();
@@ -1218,24 +990,6 @@ export default function AdminPage() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={handlePurgeDemoData}
-                    disabled={isPurgingDemoData}
-                    className="self-start px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-xs font-bold border border-purple-500/30 disabled:opacity-40 transition-colors"
-                    title="Find and delete every user whose email contains 'demo' or 'test', plus leftover demo curriculum docs"
-                  >
-                    {isPurgingDemoData ? 'Scanning…' : '🧹 Purge Demo/Test Data'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSweepOrphanedAssignments}
-                    disabled={isSweepingOrphans}
-                    className="self-start px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-bold border border-amber-500/30 disabled:opacity-40 transition-colors"
-                    title="Find and remove stale teacherUid/assignedTeacherUids entries on class docs — a single one permission-denies that teacher's ENTIRE class list, not just that one class"
-                  >
-                    {isSweepingOrphans ? 'Scanning…' : '🧹 Sweep Orphaned Class Assignments'}
-                  </button>
-                  <button
-                    type="button"
                     onClick={handleBackfillAuthClaims}
                     disabled={isBackfillingClaims}
                     className="self-start px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 disabled:opacity-40 transition-colors"
@@ -1245,42 +999,6 @@ export default function AdminPage() {
                   </button>
                 </div>
 
-                <div className="flex flex-col gap-2 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                    Debug: dump raw class/school data for one account
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    <input
-                      type="email"
-                      value={debugEmail}
-                      onChange={(e) => setDebugEmail(e.target.value)}
-                      placeholder="director@email.com"
-                      className="flex-1 min-w-[200px] bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleDebugDirectorClasses}
-                      disabled={isDebuggingClasses || !debugEmail.trim()}
-                      className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-bold border border-blue-500/30 disabled:opacity-40 transition-colors"
-                    >
-                      {isDebuggingClasses ? 'Looking up…' : '🔍 Debug Classes'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSimulateClientRead}
-                      disabled={isDebuggingClasses || !debugEmail.trim()}
-                      className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 disabled:opacity-40 transition-colors"
-                      title="Signs in AS this account (real custom token) and runs the exact same client-SDK queries fetchClasses() runs, with firestore.rules actually enforced — shows which query fails and why"
-                    >
-                      {isDebuggingClasses ? 'Simulating…' : '🧪 Simulate Client Read'}
-                    </button>
-                  </div>
-                  {debugResult && (
-                    <pre className="mt-2 max-h-96 overflow-auto p-3 rounded-lg bg-black/60 text-[10px] text-emerald-400 whitespace-pre-wrap break-all">
-                      {JSON.stringify(debugResult, null, 2)}
-                    </pre>
-                  )}
-                </div>
                 {selectedUids.size > 0 && (
                   <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20">
                     <span className="text-xs font-bold text-red-400">
@@ -1337,7 +1055,7 @@ export default function AdminPage() {
                         ) : usersLoadFailed ? (
                           <tr>
                             <td colSpan={8} className="py-8 text-center text-red-400">
-                              ⚠️ Couldn't load members — see the error above. Not a sign the list is actually empty.
+                              ⚠️ Couldn&apos;t load members — see the error above. Not a sign the list is actually empty.
                             </td>
                           </tr>
                         ) : filteredUsers.length === 0 ? (
@@ -1485,7 +1203,7 @@ export default function AdminPage() {
                         <tr className="border-b border-zinc-800 text-zinc-400">
                           <th className="py-3 px-4 font-bold">School Code (ID)</th>
                           <th className="py-3 px-4 font-bold">School Name</th>
-                          <th className="py-3 px-4 font-bold">Teacher Auth Code</th>
+                          <th className="py-3 px-4 font-bold">Parent School Code</th>
                           {/* Secondary columns hidden below md (audit action #7) */}
                           <th className="py-3 px-4 font-bold hidden md:table-cell">Teacher Quota</th>
                           <th className="py-3 px-4 font-bold hidden md:table-cell">FT / KT Seats</th>
@@ -1520,7 +1238,7 @@ export default function AdminPage() {
                               </td>
                               <td className="py-3 px-4 text-zinc-300 font-medium">{school.name}</td>
                               <td className="py-3 px-4 text-orange-400 font-mono font-bold">
-                                {school.teacherCode}
+                                {school.schoolCode}
                               </td>
                               <td className="py-3 px-4 text-zinc-400 hidden md:table-cell">
                                 <div className="flex flex-col">
@@ -1649,22 +1367,8 @@ export default function AdminPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor="create-school-teacher-code" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
-                            Teacher Authorization Code
-                          </label>
-                          <input
-                            id="create-school-teacher-code"
-                            type="text"
-                            required
-                            placeholder="e.g. APEX10-TEACHER"
-                            value={schoolTeacherCodeInput}
-                            onChange={(e) => setSchoolTeacherCodeInput(e.target.value)}
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition font-bold uppercase tracking-wider"
-                          />
-                        </div>
-                        <div>
                           <label htmlFor="create-school-max-uses" className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
-                            Max Teacher Redemptions
+                            Max Parent Code Redemptions
                           </label>
                           <input
                             id="create-school-max-uses"
@@ -1957,7 +1661,7 @@ export default function AdminPage() {
                                 )}
                                 {inv.status === 'paid' && (
                                   <span className="text-[11px] font-mono text-zinc-400">
-                                    Code: {inv.generatedTeacherCode}
+                                    School: {inv.generatedSchoolId}
                                   </span>
                                 )}
                                 <button
