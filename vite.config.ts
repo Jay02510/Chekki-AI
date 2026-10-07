@@ -4,6 +4,7 @@ import { dirname, resolve } from 'path';
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { FAQ_DATA } from './src/data/faq';
 import { ROUTE_META } from './src/data/seo';
+import { SCHOOLS_QA } from './src/data/schoolsFaq';
 // import analyzeHandler from './api/analyze'; // Removed to avoid build issues
 
 // Custom middleware to handle Vercel-like API routes in Vite
@@ -126,17 +127,21 @@ const SITE = 'https://www.chekkiai.com';
 const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const enPath = (p: string) => (p === '/' ? '/en' : `/en${p}`);
 
-const faqJsonLd = (lang: 'ko' | 'en') =>
+const faqJsonLd = (lang: 'ko' | 'en', qa = FAQ_DATA.map((f) => ({ qKo: f.questionKo, qEn: f.questionEn, aKo: f.answerKo, aEn: f.answerEn }))) =>
   JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     inLanguage: lang,
-    mainEntity: FAQ_DATA.map((f) => ({
+    mainEntity: qa.map((f) => ({
       '@type': 'Question',
-      name: lang === 'ko' ? f.questionKo : f.questionEn,
-      acceptedAnswer: { '@type': 'Answer', text: lang === 'ko' ? f.answerKo : f.answerEn },
+      name: lang === 'ko' ? f.qKo : f.qEn,
+      acceptedAnswer: { '@type': 'Answer', text: lang === 'ko' ? f.aKo : f.aEn },
     })),
   }).replace(/</g, '\\u003c');
+
+// /schools: the same six director questions the page folds open.
+const schoolsQaBody = (lang: 'ko' | 'en') =>
+  SCHOOLS_QA.map((f) => `<section><h2>${esc(lang === 'ko' ? f.qKo : f.qEn)}</h2><p>${esc(lang === 'ko' ? f.aKo : f.aEn)}</p></section>`).join('');
 
 const faqBody = (lang: 'ko' | 'en') =>
   `<h1>${lang === 'ko' ? '채키 AI 자주 묻는 질문 (FAQ)' : 'Chekki AI — Frequently Asked Questions'}</h1>` +
@@ -172,26 +177,14 @@ const BODIES: Record<keyof typeof ROUTE_META, Record<'ko' | 'en', string>> = {
     en: faqBody('en') + `<p><a href="/en">Chekki AI home</a> &middot; <a href="/en/schools">Chekki AI for academies</a> &middot; <a href="/faq">한국어</a></p>`,
   },
   schools: {
-    ko: `<h1>학원용 채키 AI: 어학원 숙제 자동 채점과 학부모 리포트</h1>
-      <p>정답지는 한 번만 등록하세요. 가정 숙제 스캔은 그 정답지 기준으로 자동 채점되고, 보강할 내용은 다음 수업 전에 미리 파악되며, 학부모 리포트까지 한 번에 정리됩니다.</p>
-      <ul>
-        <li>원어민 선생님(FT)은 30초 안에 수업 기록 작성, 한국인 선생님(KT)이 검토 후 카카오톡 학부모 리포트 발송.</li>
-        <li>AI 추측이 아닌 학급의 실제 주간 정답지로 채점합니다.</li>
-        <li>오답 맞춤 복습 프린트와 학원 브랜드 성적표.</li>
-        <li>원장님 대시보드로 반·선생님 전체 현황 확인.</li>
-        <li>요금제: 7일 무료 학원 체험, 공부방/개인 교습소, 스타터 학원 패키지, 마스터 스쿨 프로, 대형 학원 & 프랜차이즈.</li>
-      </ul>
-      <p><a href="/faq">자주 묻는 질문</a> &middot; <a href="/">학부모용 채키 AI</a> &middot; <a href="/teacher">선생님·원장님 로그인</a> &middot; <a href="/en/schools">English</a></p>`,
-    en: `<h1>Chekki AI for English Academies: Homework Grading and Parent Reporting</h1>
-      <p>Upload the week's answer key once, autograde every home scan against it, and know exactly what to reteach — before the parent report even goes out.</p>
-      <ul>
-        <li>Foreign Teacher (FT) logs class in under 30 seconds; a Korean Teacher (KT) reviews the AI-drafted KakaoTalk parent update before sending.</li>
-        <li>Grades against the class's actual weekly answer key, not an AI guess.</li>
-        <li>Printable review sheets from each student's wrong answers, and academy-branded report cards.</li>
-        <li>Director dashboard across classes and teachers.</li>
-        <li>Plans: 7-day free trial, solo tutor and study room, starter academy, School Pro, large academy and franchise.</li>
-      </ul>
-      <p><a href="/en/faq">FAQ</a> &middot; <a href="/en">Chekki AI for families</a> &middot; <a href="/teacher">Teacher &amp; Director portal</a> &middot; <a href="/schools">한국어</a></p>`,
+    ko: `<h1>학원용 채키 AI: 정답지는 한 번만, 채점과 학부모 리포트는 채키가</h1>
+      <p>집에서 한 영어 숙제를 학원 정답지로 채점하고, 원어민 선생님의 수업 기록을 한국어 리포트로 바꿔요. 학부모님께 가기 전에는 한국인 선생님이 꼭 확인해요.</p>` +
+      schoolsQaBody('ko') +
+      `<p><a href="/faq">자주 묻는 질문</a> &middot; <a href="/">학부모용 채키 AI</a> &middot; <a href="/teacher">선생님·원장님 로그인</a> &middot; <a href="/en/schools">English</a></p>`,
+    en: `<h1>Chekki AI for academies: upload the answer key once, Chekki grades and drafts the parent reports</h1>
+      <p>Homework scanned at home is graded against your own answer key, and your foreign teachers' class notes become Korean parent reports. A Korean teacher checks each one before it goes out.</p>` +
+      schoolsQaBody('en') +
+      `<p><a href="/en/faq">FAQ</a> &middot; <a href="/en">Chekki AI for families</a> &middot; <a href="/teacher">Teacher &amp; Director portal</a> &middot; <a href="/schools">한국어</a></p>`,
   },
 };
 
@@ -221,10 +214,10 @@ const prerenderRoutes = () => ({
           .replace(/<main class="sr-only">[\s\S]*?<\/main>/, `<main class="sr-only">${BODIES[key][lang]}</main>`)
           // base: './' would resolve to /en/assets/... under /en/faq.
           .replace(/(src|href)="\.\//g, '$1="/');
-        if (key === 'faq') {
+        if (key === 'faq' || key === 'schools') {
           html = html.replace(
             /<script type="application\/ld\+json">\s*\{\s*"@context": "https:\/\/schema.org",\s*"@type": "FAQPage"[\s\S]*?<\/script>/,
-            `<script type="application/ld+json">${faqJsonLd(lang)}</script>`
+            `<script type="application/ld+json">${key === 'faq' ? faqJsonLd(lang) : faqJsonLd(lang, SCHOOLS_QA)}</script>`
           );
         }
         const file = (lang === 'en' ? enPath(path) : path === '/' ? '/index' : path) + '.html';

@@ -22,7 +22,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowRight,
   ArrowSquareOut,
-  ArrowDown,
+  CaretDown,
   ChartBar,
   Check,
   FilePdf,
@@ -39,6 +39,7 @@ import { Roundel } from '../../components/metro';
 import { langPath, switchLang, urlLang } from '../lib/lang';
 import { useWarmTheme } from '../lib/theme';
 import { track } from '../lib/track';
+import { SCHOOLS_QA } from '../data/schoolsFaq';
 
 // Every new school starts as a 7-day trial (api/set-initial-role.ts); the
 // plan param only labels which plan the director was looking at.
@@ -77,12 +78,78 @@ const Points: React.FC<{ items: string[] }> = ({ items }) => (
   </ul>
 );
 
+// One director question. Closed by default so the page reads as a short list;
+// the answer and its sample screen open on tap. Controlled so links can open it.
+const QFold: React.FC<{ i: number; title: string; open: boolean; onToggle: (open: boolean) => void; children: React.ReactNode }> = ({
+  i,
+  title,
+  open,
+  onToggle,
+  children,
+}) => (
+  <details id={`q${i + 1}`} open={open} onToggle={(e) => onToggle(e.currentTarget.open)} className="group scroll-mt-20">
+    <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-3 py-4 [&::-webkit-details-marker]:hidden">
+      <Roundel state={open ? 'current' : 'next'} size={34} className="transition-colors duration-200">
+        {i + 1}
+      </Roundel>
+      <h2 className="flex-1 text-[19px] font-extrabold leading-snug tracking-[-0.01em] text-ink group-hover:text-line-ink sm:text-[22px]">{title}</h2>
+      <CaretDown size={20} weight="bold" className="shrink-0 text-ink-3 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+    </summary>
+    <div className="pb-10 pt-2">{children}</div>
+  </details>
+);
+
 const SchoolsLandingPage: React.FC = () => {
   const isKo = urlLang() === 'ko';
   const [isNight, toggleTheme] = useWarmTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [yearly, setYearly] = useState(false);
   const [activeQ, setActiveQ] = useState(-1);
+  const [showBar, setShowBar] = useState(false);
+
+  // Grading-time calculator: the director's own numbers, nothing claimed.
+  const [students, setStudents] = useState(60);
+  const [sheets, setSheets] = useState(3);
+  const [minutes, setMinutes] = useState(2);
+  const [calcUsed, setCalcUsed] = useState(false);
+  const weeklyHours = (students * sheets * minutes) / 60;
+  const fmtHours = (h: number) => (h >= 10 ? Math.round(h) : Math.round(h * 10) / 10).toLocaleString(isKo ? 'ko-KR' : 'en-US');
+  const numField = (set: (n: number) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    set(Math.min(9999, Math.max(0, Number(e.target.value) || 0)));
+    if (!calcUsed) {
+      setCalcUsed(true);
+      track('schools_calculator_used');
+    }
+  };
+
+  // Phones: a sticky trial bar once the hero button scrolls away, hidden
+  // again when the closing panel (which has its own button) is on screen.
+  useEffect(() => {
+    const hero = document.getElementById('hero-cta');
+    const close = document.getElementById('close-cta');
+    if (!hero || !close) return;
+    let heroGone = false;
+    let closeSeen = false;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.target === hero) heroGone = !e.isIntersecting && e.boundingClientRect.top < 0;
+        else closeSeen = e.isIntersecting;
+      });
+      setShowBar(heroGone && !closeSeen);
+    });
+    io.observe(hero);
+    io.observe(close);
+    return () => io.disconnect();
+  }, []);
+  const [openQs, setOpenQs] = useState<boolean[]>(() => Array(6).fill(false));
+  const setQ = (i: number, v: boolean) => setOpenQs((prev) => (prev[i] === v ? prev : prev.map((o, j) => (j === i ? v : o))));
+  // Links to a question (rail, header "Pricing", #q5 URLs) open it, then scroll to it.
+  const openQ = (i: number) => (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    setQ(i, true);
+    track('schools_question_opened', { q: i + 1 });
+    requestAnimationFrame(() => document.getElementById(`q${i + 1}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
 
   // Consultation sheet
   const [consultOpen, setConsultOpen] = useState(false);
@@ -122,10 +189,20 @@ const SchoolsLandingPage: React.FC = () => {
 
   const startTrial = (where: string, plan = 'trial') => () => track('schools_start_trial', { where, plan_id: plan });
 
-  const questions = isKo
-    ? ['채점이 정확한가요?', '원어민 선생님이 한국어를 써야 하나요?', '집에서 한 숙제가 선생님께 보이나요?', '학부모님은 돈을 내나요?', '비용은 얼마인가요?', '어떻게 시작하나요?']
-    : ['Can we trust the grading?', 'Do foreign teachers have to write Korean?', 'Do teachers see homework done at home?', 'Do parents pay anything?', 'What does it cost?', 'How do we start?'];
+  const questions = SCHOOLS_QA.map((x) => (isKo ? x.qKo : x.qEn));
+  const answer = (i: number) => (isKo ? SCHOOLS_QA[i].aKo : SCHOOLS_QA[i].aEn);
   const qId = (i: number) => `q${i + 1}`;
+
+  useEffect(() => {
+    const fromHash = () => {
+      const m = /^#q([1-6])$/.exec(window.location.hash);
+      if (m) openQ(Number(m[1]) - 1)();
+    };
+    fromHash();
+    window.addEventListener('hashchange', fromHash);
+    return () => window.removeEventListener('hashchange', fromHash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sticky rail: the question whose section crosses the upper third is current.
   useEffect(() => {
@@ -179,19 +256,9 @@ const SchoolsLandingPage: React.FC = () => {
     'btn-press inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-surface px-5 text-[15px] font-bold text-ink ring-1 ring-inset ring-rule hover:ring-ink-3';
   const iconBtn =
     'flex h-11 w-11 items-center justify-center rounded-md text-ink-2 ring-1 ring-inset ring-rule hover:text-ink hover:ring-ink-3';
-  const h2 = 'text-[24px] font-extrabold leading-tight tracking-[-0.02em] text-ink sm:text-[28px]';
   const input =
     'w-full min-h-12 rounded-md bg-sunken px-4 text-[16px] text-ink ring-1 ring-inset ring-rule placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-line';
   const label = 'mb-1.5 block text-[14px] font-semibold text-ink-2';
-
-  const QHead: React.FC<{ i: number }> = ({ i }) => (
-    <div className="flex items-start gap-3">
-      <Roundel state="current" size={36} className="mt-0.5">
-        {i + 1}
-      </Roundel>
-      <h2 className={h2}>{questions[i]}</h2>
-    </div>
-  );
 
   const seatText = (id: string) => {
     const s = PLAN_SEATS[id];
@@ -220,7 +287,7 @@ const SchoolsLandingPage: React.FC = () => {
             <a href={langPath('/')} className="hover:text-ink">
               {isKo ? '학부모용' : 'For parents'}
             </a>
-            <a href="#q5" className="hover:text-ink">
+            <a href="#q5" onClick={openQ(4)} className="hover:text-ink">
               {isKo ? '요금' : 'Pricing'}
             </a>
             <a href={langPath('/faq')} className="hover:text-ink">
@@ -272,7 +339,7 @@ const SchoolsLandingPage: React.FC = () => {
             <a href="/teacher" className="rounded-md px-3 py-3 hover:bg-sunken">
               {isKo ? '선생님·원장님 로그인' : 'Teacher and director log in'}
             </a>
-            <a href="#q5" onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-3 hover:bg-sunken">
+            <a href="#q5" onClick={(e) => { setMenuOpen(false); openQ(4)(e); }} className="rounded-md px-3 py-3 hover:bg-sunken">
               {isKo ? '요금' : 'Pricing'}
             </a>
             <a href={langPath('/')} className="rounded-md px-3 py-3 hover:bg-sunken">
@@ -288,11 +355,11 @@ const SchoolsLandingPage: React.FC = () => {
         </div>
       )}
 
-      {/* HERO: the offer on the left, the director's questions on the right */}
+      {/* HERO: the offer on the left, Chekki on the right */}
       <section id="main-content" className="tile-ground">
-        <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 pb-12 pt-10 md:grid-cols-[1.15fr_1fr] md:gap-12 md:pb-16 md:pt-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-4 px-4 pb-8 pt-8 md:grid-cols-[1.15fr_1fr] md:gap-12 md:pb-16 md:pt-16">
           <div>
-            <h1 className="text-[34px] font-extrabold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[46px]">
+            <h1 className="text-[34px] font-extrabold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[42px]">
               {isKo ? (
                 <>
                   정답지는 한 번만.
@@ -313,7 +380,7 @@ const SchoolsLandingPage: React.FC = () => {
                 : "Homework scanned at home is graded against your own answer key, and your foreign teachers' class notes become Korean parent reports. A Korean teacher checks each one before it goes out."}
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a href={trialHref()} onClick={startTrial('hero')} className={`${primaryBtn} min-h-14 px-7 text-[17px]`}>
+              <a id="hero-cta" href={trialHref()} onClick={startTrial('hero')} className={`${primaryBtn} min-h-14 px-7 text-[17px]`}>
                 {isKo ? '7일 무료로 시작하기' : 'Start 7-day free trial'}
                 <ArrowRight size={20} weight="bold" />
               </a>
@@ -323,34 +390,28 @@ const SchoolsLandingPage: React.FC = () => {
             </div>
           </div>
 
-          <nav aria-labelledby="ask-title" className="rounded-lg bg-surface p-5 ring-1 ring-inset ring-rule sm:p-6">
-            <h2 id="ask-title" className="text-[15px] font-bold text-ink-3">
-              {isKo ? '원장님들이 먼저 묻는 것' : 'What directors ask first'}
-            </h2>
-            <ol className="mt-3 divide-y divide-rule">
-              {questions.map((q, i) => (
-                <li key={q}>
-                  <a href={`#${qId(i)}`} className="group flex min-h-12 items-center gap-3 py-2.5 text-[16px] font-bold text-ink">
-                    <Roundel state="next" size={30}>
-                      {i + 1}
-                    </Roundel>
-                    <span className="flex-1 group-hover:text-line-ink">{q}</span>
-                    <ArrowDown size={16} weight="bold" className="shrink-0 text-ink-3" aria-hidden="true" />
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </nav>
+          <img
+            src="/images/chekki-holding-laptop.webp"
+            alt=""
+            width={920}
+            height={920}
+            fetchPriority="high"
+            className="mx-auto w-full max-w-[150px] md:max-w-[400px]"
+          />
         </div>
       </section>
 
       {/* QUESTIONS, with a sticky rail on wide screens */}
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[200px_1fr]">
-        <nav aria-label={isKo ? '질문 목록' : 'Questions'} className="hidden lg:block">
-          <ol className={`sticky top-24 mt-12 space-y-1 transition-[opacity,visibility] duration-500 ${activeQ < 0 ? 'invisible opacity-0' : 'visible opacity-100'}`}>
+      <div className="mx-auto grid max-w-6xl gap-4 px-4 py-8 md:py-12 lg:gap-10 lg:grid-cols-[220px_1fr]">
+        <nav aria-labelledby="ask-title" className="lg:block">
+          <h2 id="ask-title" className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px] lg:pt-4">
+            {isKo ? '원장님들이 먼저 묻는 것' : 'What directors ask first'}
+          </h2>
+          <p className="mt-1.5 text-[15px] text-ink-3">{isKo ? '궁금한 질문을 눌러 보세요.' : 'Tap a question to see the answer.'}</p>
+          <ol className={`sticky top-24 mt-6 hidden space-y-1 lg:block transition-[opacity,visibility] duration-500 ${activeQ < 0 || !openQs.some(Boolean) ? 'invisible opacity-0' : 'visible opacity-100'}`}>
             {questions.map((q, i) => (
               <li key={q}>
-                <a href={`#${qId(i)}`} aria-current={activeQ === i ? 'true' : undefined} className="flex min-h-11 items-center gap-2.5 rounded-md px-1 text-[14px] font-semibold text-ink-2 hover:text-ink">
+                <a href={`#${qId(i)}`} onClick={openQ(i)} aria-current={activeQ === i ? 'true' : undefined} className="flex min-h-11 items-center gap-2.5 rounded-md px-1 text-[14px] font-semibold text-ink-2 hover:text-ink">
                   <Roundel state={activeQ === i ? 'current' : activeQ > i ? 'done' : 'next'} size={26} className="transition-colors duration-300">
                     {i + 1}
                   </Roundel>
@@ -361,17 +422,12 @@ const SchoolsLandingPage: React.FC = () => {
           </ol>
         </nav>
 
-        <div className="min-w-0">
+        <div className="min-w-0 divide-y divide-rule border-y border-rule">
           {/* Q1: grading accuracy */}
-          <section id={qId(0)} className="scroll-mt-20 border-b border-rule py-12 md:py-14">
+          <QFold i={0} title={questions[0]} open={openQs[0]} onToggle={(v) => setQ(0, v)}>
             <div className="grid gap-8 md:grid-cols-[1fr_1.05fr]">
               <div>
-                <QHead i={0} />
-                <p className="mt-4 text-[17px] font-semibold leading-relaxed text-ink">
-                  {isKo
-                    ? '선생님이 올린 이번 주 정답지로 먼저 채점해요. 정답지에 있는 문항은 AI가 답을 추측하지 않아요.'
-                    : "Chekki grades against the answer key your teacher uploaded this week. For anything on the key, the AI doesn't guess the answer."}
-                </p>
+                <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(0)}</p>
                 <Points
                   items={
                     isKo
@@ -423,18 +479,13 @@ const SchoolsLandingPage: React.FC = () => {
                 </table>
               </figure>
             </div>
-          </section>
+          </QFold>
 
           {/* Q2: FT log, AI draft, KT sends */}
-          <section id={qId(1)} className="scroll-mt-20 border-b border-rule py-12 md:py-14">
+          <QFold i={1} title={questions[1]} open={openQs[1]} onToggle={(v) => setQ(1, v)}>
             <div className="grid gap-8 md:grid-cols-[1fr_1.05fr]">
               <div>
-                <QHead i={1} />
-                <p className="mt-4 text-[17px] font-semibold leading-relaxed text-ink">
-                  {isKo
-                    ? '아니요. 원어민 선생님은 영어로 짧은 수업 기록만 남겨요. 말로 해도 돼요. AI가 한국어 리포트 초안을 쓰고, 한국인 선생님이 고쳐서 보내요.'
-                    : 'No. Foreign teachers leave a short class note in English, typed or spoken. The AI drafts the Korean report, and a Korean teacher edits and sends it.'}
-                </p>
+                <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(1)}</p>
                 <Points
                   items={
                     isKo
@@ -484,18 +535,13 @@ const SchoolsLandingPage: React.FC = () => {
                 </ol>
               </figure>
             </div>
-          </section>
+          </QFold>
 
           {/* Q3: home homework reaches the teacher */}
-          <section id={qId(2)} className="scroll-mt-20 border-b border-rule py-12 md:py-14">
+          <QFold i={2} title={questions[2]} open={openQs[2]} onToggle={(v) => setQ(2, v)}>
             <div className="grid gap-8 md:grid-cols-[1fr_1.05fr]">
               <div>
-                <QHead i={2} />
-                <p className="mt-4 text-[17px] font-semibold leading-relaxed text-ink">
-                  {isKo
-                    ? '네. 학부모님이 학원에서 받은 초대 링크로 연결하면, 집에서 찍은 숙제의 점수와 틀린 문제가 원생별로 선생님 화면에 쌓여요.'
-                    : 'Yes. Once a parent joins with the invite link from your academy, scores and misses from homework scanned at home build up per student on the teacher’s screen.'}
-                </p>
+                <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(2)}</p>
                 <Points
                   items={
                     isKo
@@ -532,18 +578,13 @@ const SchoolsLandingPage: React.FC = () => {
                 </p>
               </figure>
             </div>
-          </section>
+          </QFold>
 
           {/* Q4: what the parent sees, and what it costs them */}
-          <section id={qId(3)} className="scroll-mt-20 border-b border-rule py-12 md:py-14">
+          <QFold i={3} title={questions[3]} open={openQs[3]} onToggle={(v) => setQ(3, v)}>
             <div className="grid gap-8 md:grid-cols-[1fr_1.05fr]">
               <div>
-                <QHead i={3} />
-                <p className="mt-4 text-[17px] font-semibold leading-relaxed text-ink">
-                  {isKo
-                    ? '아니요. 학원에 연결된 학부모님은 채키 앱을 무료로 써요. 숙제를 찍으면 채점과 한국어 설명을 받고, 선생님이 보낸 수업 리포트도 앱에서 봐요.'
-                    : 'No. Parents linked to your academy use the Chekki app for free. They scan homework to get it graded and explained in Korean, and read your class reports in the app.'}
-                </p>
+                <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(3)}</p>
                 <a href={langPath('/')} className="mt-3 inline-flex min-h-11 items-center gap-1.5 text-[15px] font-bold text-line-ink">
                   {isKo ? '학부모님이 보는 화면 보기' : 'See what parents get'}
                   <ArrowRight size={16} weight="bold" />
@@ -571,12 +612,11 @@ const SchoolsLandingPage: React.FC = () => {
                 </div>
               </figure>
             </div>
-          </section>
+          </QFold>
 
           {/* Q5: pricing */}
-          <section id={qId(4)} className="scroll-mt-20 border-b border-rule py-12 md:py-14">
+          <QFold i={4} title={questions[4]} open={openQs[4]} onToggle={(v) => setQ(4, v)}>
             <div className="flex flex-wrap items-end justify-between gap-4">
-              <QHead i={4} />
               <div className="inline-flex rounded-md bg-sunken p-0.5" role="group" aria-label={isKo ? '결제 주기' : 'Billing'}>
                 {[false, true].map((y) => (
                   <button
@@ -655,13 +695,12 @@ const SchoolsLandingPage: React.FC = () => {
                 {isKo ? '을 따라요.' : '.'}
               </p>
             </div>
-          </section>
+          </QFold>
 
           {/* Q6: getting started */}
-          <section id={qId(5)} className="scroll-mt-20 py-12 md:py-14">
-            <QHead i={5} />
+          <QFold i={5} title={questions[5]} open={openQs[5]} onToggle={(v) => setQ(5, v)}>
             {/* The orange line: vertical on phones, across from sm. Roundels sit on it. */}
-            <ol className="relative mt-7 grid gap-6 before:absolute before:bottom-4 before:left-[14px] before:top-4 before:w-1 before:rounded-full before:bg-line sm:grid-cols-4 sm:gap-4 sm:before:bottom-auto sm:before:left-[12.5%] sm:before:right-[12.5%] sm:before:top-[14px] sm:before:h-1 sm:before:w-auto">
+            <ol className="relative mt-2 grid gap-6 before:absolute before:bottom-4 before:left-[14px] before:top-4 before:w-1 before:rounded-full before:bg-line sm:grid-cols-4 sm:gap-4 sm:before:bottom-auto sm:before:left-[12.5%] sm:before:right-[12.5%] sm:before:top-[14px] sm:before:h-1 sm:before:w-auto">
               {(isKo
                 ? [
                     ['가입하기', '학원명과 원장님 이메일로 가입해요. 7일 체험이 바로 시작돼요.'],
@@ -697,9 +736,49 @@ const SchoolsLandingPage: React.FC = () => {
                 <ArrowRight size={16} weight="bold" />
               </a>
             </div>
-          </section>
+          </QFold>
         </div>
       </div>
+
+      {/* CALCULATOR: how much hand-grading the academy does today */}
+      <section className="mx-auto max-w-6xl px-4 pb-12 md:pb-16">
+        <div className="grid gap-6 rounded-lg bg-surface p-5 ring-1 ring-inset ring-rule sm:p-6 md:grid-cols-[1.3fr_1fr] md:p-8">
+          <div>
+            <h2 className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px]">
+              {isKo ? '우리 학원은 채점에 얼마나 쓰고 있을까요?' : 'How much time does grading take at your academy?'}
+            </h2>
+            <p className="mt-1.5 text-[15px] text-ink-3">{isKo ? '우리 학원 숫자로 바꿔 보세요.' : 'Put in your own numbers.'}</p>
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+              {[
+                { id: 'calc-students', label: isKo ? '원생 수' : 'Students', value: students, set: setStudents },
+                { id: 'calc-sheets', label: isKo ? '학생당 주간 숙제 장수' : 'Sheets per student a week', value: sheets, set: setSheets },
+                { id: 'calc-minutes', label: isKo ? '한 장 채점 시간 (분)' : 'Minutes to grade a sheet', value: minutes, set: setMinutes },
+              ].map((f) => (
+                <div key={f.id}>
+                  <label htmlFor={f.id} className={label}>
+                    {f.label}
+                  </label>
+                  <input id={f.id} type="number" inputMode="numeric" min={0} value={f.value} onChange={numField(f.set)} className={`${input} num`} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col justify-center rounded-md bg-line-soft p-5" aria-live="polite">
+            <p className="text-[15px] font-semibold text-ink-2">{isKo ? '매주 손 채점에 쓰는 시간' : 'Hand-grading every week'}</p>
+            <p className="num mt-1 text-[40px] font-extrabold leading-none tracking-[-0.02em] text-ink">
+              {isKo ? `약 ${fmtHours(weeklyHours)}시간` : `~${fmtHours(weeklyHours)} hours`}
+            </p>
+            <p className="num mt-2 text-[15px] font-semibold text-ink-2">
+              {isKo ? `4주면 약 ${fmtHours(weeklyHours * 4)}시간` : `about ${fmtHours(weeklyHours * 4)} hours every 4 weeks`}
+            </p>
+            <p className="mt-4 text-[14px] leading-relaxed text-ink-2">
+              {isKo
+                ? '채키를 쓰면 이 채점은 학부모님이 집에서 숙제를 찍을 때 학원 정답지로 이뤄져요.'
+                : 'With Chekki, this grading happens when parents scan homework at home, against your answer key.'}
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* EXTRAS: readiness check and free teaching resources */}
       <section className="bg-sunken">
@@ -713,12 +792,12 @@ const SchoolsLandingPage: React.FC = () => {
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-line-soft text-line-ink">
               <ChartBar size={22} weight="bold" aria-hidden="true" />
             </span>
-            <h2 className="mt-3 text-[18px] font-extrabold text-ink">{isKo ? '우리 학원 AI 준비도 진단' : 'Is your academy ready for AI grading?'}</h2>
+            <h2 className="mt-3 text-[18px] font-extrabold text-ink">{isKo ? '우리 학원, AI를 쓸 준비가 얼마나 됐을까요?' : 'How ready is your academy for AI?'}</h2>
             <p className="mt-1 flex-1 text-[15px] leading-relaxed text-ink-2">
-              {isKo ? '몇 가지 질문에 답하면 준비도 점수를 알려 줘요.' : 'Answer a few questions and get a readiness score.'}
+              {isKo ? '몇 가지 질문에 답하면 우리 학원이 어디쯤인지 알려 줘요.' : 'Answer a few questions to see where your academy stands.'}
             </p>
             <span className="mt-4 inline-flex items-center gap-1.5 text-[15px] font-bold text-line-ink">
-              {isKo ? '진단해 보기' : 'Take the check'}
+              {isKo ? '준비도 확인하기' : 'Check your readiness'}
               <ArrowSquareOut size={16} weight="bold" />
             </span>
           </a>
@@ -750,9 +829,9 @@ const SchoolsLandingPage: React.FC = () => {
       </section>
 
       {/* CLOSE: cocoa panel, trial first, consultation second */}
-      <section className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+      <section id="close-cta" className="mx-auto max-w-6xl px-4 py-12 md:py-16">
         <div className="grid items-center gap-6 rounded-lg bg-sign p-6 text-on-sign md:grid-cols-[auto_1fr_auto] md:p-8">
-          <img src="/images/chekki-holding-laptop.webp" alt="" width={112} height={112} className="hidden h-28 w-28 object-contain md:block" />
+          <img src="/images/chekki-wave.webp" alt="" width={112} height={112} className="hidden h-28 w-28 object-contain md:block" />
           <div>
             <h2 className="text-[24px] font-extrabold tracking-[-0.02em] sm:text-[28px]">
               {isKo ? '이번 주 정답지 한 장으로 시작해 보세요' : "Start with this week's answer key"}
@@ -778,7 +857,7 @@ const SchoolsLandingPage: React.FC = () => {
         </div>
       </section>
 
-      <footer className="border-t border-rule bg-surface">
+      <footer className="border-t border-rule bg-surface pb-20 md:pb-0">
         <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-10 text-[13px] text-ink-3">
           <div className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-ink-2">
             <a href={langPath('/')} className="hover:text-ink">{isKo ? '학부모용' : 'For parents'}</a>
@@ -803,6 +882,19 @@ const SchoolsLandingPage: React.FC = () => {
           <p>© {new Date().getFullYear()} Chekki AI</p>
         </div>
       </footer>
+
+      {/* PHONES: sticky trial bar */}
+      <div
+        aria-hidden={!showBar}
+        className={`fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-ground px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 transition-[transform,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden ${
+          showBar && !consultOpen && !menuOpen ? 'visible translate-y-0' : 'invisible translate-y-full'
+        }`}
+      >
+        <a href={trialHref()} onClick={startTrial('sticky')} tabIndex={showBar ? undefined : -1} className={`${primaryBtn} w-full`}>
+          {isKo ? '7일 무료로 시작하기' : 'Start 7-day free trial'}
+          <ArrowRight size={18} weight="bold" />
+        </a>
+      </div>
 
       {/* CONSULTATION: bottom sheet on phones, centred card from sm */}
       {consultOpen && (
