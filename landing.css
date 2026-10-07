@@ -92,6 +92,19 @@
     --ease-premium: cubic-bezier(0.32, 0.72, 0, 1);
   }
 
+  /* Warm pages (landing, /faq, /schools): same browser surfaces as the app. */
+  .font-warm {
+    caret-color: var(--m-line);
+  }
+  .font-warm ::selection {
+    background: var(--m-line);
+    color: #2b211a;
+  }
+  .font-warm :focus-visible {
+    outline: 3px solid var(--m-line);
+    outline-offset: 2px;
+  }
+
   p, h1, h2, h3, h4, h5, h6, span, a, button {
     word-break: keep-all;
     overflow-wrap: break-word;

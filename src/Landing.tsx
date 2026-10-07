@@ -93,7 +93,7 @@ export default function Home() {
     'flex h-11 w-11 items-center justify-center rounded-md text-ink-2 ring-1 ring-inset ring-rule hover:text-ink hover:ring-ink-3';
 
   return (
-    <main className="font-warm min-h-dvh w-full overflow-x-hidden bg-ground text-ink break-keep">
+    <main className="font-warm min-h-dvh w-full overflow-x-clip bg-ground text-ink break-keep">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-line focus:px-4 focus:py-2 focus:font-bold focus:text-[#2b211a]"

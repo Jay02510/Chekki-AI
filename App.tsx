@@ -620,7 +620,7 @@ function AppContent() {
     return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><TeacherPage isNight={isNight} /></Suspense></ErrorBoundary>;
   }
   if (showSchoolsPage && platform === 'web')
-    return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><SchoolsLandingPage isNight={isNight} setIsNight={setThemeByUser} /></Suspense></ErrorBoundary>;
+    return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><SchoolsLandingPage /></Suspense></ErrorBoundary>;
 
   // The FT/KT/Director dashboards only exist on web (TeacherPage etc. above
   // are gated `platform === 'web'`) — on the downloaded native app they were

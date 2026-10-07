@@ -18,25 +18,6 @@ const App = lazy(() => import('../App'));
 initSentry();
 
 function LandingRoot() {
-  const [isNight, setIsNightState] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('chekki_theme');
-      if (saved === 'light') return false;
-      if (saved === 'dark') return true;
-    }
-    return true;
-  });
-
-  const setIsNight = (val: boolean | ((prev: boolean) => boolean)) => {
-    setIsNightState((prev) => {
-      const next = typeof val === 'function' ? val(prev) : val;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('chekki_theme', next ? 'dark' : 'light');
-      }
-      return next;
-    });
-  };
-
   const [pathname, setPathname] = useState(stripLang(window.location.pathname));
 
   useEffect(() => {
@@ -122,7 +103,7 @@ function LandingRoot() {
     // was added (Audit: /schools outreach page broken since 2026-08-10).
     return (
       <ToastProvider>
-        <SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} />
+        <SchoolsLandingPage />
       </ToastProvider>
     );
   }

@@ -153,7 +153,7 @@ components:
 
 # Design System: Chekki AI (parent app)
 
-Scope: the parent app (`app.html` → `App.tsx`, `components/`) the marketing landing page (`index.html` → `src/Landing.tsx`), and the parent pages that render through the landing bundle (`/subscribe`, `/privacy`, `/terms`, `/refund`, `/youth`, `/support`). `/faq` (`src/pages/FaqPage.tsx`) is covered too. The Schools pages (`/schools`, `src/pages/TeacherPage.tsx`, `src/components/`) still use the older dark look and are **not** covered here.
+Scope: the parent app (`app.html` → `App.tsx`, `components/`) the marketing landing page (`index.html` → `src/Landing.tsx`), and the parent pages that render through the landing bundle (`/subscribe`, `/privacy`, `/terms`, `/refund`, `/youth`, `/support`). `/faq` (`src/pages/FaqPage.tsx`) and the academy landing `/schools` (`src/pages/SchoolsLandingPage.tsx`) are covered too. The staff dashboards (`src/pages/TeacherPage.tsx`, `src/components/`) still use the older dark look and are **not** covered here.
 
 ## Overview
 
@@ -319,6 +319,17 @@ Toasts: cocoa panel (or `wrong` for errors), white text, slide down under the ap
 
 `src/Landing.tsx`, same tokens and rules as the app. Order: hero (tagline, one orange "지금 무료로 채점해 보기" that opens `/app` as a guest, plus a card saying Chekki is designed for phones with an app link), three steps, why-not-a-chatbot, academy (free via invite, copy a message for the director, link to `/schools`), pricing (₩0 / ₩9,900 / ₩99,000), three FAQs, closing CTA, footer with business info. The app bar always shows the language and theme toggles, on every width. The theme follows the device until the visitor picks one; `useWarmTheme()` in `src/lib/theme.ts` saves the choice under `chekki_theme_override`, the same key the app reads. `/faq` uses the same hook. CTA clicks log `landing_start_scan` / `landing_get_app` via `src/lib/track.ts`.
 
+## Schools landing
+
+`src/pages/SchoolsLandingPage.tsx`, same tokens, set a little denser for directors and teachers (15 to 16px body, tables, two columns). The page is six questions a director actually asks, each answered in one bold sentence, a few checked points, and a small proof card. Order: hero (headline, one orange "7일 무료로 시작하기" to `/teacher?activate=true&role=director&plan=…`, and a card listing the six questions as roundel links), grading accuracy, FT log to KT-reviewed report, home homework reaching the teacher, what parents pay, pricing table, getting started, readiness check and teacher resources, cocoa closing panel (trial first, consultation second), footer.
+
+- **Proof cards** are white cards with a 1px rule ring and a "예시 화면 / Sample" tag top right. Anything that looks like data on them is sample data and must carry that tag.
+- **Pricing** reads prices and seats from `api/_lib/pricingTiers.ts`; never hand-copy numbers. Rows list seats and price only. Solo and Starter start the trial; School Pro and Enterprise open the consultation sheet.
+- **Sticky question rail** (lg and up): six roundels down the left that appear once reading starts and show done / current / next. The page root uses `overflow-x-clip`, not `overflow-x-hidden`, or sticky elements stop sticking.
+- **Steps** are an orange line with roundels on it (vertical on phones, across from `sm`), not a row of cards.
+- **Consultation** is a bottom sheet on phones and a centred card from `sm`, posting to `/api/request-school-invoice`.
+- No response-time, refund-guarantee, "most popular", per-plan student-count or feature-gating claims unless the product backs them.
+
 ## Copy
 
 - Korean in 해요체, short. "다시 설명 받기", not "새로운 추천 받기". "처음으로", not "결과 삭제 (처음으로)".
@@ -346,5 +357,5 @@ Toasts: cocoa panel (or `wrong` for errors), white text, slide down under the ap
 
 ## Known gaps
 
-- Schools pages and dashboards are intentionally out of scope.
+- Staff dashboards (FT, KT, Director) are not on this system yet.
 - The landing bundle's `font-sans` is Onest (for the staff pages). Parent pages on that bundle opt into Pretendard with `font-warm`; use it on any new parent page there.
