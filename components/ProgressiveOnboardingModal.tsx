@@ -130,18 +130,18 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-28 h-28 sm:w-32 sm:h-32 rounded-[2rem] mx-auto mb-6 shadow-[0_20px_40px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/40 p-2 shrink-0"
+          className="w-28 h-28 sm:w-32 sm:h-32 rounded-md mx-auto mb-6 shrink-0"
         >
           <img
-            src="/assets/bento_reveal_only.png"
+            src="/assets/chekki-mascot.webp"
             alt="Setup"
             className="w-full h-full object-contain drop-shadow-md"
           />
         </motion.div>
-        <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight">
+        <h3 className="text-3xl  font-black text-white tracking-tight leading-tight">
           {language === 'ko' ? 'AI 튜터 설정' : 'Tailor the AI'}
         </h3>
-        <p className="text-sm text-zinc-400 mt-4 font-korean leading-relaxed max-w-[280px] mx-auto">
+        <p className="text-sm text-on-sign-2 mt-4 font-korean leading-relaxed max-w-[280px] mx-auto">
           {language === 'ko'
             ? '아이의 학습 수준에 맞게 단어와 해설을 조정합니다.'
             : "We'll adjust the vocabulary and explanations to fit your child perfectly."}
@@ -151,7 +151,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       <div className="space-y-8 mb-10 flex-1 overflow-y-auto custom-scrollbar px-2 -mx-2">
         {/* Age Select */}
         <div>
-          <label className="block text-xs font-bold text-zinc-400 mb-4">
+          <label className="block text-xs font-bold text-on-sign-2 mb-4">
             {language === 'ko' ? '아이의 연령' : "Child's Age"}
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -161,17 +161,17 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 whileTap={{ scale: 0.97 }}
                 key={opt.id}
                 onClick={() => setSelectedAge(opt.id)}
-                className={`relative overflow-hidden py-4 px-3 rounded-2xl text-sm font-bold transition-[background-color,box-shadow,color] duration-200 ${
+                className={`relative overflow-hidden py-4 px-3 rounded-md text-sm font-bold transition-[background-color,box-shadow,color] duration-200 ${
                   selectedAge === opt.id
-                    ? 'text-black ring-2 ring-orange-500 bg-orange-500/10'
-                    : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
+                    ? 'text-black ring-2 ring-orange-500 bg-line/10'
+                    : 'bg-white/5 text-on-sign-2 hover:bg-white/10 ring-1 ring-white/10'
                 }`}
               >
                 <span className="relative z-10">{language === 'ko' ? opt.ko : opt.en}</span>
                 {selectedAge === opt.id && (
                   <motion.div
                     layoutId="age-active"
-                    className="absolute inset-0 bg-orange-500/20 blur-xl"
+                    className="absolute inset-0 bg-line/20 blur-xl"
                   />
                 )}
               </motion.button>
@@ -181,7 +181,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
         {/* Level Select */}
         <div>
-          <label className="block text-xs font-bold text-zinc-400 mb-4">
+          <label className="block text-xs font-bold text-on-sign-2 mb-4">
             {language === 'ko' ? '영어 학습 경험' : 'English Experience'}
           </label>
           <div className="flex flex-col gap-3">
@@ -191,17 +191,17 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 whileTap={{ scale: 0.97 }}
                 key={opt.id}
                 onClick={() => setSelectedLevel(opt.id)}
-                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-[background-color,box-shadow,color] duration-200 text-left flex justify-between items-center ${
+                className={`relative overflow-hidden py-4 px-5 rounded-md text-sm font-bold transition-[background-color,box-shadow,color] duration-200 text-left flex justify-between items-center ${
                   selectedLevel === opt.id
-                    ? 'text-black ring-2 ring-orange-500 bg-orange-500/10'
-                    : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
+                    ? 'text-black ring-2 ring-orange-500 bg-line/10'
+                    : 'bg-white/5 text-on-sign-2 hover:bg-white/10 ring-1 ring-white/10'
                 }`}
               >
                 <span className="relative z-10">{language === 'ko' ? opt.ko : opt.en}</span>
                 {selectedLevel === opt.id && (
                   <motion.div
                     layoutId="level-active"
-                    className="absolute inset-0 bg-orange-500/20 blur-xl"
+                    className="absolute inset-0 bg-line/20 blur-xl"
                   />
                 )}
                 <AnimatePresence>
@@ -210,7 +210,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      className="w-5 h-5 rounded-full bg-orange-500 text-black flex items-center justify-center text-xs relative z-10"
+                      className="w-5 h-5 rounded-full bg-line text-[#2b211a] flex items-center justify-center text-xs relative z-10"
                     >
                       ✓
                     </motion.div>
@@ -223,7 +223,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
         {/* Parent Level Select */}
         <div>
-          <label className="block text-xs font-bold text-zinc-400 mb-4">
+          <label className="block text-xs font-bold text-on-sign-2 mb-4">
             {language === 'ko' ? '엄마/아빠의 영어 수준' : "Parent's English Level"}
           </label>
           <div className="flex flex-col gap-3">
@@ -236,17 +236,17 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 whileTap={{ scale: 0.97 }}
                 key={opt.id}
                 onClick={() => setParentLevel(opt.id)}
-                className={`relative overflow-hidden py-4 px-5 rounded-2xl text-sm font-bold transition-[background-color,box-shadow,color] duration-200 text-left flex justify-between items-center ${
+                className={`relative overflow-hidden py-4 px-5 rounded-md text-sm font-bold transition-[background-color,box-shadow,color] duration-200 text-left flex justify-between items-center ${
                   parentLevel === opt.id
-                    ? 'text-black ring-2 ring-orange-500 bg-orange-500/10'
-                    : 'bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10'
+                    ? 'text-black ring-2 ring-orange-500 bg-line/10'
+                    : 'bg-white/5 text-on-sign-2 hover:bg-white/10 ring-1 ring-white/10'
                 }`}
               >
                 <span className="relative z-10">{language === 'ko' ? opt.ko : opt.en}</span>
                 {parentLevel === opt.id && (
                   <motion.div
                     layoutId="parent-level-active"
-                    className="absolute inset-0 bg-orange-500/20 blur-xl"
+                    className="absolute inset-0 bg-line/20 blur-xl"
                   />
                 )}
                 <AnimatePresence>
@@ -255,7 +255,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      className="w-5 h-5 rounded-full bg-orange-500 text-black flex items-center justify-center text-xs relative z-10"
+                      className="w-5 h-5 rounded-full bg-line text-[#2b211a] flex items-center justify-center text-xs relative z-10"
                     >
                       ✓
                     </motion.div>
@@ -276,7 +276,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           whileTap={{ scale: 0.98 }}
           onClick={handleProfileSubmit}
           disabled={!selectedAge || !selectedLevel || !parentLevel || isSubmitting}
-          className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed group shadow-[0_10px_20px_rgba(255,255,255,0.1)]"
+          className="w-full relative overflow-hidden bg-line text-[#2b211a] py-4 rounded-md font-bold text-[15px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
         >
           <span className="relative z-10">
             {isSubmitting
@@ -293,7 +293,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <div className="flex justify-center">
           <button
             onClick={onSkip}
-            className="text-zinc-400 min-h-11 px-4 font-bold text-xs hover:text-white transition-colors cursor-pointer"
+            className="text-on-sign-2 min-h-11 px-4 font-bold text-xs hover:text-white transition-colors cursor-pointer"
           >
             {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
           </button>
@@ -319,20 +319,20 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       animate="animate"
       exit="exit"
       transition={transitionSpring}
-      className="flex flex-col h-full items-center justify-center text-center py-8"
+      className="flex flex-col h-full items-center text-center pt-2 overflow-y-auto"
     >
       <motion.div
         animate={{ y: [0, -10, 0], rotate: [2, -1, 2] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-        className="w-44 h-44 sm:w-48 sm:h-48 rounded-[2.5rem] flex items-center justify-center mb-6 sm:mb-8 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/40 p-2 shrink-0"
+        className="w-44 h-44 sm:w-48 sm:h-48 rounded-md flex items-center justify-center mb-6 sm:mb-8 shrink-0"
       >
         <img src={imageSrc} alt="" className="w-full h-full object-contain drop-shadow-md" />
       </motion.div>
-      <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight mb-5">
+      <h3 className="text-3xl  font-black text-white tracking-tight leading-tight mb-5">
         {language === 'ko' ? titleKo : titleEn}
       </h3>
       <p
-        className={`text-base text-zinc-400 leading-relaxed max-w-[280px] font-korean ${extraContent ? 'mb-6' : 'mb-12'}`}
+        className={`text-base text-on-sign-2 leading-relaxed max-w-[280px] font-korean ${extraContent ? 'mb-6' : 'mb-12'}`}
       >
         {language === 'ko' ? descKo : descEn}
       </p>
@@ -344,7 +344,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={nextAction}
-          className="w-full relative overflow-hidden bg-white text-black py-5 rounded-full font-black text-sm transition-colors shadow-[0_10px_20px_rgba(255,255,255,0.1)] group"
+          className="w-full relative overflow-hidden bg-line text-[#2b211a] py-4 rounded-md font-bold text-[15px] transition-colors group"
         >
           <span className="relative z-10">
             {isLast
@@ -362,7 +362,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         <div className="flex justify-center mt-3">
           <button
             onClick={onSkip}
-            className="text-zinc-400 min-h-11 px-4 font-bold text-xs hover:text-white transition-colors cursor-pointer"
+            className="text-on-sign-2 min-h-11 px-4 font-bold text-xs hover:text-white transition-colors cursor-pointer"
           >
             {language === 'ko' ? '다음에 할게요' : 'Skip for now'}
           </button>
@@ -373,7 +373,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
             <motion.div
               key={i}
               layout
-              className={`h-1.5 rounded-full transition-colors ${step === i ? 'bg-orange-500 w-8' : 'bg-white/20 w-1.5'}`}
+              className={`h-1.5 rounded-full transition-colors ${step === i ? 'bg-line w-8' : 'bg-white/20 w-1.5'}`}
             />
           ))}
         </div>
@@ -402,10 +402,10 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={transitionSpring}
-        className="relative w-full max-w-[420px] h-[750px] max-h-[90vh] bg-white/5 ring-1 ring-white/10 p-2 sm:p-2.5 rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.8)]"
+        className="relative w-full max-w-[420px] h-[750px] max-h-[90vh] rounded-md shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)]"
       >
         {/* Inner Core */}
-        <div className="relative w-full h-full bg-brand-dark rounded-[2.5rem] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden flex flex-col">
+        <div className="relative w-full h-full bg-sign text-on-sign rounded-md p-6 sm:p-8  overflow-hidden flex flex-col">
 
           <AnimatePresence mode="wait">
             {step === 0 &&
@@ -421,24 +421,24 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 false,
                 <div className="flex flex-col gap-4 mt-2 w-full max-w-[280px] mx-auto mb-8">
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold text-zinc-400 text-left">
+                    <label className="text-xs font-bold text-on-sign-2 text-left">
                       {language === 'ko' ? '언어' : 'Language'}
                     </label>
-                    <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
+                    <div className="flex bg-white/5 rounded-md p-1 border border-white/10 relative">
                       {/* Active Background for Language */}
                       <div
-                        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl bg-zinc-800 transition-transform duration-200 ease-out`}
+                        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md bg-zinc-800 transition-transform duration-200 ease-out`}
                         style={{ transform: `translateX(${language === 'en' ? '0' : '100%'})` }}
                       />
                       <button
                         onClick={() => setLanguage('en')}
-                        className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'en' ? 'text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
+                        className={`relative z-10 w-1/2 py-2 rounded-md text-xs font-bold transition-colors ${language === 'en' ? 'text-white' : 'text-on-sign-2 hover:text-on-sign'}`}
                       >
                         English
                       </button>
                       <button
                         onClick={() => setLanguage('ko')}
-                        className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors ${language === 'ko' ? 'text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
+                        className={`relative z-10 w-1/2 py-2 rounded-md text-xs font-bold transition-colors ${language === 'ko' ? 'text-white' : 'text-on-sign-2 hover:text-on-sign'}`}
                       >
                         한국어
                       </button>
@@ -447,18 +447,18 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
 
                   {setIsNight && (
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-zinc-400 text-left">
+                      <label className="text-xs font-bold text-on-sign-2 text-left">
                         {language === 'ko' ? '화면' : 'Theme'}
                       </label>
-                      <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10 relative">
+                      <div className="flex bg-white/5 rounded-md p-1 border border-white/10 relative">
                         {/* Active Background for Theme */}
                         <div
-                          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl bg-zinc-800 transition-transform duration-200 ease-out`}
+                          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md bg-zinc-800 transition-transform duration-200 ease-out`}
                           style={{ transform: `translateX(${!isNight ? '0' : '100%'})` }}
                         />
                         <button
                           onClick={() => setIsNight(false)}
-                          className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${!isNight ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                          className={`relative z-10 w-1/2 py-2 rounded-md text-xs font-bold transition-colors flex items-center justify-center gap-2 ${!isNight ? 'text-white' : 'text-on-sign-2 hover:text-on-sign'}`}
                         >
                           <svg
                             className="w-3.5 h-3.5"
@@ -477,7 +477,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                         </button>
                         <button
                           onClick={() => setIsNight(true)}
-                          className={`relative z-10 w-1/2 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${isNight ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                          className={`relative z-10 w-1/2 py-2 rounded-md text-xs font-bold transition-colors flex items-center justify-center gap-2 ${isNight ? 'text-white' : 'text-on-sign-2 hover:text-on-sign'}`}
                         >
                           <svg
                             className="w-3.5 h-3.5"
@@ -508,25 +508,25 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 animate="animate"
                 exit="exit"
                 transition={transitionSpring}
-                className="flex flex-col h-full items-center justify-center text-center py-8"
+                className="flex flex-col h-full items-center text-center pt-2 overflow-y-auto"
               >
                 {/* Illustration */}
                 <motion.div
                   animate={{ y: [0, -10, 0], rotate: [1, -1, 1] }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-40 h-40 rounded-[2.5rem] flex items-center justify-center mb-6 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ring-white/10 overflow-hidden bg-black/40 p-2 shrink-0"
+                  className="w-40 h-40 rounded-md flex items-center justify-center mb-6 shrink-0"
                 >
                   <img
-                    src="/assets/teacher_ob_share_code.png"
+                    src="/assets/chekki_mascot_3d.png"
                     alt=""
                     className="w-full h-full object-contain drop-shadow-md"
                   />
                 </motion.div>
 
-                <h3 className="text-3xl font-display font-black text-white tracking-tight leading-tight mb-4">
+                <h3 className="text-3xl  font-black text-white tracking-tight leading-tight mb-4">
                   {language === 'ko' ? '초대 코드가 있으신가요?' : 'Got an Invite Code?'}
                 </h3>
-                <p className="text-base text-zinc-400 leading-relaxed max-w-[260px] mb-6">
+                <p className="text-base text-on-sign-2 leading-relaxed max-w-[260px] mb-6">
                   {language === 'ko'
                     ? '원장님/선생님께 초대받은 코드를 입력하면 숙제 채점이 교재에 맞게 자동 조정됩니다.'
                     : "Enter the invite code your child's teacher sent you to sync homework grading with their class curriculum."}
@@ -556,7 +556,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       }}
                       placeholder={language === 'ko' ? '예: MERC82' : 'e.g. MERC82'}
                       maxLength={8}
-                      className="w-full bg-white/5 border border-white/10 focus:border-orange-500 outline-none text-white font-black text-xl text-center tracking-[0.3em] p-4 rounded-2xl transition-colors uppercase placeholder:text-zinc-600 placeholder:tracking-normal placeholder:text-sm placeholder:font-normal"
+                      className="w-full bg-white/5 border border-white/10 focus:border-line outline-none text-white font-black text-xl text-center tracking-[0.3em] p-4 rounded-md transition-colors uppercase placeholder:text-zinc-600 placeholder:tracking-normal placeholder:text-sm placeholder:font-normal"
                     />
                     {classJoinError && (
                       <p className="text-red-400 text-xs font-semibold">{classJoinError}</p>
@@ -564,7 +564,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                     <button
                       onClick={handleJoinClass}
                       disabled={classCode.trim().length < 4 || isJoiningClass}
-                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black font-black text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-[background-color,opacity,transform] active:scale-[0.98] flex items-center justify-center gap-2"
+                      className="w-full py-4 bg-line  disabled:opacity-40 text-black font-black text-sm rounded-md  transition-[background-color,opacity,transform] active:scale-[0.98] flex items-center justify-center gap-2"
                     >
                       {isJoiningClass ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -581,13 +581,13 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       <motion.div
                         key={i}
                         layout
-                        className={`h-1.5 rounded-full transition-colors ${step === i ? 'bg-orange-500 w-8' : 'bg-white/20 w-1.5'}`}
+                        className={`h-1.5 rounded-full transition-colors ${step === i ? 'bg-line w-8' : 'bg-white/20 w-1.5'}`}
                       />
                     ))}
                   </div>
                   <button
                     onClick={onComplete}
-                    className="text-zinc-400 min-h-11 px-4 font-bold text-xs hover:text-white transition-colors cursor-pointer"
+                    className="text-on-sign-2 min-h-11 px-4 font-bold text-xs hover:text-white transition-colors cursor-pointer"
                   >
                     {language === 'ko' ? '나중에 입력할게요' : 'Skip for now'}
                   </button>

@@ -1,121 +1,791 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-17T00:00:00Z",
+  "generatedAt": "2026-10-07T05:20:17+00:00",
   "title": "Design System: Chekki AI",
   "extensions": {
     "colorMeta": {
-      "primary": { "role": "primary", "displayName": "Brand Orange", "canonical": "oklch(67% 0.22 38)", "tonalRamp": ["#431407", "#7c2d12", "#9a3412", "#c2410c", "#ea580c", "#f97316", "#fdba74", "#ffedd5"] },
-      "brand-dark": { "role": "neutral", "displayName": "Brand Dark", "canonical": "oklch(8% 0.005 240)", "tonalRamp": ["#000000", "#050505", "#09090b", "#121214", "#1c1c1f", "#27272a", "#3f3f46", "#52525b"] },
-      "brand-card": { "role": "neutral", "displayName": "Brand Card Background", "canonical": "oklch(12% 0.01 240)", "tonalRamp": ["#050505", "#0F1014", "#16171b", "#222328", "#2e3037", "#3b3d45", "#484b55", "#565a65"] },
-      "accent-purple": { "role": "reserved", "displayName": "Accent Purple (reserved, not active)", "canonical": "oklch(63% 0.25 302)", "tonalRamp": ["#3b0764", "#581c87", "#6b21a8", "#7e22ce", "#9333ea", "#a855f7", "#c084fc", "#e9d5ff"] },
-      "accent-pink": { "role": "reserved", "displayName": "Accent Pink (reserved, not active)", "canonical": "oklch(59% 0.23 350)", "tonalRamp": ["#500724", "#831843", "#9d174d", "#be185d", "#db2777", "#ec4899", "#f472b6", "#fbcfe8"] },
-      "success": { "role": "semantic", "displayName": "Success Emerald", "canonical": "oklch(70% 0.15 165)", "tonalRamp": ["#022c22", "#064e3b", "#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7"] },
-      "error": { "role": "semantic", "displayName": "Error Red", "canonical": "oklch(63% 0.21 25)", "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5"] },
-      "warning": { "role": "semantic", "displayName": "Warning Amber", "canonical": "oklch(76% 0.16 70)", "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d"] },
-      "neutral-text": { "role": "neutral", "displayName": "Neutral Text", "canonical": "oklch(97% 0.01 70)", "tonalRamp": ["#1a1917", "#3a3835", "#5c5954", "#807c76", "#a6a29b", "#ccc8c1", "#ede9e1", "#fdfaf5"] }
+      "line": {
+        "role": "primary",
+        "displayName": "Line Orange",
+        "canonical": "#ef7c1c",
+        "cssVar": "--m-line",
+        "tonalRamp": [
+          "#472305",
+          "#773b08",
+          "#a7520c",
+          "#d66a0f",
+          "#f18c37",
+          "#f5ad70",
+          "#f9cea9",
+          "#fdf1e7"
+        ]
+      },
+      "line-ink": {
+        "role": "primary",
+        "displayName": "Line Ink",
+        "canonical": "#a84d06",
+        "cssVar": "--m-line-ink",
+        "tonalRamp": [
+          "#4a2203",
+          "#7b3804",
+          "#ac4f06",
+          "#de6608",
+          "#f88830",
+          "#faaa6b",
+          "#fccca6",
+          "#fef1e6"
+        ]
+      },
+      "line-soft": {
+        "role": "primary",
+        "displayName": "Line Wash",
+        "canonical": "#fde9d7",
+        "cssVar": "--m-line-soft",
+        "tonalRamp": [
+          "#492404",
+          "#793d06",
+          "#aa5508",
+          "#db6d0b",
+          "#f58f33",
+          "#f8af6d",
+          "#fbcfa8",
+          "#fef2e7"
+        ]
+      },
+      "wrong": {
+        "role": "secondary",
+        "displayName": "Wrong Red",
+        "canonical": "#d1242b",
+        "cssVar": "--m-wrong",
+        "tonalRamp": [
+          "#410b0d",
+          "#6d1316",
+          "#981a1f",
+          "#c42228",
+          "#e0484e",
+          "#e97c81",
+          "#f2b1b3",
+          "#fbe9ea"
+        ]
+      },
+      "wrong-soft": {
+        "role": "secondary",
+        "displayName": "Wrong Wash",
+        "canonical": "#fbe3e3",
+        "cssVar": "--m-wrong-soft",
+        "tonalRamp": [
+          "#430a0a",
+          "#701010",
+          "#9c1616",
+          "#c91d1d",
+          "#e44444",
+          "#ec7979",
+          "#f4afaf",
+          "#fce9e9"
+        ]
+      },
+      "right": {
+        "role": "secondary",
+        "displayName": "Right Green",
+        "canonical": "#0a7a3e",
+        "cssVar": "--m-right",
+        "tonalRamp": [
+          "#064724",
+          "#0a763c",
+          "#0ea554",
+          "#11d46c",
+          "#39ef8d",
+          "#72f3ae",
+          "#aaf8ce",
+          "#e7fdf1"
+        ]
+      },
+      "right-soft": {
+        "role": "secondary",
+        "displayName": "Right Wash",
+        "canonical": "#dcf1e4",
+        "cssVar": "--m-right-soft",
+        "tonalRamp": [
+          "#163722",
+          "#245b39",
+          "#337f50",
+          "#42a467",
+          "#66c289",
+          "#92d3ab",
+          "#bde5cc",
+          "#edf8f1"
+        ]
+      },
+      "sign": {
+        "role": "neutral",
+        "displayName": "Enamel Charcoal",
+        "canonical": "#1e2226",
+        "cssVar": "--m-sign",
+        "tonalRamp": [
+          "#22262b",
+          "#384047",
+          "#4f5964",
+          "#657380",
+          "#8794a0",
+          "#aab2bb",
+          "#ccd1d6",
+          "#f1f2f4"
+        ]
+      },
+      "on-sign": {
+        "role": "neutral",
+        "displayName": "Sign White",
+        "canonical": "#ffffff",
+        "cssVar": "--m-on-sign",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#b2b2b2",
+          "#d1d1d1",
+          "#f2f2f2"
+        ]
+      },
+      "on-sign-2": {
+        "role": "neutral",
+        "displayName": "Sign Grey",
+        "canonical": "#b4bac1",
+        "cssVar": "--m-on-sign-2",
+        "tonalRamp": [
+          "#23262a",
+          "#3a3f46",
+          "#515962",
+          "#68727e",
+          "#8a939e",
+          "#abb2ba",
+          "#cdd1d5",
+          "#f1f2f3"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Platform Ground",
+        "canonical": "#f3f4f1",
+        "cssVar": "--m-ground",
+        "tonalRamp": [
+          "#282b22",
+          "#424738",
+          "#5d644f",
+          "#778165",
+          "#98a187",
+          "#b6bca9",
+          "#d3d7cc",
+          "#f3f4f1"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Panel White",
+        "canonical": "#ffffff",
+        "cssVar": "--m-surface",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#b2b2b2",
+          "#d1d1d1",
+          "#f2f2f2"
+        ]
+      },
+      "sunken": {
+        "role": "neutral",
+        "displayName": "Recess",
+        "canonical": "#e9ebe7",
+        "cssVar": "--m-sunken",
+        "tonalRamp": [
+          "#262a23",
+          "#40463a",
+          "#596151",
+          "#737d68",
+          "#949e8a",
+          "#b2b9ac",
+          "#d1d5cd",
+          "#f2f3f1"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink 1",
+        "canonical": "#16191c",
+        "cssVar": "--m-ink",
+        "tonalRamp": [
+          "#22262b",
+          "#384047",
+          "#4f5964",
+          "#657381",
+          "#8794a1",
+          "#a9b2bc",
+          "#ccd1d7",
+          "#f1f2f4"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink 2",
+        "canonical": "#474d55",
+        "cssVar": "--m-ink-2",
+        "tonalRamp": [
+          "#23262a",
+          "#3a3f45",
+          "#515861",
+          "#68717d",
+          "#8a939e",
+          "#acb2b9",
+          "#cdd1d5",
+          "#f1f2f3"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink 3",
+        "canonical": "#5f666e",
+        "cssVar": "--m-ink-3",
+        "tonalRamp": [
+          "#232629",
+          "#3b3f44",
+          "#535960",
+          "#6a727b",
+          "#8c939c",
+          "#adb2b8",
+          "#ced1d4",
+          "#f1f2f3"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#d6d9d4",
+        "cssVar": "--m-rule",
+        "tonalRamp": [
+          "#262924",
+          "#3f443c",
+          "#585f54",
+          "#717a6c",
+          "#939b8d",
+          "#b2b7ae",
+          "#d1d4ce",
+          "#f2f3f1"
+        ]
+      },
+      "tile-joint": {
+        "role": "neutral",
+        "displayName": "Tile Joint",
+        "canonical": "rgba(22, 25, 28, 0.055)",
+        "cssVar": "--m-tile"
+      },
+      "line-dark": {
+        "role": "primary",
+        "displayName": "Line Orange (dark)",
+        "canonical": "#f08a32",
+        "cssVar": "--m-line",
+        "tonalRamp": [
+          "#472405",
+          "#773c09",
+          "#a6540c",
+          "#d66b10",
+          "#f08d37",
+          "#f5ae70",
+          "#f9cea9",
+          "#fdf1e7"
+        ]
+      },
+      "line-ink-dark": {
+        "role": "primary",
+        "displayName": "Line Ink (dark)",
+        "canonical": "#f6a560",
+        "cssVar": "--m-line-ink",
+        "tonalRamp": [
+          "#482404",
+          "#793b07",
+          "#a9530a",
+          "#d96b0c",
+          "#f48c34",
+          "#f7ad6e",
+          "#facea8",
+          "#fef1e7"
+        ]
+      },
+      "line-soft-dark": {
+        "role": "primary",
+        "displayName": "Line Wash (dark)",
+        "canonical": "#3a2614",
+        "cssVar": "--m-line-soft",
+        "tonalRamp": [
+          "#392514",
+          "#5f3e21",
+          "#85572e",
+          "#ab703b",
+          "#c89160",
+          "#d8b18d",
+          "#e7d0bb",
+          "#f8f2ec"
+        ]
+      },
+      "wrong-dark": {
+        "role": "secondary",
+        "displayName": "Wrong Red (dark)",
+        "canonical": "#ff6369",
+        "cssVar": "--m-wrong",
+        "tonalRamp": [
+          "#4c0003",
+          "#800005",
+          "#b20007",
+          "#e60009",
+          "#ff2931",
+          "#ff666c",
+          "#ffa3a7",
+          "#ffe5e6"
+        ]
+      },
+      "wrong-soft-dark": {
+        "role": "secondary",
+        "displayName": "Wrong Wash (dark)",
+        "canonical": "#3a1a1c",
+        "cssVar": "--m-wrong-soft",
+        "tonalRamp": [
+          "#351819",
+          "#58272a",
+          "#7b373b",
+          "#9e474c",
+          "#bd6b70",
+          "#d09599",
+          "#e3c0c2",
+          "#f7edee"
+        ]
+      },
+      "right-dark": {
+        "role": "secondary",
+        "displayName": "Right Green (dark)",
+        "canonical": "#3fd07f",
+        "cssVar": "--m-right",
+        "tonalRamp": [
+          "#0f3d24",
+          "#19663b",
+          "#238f53",
+          "#2db86b",
+          "#53d58c",
+          "#84e1ad",
+          "#b5edce",
+          "#ebfaf1"
+        ]
+      },
+      "right-soft-dark": {
+        "role": "secondary",
+        "displayName": "Right Wash (dark)",
+        "canonical": "#12301f",
+        "cssVar": "--m-right-soft",
+        "tonalRamp": [
+          "#153824",
+          "#235d3c",
+          "#318254",
+          "#3fa76c",
+          "#63c58d",
+          "#90d5ae",
+          "#bce6ce",
+          "#ecf8f1"
+        ]
+      },
+      "sign-dark": {
+        "role": "neutral",
+        "displayName": "Enamel Charcoal (dark)",
+        "canonical": "#262b31",
+        "cssVar": "--m-sign",
+        "tonalRamp": [
+          "#21262b",
+          "#383f48",
+          "#4e5865",
+          "#647181",
+          "#8693a1",
+          "#a9b2bc",
+          "#cbd1d7",
+          "#f1f2f4"
+        ]
+      },
+      "on-sign-2-dark": {
+        "role": "neutral",
+        "displayName": "Sign Grey (dark)",
+        "canonical": "#a9b0b8",
+        "cssVar": "--m-on-sign-2",
+        "tonalRamp": [
+          "#23262a",
+          "#3a3f46",
+          "#515962",
+          "#68727e",
+          "#8a939e",
+          "#abb2ba",
+          "#cdd1d5",
+          "#f1f2f3"
+        ]
+      },
+      "ground-dark": {
+        "role": "neutral",
+        "displayName": "Platform Ground (dark)",
+        "canonical": "#101215",
+        "cssVar": "--m-ground",
+        "tonalRamp": [
+          "#21252b",
+          "#373e48",
+          "#4d5765",
+          "#637082",
+          "#8591a2",
+          "#a8b0bd",
+          "#cbd0d7",
+          "#f1f2f4"
+        ]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Panel White (dark)",
+        "canonical": "#181b1f",
+        "cssVar": "--m-surface",
+        "tonalRamp": [
+          "#21262b",
+          "#383f48",
+          "#4e5865",
+          "#647181",
+          "#8692a2",
+          "#a9b1bc",
+          "#cbd0d7",
+          "#f1f2f4"
+        ]
+      },
+      "sunken-dark": {
+        "role": "neutral",
+        "displayName": "Recess (dark)",
+        "canonical": "#0b0c0e",
+        "cssVar": "--m-sunken",
+        "tonalRamp": [
+          "#22252b",
+          "#383d47",
+          "#4f5664",
+          "#656e81",
+          "#8790a1",
+          "#a9afbc",
+          "#cccfd7",
+          "#f1f2f4"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Ink 1 (dark)",
+        "canonical": "#f1f2ef",
+        "cssVar": "--m-ink",
+        "tonalRamp": [
+          "#282a22",
+          "#424639",
+          "#5c6250",
+          "#777f67",
+          "#989f89",
+          "#b5baab",
+          "#d3d6cc",
+          "#f3f4f1"
+        ]
+      },
+      "ink-2-dark": {
+        "role": "neutral",
+        "displayName": "Ink 2 (dark)",
+        "canonical": "#bcc1c7",
+        "cssVar": "--m-ink-2",
+        "tonalRamp": [
+          "#23262a",
+          "#3a3f45",
+          "#515961",
+          "#68727d",
+          "#8a939d",
+          "#acb2b9",
+          "#cdd1d5",
+          "#f1f2f3"
+        ]
+      },
+      "ink-3-dark": {
+        "role": "neutral",
+        "displayName": "Ink 3 (dark)",
+        "canonical": "#959ba2",
+        "cssVar": "--m-ink-3",
+        "tonalRamp": [
+          "#242629",
+          "#3c3f44",
+          "#53595f",
+          "#6b727a",
+          "#8d939b",
+          "#aeb2b7",
+          "#ced1d4",
+          "#f1f2f3"
+        ]
+      },
+      "rule-dark": {
+        "role": "neutral",
+        "displayName": "Rule (dark)",
+        "canonical": "#2d3238",
+        "cssVar": "--m-rule",
+        "tonalRamp": [
+          "#22262a",
+          "#393f47",
+          "#505863",
+          "#66727f",
+          "#8893a0",
+          "#aab2bb",
+          "#ccd1d6",
+          "#f1f2f4"
+        ]
+      },
+      "tile-joint-dark": {
+        "role": "neutral",
+        "displayName": "Tile Joint (dark)",
+        "canonical": "rgba(255, 255, 255, 0.04)",
+        "cssVar": "--m-tile"
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display Font", "purpose": "Large display headers, brand titles (Space Grotesk)." },
-      "serif": { "displayName": "Serif Accent", "purpose": "Rare 'handwritten paper' register — italic quote blocks, worksheet-styled surfaces. Not a hierarchy role. Playfair Display, linked in index.html and app.html." },
-      "body": { "displayName": "Body Font", "purpose": "General reading text, bilingual instructions, feedback scripts." },
-      "handwritten": { "displayName": "Handwritten Annotations", "purpose": "Skeuomorphic corrections, student notes, emphasis." }
+      "sign-display": {
+        "displayName": "Sign Display",
+        "purpose": "Current stop name on the station sign; 44px desktop, 30px at 400px+, 26px phone."
+      },
+      "sign-display-mobile": {
+        "displayName": "Sign Display (phone)",
+        "purpose": "Phone size of the station sign name."
+      },
+      "door": {
+        "displayName": "Door",
+        "purpose": "Platform-door scan button label; 28px on phones."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Result and grading sign titles."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles, question text, tutor script."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Paragraphs, reports, inputs."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Stop labels, status labels, menu items."
+      },
+      "secondary-line": {
+        "displayName": "Secondary Line",
+        "purpose": "The other-language line under a primary label; hidden when identical."
+      }
     },
     "shadows": [
-      { "name": "interactive-glow", "value": "0 8px 32px rgba(249, 115, 22, 0.15)", "purpose": "Focus states for interactive items." }
+      {
+        "name": "floating-layer",
+        "value": "0 16px 40px -12px rgba(0,0,0,0.35)",
+        "purpose": "Dropdown menus only; layers that float above content."
+      },
+      {
+        "name": "floating-toast",
+        "value": "0 16px 40px -16px rgba(0,0,0,0.5)",
+        "purpose": "Fixed toasts and notices."
+      }
     ],
     "motion": [
-      { "name": "ease-standard", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Warm, natural transition curve." },
-      { "name": "ease-premium", "value": "cubic-bezier(0.32, 0.72, 0, 1)", "purpose": "Modal and toast entrance/exit (--ease-premium in index.css)." },
-      { "name": "ease-out-strong", "value": "cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Button press physics (.btn-press)." }
+      {
+        "name": "ease-arrive",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Train arrival: loop-strip marker and rail fill slide prev to current over 700ms on mount. Also panel reveals."
+      },
+      {
+        "name": "train-arrival",
+        "value": "700ms var(--ease-arrive)",
+        "purpose": "The one signature motion moment."
+      },
+      {
+        "name": "metro-transit",
+        "value": "1.8s cubic-bezier(0.45, 0, 0.2, 1) infinite",
+        "purpose": "Grading screen: orange pill travels Scan to Explain. Replaces any percentage bar."
+      },
+      {
+        "name": "press",
+        "value": "160ms cubic-bezier(0.23, 1, 0.32, 1), scale(0.97)",
+        "purpose": "Button press feedback."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "all durations 0.01ms",
+        "purpose": "prefers-reduced-motion disables everything."
+      }
     ],
     "breakpoints": [
-      { "name": "mobile", "value": "640px" },
-      { "name": "tablet", "value": "768px" },
-      { "name": "desktop", "value": "1024px" }
-    ]
+      {
+        "name": "xs",
+        "value": "400px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ],
+    "tile": {
+      "value": "48px grid, 1px joints in --m-tile",
+      "purpose": "Platform-tile ground on full-screen states."
+    },
+    "theme": {
+      "light": ":root",
+      "dark": "html.dark",
+      "source": "prefers-color-scheme, overridden by localStorage chekki_theme_override; pre-paint script in app.html"
+    }
   },
   "components": [
+    {
+      "name": "Platform Door Scan Button",
+      "kind": "button",
+      "refersTo": "button-door",
+      "description": "The one door-sized primary action on scan home: orange block, ink camera circle, bilingual label pair.",
+      "html": "<button class=\"ds-door\"><span class=\"ds-door-icon\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M208 56h-27.72l-13.63-20.44A8 8 0 0 0 160 32H96a8 8 0 0 0-6.65 3.56L75.71 56H48a24 24 0 0 0-24 24v112a24 24 0 0 0 24 24h160a24 24 0 0 0 24-24V80a24 24 0 0 0-24-24Zm8 136a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V80a8 8 0 0 1 8-8h32a8 8 0 0 0 6.66-3.56L100.28 48h55.43l13.63 20.44A8 8 0 0 0 176 72h32a8 8 0 0 1 8 8ZM128 88a44 44 0 1 0 44 44 44.05 44.05 0 0 0-44-44Zm0 72a28 28 0 1 1 28-28 28 28 0 0 1-28 28Z\"/></svg></span><span class=\"ds-door-ko\">학습지 찍기</span><span class=\"ds-door-en\">Scan a worksheet</span></button>",
+      "css": ".ds-door{display:flex;flex-direction:column;align-items:flex-start;gap:0;min-height:232px;width:360px;padding:32px;border:0;border-radius:6px;background:var(--m-line,#ef7c1c);color:#16191c;text-align:left;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;cursor:pointer;transition:transform 200ms cubic-bezier(0.16,1,0.3,1)}.ds-door:active{transform:scale(0.99)}.ds-door:focus-visible{outline:3px solid var(--m-line,#ef7c1c);outline-offset:2px}.ds-door-icon{display:inline-flex;width:56px;height:56px;border-radius:9999px;background:#16191c;color:var(--m-line,#ef7c1c);align-items:center;justify-content:center;margin-bottom:auto}.ds-door-ko{margin-top:24px;font-size:36px;font-weight:800;letter-spacing:-0.02em;line-height:1.15}.ds-door-en{margin-top:4px;font-size:16px;font-weight:500;line-height:1.3;color:rgba(22,25,28,0.75)}"
+    },
     {
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Primary action button, styled in bold brand orange.",
-      "html": "<button class=\"ds-btn-primary\">GET STARTED →</button>",
-      "css": ".ds-btn-primary { background-color: #F97316; color: #FFFFFF; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; border: none; border-radius: 24px; padding: 14px 28px; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background-color: #EA580C; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249, 115, 22, 0.25); }"
+      "description": "Orange action button with ink text, 48px.",
+      "html": "<button class=\"ds-btn-primary\">다시 찍기</button>",
+      "css": ".ds-btn-primary{min-height:48px;padding:0 16px;border:0;border-radius:6px;background:var(--m-line,#ef7c1c);color:#16191c;font:700 15px 'Pretendard Variable',Pretendard,system-ui,sans-serif;cursor:pointer;transition:transform 160ms cubic-bezier(0.23,1,0.32,1)}.ds-btn-primary:active{transform:scale(0.97)}.ds-btn-primary:focus-visible{outline:3px solid var(--m-line,#ef7c1c);outline-offset:2px}"
     },
     {
-      "name": "Secondary Button",
+      "name": "Sign Button",
       "kind": "button",
-      "refersTo": "button-secondary",
-      "description": "Secondary outline/dark button for passive actions.",
-      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
-      "css": ".ds-btn-secondary { background-color: #0F1014; color: #FDFAF5; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 500; border: 1px solid rgba(253, 250, 245, 0.08); border-radius: 24px; padding: 14px 28px; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover { background-color: rgba(253, 250, 245, 0.05); border-color: rgba(253, 250, 245, 0.15); }"
+      "refersTo": "button-sign",
+      "description": "Charcoal solid secondary button: sign in, submit, unlock.",
+      "html": "<button class=\"ds-btn-sign\">로그인</button>",
+      "css": ".ds-btn-sign{min-height:44px;padding:0 16px;border:0;border-radius:6px;background:var(--m-sign,#1e2226);color:var(--m-on-sign,#fff);font:700 15px 'Pretendard Variable',Pretendard,system-ui,sans-serif;cursor:pointer}.ds-btn-sign:disabled{opacity:.6}.ds-btn-sign:focus-visible{outline:3px solid var(--m-line,#ef7c1c);outline-offset:2px}"
     },
     {
-      "name": "Destructive Button",
+      "name": "Outline Button",
       "kind": "button",
-      "refersTo": "button-destructive",
-      "description": "Full-width destructive confirm button used in ConfirmDialog's destructive variant.",
-      "html": "<button class=\"ds-btn-destructive\">Delete</button>",
-      "css": ".ds-btn-destructive { width: 100%; background-color: #dc2626; color: #FFFFFF; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 900; text-transform: uppercase; border: none; border-radius: 16px; padding: 16px 24px; cursor: pointer; transition: all 0.2s; } .ds-btn-destructive:hover { background-color: #b91c1c; } .ds-btn-destructive:active { transform: scale(0.97); }"
+      "refersTo": "button-outline",
+      "description": "White panel button with a 1px inset rule ring.",
+      "html": "<button class=\"ds-btn-outline\">대시보드</button>",
+      "css": ".ds-btn-outline{min-height:48px;padding:0 16px;border:0;border-radius:6px;background:var(--m-surface,#fff);color:var(--m-ink,#16191c);box-shadow:inset 0 0 0 1px var(--m-rule,#d6d9d4);font:700 15px 'Pretendard Variable',Pretendard,system-ui,sans-serif;cursor:pointer}.ds-btn-outline:hover{box-shadow:inset 0 0 0 1px var(--m-ink-3,#5f666e)}.ds-btn-outline:focus-visible{outline:3px solid var(--m-line,#ef7c1c);outline-offset:2px}"
     },
     {
-      "name": "Product Container Card",
+      "name": "Station Sign",
+      "kind": "custom",
+      "refersTo": "station-sign",
+      "description": "Charcoal you-are-here panel: prev stop, current stop pair, next stop, orange line at the foot.",
+      "html": "<section class=\"ds-sign\"><div class=\"ds-sign-side\">&larr; AI 채점<small>AI grading</small></div><div class=\"ds-sign-main\"><h1>숙제 채점</h1><p>Homework check</p></div><div class=\"ds-sign-side ds-r\">한국어 설명 &rarr;<small>Korean explanations</small></div></section>",
+      "css": ".ds-sign{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;padding:32px 32px 40px;border-radius:6px;overflow:hidden;background:var(--m-sign,#1e2226);color:var(--m-on-sign,#fff);font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif}.ds-sign::after{content:'';position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--m-line,#ef7c1c)}.ds-sign-main{text-align:center}.ds-sign-main h1{margin:0;font-size:44px;font-weight:800;letter-spacing:-0.02em;line-height:1.15}.ds-sign-main p{margin:4px 0 0;font-size:18px;font-weight:500;color:var(--m-on-sign-2,#b4bac1)}.ds-sign-side{font-size:13px;font-weight:600;color:var(--m-on-sign-2,#b4bac1)}.ds-sign-side small{display:block;font-size:12px;font-weight:500;opacity:.8}.ds-r{text-align:right}"
+    },
+    {
+      "name": "Loop Strip",
+      "kind": "custom",
+      "refersTo": "roundel",
+      "description": "The week as stops on the orange line; the lit marker arrives at the current stop on mount (700ms arrive ease).",
+      "html": "<ol class=\"ds-loop\"><li class=\"ds-cur\"><span class=\"ds-rd ds-rd-cur\">1</span><b>숙제 찍기</b><small>Scan</small></li><li><span class=\"ds-rd\">2</span><b>한국어 설명</b><small>Explain</small></li><li class=\"ds-off\"><span class=\"ds-rd ds-rd-off\">3</span><b>오답 노트</b><small>Review</small></li></ol>",
+      "css": ".ds-loop{position:relative;display:grid;grid-template-columns:repeat(3,1fr);list-style:none;margin:0;padding:0;width:340px;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif}.ds-loop::before{content:'';position:absolute;top:13px;left:16.6%;right:16.6%;height:6px;border-radius:9999px;background:var(--m-rule,#d6d9d4)}.ds-loop li{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center}.ds-loop b{margin-top:8px;font-size:13px;font-weight:600;color:var(--m-ink-2,#474d55)}.ds-loop small{font-size:11px;font-weight:500;color:var(--m-ink-3,#5f666e)}.ds-loop .ds-cur b{font-weight:800;color:var(--m-ink,#16191c)}.ds-loop .ds-off b{font-weight:500;color:var(--m-ink-3,#5f666e)}.ds-rd{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;box-sizing:border-box;border:4px solid var(--m-line,#ef7c1c);border-radius:9999px;background:var(--m-surface,#fff);color:var(--m-ink,#16191c);font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}.ds-rd-cur{background:var(--m-line,#ef7c1c);color:#16191c;box-shadow:0 0 0 4px var(--m-ground,#f3f4f1)}.ds-rd-off{border-color:var(--m-rule,#d6d9d4);color:var(--m-ink-3,#5f666e)}"
+    },
+    {
+      "name": "Route Rail Stop",
       "kind": "card",
-      "refersTo": "card-container",
-      "description": "Standard container card for housing layout segments.",
-      "html": "<div class=\"ds-card-container\"><h3>Card Title</h3><p>This is a standard card text content inside Chekki.</p></div>",
-      "css": ".ds-card-container { background-color: #0F1014; border: 1px solid rgba(253, 250, 245, 0.08); border-radius: 16px; padding: 24px; color: #FDFAF5; font-family: 'Nunito', sans-serif; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); } .ds-card-container h3 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; margin-bottom: 8px; } .ds-card-container p { color: rgba(253, 250, 245, 0.55); font-size: 14px; line-height: 1.6; } .ds-card-container:hover { border-color: rgba(253, 250, 245, 0.15); transform: translateY(-3px); }"
+      "refersTo": "roundel-stop",
+      "description": "A question as a stop on the result rail: wrong ringed red with the gentle label, right ringed green.",
+      "html": "<div class=\"ds-stop\"><span class=\"ds-stop-rd\">2</span><div class=\"ds-stop-card\"><p>The book is ___ the table.</p><small>책이 탁자 ___ 있습니다.</small><em>아이와 같이 보기</em></div></div>",
+      "css": ".ds-stop{position:relative;padding-left:64px;width:360px;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif}.ds-stop::before{content:'';position:absolute;left:26px;top:0;bottom:0;width:6px;border-radius:9999px;background:var(--m-line,#ef7c1c)}.ds-stop-rd{position:absolute;left:7px;top:12px;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;box-sizing:border-box;border:5px solid var(--m-wrong,#d1242b);border-radius:9999px;background:var(--m-surface,#fff);color:var(--m-wrong,#d1242b);font-size:18px;font-weight:800}.ds-stop-card{padding:16px 20px;border-radius:6px;background:var(--m-surface,#fff);box-shadow:inset 0 0 0 1px var(--m-rule,#d6d9d4)}.ds-stop-card:hover{box-shadow:inset 0 0 0 1px var(--m-ink-3,#5f666e)}.ds-stop-card p{margin:0;font-size:16px;font-weight:600;color:var(--m-ink,#16191c)}.ds-stop-card small{display:block;margin-top:2px;font-size:14px;color:var(--m-ink-2,#474d55)}.ds-stop-card em{display:block;margin-top:8px;font-style:normal;font-size:13px;font-weight:700;color:var(--m-wrong,#d1242b)}"
     },
     {
-      "name": "Bezel Modal",
-      "kind": "custom",
-      "refersTo": "modal-bezel",
-      "description": "The app's single modal construction: full-screen blurred scrim, thin outer bezel, solid inner card. Used by ConfirmDialog and every extracted modal (ScannedModal, AcademyLogoModal, DocPreviewModal, WeekCalendarModal, ReportCardModal).",
-      "html": "<div class=\"ds-modal-scrim\"><div class=\"ds-modal-bezel\"><div class=\"ds-modal-inner\"><button class=\"ds-modal-close\" aria-label=\"Close\">×</button><p>Modal content</p></div></div></div>",
-      "css": ".ds-modal-scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; } .ds-modal-bezel { position: relative; padding: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; max-width: 480px; width: 100%; } .ds-modal-inner { position: relative; border-radius: 34px; background: #050505; padding: 32px; } .ds-modal-close { position: absolute; top: 24px; right: 24px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: rgba(255,255,255,0.05); color: #a1a1aa; border: none; cursor: pointer; transition: background 0.2s, color 0.2s; } .ds-modal-close:hover { background: rgba(255,255,255,0.1); color: #ffffff; }"
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Recessed field with rule ring; orange ring on focus.",
+      "html": "<textarea class=\"ds-input\" placeholder=\"선생님께 남길 말\"></textarea>",
+      "css": ".ds-input{width:320px;height:96px;padding:12px;border:0;border-radius:6px;resize:none;background:var(--m-sunken,#e9ebe7);color:var(--m-ink,#16191c);box-shadow:inset 0 0 0 1px var(--m-rule,#d6d9d4);font:500 15px 'Pretendard Variable',Pretendard,system-ui,sans-serif;outline:none}.ds-input::placeholder{color:var(--m-ink-3,#5f666e)}.ds-input:focus{box-shadow:inset 0 0 0 2px var(--m-line,#ef7c1c)}"
     },
     {
-      "name": "Toast",
-      "kind": "custom",
-      "refersTo": "toast",
-      "description": "Bottom-center auto-dismiss feedback, replacing all native alert()/confirm() in the app.",
-      "html": "<div class=\"ds-toast ds-toast-success\"><span>✨</span><p>Saved successfully!</p></div>",
-      "css": ".ds-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 9999px; backdrop-filter: blur(20px); box-shadow: 0 25px 50px rgba(0,0,0,0.4); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; color: #ffffff; } .ds-toast-success { background: rgba(16, 185, 129, 0.9); border: 1px solid rgba(16, 185, 129, 0.2); } .ds-toast-error { background: rgba(239, 68, 68, 0.9); border: 1px solid rgba(239, 68, 68, 0.2); }"
+      "name": "Language Toggle",
+      "kind": "nav",
+      "refersTo": "segmented-toggle",
+      "description": "Recessed segmented control; charcoal selected thumb.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-on\">한</button><button>EN</button></div>",
+      "css": ".ds-seg{display:inline-flex;padding:2px;border-radius:6px;background:var(--m-sunken,#e9ebe7)}.ds-seg button{min-height:36px;min-width:40px;padding:0 10px;border:0;border-radius:4px;background:transparent;color:var(--m-ink-2,#474d55);font:700 13px 'Pretendard Variable',Pretendard,system-ui,sans-serif;cursor:pointer}.ds-seg button:hover{color:var(--m-ink,#16191c)}.ds-seg .ds-on{background:var(--m-sign,#1e2226);color:var(--m-on-sign,#fff)}.ds-seg button:focus-visible{outline:3px solid var(--m-line,#ef7c1c);outline-offset:2px}"
     }
   ],
   "narrative": {
-    "northStar": "The Warm Console",
-    "overview": "Chekki AI reads as an instrument panel, not a form: near-black surfaces (#050505) with a single warm-orange accent, the way a piece of serious hardware has exactly one indicator light. The product exists to take the stress out of a nightly ritual — a Korean parent grading English homework they can't fully read themselves — so the interface stays calm and dark rather than loud or playful, and lets the orange accent do the work of saying \"here, this matters\" without competing with it anywhere else on screen.\n\nNearly every elevated surface — modals, cards, panels — uses a distinctive double-bezel construction: an outer rounded shell in a translucent hairline border, with an inner surface inset by a consistent margin and its own slightly smaller radius. Combined with soft, large-blur ambient shadows and a 1px inset highlight along the top edge, this reads as a physical panel with real depth, not a flat rectangle with a shadow bolted on.\n\nThis session (2026-08-17) also closed out a real drift problem: an undocumented second gradient system (orange→pink→purple/indigo) had crept into the splash screen, loading screen, camera hero, and landing headline independently. That's now retired — orange is the only accent, confirmed as the intended direction going forward, not a stopgap.",
+    "northStar": "The Loop Line",
+    "overview": "Every parent screen is a Seoul Metro station. The family is always at a stop, the previous stop and the next one are named, and the week is one trip around a single orange line. Charcoal enamel sign panels carry the \"you are here\" moment; a pale platform-tile ground sits under everything; numbered roundels mark each step, and on the result route each question is a stop on a vertical rail.\n\nThe reader is a tired parent with her child beside her, often reading in her second language. So the system is built like transit signage: big heavy Korean (or the user's language) first, the other language small underneath, one action the size of a platform door, and colour that carries meaning rather than decoration. Orange means \"the line / go here\". Red appears only on wrong answers, green only on right ones. Light and dark follow the device; both are first-class.\n\nThe world is flat. Tone blocks, 1px tile joints, ring outlines and a 6px line do all the structural work. It refuses the in-app marketing hero: no giant slogan headline, no floating mascot card, no glow, no glass.",
     "keyCharacteristics": [
-      "Near-black instrument-panel base, warmed by exactly one accent color",
-      "Double-bezel construction on nearly every card and modal",
-      "Soft, large-blur ambient shadows over hard drop-shadows",
-      "Full Korean/English parity in every component, never a fallback language",
-      "font-display (Space Grotesk, weight 900) reserved for headlines; body copy stays in Plus Jakarta Sans"
+      "Charcoal station sign with the orange line along its foot as the first thing on a screen.",
+      "One orange line (6px), drawn as rails, sign feet and roundel rings.",
+      "Bilingual pairs: primary line large and heavy, secondary line small and medium, hidden when identical.",
+      "Pretendard only, at weights 500 to 800.",
+      "Platform-tile ground (48px grid, 1px joints) behind full-screen states.",
+      "Flat tone blocks; soft corners (6px); circles only for roundels and the mascot badge.",
+      "Light and dark themes swap the same token names."
     ],
     "rules": [
-      { "name": "The One Accent Rule", "body": "Brand Orange is the only accent color on any given screen. No gradients combining orange with purple, pink, or indigo — that pattern was identified and removed as unintentional drift this session, not a rejected-but-valid alternative.", "section": "colors" },
-      { "name": "The Semantic-Never-Decorative Rule", "body": "Emerald, red, and amber are reserved for their semantic meaning (success/error/warning) and never used as arbitrary decorative accents.", "section": "colors" },
-      { "name": "The Break-Keep Rule", "body": "Any Korean-bearing text at display or title size gets break-keep — Korean text wraps by word/syllable-block, not mid-character, and this is non-negotiable given roughly half the user base reads Korean as their primary language.", "section": "typography" },
-      { "name": "The Tinted Glow Rule", "body": "When a shadow signals emphasis (an active state, a primary CTA), it is tinted to Brand Orange, never left as a neutral black glow — a black glow reads as generic elevation, an orange one reads as \"this is the important one.\"", "section": "elevation" },
-      { "name": "The Double-Bezel Rule", "body": "The system's signature form: an outer container at one radius (commonly rounded-[2rem]) with a translucent hairline border, wrapping an inner surface inset by a small fixed margin (p-1.5) at a correspondingly smaller radius (calc(2rem - 0.375rem)). New modals/cards should default to this construction, not a plain single-radius card.", "section": "components" }
+      {
+        "name": "The One Line Rule",
+        "body": "There is one accent hue: orange. No second brand colour, no gradients of it, no tints beyond Line Wash.",
+        "section": "colors"
+      },
+      {
+        "name": "The Signal Reservation Rule",
+        "body": "Red means a wrong answer or a real error; green means a right answer or success. Neither is ever used for decoration, category, or emphasis.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink-on-Orange Rule",
+        "body": "Text and icons on Line Orange are charcoal ink (#16191c) in both themes, never white.",
+        "section": "colors"
+      },
+      {
+        "name": "The Station Pair Rule",
+        "body": "Bilingual text is a pair: the user's language is the primary line (large, 700 to 800), the other language sits directly under it (small, 500, Ink 3 or Sign Grey). If the two are identical the secondary is dropped. Never set them side by side at equal size.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Pretendard only. No display face, no handwriting face, no monospace for flavour.",
+        "section": "typography"
+      },
+      {
+        "name": "The Door-Sized Action Rule",
+        "body": "Each screen has one primary action, and it is big: the scan door fills its column. Secondary actions are outline or charcoal buttons at 44 to 48px.",
+        "section": "layout"
+      },
+      {
+        "name": "The Enamel Rule",
+        "body": "Surfaces are flat tone blocks. No glass, no backdrop blur, no glow, no gradient sheen. If a resting element needs separation, use a Rule ring or a tone step, not a shadow.",
+        "section": "elevation"
+      }
     ],
     "dos": [
-      "Do use Brand Orange as the only accent color on any given screen — it is the single indicator light on the console, and its rarity is what makes it legible.",
-      "Do build new modals/elevated cards with the double-bezel construction (outer shell + inset inner surface) rather than a plain single-radius card.",
-      "Do tint emphasis shadows to Brand Orange rather than leaving them neutral black.",
-      "Do apply break-keep to any Korean-bearing display/title text.",
-      "Do give every pressable element active:scale-[0.97] press feedback.",
-      "Do give every icon-only button and modal close control a minimum 44x44px touch target.",
-      "Do route every confirmation and status message through ConfirmDialog / useToast — never window.confirm(), confirm(), or alert()."
+      "Do open each parent screen with a station sign that names where the family is, where they came from and what comes next.",
+      "Do set every user-facing label as a Station Pair: primary language large and heavy, the other language small beneath, dropped when identical.",
+      "Do keep one door-sized primary action per screen, in Line Orange with ink text.",
+      "Do use roundels and the 6px orange rail for any sequence of steps or questions.",
+      "Do keep red for wrong answers and errors and green for right answers and success, and phrase wrong answers gently (\"아이와 같이 보기 / Let's look together\").",
+      "Do define every colour through the `--m-*` tokens so light and dark swap together; the theme follows `prefers-color-scheme` unless the user overrides it.",
+      "Do keep tap targets at 44px or larger and the 3px orange focus outline intact."
     ],
     "donts": [
-      "Don't combine Brand Orange with purple/pink/indigo in a gradient — that pattern was identified and removed as unintentional drift this session, not a stylistic option.",
-      "Don't use bounce/spring easing (cubic-bezier overshoot curves) on routine, high-frequency interactions — reserve any bounce for genuinely rare, celebratory moments, and confirm there is one before reaching for it.",
-      "Don't use hard, sharp-edged drop-shadows — the system's shadow vocabulary is exclusively soft and ambient.",
-      "Don't introduce a new near-black hex value for a \"one-off\" dark surface — use Brand Dark; ~200 scattered duplicates of this exact mistake were consolidated this session.",
-      "Don't use emerald/red/amber for anything other than success/error/warning."
+      "Don't build an in-app marketing hero: no giant slogan headline, no floating mascot card, no glow.",
+      "Don't use glass, backdrop blur, gradients or glow shadows; surfaces are flat enamel and tile.",
+      "Don't add a second accent colour or use red/green for anything but answer correctness and real status.",
+      "Don't mark wrong answers with ✕ or the word \"wrong\".",
+      "Don't add a fake percentage progress bar or confetti; the train arrival is the only motion moment, and grading is shown as a train in transit.",
+      "Don't introduce another typeface; Pretendard carries every role.",
+      "Don't set white text on Line Orange."
     ]
   }
 }

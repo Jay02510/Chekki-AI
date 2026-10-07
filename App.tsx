@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { Header } from './components/Header';
+import { X } from '@phosphor-icons/react';
 import { CameraView } from './components/CameraView';
 import { LoadingScreen } from './components/LoadingScreen';
 import { SplitView } from './components/SplitView';
@@ -48,24 +49,24 @@ const SESSION_KEY = 'hw_last_session';
 // smaller in-place "Try Again" default the shared ErrorBoundary uses at
 // section level (see components/ErrorBoundary.tsx).
 const AppCrashFallback = (error: Error | null) => (
-  <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center z-[99999]">
+  <div className="fixed inset-0 bg-ground flex flex-col items-center justify-center p-6 text-center z-[99999]">
     <div className="w-24 h-24 mb-6">
       <ChekkiMascot className="w-full h-full" mood="thinking" />
     </div>
-    <h1 className="text-xl font-black text-white mb-2 font-display">
+    <h1 className="text-xl font-extrabold text-ink mb-2">
       Something went wrong.
     </h1>
     {error && (
-      <div className="max-w-md w-full p-4 mb-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono text-left overflow-auto max-h-40">
+      <div className="max-w-md w-full p-4 mb-6 rounded-md bg-wrong-soft text-wrong text-xs font-mono text-left overflow-auto max-h-40">
         <p className="font-bold">{error.name}: {error.message}</p>
         {error.stack && (
-          <pre className="text-[10px] mt-2 text-rose-300/80 whitespace-pre-wrap">{error.stack.slice(0, 300)}</pre>
+          <pre className="text-xs mt-2 text-wrong/80 whitespace-pre-wrap">{error.stack.slice(0, 300)}</pre>
         )}
       </div>
     )}
     <button
       onClick={() => window.location.reload()}
-      className="bg-orange-500 text-black px-8 py-3.5 rounded-2xl font-black text-xs shadow-lg hover:bg-orange-600 transition-all active:scale-[0.97] cursor-pointer"
+      className="bg-line text-[#2b211a] px-8 py-3.5 rounded-md font-bold text-[15px] transition-transform active:scale-[0.97] cursor-pointer"
     >
       Reload App
     </button>
@@ -75,51 +76,25 @@ const AppCrashFallback = (error: Error | null) => (
 // Suspense fallback for lazy-loaded route pages — brief by design, since the
 // chunk is small and usually cached after first visit.
 const RouteLoadingFallback: React.FC = () => (
-  <div className="fixed inset-0 bg-zinc-950 flex items-center justify-center z-[99999]">
-    <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+  <div className="fixed inset-0 bg-ground flex items-center justify-center z-[99999]">
+    <div className="w-10 h-10 border-4 border-rule border-t-line rounded-full animate-spin" />
   </div>
 );
 
-// Returns true (night) if hour is between 22:00–23:59 or 00:00–06:59 local time.
-// Falls back to system dark mode if no time preference applies.
-const isNightTime = (): boolean => {
-  const hour = new Date().getHours();
-  return hour >= 19 || hour < 7;
-};
+// Theme follows the device (prefers-color-scheme) unless the user picked one
+// from the menu. New key on purpose: the old 'chekki_theme' was written on
+// every load, so it pinned everyone to whatever theme their first visit had.
+const THEME_OVERRIDE_KEY = 'chekki_theme_override';
+const darkQuery = typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
 const getInitialTheme = () => {
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('chekki_theme');
+  try {
+    const saved = localStorage.getItem(THEME_OVERRIDE_KEY);
     if (saved) return saved === 'dark';
-    // Time-based: night between 22:00 and 07:00
-    return isNightTime();
+  } catch {
+    // storage blocked: fall back to the device theme
   }
-  return false; // Default to light mode
-};
-
-// Returns ms until the next theme-transition boundary (22:00 → night, 07:00 → day).
-const msUntilNextTransition = (): number => {
-  const now = new Date();
-  const hour = now.getHours();
-  const min = now.getMinutes();
-  const sec = now.getSeconds();
-  const ms = now.getMilliseconds();
-
-  const totalMs = ((hour * 60 + min) * 60 + sec) * 1000 + ms;
-  const nightStart = 19 * 60 * 60 * 1000; // 19:00 in ms
-  const dayStart = 7 * 60 * 60 * 1000; // 07:00 in ms
-  const dayMs = 24 * 60 * 60 * 1000;
-
-  if (totalMs < dayStart) {
-    // Currently night (after midnight). Next transition = 07:00 today.
-    return dayStart - totalMs;
-  } else if (totalMs < nightStart) {
-    // Currently day. Next transition = 19:00 today.
-    return nightStart - totalMs;
-  } else {
-    // Currently night (after 19:00). Next transition = 07:00 tomorrow.
-    return dayMs - totalMs + dayStart;
-  }
+  return !!darkQuery?.matches;
 };
 
 const useInAppBrowser = () => {
@@ -442,36 +417,34 @@ function AppContent() {
     // Initialize RevenueCat
     revenueCatService.initialize();
 
-    // --- Time-based auto night mode ---
-    // Switches to night at 19:00 and back to day at 07:00 (local time).
-    // If the user has manually set a preference in Settings it is respected,
-    // but cleared at each threshold so the schedule resumes from that point.
-    let themeTimer: ReturnType<typeof setTimeout>;
-
-    const scheduleNextTransition = () => {
-      const delay = msUntilNextTransition();
-      themeTimer = setTimeout(() => {
-        // At boundary: only apply time-based theme if user hasn't explicitly set a preference
-        if (!localStorage.getItem('chekki_theme')) {
-          setIsNight(isNightTime());
-        }
-        scheduleNextTransition(); // chain to next transition
-      }, delay);
+    // Follow the device theme live, unless the user set an override.
+    const onSchemeChange = (e: MediaQueryListEvent) => {
+      try {
+        if (localStorage.getItem(THEME_OVERRIDE_KEY)) return;
+      } catch {
+        // storage blocked: keep following the device
+      }
+      setIsNight(e.matches);
     };
-
-    scheduleNextTransition();
-    return () => clearTimeout(themeTimer);
+    darkQuery?.addEventListener('change', onSchemeChange);
+    return () => darkQuery?.removeEventListener('change', onSchemeChange);
   }, []);
 
-  // Sync isNight state with HTML class and localStorage
+  // Sync isNight state with the HTML class. Persisting happens only in
+  // setThemeByUser, so following the device theme never pins a choice.
   useEffect(() => {
-    if (isNight) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('chekki_theme', isNight ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', isNight);
+    document.documentElement.style.colorScheme = isNight ? 'dark' : 'light';
   }, [isNight]);
+
+  const setThemeByUser = React.useCallback((night: boolean) => {
+    try {
+      localStorage.setItem(THEME_OVERRIDE_KEY, night ? 'dark' : 'light');
+    } catch {
+      // storage blocked: the choice lasts this session only
+    }
+    setIsNight(night);
+  }, []);
 
   const handleSplashFinish = React.useCallback(() => {
     setShowSplash(false);
@@ -648,7 +621,7 @@ function AppContent() {
     return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><TeacherPage isNight={isNight} /></Suspense></ErrorBoundary>;
   }
   if (showSchoolsPage && platform === 'web')
-    return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><SchoolsLandingPage isNight={isNight} setIsNight={setIsNight} /></Suspense></ErrorBoundary>;
+    return <ErrorBoundary fallback={AppCrashFallback}><Suspense fallback={<RouteLoadingFallback />}><SchoolsLandingPage isNight={isNight} setIsNight={setThemeByUser} /></Suspense></ErrorBoundary>;
 
   // The FT/KT/Director dashboards only exist on web (TeacherPage etc. above
   // are gated `platform === 'web'`) — on the downloaded native app they were
@@ -678,7 +651,7 @@ function AppContent() {
           </a>
           <button
             onClick={() => {
-              try { localStorage.setItem('chekki_staff_as_parent', '1'); } catch {}
+              try { localStorage.setItem('chekki_staff_as_parent', '1'); } catch { /* storage blocked: session-only */ }
               setStaffAsParent(true);
             }}
             className="block w-full rounded-xl border border-zinc-300 py-3 font-bold"
@@ -699,7 +672,7 @@ function AppContent() {
   return (
     <ErrorBoundary fallback={AppCrashFallback}>
       <div
-        className={`min-h-[100dvh] ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'} font-sans overflow-x-hidden transition-colors duration-200 flex flex-col`}
+        className="min-h-[100dvh] bg-ground tile-ground text-ink font-sans overflow-x-hidden flex flex-col"
       >
         {standaloneLegal && (
           <div className="fixed inset-0 z-[200]">
@@ -714,7 +687,7 @@ function AppContent() {
         <Header
           onReset={() => handleReset(true)}
           isNight={isNight}
-          setIsNight={setIsNight}
+          setIsNight={setThemeByUser}
           isSpeedMode={isSpeedMode}
           setIsSpeedMode={setIsSpeedMode}
           showSpeedToggle={analysisState.status === 'complete'}
@@ -739,20 +712,19 @@ function AppContent() {
         <LoginModal isNight={isNight} />
 
         {showSuccessToast && (
-          <div className="fixed top-24 left-4 right-4 z-[99] bg-emerald-600 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-down border border-white/20 backdrop-blur-md">
-            <span className="text-xl">✅</span>
-            <p className="text-xs font-bold leading-tight font-korean">
+          <div role="status" className="fixed top-20 left-4 right-4 z-[99] mx-auto max-w-xl bg-sign text-on-sign px-5 py-4 rounded-md shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] flex items-start gap-3 animate-slide-down">
+            <span className="mt-1 h-3 w-3 shrink-0 rounded-full bg-line" aria-hidden="true" />
+            <p className="text-[14px] font-semibold leading-snug">
               {language === 'ko'
-                ? '분석 완료! 오늘도 아이와 함께 숙제하느라 고생 많으셨어요. 정답과 다정한 티칭 가이드가 준비되었습니다.'
-                : 'Analysis complete! Great job surviving another homework session. Your answer overlays and teaching guides are ready.'}
+                ? '도착: 한국어 설명. 다시 볼 문제부터 아이와 같이 봐요.'
+                : "Arrived: Explain. Start with the ones to look at together."}
             </p>
           </div>
         )}
 
         {isOffline && (
-          <div className="fixed top-24 left-4 right-4 z-[99] bg-red-600 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-down border border-white/20 backdrop-blur-md">
-            <span className="text-xl">🔌</span>
-            <p className="text-xs font-bold leading-tight font-korean">
+          <div role="alert" className="fixed top-20 left-4 right-4 z-[99] mx-auto max-w-xl bg-wrong text-white px-5 py-4 rounded-md shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] flex items-center gap-3 animate-slide-down">
+            <p className="text-[14px] font-semibold leading-snug">
               {language === 'ko'
                 ? '네트워크가 연결되어 있지 않습니다. 연결 상태를 확인해주세요.'
                 : 'You are offline. Please check your internet connection.'}
@@ -768,7 +740,7 @@ function AppContent() {
               setShowChildProfileModal(false);
             }}
             isNight={isNight}
-            setIsNight={setIsNight}
+            setIsNight={setThemeByUser}
           />
         )}
 
@@ -792,24 +764,23 @@ function AppContent() {
           />
         )}
 
-        {showConfetti && <Confetti />}
 
         {showDashboard && (
-          <div className="fixed inset-0 z-[100] bg-zinc-950/80 backdrop-blur-sm animate-fade-in">
+          <div className="fixed inset-0 z-[100] bg-ground animate-fade-in">
             <Dashboard onClose={() => setShowDashboard(false)} />
           </div>
         )}
 
-        <main className="flex-1 min-h-0 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-[calc(env(safe-area-inset-top)+6rem)] md:pt-32">
+        <main className="flex-1 min-h-0 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto w-full p-4 md:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col pt-[calc(env(safe-area-inset-top)+4.5rem)] md:pt-20">
           {/* Main Content Area */}
           <>
             {analysisState.status === 'idle' && (
               <div className="animate-fade-in flex-1 h-full flex flex-col">
                 {isInApp && showInAppNotice && (
-                  <div className="fixed top-24 left-4 right-4 z-[60] bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in-up border border-white/20 backdrop-blur-md">
+                  <div className="fixed top-20 left-4 right-4 z-[60] mx-auto max-w-xl bg-sign text-on-sign px-5 py-3.5 rounded-md shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] flex items-center justify-between animate-slide-down">
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">⚠️</span>
-                      <p className="text-[10px] md:text-xs font-bold font-korean leading-tight">
+                      <span className="h-3 w-3 shrink-0 rounded-full bg-line" aria-hidden="true" />
+                      <p className="text-[14px] font-semibold leading-snug">
                         {language === 'ko'
                           ? "더 원활한 기능을 위해 'Safari' 또는 'Chrome'으로 열어주세요."
                           : 'Open in Safari or Chrome for the best experience (Camera/Mic).'}
@@ -817,15 +788,16 @@ function AppContent() {
                     </div>
                     <button
                       onClick={() => setShowInAppNotice(false)}
-                      className="text-white/60 p-1 ml-2"
+                      aria-label={language === 'ko' ? '닫기' : 'Dismiss'}
+                      className="ml-2 inline-flex min-h-10 min-w-10 items-center justify-center rounded text-on-sign-2 hover:text-on-sign"
                     >
-                      ✕
+                      <X size={18} weight="bold" />
                     </button>
                   </div>
                 )}
                 {isAuthLoading ? (
                   <div className="flex items-center justify-center min-h-[50vh]">
-                    <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-4 border-rule border-t-line rounded-full animate-spin" />
                   </div>
                 ) : (
                   <CameraView
@@ -840,149 +812,102 @@ function AppContent() {
 
             {analysisState.status === 'analyzing' && (
               <div className="animate-fade-in flex-1 h-full flex flex-col">
-                <LoadingScreen isNight={isNight} onCancel={() => handleReset(false)} />
+                <LoadingScreen isNight={isNight} imageUrl={analysisState.originalImage} onCancel={() => handleReset(false)} />
               </div>
             )}
 
             {analysisState.status === 'error' && (
-              <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
-                <div className="relative w-40 h-40 md:w-52 md:h-52 mb-10">
-                  {/* Empathy ring — expands outward to convey "something happened" */}
-                  <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ring-pulse" />
-                  <div
-                    className="absolute inset-0 rounded-full bg-red-500/10 animate-ring-pulse"
-                    style={{ animationDelay: '0.4s' }}
-                  />
-                  <div className="relative w-full h-full bg-red-950/20 rounded-full flex items-center justify-center border border-red-500/30 overflow-hidden">
-                    <img
-                      src="https://res.cloudinary.com/dginphpy4/image/upload/v1765769939/chekki-scan_sqo9sz.png"
-                      alt="Chekki"
-                      className="w-36 h-36 md:w-48 md:h-48 object-contain"
-                    />
-                  </div>
-                </div>
-                <h3
-                  className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}
-                >
-                  {t('error_title')}
-                </h3>
-                <div className="space-y-2 mb-8 max-w-md mx-auto">
-                  <p
-                    className={`${isNight ? 'text-zinc-400' : 'text-zinc-650'} font-korean leading-relaxed`}
-                  >
-                    {translateError(analysisState.errorMessage || '')}
-                  </p>
-                  <p
-                    className={`text-xs md:text-sm font-semibold mt-4 ${isNight ? 'text-zinc-500' : 'text-zinc-450'} font-korean leading-snug`}
-                  >
-                    {language === 'ko'
-                      ? '💡 팁: 학습지를 평평하게 펴고, 밝은 곳에서 글자가 선명하게 보이도록 다시 촬영해 보세요.'
-                      : '💡 Tip: Flatten the paper, ensure bright lighting, and make sure the text is in focus.'}
-                  </p>
-                  {analysisState.errorMessage && (
-                    <div className="mt-6">
-                      <button
-                        type="button"
-                        onClick={() => setShowErrorDetails(!showErrorDetails)}
-                        className={`text-[10px] uppercase font-bold tracking-wider opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1 mx-auto ${
-                          isNight ? 'text-zinc-400' : 'text-zinc-500'
-                        }`}
-                      >
-                        <span>{showErrorDetails ? '▼' : '▶'}</span>
-                        <span>
-                          {language === 'ko' ? '상세 에러 정보 보기' : 'View Technical Details'}
-                        </span>
-                      </button>
-                      {showErrorDetails && (
-                        <div
-                          className={`mt-3 p-4 rounded-2xl border text-left text-[10px] font-mono break-all max-w-sm mx-auto overflow-y-auto max-h-32 transition-all duration-200 ${
-                            isNight
-                              ? 'bg-zinc-950/80 border-white/5 text-zinc-400'
-                              : 'bg-zinc-100 border-zinc-200 text-zinc-600'
-                          }`}
-                        >
-                          {analysisState.errorMessage}
-                        </div>
-                      )}
+              <div className="mx-auto w-full max-w-2xl px-1 pt-4 pb-12 animate-fade-in">
+                {/* service notice: what stopped, then the way forward */}
+                <section className="overflow-hidden rounded-md bg-surface ring-1 ring-inset ring-rule">
+                  <div className="h-1.5 bg-wrong" aria-hidden="true" />
+                  <div className="flex items-start gap-4 px-5 py-6 sm:px-8 sm:py-8">
+                    <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[4px] border-wrong text-xl font-extrabold text-wrong">
+                      !
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="sign-ko text-2xl sm:text-[28px] text-ink">{t('error_title')}</h2>
+                      <p className="mt-2 text-base leading-relaxed text-ink-2">
+                        {translateError(analysisState.errorMessage || '')}
+                      </p>
+                      <p className="mt-4 text-[14px] leading-snug text-ink-3">
+                        {language === 'ko'
+                          ? '사진 문제라면: 학습지를 평평하게 펴고, 밝은 곳에서 글자가 선명하게 보이도록 다시 찍어 주세요.'
+                          : 'If it was the photo: flatten the paper, use bright light, and keep the text in focus.'}
+                      </p>
                     </div>
-                  )}
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none">
-                  <button
-                    onClick={hookHandleScanAgain}
-                    className="bg-orange-500 text-black px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg w-full min-h-[48px]"
-                  >
-                    {t('btn_scan_again_simple')}
-                  </button>
-                  <button
-                    onClick={() => handleReset(false)}
-                    className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
-                  >
-                    {t('btn_retake')}
-                  </button>
-                </div>
+                  </div>
+                  <div className="flex flex-col gap-3 border-t border-rule px-5 py-5 sm:flex-row sm:px-8">
+                    <button
+                      onClick={hookHandleScanAgain}
+                      className="min-h-12 rounded-md bg-line px-6 text-[15px] font-bold text-[#2b211a] sm:flex-1"
+                    >
+                      {t('btn_scan_again_simple')}
+                    </button>
+                    <button
+                      onClick={() => handleReset(false)}
+                      className="min-h-12 rounded-md px-6 text-[15px] font-bold text-ink-2 ring-1 ring-inset ring-rule hover:text-ink sm:flex-1"
+                    >
+                      {t('btn_retake')}
+                    </button>
+                  </div>
+                </section>
+                {analysisState.errorMessage && (
+                  <div className="mt-4 px-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowErrorDetails(!showErrorDetails)}
+                      aria-expanded={showErrorDetails}
+                      className="text-[13px] font-semibold text-ink-3 hover:text-ink"
+                    >
+                      {language === 'ko' ? '기술 정보 보기' : 'Technical details'}
+                    </button>
+                    {showErrorDetails && (
+                      <pre className="mt-2 max-h-32 overflow-y-auto whitespace-pre-wrap break-all rounded-md bg-sunken p-3 text-xs text-ink-2">
+                        {analysisState.errorMessage}
+                      </pre>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
             {analysisState.status === 'complete' && analysisState.showHandwritingWarning && (
-              <div className="flex flex-col items-center justify-center flex-1 text-center p-6 animate-fade-in pt-24">
-                <div className="text-6xl md:text-7xl mb-6">📝</div>
-                <h3
-                  className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-korean`}
-                >
-                  {language === 'ko' ? '글씨를 인식하기 어려워요' : 'Handwriting Unclear'}
-                </h3>
-                <div className="space-y-2 mb-8 max-w-md mx-auto">
-                  <p
-                    className={`${isNight ? 'text-zinc-400' : 'text-zinc-650'} font-korean leading-relaxed`}
-                  >
-                    {language === 'ko'
-                      ? '작성된 글씨가 너무 흐리거나 알아보기 힘듭니다. AI가 채점을 시도하겠지만 결과가 부정확할 수 있습니다.'
-                      : 'The handwriting on this worksheet is very messy or faded. Chekki tried its best, but the grading might be inaccurate.'}
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none justify-center">
-                  <button
-                    onClick={() =>
-                      setAnalysisState((prev) => ({ ...prev, showHandwritingWarning: false }))
-                    }
-                    className="bg-orange-500 text-black px-10 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all font-korean shadow-lg min-h-[48px] w-full sm:w-auto"
-                  >
-                    {language === 'ko' ? '그래도 진행하기' : 'Proceed Anyway'}
-                  </button>
-                  <button
-                    onClick={() => handleReset(false)}
-                    className={`px-10 py-4 rounded-xl font-bold border transition-all font-korean w-full sm:w-auto min-h-[48px] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
-                  >
-                    {t('btn_retake')}
-                  </button>
-                </div>
+              <div className="mx-auto w-full max-w-2xl px-1 pt-4 pb-12 animate-fade-in">
+                <section className="overflow-hidden rounded-md bg-surface ring-1 ring-inset ring-rule">
+                  <div className="h-1.5 bg-line" aria-hidden="true" />
+                  <div className="px-5 py-6 sm:px-8 sm:py-8">
+                    <h2 className="sign-ko text-2xl sm:text-[28px] text-ink">
+                      {language === 'ko' ? '글씨를 읽기 어려워요' : 'Handwriting is hard to read'}
+                    </h2>
+                    <p className="mt-2 text-base leading-relaxed text-ink-2">
+                      {language === 'ko'
+                        ? '글씨가 흐리거나 알아보기 어려워요. 채점은 해 볼게요, 다만 결과가 틀릴 수 있어요.'
+                        : 'The writing is faint or messy. Chekki can still try, but some marks may be wrong.'}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-3 border-t border-rule px-5 py-5 sm:flex-row sm:px-8">
+                    <button
+                      onClick={() => setAnalysisState((prev) => ({ ...prev, showHandwritingWarning: false }))}
+                      className="min-h-12 rounded-md bg-line px-6 text-[15px] font-bold text-[#2b211a] sm:flex-1"
+                    >
+                      {language === 'ko' ? '그래도 채점 보기' : 'Show results anyway'}
+                    </button>
+                    <button
+                      onClick={() => handleReset(false)}
+                      className="min-h-12 rounded-md px-6 text-[15px] font-bold text-ink-2 ring-1 ring-inset ring-rule hover:text-ink sm:flex-1"
+                    >
+                      {t('btn_retake')}
+                    </button>
+                  </div>
+                </section>
               </div>
             )}
 
             {analysisState.status === 'complete' &&
               !analysisState.showHandwritingWarning &&
               analysisState.data && (
-                <div className="animate-fade-in-up flex flex-col pt-4 pb-4">
-                  <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <h2
-                        className={`text-sm md:text-2xl font-black font-korean tracking-tight truncate ${isNight ? 'text-white' : 'text-zinc-850'}`}
-                      >
-                        {language === 'ko'
-                          ? analysisState.data.worksheet_summary?.title_ko || '제목 없음'
-                          : analysisState.data.worksheet_summary?.title_en || 'Untitled'}
-                      </h2>
-                      {user?.plan === 'pro' && (
-                        <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest">
-                          PRO
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Duplicate Scan button removed here as it's now in the header for better visibility */}
-                  </div>
-
+                <div className="animate-fade-in flex flex-col pt-2 pb-4">
                   <div className="w-full">
                     <SplitView
                       imageUrl={analysisState.originalImage!}

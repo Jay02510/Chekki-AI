@@ -12,7 +12,7 @@ Ships as a Capacitor-wrapped app on iOS/Android plus a web landing page. One sha
 
 Four roles, two connected surfaces:
 
-- **Parent** ("Min-ji," 34) — mother of a 5–7yo in an English Kindergarten/hagwon in Korea. Not fluent in English, tired after work. Uses the parent-facing app (`App.tsx` root, mobile-first).
+- **Parent** ("Min-ji," 34) — mother of a 5–7yo in an English Kindergarten/hagwon in Korea. Not fluent in English, tired after work. Uses the parent-facing app (`App.tsx` root, mobile-first). Usually has the child right beside her while using it, so screens are read together at a glance: Korean first, very little reading, big obvious taps, nothing that makes a mistake feel like a scolding in front of the child.
 - **Foreign Teacher (FT)** ("David," 28) — native-English instructor. Needs a fast way to log what happened in class and flag which kids need help, without writing Korean.
 - **Korean Teacher (KT)** — bilingual staff member who liaises with parents; reviews the FT's log, corrects the Korean parent-facing version, sends it.
 - **Director** — academy owner/admin; sets up classes, invites staff and parents, sees the whole campus at a glance.

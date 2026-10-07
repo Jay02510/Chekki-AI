@@ -1,3 +1,4 @@
+import { X } from '@phosphor-icons/react';
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useModalExit } from '../hooks/useModalExit';
@@ -203,7 +204,7 @@ export const CropModal: React.FC<Props> = ({
     >
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-black/85 backdrop-blur-sm transition-opacity ${isClosing ? 'modal-backdrop-exit' : ''}`}
+        className={`absolute inset-0 bg-black/70 transition-opacity ${isClosing ? 'modal-backdrop-exit' : ''}`}
         onClick={close}
       />
 
@@ -214,21 +215,21 @@ export const CropModal: React.FC<Props> = ({
         aria-modal="true"
         aria-labelledby="crop-modal-title"
         tabIndex={-1}
-        className={`relative p-1 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.6)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[92vh] w-full max-w-xl sm:mx-4`}
+        className={`relative rounded-md shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[92vh] w-full max-w-xl sm:mx-4`}
       >
         <div
-          className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] ${isNight ? 'bg-[#0a0a0a] text-zinc-200' : 'bg-white text-zinc-900'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] flex flex-col overflow-hidden`}
+          className={`relative w-full h-full rounded-md bg-surface text-ink flex flex-col overflow-hidden`}
         >
           {/* Header */}
           <div
-            className={`p-5 pb-3 border-b ${isNight ? 'border-zinc-900 bg-zinc-950/50' : 'border-zinc-100 bg-zinc-50/50'} flex items-start justify-between shrink-0`}
+            className={`p-5 pb-4 border-b border-rule flex items-start justify-between shrink-0`}
           >
             <div>
-              <h3 id="crop-modal-title" className="text-lg md:text-xl font-black tracking-tight">
+              <h3 id="crop-modal-title" className="sign-ko text-xl">
                 {isKo ? '채점할 영역 확인' : 'Check the photo'}
               </h3>
               <p
-                className={`text-xs mt-1 leading-normal ${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-medium font-korean`}
+                className={`text-[14px] mt-1 leading-snug text-ink-3`}
               >
                 {isKo
                   ? '필요하면 모서리를 끌어 영역을 맞추세요. 그대로 두면 전체 사진을 채점합니다.'
@@ -238,10 +239,10 @@ export const CropModal: React.FC<Props> = ({
             <button
               onClick={close}
               disabled={isProcessing}
-              className={`w-11 h-11 shrink-0 flex items-center justify-center rounded-full transition-colors ${isNight ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100'}`}
+              className={`w-11 h-11 shrink-0 flex items-center justify-center rounded-md text-ink-3 hover:text-ink hover:bg-sunken`}
               aria-label={isKo ? '닫기' : 'Close'}
             >
-              ✕
+              <X size={20} weight="bold" />
             </button>
           </div>
 
@@ -249,7 +250,7 @@ export const CropModal: React.FC<Props> = ({
           <div className="p-4 flex-1 flex flex-col justify-center items-center overflow-y-auto max-h-[60vh]">
             <div
               ref={containerRef}
-              className="relative select-none touch-none mx-auto border border-zinc-500/20 rounded-xl overflow-hidden max-h-[45vh]"
+              className="relative select-none touch-none mx-auto ring-1 ring-rule rounded overflow-hidden max-h-[45vh]"
             >
               {/* Image Preview */}
               <img
@@ -260,7 +261,7 @@ export const CropModal: React.FC<Props> = ({
 
               {/* Crop Bounding Box overlay */}
               <div
-                className="absolute border-2 border-orange-500 cursor-move bg-orange-500/10 transition-[box-shadow]"
+                className="absolute border-[3px] border-line cursor-move bg-line/10 transition-[box-shadow]"
                 style={{
                   left: `${box.x}%`,
                   top: `${box.y}%`,
@@ -271,15 +272,15 @@ export const CropModal: React.FC<Props> = ({
                 onPointerDown={(e) => startDrag(e, 'move')}
               >
                 {/* 3x3 Grid Viewfinder lines */}
-                <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30 pointer-events-none border border-orange-500/30">
-                  <div className="border-r border-b border-orange-500/20" />
-                  <div className="border-r border-b border-orange-500/20" />
-                  <div className="border-b border-orange-500/20" />
-                  <div className="border-r border-b border-orange-500/20" />
-                  <div className="border-r border-b border-orange-500/20" />
-                  <div className="border-b border-orange-500/20" />
-                  <div className="border-r border-orange-500/20" />
-                  <div className="border-r border-orange-500/20" />
+                <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30 pointer-events-none border border-line/30">
+                  <div className="border-r border-b border-line/20" />
+                  <div className="border-r border-b border-line/20" />
+                  <div className="border-b border-line/20" />
+                  <div className="border-r border-b border-line/20" />
+                  <div className="border-r border-b border-line/20" />
+                  <div className="border-b border-line/20" />
+                  <div className="border-r border-line/20" />
+                  <div className="border-r border-line/20" />
                   <div />
                 </div>
 
@@ -289,28 +290,28 @@ export const CropModal: React.FC<Props> = ({
                   className="absolute w-8 h-8 -top-4 -left-4 flex items-center justify-center cursor-nwse-resize select-none touch-none z-10"
                   onPointerDown={(e) => startDrag(e, 'TL')}
                 >
-                  <div className="w-4 h-4 bg-orange-500 rounded-full border-2 border-white shadow-lg shadow-black/30" />
+                  <div className="w-4 h-4 bg-line rounded-full border-[3px] border-white shadow-[0_2px_6px_rgba(0,0,0,0.35)]" />
                 </div>
                 {/* Top Right */}
                 <div
                   className="absolute w-8 h-8 -top-4 -right-4 flex items-center justify-center cursor-nesw-resize select-none touch-none z-10"
                   onPointerDown={(e) => startDrag(e, 'TR')}
                 >
-                  <div className="w-4 h-4 bg-orange-500 rounded-full border-2 border-white shadow-lg shadow-black/30" />
+                  <div className="w-4 h-4 bg-line rounded-full border-[3px] border-white shadow-[0_2px_6px_rgba(0,0,0,0.35)]" />
                 </div>
                 {/* Bottom Left */}
                 <div
                   className="absolute w-8 h-8 -bottom-4 -left-4 flex items-center justify-center cursor-nesw-resize select-none touch-none z-10"
                   onPointerDown={(e) => startDrag(e, 'BL')}
                 >
-                  <div className="w-4 h-4 bg-orange-500 rounded-full border-2 border-white shadow-lg shadow-black/30" />
+                  <div className="w-4 h-4 bg-line rounded-full border-[3px] border-white shadow-[0_2px_6px_rgba(0,0,0,0.35)]" />
                 </div>
                 {/* Bottom Right */}
                 <div
                   className="absolute w-8 h-8 -bottom-4 -right-4 flex items-center justify-center cursor-nwse-resize select-none touch-none z-10"
                   onPointerDown={(e) => startDrag(e, 'BR')}
                 >
-                  <div className="w-4 h-4 bg-orange-500 rounded-full border-2 border-white shadow-lg shadow-black/30" />
+                  <div className="w-4 h-4 bg-line rounded-full border-[3px] border-white shadow-[0_2px_6px_rgba(0,0,0,0.35)]" />
                 </div>
               </div>
             </div>
@@ -318,7 +319,7 @@ export const CropModal: React.FC<Props> = ({
             {/* Low-res warning overlay */}
             {lowResWarning && (
               <div
-                className={`mt-3 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-semibold font-korean flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 animate-pulse shrink-0`}
+                className={`mt-3 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-semibold font-korean flex items-center gap-1.5 bg-line-soft text-line-ink shrink-0`}
               >
                 <span>⚠️</span>
                 <span>
@@ -332,16 +333,12 @@ export const CropModal: React.FC<Props> = ({
 
           {/* Quick Rotate Widget */}
           <div
-            className={`px-4 py-2 border-t flex justify-center shrink-0 ${isNight ? 'border-zinc-900 bg-zinc-950/30' : 'border-zinc-100 bg-zinc-50/30'}`}
+            className={`px-4 py-2 border-t border-rule flex justify-center shrink-0`}
           >
             <button
               onClick={handleRotate}
               disabled={isProcessing}
-              className={`px-4 min-h-11 rounded-full border text-xs font-bold tracking-wider flex items-center gap-1.5 transition-[background-color,color] duration-200 ${
-                isNight
-                  ? 'bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800'
-                  : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
-              } disabled:opacity-50`}
+              className={`px-4 min-h-11 rounded-md text-[14px] font-bold flex items-center gap-1.5 text-ink-2 ring-1 ring-inset ring-rule hover:text-ink disabled:opacity-50`}
             >
               <span aria-hidden="true">↻</span>
               <span>{isKo ? '회전' : 'Rotate'}</span>
@@ -350,15 +347,15 @@ export const CropModal: React.FC<Props> = ({
 
           {/* Footer actions */}
           <div
-            className={`p-4 border-t flex flex-col sm:flex-row justify-end gap-2.5 shrink-0 ${isNight ? 'border-zinc-900 bg-zinc-950/60' : 'border-zinc-100 bg-zinc-50/60'}`}
+            className={`p-4 border-t border-rule flex flex-col sm:flex-row justify-end gap-2.5 shrink-0`}
           >
             <button
               onClick={handleCropSubmit}
               disabled={isProcessing}
-              className="w-full px-6 min-h-12 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-black text-sm rounded-xl shadow-lg shadow-orange-500/10 transition-[background-color,transform] active:scale-[0.98] flex items-center justify-center gap-1.5"
+              className="w-full px-6 min-h-12 bg-line disabled:opacity-50 text-[#2b211a] font-bold text-[15px] rounded-md transition-transform active:scale-[0.98] flex items-center justify-center gap-1.5"
             >
               {isProcessing ? (
-                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-3.5 h-3.5 border-2 border-[#2b211a]/30 border-t-[#2b211a] rounded-full animate-spin" />
               ) : (
                 <span>{isKo ? '채점하기' : 'Grade'}</span>
               )}

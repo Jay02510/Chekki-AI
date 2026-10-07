@@ -28,6 +28,7 @@ import { WorksheetItemCard } from './WorksheetItemCard';
 import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
 import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
 import { Dashboard } from './Dashboard';
+import { ArrowLeft, ArrowRight, Camera, Check, DownloadSimple, NotePencil, X } from '@phosphor-icons/react';
 
 const simplifyGuideText = (text: string) => {
   if (!text) return text;
@@ -107,6 +108,26 @@ export const SplitView: React.FC<SplitViewProps> = ({
   const lastTranscriptRef = useRef<string>('');
 
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+
+  const hasGrading = data?.worksheet_summary?.has_handwriting !== false;
+  const wrongCount = hasGrading ? localItems.filter((i) => i.is_correct === false).length : 0;
+  const correctCount = hasGrading ? localItems.filter((i) => i.is_correct === true).length : 0;
+
+  // Focus mode: parent and child look at a single problem together. After
+  // grading that's only the misses; an unanswered sheet (answer key) walks
+  // every question. "See all" falls back to the full list.
+  const wrongItems = hasGrading ? localItems.filter((i) => i.is_correct === false) : [];
+  const focusItems = hasGrading ? wrongItems : localItems;
+  const [showAll, setShowAll] = useState(false);
+  const [step, setStep] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const focusMode = !showAll && !isLoadingItems && focusItems.length > 0;
+  const focusItem = focusMode ? focusItems[Math.min(step, focusItems.length - 1)] : null;
+
+  useEffect(() => {
+    if (focusItem && !finished) setActiveItemId(focusItem.id);
+  }, [focusItem?.id, finished]);
+
 
   useEffect(() => {
     if (items.length > 0 && isLoadingItems === false) {
@@ -702,13 +723,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
         />
       )}
 
-      <div
-        className={`flex flex-col lg:flex-row w-full ${isNight ? 'bg-brand-dark' : 'bg-white'} min-h-0`}
-      >
-        {/* Left side: Image (Scrolls with page on mobile, fixed height on desktop) */}
-        <div
-          className={`relative w-full lg:w-1/2 lg:sticky lg:top-0 lg:h-screen border-r ${isNight ? 'border-white/5 bg-zinc-950' : 'border-zinc-200 bg-white'} lg:overflow-hidden shrink-0`}
-        >
+      <div className="flex w-full min-h-0 flex-col gap-4 lg:flex-row lg:gap-6">
+        {/* the worksheet itself, marks drawn on it; under the result on phones */}
+        <div className="relative order-2 w-full shrink-0 overflow-hidden rounded-lg bg-surface ring-1 ring-inset ring-rule lg:order-1 lg:sticky lg:top-24 lg:self-start lg:h-[calc(100dvh-7rem)] lg:w-1/2">
           <WorksheetOverlay
             imageUrl={imageUrl}
             items={localItems}
@@ -723,254 +740,348 @@ export const SplitView: React.FC<SplitViewProps> = ({
         </div>
 
         <div
-          className={`w-full lg:w-1/2 min-w-0 flex flex-col ${isNight ? 'bg-brand-dark/80 border-white/10 shadow-black/80' : 'bg-white/80 border-zinc-200 shadow-zinc-300/50'} backdrop-blur-2xl rounded-[2.5rem] border lg:overflow-hidden relative lg:h-screen`}
-          onClick={() => setActiveItemId(null)}
+          className="relative order-1 flex w-full min-w-0 flex-col lg:order-2 lg:w-1/2"
+          onClick={() => !focusMode && setActiveItemId(null)}
         >
-          <div
-            className={`px-4 py-3 border-b ${isNight ? 'border-white/5 bg-zinc-900/40' : 'border-zinc-100 bg-white/80'} flex flex-col shrink-0 transition-[background-color,border-color]`}
-          >
-            <div className="flex justify-between items-center w-full gap-4">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div
-                  className={`w-8 h-8 rounded-lg ${isNight ? 'bg-zinc-800' : 'bg-zinc-100'} flex items-center justify-center shrink-0`}
-                >
-                  <span className="text-sm">✨</span>
-                </div>
-                <p
-                  className={`text-[10px] font-black uppercase tracking-widest ${isNight ? 'text-zinc-400' : 'text-zinc-500'} truncate`}
-                >
+          {/* result: praise first, then how many to look at together */}
+          <section className="relative rounded-lg bg-surface px-5 py-5 ring-1 ring-inset ring-rule">
+            <div className="flex items-start gap-4">
+              {!mascotError && (
+                <img
+                  src={wrongItems.length === 0 && hasGrading && !isLoadingItems ? '/images/chekki-wave.webp' : '/images/chekki-thumbs.webp'}
+                  alt=""
+                  onError={() => setMascotError(true)}
+                  className="h-16 w-16 shrink-0 object-contain"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-semibold text-ink-3">
+                  {worksheetTitle || (language === 'ko' ? '학습지' : 'Worksheet')}
+                </p>
+                <h2 className="sign-ko mt-0.5 text-[24px] sm:text-[28px] text-ink break-keep">
                   {isLoadingItems
                     ? t('ws_scanning_header')
-                    : `${localItems.length} ${t('ws_items_found')}`}
+                    : !hasGrading
+                      ? language === 'ko'
+                        ? `정답지 ${localItems.length}문제`
+                        : `Answer key · ${localItems.length} questions`
+                      : wrongItems.length === 0
+                        ? language === 'ko'
+                          ? '다 맞았어요!'
+                          : 'All correct!'
+                        : language === 'ko'
+                          ? `${correctCount}개 맞았어요!`
+                          : `${correctCount} right!`}
+                </h2>
+                <p className="mt-1 text-[15px] font-medium text-ink-2 break-keep num">
+                  {isLoadingItems
+                    ? t('ws_scanning_detail')
+                    : !hasGrading
+                      ? language === 'ko'
+                        ? '문제를 누르면 정답과 설명이 나와요.'
+                        : 'Tap a question for the answer and how to explain it.'
+                      : wrongItems.length === 0
+                        ? language === 'ko'
+                          ? '아이를 꼭 칭찬해 주세요.'
+                          : 'Give your child a big well done.'
+                        : language === 'ko'
+                          ? `같이 볼 문제 ${wrongItems.length}개 · 전체 ${localItems.length}문제`
+                          : `${wrongItems.length} to look at together · ${localItems.length} total`}
                 </p>
               </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  aria-label="Open Dashboard"
-                  onClick={() => onOpenDashboard && onOpenDashboard()}
-                  className={`h-12 px-5 rounded-full bg-orange-500 text-black hover:bg-orange-600 flex items-center justify-center font-black text-xs transition-[background-color,transform] duration-200 active:scale-[0.98] group shadow-sm shrink-0`}
-                  title={language === 'ko' ? '대시보드 열기' : 'Open Dashboard'}
-                >
-                  <span className="group-hover:scale-[1.02] transition-transform">{language === 'ko' ? '대시보드' : 'Dashboard'}</span>
-                </button>
+              <div className="-mr-2 -mt-2 flex shrink-0 items-center">
                 <button
                   aria-label={language === 'ko' ? '이미지 저장' : 'Save image'}
+                  title={language === 'ko' ? '기록 저장' : 'Save image'}
                   onClick={handleShare}
                   disabled={isSharing}
-                  className={`w-12 h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center active:scale-[0.97] transition-transform duration-[160ms] ease-out border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
-                  title={language === 'ko' ? '기록 저장' : 'Save Image'}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md text-ink-3 hover:bg-sunken hover:text-ink"
                 >
                   {isSharing ? (
-                    <div className="w-4 h-4 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   ) : isShareSuccess ? (
-                    <svg
-                      className="w-5 h-5 md:w-6 md:h-6 text-emerald-500 animate-bounce"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      strokeWidth={3}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
+                    <Check size={20} weight="bold" />
                   ) : (
-                    <svg
-                      className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2.5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                      />
-                    </svg>
+                    <DownloadSimple size={20} weight="bold" />
                   )}
                 </button>
                 <button
                   aria-label={t('tt_close')}
-                  onClick={onClose}
-                  className={`w-12 h-12 rounded-full ${isNight ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:text-zinc-900'} flex items-center justify-center text-lg active:scale-[0.97] transition-transform duration-[160ms] ease-out border ${isNight ? 'border-white/5' : 'border-black/5'} group`}
                   title={t('tt_close')}
+                  onClick={onClose}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md text-ink-3 hover:bg-sunken hover:text-ink"
                 >
-                  <svg
-                    className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-90 transition-transform duration-200"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2.5"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X size={20} weight="bold" />
                 </button>
               </div>
             </div>
-
-            {!isLoadingItems && localItems.length > 0 && !hasInteracted && (
-              <div className="mt-3 animate-fade-in-up">
-                <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl px-4 py-2.5 flex items-center gap-3">
-                  <span className="text-orange-500 text-sm animate-pulse shrink-0">💡</span>
-                  <p
-                    className={`text-xs md:text-sm font-black ${isNight ? 'text-orange-400' : 'text-orange-600'} uppercase tracking-wide leading-relaxed pt-0.5 break-keep`}
-                  >
-                    {t('tip_click_guide')}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+          </section>
 
           <div
-            className={`p-4 md:p-6 pb-8 md:pb-12 space-y-4 w-full lg:flex-1 lg:min-h-0 lg:overflow-y-auto ${isNight ? 'bg-gradient-to-b from-transparent to-zinc-950/20' : 'bg-white'}`}
-            style={
-              { WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' } as React.CSSProperties
-            }
+            className="relative mt-4 w-full pb-8 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1"
+            style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' } as React.CSSProperties}
             onClick={(e) => e.stopPropagation()}
           >
             {isLoadingItems && localItems.length === 0 && (
-              <div className="flex flex-col gap-4 pt-2 w-full">
-                <div className="flex flex-col items-center justify-center space-y-3 pb-4">
-                  <div className="w-6 h-6 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin"></div>
-                  <p className="text-[10px] md:text-xs font-bold text-zinc-400 font-korean uppercase tracking-wide leading-normal break-keep">
-                    {t('ws_scanning_detail')}
-                  </p>
-                </div>
+              <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className={`animate-pulse flex items-start p-4 md:p-6 gap-4 ${isNight ? 'bg-zinc-900/60 border-white/5' : 'bg-white border-zinc-100 shadow-sm'} rounded-2xl border w-full`}
-                  >
-                    <div
-                      className={`w-10 h-10 rounded-xl ${isNight ? 'bg-white/5' : 'bg-zinc-100'} shrink-0`}
-                    ></div>
-                    <div className="flex-1 space-y-4 py-1">
-                      <div className="h-4 md:h-5 bg-white/5 rounded-md w-3/4"></div>
-                      <div className="h-10 md:h-12 bg-white/5 rounded-2xl w-32 mt-4"></div>
-                    </div>
+                  <div key={i} className="flex animate-pulse items-center gap-4 rounded-md bg-surface p-4 ring-1 ring-inset ring-rule">
+                    <span className="h-9 w-9 shrink-0 rounded-full bg-sunken" />
+                    <span className="h-4 w-2/3 rounded bg-sunken" />
                   </div>
                 ))}
               </div>
             )}
 
-            {localItems.map((item, idx) => (
-              <div
-                key={item.id}
-                ref={(el) => {
-                  itemRefs.current[item.id] = el;
-                }}
-                className="w-full animate-item-appear"
-                style={{ '--i': idx } as React.CSSProperties}
-              >
-                <WorksheetItemCard
-                  index={idx}
-                  item={item}
-                  isActive={activeItemId === item.id}
-                  isNight={isNight}
-                  isSpeedMode={isSpeedMode}
-                  language={language}
-                  t={t}
-                  flagged={isMistake(item.question_text, item.correct_answer)}
-                  speechResult={speechResult}
-                  scriptLanguages={scriptLanguages}
-                  isAuthenticated={isAuthenticated}
-                  userPlan={user?.plan}
-                  isListening={isListening && activeItemId === item.id}
-                  hasHandwriting={data?.worksheet_summary?.has_handwriting}
-                  onToggleActive={() => setActiveItemId(activeItemId === item.id ? null : item.id)}
-                  onPlayAudio={playAudio}
-                  onToggleMistake={toggleMistake}
-                  onRefine={(item) => setRefiningItemId(item.id)}
-                  onStartPronunciation={startPronunciationCheck}
-                  onSetScriptLanguage={(id, lang) =>
-                    setScriptLanguages((prev) => ({ ...prev, [id]: lang }))
-                  }
-                  openLoginModal={openLoginModal}
-                  setShowPaywall={setShowPaywall}
-                  setUpsellFeature={setUpsellFeature}
-                  style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
-                />
-              </div>
-            ))}
-
-            {localItems.length > 0 && (
-              <div className="pt-8 pb-6 border-t border-white/5 mt-4 space-y-6 animate-fade-in">
-                {/* Heartfelt Message */}
-                <div className="text-center px-4">
-                  <p
-                    className={`text-sm md:text-base font-korean font-bold italic leading-relaxed ${isNight ? 'text-orange-300' : 'text-orange-500'}`}
-                  >
-                    {language === 'ko'
-                      ? '아무도 몰라줘도 채키는 알아요. 수고 많았어요, 엄마! 💌'
-                      : 'If nobody noticed, Chekki will. Great job today, Mom. 💌'}
-                  </p>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex justify-center">
-                    <div
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm cursor-help group relative"
-                      title={t('zero_memory_desc')}
-                    >
-                      <span className="text-xs">🔒</span>
-                      <span className="text-[9px] font-black text-blue-400 tracking-widest uppercase">
-                        {t('zero_memory_policy')}
-                      </span>
-
-                      {/* Tooltip Overlay */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-4 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-[opacity,transform] z-[100] transform translate-y-2 group-hover:translate-y-0">
-                        <p className="text-[10px] text-zinc-300 font-bold leading-relaxed normal-case tracking-normal text-left">
-                          {t('zero_memory_desc')}
-                        </p>
-                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-zinc-900 border-r border-b border-white/10 rotate-45"></div>
-                      </div>
-                    </div>
+            {focusMode && !finished && focusItem && (
+              <div className="animate-fade-in">
+                {/* where we are: problem 1 of 2 */}
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[15px] font-bold text-ink num">
+                      {hasGrading
+                        ? language === 'ko'
+                          ? `같이 볼 문제 ${step + 1} / ${focusItems.length}`
+                          : `Together ${step + 1} of ${focusItems.length}`
+                        : language === 'ko'
+                          ? `문제 ${step + 1} / ${focusItems.length}`
+                          : `Question ${step + 1} of ${focusItems.length}`}
+                    </span>
+                    <span className="flex gap-1.5" aria-hidden="true">
+                      {focusItems.length <= 12 && focusItems.map((w, i) => (
+                        <span key={w.id} className={`h-2 rounded-full transition-all ${i === step ? 'w-6 bg-line' : i < step ? 'w-2 bg-line/50' : 'w-2 bg-rule'}`} />
+                      ))}
+                    </span>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAll(true)}
+                    className="min-h-11 rounded-md px-3 text-[14px] font-bold text-line-ink hover:bg-line-soft"
+                  >
+                    {language === 'ko' ? '전체 보기' : 'See all'}
+                  </button>
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <div className="grid grid-cols-2 gap-3">
+                <div key={focusItem.id} className="animate-item-appear">
+                  <WorksheetItemCard
+                    // the first one they look at is the free preview
+                    index={step}
+                    item={focusItem}
+                    isActive
+                    isNight={isNight}
+                    isSpeedMode={isSpeedMode}
+                    language={language}
+                    t={t}
+                    flagged={isMistake(focusItem.question_text, focusItem.correct_answer)}
+                    speechResult={speechResult}
+                    scriptLanguages={scriptLanguages}
+                    isAuthenticated={isAuthenticated}
+                    userPlan={user?.plan}
+                    isListening={isListening}
+                    hasHandwriting={data?.worksheet_summary?.has_handwriting}
+                    onToggleActive={() => {}}
+                    onPlayAudio={playAudio}
+                    onToggleMistake={toggleMistake}
+                    onRefine={(item) => setRefiningItemId(item.id)}
+                    onStartPronunciation={startPronunciationCheck}
+                    onSetScriptLanguage={(id, lang) => setScriptLanguages((prev) => ({ ...prev, [id]: lang }))}
+                    openLoginModal={openLoginModal}
+                    setShowPaywall={setShowPaywall}
+                    setUpsellFeature={setUpsellFeature}
+                  />
+                </div>
+
+                <div className="mt-4 flex gap-3">
+                  {step > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setStep(step - 1)}
+                      className="inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-surface px-5 text-[16px] font-bold text-ink ring-1 ring-inset ring-rule"
+                    >
+                      <ArrowLeft size={18} weight="bold" />
+                      {language === 'ko' ? '이전' : 'Back'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => (step < focusItems.length - 1 ? setStep(step + 1) : setFinished(true))}
+                    className="inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-md bg-line px-5 text-[17px] font-extrabold text-[#2b211a]"
+                  >
+                    {step < focusItems.length - 1
+                      ? language === 'ko'
+                        ? '다음 문제'
+                        : 'Next one'
+                      : language === 'ko'
+                        ? '다 봤어요'
+                        : 'All done'}
+                    <ArrowRight size={18} weight="bold" />
+                  </button>
+                </div>
+
+                {correctCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAll(true)}
+                    className="mt-4 flex w-full items-center justify-between gap-3 rounded-md bg-right-soft px-5 py-4 text-left"
+                  >
+                    <span className="flex items-center gap-2 text-[15px] font-bold text-right">
+                      <Check size={18} weight="bold" />
+                      {language === 'ko' ? `맞은 문제 ${correctCount}개` : `${correctCount} correct`}
+                    </span>
+                    <span className="text-[14px] font-semibold text-ink-2">{language === 'ko' ? '보기' : 'View'}</span>
+                  </button>
+                )}
+
+                {/* the usual tools stay one tap away */}
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {[
+                    { Icon: Camera, label: language === 'ko' ? '다시 찍기' : 'Scan again', onClick: onScanAgain },
+                    { Icon: NotePencil, label: t('tt_review_note'), onClick: () => onOpenDashboard && onOpenDashboard() },
+                    {
+                      Icon: isShareSuccess ? Check : DownloadSimple,
+                      label: isShareSuccess ? (language === 'ko' ? '저장했어요' : 'Saved') : language === 'ko' ? '기록 저장' : 'Save image',
+                      onClick: handleShare,
+                    },
+                  ].map(({ Icon, label, onClick }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={onClick}
+                      className="inline-flex min-h-14 flex-col items-center justify-center gap-1 rounded-md bg-surface px-2 text-[13px] font-bold text-ink-2 ring-1 ring-inset ring-rule hover:text-ink"
+                    >
+                      <Icon size={20} weight="bold" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {focusMode && finished && (
+              <div className="rounded-lg bg-line-soft px-6 py-8 text-center animate-fade-in">
+                <img src="/images/chekki-wave.webp" alt="" className="mx-auto h-32 w-32 object-contain animate-[chekki-bob_4s_ease-in-out_infinite]" />
+                <p className="sign-ko mt-3 text-[24px] text-ink break-keep">
+                  {language === 'ko' ? '다 같이 봤어요!' : 'You went through them all!'}
+                </p>
+                <p className="mt-2 text-[16px] font-medium text-ink-2 break-keep">
+                  {language === 'ko' ? '아이에게 “잘했어, 고마워!” 하고 안아 주세요.' : 'Tell your child "Great job, thank you!" and give a hug.'}
+                </p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <button onClick={onScanAgain} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-line px-4 text-[16px] font-extrabold text-[#2b211a]">
+                    <Camera size={20} weight="bold" />
+                    {language === 'ko' ? '다음 장 찍기' : 'Scan next page'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFinished(false);
+                      setShowAll(true);
+                    }}
+                    className="inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-surface px-4 text-[16px] font-bold text-ink ring-1 ring-inset ring-rule"
+                  >
+                    {language === 'ko' ? '전체 문제 보기' : 'See every question'}
+                  </button>
+                  <button
+                    onClick={() => onOpenDashboard && onOpenDashboard()}
+                    className="inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-surface px-4 text-[16px] font-bold text-ink ring-1 ring-inset ring-rule sm:col-span-2"
+                  >
+                    <NotePencil size={20} weight="bold" />
+                    {t('tt_review_note')}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!focusMode && localItems.length > 0 && (
+              <>
+                {focusItems.length > 0 && (
+                  <div className="mb-3 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAll(false);
+                        setFinished(false);
+                        setStep(0);
+                      }}
+                      className="min-h-11 rounded-md px-3 text-[14px] font-bold text-line-ink hover:bg-line-soft"
+                    >
+                      {hasGrading
+                        ? language === 'ko'
+                          ? '틀린 문제만 하나씩 보기'
+                          : 'Just the misses, one at a time'
+                        : language === 'ko'
+                          ? '한 문제씩 보기'
+                          : 'One at a time'}
+                    </button>
+                  </div>
+                )}
+                <ol className="relative space-y-3">
+                  {localItems.map((item, idx) => (
+                    <li
+                      key={item.id}
+                      ref={(el) => {
+                        itemRefs.current[item.id] = el as unknown as HTMLDivElement;
+                      }}
+                      className="relative w-full animate-item-appear"
+                      style={{ '--i': idx } as React.CSSProperties}
+                    >
+                      <WorksheetItemCard
+                        index={idx}
+                        item={item}
+                        isActive={activeItemId === item.id}
+                        isNight={isNight}
+                        isSpeedMode={isSpeedMode}
+                        language={language}
+                        t={t}
+                        flagged={isMistake(item.question_text, item.correct_answer)}
+                        speechResult={speechResult}
+                        scriptLanguages={scriptLanguages}
+                        isAuthenticated={isAuthenticated}
+                        userPlan={user?.plan}
+                        isListening={isListening && activeItemId === item.id}
+                        hasHandwriting={data?.worksheet_summary?.has_handwriting}
+                        onToggleActive={() => setActiveItemId(activeItemId === item.id ? null : item.id)}
+                        onPlayAudio={playAudio}
+                        onToggleMistake={toggleMistake}
+                        onRefine={(item) => setRefiningItemId(item.id)}
+                        onStartPronunciation={startPronunciationCheck}
+                        onSetScriptLanguage={(id, lang) => setScriptLanguages((prev) => ({ ...prev, [id]: lang }))}
+                        openLoginModal={openLoginModal}
+                        setShowPaywall={setShowPaywall}
+                        setUpsellFeature={setUpsellFeature}
+                      />
+                    </li>
+                  ))}
+                </ol>
+
+                <div className="mt-8 space-y-4 animate-fade-in">
+                  <div className="rounded-lg bg-line-soft px-5 py-5">
+                    <p className="text-[17px] font-bold leading-snug text-ink break-keep">
+                      {language === 'ko'
+                        ? '아무도 몰라줘도 채키는 알아요. 수고 많았어요, 엄마!'
+                        : 'If nobody noticed, Chekki did. Great job today, Mom.'}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <button
                       onClick={onScanAgain}
-                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest active:scale-[0.97] transition-transform duration-[160ms] ease-out ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'}`}
+                      className="inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-line px-4 text-[16px] font-extrabold text-[#2b211a]"
                     >
-                      <span className="text-xl">📸</span>
+                      <Camera size={20} weight="bold" />
                       {t('ws_scan_again')}
                     </button>
                     <button
-                      aria-label="Share"
-                      onClick={handleShare}
-                      disabled={isSharing}
-                      className={`h-16 border rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest active:scale-[0.97] transition-transform duration-[160ms] ease-out ${isNight ? 'bg-zinc-800 border-white/10 text-zinc-300 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800'}`}
+                      onClick={() => onOpenDashboard && onOpenDashboard()}
+                      className="inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-surface px-4 text-[16px] font-bold text-ink ring-1 ring-inset ring-rule hover:ring-ink-3"
                     >
-                      {isSharing ? (
-                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <span className="text-xl">✨</span>{' '}
-                          {language === 'ko' ? '기록 저장' : 'Save Image'}
-                        </>
-                      )}
+                      <NotePencil size={20} weight="bold" />
+                      {t('tt_review_note')}
                     </button>
                   </div>
-                </div>
-
-                {isShareSuccess && (
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-3xl flex items-center gap-4 animate-pulse">
-                    <span className="text-2xl">🎉</span>
-                    <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-relaxed">
-                      {language === 'ko'
-                        ? '기록이 성공적으로 저장되었습니다! ✨'
-                        : 'Image saved to gallery! ✨'}
-                    </p>
+                  <div className="pt-2">
+                    <InlineFeedback />
                   </div>
-                )}
-
-                <div className="pt-4 opacity-40">
-                  <InlineFeedback />
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>

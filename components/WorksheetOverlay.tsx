@@ -214,7 +214,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
             ? viewMode === 'fit'
               ? 'h-full w-full'
               : 'w-full max-w-5xl mx-auto'
-            : 'w-full min-h-[300px] h-auto'
+            : 'w-full min-h-[300px] h-auto lg:h-full'
         }`}
         style={{ touchAction: inFullscreen || draggingId !== null ? 'none' : 'pan-y' }}
       >
@@ -234,10 +234,11 @@ export const WorksheetOverlay: React.FC<Props> = ({
             alt="Worksheet"
             className={`block transition-[opacity,transform,filter] duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform-gpu pointer-events-none ${
               imageLoaded || inFullscreen ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-lg'
-            }`}
+            } ${inFullscreen ? '' : 'lg:max-h-[calc(100dvh-8rem)]'}`}
             style={{
               maxWidth: '100%',
-              maxHeight: inFullscreen && viewMode === 'fit' ? '100vh' : '100%',
+              // in the side panel the whole page fits (class above); fullscreen zooms
+              maxHeight: inFullscreen ? (viewMode === 'fit' ? '100vh' : '100%') : undefined,
               width: 'auto',
               height: 'auto',
               display: 'block',
@@ -249,7 +250,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
           {isLoadingItems && (
             <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">
-              <div className="w-full h-1 bg-gradient-to-r from-transparent via-orange-500/50 to-transparent absolute top-0 animate-[scan_3s_linear_infinite] shadow-[0_0_20px_#f97316]"></div>
+              <div className="w-full h-1.5 bg-line absolute top-0 animate-[scan_3s_linear_infinite]"></div>
             </div>
           )}
 
@@ -307,41 +308,35 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 >
                   <div
                     className={`
-                        rounded-2xl shadow-md border-2 flex items-center gap-2 transform transition-transform active:scale-[0.97] group cursor-grab w-fit max-w-[80vw] md:max-w-[500px] ring-offset-black ring-offset-2
+                        rounded-md shadow-[0_4px_10px_-4px_rgba(0,0,0,0.45)] border-2 flex items-center gap-2 transform transition-transform active:scale-[0.97] group cursor-grab w-fit max-w-[80vw] md:max-w-[500px] ring-offset-2
                         ${isDragging ? 'cursor-grabbing border-white/50 scale-110 shadow-lg ring-4 z-[1000]' : ''}
                         ${
                           isFocused
                             ? isBlankKeyMode
-                              ? 'bg-blue-500 border-white shadow-sm'
+                              ? 'bg-sign border-white'
                               : item.is_correct === true
-                                ? 'bg-emerald-500 border-white shadow-sm'
+                                ? 'bg-right border-white'
                                 : item.is_correct === false
-                                  ? 'bg-red-500 border-white shadow-sm'
-                                  : 'bg-orange-500 border-white shadow-sm'
+                                  ? 'bg-wrong border-white'
+                                  : 'bg-sign border-white'
                             : 'bg-transparent border-transparent'
                         }
                         ${
                           focusedId !== null && focusedId !== undefined && focusedId === item.id
-                            ? isBlankKeyMode
-                              ? 'ring-2 ring-blue-500/50 scale-[1.02] shadow-md'
-                              : item.is_correct === true
-                                ? 'ring-2 ring-emerald-500/50 scale-[1.02] shadow-md'
-                                : item.is_correct === false
-                                  ? 'ring-2 ring-red-500/50 scale-[1.02] shadow-md'
-                                  : 'ring-2 ring-orange-500/50 scale-[1.02] shadow-md'
+                            ? 'ring-[3px] ring-line scale-[1.02]'
                             : ''
                         }
                         px-2.5 py-1.5 md:px-4 md:py-3
                     `}
                   >
                     <>
-                      <div className="w-5 h-5 md:w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
-                        <span className="font-black text-[9px] md:text-sm text-white">
+                      <div className="w-5 h-5 md:w-7 md:h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                        <span className="font-extrabold num text-[10px] md:text-sm text-white">
                           {item.id}
                         </span>
                       </div>
                       <span
-                        className={`font-hand font-black leading-tight tracking-tight text-white whitespace-normal break-words text-left text-balance drop-shadow-md text-sm md:text-xl  inline-block`}
+                        className={`font-bold leading-tight text-white whitespace-normal break-words text-left text-balance text-sm md:text-lg inline-block`}
                       >
                         {displayValue}
                       </span>
@@ -358,14 +353,14 @@ export const WorksheetOverlay: React.FC<Props> = ({
   return (
     <>
       <div
-        className={`w-full flex flex-col ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200 shadow-xl'} lg:overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-[background-color,border-color] duration-700 ${className || 'h-full rounded-3xl'}`}
+        className={`w-full flex flex-col bg-surface lg:overflow-hidden relative ${className || 'h-full rounded-md'}`}
       >
         <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50 flex flex-col items-end pointer-events-none gap-2">
           <div className="flex flex-col gap-3 items-start pointer-events-auto relative shrink-0">
             <button
               aria-label={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
               onClick={() => setShowSettings(!showSettings)}
-              className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/10 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-70 md:opacity-40 md:hover:opacity-100'} hover:scale-110 active:scale-90 hover:border-orange-500/50 hover:text-orange-500 transition-[border-color,color,opacity,transform] duration-200 flex items-center justify-center text-xl shadow-2xl group shrink-0`}
+              className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule ${showSettings ? 'ring-2 ring-line text-line-ink opacity-100' : 'opacity-70 md:opacity-40 md:hover:opacity-100'} hover:scale-110 active:scale-90 hover:border-orange-500/50 hover:text-orange-500 transition-[border-color,color,opacity,transform] duration-200 flex items-center justify-center text-xl shadow-2xl group shrink-0`}
               title={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
             >
               <svg
@@ -387,10 +382,10 @@ export const WorksheetOverlay: React.FC<Props> = ({
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowSettings(false)}></div>
                 <div
-                  className={`flex flex-col gap-4 ${isNight ? 'bg-black/80 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-5 rounded-3xl border shadow-md animate-[fadeIn_200ms_ease-out]-up origin-top-right absolute top-16 right-0 w-max z-[100]`}
+                  className={`flex flex-col gap-4 bg-surface ring-1 ring-rule p-5 rounded-md shadow-md animate-[fadeIn_200ms_ease-out]-up origin-top-right absolute top-16 right-0 w-max z-[100]`}
                 >
                   <div className="flex flex-col gap-2">
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] px-1">
+                    <span className="text-[13px] font-semibold text-ink-3 px-1">
                       {language === 'ko' ? '정답 크기' : 'Answer Size'}
                     </span>
                     <div className="flex items-center gap-3">
@@ -402,7 +397,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                         step="0.05"
                         value={bubbleScale}
                         onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
-                        className={`w-32 accent-orange-500 cursor-pointer h-1.5 ${isNight ? 'bg-white/10' : 'bg-zinc-200'} rounded-full appearance-none`}
+                        className={`w-32 accent-[var(--m-line)] cursor-pointer h-1.5 ${isNight ? 'bg-white/10' : 'bg-zinc-200'} rounded-full appearance-none`}
                       />
                       <span className="text-lg font-black">A</span>
                     </div>
@@ -410,10 +405,9 @@ export const WorksheetOverlay: React.FC<Props> = ({
                   <div className="w-full h-px bg-white/10"></div>
                   <button
                     onClick={resetPositions}
-                    className={`w-full py-3 rounded-2xl ${isNight ? 'bg-white/5 text-white border-white/10 hover:bg-white/10' : 'bg-zinc-100 text-zinc-900 border-zinc-200 hover:bg-zinc-200'} transition-[background-color,transform] flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border`}
+                    className={`w-full py-3 rounded-md bg-sunken text-ink ring-1 ring-inset ring-rule hover:bg-rule transition-[background-color,transform] flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border`}
                   >
-                    <span className="text-base">🔄</span>{' '}
-                    {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
+                                        {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
                   </button>
                 </div>
               </>
@@ -423,7 +417,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
           <div className="flex items-center gap-3 pointer-events-auto shrink-0">
             <button
               onClick={() => setIsFullscreen(true)}
-              className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/30 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center hover:bg-orange-500 hover:border-orange-400 hover:text-white opacity-70 md:opacity-40 md:hover:opacity-100 hover:scale-110 active:scale-90 transition-[background-color,border-color,color,opacity,transform] duration-200 shadow-2xl group shrink-0`}
+              className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule flex items-center justify-center hover:ring-line hover:text-white opacity-70 md:opacity-40 md:hover:opacity-100 hover:scale-110 active:scale-90 transition-[background-color,border-color,color,opacity,transform] duration-200 shadow-2xl group shrink-0`}
               title="Full Screen Focus"
             >
               <svg
@@ -444,15 +438,15 @@ export const WorksheetOverlay: React.FC<Props> = ({
         </div>
 
         <div
-          className={`lg:flex-1 relative lg:overflow-y-auto custom-scrollbar overscroll-y-auto ${isNight ? 'bg-zinc-900/50' : 'bg-zinc-50/50'}`}
+          className="lg:flex-1 relative lg:overflow-y-auto custom-scrollbar overscroll-y-auto bg-sunken"
         >
-          <div className="relative w-full transform-gpu min-h-full">
+          <div className="relative w-full transform-gpu min-h-full lg:h-full">
             {!imageLoaded && (
               <div
-                className={`absolute inset-0 flex flex-col items-center justify-center ${isNight ? 'bg-zinc-900/40' : 'bg-white/40'} backdrop-blur-2xl min-h-[400px] z-20`}
+                className="absolute inset-0 flex flex-col items-center justify-center bg-sunken min-h-[400px] z-20"
               >
-                <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin mb-6"></div>
-                <p className="text-zinc-400 text-[10px] font-black uppercase tracking-wide leading-normal animate-pulse break-keep">
+                <div className="w-10 h-10 border-4 border-rule border-t-line rounded-full animate-spin mb-4"></div>
+                <p className="text-ink-3 text-sm font-semibold break-keep">
                   {language === 'ko' ? '종이 분석 중...' : 'Scanning Paper...'}
                 </p>
               </div>
@@ -466,21 +460,18 @@ export const WorksheetOverlay: React.FC<Props> = ({
           <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none z-[60]">
             <button
               onClick={handleToggleAnswers}
-              className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-[background-color,border-color,color,transform] active:scale-[0.97] border-2 ${
-                showAnswers
-                  ? 'bg-white text-black border-white shadow-sm'
-                  : isNight
-                    ? 'bg-zinc-800 text-zinc-300 border-white/10 hover:border-orange-500/50 hover:text-orange-400'
-                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-orange-500/50 hover:text-orange-500'
+              aria-pressed={showAnswers}
+              className={`pointer-events-auto min-h-11 px-5 rounded-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)] active:scale-[0.97] transition-transform ${
+                showAnswers ? 'bg-sign text-on-sign' : 'bg-line text-[#2b211a]'
               }`}
             >
               {showAnswers
                 ? language === 'ko'
                   ? '정답 숨기기'
-                  : 'Hide Answers'
+                  : 'Hide answers'
                 : language === 'ko'
-                  ? '👀 정답 보기'
-                  : '👀 Show Answers'}
+                  ? '정답 보기'
+                  : 'Show answers'}
             </button>
           </div>
         )}
@@ -497,7 +488,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
               <div className="flex gap-4 pointer-events-auto shrink-0">
                 <button
                   onClick={() => setShowFullscreenSettings(!showFullscreenSettings)}
-                  className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white/90' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 ${showFullscreenSettings ? 'border-orange-500 text-orange-500 opacity-100' : 'opacity-40 hover:opacity-100'} transition-[border-color,color,opacity,transform] flex items-center justify-center text-2xl shadow-2xl active:scale-90 group relative`}
+                  className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule ${showFullscreenSettings ? 'ring-2 ring-line text-line-ink opacity-100' : 'opacity-40 hover:opacity-100'} transition-[border-color,color,opacity,transform] flex items-center justify-center text-2xl shadow-2xl active:scale-90 group relative`}
                   title={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
                 >
                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -511,11 +502,11 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
                   {showFullscreenSettings && (
                     <div
-                      className={`absolute top-20 left-0 flex flex-col gap-4 ${isNight ? 'bg-black/90 border-white/20' : 'bg-white/95 border-zinc-200'} backdrop-blur-2xl p-6 rounded-3xl border shadow-[0_30px_70px_rgba(0,0,0,0.7)] animate-[fadeIn_200ms_ease-out]-up origin-top-left w-max z-[10003]`}
+                      className={`absolute top-20 left-0 flex flex-col gap-4 bg-surface ring-1 ring-rule p-6 rounded-md shadow-[0_30px_70px_rgba(0,0,0,0.7)] animate-[fadeIn_200ms_ease-out]-up origin-top-left w-max z-[10003]`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex flex-col gap-3">
-                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] px-1">
+                        <span className="text-[13px] font-semibold text-ink-3 px-1">
                           {language === 'ko' ? '정답 크기' : 'Answer Size'}
                         </span>
                         <div className="flex items-center gap-4">
@@ -527,7 +518,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                             step="0.05"
                             value={bubbleScale}
                             onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
-                            className={`w-36 accent-orange-500 cursor-pointer h-2 ${isNight ? 'bg-white/10' : 'bg-zinc-200'} rounded-full appearance-none`}
+                            className={`w-36 accent-[var(--m-line)] cursor-pointer h-2 ${isNight ? 'bg-white/10' : 'bg-zinc-200'} rounded-full appearance-none`}
                           />
                           <span className="text-xl font-black">A</span>
                         </div>
@@ -535,10 +526,9 @@ export const WorksheetOverlay: React.FC<Props> = ({
                       <div className="w-full h-px bg-white/10"></div>
                       <button
                         onClick={resetPositions}
-                        className="w-full py-4 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-[background-color,transform] flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border border-white/10"
+                        className="w-full py-4 rounded-md bg-sunken text-ink hover:bg-rule transition-[background-color,transform] flex items-center justify-center gap-3 text-[14px] font-bold active:scale-[0.97] border border-white/10"
                       >
-                        <span className="text-lg">🔄</span>{' '}
-                        {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
+                                                {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
                       </button>
                     </div>
                   )}
@@ -549,10 +539,10 @@ export const WorksheetOverlay: React.FC<Props> = ({
                   <div className="flex justify-center pointer-events-none absolute left-1/2 -translate-x-1/2">
                     <button
                       onClick={handleToggleAnswers}
-                      className={`pointer-events-auto px-6 py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl transition-[background-color,border-color,color,transform] active:scale-[0.97] border-2 ${
+                      className={`pointer-events-auto px-6 py-3 rounded-md font-bold text-[14px] shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)] transition-[background-color,border-color,color,transform] active:scale-[0.97] border-2 ${
                         showAnswers
                           ? 'bg-white text-black border-white shadow-sm'
-                          : 'bg-zinc-900 text-zinc-300 border-white/20 hover:border-orange-500/50 hover:text-orange-400'
+                          : 'bg-line text-[#2b211a] border-transparent'
                       }`}
                     >
                       {showAnswers
@@ -568,7 +558,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
                 <button
                   onClick={() => setViewMode(viewMode === 'fit' ? 'fill' : 'fit')}
-                  className={`w-14 h-14 rounded-full ${isNight ? 'bg-black/60 border-white/20 text-white' : 'bg-white/80 border-zinc-200 text-zinc-900'} backdrop-blur-xl border-2 flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity shadow-2xl active:scale-90`}
+                  className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity shadow-2xl active:scale-90`}
                   title={
                     viewMode === 'fit'
                       ? language === 'ko'
@@ -613,7 +603,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
               <button
                 onClick={() => setIsFullscreen(false)}
-                className="w-14 h-14 rounded-full bg-orange-600/90 hover:bg-orange-500 backdrop-blur-xl flex items-center justify-center text-black opacity-40 hover:opacity-100 transition-[background-color,opacity,transform] active:scale-90 border-2 border-white/30 pointer-events-auto shadow-2xl group shrink-0"
+                className="w-11 h-11 rounded-md bg-sign text-on-sign flex items-center justify-center opacity-80 hover:opacity-100 transition-[background-color,opacity,transform] active:scale-90 border-2 border-white/30 pointer-events-auto shadow-2xl group shrink-0"
               >
                 <svg
                   className="w-10 h-10 group-hover:rotate-90 transition-transform duration-200"

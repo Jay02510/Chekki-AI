@@ -31,64 +31,55 @@ export const InlineFeedback: React.FC = () => {
     }
   };
 
+  // Sending needs a signed-in user; guests would rate into a void.
+  if (!firebaseUser) return null;
+  const ko = language === 'ko';
+
   if (isSuccess) {
     return (
-      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-8 text-center animate-fade-in">
-        <span className="text-4xl block mb-2">💖</span>
-        <h4 className="text-white font-black text-lg font-korean">{t('fb_success')}</h4>
-        <p className="text-emerald-400/60 text-[10px] font-bold uppercase tracking-wide mt-1">
-          Benjamin has been notified!
-        </p>
+      <div className="rounded-md bg-right-soft px-5 py-4 animate-fade-in" role="status">
+        <p className="text-[15px] font-bold text-ink">{t('fb_success')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-3xl p-5 md:p-6 animate-fade-in-up">
-      <div className="text-center mb-3">
-        <h4 className="text-white font-black text-lg md:text-xl font-display mb-1">
-          {language === 'ko' ? '채키가 도움이 되었나요? 🎓' : 'Is Chekki helping tonight?'}
-        </h4>
-        <p className="text-zinc-400 text-xs font-korean">
-          {language === 'ko'
-            ? '더 나은 서비스를 위해 의견을 남겨주세요.'
-            : 'Help us make homework time even better.'}
-        </p>
-      </div>
-
-      <div className="flex justify-center gap-3 md:gap-4 mb-2">
-        {[1, 2, 3, 4, 5].map((star) => (
+    <div className="rounded-md bg-surface px-5 py-5 ring-1 ring-inset ring-rule">
+      <p className="text-[15px] font-bold text-ink">{ko ? '오늘 채키가 도움이 되었나요?' : 'Did Chekki help tonight?'}</p>
+      <p className="mt-0.5 text-[13px] text-ink-3">{ko ? '1은 별로, 5는 아주 좋았어요' : '1 is not really, 5 is a lot'}</p>
+      <div className="mt-3 flex gap-2" role="radiogroup" aria-label={ko ? '평점' : 'Rating'}>
+        {[1, 2, 3, 4, 5].map((n) => (
           <button
-            key={star}
-            onClick={() => setRating(star)}
-            className={`text-3xl md:text-4xl transition-all hover:scale-125 active:scale-90 ${rating === star ? 'grayscale-0 scale-110' : 'grayscale opacity-30 hover:opacity-100 hover:grayscale-0'}`}
+            key={n}
+            role="radio"
+            aria-checked={rating === n}
+            onClick={() => setRating(n)}
+            className={`num h-11 w-11 rounded-full border-[4px] text-[15px] font-extrabold transition-colors ${
+              rating === n ? 'border-line bg-line text-[#2b211a]' : 'border-rule bg-surface text-ink-2 hover:border-line'
+            }`}
           >
-            {['😞', '😐', '🙂', '😊', '🤩'][star - 1]}
+            {n}
           </button>
         ))}
       </div>
 
       {rating !== null && (
-        <div className="space-y-4 animate-fade-in">
+        <div className="mt-4 space-y-3 animate-fade-in">
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder={
-              language === 'ko'
-                ? '더 하고 싶은 말씀이 있으신가요?'
-                : 'Tell Benjamin what we could do better...'
-            }
-            className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-zinc-200 text-sm focus:border-indigo-500 outline-none h-24 resize-none transition-all placeholder:text-zinc-700"
+            placeholder={ko ? '더 하고 싶은 말씀이 있으신가요?' : 'Anything we could do better?'}
+            className="h-24 w-full resize-none rounded-md bg-sunken p-3 text-[15px] text-ink placeholder:text-ink-3 outline-none ring-1 ring-inset ring-rule focus:ring-2 focus:ring-line"
           />
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-50 text-white hover:text-indigo-900 font-black text-sm transition-all transform active:scale-[0.97] flex items-center justify-center gap-2"
+            className="flex min-h-11 w-full items-center justify-center rounded-md bg-sign text-[15px] font-bold text-on-sign disabled:opacity-60"
           >
             {isSubmitting ? (
-              <div className="w-4 h-4 border-2 border-indigo-900/30 border-t-indigo-900 rounded-full animate-spin"></div>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
             ) : (
-              <span>{t('fb_submit')}</span>
+              t('fb_submit')
             )}
           </button>
         </div>

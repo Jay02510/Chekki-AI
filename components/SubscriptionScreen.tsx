@@ -201,7 +201,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         <p className="text-zinc-400 text-sm font-medium max-w-xs">{error}</p>
         <button
           onClick={fetchProducts}
-          className={`px-8 py-3 rounded-xl ${isNight ? 'bg-white/5 border-white/10 text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-900'} border font-black text-xs uppercase tracking-widest hover:opacity-80 transition-all`}
+          className={`px-8 py-3 rounded-md ${'bg-sunken border-rule text-ink'} border font-black text-xs hover:opacity-80 transition-all`}
         >
           {t('sub_retry')}
         </button>
@@ -231,13 +231,13 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
   return (
     <div className="space-y-5">
       <div className="text-center space-y-2 pb-2">
-        <div className="inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 rounded-full px-4 py-1.5 mb-1">
-          <span className="text-orange-500 text-[10px] font-black uppercase tracking-[0.2em]">
+        <div className="inline-flex items-center gap-2 bg-line/15 border border-orange-500/30 rounded-full px-4 py-1.5 mb-1">
+          <span className="text-line-ink text-xs font-black">
             {language === 'ko' ? '🎉 7일 무료 체험' : '🎉 7-Day Free Trial'}
           </span>
         </div>
         <h2
-          className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} leading-tight break-keep`}
+          className={`text-2xl md:text-3xl font-black ${'text-ink'} leading-tight break-keep`}
         >
           {getContextualCopy(paywallContext, language, t).headline}
         </h2>
@@ -247,16 +247,16 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
       </div>
 
       <div
-        className={`${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200 shadow-sm'} rounded-3xl p-5 md:p-6 border`}
+        className={`${'bg-sunken border-rule'} rounded-md p-5 md:p-6 border`}
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 sm:gap-x-6">
           {features.map((item) => (
             <div key={item.key} className="flex items-center gap-3 group">
-              <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-orange-500/10 flex items-center justify-center text-base flex-shrink-0 group-hover:scale-110 transition-transform shadow-inner">
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-md bg-line/10 flex items-center justify-center text-base flex-shrink-0 group-hover:scale-110 transition-transform shadow-inner">
                 {item.icon}
               </div>
               <span
-                className={`text-xs md:text-sm font-bold ${isNight ? 'text-zinc-200' : 'text-zinc-700'} leading-tight break-keep`}
+                className={`text-xs md:text-sm font-bold ${'text-ink-2'} leading-tight break-keep`}
               >
                 {t(item.key as any)}
               </span>
@@ -268,28 +268,28 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
         <button
           onClick={() => setSelectedProduct(yearlyProductIdentifier)}
-          className={`text-left rounded-3xl p-5 md:p-7 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 lg:order-first ${
+          className={`text-left rounded-md p-5 md:p-7 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 lg:order-first ${
             selectedProduct === yearlyProductIdentifier
-              ? `bg-gradient-to-br ${isNight ? 'from-orange-50/15 to-orange-500/5 border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.2)]' : 'from-orange-50/50 to-white border-orange-500 shadow-[0_30px_60px_rgba(249,115,22,0.1)]'}`
-              : `${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-sm'} hover:border-orange-500/30`
+              ? `bg-gradient-to-br ${'from-line-soft to-line-soft border-line'}`
+              : `${'bg-surface border-rule'} hover:border-orange-500/30`
           }`}
         >
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[9px] md:text-[10px] bg-emerald-500 text-white px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+            <span className="text-xs md:text-xs bg-emerald-500 text-white px-2.5 py-0.5 rounded-full font-black shadow-lg shadow-emerald-500/20">
               {t('sub_bestValue')}
             </span>
-            <span className="text-[9px] md:text-[10px] bg-orange-500/20 text-orange-500 border border-orange-500/30 px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest">
+            <span className="text-xs md:text-xs bg-line/20 text-line-ink border border-orange-500/30 px-2.5 py-0.5 rounded-full font-black">
               {t('sub_trial_badge')}
             </span>
           </div>
 
-          <p className="text-[10px] md:text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+          <p className="text-xs md:text-[11px] font-black text-zinc-400">
             {t('sub_yearly')}
           </p>
 
           <div className="flex items-baseline gap-1.5">
             <p
-              className={`font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-3xl md:text-4xl`}
+              className={`font-black ${'text-ink'} text-3xl md:text-4xl`}
             >
               {SCREENSHOT_MODE
                 ? t('sub_yearly')
@@ -303,37 +303,37 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
           </div>
 
           {!SCREENSHOT_MODE && (
-            <p className="text-[10px] md:text-[11px] text-emerald-500 font-black uppercase tracking-wide mt-0.5">
+            <p className="text-xs md:text-[11px] text-emerald-500 font-black uppercase tracking-wide mt-0.5">
               ✓ {t('sub_save_yearly')}
             </p>
           )}
 
           {selectedProduct === yearlyProductIdentifier && (
-            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
-              <span className="text-white text-[10px]">✓</span>
+            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-line flex items-center justify-center">
+              <span className="text-white text-xs">✓</span>
             </div>
           )}
         </button>
 
         <button
           onClick={() => setSelectedProduct(monthlyProductIdentifier)}
-          className={`text-left rounded-2xl p-4 md:p-5 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 ${
+          className={`text-left rounded-md p-4 md:p-5 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 ${
             selectedProduct === monthlyProductIdentifier
-              ? `bg-orange-500/10 border-orange-500 ${isNight ? 'shadow-[0_20px_40px_rgba(249,115,22,0.1)]' : 'shadow-[0_20px_40px_rgba(249,115,22,0.05)]'}`
-              : `${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-sm'} hover:border-orange-500/30`
+              ? `bg-line/10 border-orange-500 ${''}`
+              : `${'bg-surface border-rule'} hover:border-orange-500/30`
           }`}
         >
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[9px] bg-orange-500/20 text-orange-500 border border-orange-500/30 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">
+            <span className="text-xs bg-line/20 text-line-ink border border-orange-500/30 px-2 py-0.5 rounded-full font-black">
               {t('sub_trial_badge')}
             </span>
           </div>
-          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+          <p className="text-xs font-black text-zinc-400">
             {t('sub_monthly')}
           </p>
           <div className="flex items-baseline gap-1">
             <p
-              className={`font-black ${isNight ? 'text-white' : 'text-zinc-900'} text-2xl md:text-3xl`}
+              className={`font-black ${'text-ink'} text-2xl md:text-3xl`}
             >
               {SCREENSHOT_MODE
                 ? t('sub_monthly')
@@ -347,8 +347,8 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
           </div>
 
           {selectedProduct === monthlyProductIdentifier && (
-            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
-              <span className="text-white text-[10px]">✓</span>
+            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-line flex items-center justify-center">
+              <span className="text-white text-xs">✓</span>
             </div>
           )}
         </button>
@@ -358,7 +358,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         <button
           onClick={handleSubscribe}
           disabled={isProcessing}
-          className="w-full py-5 rounded-3xl bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-200 disabled:text-zinc-500 text-black font-black text-lg shadow-2xl shadow-orange-500/40 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+          className="w-full py-5 rounded-md bg-line  disabled:bg-zinc-200 disabled:text-zinc-500 text-black font-black text-lg shadow-2xl shadow-orange-500/40 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
         >
           {isProcessing ? (
             <div className="w-5 h-5 border-[3px] border-white/20 border-t-white rounded-full animate-spin" />
@@ -380,7 +380,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         </button>
 
         {error && (
-          <p className="text-center text-red-500 text-[10px] font-black uppercase tracking-widest">
+          <p className="text-center text-red-500 text-xs font-black">
             {error}
           </p>
         )}
@@ -393,7 +393,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
           ].map((item) => (
             <span
               key={item.key}
-              className="text-[9px] md:text-[10px] text-zinc-400 font-bold flex items-center gap-1"
+              className="text-xs md:text-xs text-zinc-400 font-bold flex items-center gap-1"
             >
               <span>{item.icon}</span>
               {getDisclosureText(t(item.key as any))}
@@ -406,24 +406,24 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         <button
           onClick={handleRestore}
           disabled={isProcessing}
-          className="text-zinc-400 hover:text-orange-500 font-black text-[10px] uppercase tracking-widest transition-colors"
+          className="text-zinc-400 hover:text-line-ink font-black text-xs transition-colors"
         >
           {t('sub_restore')}
         </button>
 
         <div
-          className={`${isNight ? 'bg-white/5 border-white/5' : 'bg-zinc-100 border-zinc-200 shadow-inner'} rounded-3xl p-5 border space-y-4 w-full`}
+          className={`${'bg-sunken border-rule'} rounded-md p-5 border space-y-4 w-full`}
         >
-          <p className="text-[10px] text-zinc-400 leading-relaxed text-center font-medium break-keep">
+          <p className="text-xs text-zinc-400 leading-relaxed text-center font-medium break-keep">
             {getDisclosureText(t('sub_disclosure_trial'))}
           </p>
 
-          <div className="flex justify-center gap-4 text-[10px] font-black uppercase tracking-widest">
+          <div className="flex justify-center gap-4 text-xs font-black">
             <button
               onClick={() =>
                 window.dispatchEvent(new CustomEvent('show-legal', { detail: 'privacy' }))
               }
-              className="text-orange-500 hover:underline"
+              className="text-line-ink hover:underline"
             >
               {language === 'ko' ? '개인정보 처리방침' : 'Privacy Policy'}
             </button>
@@ -432,12 +432,12 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
               onClick={() =>
                 window.dispatchEvent(new CustomEvent('show-legal', { detail: 'terms' }))
               }
-              className="text-orange-500 hover:underline"
+              className="text-line-ink hover:underline"
             >
               {language === 'ko' ? '이용약관' : 'Terms of Use'}
             </button>
           </div>
-          <p className="text-[9px] text-zinc-600 text-center uppercase tracking-tight">
+          <p className="text-xs text-zinc-600 text-center uppercase tracking-tight">
             Subscription follows {isIOS ? 'Apple Standard EULA' : 'Google Play Terms of Service'}
           </p>
         </div>
@@ -468,13 +468,13 @@ const WebSubscriptionView: React.FC<{ isNight?: boolean }> = ({ isNight = true }
   return (
     <div className="flex flex-col items-center justify-center text-center py-6 space-y-6">
       <div
-        className={`w-16 h-16 md:w-20 md:h-20 rounded-3xl ${isNight ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50 border-orange-200 shadow-sm'} border flex items-center justify-center text-3xl md:text-4xl shadow-lg shadow-orange-500/10`}
+        className={`w-16 h-16 md:w-20 md:h-20 rounded-md ${'bg-line-soft border-transparent'} border flex items-center justify-center text-3xl md:text-4xl `}
       >
         {getContextIcon()}
       </div>
       <div className="px-4">
         <h3
-          className={`text-lg md:text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 leading-tight`}
+          className={`text-lg md:text-xl font-black ${'text-ink'} mb-2 leading-tight`}
         >
           {copy.headline}
         </h3>
@@ -486,19 +486,19 @@ const WebSubscriptionView: React.FC<{ isNight?: boolean }> = ({ isNight = true }
       <div className="w-full max-w-xs space-y-3 px-4">
         <a
           href="/subscribe"
-          className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-black font-black text-base shadow-xl shadow-orange-500/20 active:scale-[0.97] transition-all text-center block"
+          className="w-full py-4 rounded-md bg-line text-[#2b211a] font-black text-base  active:scale-[0.97] transition-all text-center block"
         >
           {t('sub_webCta')}
         </a>
 
         <div
-          className={`flex items-center justify-center gap-3 py-2 border-t ${isNight ? 'border-white/5' : 'border-zinc-100'} mt-4 opacity-50`}
+          className={`flex items-center justify-center gap-3 py-2 border-t ${'border-rule'} mt-4 opacity-50`}
         >
-          <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1">
+          <span className="text-xs font-black text-zinc-400 flex items-center gap-1">
             <AppleLogo className="w-2 h-2" /> iOS
           </span>
           <span className="text-zinc-700">|</span>
-          <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1">
+          <span className="text-xs font-black text-zinc-400 flex items-center gap-1">
             🤖 Android ({language === 'ko' ? '준비 중' : 'Soon'})
           </span>
         </div>
@@ -523,7 +523,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ onClose, isNight = true })
       {/* Header */}
       <div className="text-center mb-6">
         <h2
-          className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} mb-1 font-display break-keep`}
+          className={`text-2xl md:text-3xl font-black ${'text-ink'} mb-1  break-keep`}
         >
           {t('sub_title')}
         </h2>
@@ -531,7 +531,7 @@ export const SubscriptionScreen: React.FC<Props> = ({ onClose, isNight = true })
 
         <div className="mt-3 flex justify-center">
           <span
-            className={`text-[9px] ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-100 border-zinc-200 shadow-sm'} text-zinc-500 px-3 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1.5 border`}
+            className={`text-xs ${'bg-sunken border-rule'} text-zinc-500 px-3 py-1 rounded-full font-black flex items-center gap-1.5 border`}
           >
             {platform === 'ios' ? (
               <>

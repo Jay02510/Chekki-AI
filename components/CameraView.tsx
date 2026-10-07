@@ -1,20 +1,12 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Camera, Sun, LockSimple, ArrowRight, ChatCircleText, ChalkboardTeacher, Target } from '@phosphor-icons/react';
 import { useToast } from '../contexts/ToastContext';
 import { compressImage } from '../utils/imageUtils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { ChekkiMascot } from './Icons';
-import { ASSETS } from '../constants';
-import { SCREENSHOT_MODE } from '../config';
-import { FeedbackModal } from './FeedbackModal';
-import { LegalType } from '../types';
-import { LegalModal } from './LegalModal';
-import { ScreenshotCarousel } from './ScreenshotCarousel';
-import { askChekkiQuestion, ChatTurn } from '../services/geminiService';
-import { renderMarkdown } from '../utils/markdownUtils';
-
-import { AskChekkiBar, AskChekkiAnswerModal } from './AskChekkiBar';
 import { CropModal } from './CropModal';
+import { LoopStrip, Stop } from './metro';
+import { ParentClassLogs } from './ParentClassLogs';
 
 interface Props {
   onImageSelected: (base64: string) => void;
@@ -23,86 +15,60 @@ interface Props {
   onOpenHelp?: () => void;
 }
 
-export const CameraView: React.FC<Props> = ({
-  onImageSelected,
-  isNight = false,
-  minimal = false,
-  onOpenHelp,
-}) => {
+// Scan home: Chekki greets the parent, one big button takes the photo.
+// Everything else stays quiet so a tired parent with a child on their lap
+// sees exactly one thing to do.
+export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }) => {
   const { showToast } = useToast();
-  const {
-    user,
-    isAuthenticated,
-    openLoginModal,
-    checkScanLimit,
-    incrementScan,
-    checkQuestionLimit,
-    incrementQuestion,
-    setShowPaywall,
-  } = useAuth();
+  const { user, isAuthenticated, openLoginModal, setShowPaywall } = useAuth();
+  const { t, language } = useLanguage();
+  const ko = language === 'ko';
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-
-  const [imgError, setImgError] = useState(false);
-  const [mascotLoaded, setMascotLoaded] = useState(false);
-
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [showLegal, setShowLegal] = useState<LegalType | null>(null);
-  const [showVideoModal, setShowVideoModal] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
-
-  const { t, language } = useLanguage();
-
   const [guestUsed, setGuestUsed] = useState(false);
-  const [classCodeBannerDismissed, setClassCodeBannerDismissed] = useState(
+  const [inviteDismissed, setInviteDismissed] = useState(
     () => localStorage.getItem('chekki_classcode_banner_dismissed') === '1'
   );
 
-  const dismissClassCodeBanner = () => {
-    localStorage.setItem('chekki_classcode_banner_dismissed', '1');
-    setClassCodeBannerDismissed(true);
+  useEffect(() => {
+    setGuestUsed(localStorage.getItem('chekki_guest_scan_used') === 'true');
+  }, [isAuthenticated]);
+
+  const isLocked = !isAuthenticated && guestUsed;
+
+  const openPicker = () => {
+    if (isLocked) openLoginModal();
+    else fileInputRef.current?.click();
   };
 
   useEffect(() => {
-    const used = localStorage.getItem('chekki_guest_scan_used') === 'true';
-    setGuestUsed(used);
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    const handleTriggerScan = () => {
-      if (isAuthenticated) {
-        fileInputRef.current?.click();
-      } else if (guestUsed) {
-        openLoginModal();
-      } else {
-        fileInputRef.current?.click();
-      }
-    };
-    window.addEventListener('trigger-scan', handleTriggerScan);
-    return () => window.removeEventListener('trigger-scan', handleTriggerScan);
-  }, [isAuthenticated, guestUsed, openLoginModal]);
+    window.addEventListener('trigger-scan', openPicker);
+    return () => window.removeEventListener('trigger-scan', openPicker);
+  });
 
   const processFile = async (file: File) => {
     setIsProcessing(true);
     try {
-      const base64Url = await compressImage(file);
-      setImageToCrop(base64Url);
-    } catch (e) {
-      console.error('Image processing failed.');
-      showToast({ message: 'Error processing image. Please try another photo.', type: 'error' });
+      setImageToCrop(await compressImage(file));
+    } catch {
+      showToast({
+        message: ko
+          ? '사진을 불러오지 못했어요. 다른 사진으로 다시 시도해 주세요.'
+          : "Couldn't read that photo. Please try another one.",
+        type: 'error',
+      });
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) processFile(e.target.files[0]);
-  };
-
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isLocked) return;
     if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
     else if (e.type === 'dragleave') setDragActive(false);
   };
@@ -111,741 +77,259 @@ export const CameraView: React.FC<Props> = ({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+    if (!isLocked && e.dataTransfer.files?.[0]) processFile(e.dataTransfer.files[0]);
   };
 
-  const renderVideoWalkthroughModal = () => (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
-        onClick={() => setShowVideoModal(false)}
-      ></div>
-      <div className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up">
-        <video src={ASSETS.VIDEO_WALKTHROUGH} controls autoPlay className="w-full h-full" />
-        <button
-          onClick={() => setShowVideoModal(false)}
-          className="absolute top-6 right-6 md:top-8 md:right-8 bg-black/50 hover:bg-black text-white p-3 rounded-full transition-colors z-10 border border-white/10 backdrop-blur-md"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  );
+  const linked = !!(user?.schoolId && user?.classId && user?.classStatus === 'active');
+  const isPro = user?.plan === 'pro';
+  const today = new Date().toISOString().split('T')[0];
+  const scansUsed = user && user.lastScanDate === today ? user.scansUsedToday || 0 : 0;
+  const scansLeft = Math.max(0, (user?.maxScansPerDay || 2) - scansUsed);
 
-  const renderFeatureSection = () => null;
+    const stops: Stop[] = [
+    { ko: '정답지', en: 'Key', state: 'done' },
+    { ko: '숙제', en: 'Scan', state: 'current' },
+    { ko: '설명', en: 'Explain', state: 'next' },
+    { ko: '수업', en: 'Class', state: 'next' },
+    { ko: '리포트', en: 'Report', state: 'next' },
+  ];
 
-  // State for the inline Ask Chekki answer modal
-  const [askQuery, setAskQuery] = useState('');
-  const [askAnswer, setAskAnswer] = useState<string | null>(null);
-  const [askAnsweredQuestion, setAskAnsweredQuestion] = useState('');
-  const [isAskAsking, setIsAskAsking] = useState(false);
-  const [askHistory, setAskHistory] = useState<ChatTurn[]>([]);
-  const [showTools, setShowTools] = useState(false);
-
-  const handleAskSubmit = useCallback(
-    async (question: string) => {
-      if (!question.trim() || isAskAsking) return;
-
-      // Check limit for authenticated free users
-      if (isAuthenticated && !checkQuestionLimit()) {
-        return;
-      }
-
-      const isFollowUp = askHistory.length > 0;
-      if (!isFollowUp) {
-        setAskAnswer(null);
-        setAskHistory([]);
-      }
-
-      setAskAnsweredQuestion(question);
-      setIsAskAsking(true);
-
-      try {
-        const isGuest = !isAuthenticated;
-        const response = await askChekkiQuestion(
-          question,
-          language,
-          isGuest,
-          undefined,
-          askHistory
-        );
-        setAskAnswer(response);
-
-        setAskHistory((prev) => [
-          ...prev,
-          { role: 'user' as const, text: question },
-          { role: 'model' as const, text: response },
-        ]);
-
-        // Increment only for authenticated users (backend also handles this)
-        if (isAuthenticated) {
-          await incrementQuestion();
-        }
-      } catch (error: any) {
-        setAskAnswer(
-          language === 'ko'
-            ? '오류가 발생했습니다. 다시 시도해주세요.'
-            : 'Something went wrong. Please try again.'
-        );
-      } finally {
-        setIsAskAsking(false);
-      }
+  // Why this and not a chatbot: three honest differences, guests only.
+  const reasons = [
+    {
+      Icon: Camera,
+      title: ko ? '사진 한 장이면 끝' : 'One photo, no typing',
+      desc: ko
+        ? '질문을 쓰거나 복사할 필요 없어요. 학습지를 그대로 찍으면 돼요.'
+        : 'No questions to type. Just snap the page as it is.',
     },
-    [isAuthenticated, checkQuestionLimit, incrementQuestion, language, askHistory, isAskAsking]
-  );
-
-  const renderClarityGuide = () => {
-    const tips = [
-      {
-        emoji: '💡',
-        label: t('lbl_lighting'),
-        desc: t('tt_lighting'),
-      },
-      {
-        emoji: '📏',
-        label: t('lbl_flat'),
-        desc: t('tt_flat'),
-      },
-      {
-        emoji: '🔍',
-        label: t('lbl_sharp'),
-        desc: t('tt_sharp'),
-      },
-    ];
-
-    return (
-      <p
-        className={`mt-3 text-xs md:text-sm font-bold flex items-center justify-center gap-3 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
-      >
-        {tips.map((tip) => (
-          <span key={tip.label} title={tip.desc} className="flex items-center gap-1">
-            <span aria-hidden="true">{tip.emoji}</span>
-            {tip.label}
-          </span>
-        ))}
-      </p>
-    );
-  };
-
-  const renderTrustAndSteps = () => (
-    <div className="mt-8 md:mt-12 w-full space-y-6 animate-fade-in-up">
-      {/* 3-Step Flow Strip */}
-      <div
-        className={`grid grid-cols-1 md:grid-cols-3 gap-4 p-5 md:p-6 rounded-3xl border ${isNight ? 'bg-zinc-900/30 border-white/5' : 'bg-white border-zinc-150 shadow-[0_4px_20px_rgba(0,0,0,0.015)]'}`}
-      >
-        {[
-          {
-            step: '①',
-            title: language === 'ko' ? '학습지 촬영' : 'Snap Worksheet',
-            desc:
-              language === 'ko'
-                ? '카메라로 영어 학습지를 찍어주세요'
-                : 'Take a photo of the worksheet',
-          },
-          {
-            step: '②',
-            title: language === 'ko' ? '실시간 분석' : 'Chekki Reads',
-            desc:
-              language === 'ko'
-                ? '채키가 문제와 정답을 분석합니다'
-                : 'Chekki analyzes questions & answers',
-          },
-          {
-            step: '③',
-            title: language === 'ko' ? '맞춤 지도' : 'Korean Guides',
-            desc:
-              language === 'ko'
-                ? '한국어 가이드와 발음을 확인하세요'
-                : 'Get step-by-step guides in Korean',
-          },
-        ].map((item, idx) => (
-          <div key={idx} className="flex items-start gap-2.5 text-left font-sans">
-            <span
-              className={`text-base font-black ${isNight ? 'text-brand-purple' : 'text-orange-500'}`}
-            >
-              {item.step}
-            </span>
-            <div>
-              <h4
-                className={`text-xs md:text-sm font-black ${isNight ? 'text-zinc-200' : 'text-zinc-800'} tracking-tight`}
-              >
-                {item.title}
-              </h4>
-              <p
-                className={`text-[10px] md:text-xs font-semibold ${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-korean mt-0.5 leading-tight`}
-              >
-                {item.desc}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderDropZone = (size: 'large' | 'compact' = 'large') => {
-    const isGuestLocked = !isAuthenticated && guestUsed;
-    const isLocked = isGuestLocked;
-
-    const handleAction = () => {
-      if (isGuestLocked) openLoginModal();
-      else fileInputRef.current?.click();
-    };
-
-    return (
-      <div
-        className={`relative w-full ${size === 'large' ? 'min-h-[350px] md:min-h-[500px]' : 'h-full'} flex items-center justify-center py-4 md:py-8`}
-      >
-        <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[98%] h-[98%] border ${isNight ? 'border-white/5' : 'border-zinc-200/50'} rounded-[2.5rem]  pointer-events-none`}
-        ></div>
-        <div
-          id="magic-drop-zone-inner"
-          className={`relative w-full h-full max-w-3xl mx-auto ${isNight ? 'bg-brand-dark/40 border-white/10 shadow-2xl' : 'bg-white border-zinc-200 shadow-xl'} backdrop-blur-3xl rounded-[2.5rem] border transition-[border-color,box-shadow,transform] duration-200 ease-[var(--ease-premium)] flex flex-col items-center justify-center p-5 md:p-12 group
-              ${dragActive && !isLocked ? 'border-orange-500 shadow-md scale-[1.02]' : 'lg:hover:border-orange-500/30'}`}
-          onDragEnter={isLocked ? undefined : handleDrag}
-          onDragLeave={isLocked ? undefined : handleDrag}
-          onDragOver={isLocked ? undefined : handleDrag}
-          onDrop={isLocked ? undefined : handleDrop}
-        >
-          {!isAuthenticated && !guestUsed && (
-            <div className="absolute top-4 md:top-10 z-40  pointer-events-none">
-              <div className="bg-orange-500 text-black text-[8px] md:text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-2 border border-white/20 whitespace-nowrap">
-                <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
-                {t('guest_scan_badge')}
-              </div>
-            </div>
-          )}
-
-          <div className="relative z-10 flex flex-col items-center text-center w-full pt-4">
-            <div
-              className={`${size === 'large' ? 'w-24 h-24 md:w-44 md:h-44' : 'w-24 h-24'} mb-3 md:mb-6 relative transition-[filter,opacity,transform] duration-700 ${isLocked ? 'blur-md opacity-40 grayscale scale-90' : 'group-hover:scale-[1.02]'}`}
-            >
-              {isProcessing ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div
-                    className={`w-10 h-10 md:w-16 md:h-16 border-[3px] ${isNight ? 'border-indigo-500' : 'border-orange-500'} border-t-transparent rounded-full animate-spin shadow-2xl`}
-                  ></div>
-                </div>
-              ) : (
-                <div className="w-full h-full  flex items-center justify-center">
-                  {!imgError ? (
-                    <img
-                      src={ASSETS.HERO_IMAGE}
-                      alt="Chekki Mascot"
-                      className="w-full h-full object-contain drop-shadow-lg filter brightness-110 transition-opacity duration-700"
-                      onLoad={() => setMascotLoaded(true)}
-                      onError={() => setImgError(true)}
-                      loading="eager"
-                    />
-                  ) : (
-                    <ChekkiMascot
-                      className="w-full h-full drop-shadow-2xl"
-                      mood={isNight ? 'sleeping' : 'happy'}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-
-            {isLocked ? (
-              <div className="animate-fade-in space-y-4 px-4">
-                <div className="space-y-1">
-                  <h3
-                    className={`text-xl md:text-5xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight break-keep leading-tight`}
-                  >
-                    {t('guest_used_title')}
-                  </h3>
-                  <p className="text-zinc-400 font-bold font-korean text-xs md:text-2xl max-w-md mx-auto leading-relaxed opacity-80">
-                    {t('guest_used_desc')}
-                  </p>
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openLoginModal();
-                  }}
-                  className={`bg-white text-black px-8 py-3 md:px-16 md:py-6 rounded-xl md:rounded-2xl font-black text-sm md:text-2xl transition-transform active:scale-[0.97] uppercase tracking-wider w-full md:w-auto shadow-xl`}
-                >
-                  {t('login')}
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-1 max-w-lg px-2">
-                  <h3
-                    className={`text-xl md:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight break-keep leading-[1.2] ${isProcessing ? 'text-orange-500 italic' : ''}`}
-                  >
-                    {isProcessing
-                      ? language === 'ko'
-                        ? '채점 중... 칭찬만 준비하세요! 💖'
-                        : "Grading... We've got this! 💖"
-                      : t('drop_title')}
-                  </h3>
-                  <p
-                    className={`${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-bold font-korean text-xs md:text-2xl break-keep opacity-80 leading-relaxed`}
-                  >
-                    {t('drop_subtitle')}
-                  </p>
-                </div>
-
-                {renderClarityGuide()}
-
-                <button
-                  type="button"
-                  onClick={handleAction}
-                  className="mt-4 md:mt-6 flex flex-col items-center gap-3 group/btn cursor-pointer bg-transparent border-0 p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-500 rounded-2xl"
-                  title={t('btn_guest_scan')}
-                >
-                  <div
-                    className={`w-16 h-16 md:w-28 md:h-28 rounded-full bg-orange-500 border-white/20 flex items-center justify-center shadow-lg shadow-orange-500/30 transition-[transform,box-shadow] duration-200 ease-[var(--ease-premium)] group-hover:scale-110 group-hover:shadow-lg border-4 active:scale-90 `}
-                  >
-                    <svg
-                      className="w-8 h-8 md:w-14 md:h-14 text-black"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  </div>
-                  <span
-                    className={`text-xs md:text-lg font-black tracking-wider transition-colors ${isNight ? 'text-white' : 'text-zinc-900'}`}
-                  >
-                    {isAuthenticated ? t('btn_upload') : t('btn_guest_scan')}
-                  </span>
-                  <div
-                    className={`mt-2 flex items-center justify-center gap-1.5 text-[10px] md:text-xs font-semibold ${isNight ? 'text-zinc-500' : 'text-zinc-400'} font-korean opacity-85`}
-                  >
-                    <span>🔒</span>
-                    <span>{t('supported_formats')}</span>
-                  </div>
-                </button>
-
-              </>
-            )}
-          </div>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            disabled={isProcessing || isLocked}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const renderFeatureBanner = () => {
-    const banners = [
-      {
-        id: 'feedback',
-        label: t('lbl_feedback'),
-        title: t('lbl_share_ideas'),
-        tooltip: t('tt_feedback'),
-        emoji: '✨',
-        onClick: () => setShowFeedbackModal(true),
-        color: isNight ? 'text-indigo-400' : 'text-orange-400',
-      },
-      {
-        id: 'guide',
-        label: t('lbl_quick_guide'),
-        title: t('btn_walkthrough'),
-        tooltip: t('tt_guide'),
-        emoji: '▶️',
-        onClick: () => setShowVideoModal(true),
-        color: 'text-indigo-400',
-      },
-    ];
-
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6 mb-8 md:mb-16 animate-fade-in-up w-full px-2 max-w-5xl mx-auto">
-        {banners.map((banner) => (
-          <button
-            key={banner.id}
-            onClick={banner.onClick}
-            title={banner.tooltip}
-            className="group bg-white/5 hover:bg-white/10 border border-white/10 p-5 md:p-8 rounded-3xl flex items-center gap-4 md:gap-6 transition-colors text-left w-full h-full backdrop-blur-sm"
-          >
-            <div
-              className={`w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex-shrink-0 ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'} flex items-center justify-center text-xl md:text-3xl shadow-xl group-hover:scale-110 transition-transform duration-200`}
-            >
-              {banner.emoji}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p
-                className={`text-[9px] md:text-xs font-black uppercase tracking-[0.2em] ${banner.color} mb-1 opacity-90`}
-              >
-                {banner.label}
-              </p>
-              <h4
-                className={`text-sm md:text-xl font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-korean truncate leading-tight`}
-              >
-                {banner.title}
-              </h4>
-            </div>
-          </button>
-        ))}
-      </div>
-    );
-  };
-
-  if (isAuthenticated && user) {
-    const isPro = user.plan === 'pro';
-    const today = new Date().toISOString().split('T')[0];
-    const isNewDay = user?.lastScanDate !== today;
-    const maxScans = user?.maxScansPerDay || 3;
-    const scansUsed = isNewDay ? 0 : user?.scansUsedToday || 0;
-    const remainingCount = Math.max(0, maxScans - scansUsed);
-    const remaining = isPro ? '∞' : remainingCount.toString();
-
-    const isNewQuestionDay = user?.lastQuestionDate !== today;
-    const maxQuestions = user?.maxQuestionsPerDay || 5;
-    const questionsUsed = isNewQuestionDay ? 0 : user?.questionsUsedToday || 0;
-    const remainingQuestionsCount = Math.max(0, maxQuestions - questionsUsed);
-    const remainingQuestions = isPro ? '∞' : remainingQuestionsCount.toString();
-
-    return (
-      <div className="min-h-full pt-4 md:pt-8 pb-10 px-4 md:px-10 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto flex flex-col items-center animate-fade-in relative">
-        {imageToCrop && (
-          <CropModal
-            imageSrc={imageToCrop}
-            isNight={isNight}
-            onClose={() => setImageToCrop(null)}
-            onCropComplete={(croppedDataUrl) => {
-              const base64Data = croppedDataUrl.split(',')[1];
-              onImageSelected(base64Data);
-              setImageToCrop(null);
-            }}
-            onGradeOriginal={() => {
-              const base64Data = imageToCrop.split(',')[1];
-              onImageSelected(base64Data);
-              setImageToCrop(null);
-            }}
-          />
-        )}
-        {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
-        {showVideoModal && renderVideoWalkthroughModal()}
-        <AskChekkiAnswerModal
-          answer={askAnswer}
-          isAsking={isAskAsking}
-          question={askAnsweredQuestion}
-          isAuthenticated={isAuthenticated}
-          language={language}
-          history={askHistory}
-          onClose={() => {
-            setAskAnswer(null);
-            setAskAnsweredQuestion('');
-            setAskHistory([]);
-          }}
-          openLoginModal={openLoginModal}
-          onFollowUp={handleAskSubmit}
-          isNight={isNight}
-        />
-
-        <div className="w-full max-w-5xl flex flex-col items-center text-center mb-6 md:mb-16 gap-4 md:gap-10 px-4">
-          <div className="space-y-2 md:space-y-8">
-            {user.schoolName && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-1 shadow-xl backdrop-blur-sm">
-                <span className="text-xs">🏫</span>
-                <span className="text-xs font-bold text-indigo-300">
-                  {user.schoolName}
-                </span>
-              </div>
-            )}
-            <h1
-              className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display break-keep leading-tight tracking-tight`}
-            >
-              {t('dash_welcome')}{' '}
-              <span className="text-brand-orange">
-                {user.name}!
-              </span>
-            </h1>
-            <p
-              className={`${isNight ? 'text-zinc-400' : 'text-zinc-500'} font-bold font-korean text-xs sm:text-sm md:text-lg lg:text-xl max-w-3xl mx-auto leading-relaxed break-keep opacity-80`}
-            >
-              {t('dash_subtitle')}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            {!isPro && (
-              <div
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-2 shadow-sm ${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-100 border-zinc-200'}`}
-              >
-                <span className="text-xs">📸</span>
-                <span
-                  className={`text-[10px] md:text-xs font-black ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
-                >
-                  {language === 'ko'
-                    ? `오늘 남은 무료 스캔: ${remainingCount}회`
-                    : `${remainingCount} free scans left today`}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {!isPro && (
-            <div
-              onClick={() => setShowPaywall(true)}
-              className="w-full max-w-xl mx-auto mt-6 px-5 py-4 rounded-3xl bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-red-500/10 border border-orange-500/30 hover:border-orange-500/50 shadow-lg cursor-pointer transform hover:scale-[1.02] active:scale-[0.97] transition-[transform,border-color] duration-200 flex items-center justify-between gap-4 animate-fade-in-up"
-            >
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-pink-500 flex items-center justify-center text-xl shadow-md shadow-orange-500/20 flex-shrink-0 animate-bounce">
-                  ✨
-                </div>
-                <div>
-                  <h4 className="text-xs md:text-sm font-black text-white leading-tight font-display">
-                    {language === 'ko' ? 'Chekki PRO 7일 무료 체험' : 'Chekki PRO 7-Day Free Trial'}
-                  </h4>
-                  <p className="text-[10px] md:text-xs text-zinc-400 font-medium font-korean leading-snug mt-0.5">
-                    {language === 'ko'
-                      ? '무제한 문제 스캔 및 질문하기 기능 제공'
-                      : 'Unlock unlimited scans, questions, and all premium features.'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-[10px] md:text-xs font-black text-white shadow-md shadow-orange-500/10 transition-colors whitespace-nowrap">
-                <span>{language === 'ko' ? '무료 체험 시작' : 'Start Trial'}</span>
-                <span>→</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="w-full max-w-4xl mx-auto flex flex-col gap-4 md:gap-10 px-4">
-          {minimal ? null : (
-            <AskChekkiBar
-              query={askQuery}
-              setQuery={setAskQuery}
-              onSubmit={handleAskSubmit}
-              isAsking={isAskAsking}
-              language={language}
-              isNight={isNight}
-            />
-          )}
-          {renderDropZone('large')}
-          {minimal ? null : renderFeatureBanner()}
-        </div>
-      </div>
-    );
-  }
+    {
+      Icon: ChatCircleText,
+      title: ko ? '아이에게 할 말까지' : 'What to say to your child',
+      desc: ko
+        ? '정답만이 아니라, 아이에게 어떻게 설명할지 한국어로 알려 줘요.'
+        : 'Not just the answer: how to explain it, in Korean.',
+    },
+    linked
+      ? {
+          Icon: ChalkboardTeacher,
+          title: ko ? '선생님 정답지로 채점' : "Graded with the teacher's key",
+          desc: ko
+            ? '학원 선생님이 올린 정답지로 채점하고, 틀린 문제는 선생님께도 전달돼요.'
+            : "Uses your academy's answer key, and the teacher sees what was missed.",
+        }
+      : {
+          Icon: Target,
+          title: ko ? '틀린 문제만, 하나씩' : 'Only the misses, one at a time',
+          desc: ko
+            ? '맞은 건 칭찬하고, 틀린 문제만 아이와 하나씩 같이 봐요.'
+            : 'Praise the right ones, then go through the misses together.',
+        },
+  ];
 
   return (
-    <div className="min-h-full flex flex-col pt-4 md:pt-8 pb-10 px-4 md:px-10 max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto flex flex-col items-center animate-fade-in relative">
+    <div className="mx-auto w-full max-w-3xl px-2 pt-2 pb-16 sm:px-4 animate-fade-in">
       {imageToCrop && (
         <CropModal
           imageSrc={imageToCrop}
           isNight={isNight}
           onClose={() => setImageToCrop(null)}
-          onCropComplete={(croppedDataUrl) => {
-            const base64Data = croppedDataUrl.split(',')[1];
-            onImageSelected(base64Data);
+          onCropComplete={(cropped) => {
+            onImageSelected(cropped.split(',')[1]);
             setImageToCrop(null);
           }}
           onGradeOriginal={() => {
-            const base64Data = imageToCrop.split(',')[1];
-            onImageSelected(base64Data);
+            onImageSelected(imageToCrop.split(',')[1]);
             setImageToCrop(null);
           }}
         />
       )}
-      {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
-      {showLegal && (
-        <LegalModal type={showLegal} onClose={() => setShowLegal(null)} isNight={isNight} />
-      )}
-      {showVideoModal && renderVideoWalkthroughModal()}
-      <AskChekkiAnswerModal
-        answer={askAnswer}
-        isAsking={isAskAsking}
-        question={askAnsweredQuestion}
-        isAuthenticated={isAuthenticated}
-        language={language}
-        history={askHistory}
-        onClose={() => {
-          setAskAnswer(null);
-          setAskAnsweredQuestion('');
-          setAskHistory([]);
-        }}
-        openLoginModal={openLoginModal}
-        onFollowUp={handleAskSubmit}
-        isNight={isNight}
-      />
 
-      <div className="relative w-full max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 md:px-6 flex flex-col items-center mb-6 md:mb-12 mt-8 md:mt-16">
-        <div
-          className={`absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[500px] ${isNight ? 'bg-indigo-900/20' : 'bg-brand-purple/10'} rounded-full blur-[60px] md:blur-[180px] -z-10 pointer-events-none opacity-20 mix-blend-screen`}
-        ></div>
+      {/* Chekki says hello */}
+      <section className="flex flex-col items-center text-center sm:flex-row sm:items-end sm:gap-6 sm:text-left">
+        <img
+          src="/images/chekki-wave.webp"
+          alt=""
+          width={500}
+          height={500}
+          className="h-36 w-36 shrink-0 object-contain sm:h-44 sm:w-44 animate-[chekki-bob_4s_ease-in-out_infinite]"
+        />
+        <div className="mt-1 sm:mb-6">
+          <h1 className="sign-ko text-[30px] sm:text-[38px] text-ink break-keep">
+            {ko ? '오늘 숙제, 같이 봐요' : "Let's check today's homework"}
+          </h1>
+          <p className="mt-2 text-[17px] font-medium leading-snug text-ink-2 break-keep">
+            {ko ? '사진 한 장만 찍어 주세요. 나머지는 채키가 할게요.' : 'Take one photo. Chekki does the rest.'}
+          </p>
+        </div>
+      </section>
 
-        <div className="text-center w-full max-w-4xl">
-          {/* Premium 7-Day Free Trial Banner */}
-          <div
-            onClick={openLoginModal}
-            className={`inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full mb-6 cursor-pointer transform hover:scale-[1.02] active:scale-[0.97] transition-[transform,border-color] duration-200 border ${
-              isNight
-                ? 'bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-red-500/10 border-orange-500/20 hover:border-orange-500/40 shadow-lg shadow-orange-500/5'
-                : 'bg-gradient-to-r from-orange-500/5 via-pink-500/5 to-red-500/5 border-orange-500/15 hover:border-orange-500/35 shadow-sm'
+      {/* the one thing to do */}
+      <div
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        className="mt-6"
+      >
+        <button
+          type="button"
+          onClick={openPicker}
+          disabled={isProcessing}
+          className={`group flex w-full items-center gap-5 rounded-lg px-6 py-6 text-left transition-[transform,box-shadow] duration-200 ease-[var(--ease-arrive)] active:scale-[0.98] disabled:cursor-progress sm:px-8 sm:py-7 ${
+            isLocked
+              ? 'bg-surface text-ink ring-2 ring-inset ring-rule'
+              : 'bg-line text-[#2b211a] shadow-[0_10px_24px_-12px_rgba(239,124,28,0.7)] hover:shadow-[0_14px_30px_-12px_rgba(239,124,28,0.8)]'
+          } ${dragActive ? 'outline-dashed outline-[3px] outline-offset-4 outline-line' : ''}`}
+        >
+          <span
+            className={`inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full ${
+              isLocked ? 'bg-sign text-on-sign' : 'bg-white/90 text-line-ink'
             }`}
           >
-            <span className="text-[10px] md:text-xs animate-pulse">🎁</span>
-            <span
-              className={`text-[9px] md:text-xs font-black uppercase tracking-wider ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}
-            >
-              {language === 'ko'
-                ? '7일 무료 체험 지금 시작하세요'
-                : 'Start your 7-Day Free Trial now'}
-            </span>
-            <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-[8px] md:text-[9px] font-black text-white shadow-md shadow-orange-500/10">
-              <span>{language === 'ko' ? '자세히 보기' : 'Try Free'}</span>
-              <span>→</span>
-            </div>
-          </div>
-
-          <h1
-            className={`text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2 md:mb-6 tracking-tight drop-shadow-2xl whitespace-pre-line leading-[1.05] break-keep`}
-          >
-            {isNight ? (
-              <span className="text-brand-purple">{t('hero_title_night')}</span>
+            {isProcessing ? (
+              <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-current border-t-transparent" />
+            ) : isLocked ? (
+              <LockSimple size={30} weight="bold" />
             ) : (
-              <span className="text-brand-purple">{t('hero_title')}</span>
+              <Camera size={34} weight="fill" />
             )}
-          </h1>
-
-          <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center w-full max-w-md md:max-w-2xl mx-auto"></div>
+          </span>
+          <span className="min-w-0">
+            <span className="sign-ko block text-[26px] sm:text-[32px]">
+              {isProcessing
+                ? ko
+                  ? '사진 준비 중…'
+                  : 'Preparing photo…'
+                : isLocked
+                  ? ko
+                    ? '로그인하고 계속하기'
+                    : 'Sign in to keep going'
+                  : ko
+                    ? '학습지 찍기'
+                    : 'Scan homework'}
+            </span>
+            <span className={`mt-1 block text-[15px] font-semibold ${isLocked ? 'text-ink-2' : 'text-[#2b211a]/75'}`}>
+              {isLocked
+                ? t('guest_used_desc')
+                : !isAuthenticated && !guestUsed
+                  ? ko
+                    ? '첫 채점은 로그인 없이 무료예요'
+                    : 'First one is free, no sign-in'
+                  : ko
+                    ? 'Scan homework'
+                    : '학습지 찍기'}
+            </span>
+          </span>
+        </button>
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={(e) => e.target.files?.[0] && processFile(e.target.files[0])}
+          disabled={isProcessing || isLocked}
+        />
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[13px] font-medium text-ink-3 sm:justify-start">
+          <span className="inline-flex items-center gap-1.5">
+            <Sun size={15} weight="bold" aria-hidden="true" />
+            {ko ? '밝은 곳에서, 평평하게 찍어 주세요' : 'Bright light, page flat'}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <LockSimple size={14} weight="bold" aria-hidden="true" />
+            {t('supported_formats')}
+          </span>
         </div>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto px-4">
-        {/* Invite Code Prompt Banner */}
-        {isAuthenticated && !user?.schoolId && !user?.classId && !classCodeBannerDismissed && (
-          <div
-            className={`mb-4 flex items-center gap-3 px-4 py-3 rounded-2xl border ${
-              isNight
-                ? 'bg-orange-500/8 border-orange-500/20 text-orange-300'
-                : 'bg-orange-50 border-orange-200 text-orange-700'
-            } animate-fade-in-up`}
-          >
-            <span className="text-lg flex-shrink-0">🏫</span>
-            <div className="flex-1 min-w-0">
-              <p
-                className={`text-xs font-black uppercase tracking-wider ${isNight ? 'text-orange-400' : 'text-orange-600'}`}
-              >
-                {language === 'ko'
-                  ? '초대 코드가 있으신가요?'
-                  : 'Got an invite code from your teacher?'}
-              </p>
-              <p
-                className={`text-[11px] font-medium mt-0.5 ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
-              >
-                {language === 'ko'
-                  ? '코드를 입력하면 채점이 학원 교재에 맞게 조정됩니다.'
-                  : "Enter it to align grading with your child's class curriculum."}
-              </p>
-            </div>
+      {isAuthenticated && !isPro && (
+        <button
+          type="button"
+          onClick={() => setShowPaywall(true)}
+          className="mt-5 flex w-full items-center justify-between gap-4 rounded-md bg-surface px-5 py-3.5 text-left ring-1 ring-inset ring-rule transition-colors hover:ring-line"
+        >
+          <span className="text-[15px] font-bold text-ink">
+            {ko ? '오늘 남은 무료 채점 ' : 'Free scans left today '}
+            <span className="num text-line-ink">{scansLeft}</span>
+            {ko ? '회' : ''}
+          </span>
+          <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-ink-3">
+            {ko ? '무제한은 Pro' : 'Unlimited with Pro'}
+            <ArrowRight size={14} weight="bold" />
+          </span>
+        </button>
+      )}
+
+      {isAuthenticated && !linked && !inviteDismissed && (
+        <div className="mt-5 rounded-md bg-surface px-5 py-4 ring-1 ring-inset ring-rule">
+          <p className="text-[15px] font-bold text-ink">
+            {ko ? '학원에서 초대를 받으셨나요?' : 'Invited by your academy?'}
+          </p>
+          <p className="mt-0.5 text-[14px] text-ink-2 leading-snug break-keep">
+            {ko
+              ? '초대 코드를 넣으면 선생님 정답지로 채점하고, 수업 리포트도 여기로 와요.'
+              : "Add the invite code to grade with your teacher's answer key and get class reports here."}
+          </p>
+          <div className="mt-3 flex items-center gap-4">
             <button
+              type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('open-settings-class-code'))}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors ${
-                isNight
-                  ? 'bg-orange-500 hover:bg-orange-600 text-black shadow-md shadow-orange-500/20'
-                  : 'bg-orange-500 hover:bg-orange-600 text-black'
-              }`}
+              className="min-h-11 rounded-md bg-sign px-4 text-sm font-bold text-on-sign"
             >
-              {language === 'ko' ? '코드 입력' : 'Enter Code'}
+              {ko ? '초대 코드 넣기' : 'Enter invite code'}
             </button>
             <button
-              onClick={dismissClassCodeBanner}
-              className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-lg transition-colors ${
-                isNight
-                  ? 'text-zinc-600 hover:text-zinc-300 hover:bg-white/5'
-                  : 'text-zinc-400 hover:text-zinc-700 hover:bg-black/5'
-              }`}
-              aria-label="Dismiss"
+              type="button"
+              onClick={() => {
+                localStorage.setItem('chekki_classcode_banner_dismissed', '1');
+                setInviteDismissed(true);
+              }}
+              className="min-h-11 text-sm font-semibold text-ink-3 hover:text-ink"
             >
-              ×
+              {ko ? '나중에' : 'Not now'}
             </button>
           </div>
-        )}
-        {renderDropZone('large')}
-        {renderTrustAndSteps()}
-      </div>
-
-      {/* Floating Tools Trigger */}
-      {!minimal && (
-        <div className="fixed bottom-24 right-6 z-40">
-          <button
-            onClick={() => setShowTools(!showTools)}
-            className={`w-16 h-16 rounded-full flex items-center justify-center transition-[transform,background-color,border-color] bg-zinc-900 border border-white/10 shadow-2xl hover:scale-110 active:scale-[0.97] ${showTools ? 'rotate-45 bg-orange-500 border-orange-400' : ''}`}
-          >
-            {showTools ? (
-              <span className="text-3xl text-white">×</span>
-            ) : (
-              <span className="text-2xl">🧰</span>
-            )}
-          </button>
         </div>
       )}
 
-      {/* Tools Overlay (Progressive Disclosure) */}
-      {showTools && (
-        <div className="fixed inset-0 z-30 bg-black/80 backdrop-blur-3xl animate-fade-in flex flex-col p-6 md:p-12 overflow-y-auto">
-          <div className="max-w-4xl mx-auto w-full pt-12 md:pt-24 space-y-12 mb-20">
-            <div className="text-center space-y-4">
-              <h3 className="text-2xl md:text-5xl font-black text-white uppercase tracking-tighter">
-                Chekki Toolkit
-              </h3>
-              <p className="text-zinc-400 font-bold uppercase tracking-widest text-[10px] md:text-sm">
-                Advanced assistance for curious parents
-              </p>
-            </div>
+      {!isAuthenticated && (
+        <section className="mt-10">
+          <h2 className="text-center text-[15px] font-bold text-ink-2 sm:text-left">
+            {ko ? 'AI 챗봇에 물어보는 것과 뭐가 다를까요?' : 'Why not just ask a chatbot?'}
+          </h2>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-3">
+            {reasons.map(({ Icon, title, desc }) => (
+              <li key={title} className="rounded-md bg-surface p-5 ring-1 ring-inset ring-rule">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-line-soft text-line-ink">
+                  <Icon size={22} weight="bold" aria-hidden="true" />
+                </span>
+                <p className="mt-3 text-[16px] font-extrabold text-ink break-keep">{title}</p>
+                <p className="mt-1 text-[14px] leading-relaxed text-ink-2 break-keep">{desc}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-            <div
-              className={`bg-zinc-900/50 border border-white/5 rounded-3xl p-6 md:p-12 space-y-8 shadow-2xl`}
-            >
-              <div className="space-y-4">
-                <h4 className="text-lg md:text-2xl font-black text-orange-500 uppercase tracking-tight flex items-center gap-3">
-                  <span>🤔</span> Grammar Q&A
-                </h4>
-                <AskChekkiBar
-                  query={askQuery}
-                  setQuery={setAskQuery}
-                  onSubmit={handleAskSubmit}
-                  isAsking={isAskAsking}
-                  language={language}
-                  isNight={isNight}
-                />
-              </div>
-
-              <div className="w-full h-px bg-white/5"></div>
-
-              <div className="space-y-6">
-                <h4 className="text-lg md:text-2xl font-black text-blue-500 uppercase tracking-tight flex items-center gap-3">
-                  <span>📚</span> Parent Resources
-                </h4>
-                {renderFeatureSection()}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowTools(false)}
-              className="w-full py-6 rounded-3xl bg-zinc-800 text-zinc-400 font-black uppercase tracking-widest hover:bg-zinc-700 transition-colors"
-            >
-              Close Toolkit
-            </button>
+      {/* this week, for families linked to an academy */}
+      {linked && user?.classId && (
+        <>
+          <section className="mt-8 rounded-md bg-surface px-4 pt-4 pb-5 ring-1 ring-inset ring-rule sm:px-6">
+            <h2 className="text-[15px] font-bold text-ink">
+              {user?.schoolName || (ko ? '이번 주' : 'This week')}
+            </h2>
+            <LoopStrip stops={stops} language={language} className="mt-5" />
+          </section>
+          <div className="mt-4">
+            <ParentClassLogs
+              classId={user.classId}
+              studentUid={user.uid}
+              studentName={user.studentName}
+              language={language}
+              max={1}
+            />
           </div>
-        </div>
+        </>
       )}
     </div>
   );
